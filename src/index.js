@@ -21,16 +21,19 @@ const Render = () => {
   return (
     <BrowserRouter>
       <Switch> 
-        <Route exact path='/' >
+        <Route path='/' exact >
           {token['tec-token'] ? <Redirect to="/home" /> : <Login />}
         </Route>
-        <Route exact path='/home'> 
+
+        <Route path='/home'> 
           {token['tec-token'] ? <Home /> : <Redirect to="/" />}
         </Route>
-        <Route exact path='/estructura'>
+
+        <Route path='/estructura'>
           {token['tec-token'] ? <Estructura /> : <Redirect to="/" />}
         </Route>
-        <Route exact path='/repuestos'>
+        
+        <Route path='/repuestos'>
           {token['tec-token'] ? <Repuestos /> : <Redirect to="/" />}
         </Route>
       </Switch>

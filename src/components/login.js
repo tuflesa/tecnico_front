@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useCookies } from 'react-cookie';
 import {Container, Row, Form, Button, Modal } from 'react-bootstrap';
 import axios from 'axios';
+import { BACKEND_SERVER } from '../constantes';
 
 const Login = () => {
     const [datos, setDatos] = useState({
@@ -26,7 +27,7 @@ const Login = () => {
     const enviarDatos = (event) => {
         event.preventDefault()
         // console.log('enviando datos...' + datos.username + ' ' + datos.password)
-        axios.post('http://localhost:8000/auth/', {
+        axios.post(BACKEND_SERVER + '/auth/', {
             username: datos.username,
             password: datos.password
         })
