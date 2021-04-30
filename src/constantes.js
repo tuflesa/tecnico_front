@@ -1,1 +1,1 @@
-export const BACKEND_SERVER = 'http://localhost:8000'
+export const BACKEND_SERVER = 'http://10.128.100.242:8000'
