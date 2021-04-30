@@ -7,6 +7,12 @@ import EstEmpresaNueva from './est_empresa_nueva';
 import EstZonaLista from './est_zona_lista';
 import EstZonaDetalle from './est_zona_editar';
 import EstZonaNueva from './est_zona_nueva';
+import EstSeccionLista from './est_seccion_lista';
+import EstSeccionNueva from './est_seccion_nueva';
+import EstSeccionDetalle from './est_seccion_editar';
+import EstEquipoLista from './est_equipo_lista';
+import EstEquipoDetalle from './est_equipo_editar';
+import EstEquipoNuevo from './est_equipo_nuevo';
 
 const Estructura = () => {
 
@@ -24,6 +30,13 @@ const Estructura = () => {
                 <Route path='/estructura/zona/nueva' exact component={EstZonaNueva} />
                 <Route path='/estructura/zona/:id' component={EstZonaDetalle} />
                 
+                <Route path='/estructura/secciones' component={EstSeccionLista} />
+                <Route path='/estructura/seccion/nueva' exact component={EstSeccionNueva} />
+                <Route path='/estructura/seccion/:id' component={EstSeccionDetalle} />
+
+                <Route path='/estructura/equipos' component={EstEquipoLista} />
+                <Route path='/estructura/equipo/nuevo' component={EstEquipoNuevo} />
+                <Route path='/estructura/equipo/:id' component={EstEquipoDetalle} />
                 
                 <Route path='/estructura' exact>
                     <h1>Estructura</h1>

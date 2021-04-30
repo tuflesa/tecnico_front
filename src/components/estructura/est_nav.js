@@ -18,11 +18,11 @@ const EstNavBar = () => {
                             <NavDropdown.Item href="/estructura/zonas">Lista de zonas</NavDropdown.Item>
                             <NavDropdown.Item href="/estructura/zona/nueva">Nueva zona</NavDropdown.Item>
                             <NavDropdown.Divider />
-                            <NavDropdown.Item href="#">Lista de secciones</NavDropdown.Item>
-                            <NavDropdown.Item href="#">Nueva sección</NavDropdown.Item>
+                            <NavDropdown.Item href="/estructura/secciones">Lista de secciones</NavDropdown.Item>
+                            <NavDropdown.Item href="/estructura/seccion/nueva">Nueva sección</NavDropdown.Item>
                             <NavDropdown.Divider />
-                            <NavDropdown.Item href="#">Lista de equipos</NavDropdown.Item>
-                            <NavDropdown.Item href="#">Nuevo equipo</NavDropdown.Item>
+                            <NavDropdown.Item href="/estructura/equipos">Lista de equipos</NavDropdown.Item>
+                            <NavDropdown.Item href="/estructura/equipo/nuevo">Nuevo equipo</NavDropdown.Item>
                         </NavDropdown>
                     </Nav>    
                     <Form inline>

@@ -3,10 +3,10 @@ import { useCookies } from 'react-cookie';
 import { Button } from 'react-bootstrap';
 
 const Logout = () => {
-    const [ , , deleteToken] = useCookies(['tec-token']);
+    const [ ,  , deleteToken] = useCookies(['tec-token']);
 
     const logout = () => {
-        deleteToken(['tec-token']);
+        deleteToken('tec-token', { Path: '/' });
     }
 
     return (

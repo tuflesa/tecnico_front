@@ -5,11 +5,12 @@ import axios from 'axios';
 import { Container, Row, Col, Table } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { Trash, PencilFill } from 'react-bootstrap-icons';
-import EstSeccionFiltro from './est_seccion_filtro';
+import EstEquipoFiltro from './est_equipo_filtro';
 
-const EstSeccionLista = () => {
+
+const EstEquipoLista = () => {
     const [token] = useCookies(['tec-token']);
-    const [secciones, setSecciones] = useState([]);
+    const [equipos, setEquipos] = useState([]);
     const [filtro, setFiltro] = useState('')
 
     const actualizaFiltro = str => {
@@ -17,14 +18,14 @@ const EstSeccionLista = () => {
     }
 
     useEffect(()=>{
-        axios.get(BACKEND_SERVER + '/api/estructura/seccion/' + filtro, {
+        axios.get(BACKEND_SERVER + '/api/estructura/equipo/' + filtro, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
         .then(res => {
             // console.log(res.data);
-            setSecciones(res.data);
+            setEquipos(res.data);
         })
     },[token, filtro]);
 
@@ -32,26 +33,28 @@ const EstSeccionLista = () => {
         <Container>
             <Row>
                 <Col xs="12" sm="4">
-                    <EstSeccionFiltro actualizaFiltro={actualizaFiltro}/>
+                    <EstEquipoFiltro actualizaFiltro={actualizaFiltro}/>
                 </Col>
                 <Col>
-                    <h5 className="mb-3 mt-3">Lista de secciones</h5>
+                    <h5 className="mb-3 mt-3">Lista de equipos</h5>
                     <Table striped bordered hover>
                         <thead>
                             <tr>
                             <th>Zona</th>
+                            <th>Seccion</th>
                             <th>Nombre</th>
                             <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {secciones && secciones.map( sec => {
+                            {equipos && equipos.map( equipo => {
                                 return (
-                                    <tr key={sec.id}>
-                                        <td>{sec.siglas_zona}</td>
-                                        <td>{sec.nombre}</td>
+                                    <tr key={equipo.id}>
+                                        <td>{equipo.siglas_zona}</td>
+                                        <td>{equipo.seccion_nombre}</td>
+                                        <td>{equipo.nombre}</td>
                                         <td>
-                                            <Link to={`/estructura/seccion/${sec.id}`}>
+                                            <Link to={`/estructura/equipo/${equipo.id}`}>
                                                 <PencilFill className="mr-3 pencil"/>
                                             </Link>
                                             <Trash className="trash" />
@@ -68,4 +71,4 @@ const EstSeccionLista = () => {
      );
 }
  
-export default EstSeccionLista;
+export default EstEquipoLista;
