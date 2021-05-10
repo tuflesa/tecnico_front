@@ -13,31 +13,37 @@ import Home from './components/home';
 import Estructura from './components/estructura/estructura';
 import Repuestos from './components/repuestos/repuestos';
 import Login from './components/login';
+import Cargas from './components/cargas/cargas';
 import { CookiesProvider, useCookies } from 'react-cookie';
 
 const Render = () => {
   const [token] = useCookies(['tec-token']);
- 
+  // const [user] = useCookies(['tec-user']);
+
   return (
-    <BrowserRouter>
-      <Switch> 
-        <Route path='/' exact >
-          {token['tec-token'] ? <Redirect to="/home" /> : <Login />}
-        </Route>
+      <BrowserRouter>
+        <Switch> 
+          <Route path='/' exact >
+            {token['tec-token'] ? <Redirect to="/home" /> : <Login />}
+          </Route>
 
-        <Route path='/home'> 
-          {token['tec-token'] ? <Home /> : <Redirect to="/" />}
-        </Route>
+          <Route path='/home'> 
+            {token['tec-token'] ? <Home /> : <Redirect to="/" />}
+          </Route>
 
-        <Route path='/estructura'>
-          {token['tec-token'] ? <Estructura /> : <Redirect to="/" />}
-        </Route>
-        
-        <Route path='/repuestos'>
-          {token['tec-token'] ? <Repuestos /> : <Redirect to="/" />}
-        </Route>
-      </Switch>
-    </BrowserRouter>
+          <Route path='/cargas'> 
+            {token['tec-token'] ? <Cargas /> : <Redirect to="/" />}
+          </Route>
+
+          <Route path='/estructura'>
+            {token['tec-token'] ? <Estructura /> : <Redirect to="/" />}
+          </Route>
+          
+          <Route path='/repuestos'>
+            {token['tec-token'] ? <Repuestos /> : <Redirect to="/" />}
+          </Route>
+        </Switch>
+      </BrowserRouter>
   )
 }
 

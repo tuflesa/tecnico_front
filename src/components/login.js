@@ -10,8 +10,8 @@ const Login = () => {
         password: ''
     });
     const [show, setShow] = useState(false);
-
-    const [, setToken] = useCookies(['tec-token']);
+    const [ , setToken] = useCookies(['tec-token']);
+    const [ , setUser] = useCookies(['tec-user']);
 
     const handleInputChange = (event) => {
         // console.log(event.target.name)
@@ -26,14 +26,15 @@ const Login = () => {
 
     const enviarDatos = (event) => {
         event.preventDefault()
-        // console.log('enviando datos...' + datos.username + ' ' + datos.password)
+        // console.log('enviando datos...' + BACKEND_SERVER + ' ' + datos.username + ' ' + datos.password)
         axios.post(BACKEND_SERVER + '/auth/', {
             username: datos.username,
             password: datos.password
         })
         .then( resp => {
-            //console.log(resp.data.token);
-            setToken('tec-token', resp.data.token)
+            // console.log(resp.data);
+            setUser('tec-user',resp.data.usuario);
+            setToken('tec-token', resp.data.token);
         })
         .catch( err => {
             console.log(err);
