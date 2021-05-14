@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
-import { Container, Row, Col, Table } from 'react-bootstrap';
+import { Container, Row, Col, Table, Modal, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { Trash, PencilFill } from 'react-bootstrap-icons';
 import EstSeccionFiltro from './est_seccion_filtro';
@@ -10,7 +10,9 @@ import EstSeccionFiltro from './est_seccion_filtro';
 const EstSeccionLista = () => {
     const [token] = useCookies(['tec-token']);
     const [secciones, setSecciones] = useState([]);
-    const [filtro, setFiltro] = useState('')
+    const [seccionBorrar, setSeccionBorrar] = useState(null);
+    const [filtro, setFiltro] = useState('');
+    const [show, setShow] = useState(false);
 
     const actualizaFiltro = str => {
         setFiltro(str);
@@ -27,6 +29,32 @@ const EstSeccionLista = () => {
             setSecciones(res.data);
         })
     },[token, filtro]);
+
+    const handleTrashClick = (seccion) => {
+        console.log(seccion.siglas);
+        setSeccionBorrar(seccion);
+        setShow(true);
+    }
+
+    const handleClose = () => setShow(false);
+
+    const borrarSeccion = () => {
+        console.log('Borrar ' + seccionBorrar.nombre);
+        axios.delete(BACKEND_SERVER + `/api/estructura/seccion/${seccionBorrar.id}/`, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+            })
+            .then(res => {
+                // console.log(res);
+                // Actualiza la lista de empresas
+                const seccionesActual = secciones.filter(sec => sec.id !== seccionBorrar.id);
+                setSecciones(seccionesActual);
+                setShow(false);
+                setSeccionBorrar(null);
+            })
+            .catch(err => {console.log(err);})
+    }
 
     return ( 
         <Container>
@@ -54,7 +82,7 @@ const EstSeccionLista = () => {
                                             <Link to={`/estructura/seccion/${sec.id}`}>
                                                 <PencilFill className="mr-3 pencil"/>
                                             </Link>
-                                            <Trash className="trash" />
+                                            <Trash className="trash" onClick={event => {handleTrashClick(sec)}}/>
                                         </td>
                                     </tr>
                                 )})
@@ -63,7 +91,20 @@ const EstSeccionLista = () => {
                     </Table>
                 </Col>
             </Row>
-            
+            <Modal show={show} onHide={handleClose} backdrop="static" keyboard={ false }>
+                <Modal.Header closeButton>
+                    <Modal.Title>Borrar</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>Está a punto de borrar la seccion: <strong>{seccionBorrar && seccionBorrar.nombre}</strong></Modal.Body>
+                <Modal.Footer>
+                    <Button variant="danger" onClick={borrarSeccion}>
+                        Borrar
+                    </Button>
+                    <Button variant="waring" onClick={handleClose}>
+                        Cancelar
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </Container>
      );
 }

@@ -7,11 +7,12 @@ import { BACKEND_SERVER } from '../../constantes';
 
 const EstSeccionForm = ({ seccion }) => {
     const [token] = useCookies(['tec-token']);
+    const [user] = useCookies(['tec-user']);
 
     const [datos, setDatos] = useState({
         nombre: seccion.nombre,
         zona: seccion.zona,
-        empresa: seccion.empresa_id
+        empresa: seccion.zona ? seccion.empresa_id : seccion.empresa
     });
 
     const [empresas, setEmpresas] = useState([]);
@@ -66,7 +67,10 @@ const EstSeccionForm = ({ seccion }) => {
                 'Authorization': `token ${token['tec-token']}`
               }     
         })
-        .then( res => { console.log(res);})
+        .then( res => { 
+            console.log(res);
+            window.location.href = '/estructura/secciones';
+        })
         .catch(err => { console.log(err);})
         
     }
@@ -83,7 +87,10 @@ const EstSeccionForm = ({ seccion }) => {
                 'Authorization': `token ${token['tec-token']}`
               }     
         })
-        .then( res => { console.log(res);})
+        .then( res => { 
+            console.log(res);
+            window.location.href = '/estructura/secciones';
+        })
         .catch(err => { console.log(err);})
     }
 
@@ -94,6 +101,10 @@ const EstSeccionForm = ({ seccion }) => {
             ...datos,
             [event.target.name] : event.target.value
         })
+    }
+
+    const handleDisabled = () => {
+        return user['tec-user'].perfil.nivel_acceso.nombre === 'local'
     }
 
     return ( 
@@ -110,8 +121,9 @@ const EstSeccionForm = ({ seccion }) => {
                         <Form.Control as="select" 
                                       value={datos.empresa}
                                       name='empresa'
-                                      onChange={handleInputChange}>
-                            <option key={0} value={null}>-------</option>
+                                      onChange={handleInputChange}
+                                      disabled={handleDisabled()}>
+                            {/* <option key={0} value={null}>-------</option> */}
                             {empresas && empresas.map( empresa => {
                                 return (
                                 <option key={empresa.id} value={empresa.id}>

@@ -70,6 +70,7 @@ const AgenciaLista = () => {
                             <th>Teléfono</th>
                             <th>Persona de contacto</th>
                             <th>Observaciones</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>

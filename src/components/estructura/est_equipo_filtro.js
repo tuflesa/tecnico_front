@@ -5,12 +5,14 @@ import axios from 'axios';
 import { useCookies } from 'react-cookie';
 
 const EstEquiposFiltro = ({ actualizaFiltro }) => {
+    const [token] = useCookies(['tec-token']);
+    const [user] = useCookies(['tec-user']);
+
     const [empresas, setEmpresas] = useState([]);
     const [zonas, setZonas] = useState([]);
     const [secciones, setSecciones] = useState([]);
-    const [token] = useCookies(['tec-token']);
     const [datos, setDatos] = useState({
-        empresa: '',
+        empresa: user['tec-user'].perfil.empresa.id,
         zona: '',
         seccion: '',
         nombre: ''
@@ -88,6 +90,9 @@ const EstEquiposFiltro = ({ actualizaFiltro }) => {
         // console.log(filtro);
     },[datos, actualizaFiltro]);
 
+    const handleDisabled = () => {
+        return user['tec-user'].perfil.nivel_acceso.nombre === 'local'
+    }
 
     return ( 
         <Container>
@@ -99,7 +104,8 @@ const EstEquiposFiltro = ({ actualizaFiltro }) => {
                         <Form.Control as="select" 
                                         value={datos.empresa}
                                         name='empresa'
-                                        onChange={handleInputChange}>
+                                        onChange={handleInputChange}
+                                        disabled={handleDisabled()}>
                             <option key={0} value={''}>-------</option>
                             {empresas && empresas.map( empresa => {
                                 return (

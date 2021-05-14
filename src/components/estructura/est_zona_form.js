@@ -7,6 +7,7 @@ import { BACKEND_SERVER } from '../../constantes';
 
 const EstZonaForm = ({ zona }) => {
     const [token] = useCookies(['tec-token']);
+    const [user] = useCookies(['tec-user']);
 
     const [datos, setDatos] = useState({
         nombre: zona.nombre,
@@ -44,7 +45,10 @@ const EstZonaForm = ({ zona }) => {
                 'Authorization': `token ${token['tec-token']}`
               }     
         })
-        .then( res => { console.log(res);})
+        .then( res => { 
+            console.log(res);
+            window.location.href = '/estructura/zonas';
+        })
         .catch(err => { console.log(err);})
         
     }
@@ -62,7 +66,10 @@ const EstZonaForm = ({ zona }) => {
                 'Authorization': `token ${token['tec-token']}`
               }     
         })
-        .then( res => { console.log(res);})
+        .then( res => { 
+            console.log(res);
+            window.location.href = '/estructura/zonas';
+        })
         .catch(err => { console.log(err);})
     }
 
@@ -73,6 +80,10 @@ const EstZonaForm = ({ zona }) => {
             ...datos,
             [event.target.name] : event.target.value
         })
+    }
+
+    const handleDisabled = () => {
+        return user['tec-user'].perfil.nivel_acceso.nombre === 'local'
     }
 
     return ( 
@@ -89,8 +100,9 @@ const EstZonaForm = ({ zona }) => {
                         <Form.Control as="select" 
                                       value={datos.empresa}
                                       name='empresa'
-                                      onChange={handleInputChange}>
-                            <option key={0} value={null}>-------</option>
+                                      onChange={handleInputChange}
+                                      disabled={handleDisabled()}>
+                            {/* <option key={0} value={null}>-------</option> */}
                             {empresas && empresas.map( empresa => {
                                 return (
                                 <option key={empresa.id} value={empresa.id}>
