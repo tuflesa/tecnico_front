@@ -39,7 +39,7 @@ const Estructura = () => {
                 <Route path='/estructura/equipo/:id' component={EstEquipoDetalle} />
                 
                 <Route path='/estructura' exact>
-                    <h1>Estructura</h1>
+                    <EstEquipoLista />
                 </Route>
             </Switch>
         </React.Fragment>
