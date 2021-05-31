@@ -4,11 +4,18 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
+import useInterval from '../utilidades/use_interval';
 
 const CargaForm = ({ carga }) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
 
+    const [basculas, setBasculas] = useState([]);
+    const [basculasEmpresa, setBasculasEmpresa] = useState([]);
+    const [peso, setPeso] = useState(0);
+    const [pesoDisabled, setPesoDisabled] = useState(false);
+    const [empresas, setEmpresas] = useState([]);
+    const [agencias, setAgencias] = useState([]);
     const [datos, setDatos] = useState({
         empresa: carga.empresa,
         matricula: carga.matricula,
@@ -20,12 +27,39 @@ const CargaForm = ({ carga }) => {
         tara: Number.isInteger(parseInt(carga.tara)) ? carga.tara : '',
         destino: carga.destino,
         bruto: Number.isInteger(parseInt(carga.bruto)) ? carga.bruto : '',
-        fecha_salida: carga.fecha_salida
+        fecha_salida: carga.fecha_salida,
+        bascula: ''
     });
-
-    const [empresas, setEmpresas] = useState([]);
-    const [agencias, setAgencias] = useState([]);
  
+    useEffect(()=>{
+        axios.get(BACKEND_SERVER + '/api/cargas/bascula/',{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            //console.log(res.data);
+            setBasculas(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+
+    },[token]);
+
+    useEffect(()=>{
+        if (basculas !== []) {
+            const b_filter = basculas.filter(bascula => bascula.empresa === parseInt(datos.empresa));
+            console.log(b_filter);
+            setBasculasEmpresa(b_filter);
+            if (b_filter.length > 0){
+                // console.log('hay basculas');
+                console.log(b_filter[0].id);
+                datos.bascula = b_filter[0].id;
+            }
+        }
+    },[basculas, datos.empresa]);
+
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
             headers: {
@@ -76,7 +110,7 @@ const CargaForm = ({ carga }) => {
             hora_entrada: datos.hora_entrada,
             tara: datos.tara,
             destino: datos.destino,
-            bruto: datos.bruto,
+            bruto: !pesoDisabled || datos.bruto ? datos.bruto : peso,
             fecha_salida: datos.fecha_salida
         }, {
             headers: {
@@ -92,7 +126,7 @@ const CargaForm = ({ carga }) => {
 
     const crearDatos = (event) => {
         event.preventDefault()
-        console.log('Crear datos...' + datos.empresa + ' ' + datos.bruto + ' ' + datos.remolque)
+        console.log('Crear datos...' + datos.empresa + ' ' + datos.tara + ' ' + datos.remolque)
         
         axios.post(BACKEND_SERVER + `/api/cargas/carga/`, {
             empresa: datos.empresa,
@@ -102,7 +136,7 @@ const CargaForm = ({ carga }) => {
             agencia: datos.agencia === 0 ? null : datos.agencia,
             fecha_entrada: datos.fecha_entrada,
             hora_entrada: datos.hora_entrada,
-            tara: Number.isInteger(parseInt(datos.tara)) ? datos.tara : null,
+            tara: !pesoDisabled ? (Number.isInteger(parseInt(datos.tara)) ? datos.tara : null) : peso,
             destino: datos.destino,
             bruto: Number.isInteger(parseInt(datos.bruto)) ? datos.bruto : null,
             fecha_salida: datos.fecha_salida
@@ -131,6 +165,36 @@ const CargaForm = ({ carga }) => {
         return user['tec-user'].perfil.nivel_acceso.nombre === 'local'
     }
 
+    const actualizaPeso = () =>{
+        // console.log('lectura de la bascula');
+        const mi_bascula = basculasEmpresa.filter(b => b.id === parseInt(datos.bascula))[0];
+        // console.log(mi_bascula);
+        if(mi_bascula.url){
+            // console.log(mi_bascula.url);
+            axios.get(mi_bascula.url)
+            .then(res =>{
+                if (Number.isInteger(parseInt(res.data.peso))){
+                    console.log(res.data.peso);
+                    setPeso(res.data.peso);
+                    setPesoDisabled(true);
+                }
+                else {
+                    console.log(res.data);
+                    setPeso('Sin lectura');
+                    setPesoDisabled(false);
+                }
+            })
+            .catch(err => {
+                console.log(err);
+            });
+        }
+        else {
+            console.log('No hay url de la bascula');
+            setPeso('Sin lectura');
+            setPesoDisabled(false);
+        }
+    }
+    useInterval(actualizaPeso, 1000);
 
     return ( 
         <Container>
@@ -150,7 +214,6 @@ const CargaForm = ({ carga }) => {
                                             name='empresa'
                                             onChange={handleInputChange}
                                             disabled={handleDisabled()}>
-                                    <option key={0} value={null}>-------</option>
                                     {empresas && empresas.map( empresa => {
                                         return (
                                         <option key={empresa.id} value={empresa.id}>
@@ -159,6 +222,34 @@ const CargaForm = ({ carga }) => {
                                         )
                                     })}
                                 </Form.Control>
+                            </Form.Group>
+                        </Col>
+                        <Col>
+                            <Form.Group controlId="bascula">
+                                <Form.Label>Bascula</Form.Label>
+                                <Form.Control as="select" 
+                                            value={datos.bascula}
+                                            name='bascula'
+                                            onChange={handleInputChange}>
+                                    {basculasEmpresa && basculasEmpresa.map( b => {
+                                        return (
+                                        <option key={b.id} value={b.id}>
+                                            {b.nombre}
+                                        </option>
+                                        )
+                                    })}
+                                </Form.Control>
+                            </Form.Group>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col>
+                            <Form.Group controlId="Peso">
+                                <Form.Label>Peso</Form.Label>
+                                <Form.Control type="text" 
+                                            name='peso' 
+                                            value={peso}
+                                            disabled/>
                             </Form.Group>
                         </Col>
                         <Col>
@@ -232,9 +323,10 @@ const CargaForm = ({ carga }) => {
                                 <Form.Label>Tara</Form.Label>
                                 <Form.Control type="text" 
                                             name='tara' 
-                                            value={datos.tara}
+                                            value={carga.id ? datos.tara : pesoDisabled ? peso : datos.tara}
                                             onChange={handleInputChange} 
                                             placeholder="Tara"
+                                            disabled={pesoDisabled}
                                             required />
                             </Form.Group>
                         </Col>
@@ -255,9 +347,10 @@ const CargaForm = ({ carga }) => {
                                 <Form.Label>Bruto</Form.Label>
                                 <Form.Control type="text" 
                                             name='bruto' 
-                                            value={datos.bruto}
+                                            value={carga.id && pesoDisabled && !datos.bruto ? peso : datos.bruto}
                                             onChange={handleInputChange} 
-                                            placeholder="Bruto" />
+                                            placeholder="Bruto" 
+                                            disabled={pesoDisabled}/>
                             </Form.Group>
                         </Col>
                         <Col>
