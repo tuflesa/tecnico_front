@@ -14,6 +14,7 @@ import Estructura from './components/estructura/estructura';
 import Repuestos from './components/repuestos/repuestos';
 import Login from './components/login';
 import Cargas from './components/cargas/cargas';
+import GraficoVelocidad from './components/velocidad/vel_grafico_velocidad';
 import { CookiesProvider, useCookies } from 'react-cookie';
 
 const Render = () => {
@@ -41,6 +42,10 @@ const Render = () => {
           
           <Route path='/repuestos'>
             {token['tec-token'] ? <Repuestos /> : <Redirect to="/" />}
+          </Route>
+
+          <Route path='/velocidad'>
+            {token['tec-token'] ? <GraficoVelocidad /> : <Redirect to="/" />}
           </Route>
         </Switch>
       </BrowserRouter>

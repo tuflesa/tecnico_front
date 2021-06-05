@@ -58,7 +58,7 @@ const CargaForm = ({ carga }) => {
                 datos.bascula = b_filter[0].id;
             }
         }
-    },[basculas, datos.empresa]);
+    },[basculas, datos]);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
