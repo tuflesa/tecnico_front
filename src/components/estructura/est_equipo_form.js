@@ -98,7 +98,8 @@ const EstEquipoForm = ({ equipo }) => {
 
         axios.put(BACKEND_SERVER + `/api/estructura/equipo/${equipo.id}/`, updateData, {
             headers: {
-                'Authorization': `token ${token['tec-token']}`
+                'Authorization': `token ${token['tec-token']}`,
+                "Content-Type": "multipart/form-data"
               }     
         })
         .then( res => { 
@@ -123,7 +124,8 @@ const EstEquipoForm = ({ equipo }) => {
         }
         axios.post(BACKEND_SERVER + `/api/estructura/equipo/`, updateData, {
             headers: {
-                'Authorization': `token ${token['tec-token']}`
+                'Authorization': `token ${token['tec-token']}`,
+                "Content-Type": "multipart/form-data"
               }     
         })
         .then( res => { 
