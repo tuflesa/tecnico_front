@@ -13,7 +13,7 @@ import './velocidad.css';
 
 const LineChart = ({data, fecha, hora_inicio, hora_fin}) => {
     const svgRef = useRef();
-    const [size, setSize] = useState({width: 1200, height: 380})
+    const [size, setSize] = useState({width: 1100, height: 370})
 
       // Cuando cambian los datos actualizamos el grafico
     useEffect(()=>{
