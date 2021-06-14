@@ -11,21 +11,42 @@ import {
 import moment from 'moment';
 import './velocidad.css';
 
+const useResizeObserver = (ref) => {
+    const [dimensions, setDimensions] = useState(null);
+    useEffect(() => {
+      const observeTarget = ref.current;
+      const resizeObserver = new ResizeObserver((entries) => {
+        entries.forEach((entry) => {
+          setDimensions(entry.contentRect);
+        });
+      });
+      resizeObserver.observe(observeTarget);
+      return () => {
+        resizeObserver.unobserve(observeTarget);
+      };
+    }, [ref]);
+    return dimensions;
+  };
+
 const LineChart = ({data, fecha, hora_inicio, hora_fin}) => {
     const svgRef = useRef();
-    const [size, setSize] = useState({width: 1100, height: 370})
+    const wrapperRef = useRef();
+    const dimensions = useResizeObserver(wrapperRef);
+    // const [size, setSize] = useState({width: 1150, height: 370})
 
       // Cuando cambian los datos actualizamos el grafico
     useEffect(()=>{
-        const width = size.width
-            , height = size.height
-        const margin = {top: 20, right: 30, bottom: 20, left: 30}
+        if (!dimensions) return;
+        const width = dimensions.width
+            , height = dimensions.height
+        const margin = {top: 20, right: 30, bottom: 20, left: 30};
         const innerWidth = width - margin.left - margin.right
         const innerHeight = height - margin.top - margin.bottom;
 
         const svg =svgRef.current;
+        
+        // console.log(dimensions);
 
-        //console.log(fecha, hora_inicio);
         const inicio = moment(fecha + ' ' + hora_inicio)
         const fin = moment(fecha + ' ' + hora_fin)
         const n_ticks_x = fin.diff(inicio, 'hours');
@@ -85,17 +106,17 @@ const LineChart = ({data, fecha, hora_inicio, hora_fin}) => {
             .transition()
             .attr('d', value => myLine(value.datos));
 
-            select(svg).select('.grid-x')
-                .attr("class","grid")
-                .attr('transform',`translate(${margin.left},${margin.top + innerHeight})`)
-                .style("stroke-dasharray",("3,3"))
-                .call(make_x_gridlines()
-                .tickSize(-innerHeight)
-                .tickFormat("")
-                );
+        select(svg).select('.grid-x')
+            // .attr("class","rejilla")
+            .attr('transform',`translate(${margin.left},${margin.top + innerHeight})`)
+            .style("stroke-dasharray",("3,3"))
+            .call(make_x_gridlines()
+            .tickSize(-innerHeight)
+            .tickFormat("")
+            );
 
-            select(svg).select('.grid-y')
-            .attr("class","grid")
+        select(svg).select('.grid-y')
+            // .attr("class","rejilla")
             .attr('transform', `translate(${margin.left},${margin.top})`)
             .style("stroke-dasharray",("3,3"))
             .call(make_y_gridlines()
@@ -103,22 +124,22 @@ const LineChart = ({data, fecha, hora_inicio, hora_fin}) => {
               .tickFormat("")
             );
 
-    },[data, fecha, hora_fin, hora_inicio, size]);
+    },[data, fecha, hora_fin, hora_inicio, dimensions]);
 
     return (
-        <React.Fragment>
+        <div ref={wrapperRef}>
             <svg ref={svgRef}
-                width={size.width} 
-                height={size.height}
-                // viewBox={`0 0 ${size.height} ${size.width}`}
+                // width={size.width} 
+                // height={size.height}
+                // viewBox={`0 0 ${size.width} ${size.height}`}
                 >
                 <g className='grafico'></g>
-                <g className='grid-x'></g>
-                <g className='grid-y'></g>
+                <g className='grid-x grid'></g>
+                <g className='grid-y grid'></g>
                 <g className='eje-x'></g>
-                <g className='eje-y'></g>    
+                <g className='eje-y'></g>  
             </svg>
-        </React.Fragment>
+        </div>
     );
 }
 

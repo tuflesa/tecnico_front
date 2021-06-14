@@ -180,7 +180,7 @@ const GraficoVelocidad = () => {
                     })}
                 </Row>
                 <Row>
-                    <Col>
+                    <Col className="col-12">
                         <LineChart data={registros}
                                 fecha={filtro.fecha}
                                 hora_inicio={filtro.hora_inicio}
