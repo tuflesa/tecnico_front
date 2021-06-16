@@ -128,7 +128,8 @@ const LineChart = ({data, fecha, hora_inicio, hora_fin}) => {
 
     return (
         <div ref={wrapperRef}>
-            <svg ref={svgRef}
+            <svg ref={svgRef} 
+                 className='speedChart'
                 // width={size.width} 
                 // height={size.height}
                 // viewBox={`0 0 ${size.width} ${size.height}`}
