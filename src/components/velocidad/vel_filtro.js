@@ -40,7 +40,7 @@ const VelocidadFiltro = ({ actualizaFiltro, filtro }) => {
             <Container>
                 <Form>
                     <Row>
-                        <Col>
+                        <Col sm='12' md='3' >
                             <Form.Group controlId="empresa">
                                 <Form.Label>Empresa</Form.Label>
                                 <Form.Control as="select" 
@@ -59,7 +59,7 @@ const VelocidadFiltro = ({ actualizaFiltro, filtro }) => {
                                 </Form.Control>
                             </Form.Group>
                         </Col>
-                        <Col>
+                        <Col sm='6' md='3'>
                             <Form.Group controlId="fecha_inicio">
                                 <Form.Label>Fecha</Form.Label>
                                 <Form.Control type="date" 
@@ -68,7 +68,7 @@ const VelocidadFiltro = ({ actualizaFiltro, filtro }) => {
                                                 onChange={handleInputChange}  />
                             </Form.Group>
                         </Col>
-                        <Col>
+                        <Col xs='6' sm='3' md='3'>
                             <Form.Group controlId="hora_inicio">
                                 <Form.Label>Hora inicio</Form.Label>
                                 <Form.Control type="time" 
@@ -77,7 +77,7 @@ const VelocidadFiltro = ({ actualizaFiltro, filtro }) => {
                                                 onChange={handleInputChange}  />
                             </Form.Group>
                         </Col>
-                        <Col>
+                        <Col xs='6' sm='3' md='3'>
                             <Form.Group controlId="hora_fin">
                                 <Form.Label>Hora fin</Form.Label>
                                 <Form.Control type="time" 
