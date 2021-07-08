@@ -58,6 +58,7 @@ const CargaForm = ({ carga }) => {
                 datos.bascula = b_filter[0].id;
             }
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     },[basculas, datos.empresa]);
 
     useEffect(() => {
@@ -364,7 +365,18 @@ const CargaForm = ({ carga }) => {
                             </Form.Group>
                         </Col>
                     </Row>
-                    
+                    <Row>
+                        <Col>
+                            <Form.Group controlId="neto">
+                                <Form.Label>Neto</Form.Label>
+                                <Form.Control type="text" 
+                                            name='neto' 
+                                            value={parseInt(datos.bruto) > parseInt(datos.tara) ? datos.bruto - datos.tara : null}
+                                            placeholder="Neto" 
+                                            disabled={true}/>
+                            </Form.Group>
+                        </Col>
+                    </Row>
                     <Row className="justify-content-center">
                         {carga.id ? 
                             <Button variant="info" type="submit" className="mr-3" onClick={actualizarDatos}>Actualizar</Button> :

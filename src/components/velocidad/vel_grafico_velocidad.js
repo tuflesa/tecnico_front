@@ -28,7 +28,7 @@ const GraficoVelocidad = () => {
 
     useEffect(()=>{
         // console.log('Leer empresas');
-        filtro && axios.get(BACKEND_SERVER + '/api/velocidad/lineas/' + `?zona__empresa=${filtro.empresa}`,{
+        filtro && axios.get(BACKEND_SERVER + `/api/velocidad/lineas/?zona__empresa=${filtro.empresa}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -48,6 +48,7 @@ const GraficoVelocidad = () => {
             setEstados(states);
             setLineas(res.data);
         });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     },[token, filtro.empresa]);
 
     useEffect(()=>{
@@ -137,6 +138,7 @@ const GraficoVelocidad = () => {
                 setEstados(newEstados);
             }
         });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     },[token, filtro.empresa, lineas, actualizar]);
 
     const actualizarGrafico = () => {

@@ -91,7 +91,7 @@ const EstZonaLista = () => {
                     </Table>
                 </Col>
             </Row>
-            <Modal show={show} onHide={handleClose} backdrop="static" keyboard={ false }>
+            <Modal show={show} onHide={handleClose} backdrop="static" keyboard={ false } animation={false}>
                 <Modal.Header closeButton>
                     <Modal.Title>Borrar</Modal.Title>
                 </Modal.Header>

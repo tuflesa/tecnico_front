@@ -74,7 +74,7 @@ const CargasLista = () => {
     }
 
     return (
-        <Container>
+        <Container >
             <Row className="justify-content-center">
                 
                     <CargasFiltro actualizaFiltro={actualizaFiltro} />
@@ -94,6 +94,7 @@ const CargasLista = () => {
                             <th>Destino</th>
                             <th>Tara</th>
                             <th>Bruto</th>
+                            <th>Neto</th>
                             <th>Salida</th>
                             <th>Acciones</th>
                         </tr>
@@ -112,6 +113,7 @@ const CargasLista = () => {
                                     <td>{carga.destino}</td>
                                     <td>{carga.tara}</td>
                                     <td>{carga.bruto}</td>
+                                    <td>{parseInt(carga.bruto)>parseInt(carga.tara) ? carga.bruto - carga.tara : null}</td>
                                     <td>{carga.fecha_salida}</td>
                                     <td>
                                         <Link to={`/cargas/${carga.id}`}>

@@ -37,7 +37,7 @@ const Login = () => {
             setToken('tec-token', resp.data.token);
         })
         .catch( err => {
-            console.log(err);
+            // console.log(err);
             setDatos({
                 username: '',
                 password: ''
@@ -79,7 +79,7 @@ const Login = () => {
                     </Button>
                 </Form>
             </Row>
-            <Modal show={show} onHide={handleClose} backdrop="static" keyboard={ false }>
+            <Modal show={show} onHide={handleClose} backdrop="static" keyboard={ false } animation={false}>
                 <Modal.Header closeButton>
                     <Modal.Title>Error</Modal.Title>
                 </Modal.Header>
