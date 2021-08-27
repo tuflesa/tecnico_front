@@ -20,15 +20,13 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         stock_T: 0,
         stocks_minimos: repuesto.stocks_minimos,
         es_critico: repuesto.es_critico,
+        descatalogado: repuesto.descatalogado,
         equipos: repuesto.equipos,
         proveedores: repuesto.proveedores
     });
     const [show_stock, setShowStock] = useState(false);
     const [stock_editar, setStockEditar] = useState(null);
     const [stock_minimo_editar, setStockMinimoEditar] = useState(null);
-    const [lista_almacenes, setListaAlmacenes] = useState({
-        lista : []
-    });
 
     useEffect(()=>{
         console.log('Cambio en repuesto, actualizando datos ...');
@@ -41,6 +39,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             stock_T: 0,
             stocks_minimos: repuesto.stocks_minimos,
             es_critico: repuesto.es_critico,
+            descatalogado: repuesto.descatalogado,
             equipos: repuesto.equipos,
             proveedores: repuesto.proveedores}
             );
@@ -81,6 +80,13 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         })
     }
 
+    const handleDescatalogar = (event) => {
+        setDatos({
+            ...datos,
+            descatalogado : !datos.descatalogado
+        })
+    }
+
     const actualizarDatos = (event) => {
         event.preventDefault();
         // console.log(datos);
@@ -88,7 +94,8 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             nombre: datos.nombre,
             fabricante: datos.fabricante,
             modelo: datos.modelo,
-            es_critico: datos.es_critico
+            es_critico: datos.es_critico,
+            descatalogado: datos.descatalogado
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -109,7 +116,8 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             nombre: datos.nombre,
             fabricante: datos.fabricante,
             modelo: datos.modelo,
-            es_critico: datos.es_critico
+            es_critico: datos.es_critico,
+            descatalogado: datos.descatalogado
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -244,6 +252,14 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                 onChange = {handleCritico} />
                                 </Form.Group>
                             </Col>
+                            <Col>
+                                <Form.Group className="mb-3" controlId="descatalogado">
+                                    <Form.Check type="checkbox" 
+                                                label="Descatalogado"
+                                                checked = {datos.descatalogado}
+                                                onChange = {handleDescatalogar} />
+                                </Form.Group>
+                            </Col>
                         </Row>
                         <Form.Row className="justify-content-center">
                             {repuesto.id ? 
@@ -289,7 +305,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                             <td>{stock.stock_minimo}</td>
                                                             <td>
                                                                 <PencilFill className="mr-3 pencil" onClick={event => {handleEditStock(stock)}}/>
-                                                                <Trash className="trash"  onClick={null} />
+                                                                {/* <Trash className="trash"  onClick={null} /> */}
                                                             </td>
                                                         </tr>
                                                     )})

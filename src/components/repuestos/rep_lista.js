@@ -5,15 +5,21 @@ import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table, Modal, Button } from 'react-bootstrap';
 import { Trash, PencilFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
+import RepListaFilto from './rep_lista_filtro';
 
 const RepLista = () => {
     const [token] = useCookies(['tec-token']);
     const [repuestos, setRepuestos] = useState(null);
     const [show, setShow] = useState(false);
     const [repuestoBorrar, setRepuestoBorrar] = useState(null);
+    const [filtro, setFiltro] = useState('');
+
+    // const actualizaFiltro = str => {
+    //     setFiltro(str);
+    // }
 
     useEffect(()=>{
-            axios.get(BACKEND_SERVER + '/api/repuestos/lista',{
+            axios.get(BACKEND_SERVER + '/api/repuestos/lista/' + filtro,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                   }
@@ -24,7 +30,7 @@ const RepLista = () => {
             .catch( err => {
                 console.log(err);
             });
-        }, [token]);
+        }, [token, filtro]);
 
         const handleClose = () => setShow(false);
 
@@ -35,14 +41,17 @@ const RepLista = () => {
 
         const borrarRepuesto = () => {
             // console.log(repuestoBorrar);
-            axios.delete(BACKEND_SERVER + `/api/repuestos/lista/${repuestoBorrar.id}/`, {
+            axios.patch(BACKEND_SERVER + `/api/repuestos/lista/${repuestoBorrar.id}/`,{
+                descatalogado: true
+            }, {
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                   }
                 })
                 .then(res => {
-                    const repuestosActual = repuestos.filter(repuesto => repuesto.id !== repuestoBorrar.id);
-                    setRepuestos(repuestosActual);
+                    // const repuestosActual = repuestos.filter(repuesto => repuesto.id !== repuestoBorrar.id);
+                    // setRepuestos(repuestosActual);
+                    console.log(res.data);
                     setShow(false);
                     setRepuestoBorrar(null);
                 })
@@ -53,7 +62,7 @@ const RepLista = () => {
         <Container>
             <Row>
                 <Col>
-                    <h5>Filtro</h5>
+                    <RepListaFilto actualizaFiltro={setFiltro}/>
                 </Col>
             </ Row>
             <Row>
@@ -94,12 +103,12 @@ const RepLista = () => {
             </Row>
             <Modal show={show} onHide={handleClose} backdrop="static" keyboard={ false } animation={false}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Borrar</Modal.Title>
+                    <Modal.Title>Descatalogar</Modal.Title>
                 </Modal.Header>
-                <Modal.Body>Está a punto de borrar el repuesto: <strong>{repuestoBorrar && repuestoBorrar.nombre}</strong></Modal.Body>
+                <Modal.Body>Está a punto de descatalogar el repuesto: <strong>{repuestoBorrar && repuestoBorrar.nombre}</strong></Modal.Body>
                 <Modal.Footer>
                     <Button variant="danger" onClick={borrarRepuesto}>
-                        Borrar
+                        Descatalogar
                     </Button>
                     <Button variant="waring" onClick={handleClose}>
                         Cancelar
