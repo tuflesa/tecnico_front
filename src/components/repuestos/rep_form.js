@@ -6,6 +6,7 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import { PlusCircle, PencilFill, Trash } from 'react-bootstrap-icons';
 import './repuestos.css';
+import StockMinimoForm from './rep_stock_minimo';
 
 const RepuestoForm = ({repuesto, setRepuesto}) => {
     const [token] = useCookies(['tec-token']);
@@ -22,6 +23,29 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         equipos: repuesto.equipos,
         proveedores: repuesto.proveedores
     });
+    const [show_stock, setShowStock] = useState(false);
+    const [stock_editar, setStockEditar] = useState(null);
+    const [stock_minimo_editar, setStockMinimoEditar] = useState(null);
+    const [lista_almacenes, setListaAlmacenes] = useState({
+        lista : []
+    });
+
+    useEffect(()=>{
+        console.log('Cambio en repuesto, actualizando datos ...');
+        setDatos({
+            id: repuesto.id ? repuesto.id : null,
+            nombre: repuesto.nombre,
+            fabricante: repuesto.fabricante ? repuesto.fabricante : '',
+            modelo: repuesto.modelo ? repuesto.modelo : '',
+            stock: repuesto.stock,
+            stock_T: 0,
+            stocks_minimos: repuesto.stocks_minimos,
+            es_critico: repuesto.es_critico,
+            equipos: repuesto.equipos,
+            proveedores: repuesto.proveedores}
+            );
+        // console.log(datos.stocks_minimos)
+    },[repuesto]);
 
     useEffect(()=>{
         let stock_T = 0;
@@ -87,6 +111,58 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             modelo: datos.modelo,
             es_critico: datos.es_critico
         }, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => { 
+            console.log(res.data);
+            setRepuesto(res.data);
+            // window.location.href = "/repuestos";
+        })
+        .catch(err => { console.log(err);})
+    }
+
+    const handleCloseStock = () => {
+        setShowStock(false);
+        setStockEditar(null);
+        setStockMinimoEditar(null);
+    }
+
+    const handleEditStock = (stock) => {
+        const almacen_id = stock.almacen__id;
+        const repuesto_id = datos.id;
+        const stock_minimo = datos.stocks_minimos.filter(stock_minimmo => stock_minimmo.almacen === almacen_id && stock_minimmo.repuesto === repuesto_id)[0]
+        // console.log(stock_minimo);
+        setStockMinimoEditar(stock_minimo);
+        setStockEditar(stock);
+        setShowStock(true);
+    }
+
+    const abrirNuevoStock = () => {
+        setStockEditar(null);
+        setStockMinimoEditar(null);
+        setShowStock(true);
+    }
+
+    // const updateStocksMinimos = (id, stock_minimo) => {
+    //     console.log(datos.stocks_minimos);
+    //     const new_stocks_minimos = [ ...datos.stocks_minimos.filter(stock_minimmo => stock_minimmo.id !== id), stock_minimo];
+    //     setRepuesto({
+    //         ...repuesto,
+    //         stocks_minimos : new_stocks_minimos,
+    //         stock : datos.stock.forEach(s =>{
+    //                 if (s.almacen__id === stock_minimo.almacen) {
+    //                     s.stock_minimo = stock_minimo.cantidad;
+    //                 }
+    //             })
+    //     })
+    //     // repuesto.stocks_minimos = new_stocks_minimos;
+    //     console.log(repuesto);
+    // }
+
+    const updateRepuesto = () => {
+        axios.get(BACKEND_SERVER + `/api/repuestos/detalle/${datos.id}/`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }     
@@ -189,7 +265,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                             <h5 className="pb-3 pt-1 mt-2">Stock por almacén:</h5>
                                             </Col>
                                             <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
-                                                    <PlusCircle className="plus mr-2" size={30} />
+                                                    <PlusCircle className="plus mr-2" size={30} onClick={abrirNuevoStock}/>
                                             </Col>
 
                                         </Row>
@@ -212,9 +288,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                             <td>{stock.suma}</td>
                                                             <td>{stock.stock_minimo}</td>
                                                             <td>
-                                                                <Link to={`#`}>
-                                                                    <PencilFill className="mr-3 pencil"/>
-                                                                </Link>
+                                                                <PencilFill className="mr-3 pencil" onClick={event => {handleEditStock(stock)}}/>
                                                                 <Trash className="trash"  onClick={null} />
                                                             </td>
                                                         </tr>
@@ -301,6 +375,14 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                     </Form>
                 </Col>
             </Row>        
+
+            <StockMinimoForm show={show_stock}
+                             handleCloseStock = {handleCloseStock}
+                             repuesto_id = {repuesto.id}
+                             stock = {stock_editar}
+                             stock_minimo =  {stock_minimo_editar}
+                             updateRepuesto = {updateRepuesto}
+                             stocks_utilizados = {datos.stocks_minimos}/>
         </Container> 
     )
 }
