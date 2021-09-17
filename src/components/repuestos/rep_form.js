@@ -7,6 +7,8 @@ import { BACKEND_SERVER } from '../../constantes';
 import { PlusCircle, PencilFill, Trash } from 'react-bootstrap-icons';
 import './repuestos.css';
 import StockMinimoForm from './rep_stock_minimo';
+import EquipoForm from './rep_equipo';
+import ProveedorForm from './rep_proveedor';
 
 const RepuestoForm = ({repuesto, setRepuesto}) => {
     const [token] = useCookies(['tec-token']);
@@ -25,11 +27,13 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         proveedores: repuesto.proveedores
     });
     const [show_stock, setShowStock] = useState(false);
+    const [show_equipo, setShowEquipo] = useState(false);
+    const [show_proveedor, setShowProveedor] = useState(false);
     const [stock_editar, setStockEditar] = useState(null);
     const [stock_minimo_editar, setStockMinimoEditar] = useState(null);
 
     useEffect(()=>{
-        console.log('Cambio en repuesto, actualizando datos ...');
+        // console.log('Cambio en repuesto, actualizando datos ...');
         setDatos({
             id: repuesto.id ? repuesto.id : null,
             nombre: repuesto.nombre,
@@ -43,7 +47,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             equipos: repuesto.equipos,
             proveedores: repuesto.proveedores}
             );
-        // console.log(datos.stocks_minimos)
+        // console.log(datos)
     },[repuesto]);
 
     useEffect(()=>{
@@ -102,7 +106,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
               }     
         })
         .then( res => { 
-            console.log(res.data);
+            // console.log(res.data);
             setRepuesto(res.data);
             window.location.href = "/repuestos";
         })
@@ -124,7 +128,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
               }     
         })
         .then( res => { 
-            console.log(res.data);
+            // console.log(res.data);
             setRepuesto(res.data);
             // window.location.href = "/repuestos";
         })
@@ -153,21 +157,21 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         setShowStock(true);
     }
 
-    // const updateStocksMinimos = (id, stock_minimo) => {
-    //     console.log(datos.stocks_minimos);
-    //     const new_stocks_minimos = [ ...datos.stocks_minimos.filter(stock_minimmo => stock_minimmo.id !== id), stock_minimo];
-    //     setRepuesto({
-    //         ...repuesto,
-    //         stocks_minimos : new_stocks_minimos,
-    //         stock : datos.stock.forEach(s =>{
-    //                 if (s.almacen__id === stock_minimo.almacen) {
-    //                     s.stock_minimo = stock_minimo.cantidad;
-    //                 }
-    //             })
-    //     })
-    //     // repuesto.stocks_minimos = new_stocks_minimos;
-    //     console.log(repuesto);
-    // }
+    const abrirAddEquipo = () => {
+        setShowEquipo(true);
+    }
+
+    const cerrarAddEquipo = () => {
+        setShowEquipo(false);
+    }
+
+    const abrirAddProveedor = () => {
+        setShowProveedor(true);
+    }
+
+    const cerrarAddProveedor = () => {
+        setShowProveedor(false);
+    }
 
     const updateRepuesto = () => {
         axios.get(BACKEND_SERVER + `/api/repuestos/detalle/${datos.id}/`,{
@@ -176,11 +180,59 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
               }     
         })
         .then( res => { 
-            console.log(res.data);
+            // console.log(res.data);
             setRepuesto(res.data);
             // window.location.href = "/repuestos";
         })
         .catch(err => { console.log(err);})
+    }
+
+    const handlerBorrarEquipo = (id) => {
+        // console.log(id);
+        let newEquipos = [];
+        datos.equipos && datos.equipos.forEach( e => {
+            if (e.id !== id) {
+                newEquipos.push(e.id);
+            }
+        });
+        
+        axios.patch(BACKEND_SERVER + `/api/repuestos/lista/${repuesto.id}/`, {
+            equipos: newEquipos
+        }, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => { 
+                // console.log(res.data);
+                updateRepuesto();
+            }
+        )
+        .catch(err => { console.log(err);});
+    }
+
+    const handlerBorrarProveedor = (id) => {
+        // console.log(id);
+        let newProveedores = [];
+        datos.proveedores && datos.proveedores.forEach( p => {
+            if (p.id !== id) {
+                newProveedores.push(p.id);
+            }
+        });
+        
+        axios.patch(BACKEND_SERVER + `/api/repuestos/lista/${repuesto.id}/`, {
+            proveedores: newProveedores
+        }, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => { 
+                // console.log(res.data);
+                updateRepuesto();
+            }
+        )
+        .catch(err => { console.log(err);});
     }
 
     return (
@@ -321,7 +373,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                 <h5 className="pb-3 pt-1 mt-2">Es repuesto de:</h5>
                                             </Col>
                                             <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
-                                                <PlusCircle className="plus mr-2" size={30} />
+                                                <PlusCircle className="plus mr-2" size={30} onClick={abrirAddEquipo}/>
                                             </Col>
                                         </Row>
                                         <Table striped bordered hover>
@@ -341,10 +393,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                             <td>{equipo.seccion_nombre}</td>
                                                             <td>{equipo.nombre}</td>
                                                             <td>
-                                                                <Link to={`#`}>
-                                                                    <PencilFill className="mr-3 pencil"/>
-                                                                </Link>
-                                                                <Trash className="trash"  onClick={null} />
+                                                                <Trash className="trash"  onClick={event => {handlerBorrarEquipo(equipo.id)}} />
                                                             </td>
                                                         </tr>
                                                     )})
@@ -358,7 +407,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                             <h5 className="pb-3 pt-1 mt-2">Proveedores:</h5>
                                             </Col>
                                             <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
-                                                <PlusCircle className="plus mr-2" size={30} />
+                                                <PlusCircle className="plus mr-2" size={30} onClick={abrirAddProveedor}/>
                                             </Col>
                                         </Row>
                                         <Table striped bordered hover>
@@ -374,10 +423,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                         <tr key={p.id}>
                                                             <td>{p.nombre}</td>
                                                             <td>
-                                                                <Link to={`#`}>
-                                                                    <PencilFill className="mr-3 pencil"/>
-                                                                </Link>
-                                                                <Trash className="trash"  onClick={null} />
+                                                                <Trash className="trash"  onClick={event => {handlerBorrarProveedor(p.id)}} />
                                                             </td>
                                                         </tr>
                                                     )})
@@ -399,6 +445,18 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                              stock_minimo =  {stock_minimo_editar}
                              updateRepuesto = {updateRepuesto}
                              stocks_utilizados = {datos.stocks_minimos}/>
+
+            <EquipoForm show={show_equipo}
+                        handleCloseEquipo={cerrarAddEquipo}
+                        repuesto_id = {repuesto.id}
+                        equiposAsignados={datos.equipos}
+                        updateRepuesto = {updateRepuesto}/>
+
+            <ProveedorForm show={show_proveedor}
+                           handleCloseProveedor={cerrarAddProveedor}
+                           proveedoresAsignados={datos.proveedores}
+                           repuesto_id={repuesto.id}
+                           updateRepuesto = {updateRepuesto}/>
         </Container> 
     )
 }

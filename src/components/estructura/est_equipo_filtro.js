@@ -37,6 +37,10 @@ const EstEquiposFiltro = ({ actualizaFiltro }) => {
         // console.log(BACKEND_SERVER + `/api/estructura/zona/?empresa=${datos.empresa}`);
         if (datos.empresa === '') {
             setZonas([]);
+            setDatos({
+                ...datos,
+                zona: ''
+            });
         }
         else {
             axios.get(BACKEND_SERVER + `/api/estructura/zona/?empresa=${datos.empresa}`,{
@@ -47,6 +51,10 @@ const EstEquiposFiltro = ({ actualizaFiltro }) => {
             .then( res => {
                 //console.log(res.data);
                 setZonas(res.data);
+                setDatos({
+                    ...datos,
+                    zona: ''
+                });
             })
             .catch( err => {
                 console.log(err);
@@ -58,6 +66,10 @@ const EstEquiposFiltro = ({ actualizaFiltro }) => {
         // console.log(BACKEND_SERVER + `/api/estructura/seccion/?zona=${datos.zona}`);
         if (datos.zona === '') {
             setSecciones([]);
+            setDatos({
+                ...datos,
+                seccion: ''
+            });
         }
         else {
             axios.get(BACKEND_SERVER + `/api/estructura/seccion/?zona=${datos.zona}`,{
@@ -68,6 +80,10 @@ const EstEquiposFiltro = ({ actualizaFiltro }) => {
             .then( res => {
                 //console.log(res.data);
                 setSecciones(res.data);
+                setDatos({
+                    ...datos,
+                    seccion: ''
+                });
             })
             .catch( err => {
                 console.log(err);

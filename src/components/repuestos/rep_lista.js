@@ -9,16 +9,20 @@ import RepListaFilto from './rep_lista_filtro';
 
 const RepLista = () => {
     const [token] = useCookies(['tec-token']);
+    const [user] = useCookies(['tec-user']);
     const [repuestos, setRepuestos] = useState(null);
     const [show, setShow] = useState(false);
     const [repuestoBorrar, setRepuestoBorrar] = useState(null);
-    const [filtro, setFiltro] = useState('');
+    const [filtro, setFiltro] = useState(`?equipos__seccion__zona__empresa__id=${user['tec-user'].perfil.empresa.id}&&descatalogado=${false}`);
 
-    // const actualizaFiltro = str => {
-    //     setFiltro(str);
-    // }
+    const actualizaFiltro = str => {
+        // console.log(str);
+        setFiltro(str);
+    }
 
     useEffect(()=>{
+        if (!show){
+            // console.log(filtro);
             axios.get(BACKEND_SERVER + '/api/repuestos/lista/' + filtro,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
@@ -30,39 +34,40 @@ const RepLista = () => {
             .catch( err => {
                 console.log(err);
             });
-        }, [token, filtro]);
-
-        const handleClose = () => setShow(false);
-
-        const handleTrashClick = (repuesto) => {
-            setShow(true);
-            setRepuestoBorrar(repuesto);
         }
+    }, [token, filtro, show]);
 
-        const borrarRepuesto = () => {
-            // console.log(repuestoBorrar);
-            axios.patch(BACKEND_SERVER + `/api/repuestos/lista/${repuestoBorrar.id}/`,{
-                descatalogado: true
-            }, {
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                  }
-                })
-                .then(res => {
-                    // const repuestosActual = repuestos.filter(repuesto => repuesto.id !== repuestoBorrar.id);
-                    // setRepuestos(repuestosActual);
-                    console.log(res.data);
-                    setShow(false);
-                    setRepuestoBorrar(null);
-                })
-                .catch(err => {console.log(err);})
-        }
+    const handleClose = () => setShow(false);
+
+    const handleTrashClick = (repuesto) => {
+        setShow(true);
+        setRepuestoBorrar(repuesto);
+    }
+
+    const borrarRepuesto = () => {
+        // console.log(repuestoBorrar);
+        axios.patch(BACKEND_SERVER + `/api/repuestos/lista/${repuestoBorrar.id}/`,{
+            descatalogado: true
+        }, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+                }
+            })
+            .then(res => {
+                // const repuestosActual = repuestos.filter(repuesto => repuesto.id !== repuestoBorrar.id);
+                // setRepuestos(repuestosActual);
+                // console.log(res.data);
+                setShow(false);
+                setRepuestoBorrar(null);
+            })
+            .catch(err => {console.log(err);})
+    }
 
     return (
         <Container>
             <Row>
                 <Col>
-                    <RepListaFilto actualizaFiltro={setFiltro}/>
+                    <RepListaFilto actualizaFiltro={actualizaFiltro}/>
                 </Col>
             </ Row>
             <Row>
@@ -76,6 +81,7 @@ const RepLista = () => {
                                 <th>Modelo</th>
                                 {/* <th>Stock</th> */}
                                 <th>Crítico</th>
+                                <th>Descatalogado</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -88,6 +94,7 @@ const RepLista = () => {
                                         <td>{repuesto.modelo}</td>
                                         {/* <td>{repuesto.stock}</td> */}
                                         <td>{repuesto.es_critico ? 'Si' : 'No'}</td>
+                                        <td>{repuesto.descatalogado ? 'Si' : 'No'}</td>
                                         <td>
                                             <Link to={`/repuestos/${repuesto.id}`}>
                                                 <PencilFill className="mr-3 pencil"/>

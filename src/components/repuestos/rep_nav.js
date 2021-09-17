@@ -16,8 +16,8 @@ const RepNavBar = () => {
                             <NavDropdown.Item href="/repuestos">Lista de repuestos</NavDropdown.Item>
                             <NavDropdown.Item href="/repuestos/nuevo">Nuevo repuesto</NavDropdown.Item>
                             <NavDropdown.Divider />
-                            <NavDropdown.Item href="#">Lista de almacenes</NavDropdown.Item>
-                            <NavDropdown.Item href="#">Nuevo almacén</NavDropdown.Item>
+                            <NavDropdown.Item href="/repuestos/almacenes">Lista de almacenes</NavDropdown.Item>
+                            <NavDropdown.Item href="/repuestos/almacen/nuevo">Nuevo almacén</NavDropdown.Item>
                             <NavDropdown.Divider />
                             <NavDropdown.Item href="#">Lista de proveedores</NavDropdown.Item>
                             <NavDropdown.Item href="#">Nuevo proveedor</NavDropdown.Item>

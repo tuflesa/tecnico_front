@@ -35,28 +35,28 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
     }, [token]);
 
     useEffect(() => {
-        console.log('recalculando almacenes ...');
+        // console.log('recalculando almacenes ...');
         axios.get(BACKEND_SERVER + `/api/repuestos/almacen/?empresa=${datos.empresa}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
         .then( res => {
-            console.log('datos recibidos DB ...')
-            console.log(res.data);
-            console.log('Lista de stocks utilizados ...');
-            console.log(stocks_utilizados);
+            // console.log('datos recibidos DB ...')
+            // console.log(res.data);
+            // console.log('Lista de stocks utilizados ...');
+            // console.log(stocks_utilizados);
             let almacenes_utilizados = [];
             if (stocks_utilizados) {
-                console.log('Calculando almacenes utilizados')
+                // console.log('Calculando almacenes utilizados')
                 stocks_utilizados.forEach( s => {
                     almacenes_utilizados.push(s.almacen);
                 })
-                console.log(almacenes_utilizados)
+                // console.log(almacenes_utilizados)
             }
             const almacenes_disponible = res.data.filter( a =>  !almacenes_utilizados.includes(a.id));
-            console.log('almacenes disponibles ...')
-            console.log(almacenes_disponible)
+            // console.log('almacenes disponibles ...')
+            // console.log(almacenes_disponible)
             setGuardarDisabled(almacenes_disponible.length === 0);
             setAlmacenes(almacenes_disponible);
         })
@@ -90,7 +90,7 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
             ...datos,
             [event.target.name] : event.target.value
         });
-        console.log(datos);
+        // console.log(datos);
     }
 
     const handleDisabled = () => {
@@ -120,7 +120,7 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
                       }     
                 })
                 .then( res => { 
-                        console.log(res.data);
+                        // console.log(res.data);
                         updateRepuesto();
                     }
                 )
@@ -151,7 +151,7 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
 
         // Ajustar Stock
         if (datos.stock_actual !== datos.stock_actual_inicial || !datos.stock_actual){ // Si hay cambios o se deja sin valor el campo stock
-            console.log('Guardar ajuste stock ' + datos.stock_actual);
+            // console.log('Guardar ajuste stock ' + datos.stock_actual);
             // 1 Crear un inventario
             // 2 Añadir una línea de inventario
             // 3 Generar un movimiento correspondiente al inventario
@@ -198,7 +198,7 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
                               }     
                         })
                         .then( res => {
-                            console.log(res.data);
+                            // console.log(res.data);
                             updateRepuesto();
                         })
                         .catch( err => {console.log(err);})

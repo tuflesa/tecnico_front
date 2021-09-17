@@ -4,6 +4,9 @@ import RepNavBar from './rep_nav';
 import RepLista from './rep_lista';
 import RepNuevo from './rep_nuevo';
 import RepDetalle from './rep_editar';
+import RepAlmacenesLista from './rep_almacenes_lista';
+import RepAlmacenNuevo from './rep_almacen_nuevo';
+import RepAlmacenEdit from './rep_almacen_editar';
 
 const Repuestos = () => {
     
@@ -13,6 +16,9 @@ const Repuestos = () => {
             <Switch>
                 <Route path='/repuestos' exact component={RepLista} />
                 <Route path='/repuestos/nuevo' component={RepNuevo} />
+                <Route path='/repuestos/almacenes' component={RepAlmacenesLista} />
+                <Route path='/repuestos/almacen/nuevo' component={RepAlmacenNuevo} />
+                <Route path='/repuestos/almacen/:id' component={RepAlmacenEdit} />
                 <Route path='/repuestos/:id' component={RepDetalle} />
             </Switch>
         </React.Fragment>
