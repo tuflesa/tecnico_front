@@ -5,6 +5,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table, Modal, Button } from 'react-bootstrap';
 import { Trash, PencilFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
+import AlmacenFiltro from './rep_almacen_filtro';
 
 const RepAlmacenesLista = () => {
     const [token] = useCookies(['tec-token']);
@@ -26,7 +27,11 @@ const RepAlmacenesLista = () => {
         .catch( err => {
             console.log(err);
         });
-    }, [token]);
+    }, [token, filtro]);
+
+    const actualizaFiltro = str => {
+        setFiltro(str);
+    }
 
     const handlerBorrar = () => {
         setShow(true);
@@ -38,6 +43,9 @@ const RepAlmacenesLista = () => {
 
     return (
         <Container>
+            <Row className="justify-content-center">
+                <AlmacenFiltro actualizaFiltro={actualizaFiltro} />
+            </Row>
             <Row>
                 <Col>
                     <h5 className="mb-3 mt-3">Lista de Almacenes</h5>
