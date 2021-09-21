@@ -4,6 +4,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { Link } from 'react-router-dom';
+import { linkVertical } from 'd3-shape';
 
 const RepAlmacenForm = ({nombre, empresa, almacen_id}) => {
     const [token] = useCookies(['tec-token']);
@@ -51,7 +52,26 @@ const RepAlmacenForm = ({nombre, empresa, almacen_id}) => {
         })
         .then( res => { 
             console.log(res);
-            // window.location.href = '/estructura/zonas';
+            window.location.href = "/repuestos/almacenes/";
+        })
+        .catch(err => { console.log(err);})
+        
+    }
+    const nuevoDatos = (event) => {
+        event.preventDefault()
+        console.log('Actualizar datos...' + almacen_id + ' ' + datos.nombre + ' ' + datos.empresa)
+
+        axios.post(BACKEND_SERVER + `/api/repuestos/almacen/`, {
+            nombre: datos.nombre,
+            empresa: datos.empresa
+        }, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => { 
+            console.log(res);
+            window.location.href = "/repuestos/almacenes/";
         })
         .catch(err => { console.log(err);})
         
@@ -104,11 +124,11 @@ const RepAlmacenForm = ({nombre, empresa, almacen_id}) => {
                     </Form>
                 </Col>
             </Row>
-            <Form.Row className="justify-content-center">
-                {almacen_id ? 
+            <Form.Row className="justify-content-center">                
+                {almacen_id ?
                     <Button variant="info" type="submit" className={'mr-1'} onClick={actualizarDatos}>Actualizar</Button> :
-                    <Button variant="info" type="submit" className={'mr-1'} onClick={actualizarDatos}>Guardar</Button>
-                }
+                    <Button variant="info" type="submit" className={'mr-1'} onClick={nuevoDatos}>Guardar</Button>
+                }                       
                 <Link to='/repuestos/almacenes'>
                     <Button variant="warning" className={'ml-1'} >
                         Cancelar
