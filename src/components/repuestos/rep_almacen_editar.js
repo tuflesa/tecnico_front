@@ -9,14 +9,12 @@ const RepAlmacenEdit = ({ match }) => {
     const [almacen, setAlmacenes] = useState(null);
 
     useEffect(() => {
-        // console.log('Detalle');
         axios.get(BACKEND_SERVER + `/api/repuestos/almacen/${match.params.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
         .then( res => {
-            console.log(res.data);
             setAlmacenes (res.data);
         })
         .catch( err => {

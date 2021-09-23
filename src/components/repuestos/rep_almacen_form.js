@@ -4,7 +4,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { Link } from 'react-router-dom';
-import { linkVertical } from 'd3-shape';
+/* import { linkVertical } from 'd3-shape'; */
 
 const RepAlmacenForm = ({nombre, empresa, almacen_id}) => {
     const [token] = useCookies(['tec-token']);
@@ -23,7 +23,6 @@ const RepAlmacenForm = ({nombre, empresa, almacen_id}) => {
               }
         })
         .then( res => {
-            // console.log(res.data);
             setEmpresas(res.data);
         })
         .catch( err => {
@@ -34,13 +33,12 @@ const RepAlmacenForm = ({nombre, empresa, almacen_id}) => {
     const handleInputChange = (event) => {
         setDatos({
             ...datos,
-            [event.target.name] : event.target.value
+            [event.target.name] : event.target.value           
         });
-        // console.log(datos);
     }
     const actualizarDatos = (event) => {
         event.preventDefault()
-        console.log('Actualizar datos...' + almacen_id + ' ' + datos.nombre + ' ' + datos.empresa)
+     //   console.log('Actualizar datos...' + almacen_id + ' ' + datos.nombre + ' ' + datos.empresa)
 
         axios.put(BACKEND_SERVER + `/api/repuestos/almacen/${almacen_id}/`, {
             nombre: datos.nombre,
@@ -51,7 +49,7 @@ const RepAlmacenForm = ({nombre, empresa, almacen_id}) => {
               }     
         })
         .then( res => { 
-            console.log(res);
+            console.log('esto es res' + res[0]);
             window.location.href = "/repuestos/almacenes/";
         })
         .catch(err => { console.log(err);})
@@ -71,7 +69,7 @@ const RepAlmacenForm = ({nombre, empresa, almacen_id}) => {
         })
         .then( res => { 
             console.log(res);
-            window.location.href = "/repuestos/almacenes/";
+           // window.location.href = "/repuestos/almacenes/";
         })
         .catch(err => { console.log(err);})
         
