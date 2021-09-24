@@ -8,6 +8,8 @@ import RepAlmacenesLista from './rep_almacenes_lista';
 import RepAlmacenNuevo from './rep_almacen_nuevo';
 import RepAlmacenEdit from './rep_almacen_editar';
 import RepProveedoresLista from './rep_proveedores_lista';
+import RepProveedorNuevo from './rep_proveedor_nuevo';
+import RepProveedorEdit from './rep_proveedor_editar';
 
 const Repuestos = () => {
     
@@ -20,7 +22,9 @@ const Repuestos = () => {
                 <Route path='/repuestos/almacenes' component={RepAlmacenesLista} />
                 <Route path='/repuestos/almacen/nuevo' component={RepAlmacenNuevo} />
                 <Route path='/repuestos/almacen/:id' component={RepAlmacenEdit} />
-                <Route path='/repuestos/proveedores' component={RepProveedoresLista} />                                
+                <Route path='/repuestos/proveedores' component={RepProveedoresLista} />  
+                <Route path='/repuestos/proveedor/nuevo' component={RepProveedorNuevo} />
+                <Route path='/repuestos/proveedor/:id' component={RepProveedorEdit} />                              
                 <Route path='/repuestos/:id' component={RepDetalle} />
             </Switch>
         </React.Fragment>

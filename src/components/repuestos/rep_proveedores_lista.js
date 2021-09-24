@@ -5,7 +5,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table, Modal, Button } from 'react-bootstrap';
 import { Trash, PencilFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
-//import ProveedorFiltro from './rep_proveedor_filtro';
+import ProveedorFiltro from './rep_proveedores_filtro';
 
 
 const RepProveedoresLista = () => {
@@ -15,7 +15,7 @@ const RepProveedoresLista = () => {
     const [proveedores, setProveedores] = useState(null);
     const [show, setShow] = useState(false);
     useEffect(()=>{
-        axios.get(BACKEND_SERVER + `/api/repuestos/proveedor/`,{
+        axios.get(BACKEND_SERVER + `/api/repuestos/proveedor/` + filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -27,7 +27,7 @@ const RepProveedoresLista = () => {
         .catch( err => {
             console.log(err);
         });
-    }, [token]);
+    }, [token, filtro]);
 
      const actualizaFiltro = str => {
         setFiltro(str);
@@ -43,9 +43,9 @@ const RepProveedoresLista = () => {
 
     return (
         <Container>
-{/*             <Row className="justify-content-center">
+            <Row className="justify-content-center">
                 <ProveedorFiltro actualizaFiltro={actualizaFiltro} />
-            </Row> */}
+            </Row>
             <Row>
                 <Col>
                     <h5 className="mb-3 mt-3">Lista de Proveedores</h5>
@@ -55,7 +55,7 @@ const RepProveedoresLista = () => {
                                 <th>Nombre</th>
                                 <th>Teléfono</th>
                                 <th>Dirección</th>
-                                {/* <th>Acciones</th> */}
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -65,12 +65,12 @@ const RepProveedoresLista = () => {
                                         <td>{proveedor.nombre}</td>
                                         <td>{proveedor.telefono}</td>
                                         <td>{proveedor.direccion}</td>
-{/*                                         <td>
+                                        <td>
                                             <Link to={`/repuestos/proveedor/${proveedor.id}`}>
                                                 <PencilFill className="mr-3 pencil"/>
                                             </Link>
                                             <Trash className="trash"  onClick={handlerBorrar} />
-                                        </td> */}
+                                        </td>
                                     </tr>
                                 )})
                             }
@@ -78,7 +78,7 @@ const RepProveedoresLista = () => {
                     </Table>
                 </Col>
             </Row>
-{/*             <Modal show={show} onHide={handlerClose} backdrop="static" keyboard={ false } animation={false}>
+            <Modal show={show} onHide={handlerClose} backdrop="static" keyboard={ false } animation={false}>
                 <Modal.Header closeButton>
                     <Modal.Title>Borrar Proveedor no permitido ...</Modal.Title>
                 </Modal.Header>
@@ -90,7 +90,7 @@ const RepProveedoresLista = () => {
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handlerClose}>Cerrar</Button>
                 </Modal.Footer>
-            </Modal> */}
+            </Modal>
         </Container>
     )
 }
