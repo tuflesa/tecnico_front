@@ -5,67 +5,68 @@ import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table, Modal, Button } from 'react-bootstrap';
 import { Trash, PencilFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
-import AlmacenFiltro from './rep_almacen_filtro';
+import ProveedorFiltro from './rep_proveedores_filtro';
 
-const RepAlmacenesLista = () => {
+
+const RepProveedoresLista = () => {
     const [token] = useCookies(['tec-token']);
 
     const [filtro, setFiltro] = useState('');
-    const [almacenes, setAlmacenes] = useState(null);
+    const [proveedores, setProveedores] = useState(null);
     const [show, setShow] = useState(false);
-
     useEffect(()=>{
-        axios.get(BACKEND_SERVER + '/api/repuestos/almacen/' + filtro,{
+        axios.get(BACKEND_SERVER + `/api/repuestos/proveedor/` + filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
         .then( res => {
             console.log(res.data); 
-            setAlmacenes(res.data);
+            setProveedores(res.data);
         })
         .catch( err => {
             console.log(err);
         });
     }, [token, filtro]);
-    console.log('estoy viendo los proveedores....' + almacenes);
 
-    const actualizaFiltro = str => {
+     const actualizaFiltro = str => {
         setFiltro(str);
-    }
+    } 
 
-    const handlerBorrar = () => {
+     const handlerBorrar = () => {
         setShow(true);
     }
 
     const handlerClose = () => {
         setShow(false);
-    }
+    } 
 
     return (
         <Container>
             <Row className="justify-content-center">
-                <AlmacenFiltro actualizaFiltro={actualizaFiltro} />
+                <ProveedorFiltro actualizaFiltro={actualizaFiltro} />
             </Row>
             <Row>
                 <Col>
-                    <h5 className="mb-3 mt-3">Lista de Almacenes</h5>
+                    <h5 className="mb-3 mt-3">Lista de Proveedores</h5>
                     <Table striped bordered hover>
                         <thead>
                             <tr>
-                                <th>Empresa</th>
                                 <th>Nombre</th>
+                                <th>Teléfono</th>
+                                <th>Dirección</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {almacenes && almacenes.map( almacen => {
+                            {proveedores && proveedores.map( proveedor => {
                                 return (
-                                    <tr key={almacen.id}>
-                                        <td>{almacen.empresa_siglas}</td>
-                                        <td>{almacen.nombre}</td>
+                                    <tr key={proveedor.id}>
+                                        <td>{proveedor.nombre}</td>
+                                        <td>{proveedor.telefono}</td>
+                                        <td>{proveedor.direccion}</td>
                                         <td>
-                                            <Link to={`/repuestos/almacen/${almacen.id}`}>
+                                            <Link to={`/repuestos/proveedor/${proveedor.id}`}>
                                                 <PencilFill className="mr-3 pencil"/>
                                             </Link>
                                             <Trash className="trash"  onClick={handlerBorrar} />
@@ -79,11 +80,11 @@ const RepAlmacenesLista = () => {
             </Row>
             <Modal show={show} onHide={handlerClose} backdrop="static" keyboard={ false } animation={false}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Borrar Almacen no permitido ...</Modal.Title>
+                    <Modal.Title>Borrar Proveedor no permitido ...</Modal.Title>
                 </Modal.Header>
 
                 <Modal.Body>
-                    <p>Por favor pongase en contacto con el administrador de la base de datos para borrar el almacén.</p>
+                    <p>Por favor pongase en contacto con el administrador de la base de datos para borrar el proveedor.</p>
                 </Modal.Body>
 
                 <Modal.Footer>
@@ -94,4 +95,4 @@ const RepAlmacenesLista = () => {
     )
 }
 
-export default RepAlmacenesLista;
+export default RepProveedoresLista;

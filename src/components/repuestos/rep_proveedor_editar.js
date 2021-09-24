@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import RepAlmacenForm from './rep_almacen_form';
+import RepProveedorForm from './rep_proveedor_form';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 
-const RepAlmacenEdit = ({ match }) => {
+const RepProveedorEdit = ({ match }) => {
     const [token] = useCookies(['tec-token']);
-    const [almacen, setAlmacenes] = useState(null);
+    const [proveedor, setProveedores] = useState(null);
 
     useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/repuestos/almacen/${match.params.id}`,{
+        axios.get(BACKEND_SERVER + `/api/repuestos/proveedor/${match.params.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
         .then( res => {
-            setAlmacenes (res.data);
+            setProveedores (res.data);
         })
         .catch( err => {
             console.log(err);
@@ -23,10 +23,10 @@ const RepAlmacenEdit = ({ match }) => {
     }, [token, match]);
 
     return (
-        <React.Fragment>    
-            {almacen ? <RepAlmacenForm nombre={almacen.nombre} empresa={almacen.empresa} almacen_id={almacen.id}/> : null}
+        <React.Fragment>
+            {proveedor ? <RepProveedorForm nombre={proveedor.nombre} direccion={proveedor.direccion} telefono={proveedor.telefono} proveedor_id={proveedor.id}/> : null}
         </React.Fragment>
     )
 }
 
-export default RepAlmacenEdit;
+export default RepProveedorEdit;

@@ -4,31 +4,16 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { Link } from 'react-router-dom';
-/* import { linkVertical } from 'd3-shape'; */
 
-const RepAlmacenForm = ({nombre, empresa, almacen_id}) => {
+const RepProveedorForm = ({nombre, direccion, telefono, proveedor_id}) => {
     const [token] = useCookies(['tec-token']);
 
     const [datos, setDatos] = useState({
-        almacen_id: almacen_id,
+        proveedor_id: proveedor_id,
         nombre: nombre,
-        empresa: empresa
+        direccion: direccion,
+        telefono: telefono
     });
-    const [empresas, setEmpresas] = useState([]);
-
-    useEffect(() => {
-        axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            setEmpresas(res.data);
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    }, [token]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -38,30 +23,32 @@ const RepAlmacenForm = ({nombre, empresa, almacen_id}) => {
     }
     const actualizarDatos = (event) => {
         event.preventDefault()
-     //   console.log('Actualizar datos...' + almacen_id + ' ' + datos.nombre + ' ' + datos.empresa)
+        console.log('Actualizar datos...' + proveedor_id + ' ' + datos.nombre + ' ' + datos.telefono + ' ' + datos.direccion);
 
-        axios.put(BACKEND_SERVER + `/api/repuestos/almacen/${almacen_id}/`, {
+        axios.put(BACKEND_SERVER + `/api/repuestos/proveedor/${proveedor_id}/`, {
             nombre: datos.nombre,
-            empresa: datos.empresa
+            direccion: datos.direccion,
+            telefono: datos.telefono,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }     
         })
         .then( res => { 
-            console.log('esto es res' + res[0]);
-            window.location.href = "/repuestos/almacenes/";
+            console.log('esto es res' + res);
+            window.location.href = "/repuestos/proveedores/";
         })
         .catch(err => { console.log(err);})
         
     }
     const nuevoDatos = (event) => {
         event.preventDefault()
-        console.log('Actualizar datos...' + almacen_id + ' ' + datos.nombre + ' ' + datos.empresa)
+        console.log('Nuevo datos...' + proveedor_id + ' ' + datos.nombre + ' ' + datos.telefono + ' ' + datos.direccion);
 
-        axios.post(BACKEND_SERVER + `/api/repuestos/almacen/`, {
+        axios.post(BACKEND_SERVER + `/api/repuestos/proveedor/`, {
             nombre: datos.nombre,
-            empresa: datos.empresa
+            direccion: datos.direccion,
+            telefono: datos.telefono,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -69,7 +56,7 @@ const RepAlmacenForm = ({nombre, empresa, almacen_id}) => {
         })
         .then( res => { 
             console.log(res);
-           // window.location.href = "/repuestos/almacenes/";
+            window.location.href = "/repuestos/proveedores";
         })
         .catch(err => { console.log(err);})
         
@@ -79,33 +66,13 @@ const RepAlmacenForm = ({nombre, empresa, almacen_id}) => {
     return (
         <Container>
             <Row className="justify-content-center"> 
-            {almacen_id ?
-                <h5 className="pb-3 pt-1 mt-2">Almacen Detalle</h5>:
-                <h5 className="pb-3 pt-1 mt-2">Nuevo Almacen</h5>}
+            {proveedor_id ?
+                <h5 className="pb-3 pt-1 mt-2">proveedor Detalle</h5>:
+                <h5 className="pb-3 pt-1 mt-2">Nuevo Proveedor</h5>}
             </Row>
             <Row className="justify-content-center">
                 <Col>
                     <Form >
-                    <Row>
-                        <Col>
-                            <Form.Group controlId="empresa">
-                                <Form.Label>Empresa</Form.Label>
-                                <Form.Control as="select"  
-                                            name='empresa' 
-                                            value={datos.empresa}
-                                            onChange={handleInputChange}
-                                            placeholder="Empresa">
-                                            {empresas && empresas.map( empresa => {
-                                                return (
-                                                <option key={empresa.id} value={empresa.id}>
-                                                    {empresa.nombre}
-                                                </option>
-                                                )
-                                            })}
-                                </Form.Control>
-                            </Form.Group>
-                        </Col>
-                    </Row>
                     <Row>
                         <Col>
                             <Form.Group controlId="nombre">
@@ -119,15 +86,41 @@ const RepAlmacenForm = ({nombre, empresa, almacen_id}) => {
                                 </Form.Group>
                         </Col>
                     </Row>
+                    <Row>
+                        <Col>
+                            <Form.Group controlId="direccion">
+                                <Form.Label>Dirección</Form.Label>
+                                <Form.Control type="text" 
+                                            name='direccion' 
+                                            value={datos.direccion}
+                                            onChange={handleInputChange} 
+                                            placeholder="Direccion"
+                                />
+                                </Form.Group>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col>
+                            <Form.Group controlId="telefono">
+                                <Form.Label>Teléfono</Form.Label>
+                                <Form.Control type="text" 
+                                            name='telefono' 
+                                            value={datos.telefono}
+                                            onChange={handleInputChange} 
+                                            placeholder="Telefono"
+                                />
+                                </Form.Group>
+                        </Col>
+                    </Row>
                     </Form>
                 </Col>
             </Row>
             <Form.Row className="justify-content-center">                
-                {almacen_id ?
+                {proveedor_id ?
                     <Button variant="info" type="submit" className={'mr-1'} onClick={actualizarDatos}>Actualizar</Button> :
                     <Button variant="info" type="submit" className={'mr-1'} onClick={nuevoDatos}>Guardar</Button>
                 }                       
-                <Link to='/repuestos/almacenes'>
+                <Link to='/repuestos/proveedores'>
                     <Button variant="warning" className={'ml-1'} >
                         Cancelar
                     </Button>
@@ -137,4 +130,4 @@ const RepAlmacenForm = ({nombre, empresa, almacen_id}) => {
     )
 }
 
-export default RepAlmacenForm;
+export default RepProveedorForm;
