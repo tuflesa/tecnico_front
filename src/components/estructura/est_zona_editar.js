@@ -16,7 +16,6 @@ const EstZonaDetalle = ({ match }) => {
         })
         .then( res => {
             console.log(res.data);
-            console.log("estoy aqui");
             setZona(res.data);
         })
         .catch( err => {

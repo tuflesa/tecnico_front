@@ -25,7 +25,7 @@ const RepAlmacenEdit = ({ match }) => {
     }, [token, match]);
 
     return (
-        <React.Fragment>
+        <React.Fragment>    
             {almacen ? <RepAlmacenForm nombre={almacen.nombre} empresa={almacen.empresa} almacen_id={almacen.id}/> : null}
         </React.Fragment>
     )
