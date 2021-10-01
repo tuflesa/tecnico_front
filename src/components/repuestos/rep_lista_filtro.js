@@ -10,7 +10,6 @@ const RepListaFilto = ({actualizaFiltro}) => {
 
     const [datos, setDatos] = useState({
         nombre: '',
-        tipo: '',
         fabricante: '',
         modelo: '',
         critico: '',
@@ -20,7 +19,6 @@ const RepListaFilto = ({actualizaFiltro}) => {
         seccion: '',
         equipo: ''
     });
-    const [tipos, setTipos] = useState(null);
     const [empresas, setEmpresas] = useState(null);
     const [secciones, setSecciones] = useState(null);
     const [zonas, setZonas] = useState(null);
@@ -36,23 +34,6 @@ const RepListaFilto = ({actualizaFiltro}) => {
         .then( res => {
             // console.log(res.data);
             setEmpresas(res.data);
-        })
-        .catch( err => {
-            console.log(err);
-        });
-        // console.log(empresas);
-    }, [token]);
-
-    useEffect(() => {
-        // console.log('Leer empresas ...');
-        axios.get(BACKEND_SERVER + '/api/repuestos/tipo_repuesto/',{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            // console.log(res.data);
-            setTipos(res.data);
         })
         .catch( err => {
             console.log(err);
@@ -156,7 +137,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
     }, [token, datos.seccion]);
 
     useEffect(()=>{
-        const filtro1 = `?tipo_repuesto=${datos.tipo}&nombre__icontains=${datos.nombre}&fabricante__icontains=${datos.fabricante}&modelo__icontains=${datos.modelo}&es_critico=${datos.critico}&descatalogado=${datos.descatalogado}`;
+        const filtro1 = `?nombre__icontains=${datos.nombre}&fabricante__icontains=${datos.fabricante}&modelo__icontains=${datos.modelo}&es_critico=${datos.critico}&descatalogado=${datos.descatalogado}`;
         let filtro2 = `&equipos__seccion__zona__empresa__id=${datos.empresa}`;
         if (datos.empresa !== ''){
             filtro2 = filtro2 + `&equipos__seccion__zona__id=${datos.zona}`;
@@ -171,7 +152,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
         const filtro = filtro1 + filtro2;
         
         actualizaFiltro(filtro);
-    },[datos.nombre, datos.tipo, datos.fabricante, datos.modelo, datos.critico, datos.descatalogado, datos.empresa, datos.zona, datos.seccion, datos.equipo]);
+    },[datos.nombre, datos.fabricante, datos.modelo, datos.critico, datos.descatalogado, datos.empresa, datos.zona, datos.seccion, datos.equipo]);
 
 
     const handleInputChange = (event) => {
@@ -190,26 +171,6 @@ const RepListaFilto = ({actualizaFiltro}) => {
             <h5 className="mb-3 mt-3">Filtro</h5>
             <Form>
                 <Row>
-                    <Col>
-                    <Form.Group controlId="tipo">
-                            <Form.Label>Tipo</Form.Label>
-                            <Form.Control as="select"  
-                                        name='tipo' 
-                                        value={datos.tipo}
-                                        onChange={handleInputChange}
-                                        disabled={handleDisabled()}
-                                        placeholder="Tipo">
-                                        <option key={0} value={''}>Todos</option>    
-                                        {tipos && tipos.map( tipo => {
-                                            return (
-                                            <option key={tipo.id} value={tipo.id}>
-                                                {tipo.nombre}
-                                            </option>
-                                            )
-                                        })}
-                        </Form.Control>
-                        </Form.Group>
-                    </Col>
                     <Col>
                         <Form.Group controlId="formNombre">
                             <Form.Label>Nombre contiene</Form.Label>

@@ -16,7 +16,6 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     const [datos, setDatos] = useState({
         id: repuesto.id ? repuesto.id : null,
         nombre: repuesto.nombre,
-        tipo: repuesto.tipo_repuesto,
         fabricante: repuesto.fabricante ? repuesto.fabricante : '',
         modelo: repuesto.modelo ? repuesto.modelo : '',
         stock: repuesto.stock,
@@ -27,34 +26,17 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         equipos: repuesto.equipos,
         proveedores: repuesto.proveedores
     });
-    const [tipos, setTipos] = useState(null);
     const [show_stock, setShowStock] = useState(false);
     const [show_equipo, setShowEquipo] = useState(false);
     const [show_proveedor, setShowProveedor] = useState(false);
     const [stock_editar, setStockEditar] = useState(null);
     const [stock_minimo_editar, setStockMinimoEditar] = useState(null);
 
-    useEffect(() => {
-        axios.get(BACKEND_SERVER + '/api/repuestos/tipo_repuesto/',{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            console.log(res.data);
-            setTipos(res.data);
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    }, [token]);
-
     useEffect(()=>{
         // console.log('Cambio en repuesto, actualizando datos ...');
         setDatos({
             id: repuesto.id ? repuesto.id : null,
             nombre: repuesto.nombre,
-            tipo: repuesto.tipo_repuesto,
             fabricante: repuesto.fabricante ? repuesto.fabricante : '',
             modelo: repuesto.modelo ? repuesto.modelo : '',
             stock: repuesto.stock,
@@ -111,10 +93,9 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
 
     const actualizarDatos = (event) => {
         event.preventDefault();
-        console.log('Actualizar datos  ' + datos.tipo);
+        // console.log(datos);
         axios.put(BACKEND_SERVER + `/api/repuestos/detalle/${datos.id}/`, {
             nombre: datos.nombre,
-            tipo_repuesto: datos.tipo,
             fabricante: datos.fabricante,
             modelo: datos.modelo,
             es_critico: datos.es_critico,
@@ -137,7 +118,6 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         event.preventDefault();
         axios.post(BACKEND_SERVER + `/api/repuestos/detalle/`, {
             nombre: datos.nombre,
-            tipo_repuesto: datos.tipo,
             fabricante: datos.fabricante,
             modelo: datos.modelo,
             es_critico: datos.es_critico,
@@ -279,38 +259,16 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                 </Form.Group>
                             </Col>
                             <Col>
-                                <Row>
-                                    <Col>
-                                        <Form.Group controlId="tipo">
-                                            <Form.Label>Tipo</Form.Label>
-                                            <Form.Control as="select"  
-                                                        name='tipo' 
-                                                        value={datos.tipo}
-                                                        onChange={handleInputChange}
-                                                        placeholder="Tipo">
-                                                        {tipos && tipos.map( tipo => {
-                                                            return (
-                                                            <option key={tipo.id} value={tipo.id}>
-                                                                {tipo.nombre}
-                                                            </option>
-                                                            )
-                                                        })}
-                                            </Form.Control>
-                                        </Form.Group>
-                                    </Col>
-                                    <Col>
-                                        <Form.Group controlId="stock_T">
-                                            <Form.Label>Stock</Form.Label>
-                                            <Form.Control type="text" 
-                                                        name='stock_T' 
-                                                        value={datos.stock_T}
-                                                        // onChange={handleInputChange} 
-                                                        placeholder="Stock Total"
-                                                        disabled
-                                            />
-                                        </Form.Group>
-                                    </Col>
-                                </Row>
+                                <Form.Group controlId="stock_T">
+                                    <Form.Label>Stock</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='stock_T' 
+                                                value={datos.stock_T}
+                                                // onChange={handleInputChange} 
+                                                placeholder="Stock Total"
+                                                disabled
+                                    />
+                                </Form.Group>
                             </Col>
                         </Row>
                         <Row>

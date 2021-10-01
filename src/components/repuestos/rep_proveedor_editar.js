@@ -7,6 +7,7 @@ import axios from 'axios';
 const RepProveedorEdit = ({ match }) => {
     const [token] = useCookies(['tec-token']);
     const [proveedor, setProveedores] = useState(null);
+    const[contacto, setContactos]=useState(null);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + `/api/repuestos/proveedor/${match.params.id}`,{
@@ -24,7 +25,7 @@ const RepProveedorEdit = ({ match }) => {
 
     return (
         <React.Fragment>
-            {proveedor ? <RepProveedorForm nombre={proveedor.nombre} direccion={proveedor.direccion} telefono={proveedor.telefono} proveedor_id={proveedor.id}/> : null}
+            {proveedor ? <RepProveedorForm nombre={proveedor.nombre} direccion={proveedor.direccion} telefono={proveedor.telefono} proveedor_id={proveedor.id}/> : null}           
         </React.Fragment>
     )
 }

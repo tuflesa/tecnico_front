@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Form, Button } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, Table } from 'react-bootstrap';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { Link } from 'react-router-dom';
+import { PlusCircle } from 'react-bootstrap-icons';
+import ContactoForm from './rep_contacto';
 
 const RepProveedorForm = ({nombre, direccion, telefono, proveedor_id}) => {
     const [token] = useCookies(['tec-token']);
+    const [show_contacto, setShowContacto] = useState(false);
+    const [contactos, setContactos] = useState(null);
 
     const [datos, setDatos] = useState({
-        proveedor_id: proveedor_id,
+        proveedor_id: proveedor_id,        
         nombre: nombre,
         direccion: direccion,
         telefono: telefono
@@ -24,7 +28,6 @@ const RepProveedorForm = ({nombre, direccion, telefono, proveedor_id}) => {
     const actualizarDatos = (event) => {
         event.preventDefault()
         console.log('Actualizar datos...' + proveedor_id + ' ' + datos.nombre + ' ' + datos.telefono + ' ' + datos.direccion);
-
         axios.put(BACKEND_SERVER + `/api/repuestos/proveedor/${proveedor_id}/`, {
             nombre: datos.nombre,
             direccion: datos.direccion,
@@ -36,6 +39,7 @@ const RepProveedorForm = ({nombre, direccion, telefono, proveedor_id}) => {
         })
         .then( res => { 
             console.log('esto es res' + res);
+            
             window.location.href = "/repuestos/proveedores/";
         })
         .catch(err => { console.log(err);})
@@ -62,6 +66,27 @@ const RepProveedorForm = ({nombre, direccion, telefono, proveedor_id}) => {
         
     }
 
+    const abrirAddContacto =() =>{
+        setShowContacto(true);
+    }
+    const cerrarAddContacto =() =>{
+        setShowContacto(true);
+    }
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + `/api/repuestos/contacto/`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setContactos (res.data);
+            console.log('recogiendo los datos de los contactos');
+            console.log(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token, proveedor_id]);
 
     return (
         <Container>
@@ -70,62 +95,107 @@ const RepProveedorForm = ({nombre, direccion, telefono, proveedor_id}) => {
                 <h5 className="pb-3 pt-1 mt-2">proveedor Detalle</h5>:
                 <h5 className="pb-3 pt-1 mt-2">Nuevo Proveedor</h5>}
             </Row>
+
             <Row className="justify-content-center">
                 <Col>
                     <Form >
-                    <Row>
-                        <Col>
-                            <Form.Group controlId="nombre">
-                                <Form.Label>Nombre</Form.Label>
-                                <Form.Control type="text" 
-                                            name='nombre' 
-                                            value={datos.nombre}
-                                            onChange={handleInputChange} 
-                                            placeholder="Nombre"
-                                />
-                                </Form.Group>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col>
-                            <Form.Group controlId="direccion">
-                                <Form.Label>Dirección</Form.Label>
-                                <Form.Control type="text" 
-                                            name='direccion' 
-                                            value={datos.direccion}
-                                            onChange={handleInputChange} 
-                                            placeholder="Direccion"
-                                />
-                                </Form.Group>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col>
-                            <Form.Group controlId="telefono">
-                                <Form.Label>Teléfono</Form.Label>
-                                <Form.Control type="text" 
-                                            name='telefono' 
-                                            value={datos.telefono}
-                                            onChange={handleInputChange} 
-                                            placeholder="Telefono"
-                                />
-                                </Form.Group>
-                        </Col>
-                    </Row>
+                        <Row>
+                            <Col>
+                                <Form.Group controlId="nombre">
+                                    <Form.Label>Nombre</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='nombre' 
+                                                value={datos.nombre}
+                                                onChange={handleInputChange} 
+                                                placeholder="Nombre"
+                                    />
+                                    </Form.Group>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <Form.Group controlId="direccion">
+                                    <Form.Label>Dirección</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='direccion' 
+                                                value={datos.direccion}
+                                                onChange={handleInputChange} 
+                                                placeholder="Direccion"
+                                    />
+                                    </Form.Group>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <Form.Group controlId="telefono">
+                                    <Form.Label>Teléfono</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='telefono' 
+                                                value={datos.telefono}
+                                                onChange={handleInputChange} 
+                                                placeholder="Telefono"
+                                    />
+                                    </Form.Group>
+                            </Col>
+                        </Row>
+                        <Form.Row className="justify-content-center">                
+                            {proveedor_id ?
+                                <Button variant="info" type="submit" className={'mr-1'} onClick={actualizarDatos}>Actualizar</Button> :
+                                <Button variant="info" type="submit" className={'mr-1'} onClick={nuevoDatos}>Guardar</Button>
+                            }                       
+                            <Link to='/repuestos/proveedores'>
+                                <Button variant="warning" className={'ml-1'} >
+                                    Cancelar
+                                </Button>
+                            </Link>
+                        </Form.Row>
+                        {contactos ?
+                            <React.Fragment>
+                                <Form.Row>
+                                    <Col>
+                                        <Row>
+                                            <Col>
+                                            <h5 className="pb-3 pt-1 mt-2"> Contactos:</h5>
+                                            </Col>
+                                            <Col className="d-flex flex-row-reverse align-content-center flex-wrap"> 
+                                                <PlusCircle className="plus mr-2" size={30} onClick={abrirAddContacto}/>
+                                            </Col>
+                                        </Row>
+                                        <Table striped bordered hover>
+                                            <thead>
+                                                <tr>
+                                                    <th>Nombre</th>
+                                                    <th>Departamento</th>
+                                                    <th>Teléfono</th>
+                                                    <th>Email</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {contactos && contactos.map( contacto => {
+                                                    return (
+                                                        <tr key={contacto.id}>
+                                                            <td>{contacto.nombre}</td>
+                                                            <td>{contacto.direccion}</td>
+                                                            <td>{contacto.telefono}</td>
+{/*                                                             <td>
+                                                                <Trash className="trash"  onClick={event => {handlerBorrarContacto(contacto.id)}} />
+                                                            </td> */}
+                                                        </tr>
+                                                    )})
+                                                }
+                                            </tbody>
+                                        </Table>                                        
+                                    </Col>
+                                </Form.Row>
+                            </React.Fragment>
+                        :null}
                     </Form>
                 </Col>
             </Row>
-            <Form.Row className="justify-content-center">                
-                {proveedor_id ?
-                    <Button variant="info" type="submit" className={'mr-1'} onClick={actualizarDatos}>Actualizar</Button> :
-                    <Button variant="info" type="submit" className={'mr-1'} onClick={nuevoDatos}>Guardar</Button>
-                }                       
-                <Link to='/repuestos/proveedores'>
-                    <Button variant="warning" className={'ml-1'} >
-                        Cancelar
-                    </Button>
-                </Link>
-            </Form.Row>
+            <ContactoForm show={show_contacto}
+                            proveedor_id={proveedor_id}
+            />
+
         </Container>
     )
 }
