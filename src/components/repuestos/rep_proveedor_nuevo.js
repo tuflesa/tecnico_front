@@ -6,10 +6,13 @@ const RepProveedorNuevo = () => {
     const [user] = useCookies(['tec-user']);
 
     return (
-        <RepProvedorForm nombre={''}
-                        direccion={''}
-                        telefono={''}
-                        proveedor_id={null}/>
+        <RepProvedorForm proveedor= {
+            {
+                nombre: '',
+                direccion: '',
+                telefono: ''
+            }
+           }/>
     )
 }
 export default RepProveedorNuevo;

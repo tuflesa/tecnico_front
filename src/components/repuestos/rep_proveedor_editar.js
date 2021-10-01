@@ -7,15 +7,16 @@ import axios from 'axios';
 const RepProveedorEdit = ({ match }) => {
     const [token] = useCookies(['tec-token']);
     const [proveedor, setProveedores] = useState(null);
-    const[contacto, setContactos]=useState(null);
 
     useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/repuestos/proveedor/${match.params.id}`,{
+        console.log('proveedor detalle ...');
+        axios.get(BACKEND_SERVER + `/api/repuestos/proveedor_detalle/${match.params.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
         .then( res => {
+            console.log(res.data)
             setProveedores (res.data);
         })
         .catch( err => {
@@ -25,7 +26,7 @@ const RepProveedorEdit = ({ match }) => {
 
     return (
         <React.Fragment>
-            {proveedor ? <RepProveedorForm nombre={proveedor.nombre} direccion={proveedor.direccion} telefono={proveedor.telefono} proveedor_id={proveedor.id}/> : null}           
+            {proveedor ? <RepProveedorForm proveedor={proveedor}/> : null}           
         </React.Fragment>
     )
 }

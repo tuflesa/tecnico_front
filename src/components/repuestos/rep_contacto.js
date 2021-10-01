@@ -3,36 +3,42 @@ import { Button, Modal, Form, Col, Row } from 'react-bootstrap';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
+import { Link } from 'react-router-dom';
 
 const ContactoForm = ({show, proveedor_id}) => {
     const [token] = useCookies(['tec-token']);
-
     const [datos, setDatos] = useState({
         nombre: '',
         departamento:'',
         telefono:'',
-        email:'',
+        correo_electronico:'',
+        proveedor: proveedor_id,
 
     });
-    const [contactos, setContactos] = useState(null);
+    //const [contactos, setContactos] = useState(null);
    
-    useEffect(()=>{
-        axios.put(BACKEND_SERVER + `/api/repuestos/proveedor/${proveedor_id}/`,{
+    const handlerGuardar = () => {
+        axios.post(BACKEND_SERVER + `/api/repuestos/contacto/`,{
             nombre: datos.nombre,
             telefono: datos.telefono,
             departamento: datos.departamento,
+            correo_electronico: datos.correo_electronico,
+            proveedor: datos.proveedor,
+        },
+        {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }
         })
         .then( res => {
-            console.log('esto es res de contacto' + res);
-            window.location.href="/repuestos/proveedores/";
+            console.log('esto es res de contacto');
+            console.log(res);
+          //  window.location.href="/repuestos/proveedor/";
         })
         .catch( err => {
             console.log(err);
         });
-    }, [token]);
+    }
     console.log('cogiendo nuevos datos');
     console.log(datos);
 
@@ -92,15 +98,17 @@ const ContactoForm = ({show, proveedor_id}) => {
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="info" 
-                        /* onClick={handlerGuardar} */>
-                        Guardar
+                    <Button variant="info" onClick={handlerGuardar}>
+                        Guardar   
                     </Button>
+                    <Link to='/repuestos/proveedores'>
                     <Button variant="waring" /* onClick={handlerCancelar} */>
                         Cancelar
                     </Button>
+                    </Link>
                 </Modal.Footer>
         </Modal>
+
     );
 }
 

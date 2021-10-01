@@ -7,16 +7,16 @@ import { Link } from 'react-router-dom';
 import { PlusCircle } from 'react-bootstrap-icons';
 import ContactoForm from './rep_contacto';
 
-const RepProveedorForm = ({nombre, direccion, telefono, proveedor_id}) => {
+const RepProveedorForm = ({proveedor}) => {
     const [token] = useCookies(['tec-token']);
     const [show_contacto, setShowContacto] = useState(false);
-    const [contactos, setContactos] = useState(null);
 
     const [datos, setDatos] = useState({
-        proveedor_id: proveedor_id,        
-        nombre: nombre,
-        direccion: direccion,
-        telefono: telefono
+        proveedor_id: proveedor.id ? proveedor.id : null,        
+        nombre: proveedor.nombre,
+        direccion: proveedor.direccion,
+        telefono: proveedor.telefono,
+        contactos: proveedor.contactos ? proveedor.contactos : null
     });
 
     const handleInputChange = (event) => {
@@ -27,8 +27,8 @@ const RepProveedorForm = ({nombre, direccion, telefono, proveedor_id}) => {
     }
     const actualizarDatos = (event) => {
         event.preventDefault()
-        console.log('Actualizar datos...' + proveedor_id + ' ' + datos.nombre + ' ' + datos.telefono + ' ' + datos.direccion);
-        axios.put(BACKEND_SERVER + `/api/repuestos/proveedor/${proveedor_id}/`, {
+        console.log('Actualizar datos...' + datos.proveedor_id + ' ' + datos.nombre + ' ' + datos.telefono + ' ' + datos.direccion);
+        axios.put(BACKEND_SERVER + `/api/repuestos/proveedor/${proveedor.id}/`, {
             nombre: datos.nombre,
             direccion: datos.direccion,
             telefono: datos.telefono,
@@ -38,8 +38,7 @@ const RepProveedorForm = ({nombre, direccion, telefono, proveedor_id}) => {
               }     
         })
         .then( res => { 
-            console.log('esto es res' + res);
-            
+            // console.log('esto es res' + res);
             window.location.href = "/repuestos/proveedores/";
         })
         .catch(err => { console.log(err);})
@@ -47,7 +46,7 @@ const RepProveedorForm = ({nombre, direccion, telefono, proveedor_id}) => {
     }
     const nuevoDatos = (event) => {
         event.preventDefault()
-        console.log('Nuevo datos...' + proveedor_id + ' ' + datos.nombre + ' ' + datos.telefono + ' ' + datos.direccion);
+        console.log('Nuevo datos...' + proveedor.id + ' ' + datos.nombre + ' ' + datos.telefono + ' ' + datos.direccion);
 
         axios.post(BACKEND_SERVER + `/api/repuestos/proveedor/`, {
             nombre: datos.nombre,
@@ -70,28 +69,28 @@ const RepProveedorForm = ({nombre, direccion, telefono, proveedor_id}) => {
         setShowContacto(true);
     }
     const cerrarAddContacto =() =>{
-        setShowContacto(true);
+        setShowContacto(false);
     }
-    useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/repuestos/contacto/`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            setContactos (res.data);
-            console.log('recogiendo los datos de los contactos');
-            console.log(res.data);
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    }, [token, proveedor_id]);
+    // useEffect(() => {
+    //     axios.get(BACKEND_SERVER + `/api/repuestos/contacto/`,{
+    //         headers: {
+    //             'Authorization': `token ${token['tec-token']}`
+    //           }
+    //     })
+    //     .then( res => {
+    //         setContactos (res.data);
+    //         console.log('recogiendo los datos de los contactos');
+    //         console.log(res.data);
+    //     })
+    //     .catch( err => {
+    //         console.log(err);
+    //     });
+    // }, [token, proveedor_id]);
 
     return (
         <Container>
             <Row className="justify-content-center"> 
-            {proveedor_id ?
+            {proveedor.id ?
                 <h5 className="pb-3 pt-1 mt-2">proveedor Detalle</h5>:
                 <h5 className="pb-3 pt-1 mt-2">Nuevo Proveedor</h5>}
             </Row>
@@ -139,7 +138,7 @@ const RepProveedorForm = ({nombre, direccion, telefono, proveedor_id}) => {
                             </Col>
                         </Row>
                         <Form.Row className="justify-content-center">                
-                            {proveedor_id ?
+                            {proveedor.id ?
                                 <Button variant="info" type="submit" className={'mr-1'} onClick={actualizarDatos}>Actualizar</Button> :
                                 <Button variant="info" type="submit" className={'mr-1'} onClick={nuevoDatos}>Guardar</Button>
                             }                       
@@ -149,7 +148,7 @@ const RepProveedorForm = ({nombre, direccion, telefono, proveedor_id}) => {
                                 </Button>
                             </Link>
                         </Form.Row>
-                        {contactos ?
+                        {proveedor.contactos ?
                             <React.Fragment>
                                 <Form.Row>
                                     <Col>
@@ -171,12 +170,13 @@ const RepProveedorForm = ({nombre, direccion, telefono, proveedor_id}) => {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {contactos && contactos.map( contacto => {
+                                                {proveedor.contactos && proveedor.contactos.map( contacto => {
                                                     return (
                                                         <tr key={contacto.id}>
                                                             <td>{contacto.nombre}</td>
                                                             <td>{contacto.direccion}</td>
                                                             <td>{contacto.telefono}</td>
+                                                            <td>{contacto.correo_electronico}</td>
 {/*                                                             <td>
                                                                 <Trash className="trash"  onClick={event => {handlerBorrarContacto(contacto.id)}} />
                                                             </td> */}
@@ -193,9 +193,8 @@ const RepProveedorForm = ({nombre, direccion, telefono, proveedor_id}) => {
                 </Col>
             </Row>
             <ContactoForm show={show_contacto}
-                            proveedor_id={proveedor_id}
+                            proveedor_id={proveedor.id}
             />
-
         </Container>
     )
 }
