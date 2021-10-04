@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, Table } from 'react-bootstrap';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
@@ -45,7 +45,7 @@ const RepProveedorForm = ({proveedor}) => {
         
     }
     const updateProveedorCont = () => {
-        axios.get(BACKEND_SERVER + `/api/repuestos/proveedor/${proveedor.id}/`,{
+        axios.get(BACKEND_SERVER + `/api/repuestos/proveedor_detalle/${proveedor.id}/`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }     
@@ -78,11 +78,23 @@ const RepProveedorForm = ({proveedor}) => {
         .catch(err => { console.log(err);})
         
     }
-      const abrirAddContacto =() =>{
+    const abrirAddContacto =() =>{
         setShowContacto(true);
     }
     const cerrarAddContacto =() =>{
         setShowContacto(false);
+    }
+    const BorrarContacto = (id) =>{
+        console.log(id);
+        axios.delete(BACKEND_SERVER + `/api/repuestos/contacto/${id}/`,{            
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            } 
+        })
+        .then(res =>{
+            updateProveedorCont();
+        })
+        .catch (err=>{console.console.log((err));});
     }
 
     return (
@@ -146,7 +158,7 @@ const RepProveedorForm = ({proveedor}) => {
                                 </Button>
                             </Link>
                         </Form.Row>
-                        {proveedor.contactos ?
+                        {datos.contactos ?
                             <React.Fragment>
                                 <Form.Row>
                                     <Col>
@@ -169,7 +181,7 @@ const RepProveedorForm = ({proveedor}) => {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {proveedor.contactos && proveedor.contactos.map( contacto => {
+                                                {datos.contactos && datos.contactos.map( contacto => {
                                                     return (
                                                         <tr key={contacto.id}>
                                                             <td>{contacto.nombre}</td>
@@ -177,10 +189,10 @@ const RepProveedorForm = ({proveedor}) => {
                                                             <td>{contacto.telefono}</td>
                                                             <td>{contacto.correo_electronico}</td>
                                                             <td>
-                                                                <Link to={`/repuestos/proveedor/${proveedor.id}`}>
-                                                                    <PencilFill className="mr-3 pencil"/>
-                                                                </Link>
-                                                                <Trash className="trash"  /* onClick={BorrarContacto} */ />
+                                                                {/* <Link to={`/repuestos/proveedor/${proveedor.id}`}>
+                                                                    <PencilFill className="mr-3 pencil" onClick={abrirAddContacto}/>
+                                                                </Link> */}
+                                                                <Trash className="trash"  onClick={event => {BorrarContacto(contacto.id)}}/>
                                                             </td>
                                                         </tr>
                                                     )})
@@ -197,7 +209,7 @@ const RepProveedorForm = ({proveedor}) => {
             <ContactoForm show={show_contacto}
                             proveedor_id={proveedor.id}
                             handleCloseContacto ={cerrarAddContacto}
-                            // updateProveedorCont ={updateProveedorCont}
+                            updateProveedorCont ={updateProveedorCont}
             />
         </Container>
     )

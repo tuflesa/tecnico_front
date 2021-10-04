@@ -3,8 +3,6 @@ import { Button, Modal, Form, Col, Row } from 'react-bootstrap';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
-import { Link } from 'react-router-dom';
-import RepProveedorForm from './rep_proveedor_form';
 
 const ContactoForm = ({show, proveedor_id, handleCloseContacto, updateProveedorCont}) => {
     const [token] = useCookies(['tec-token']);
@@ -42,9 +40,8 @@ const ContactoForm = ({show, proveedor_id, handleCloseContacto, updateProveedorC
         })
         .then( res => {
             console.log('esto es setDatos en handlerGuardar');
-           // console.log(setDatos);  
-          //  updateProveedorCont(); 
-     
+            console.log(res);  
+            updateProveedorCont();    
             handlerCancelar();
             //window.location.href="/repuestos/proveedores/";
         })
