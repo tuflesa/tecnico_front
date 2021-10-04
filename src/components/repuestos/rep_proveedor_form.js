@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Container, Row, Col, Form, Button, Table } from 'react-bootstrap';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { Link } from 'react-router-dom';
-import { PlusCircle } from 'react-bootstrap-icons';
+import { PlusCircle, Trash, PencilFill } from 'react-bootstrap-icons';
 import ContactoForm from './rep_contacto';
 
 const RepProveedorForm = ({proveedor}) => {
@@ -44,6 +44,20 @@ const RepProveedorForm = ({proveedor}) => {
         .catch(err => { console.log(err);})
         
     }
+    const updateProveedorCont = () => {
+        axios.get(BACKEND_SERVER + `/api/repuestos/proveedor/${proveedor.id}/`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => { 
+            console.log('estamos viendo console log de updateContacto');
+            console.log(res.data);
+            setDatos(res.data);
+        })
+        .catch(err => { console.log(err);})
+    }
+
     const nuevoDatos = (event) => {
         event.preventDefault()
         console.log('Nuevo datos...' + proveedor.id + ' ' + datos.nombre + ' ' + datos.telefono + ' ' + datos.direccion);
@@ -64,28 +78,12 @@ const RepProveedorForm = ({proveedor}) => {
         .catch(err => { console.log(err);})
         
     }
-
-    const abrirAddContacto =() =>{
+      const abrirAddContacto =() =>{
         setShowContacto(true);
     }
     const cerrarAddContacto =() =>{
         setShowContacto(false);
     }
-    // useEffect(() => {
-    //     axios.get(BACKEND_SERVER + `/api/repuestos/contacto/`,{
-    //         headers: {
-    //             'Authorization': `token ${token['tec-token']}`
-    //           }
-    //     })
-    //     .then( res => {
-    //         setContactos (res.data);
-    //         console.log('recogiendo los datos de los contactos');
-    //         console.log(res.data);
-    //     })
-    //     .catch( err => {
-    //         console.log(err);
-    //     });
-    // }, [token, proveedor_id]);
 
     return (
         <Container>
@@ -167,6 +165,7 @@ const RepProveedorForm = ({proveedor}) => {
                                                     <th>Departamento</th>
                                                     <th>Teléfono</th>
                                                     <th>Email</th>
+                                                    <th>Acciones</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -174,12 +173,15 @@ const RepProveedorForm = ({proveedor}) => {
                                                     return (
                                                         <tr key={contacto.id}>
                                                             <td>{contacto.nombre}</td>
-                                                            <td>{contacto.direccion}</td>
+                                                            <td>{contacto.departamento}</td>
                                                             <td>{contacto.telefono}</td>
                                                             <td>{contacto.correo_electronico}</td>
-{/*                                                             <td>
-                                                                <Trash className="trash"  onClick={event => {handlerBorrarContacto(contacto.id)}} />
-                                                            </td> */}
+                                                            <td>
+                                                                <Link to={`/repuestos/proveedor/${proveedor.id}`}>
+                                                                    <PencilFill className="mr-3 pencil"/>
+                                                                </Link>
+                                                                <Trash className="trash"  /* onClick={BorrarContacto} */ />
+                                                            </td>
                                                         </tr>
                                                     )})
                                                 }
@@ -194,6 +196,8 @@ const RepProveedorForm = ({proveedor}) => {
             </Row>
             <ContactoForm show={show_contacto}
                             proveedor_id={proveedor.id}
+                            handleCloseContacto ={cerrarAddContacto}
+                            // updateProveedorCont ={updateProveedorCont}
             />
         </Container>
     )

@@ -4,8 +4,9 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { Link } from 'react-router-dom';
+import RepProveedorForm from './rep_proveedor_form';
 
-const ContactoForm = ({show, proveedor_id}) => {
+const ContactoForm = ({show, proveedor_id, handleCloseContacto, updateProveedorCont}) => {
     const [token] = useCookies(['tec-token']);
     const [datos, setDatos] = useState({
         nombre: '',
@@ -16,7 +17,16 @@ const ContactoForm = ({show, proveedor_id}) => {
 
     });
     //const [contactos, setContactos] = useState(null);
-   
+    const handlerCancelar = () => {
+        setDatos({
+            nombre: '',
+            departamento:'',
+            telefono:'',
+            correo_electronico:'',
+            proveedor: proveedor_id,
+        });
+        handleCloseContacto();
+    }   
     const handlerGuardar = () => {
         axios.post(BACKEND_SERVER + `/api/repuestos/contacto/`,{
             nombre: datos.nombre,
@@ -31,16 +41,22 @@ const ContactoForm = ({show, proveedor_id}) => {
             }
         })
         .then( res => {
-            console.log('esto es res de contacto');
-            console.log(res);
-          //  window.location.href="/repuestos/proveedor/";
+            console.log('esto es setDatos en handlerGuardar');
+           // console.log(setDatos);  
+          //  updateProveedorCont(); 
+     
+            handlerCancelar();
+            //window.location.href="/repuestos/proveedores/";
         })
         .catch( err => {
             console.log(err);
+            
+            handlerCancelar();
         });
     }
-    console.log('cogiendo nuevos datos');
-    console.log(datos);
+
+/*     console.log('cogiendo nuevos datos');
+    console.log(datos); */
 
     const handleInputChange = (event) => {
         setDatos({
@@ -57,7 +73,7 @@ const ContactoForm = ({show, proveedor_id}) => {
                     <Form >
                         <Row>
                             <Col>
-                                <Form.Group controlId="nombre2">
+                                <Form.Group controlId="nombre">
                                     <Form.Label>Nombre</Form.Label>
                                     <Form.Control imput type="text"  
                                                 name='nombre' 
@@ -101,11 +117,11 @@ const ContactoForm = ({show, proveedor_id}) => {
                     <Button variant="info" onClick={handlerGuardar}>
                         Guardar   
                     </Button>
-                    <Link to='/repuestos/proveedores'>
-                    <Button variant="waring" /* onClick={handlerCancelar} */>
+                    {/* <Link to='/repuestos/proveedor/'> */}
+                    <Button variant="waring" onClick={handlerCancelar}>
                         Cancelar
                     </Button>
-                    </Link>
+                    {/* </Link> */}
                 </Modal.Footer>
         </Modal>
 
