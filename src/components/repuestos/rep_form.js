@@ -23,14 +23,29 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         stocks_minimos: repuesto.stocks_minimos,
         es_critico: repuesto.es_critico,
         descatalogado: repuesto.descatalogado,
+        tipo_repuesto: repuesto.tipo_repuesto,
         equipos: repuesto.equipos,
         proveedores: repuesto.proveedores
     });
+    const [tiposRepuesto, setTiposRepuesto] = useState(null);
     const [show_stock, setShowStock] = useState(false);
     const [show_equipo, setShowEquipo] = useState(false);
     const [show_proveedor, setShowProveedor] = useState(false);
     const [stock_editar, setStockEditar] = useState(null);
     const [stock_minimo_editar, setStockMinimoEditar] = useState(null);
+
+    useEffect(()=>{
+        axios.get(BACKEND_SERVER + `/api/repuestos/tipo_repuesto/`, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => { 
+            // console.log(res.data);
+            setTiposRepuesto(res.data);
+        })
+        .catch(err => { console.log(err);})
+    },[token]);
 
     useEffect(()=>{
         // console.log('Cambio en repuesto, actualizando datos ...');
@@ -44,6 +59,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             stocks_minimos: repuesto.stocks_minimos,
             es_critico: repuesto.es_critico,
             descatalogado: repuesto.descatalogado,
+            tipo_repuesto: repuesto.tipo_repuesto,
             equipos: repuesto.equipos,
             proveedores: repuesto.proveedores}
             );
@@ -99,7 +115,8 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             fabricante: datos.fabricante,
             modelo: datos.modelo,
             es_critico: datos.es_critico,
-            descatalogado: datos.descatalogado
+            descatalogado: datos.descatalogado,
+            tipo_repuesto: datos.tipo_repuesto
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -121,7 +138,8 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             fabricante: datos.fabricante,
             modelo: datos.modelo,
             es_critico: datos.es_critico,
-            descatalogado: datos.descatalogado
+            descatalogado: datos.descatalogado,
+            tipo_repuesto: datos.tipo_repuesto
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -259,15 +277,21 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                 </Form.Group>
                             </Col>
                             <Col>
-                                <Form.Group controlId="stock_T">
-                                    <Form.Label>Stock</Form.Label>
-                                    <Form.Control type="text" 
-                                                name='stock_T' 
-                                                value={datos.stock_T}
-                                                // onChange={handleInputChange} 
-                                                placeholder="Stock Total"
-                                                disabled
-                                    />
+                                <Form.Group controlId="tipo">
+                                    <Form.Label>Tipo</Form.Label>
+                                    <Form.Control as="select"  
+                                                name='tipo_repuesto' 
+                                                value={datos.tipo_repuesto}
+                                                onChange={handleInputChange}
+                                                placeholder="Tipo repuesto">
+                                                {tiposRepuesto && tiposRepuesto.map( tipo => {
+                                                    return (
+                                                    <option key={tipo.id} value={tipo.id}>
+                                                        {tipo.nombre}
+                                                    </option>
+                                                    )
+                                                })}
+                                    </Form.Control>
                                 </Form.Group>
                             </Col>
                         </Row>
@@ -291,6 +315,20 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                 value={datos.modelo}
                                                 onChange={handleInputChange} 
                                                 placeholder="Modelo"
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <Form.Group controlId="stock_T">
+                                    <Form.Label>Stock</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='stock_T' 
+                                                value={datos.stock_T}
+                                                // onChange={handleInputChange} 
+                                                placeholder="Stock Total"
+                                                disabled
                                     />
                                 </Form.Group>
                             </Col>
