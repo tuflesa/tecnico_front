@@ -4,16 +4,16 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 
-const ContactoForm = ({show, proveedor_id, handleCloseContacto, updateProveedorCont,idContacto, AnularContacto}) => {
+const ContactoForm = ({show, proveedor_id, handleCloseContacto, updateProveedorCont,contacto, AnularContacto}) => {
 
     const [token] = useCookies(['tec-token']);
-    //const[idContacto]=useState(null);
+    
     const [datos, setDatos] = useState({  
         nombre: '',
         departamento:'',
         telefono:'',
         correo_electronico:'',        
-        proveedor: proveedor_id,
+        proveedor: proveedor_id
     });
 
     const handleInputChange = (event) => {
@@ -22,6 +22,16 @@ const ContactoForm = ({show, proveedor_id, handleCloseContacto, updateProveedorC
             [event.target.name] : event.target.value
         })
     }
+
+    useEffect(()=>{
+        contacto && setDatos({
+            nombre: contacto.nombre,
+            departamento: contacto.departamento,
+            telefono: contacto.telefono,
+            correo_electronico:contacto.correo_electronico,        
+            proveedor: proveedor_id
+        });
+    },[contacto]);
 
     const handlerCancelar = () => {
         AnularContacto();
@@ -60,7 +70,7 @@ const ContactoForm = ({show, proveedor_id, handleCloseContacto, updateProveedorC
         });
     }
     const ActualizarContacto = (id) =>{
-        axios.put(BACKEND_SERVER + `/api/repuestos/contacto/${id.id}/`,{              
+        axios.put(BACKEND_SERVER + `/api/repuestos/contacto/${contacto.id}/`,{              
             nombre: datos.nombre,
             departamento: datos.departamento,
             telefono: datos.telefono,
@@ -81,7 +91,7 @@ const ContactoForm = ({show, proveedor_id, handleCloseContacto, updateProveedorC
     return (
         <Modal show={show} backdrop="static" keyboard={ false } animation={false}>
                 <Modal.Header closeButton>
-                    {idContacto ?                    
+                    {contacto ?                    
                         <Modal.Title>Actualizar Contacto</Modal.Title> : <Modal.Title>Añadir Contacto</Modal.Title>
                     }
                 </Modal.Header>
@@ -130,8 +140,8 @@ const ContactoForm = ({show, proveedor_id, handleCloseContacto, updateProveedorC
                     </Form>
                 </Modal.Body>                
                 <Modal.Footer> 
-                    {idContacto ?  
-                        <Button variant="info" onClick={event => {ActualizarContacto(idContacto)}}> Actualizar </Button> :
+                    {contacto ?  
+                        <Button variant="info" onClick={event => {ActualizarContacto(contacto.id)}}> Actualizar </Button> :
                         <Button variant="info" onClick={handlerGuardar}> Guardar </Button>
                     }                    
                     <Button variant="waring" onClick={handlerCancelar}>

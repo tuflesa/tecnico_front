@@ -10,7 +10,7 @@ import ContactoForm from './rep_contacto';
 const RepProveedorForm = ({proveedor}) => {
     const [token] = useCookies(['tec-token']);
     const [show_contacto, setShowContacto] = useState(false);
-    const [contacto, setContacto]=useState(null);
+    const [contactoEditar, setContactoEditar]=useState(null);
     
 
     const [datos, setDatos] = useState({
@@ -96,20 +96,24 @@ const RepProveedorForm = ({proveedor}) => {
         .catch (err=>{console.log((err));});
     }
     const RecogerContacto = (id) =>{
-        axios.get(BACKEND_SERVER + `/api/repuestos/contacto/${id}/`,{            
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-            } 
-        })
-        .then(res =>{
-            setContacto(res.data);
-            setShowContacto(true);
-        })
+        // axios.get(BACKEND_SERVER + `/api/repuestos/contacto/${id}/`,{            
+        //     headers: {
+        //         'Authorization': `token ${token['tec-token']}`
+        //     } 
+        // })
+        // .then(res =>{
+        //     setContacto(res.data);
+        //     setShowContacto(true);
+        // })
 
-        .catch (err=>{console.log((err));});
+        // .catch (err=>{console.log((err));});
+        const contacto_editar = datos.contactos.filter(c => c.id === id)[0];
+        // console.log(contacto_editar);
+        setContactoEditar(contacto_editar);
+        setShowContacto(true);
     }
     const AnularContacto =()=>{
-        setContacto(null);
+        setContactoEditar(null);
     } 
 
     return (
@@ -223,7 +227,7 @@ const RepProveedorForm = ({proveedor}) => {
                             proveedor_id={proveedor.id}
                             handleCloseContacto ={cerrarAddContacto}
                             updateProveedorCont ={updateProveedorCont}
-                            idContacto = {contacto}
+                            contacto = {contactoEditar}
                             AnularContacto={AnularContacto}
 
             />

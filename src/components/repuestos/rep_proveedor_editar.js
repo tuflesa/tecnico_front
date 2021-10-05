@@ -6,7 +6,7 @@ import axios from 'axios';
 
 const RepProveedorEdit = ({ match }) => {
     const [token] = useCookies(['tec-token']);
-    const [proveedor, setProveedores] = useState(null);
+    const [proveedor, setProveedor] = useState(null);
 
     useEffect(() => {
         console.log('proveedor detalle ...');
@@ -17,7 +17,7 @@ const RepProveedorEdit = ({ match }) => {
         })
         .then( res => {
             console.log(res.data)
-            setProveedores (res.data);
+            setProveedor (res.data);
         })
         .catch( err => {
             console.log(err);
