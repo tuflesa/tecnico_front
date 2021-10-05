@@ -4,27 +4,39 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 
-const ContactoForm = ({show, proveedor_id, handleCloseContacto, updateProveedorCont}) => {
+const ContactoForm = ({show, proveedor_id, handleCloseContacto, updateProveedorCont,idContacto, AnularContacto}) => {
+
     const [token] = useCookies(['tec-token']);
-    const [datos, setDatos] = useState({
+    //const[idContacto]=useState(null);
+    const [datos, setDatos] = useState({  
         nombre: '',
         departamento:'',
         telefono:'',
-        correo_electronico:'',
+        correo_electronico:'',        
         proveedor: proveedor_id,
-
     });
-    //const [contactos, setContactos] = useState(null);
-    const handlerCancelar = () => {
+
+    const handleInputChange = (event) => {
         setDatos({
+            ...datos,
+            [event.target.name] : event.target.value
+        })
+    }
+
+    const handlerCancelar = () => {
+        AnularContacto();
+        setDatos({
+            ...datos,
             nombre: '',
             departamento:'',
             telefono:'',
             correo_electronico:'',
             proveedor: proveedor_id,
-        });
+        });  
+        
         handleCloseContacto();
-    }   
+    } 
+
     const handlerGuardar = () => {
         axios.post(BACKEND_SERVER + `/api/repuestos/contacto/`,{
             nombre: datos.nombre,
@@ -39,32 +51,39 @@ const ContactoForm = ({show, proveedor_id, handleCloseContacto, updateProveedorC
             }
         })
         .then( res => {
-            console.log('esto es setDatos en handlerGuardar');
-            console.log(res);  
             updateProveedorCont();    
             handlerCancelar();
-            //window.location.href="/repuestos/proveedores/";
         })
         .catch( err => {
-            console.log(err);
-            
+            console.log(err);            
             handlerCancelar();
         });
     }
-
-/*     console.log('cogiendo nuevos datos');
-    console.log(datos); */
-
-    const handleInputChange = (event) => {
-        setDatos({
-            ...datos,
-            [event.target.name] : event.target.value
+    const ActualizarContacto = (id) =>{
+        axios.put(BACKEND_SERVER + `/api/repuestos/contacto/${id.id}/`,{              
+            nombre: datos.nombre,
+            departamento: datos.departamento,
+            telefono: datos.telefono,
+            correo_electronico: datos.correo_electronico,
+            proveedor: proveedor_id,},
+        {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            } 
         })
+        .then(res =>{
+            updateProveedorCont();
+            handlerCancelar();
+        })
+        .catch (err=>{console.log((err));});
     }
+
     return (
         <Modal show={show} backdrop="static" keyboard={ false } animation={false}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Añadir Contacto</Modal.Title>
+                    {idContacto ?                    
+                        <Modal.Title>Actualizar Contacto</Modal.Title> : <Modal.Title>Añadir Contacto</Modal.Title>
+                    }
                 </Modal.Header>
                 <Modal.Body>
                     <Form >
@@ -92,7 +111,7 @@ const ContactoForm = ({show, proveedor_id, handleCloseContacto, updateProveedorC
                                     <Form.Label>Email</Form.Label>
                                     <Form.Control imput type="text"  
                                                 name='correo_electronico' 
-                                                value={datos.email}
+                                                value={datos.correo_electronico}
                                                 onChange={handleInputChange}
                                                 placeholder="Email">  
                                     </Form.Control>
@@ -109,12 +128,12 @@ const ContactoForm = ({show, proveedor_id, handleCloseContacto, updateProveedorC
                             </Col>
                         </Row>
                     </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="info" onClick={handlerGuardar}>
-                        Guardar   
-                    </Button>
-                    {/* <Link to='/repuestos/proveedor/'> */}
+                </Modal.Body>                
+                <Modal.Footer> 
+                    {idContacto ?  
+                        <Button variant="info" onClick={event => {ActualizarContacto(idContacto)}}> Actualizar </Button> :
+                        <Button variant="info" onClick={handlerGuardar}> Guardar </Button>
+                    }                    
                     <Button variant="waring" onClick={handlerCancelar}>
                         Cancelar
                     </Button>

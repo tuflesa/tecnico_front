@@ -10,6 +10,8 @@ import ContactoForm from './rep_contacto';
 const RepProveedorForm = ({proveedor}) => {
     const [token] = useCookies(['tec-token']);
     const [show_contacto, setShowContacto] = useState(false);
+    const [contacto, setContacto]=useState(null);
+    
 
     const [datos, setDatos] = useState({
         proveedor_id: proveedor.id ? proveedor.id : null,        
@@ -18,13 +20,13 @@ const RepProveedorForm = ({proveedor}) => {
         telefono: proveedor.telefono,
         contactos: proveedor.contactos ? proveedor.contactos : null
     });
-
     const handleInputChange = (event) => {
         setDatos({
             ...datos,
             [event.target.name] : event.target.value           
         });
     }
+
     const actualizarDatos = (event) => {
         event.preventDefault()
         console.log('Actualizar datos...' + datos.proveedor_id + ' ' + datos.nombre + ' ' + datos.telefono + ' ' + datos.direccion);
@@ -51,8 +53,6 @@ const RepProveedorForm = ({proveedor}) => {
               }     
         })
         .then( res => { 
-            console.log('estamos viendo console log de updateContacto');
-            console.log(res.data);
             setDatos(res.data);
         })
         .catch(err => { console.log(err);})
@@ -85,7 +85,6 @@ const RepProveedorForm = ({proveedor}) => {
         setShowContacto(false);
     }
     const BorrarContacto = (id) =>{
-        console.log(id);
         axios.delete(BACKEND_SERVER + `/api/repuestos/contacto/${id}/`,{            
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -94,8 +93,24 @@ const RepProveedorForm = ({proveedor}) => {
         .then(res =>{
             updateProveedorCont();
         })
-        .catch (err=>{console.console.log((err));});
+        .catch (err=>{console.log((err));});
     }
+    const RecogerContacto = (id) =>{
+        axios.get(BACKEND_SERVER + `/api/repuestos/contacto/${id}/`,{            
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            } 
+        })
+        .then(res =>{
+            setContacto(res.data);
+            setShowContacto(true);
+        })
+
+        .catch (err=>{console.log((err));});
+    }
+    const AnularContacto =()=>{
+        setContacto(null);
+    } 
 
     return (
         <Container>
@@ -188,10 +203,8 @@ const RepProveedorForm = ({proveedor}) => {
                                                             <td>{contacto.departamento}</td>
                                                             <td>{contacto.telefono}</td>
                                                             <td>{contacto.correo_electronico}</td>
-                                                            <td>
-                                                                {/* <Link to={`/repuestos/proveedor/${proveedor.id}`}>
-                                                                    <PencilFill className="mr-3 pencil" onClick={abrirAddContacto}/>
-                                                                </Link> */}
+                                                            <td>                                                                
+                                                                <PencilFill className="mr-3 pencil" onClick={event => {RecogerContacto(contacto.id)}}/>                                                              
                                                                 <Trash className="trash"  onClick={event => {BorrarContacto(contacto.id)}}/>
                                                             </td>
                                                         </tr>
@@ -210,6 +223,9 @@ const RepProveedorForm = ({proveedor}) => {
                             proveedor_id={proveedor.id}
                             handleCloseContacto ={cerrarAddContacto}
                             updateProveedorCont ={updateProveedorCont}
+                            idContacto = {contacto}
+                            AnularContacto={AnularContacto}
+
             />
         </Container>
     )
