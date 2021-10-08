@@ -28,7 +28,7 @@ const RepAlmacenesLista = () => {
             console.log(err);
         });
     }, [token, filtro]);
-    console.log('estoy viendo los proveedores....' + almacenes);
+    console.log('estoy viendo los almacenes....' + almacenes);
 
     const actualizaFiltro = str => {
         setFiltro(str);

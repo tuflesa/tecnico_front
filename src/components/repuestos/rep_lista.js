@@ -22,7 +22,6 @@ const RepLista = () => {
 
     useEffect(()=>{
         if (!show){
-            // console.log(filtro);
             axios.get(BACKEND_SERVER + '/api/repuestos/lista/' + filtro,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`

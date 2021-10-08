@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Container, Row, Col, Form, Button, Table } from 'react-bootstrap';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
@@ -108,7 +108,7 @@ const RepProveedorForm = ({proveedor}) => {
 
         // .catch (err=>{console.log((err));});
         const contacto_editar = datos.contactos.filter(c => c.id === id)[0];
-        // console.log(contacto_editar);
+        console.log(contacto_editar);
         setContactoEditar(contacto_editar);
         setShowContacto(true);
     }
