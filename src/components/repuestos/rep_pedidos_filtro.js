@@ -8,12 +8,13 @@ const PedidosFiltro = ({ actualizaFiltro }) => {
     const [datos, setDatos] = useState({
         nombre: '',
         fecha_creacion_lte:'',
-        fecha_creacion_gte:''
+        fecha_creacion_gte:'',
+        finalizado: ''
 
     });
 
     useEffect(()=>{
-        const filtro = `?proveedor__nombre__icontains=${datos.nombre}&fecha_creacion__lte=${datos.fecha_creacion_lte}&fecha_creacion__gte=${datos.fecha_creacion_gte}`;
+        const filtro = `?proveedor__nombre__icontains=${datos.nombre}&fecha_creacion__lte=${datos.fecha_creacion_lte}&fecha_creacion__gte=${datos.fecha_creacion_gte}&finalizado=${datos.finalizado}`;
         actualizaFiltro(filtro);
     },[datos, actualizaFiltro]);
 
@@ -57,6 +58,19 @@ const PedidosFiltro = ({ actualizaFiltro }) => {
                                         value={datos.fecha_creacion_lte}
                                         onChange={handleInputChange} 
                                         placeholder="Fecha creación anterior a..." />
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="finalizado">
+                            <Form.Label>Finalizado</Form.Label>
+                            <Form.Control as="select" 
+                                            value={datos.finalizado}
+                                            name='finalizado'
+                                            onChange={handleInputChange}>
+                                <option key={0} value={''}>Todos</option>
+                                <option key={1} value={true}>Si</option>
+                                <option key={2} value={false}>No</option>
+                            </Form.Control>
                         </Form.Group>
                     </Col>
                 </Row>
