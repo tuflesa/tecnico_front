@@ -67,9 +67,9 @@ const PedLista = () => {
                                         <td>{pedido.fecha_entrega && invertirFecha(String(pedido.fecha_entrega))}</td>                                        
                                         <td>{pedido.finalizado ? 'Si' : 'No'}</td>
                                         <td>
-                                            {/* <Link to={`/repuestos/pedidos${pedido.id}`}> */}
+                                            <Link to={`/repuestos/pedido_detalle/${pedido.id}`}>
                                                 <PencilFill className="mr-3 pencil"/>
-                                            {/* </Link> */}
+                                            </Link>
                                             <Trash className="trash" />
                                         </td>
                                     </tr>
