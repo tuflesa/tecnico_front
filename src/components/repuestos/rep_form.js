@@ -12,8 +12,6 @@ import ProveedorForm from './rep_proveedor';
 
 const RepuestoForm = ({repuesto, setRepuesto}) => {
     const [token] = useCookies(['tec-token']);
-    console.log('voy a ver que llega en repuesto');
-    console.log(repuesto);
 
     const [datos, setDatos] = useState({
         id: repuesto.id ? repuesto.id : null,

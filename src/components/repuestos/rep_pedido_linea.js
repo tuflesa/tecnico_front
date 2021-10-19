@@ -41,7 +41,7 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id}) => {
     } 
 
     const handlerGuardar = () => {
-        axios.post(BACKEND_SERVER + `/api/repuestos/lista_pedidos/`,{
+        axios.post(BACKEND_SERVER + `/api/repuestos/pedido_detalle/`,{
             repuesto: datos.repuesto,
             cantidad:datos.cantidad,
             precio:datos.precio,
@@ -68,7 +68,7 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id}) => {
     return (
         <Modal show={show} backdrop="static" keyboard={ false } animation={false}>
                 <Modal.Header closeButton>                
-                        <Modal.Title>Nueva Linea</Modal.Title>
+                    <Modal.Title>Nueva Linea</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form >

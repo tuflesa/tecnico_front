@@ -5,33 +5,26 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import { PlusCircle, PencilFill, Trash } from 'react-bootstrap-icons';
 import LineaForm from './rep_pedido_linea';
+import { Link } from 'react-router-dom';
+import { now } from 'd3-timer';
 
 const PedidoForm = ({pedido}) => {
     const [token] = useCookies(['tec-token']);
     const [show_linea, setShowLinea] = useState(false);
-
+    const [empresas, setEmpresas] = useState(null);
+    const [user] = useCookies(['tec-user']); 
+    
     const [datos, setDatos] = useState({
         proveedor: pedido ? pedido.proveedor.id : '',
+        empresa: pedido ? pedido.empresa : user['tec-user'].perfil.empresa.id,
+        numero: pedido ? pedido.numero : '',
         fecha_creacion: pedido ? pedido.fecha_creacion : new Date(),
         fecha_cierre: pedido ? pedido.fecha_entrega : '',
         finalizado: pedido ? pedido.finalizado : false,
         lineas_pedido: pedido.lineas_pedido ? pedido.lineas_pedido : null
-    });
-    const [proveedores, setProveedores]= useState(null);
+    });  
 
-    useEffect(()=>{
-        axios.get(BACKEND_SERVER + `/api/repuestos/proveedor/`, {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }     
-        })
-        .then( res => { 
-            console.log('imprimiendo proveedores de pedido_detalle');
-            console.log(res.data);
-            setProveedores(res.data);
-        })
-        .catch(err => { console.log(err);})
-    },[token]);
+    const [proveedores, setProveedores]= useState(null);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -55,6 +48,59 @@ const PedidoForm = ({pedido}) => {
         setShowLinea(false);
     }
 
+    const handleDisabled = () => {
+        return user['tec-user'].perfil.nivel_acceso.nombre === 'local'
+    }
+
+    const crearPedido = (event) => {
+        event.preventDefault();
+        console.log('que entra en crear pedido????....');
+        console.log(datos);
+        axios.post(BACKEND_SERVER + `/api/repuestos/pedido/`, {
+            proveedor: datos.proveedor,
+            empresa: datos.empresa,
+            fecha_cierre: datos.fecha_cierre,
+            fecha_creacion: datos.fecha_creacion,
+            finalizado: datos.finalizado
+        }, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => { 
+            console.log('viendo los nuevos datos del pedido');
+            console.log(res.data);
+            setDatos(res.data);
+        })
+        .catch(err => { console.log(err);})
+    }
+
+    useEffect(()=>{
+        axios.get(BACKEND_SERVER + `/api/repuestos/proveedor/`, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => { 
+            setProveedores(res.data);
+        })
+        .catch(err => { console.log(err);})
+    },[token]);
+
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setEmpresas(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
+
     return (
         <Container>
             <Row className="justify-content-center"> 
@@ -74,14 +120,29 @@ const PedidoForm = ({pedido}) => {
                                     <Form.Label>Proveedor</Form.Label>
                                     <Form.Control type="text"  
                                                 name='proveedor' 
-                                                value={pedido.proveedor.nombre}
-                                                onChange={handleInputChange}
-                                                placeholder="Proveedor">  
+                                                value={pedido.proveedor.nombre}>  
                                     </Form.Control>
                                 </Form.Group>
                             </Col>
+                            <Col>
+                                <Form.Group controlId="empresa">
+                                    <Form.Label>Empresa</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='empresa' 
+                                                value={datos.empresa.nombre}/>
+                                </Form.Group>
+                            </Col>
+                            <Col>
+                                <Form.Group controlId="numero">
+                                    <Form.Label>Numero Pedido</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='numero' 
+                                                value={datos.numero}/>
+                                </Form.Group>
+                            </Col>
                             </React.Fragment>
-                            :     
+                            :
+                            <React.Fragment>     
                                 <Col>
                                     <Form.Group controlId="proveedor">
                                         <Form.Label>Proveedor</Form.Label>
@@ -99,8 +160,37 @@ const PedidoForm = ({pedido}) => {
                                                     })}
                                         </Form.Control>
                                     </Form.Group>
+                                </Col>                            
+                                <Col>
+                                    <Form.Group controlId="empresa">
+                                        <Form.Label>Empresa</Form.Label>
+                                        <Form.Control as="select"  
+                                                    name='empresa' 
+                                                    value={datos.empresa}
+                                                    onChange={handleInputChange}
+                                                    disabled={handleDisabled()}
+                                                    placeholder="Empresa">
+                                                    <option key={0} value={''}>Todas</option>    
+                                                    {empresas && empresas.map( empresa => {
+                                                        return (
+                                                        <option key={empresa.id} value={empresa.id}>
+                                                            {empresa.nombre}
+                                                        </option>
+                                                        )
+                                                    })}
+                                        </Form.Control>
+                                    </Form.Group>
                                 </Col>
-                            }
+                                <Col>
+                                    <Form.Group controlId="numero">
+                                        <Form.Label>Numero Pedido</Form.Label>
+                                        <Form.Control type="text" 
+                                                    name='numero' 
+                                                    value={datos.numero}/>
+                                    </Form.Group>
+                                </Col>
+                            </React.Fragment> 
+                            }                                                 
                             <Col>
                                 <Form.Group controlId="fecha_creacion">
                                     <Form.Label>Fecha Creación</Form.Label>
@@ -132,6 +222,18 @@ const PedidoForm = ({pedido}) => {
                                 </Form.Group>
                             </Col>
                         </Row>                        
+                        <Form.Row className="justify-content-center">
+                            {pedido.id ? 
+                                <Button variant="info" type="submit" className={'mx-2'} onClick={''}>Actualizar</Button> :
+                                <Button variant="info" type="submit" className={'mx-2'} onClick={crearPedido}>Guardar</Button>
+                            }
+                            <Link to='/repuestos/pedidos'>
+                                <Button variant="warning" >
+                                    Cancelar
+                                </Button>
+                            </Link>
+                        </Form.Row> 
+                        {pedido.id ? 
                         <React.Fragment>
                             <Form.Row>
                                 <Col>
@@ -152,7 +254,7 @@ const PedidoForm = ({pedido}) => {
                                                 <th>Acciones</th>
                                             </tr>
                                         </thead> 
-                                        {pedido.id ?                                           
+                                                                                  
                                         <tbody>
                                             {datos.lineas_pedido && datos.lineas_pedido.map( linea => {
                                                 return (
@@ -168,11 +270,11 @@ const PedidoForm = ({pedido}) => {
                                                 )})
                                             }
                                         </tbody>
-                                        : null}
-                                    </Table>
+                                    </Table>                                     
                                 </Col>
                             </Form.Row>                                                
-                        </React.Fragment>                        
+                        </React.Fragment> 
+                        : null}                       
                     </Form>
                 </Col>
             </Row>    

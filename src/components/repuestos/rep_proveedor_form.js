@@ -14,7 +14,7 @@ const RepProveedorForm = ({proveedor}) => {
     
 
     const [datos, setDatos] = useState({
-        proveedor_id: proveedor.id ? proveedor.id : null,        
+        proveedor_id: proveedor.id ? proveedor.id : null,         
         nombre: proveedor.nombre,
         direccion: proveedor.direccion,
         telefono: proveedor.telefono,

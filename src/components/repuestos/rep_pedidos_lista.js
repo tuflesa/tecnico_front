@@ -21,16 +21,15 @@ const PedLista = () => {
     } 
     
     useEffect(()=>{
-        console.log('estoy aqui, estoy aqui!!');
         axios.get(BACKEND_SERVER + `/api/repuestos/lista_pedidos/` + filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }
         })
         .then( res => {
-            console.log('lista de pedidos');
             console.log(res.data);
             setPedidos(res.data);
+            setShow(true);
         })
         .catch( err => {
             console.log(err);
