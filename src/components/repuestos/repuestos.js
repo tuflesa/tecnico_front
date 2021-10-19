@@ -12,6 +12,7 @@ import RepProveedorNuevo from './rep_proveedor_nuevo';
 import RepProveedorEdit from './rep_proveedor_editar';
 import PedLista from './rep_pedidos_lista';
 import PedidoEditar from './rep_pedido_editar';
+import RepPedidoNuevo from './rep_pedido_nuevo';
 
 const Repuestos = () => {
     
@@ -20,8 +21,9 @@ const Repuestos = () => {
             <RepNavBar />
             <Switch>
                 <Route path='/repuestos' exact component={RepLista} />
-                <Route path='/repuestos/pedidos' exact component={PedLista} />
-                <Route path='/repuestos/pedido_detalle/:id' component={PedidoEditar} />
+                <Route path='/repuestos/pedidos' component={PedLista} />                
+                <Route path='/repuestos/pedido_detalle/:id' component={PedidoEditar} />                
+                <Route path='/repuestos/pedido/nuevo' component={RepPedidoNuevo} />
                 <Route path='/repuestos/nuevo' component={RepNuevo} />
                 <Route path='/repuestos/almacenes' component={RepAlmacenesLista} />
                 <Route path='/repuestos/almacen/nuevo' component={RepAlmacenNuevo} />

@@ -28,13 +28,14 @@ const PedLista = () => {
             }
         })
         .then( res => {
+            console.log('lista de pedidos');
             console.log(res.data);
             setPedidos(res.data);
         })
         .catch( err => {
             console.log(err);
         });
-    },[show, filtro, token]);   
+    },[show, filtro]);   
 
     return (
         <Container>
@@ -50,6 +51,7 @@ const PedLista = () => {
                         <thead>
                             <tr>
                                 <th>Num-Pedido</th>
+                                <th>Empresa</th>
                                 <th>Proveedor</th>
                                 <th>Fecha Pedido</th>
                                 <th>Fecha Entrega</th>
@@ -61,7 +63,8 @@ const PedLista = () => {
                             {pedidos && pedidos.map( pedido => {
                                 return (
                                     <tr key={pedido.id}>
-                                        <td>{pedido.id}</td>
+                                        <td>{pedido.numero}</td>
+                                        <td>{pedido.empresa.nombre}</td>
                                         <td>{pedido.proveedor.nombre}</td>
                                         <td>{invertirFecha(String(pedido.fecha_creacion))}</td>
                                         <td>{pedido.fecha_entrega && invertirFecha(String(pedido.fecha_entrega))}</td>                                        

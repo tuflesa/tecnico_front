@@ -15,6 +15,7 @@ const PedidoEditar = ({ match }) => {
               }
         })
         .then( res => {
+            console.log('pedidos desde pedido_detalle de pedido_editar');
             console.log(res.data);
             setPedido(res.data);
         })
