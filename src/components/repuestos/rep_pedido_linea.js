@@ -4,7 +4,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 
-const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id}) => {
+const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updateLinea}) => {
     
     const [token] = useCookies(['tec-token']);
     
@@ -13,7 +13,6 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id}) => {
         cantidad:'',
         precio:'',
         pedido: pedido_id,
-        proveedor: proveedor_id
     });
     const [repuestos, setRepuestos]= useState(null);
 
@@ -41,13 +40,11 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id}) => {
     } 
 
     const handlerGuardar = () => {
-        axios.post(BACKEND_SERVER + `/api/repuestos/pedido_detalle/`,{
+        axios.post(BACKEND_SERVER + `/api/repuestos/linea_pedido/`,{
             repuesto: datos.repuesto,
             cantidad:datos.cantidad,
             precio:datos.precio,
             pedido: datos.pedido,
-            empresa: '1'
-           // proveedor: proveedor_id
         },
         {
             headers: {
@@ -55,8 +52,7 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id}) => {
             }
         })
         .then( res => {
-           // updateProveedorCont();    
-           console.log('hemos grabado nueva linea');
+            updateLinea();
             handlerCancelar();
         })
         .catch( err => {
@@ -113,7 +109,7 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id}) => {
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>                        
-                        <Button variant="info" onClick={handlerGuardar}> Guardar </Button>                
+                    <Button variant="info" onClick={handlerGuardar}> Guardar </Button>                
                     <Button variant="waring" onClick={handlerCancelar}>
                         Cancelar
                     </Button>

@@ -12,18 +12,19 @@ const PedidoForm = ({pedido}) => {
     const [token] = useCookies(['tec-token']);
     const [show_linea, setShowLinea] = useState(false);
     const [empresas, setEmpresas] = useState(null);
-    const [user] = useCookies(['tec-user']); 
+    const [user] = useCookies(['tec-user']);
+    const [hoy] = useState(new Date);
     
     const [datos, setDatos] = useState({
-        proveedor: pedido ? pedido.proveedor.id : '',
+        proveedor: pedido ? pedido.proveedor.id : null,
         empresa: pedido ? pedido.empresa : user['tec-user'].perfil.empresa.id,
         numero: pedido ? pedido.numero : '',
-        fecha_creacion: pedido ? pedido.fecha_creacion : new Date(),
+        fecha_creacion: pedido ? pedido.fecha_creacion : (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate()),
         fecha_cierre: pedido ? pedido.fecha_entrega : '',
         finalizado: pedido ? pedido.finalizado : false,
         lineas_pedido: pedido.lineas_pedido ? pedido.lineas_pedido : null
-    });  
-
+    }); 
+    
     const [proveedores, setProveedores]= useState(null);
 
     const handleInputChange = (event) => {
@@ -68,9 +69,40 @@ const PedidoForm = ({pedido}) => {
               }     
         })
         .then( res => { 
-            console.log('viendo los nuevos datos del pedido');
-            console.log(res.data);
             setDatos(res.data);
+        })
+        .catch(err => { console.log(err);})
+    }
+
+    const actualizarDatos = (event) => {
+        event.preventDefault();
+        axios.put(BACKEND_SERVER + `/api/repuestos/pedido_detalle/${pedido.id}/`, {
+            proveedor: datos.proveedor,
+            empresa: datos.empresa,
+            fecha_cierre: datos.fecha_cierre,
+            fecha_creacion: datos.fecha_creacion,
+            finalizado: datos.finalizado
+        }, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => { 
+            setDatos(res.data);
+            window.location.href = "/repuestos/pedidos";
+        })
+        .catch(err => { console.log(err);})
+
+    }
+
+    const updateLinea = () => {
+        axios.get(BACKEND_SERVER + `/api/repuestos/pedido_detalle/${pedido.id}/`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => {  
+            setDatos(res.data); 
         })
         .catch(err => { console.log(err);})
     }
@@ -150,7 +182,7 @@ const PedidoForm = ({pedido}) => {
                                                     name='proveedor' 
                                                     value={datos.proveedor}
                                                     onChange={handleInputChange}
-                                                    placeholder="Proveedor">
+                                                    placeholder="Elige Proveedor">
                                                     {proveedores && proveedores.map( proveedor => {
                                                         return (
                                                         <option key={proveedor.id} value={proveedor.id}>
@@ -224,7 +256,7 @@ const PedidoForm = ({pedido}) => {
                         </Row>                        
                         <Form.Row className="justify-content-center">
                             {pedido.id ? 
-                                <Button variant="info" type="submit" className={'mx-2'} onClick={''}>Actualizar</Button> :
+                                <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button> :
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={crearPedido}>Guardar</Button>
                             }
                             <Link to='/repuestos/pedidos'>
@@ -233,7 +265,7 @@ const PedidoForm = ({pedido}) => {
                                 </Button>
                             </Link>
                         </Form.Row> 
-                        {pedido.id ? 
+                        {datos.numero ? 
                         <React.Fragment>
                             <Form.Row>
                                 <Col>
@@ -282,10 +314,7 @@ const PedidoForm = ({pedido}) => {
                         pedido_id={pedido.id}
                         handleCloseLinea ={cerrarAddLinea}
                         proveedor_id={datos.proveedor}
-   /*                      updateProveedorCont ={updateProveedorCont}
-                        contacto = {contactoEditar}
-                        AnularContacto={AnularContacto} */
-
+                        updateLinea={updateLinea}
             />
         </Container>
     )
