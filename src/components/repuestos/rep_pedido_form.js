@@ -3,27 +3,33 @@ import { Container, Row, Col, Form, Button, Table } from 'react-bootstrap';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
-import { PlusCircle, PencilFill, Trash } from 'react-bootstrap-icons';
+import { PlusCircle, PencilFill, Trash, Truck } from 'react-bootstrap-icons';
 import LineaForm from './rep_pedido_linea';
+import MovimientoForm from './rep_pedido_movimiento';
 import { Link } from 'react-router-dom';
 import { now } from 'd3-timer';
 
 const PedidoForm = ({pedido, setPedido}) => {
     const [token] = useCookies(['tec-token']);
-    const [show_linea, setShowLinea] = useState(false);
-    const [empresas, setEmpresas] = useState(null);
     const [user] = useCookies(['tec-user']);
+
+    const [show_linea, setShowLinea] = useState(false);
+    const [show_movimiento, setShowMovimiento] = useState(false);
+    const [empresas, setEmpresas] = useState(null);
+    const [lineaEditar, setLineaEtitar] = useState(null);
+    const [lineaMovimiento, setLineaMovimiento] = useState(null);
     const [hoy] = useState(new Date);
     
     const [datos, setDatos] = useState({
-        id: pedido.id ? pedido.id : null,
+        id: pedido ? pedido.id : null,
         proveedor: pedido ? pedido.proveedor.id : null,
         empresa: pedido ? pedido.empresa : user['tec-user'].perfil.empresa.id,
         numero: pedido ? pedido.numero : '',
+        creado_por: pedido ? pedido.creado_por.get_full_name : '',
         fecha_creacion: pedido ? pedido.fecha_creacion : (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate()),
         fecha_cierre: pedido ? pedido.fecha_entrega : '',
         finalizado: pedido ? pedido.finalizado : false,
-        lineas_pedido: pedido.lineas_pedido ? pedido.lineas_pedido : null
+        lineas_pedido: pedido ? pedido.lineas_pedido : null
     }); 
     
     const [proveedores, setProveedores]= useState(null);
@@ -43,15 +49,27 @@ const PedidoForm = ({pedido, setPedido}) => {
     }
 
     const abrirAddLinea =() =>{
+        setLineaEtitar(null);
         setShowLinea(true);
     }
 
-    const cerrarAddLinea =() =>{
+    const editLinea = (linea) => {
+        setLineaEtitar(linea);
+        setShowLinea(true);
+    }
+
+    const creaMoviviento = (linea) => {
+        setLineaMovimiento(linea);
+        setShowMovimiento(true);
+    }
+
+    const cerrarAddLinea =() =>{        
+        editLinea();
         setShowLinea(false);
     }
 
-    const handleDisabled = () => {
-        return user['tec-user'].perfil.nivel_acceso.nombre === 'local'
+    const cerrarMovimiento =() =>{    
+        setShowMovimiento(false);
     }
 
     const crearPedido = (event) => {
@@ -63,14 +81,15 @@ const PedidoForm = ({pedido, setPedido}) => {
             empresa: datos.empresa,
             fecha_cierre: datos.fecha_cierre,
             fecha_creacion: datos.fecha_creacion,
-            finalizado: datos.finalizado
+            finalizado: datos.finalizado,
+            creado_por: user['tec-user'].id
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }     
         })
         .then( res => { 
-            setDatos(res.data);
+            setPedido(res.data);
             console.log(res);
         })
         .catch(err => { console.log(err);})
@@ -136,23 +155,41 @@ const PedidoForm = ({pedido, setPedido}) => {
     }, [token]);
 
     useEffect(()=>{
-        // console.log('Cambio en repuesto, actualizando datos ...');
-        setDatos({
-        proveedor: pedido ? pedido.proveedor.id : null,
-        empresa: pedido ? pedido.empresa : user['tec-user'].perfil.empresa.id,
-        numero: pedido ? pedido.numero : '',
-        fecha_creacion: pedido ? pedido.fecha_creacion : (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate()),
-        fecha_cierre: pedido ? pedido.fecha_entrega : '',
-        finalizado: pedido ? pedido.finalizado : false,
-        lineas_pedido: pedido.lineas_pedido ? pedido.lineas_pedido : null
+        // console.log('Cambio en pedido, actualizando datos ...');
+        pedido && setDatos({
+            id: pedido ? pedido.id : null,
+            proveedor: pedido ? pedido.proveedor.id : null,
+            empresa: pedido ? pedido.empresa : user['tec-user'].perfil.empresa.id,
+            numero: pedido ? pedido.numero : '',
+            creado_por: pedido ? pedido.creado_por.get_full_name : '',
+            fecha_creacion: pedido ? pedido.fecha_creacion : (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate()),
+            fecha_cierre: pedido ? pedido.fecha_entrega : '',
+            finalizado: pedido ? pedido.finalizado : false,
+            lineas_pedido: pedido.lineas_pedido ? pedido.lineas_pedido : null
         });
             //console.log(datos);
     },[pedido]);
 
+    const handleDeshabilitar = () =>{
+        if (pedido){
+            console.log('ya hay pedido....');
+            console.log(pedido.id);
+            return true
+        } 
+        else {
+            console.log('No hay id de pedido');
+            return false
+        }
+    }
+
+    const handleDisabled = () => {
+        return user['tec-user'].perfil.nivel_acceso.nombre === 'local' || handleDeshabilitar()
+    }
+
     return (
         <Container>
             <Row className="justify-content-center"> 
-            {pedido.id ?
+            {pedido ?
                 <h5 className="pb-3 pt-1 mt-2">Pedido Detalle</h5>:
                 <h5 className="pb-3 pt-1 mt-2">Nuevo Pedido</h5>}
             </Row>
@@ -160,24 +197,47 @@ const PedidoForm = ({pedido, setPedido}) => {
                 <Col>
                     <h5 className="pb-3 pt-1 mt-2">Datos básicos:</h5>
                     <Form >
-                        <Row>
-                        {pedido.id ?
-                            <React.Fragment>
+                        <Row> 
                             <Col>
                                 <Form.Group controlId="proveedor">
                                     <Form.Label>Proveedor</Form.Label>
-                                    <Form.Control type="text"  
+                                    <Form.Control as="select"  
                                                 name='proveedor' 
-                                                value={pedido.proveedor.nombre}>  
+                                                value={datos.proveedor}
+                                                onChange={handleInputChange}
+                                                disabled={handleDeshabilitar()}
+                                                placeholder="Elige Proveedor">
+                                                    <option key={0} value={''}>
+                                                        ----
+                                                    </option>
+                                                {proveedores && proveedores.map( proveedor => {
+                                                    return (
+                                                    <option key={proveedor.id} value={proveedor.id}>
+                                                        {proveedor.nombre}
+                                                    </option>
+                                                    )
+                                                })}
                                     </Form.Control>
                                 </Form.Group>
-                            </Col>
+                            </Col>                            
                             <Col>
                                 <Form.Group controlId="empresa">
                                     <Form.Label>Empresa</Form.Label>
-                                    <Form.Control type="text" 
+                                    <Form.Control as="select"  
                                                 name='empresa' 
-                                                value={datos.empresa.nombre}/>
+                                                value={datos.empresa}
+                                                onChange={handleInputChange}
+                                                disabled={handleDisabled()}
+                                                placeholder="Empresa">
+                                                <option key={0} value={''}>Todas</option>    
+                                                {empresas && empresas.map( empresa => {
+                                                    return (
+                                                    <option key={empresa.id} value={empresa.id}>
+                                                        {empresa.nombre}
+                                                    </option>
+                                                    )
+                                                })}
+                                    </Form.Control>
                                 </Form.Group>
                             </Col>
                             <Col>
@@ -185,60 +245,21 @@ const PedidoForm = ({pedido, setPedido}) => {
                                     <Form.Label>Numero Pedido</Form.Label>
                                     <Form.Control type="text" 
                                                 name='numero' 
+                                                disabled
                                                 value={datos.numero}/>
                                 </Form.Group>
-                            </Col>
-                            </React.Fragment>
-                            :
-                            <React.Fragment>     
-                                <Col>
-                                    <Form.Group controlId="proveedor">
-                                        <Form.Label>Proveedor</Form.Label>
-                                        <Form.Control as="select"  
-                                                    name='proveedor' 
-                                                    value={datos.proveedor}
-                                                    onChange={handleInputChange}
-                                                    placeholder="Elige Proveedor">
-                                                    {proveedores && proveedores.map( proveedor => {
-                                                        return (
-                                                        <option key={proveedor.id} value={proveedor.id}>
-                                                            {proveedor.nombre}
-                                                        </option>
-                                                        )
-                                                    })}
-                                        </Form.Control>
-                                    </Form.Group>
-                                </Col>                            
-                                <Col>
-                                    <Form.Group controlId="empresa">
-                                        <Form.Label>Empresa</Form.Label>
-                                        <Form.Control as="select"  
-                                                    name='empresa' 
-                                                    value={datos.empresa}
-                                                    onChange={handleInputChange}
-                                                    disabled={handleDisabled()}
-                                                    placeholder="Empresa">
-                                                    <option key={0} value={''}>Todas</option>    
-                                                    {empresas && empresas.map( empresa => {
-                                                        return (
-                                                        <option key={empresa.id} value={empresa.id}>
-                                                            {empresa.nombre}
-                                                        </option>
-                                                        )
-                                                    })}
-                                        </Form.Control>
-                                    </Form.Group>
-                                </Col>
-                                <Col>
-                                    <Form.Group controlId="numero">
-                                        <Form.Label>Numero Pedido</Form.Label>
-                                        <Form.Control type="text" 
-                                                    name='numero' 
-                                                    value={datos.numero}/>
-                                    </Form.Group>
-                                </Col>
-                            </React.Fragment> 
-                            }                                                 
+                            </Col> 
+                            <Col>
+                                <Form.Group controlId="creado_por">
+                                    <Form.Label>Creado por</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='creado_por' 
+                                                disabled
+                                                value={pedido ? pedido.creado_por.get_full_name : user['tec-user'].get_full_name}/>
+                                </Form.Group>
+                            </Col> 
+                        </Row>
+                        <Row>                                             
                             <Col>
                                 <Form.Group controlId="fecha_creacion">
                                     <Form.Label>Fecha Creación</Form.Label>
@@ -271,7 +292,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                             </Col>
                         </Row>                        
                         <Form.Row className="justify-content-center">
-                            {pedido.id ? 
+                            {pedido ? 
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button> :
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={crearPedido}>Guardar</Button>
                             }
@@ -311,7 +332,8 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                         <td>{linea.cantidad}</td>
                                                         <td>{linea.precio}</td>
                                                         <td>
-                                                            <PencilFill className="mr-3 pencil"/>
+                                                            <PencilFill className="mr-3 pencil" onClick={event => {editLinea(linea)}}/>
+                                                            <Truck className="mr-3 pencil" onClick={event => {creaMoviviento(linea)}}/>
                                                             {/* <Trash className="trash"  onClick={null} /> */}
                                                         </td>
                                                     </tr>
@@ -327,10 +349,16 @@ const PedidoForm = ({pedido, setPedido}) => {
                 </Col>
             </Row>    
             <LineaForm  show={show_linea}
-                        pedido_id={pedido.id}
+                        pedido_id={pedido ? pedido.id : null}
+                        linea={lineaEditar}
                         handleCloseLinea ={cerrarAddLinea}
                         proveedor_id={datos.proveedor}
                         updateLinea={updateLinea}
+            />
+            <MovimientoForm show={show_movimiento}
+                            handleCloseMovimiento ={cerrarMovimiento}
+                            linea={lineaMovimiento}
+
             />
         </Container>
     )

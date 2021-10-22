@@ -15,6 +15,7 @@ const PedidoEditar = ({ match }) => {
               }
         })
         .then( res => {
+            console.log(res.data);
             setPedido(res.data);
         })
         .catch( err => {

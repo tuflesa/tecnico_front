@@ -14,7 +14,7 @@ const PedidosFiltro = ({ actualizaFiltro }) => {
         empresa: user['tec-user'].perfil.empresa.id,
         fecha_creacion_lte:'',
         fecha_creacion_gte:'',
-        finalizado: '',
+        finalizado: false,
         numero:''
 
     });
@@ -54,7 +54,7 @@ const PedidosFiltro = ({ actualizaFiltro }) => {
                 <Row>
                     <Col>
                         <Form.Group controlId="nombre">
-                            <Form.Label>Nombre Proveedor</Form.Label>
+                            <Form.Label>Proveedor</Form.Label>
                             <Form.Control type="text" 
                                         name='nombre' 
                                         value={datos.nombre}

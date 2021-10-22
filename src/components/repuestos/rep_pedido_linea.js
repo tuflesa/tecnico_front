@@ -4,20 +4,29 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 
-const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updateLinea}) => {
+const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updateLinea, linea}) => {
     
     const [token] = useCookies(['tec-token']);
     
     const [datos, setDatos] = useState({  
-        repuesto: '',
-        cantidad:'',
-        precio:'',
+        repuesto: linea ? linea.repuesto : '',
+        cantidad: linea ? linea.cantidad : '',
+        precio:linea ? linea.precio : '',
         pedido: pedido_id,
     });
     const [repuestos, setRepuestos]= useState(null);
 
     useEffect(()=>{
-        axios.get(BACKEND_SERVER + `/api/repuestos/lista/?proveedores__id=${proveedor_id}`, {
+        setDatos({  
+            repuesto: linea ? linea.repuesto.id : 0,
+            cantidad: linea ? linea.cantidad : '',
+            precio: linea ? linea.precio : '',
+            pedido: pedido_id,
+        });
+    },[linea, pedido_id]);
+
+    useEffect(()=>{
+        proveedor_id && axios.get(BACKEND_SERVER + `/api/repuestos/lista/?proveedores__id=${proveedor_id}&descatalogado=${false}`, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }     
@@ -27,7 +36,7 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updateLinea
             console.log(res.data);
         })
         .catch(err => { console.log(err);})
-    },[token]);
+    },[token, proveedor_id]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -35,16 +44,16 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updateLinea
             [event.target.name] : event.target.value
         })
     }
-    const handlerCancelar = () => {
+    const handlerCancelar = () => {      
         handleCloseLinea();
-
     } 
 
     const handlerGuardar = () => {
+        // console.log(datos);
         axios.post(BACKEND_SERVER + `/api/repuestos/linea_pedido/`,{
             repuesto: datos.repuesto,
-            cantidad:datos.cantidad,
-            precio:datos.precio,
+            cantidad: datos.cantidad,
+            precio: datos.precio,
             pedido: datos.pedido,
         },
         {
@@ -62,6 +71,34 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updateLinea
         });
     }
 
+    const handlerEditar = () => {
+        axios.patch(BACKEND_SERVER + `/api/repuestos/linea_pedido/${linea.id}/`,{
+            cantidad: datos.cantidad,
+            precio: datos.precio,
+            pedido: datos.pedido,
+        },
+        {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( res => {
+            updateLinea();
+            handlerCancelar();
+        })
+        .catch( err => {
+            console.log(err);            
+            handlerCancelar();
+        });
+    }
+
+    const handleRepuestoEnabled = () => {
+        if (linea) {
+            return true
+        }
+        else return false
+    }
+
     return (
         <Modal show={show} backdrop="static" keyboard={ false } animation={false}>
                 <Modal.Header closeButton>                
@@ -77,7 +114,11 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updateLinea
                                                 name='repuesto' 
                                                 value={datos.repuesto}
                                                 onChange={handleInputChange}
+                                                disabled={handleRepuestoEnabled()}
                                                 placeholder="Repuesto">
+                                                    <option key={0} value={''}>
+                                                        ----
+                                                    </option>
                                                 {repuestos && repuestos.map( repuesto => {
                                                     return (
                                                     <option key={repuesto.id} value={repuesto.id}>
@@ -109,8 +150,11 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updateLinea
                         </Row>
                     </Form>
                 </Modal.Body>
-                <Modal.Footer>                        
-                    <Button variant="info" onClick={handlerGuardar}> Guardar </Button>                
+                <Modal.Footer>
+                    { linea ?                     
+                        <Button variant="info" onClick={handlerEditar}> Editar </Button> :
+                        <Button variant="info" onClick={handlerGuardar}> Guardar </Button>
+                    }        
                     <Button variant="waring" onClick={handlerCancelar}>
                         Cancelar
                     </Button>
