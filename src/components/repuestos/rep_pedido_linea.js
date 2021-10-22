@@ -17,13 +17,14 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updateLinea
     const [repuestos, setRepuestos]= useState(null);
 
     useEffect(()=>{
-        axios.get(BACKEND_SERVER + `/api/repuestos/lista/`, {
+        axios.get(BACKEND_SERVER + `/api/repuestos/lista/?proveedores__id=${proveedor_id}`, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }     
         })
         .then( res => { 
             setRepuestos(res.data);
+            console.log(res.data);
         })
         .catch(err => { console.log(err);})
     },[token]);

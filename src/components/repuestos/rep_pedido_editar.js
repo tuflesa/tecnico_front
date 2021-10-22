@@ -24,9 +24,9 @@ const PedidoEditar = ({ match }) => {
 
     return (
         <React.Fragment>
-            {pedido && <PedidoForm pedido={pedido} />}
+            {pedido ? <PedidoForm pedido={pedido} setPedido={setPedido}/> : null}
         </React.Fragment>
-    )
+    );
 }
 
 export default PedidoEditar;

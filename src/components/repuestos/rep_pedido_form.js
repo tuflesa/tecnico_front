@@ -8,7 +8,7 @@ import LineaForm from './rep_pedido_linea';
 import { Link } from 'react-router-dom';
 import { now } from 'd3-timer';
 
-const PedidoForm = ({pedido}) => {
+const PedidoForm = ({pedido, setPedido}) => {
     const [token] = useCookies(['tec-token']);
     const [show_linea, setShowLinea] = useState(false);
     const [empresas, setEmpresas] = useState(null);
@@ -16,6 +16,7 @@ const PedidoForm = ({pedido}) => {
     const [hoy] = useState(new Date);
     
     const [datos, setDatos] = useState({
+        id: pedido.id ? pedido.id : null,
         proveedor: pedido ? pedido.proveedor.id : null,
         empresa: pedido ? pedido.empresa : user['tec-user'].perfil.empresa.id,
         numero: pedido ? pedido.numero : '',
@@ -70,6 +71,7 @@ const PedidoForm = ({pedido}) => {
         })
         .then( res => { 
             setDatos(res.data);
+            console.log(res);
         })
         .catch(err => { console.log(err);})
     }
@@ -88,7 +90,7 @@ const PedidoForm = ({pedido}) => {
               }     
         })
         .then( res => { 
-            setDatos(res.data);
+            setPedido(res.data);
             window.location.href = "/repuestos/pedidos";
         })
         .catch(err => { console.log(err);})
@@ -102,7 +104,7 @@ const PedidoForm = ({pedido}) => {
               }     
         })
         .then( res => {  
-            setDatos(res.data); 
+            setPedido(res.data); 
         })
         .catch(err => { console.log(err);})
     }
@@ -132,6 +134,20 @@ const PedidoForm = ({pedido}) => {
             console.log(err);
         });
     }, [token]);
+
+    useEffect(()=>{
+        // console.log('Cambio en repuesto, actualizando datos ...');
+        setDatos({
+        proveedor: pedido ? pedido.proveedor.id : null,
+        empresa: pedido ? pedido.empresa : user['tec-user'].perfil.empresa.id,
+        numero: pedido ? pedido.numero : '',
+        fecha_creacion: pedido ? pedido.fecha_creacion : (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate()),
+        fecha_cierre: pedido ? pedido.fecha_entrega : '',
+        finalizado: pedido ? pedido.finalizado : false,
+        lineas_pedido: pedido.lineas_pedido ? pedido.lineas_pedido : null
+        });
+            //console.log(datos);
+    },[pedido]);
 
     return (
         <Container>
