@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { Button, Modal, Form, Col, Row } from 'react-bootstrap';
 
-const MovimientoForm = ({show, linea, handleCloseMovimiento, empresa}) => {
+const MovimientoForm = ({show, linea, handleCloseMovimiento, pedido, empresa}) => {
     
     const [token] = useCookies(['tec-token']);
  
@@ -20,13 +20,13 @@ const MovimientoForm = ({show, linea, handleCloseMovimiento, empresa}) => {
         almacen: ''
     });
     console.log('imprimiendo datos de la linea');
-    console.log (linea);
+    console.log (pedido);
     const handlerCancelar = () => {      
         handleCloseMovimiento();
     } 
 
     useEffect(()=>{
-        linea && axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimos/?almacen__empresa__id=${empresa}&repuesto=${linea.repuesto.id}`, {
+        linea && axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimo_detalle/?almacen__empresa__id=${empresa}&repuesto=${linea.repuesto.id}`, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }     

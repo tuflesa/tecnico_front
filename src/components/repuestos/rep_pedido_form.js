@@ -359,6 +359,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                             handleCloseMovimiento ={cerrarMovimiento}
                             linea={lineaMovimiento}
                             empresa={datos.empresa}
+                            pedido={pedido ? pedido.id : null}
 
             />
         </Container>
