@@ -358,6 +358,7 @@ const PedidoForm = ({pedido, setPedido}) => {
             <MovimientoForm show={show_movimiento}
                             handleCloseMovimiento ={cerrarMovimiento}
                             linea={lineaMovimiento}
+                            empresa={datos.empresa}
 
             />
         </Container>

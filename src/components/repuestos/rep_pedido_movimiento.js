@@ -4,11 +4,12 @@ import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { Button, Modal, Form, Col, Row } from 'react-bootstrap';
 
-const MovimientoForm = ({show, linea, handleCloseMovimiento}) => {
+const MovimientoForm = ({show, linea, handleCloseMovimiento, empresa}) => {
     
     const [token] = useCookies(['tec-token']);
  
     const [hoy] = useState(new Date);
+    const [almacenes, setAlmacenes]=useState(null)
     const [datos, setDatos] = useState({  
         repuesto:  linea ? linea.repuesto.nombre : '',
         cantidad:  linea ? linea.cantidad : '',
@@ -18,16 +19,32 @@ const MovimientoForm = ({show, linea, handleCloseMovimiento}) => {
         albaran: null,
         almacen: ''
     });
-
+    console.log('imprimiendo datos de la linea');
+    console.log (linea);
     const handlerCancelar = () => {      
         handleCloseMovimiento();
     } 
 
     useEffect(()=>{
+        linea && axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimos/?almacen__empresa__id=${empresa}&repuesto=${linea.repuesto.id}`, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => { 
+            console.log('imprimiendo los datos de stock minimo');
+            console.log(res.data);
+            setAlmacenes(res.data);
+        })
+        .catch(err => { console.log(err);})
+    },[token, linea]);
+
+    useEffect(()=>{
         setDatos({
             repuesto:  linea ? linea.repuesto.nombre : '',
             cantidad:  linea ? linea.cantidad : '',
-            precio: linea ? linea.precio : ''
+            precio: linea ? linea.precio : '',
+            almacen: almacenes
         });
     },[linea]);
 
@@ -117,13 +134,20 @@ const MovimientoForm = ({show, linea, handleCloseMovimiento}) => {
                                 </Form.Group>
                             </Col>
                             <Col>
-                                <Form.Group controlId="albaran">
+                                <Form.Group controlId="almacen">
                                     <Form.Label>Almacén</Form.Label>
-                                    <Form.Control imput type="text"  
+                                    <Form.Control as="select"  
                                                 name='almacen' 
                                                 value={datos.almacen}
                                                 onChange={handleInputChange}
-                                                placeholder="Almacén">  
+                                                placeholder="Almacén"> 
+                                                {almacenes && almacenes.map( stock => {
+                                                    return (
+                                                    <option key={stock.id} value={stock.almacen}>
+                                                        {stock.almacen.nombre}
+                                                    </option>
+                                                    )
+                                                })}                                                                                                 
                                     </Form.Control>
                                 </Form.Group>
                             </Col>
