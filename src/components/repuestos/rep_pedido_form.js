@@ -74,8 +74,6 @@ const PedidoForm = ({pedido, setPedido}) => {
 
     const crearPedido = (event) => {
         event.preventDefault();
-        console.log('que entra en crear pedido????....');
-        console.log(datos);
         axios.post(BACKEND_SERVER + `/api/repuestos/pedido/`, {
             proveedor: datos.proveedor,
             empresa: datos.empresa,
@@ -359,8 +357,6 @@ const PedidoForm = ({pedido, setPedido}) => {
                             handleCloseMovimiento ={cerrarMovimiento}
                             linea={lineaMovimiento}
                             empresa={datos.empresa}
-                            pedido={pedido ? pedido.id : null}
-
             />
         </Container>
     )

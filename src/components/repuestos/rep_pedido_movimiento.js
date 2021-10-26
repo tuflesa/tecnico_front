@@ -4,23 +4,30 @@ import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { Button, Modal, Form, Col, Row } from 'react-bootstrap';
 
-const MovimientoForm = ({show, linea, handleCloseMovimiento, pedido, empresa}) => {
+const MovimientoForm = ({show, linea, handleCloseMovimiento, empresa}) => {
     
     const [token] = useCookies(['tec-token']);
+    const [user] = useCookies(['tec-user']);
  
     const [hoy] = useState(new Date);
     const [almacenes, setAlmacenes]=useState(null)
+    const [movimiento, setMovimiento]=useState(null)
     const [datos, setDatos] = useState({  
+        linea_pedido:linea ? linea.id : '',
+        inventario: '',
         repuesto:  linea ? linea.repuesto.nombre : '',
         cantidad:  linea ? linea.cantidad : '',
         precio: linea ? linea.precio : '', 
         fecha: (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate()),
         recibido: null,
         albaran: null,
-        almacen: ''
+        almacen: '',
+        usuario: user['tec-user']
     });
     console.log('imprimiendo datos de la linea');
-    console.log (pedido);
+    console.log (linea);
+    console.log('imprimiendo datos rellenados');
+    console.log(datos);
     const handlerCancelar = () => {      
         handleCloseMovimiento();
     } 
@@ -44,9 +51,33 @@ const MovimientoForm = ({show, linea, handleCloseMovimiento, pedido, empresa}) =
             repuesto:  linea ? linea.repuesto.nombre : '',
             cantidad:  linea ? linea.cantidad : '',
             precio: linea ? linea.precio : '',
-            almacen: almacenes
+            fecha: (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate()),
+            almacen: datos.almacen,
+            usuario: user['tec-user'].id
         });
     },[linea]);
+    const guardarMovimiento = (event) => {
+        event.preventDefault();
+        axios.post(BACKEND_SERVER + `/api/repuestos/movimiento/`, {
+            fecha: datos.fecha,
+            cantidad: datos.cantidad,
+            almacen: datos.almacen,
+            usuario: user['tec-user'].id,
+            lina_pedido: datos.linea_pedido ? datos.linea_pedido : '',
+            linea_inventario: datos.inventario ? datos.inventario : '',
+            albaran: datos.albaran
+        }, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => { 
+            setMovimiento(res.data);
+            //console.log(res);
+            handlerCancelar();
+        })
+        .catch(err => { console.log(err);})
+    }
 
     const handleInputChange = (event) => {
         setDatos({
@@ -141,9 +172,12 @@ const MovimientoForm = ({show, linea, handleCloseMovimiento, pedido, empresa}) =
                                                 value={datos.almacen}
                                                 onChange={handleInputChange}
                                                 placeholder="Almacén"> 
+                                                <option key={0} value={''}>
+                                                        ----
+                                                </option>
                                                 {almacenes && almacenes.map( stock => {
                                                     return (
-                                                    <option key={stock.id} value={stock.almacen}>
+                                                    <option key={stock.id} value={stock.almacen.id}>
                                                         {stock.almacen.nombre}
                                                     </option>
                                                     )
@@ -151,11 +185,22 @@ const MovimientoForm = ({show, linea, handleCloseMovimiento, pedido, empresa}) =
                                     </Form.Control>
                                 </Form.Group>
                             </Col>
+                            {/* <Col>
+                                <Form.Group controlId="localizacion">
+                                    <Form.Label>Localización en Almacén</Form.Label>
+                                    <Form.Control type="text"  
+                                                name='localizacion' 
+                                                value={almacenes.localizacion}
+                                                onChange={handleInputChange}
+                                                placeholder="Localizacion">  
+                                    </Form.Control>
+                                </Form.Group>
+                            </Col> */}
                         </Row>
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>                        
-                <Button variant="info" > Guardar </Button>                
+                <Button variant="info" onClick={guardarMovimiento}> Guardar </Button>                
                     <Button variant="waring" onClick={handlerCancelar}>
                         Cancelar
                     </Button>
