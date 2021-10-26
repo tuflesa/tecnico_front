@@ -318,6 +318,8 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                 <th>repuesto</th>
                                                 <th>Cantidad</th>
                                                 <th>Precio</th>
+                                                <th>Pendiente Recibir</th>
+                                                <th>Por Recibir</th>
                                                 <th>Acciones</th>
                                             </tr>
                                         </thead> 
@@ -329,6 +331,8 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                         <td>{linea.repuesto.nombre}</td>
                                                         <td>{linea.cantidad}</td>
                                                         <td>{linea.precio}</td>
+                                                        <td>{linea.pendiente}</td>
+                                                        <td>{linea.por_recibir}</td>
                                                         <td>
                                                             <PencilFill className="mr-3 pencil" onClick={event => {editLinea(linea)}}/>
                                                             <Truck className="mr-3 pencil" onClick={event => {creaMoviviento(linea)}}/>
@@ -357,6 +361,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                             handleCloseMovimiento ={cerrarMovimiento}
                             linea={lineaMovimiento}
                             empresa={datos.empresa}
+                            updateLinea={updateLinea}
             />
         </Container>
     )

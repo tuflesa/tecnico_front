@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { Button, Modal, Form, Col, Row } from 'react-bootstrap';
 
-const MovimientoForm = ({show, linea, handleCloseMovimiento, empresa}) => {
+const MovimientoForm = ({show, updateLinea, linea, handleCloseMovimiento, empresa}) => {
     
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
@@ -22,7 +22,7 @@ const MovimientoForm = ({show, linea, handleCloseMovimiento, empresa}) => {
         recibido: null,
         albaran: null,
         almacen: '',
-        usuario: user['tec-user']
+        usuario: user['tec-user'],
     });
     console.log('imprimiendo datos de la linea');
     console.log (linea);
@@ -53,9 +53,27 @@ const MovimientoForm = ({show, linea, handleCloseMovimiento, empresa}) => {
             precio: linea ? linea.precio : '',
             fecha: (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate()),
             almacen: datos.almacen,
-            usuario: user['tec-user'].id
+            usuario: user['tec-user'].id,
         });
     },[linea]);
+
+    const actualizarRecibir = () =>{
+        //event.preventDefault();
+        axios.patch(BACKEND_SERVER + `/api/repuestos/linea_pedido/${linea.id}/`, {
+            por_recibir: linea.por_recibir - datos.recibido,            
+        }, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => {    
+            console.log('esto vale ahora por_recibir');
+            console.log(res.data);
+            updateLinea();
+        })
+        .catch(err => { console.log(err);})
+    }
+
     const guardarMovimiento = (event) => {
         event.preventDefault();
         axios.post(BACKEND_SERVER + `/api/repuestos/movimiento/`, {
@@ -72,9 +90,9 @@ const MovimientoForm = ({show, linea, handleCloseMovimiento, empresa}) => {
               }     
         })
         .then( res => { 
-            setMovimiento(res.data);
-            //console.log(res);
+            setMovimiento(res.data);            
             handlerCancelar();
+            actualizarRecibir();
         })
         .catch(err => { console.log(err);})
     }

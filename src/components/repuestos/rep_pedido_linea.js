@@ -13,6 +13,7 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updateLinea
         cantidad: linea ? linea.cantidad : '',
         precio:linea ? linea.precio : '',
         pedido: pedido_id,
+        por_recibir:''
     });
     const [repuestos, setRepuestos]= useState(null);
 
@@ -55,6 +56,7 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updateLinea
             cantidad: datos.cantidad,
             precio: datos.precio,
             pedido: datos.pedido,
+            por_recibir: datos.cantidad,
         },
         {
             headers: {
