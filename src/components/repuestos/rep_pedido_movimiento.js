@@ -24,10 +24,7 @@ const MovimientoForm = ({show, updateLinea, linea, handleCloseMovimiento, empres
         almacen: '',
         usuario: user['tec-user'],
     });
-    console.log('imprimiendo datos de la linea');
-    console.log (linea);
-    console.log('imprimiendo datos rellenados');
-    console.log(datos);
+
     const handlerCancelar = () => {      
         handleCloseMovimiento();
     } 
@@ -39,8 +36,8 @@ const MovimientoForm = ({show, updateLinea, linea, handleCloseMovimiento, empres
               }     
         })
         .then( res => { 
-            console.log('imprimiendo los datos de stock minimo');
-            console.log(res.data);
+            console.log('imprimiendo los datos de stock minimo ----- linea');
+            console.log(linea);
             setAlmacenes(res.data);
         })
         .catch(err => { console.log(err);})
@@ -48,17 +45,20 @@ const MovimientoForm = ({show, updateLinea, linea, handleCloseMovimiento, empres
 
     useEffect(()=>{
         setDatos({
+            linea_pedido:linea ? linea.id : '',
+            inventario: '',
             repuesto:  linea ? linea.repuesto.nombre : '',
             cantidad:  linea ? linea.cantidad : '',
-            precio: linea ? linea.precio : '',
+            precio: linea ? linea.precio : '', 
             fecha: (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate()),
-            almacen: datos.almacen,
+            recibido: datos ? datos.recibido : '',
+            albaran: datos ? datos.albaran : '',
+            almacen: datos ? datos.almacen : '',
             usuario: user['tec-user'].id,
         });
     },[linea]);
 
     const actualizarRecibir = () =>{
-        //event.preventDefault();
         axios.patch(BACKEND_SERVER + `/api/repuestos/linea_pedido/${linea.id}/`, {
             por_recibir: linea.por_recibir - datos.recibido,            
         }, {
@@ -67,8 +67,6 @@ const MovimientoForm = ({show, updateLinea, linea, handleCloseMovimiento, empres
               }     
         })
         .then( res => {    
-            console.log('esto vale ahora por_recibir');
-            console.log(res.data);
             updateLinea();
         })
         .catch(err => { console.log(err);})
@@ -78,11 +76,11 @@ const MovimientoForm = ({show, updateLinea, linea, handleCloseMovimiento, empres
         event.preventDefault();
         axios.post(BACKEND_SERVER + `/api/repuestos/movimiento/`, {
             fecha: datos.fecha,
-            cantidad: datos.cantidad,
+            cantidad: datos.recibido,
             almacen: datos.almacen,
             usuario: user['tec-user'].id,
-            lina_pedido: datos.linea_pedido ? datos.linea_pedido : '',
-            linea_inventario: datos.inventario ? datos.inventario : '',
+            linea_pedido: datos.linea_pedido,
+            linea_inventario: datos.inventario,
             albaran: datos.albaran
         }, {
             headers: {

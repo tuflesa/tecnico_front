@@ -27,7 +27,6 @@ const PedLista = () => {
             }
         })
         .then( res => {
-            console.log(res.data);
             setPedidos(res.data);
             setShow(true);
         })
