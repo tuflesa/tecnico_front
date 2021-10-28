@@ -27,6 +27,9 @@ const MovimientoForm = ({show, updateLinea, linea, handleCloseMovimiento, empres
 
     const handlerCancelar = () => {      
         handleCloseMovimiento();
+        datos.recibido= '';
+        datos.albaran = '';
+        datos.almacen = '';
     } 
 
     useEffect(()=>{
@@ -36,8 +39,8 @@ const MovimientoForm = ({show, updateLinea, linea, handleCloseMovimiento, empres
               }     
         })
         .then( res => { 
-            console.log('imprimiendo los datos de stock minimo ----- linea');
-            console.log(linea);
+            //console.log('imprimiendo los datos de stock minimo ----- linea');
+            //console.log(linea);
             setAlmacenes(res.data);
         })
         .catch(err => { console.log(err);})

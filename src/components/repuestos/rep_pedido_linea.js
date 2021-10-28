@@ -7,6 +7,9 @@ import { useCookies } from 'react-cookie';
 const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updateLinea, linea}) => {
     
     const [token] = useCookies(['tec-token']);
+
+    const [repuestos, setRepuestos]= useState(null);
+    //const[unidades, setUnidades]=useState(null);
     
     const [datos, setDatos] = useState({  
         repuesto: linea ? linea.repuesto : '',
@@ -14,10 +17,7 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updateLinea
         precio:linea ? linea.precio : '',
         pedido: pedido_id,
         por_recibir:''
-    });
-    const [repuestos, setRepuestos]= useState(null);
-    const[unidades, setUnidades]=useState(null);
-    //const entregaTotal=null;
+    });   
 
     useEffect(()=>{
         setDatos({  
@@ -47,12 +47,12 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updateLinea
             [event.target.name] : event.target.value
         })
     }
+
     const handlerCancelar = () => {      
         handleCloseLinea();
     } 
 
     const handlerGuardar = () => {
-        // console.log(datos);
         axios.post(BACKEND_SERVER + `/api/repuestos/linea_pedido/`,{
             repuesto: datos.repuesto,
             cantidad: datos.cantidad,
@@ -75,44 +75,21 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updateLinea
         });
     }
 
-    /* const cantidadRecibida = async() => {
-        // console.log(datos);
-        axios.get(BACKEND_SERVER + `/api/repuestos/movimiento/?linea_pedido__id=${linea.id}`,{
+    const prueba = async() => {         
+        const res = await axios.get(BACKEND_SERVER + `/api/repuestos/movimiento/?linea_pedido__id=${linea.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
-              }  
-          
-        })
-        .then( res => {  
-            setUnidades(res.data);
+                }  
             
-            console.log(res.data);
-                       
-        })
-        .catch(err => { console.log(err);})
-    } */
+        })                            
+        const suma = datos.cantidad - total(res.data, 'cantidad');
+        datos.por_recibir = suma;
+        return datos.por_recibir;                    
+    }  
 
-    const prueba = async() => { 
-        //function prueba (){
-            const res = await axios.get(BACKEND_SERVER + `/api/repuestos/movimiento/?linea_pedido__id=${linea.id}`,{
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                    }  
-                
-            })
-                             
-            const suma = datos.cantidad - total(res.data, 'cantidad');
-            datos.por_recibir = suma;
-            console.log('que vale datos');            
-            console.log(datos.por_recibir);
-            return datos.por_recibir;                     
-            
-                   
-        }  
     function total (unidades,fn){
         return unidades.map(d => d[fn]).reduce((a,v)=> a + v,0);
-    }
-    
+    }   
     
     const handlerEditar = async () => {
         let entregaTotal = await prueba();    
@@ -120,13 +97,7 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updateLinea
             alert('Cantidad erronea, revisa cantidad recibida');            
             handlerCancelar();
         }
-        else{                                  
-            console.log('entregaTotallllllllllll.');
-            console.log(entregaTotal);
-            
-            //datos.por_recibir = (datos.cantidad - entregaTotal); 
-            console.log('que vale datoooooossss');
-            console.log(datos.por_recibir);
+        else{  
             axios.patch(BACKEND_SERVER + `/api/repuestos/linea_pedido/${linea.id}/`,{
                 cantidad: datos.cantidad,
                 precio: datos.precio,
@@ -139,12 +110,10 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updateLinea
                 }
             })
             .then( res => {
-                console.log('he entrado en el patch');
                 updateLinea();
                 handlerCancelar();
             })
-            .catch( err => {
-                console.log(err);            
+            .catch( err => {           
                 handlerCancelar();
             });
         }

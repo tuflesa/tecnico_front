@@ -3,9 +3,10 @@ import { Container, Row, Col, Form, Button, Table } from 'react-bootstrap';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
-import { PlusCircle, PencilFill, Trash, Truck } from 'react-bootstrap-icons';
+import { PlusCircle, PencilFill, Trash, Truck, Receipt } from 'react-bootstrap-icons';
 import LineaForm from './rep_pedido_linea';
 import MovimientoForm from './rep_pedido_movimiento';
+import MovLista from './rep_pedido_listmovimiento';
 import { Link } from 'react-router-dom';
 import { now } from 'd3-timer';
 
@@ -14,10 +15,12 @@ const PedidoForm = ({pedido, setPedido}) => {
     const [user] = useCookies(['tec-user']);
 
     const [show_linea, setShowLinea] = useState(false);
-    const [show_movimiento, setShowMovimiento] = useState(false);
+    const [show_listmovimiento, setShowListMovimiento] = useState(false);
+    const [show_movimiento, setShowMovimiento] = useState(false);    
     const [empresas, setEmpresas] = useState(null);
     const [lineaEditar, setLineaEtitar] = useState(null);
     const [lineaMovimiento, setLineaMovimiento] = useState(null);
+    const [listMovimiento, setListMovimiento] = useState(null);
     const [hoy] = useState(new Date);
     
     const [datos, setDatos] = useState({
@@ -63,13 +66,22 @@ const PedidoForm = ({pedido, setPedido}) => {
         setShowMovimiento(true);
     }
 
+    const listarMovimiento = (linea)=>{
+        setListMovimiento(linea);
+        setShowListMovimiento(true);
+    }
+
     const cerrarAddLinea =() =>{        
         editLinea();
         setShowLinea(false);
     }
 
-    const cerrarMovimiento =() =>{    
+    const cerrarMovimiento =() =>{   
         setShowMovimiento(false);
+    }
+
+    const cerrarListMovimiento =() =>{   
+        setShowListMovimiento(false);
     }
 
     const crearPedido = (event) => {
@@ -336,6 +348,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                         <td>
                                                             <PencilFill className="mr-3 pencil" onClick={event => {editLinea(linea)}}/>
                                                             <Truck className="mr-3 pencil" onClick={event => {creaMoviviento(linea)}}/>
+                                                            <Receipt className="mr-3 pencil" onClick={event =>{listarMovimiento(linea)}}/>
                                                             {/* <Trash className="trash"  onClick={null} /> */}
                                                         </td>
                                                     </tr>
@@ -362,6 +375,10 @@ const PedidoForm = ({pedido, setPedido}) => {
                             linea={lineaMovimiento}
                             empresa={datos.empresa}
                             updateLinea={updateLinea}
+            />
+            <MovLista   show={show_listmovimiento}
+                        handleCloseListMovimiento ={cerrarListMovimiento}
+                        linea={listMovimiento}
             />
         </Container>
     )
