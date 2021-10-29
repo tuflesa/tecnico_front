@@ -91,9 +91,10 @@ const MovimientoForm = ({show, updateLinea, linea, handleCloseMovimiento, empres
               }     
         })
         .then( res => { 
-            setMovimiento(res.data);            
+            setMovimiento(res.data); 
+            actualizarRecibir();           
             handlerCancelar();
-            actualizarRecibir();
+            
         })
         .catch(err => { console.log(err);})
     }

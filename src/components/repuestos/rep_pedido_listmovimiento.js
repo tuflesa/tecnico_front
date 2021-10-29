@@ -10,22 +10,14 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
 
     const [listados, setListados] = useState(null);
 
-    console.log('estamos dentro mostrando linea y show');
-    console.log(linea);
-    console.log(show);
-    console.log('esto es listados');
-    console.log(listados);
-
     useEffect(()=>{
-        linea && axios.get(BACKEND_SERVER + `/api/repuestos/movimiento/?linea_pedido__id=${linea.id}`,{
+        linea && axios.get(BACKEND_SERVER + `/api/repuestos/movimiento_detalle/?linea_pedido__id=${linea.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }
         })
         .then( res => {
             setListados(res.data);
-            console.log('estoy en el useEffect, estos son los movimientos');
-            console.log(res.data);
         })
         .catch( err => {
             console.log(err);
@@ -72,7 +64,7 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
                                                 <td>{lista.fecha}</td>
                                                 <td>{lista.cantidad}</td>
                                                 <td>{lista.albaran}</td> 
-                                                <td>{lista.almacen__nombre}</td>                                                                    
+                                                <td>{lista.almacen.nombre}</td>                                                                    
                                             </tr>
                                         )})
                                     }                                    
