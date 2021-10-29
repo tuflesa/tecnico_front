@@ -36,7 +36,6 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
                 <Modal.Body>
                     <Row>
                         <Col>
-                            {/* <h5 className="mb-3 mt-3">Lista de Pedidos</h5> */}
                             { linea ? 
                             <Form.Group controlId="repuesto">
                                     <Form.Label>Repuesto</Form.Label>

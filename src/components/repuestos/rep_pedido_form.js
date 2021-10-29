@@ -22,6 +22,7 @@ const PedidoForm = ({pedido, setPedido}) => {
     const [lineaMovimiento, setLineaMovimiento] = useState(null);
     const [listMovimiento, setListMovimiento] = useState(null);
     const [hoy] = useState(new Date);
+    const [borrar] = useState(false);
     
     const [datos, setDatos] = useState({
         id: pedido ? pedido.id : null,
@@ -59,6 +60,33 @@ const PedidoForm = ({pedido, setPedido}) => {
     const editLinea = (linea) => {
         setLineaEtitar(linea);
         setShowLinea(true);
+    }
+
+    const BorrarLinea =(linea) =>{
+        /* linea && axios.get(BACKEND_SERVER + `/api/repuestos/movimiento_detalle/?linea_pedido__id=${linea.id}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( res => {            
+            console.log('que vale res');
+            console.log(res);
+            if (res.data.length){ */
+        if (linea.cantidad>linea.por_recibir){
+            alert('No se puede eliminar la linea, ya tiene movimientos de recepción');            
+        }
+        else{
+            alert('Se va a eliminar la linea'); 
+            console.log('se puede eliminar, NO hay movimientos');
+            //console.log(res.data); 
+            fetch (BACKEND_SERVER + `/api/repuestos/linea_pedido/${linea.id}`,{
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }
+            })                           
+        }
+        /* }) */
     }
 
     const creaMoviviento = (linea) => {
@@ -182,12 +210,12 @@ const PedidoForm = ({pedido, setPedido}) => {
 
     const handleDeshabilitar = () =>{
         if (pedido){
-            console.log('ya hay pedido....');
-            console.log(pedido.id);
+            //console.log('ya hay pedido....');
+            //console.log(pedido.id);
             return true
         } 
         else {
-            console.log('No hay id de pedido');
+            //console.log('No hay id de pedido');
             return false
         }
     }
@@ -349,7 +377,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                             <PencilFill className="mr-3 pencil" onClick={event => {editLinea(linea)}}/>
                                                             <Truck className="mr-3 pencil" onClick={event => {creaMoviviento(linea)}}/>
                                                             <Receipt className="mr-3 pencil" onClick={event =>{listarMovimiento(linea)}}/>
-                                                            {/* <Trash className="trash"  onClick={null} /> */}
+                                                            <Trash className="trash"  onClick={event =>{BorrarLinea(linea)}} />
                                                         </td>
                                                     </tr>
                                                 )})
