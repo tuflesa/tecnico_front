@@ -7,7 +7,7 @@ import { Trash, PencilFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import PedidosFiltro from './rep_pedidos_filtro';
 import {invertirFecha} from '../utilidades/funciones_fecha';
-
+import BorrarPedido from './rep_pedido_borrar';
 
 const PedLista = () => {
     const [token] = useCookies(['tec-token']);
@@ -33,7 +33,11 @@ const PedLista = () => {
         .catch( err => {
             console.log(err);
         });
-    },[show, filtro]);   
+    },[show, filtro]); 
+
+    const BorrarP = ((id)=>{
+        BorrarPedido(id);
+    });
 
     return (
         <Container>
@@ -71,7 +75,7 @@ const PedLista = () => {
                                             <Link to={`/repuestos/pedido_detalle/${pedido.id}`}>
                                                 <PencilFill className="mr-3 pencil"/>
                                             </Link>
-                                            <Trash className="trash" />
+                                            <Trash className="trash" onClick={event =>{BorrarP(pedido.id)}} />
                                         </td>
                                     </tr>
                                 )})

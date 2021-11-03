@@ -18,7 +18,7 @@ const MovimientoForm = ({show, updateLinea, linea, handleCloseMovimiento, empres
         repuesto:  linea ? linea.repuesto.nombre : '',
         cantidad:  linea ? linea.cantidad : '',
         precio: linea ? linea.precio : '', 
-        fecha: (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate()),
+        fecha: (hoy.getDate() + '-'+(hoy.getMonth()+1)+'-'+ hoy.getFullYear()),
         recibido: null,
         albaran: null,
         almacen: '',
@@ -39,8 +39,6 @@ const MovimientoForm = ({show, updateLinea, linea, handleCloseMovimiento, empres
               }     
         })
         .then( res => { 
-            //console.log('imprimiendo los datos de stock minimo ----- linea');
-            //console.log(linea);
             setAlmacenes(res.data);
         })
         .catch(err => { console.log(err);})

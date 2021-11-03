@@ -62,31 +62,24 @@ const PedidoForm = ({pedido, setPedido}) => {
         setShowLinea(true);
     }
 
-    const BorrarLinea =(linea) =>{
-        /* linea && axios.get(BACKEND_SERVER + `/api/repuestos/movimiento_detalle/?linea_pedido__id=${linea.id}`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-            }
-        })
-        .then( res => {            
-            console.log('que vale res');
-            console.log(res);
-            if (res.data.length){ */
+    const BorrarLinea =(linea) =>{     
         if (linea.cantidad>linea.por_recibir){
             alert('No se puede eliminar la linea, ya tiene movimientos de recepción');            
         }
-        else{
-            alert('Se va a eliminar la linea'); 
-            console.log('se puede eliminar, NO hay movimientos');
-            //console.log(res.data); 
+        else{  
             fetch (BACKEND_SERVER + `/api/repuestos/linea_pedido/${linea.id}`,{
                 method: 'DELETE',
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
-            })                           
+            })
+            .then( res => { 
+                alert('Se va a eliminar la linea');
+            }) 
+            .then( res => { 
+                updateLinea();
+            })
         }
-        /* }) */
     }
 
     const creaMoviviento = (linea) => {
