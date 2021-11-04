@@ -9,16 +9,19 @@ const MovimientoForm = ({show, updateLinea, linea, handleCloseMovimiento, empres
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
  
-    const [hoy] = useState(new Date);
+    const hoy = new Date();
+    const fechaString = hoy.getFullYear() + '-' + ('0' + (hoy.getMonth()+1)).slice(-2) + '-' + ('0' + hoy.getDate()).slice(-2);
     const [almacenes, setAlmacenes]=useState(null)
     const [movimiento, setMovimiento]=useState(null)
+
     const [datos, setDatos] = useState({  
         linea_pedido:linea ? linea.id : '',
         inventario: '',
         repuesto:  linea ? linea.repuesto.nombre : '',
         cantidad:  linea ? linea.cantidad : '',
         precio: linea ? linea.precio : '', 
-        fecha: (hoy.getDate() + '-'+(hoy.getMonth()+1)+'-'+ hoy.getFullYear()),
+        //fecha: (('0'+hoy.getDay()) + '-'+(hoy.getMonth()+1)+'-'+ hoy.getFullYear()),
+        fecha: fechaString,
         recibido: null,
         albaran: null,
         almacen: '',
@@ -51,7 +54,7 @@ const MovimientoForm = ({show, updateLinea, linea, handleCloseMovimiento, empres
             repuesto:  linea ? linea.repuesto.nombre : '',
             cantidad:  linea ? linea.cantidad : '',
             precio: linea ? linea.precio : '', 
-            fecha: (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate()),
+            fecha: fechaString,
             recibido: datos ? datos.recibido : '',
             albaran: datos ? datos.albaran : '',
             almacen: datos ? datos.almacen : '',

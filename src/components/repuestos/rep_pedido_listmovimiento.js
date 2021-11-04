@@ -3,6 +3,7 @@ import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { Button, Row, Form, Modal, Col, Table } from 'react-bootstrap';
+import {invertirFecha} from '../utilidades/funciones_fecha';
 
 const MovLista = ({linea, handleCloseListMovimiento, show}) => {
     const [token] = useCookies(['tec-token']);
@@ -60,7 +61,7 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
                                     {listados && listados.map( lista => {
                                         return (
                                             <tr key={lista.id}>
-                                                <td>{lista.fecha}</td>
+                                                <td>{invertirFecha(String(lista.fecha))}</td>
                                                 <td>{lista.cantidad}</td>
                                                 <td>{lista.albaran}</td> 
                                                 <td>{lista.almacen.nombre}</td>                                                                    

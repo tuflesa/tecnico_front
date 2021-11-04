@@ -7,7 +7,6 @@ import { Trash, PencilFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import PedidosFiltro from './rep_pedidos_filtro';
 import {invertirFecha} from '../utilidades/funciones_fecha';
-//import BorrarPedido from './rep_pedido_borrar';
 
 const PedLista = () => {
     const [token] = useCookies(['tec-token']);
@@ -15,7 +14,6 @@ const PedLista = () => {
     const [pedidos, setPedidos] = useState(null);
     const [show, setShow] = useState(false);
     const [filtro, setFiltro] = useState('');
-    //const [borrarPedido, setBorrarPedido] = useState(null);
 
     const actualizaFiltro = str => {
         setFiltro(str);
