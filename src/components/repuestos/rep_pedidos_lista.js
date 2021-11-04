@@ -7,7 +7,7 @@ import { Trash, PencilFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import PedidosFiltro from './rep_pedidos_filtro';
 import {invertirFecha} from '../utilidades/funciones_fecha';
-import BorrarPedido from './rep_pedido_borrar';
+//import BorrarPedido from './rep_pedido_borrar';
 
 const PedLista = () => {
     const [token] = useCookies(['tec-token']);
@@ -15,11 +15,61 @@ const PedLista = () => {
     const [pedidos, setPedidos] = useState(null);
     const [show, setShow] = useState(false);
     const [filtro, setFiltro] = useState('');
+    //const [borrarPedido, setBorrarPedido] = useState(null);
 
     const actualizaFiltro = str => {
         setFiltro(str);
     } 
     
+    const BorrarP = (pedido)=>{
+        axios.get(BACKEND_SERVER + `/api/repuestos/pedido_detalle/${pedido.id}/`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( res => {
+            borrarPedido(res.data);    
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }
+
+    const borrarPedido = (pedido) =>{
+        var y=0;
+        do{
+            if(pedido.lineas_pedido.length===0){
+                console.log('no hay lineas en el pedido');
+                y=pedido.lineas_pedido.length;
+            }
+            else if(pedido.lineas_pedido[y].cantidad === pedido.lineas_pedido[y].por_recibir){
+                y++;
+                console.log('Hay lineas sin movimientos');
+            }
+            else{
+                console.log('Hay lineas con movimientos');
+                return alert ('no se puede borrar el pedido,hay lineas con movimientos de recepción');
+            }
+        }while (y<pedido.lineas_pedido.length);
+        if (y==pedido.lineas_pedido.length||pedido.lineas_pedido.length==0){            
+            fetch (BACKEND_SERVER + `/api/repuestos/pedido_detalle/${pedido.id}/`,{
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }
+            })
+            .then( res => {
+                console.log(res);   
+                return alert ('Se va a borrar el pedido'); 
+            })
+            .catch( err => {
+                console.log(err);
+            });
+            actualizaFiltro();
+        }
+
+    }
+
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/repuestos/lista_pedidos/` + filtro,{
             headers: {
@@ -34,11 +84,7 @@ const PedLista = () => {
             console.log(err);
         });
     },[show, filtro]); 
-
-    const BorrarP = ((id)=>{
-        BorrarPedido(id);
-    });
-
+   
     return (
         <Container>
             <Row>
@@ -75,7 +121,7 @@ const PedLista = () => {
                                             <Link to={`/repuestos/pedido_detalle/${pedido.id}`}>
                                                 <PencilFill className="mr-3 pencil"/>
                                             </Link>
-                                            <Trash className="trash" onClick={event =>{BorrarP(pedido.id)}} />
+                                            <Trash className="trash"  onClick={event =>{BorrarP(pedido)}} />
                                         </td>
                                     </tr>
                                 )})
@@ -83,7 +129,7 @@ const PedLista = () => {
                         </tbody>
                     </Table>
                 </Col>
-            </Row>
+            </Row> 
         </Container>
     )
 }
