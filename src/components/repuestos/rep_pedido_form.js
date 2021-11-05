@@ -5,8 +5,11 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import { PlusCircle, PencilFill, Trash, Truck, Receipt } from 'react-bootstrap-icons';
 import LineaForm from './rep_pedido_linea';
+import LineaAdicionalForm from './rep_pedido_linea_adicional';
 import MovimientoForm from './rep_pedido_movimiento';
 import MovLista from './rep_pedido_listmovimiento';
+import EntLista from './rep_pedido_listentrega';
+import EntregaForm from './rep_pedido_entrega';
 import { Link } from 'react-router-dom';
 import { now } from 'd3-timer';
 
@@ -15,12 +18,18 @@ const PedidoForm = ({pedido, setPedido}) => {
     const [user] = useCookies(['tec-user']);
 
     const [show_linea, setShowLinea] = useState(false);
+    const [show_linea_adicional, setShowLineaAdicional] = useState(false);
     const [show_listmovimiento, setShowListMovimiento] = useState(false);
-    const [show_movimiento, setShowMovimiento] = useState(false);    
+    const [show_listentrega, setShowListEntrega] = useState(false);
+    const [show_movimiento, setShowMovimiento] = useState(false); 
+    const [show_entrega, setShowEntrega] = useState(false);   
     const [empresas, setEmpresas] = useState(null);
     const [lineaEditar, setLineaEtitar] = useState(null);
+    const [linea_adicionalEditar, setLineaAdicionalEditar] = useState(null);
     const [lineaMovimiento, setLineaMovimiento] = useState(null);
+    const [lineaEntrega, setLineaEntrega] = useState(null);
     const [listMovimiento, setListMovimiento] = useState(null);
+    const [listEntrega, setListEntrega] = useState(null);
     const [hoy] = useState(new Date);
     const [borrar] = useState(false);
     
@@ -33,9 +42,10 @@ const PedidoForm = ({pedido, setPedido}) => {
         fecha_creacion: pedido ? pedido.fecha_creacion : (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate()),
         fecha_cierre: pedido ? pedido.fecha_entrega : '',
         finalizado: pedido ? pedido.finalizado : false,
-        lineas_pedido: pedido ? pedido.lineas_pedido : null
+        lineas_pedido: pedido ? pedido.lineas_pedido : null,
+        lineas_adicionales: pedido ? pedido.lineas_adicionales : null
     }); 
-    
+
     const [proveedores, setProveedores]= useState(null);
 
     const handleInputChange = (event) => {
@@ -57,9 +67,19 @@ const PedidoForm = ({pedido, setPedido}) => {
         setShowLinea(true);
     }
 
+    const abrirAddLineaAdi =() =>{
+        setLineaAdicionalEditar(null);
+        setShowLineaAdicional(true);
+    }
+
     const editLinea = (linea) => {
         setLineaEtitar(linea);
         setShowLinea(true);
+    }
+
+    const editLineaAdicional = (lineaAdicional) => {
+        setLineaAdicionalEditar(lineaAdicional);
+        setShowLineaAdicional(true);
     }
 
     const BorrarLinea =(linea) =>{     
@@ -81,10 +101,34 @@ const PedidoForm = ({pedido, setPedido}) => {
             })
         }
     }
+    const BorrarLineaAdicional =(lineaAdicional) =>{     
+        if (lineaAdicional.cantidad>lineaAdicional.por_recibir){
+            alert('No se puede eliminar la linea, ya tiene movimientos de recepción');            
+        }
+        else{  
+            fetch (BACKEND_SERVER + `/api/repuestos/linea_adicional_pedido/${lineaAdicional.id}`,{
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }
+            })
+            .then( res => { 
+                alert('Se va a eliminar la linea');
+            }) 
+            .then( res => { 
+                updateLinea();
+            })
+        }
+    }
 
     const creaMoviviento = (linea) => {
         setLineaMovimiento(linea);
         setShowMovimiento(true);
+    }
+
+    const creaEntrega = (lineaAdicional) => {
+        setLineaEntrega(lineaAdicional);
+        setShowEntrega(true);
     }
 
     const listarMovimiento = (linea)=>{
@@ -92,17 +136,35 @@ const PedidoForm = ({pedido, setPedido}) => {
         setShowListMovimiento(true);
     }
 
+    const listarEntrega = (lineaAdicional)=>{
+        setListEntrega(lineaAdicional);
+        setShowListEntrega(true);
+    }
+
     const cerrarAddLinea =() =>{        
         editLinea();
         setShowLinea(false);
+    }
+
+    const cerrarAddLineaAdicional =() =>{        
+        editLineaAdicional();
+        setShowLineaAdicional(false);
     }
 
     const cerrarMovimiento =() =>{   
         setShowMovimiento(false);
     }
 
+    const cerrarEntrega =() =>{   
+        setShowEntrega(false);
+    }
+
     const cerrarListMovimiento =() =>{   
         setShowListMovimiento(false);
+    }
+
+    const cerrarListEntrega =() =>{   
+        setShowListEntrega(false);
     }
 
     const crearPedido = (event) => {
@@ -121,7 +183,7 @@ const PedidoForm = ({pedido, setPedido}) => {
         })
         .then( res => { 
             setPedido(res.data);
-            console.log(res);
+            //console.log(res);
         })
         .catch(err => { console.log(err);})
     }
@@ -196,7 +258,8 @@ const PedidoForm = ({pedido, setPedido}) => {
             fecha_creacion: pedido ? pedido.fecha_creacion : (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate()),
             fecha_cierre: pedido ? pedido.fecha_entrega : '',
             finalizado: pedido ? pedido.finalizado : false,
-            lineas_pedido: pedido.lineas_pedido ? pedido.lineas_pedido : null
+            lineas_pedido: pedido.lineas_pedido ? pedido.lineas_pedido : null,
+            lineas_adicionales: pedido ? pedido.lineas_adicionales : null
         });
             //console.log(datos);
     },[pedido]);
@@ -351,8 +414,8 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                 <th>repuesto</th>
                                                 <th>Cantidad</th>
                                                 <th>Precio</th>
+                                                <th>Recibido</th>
                                                 <th>Pendiente Recibir</th>
-                                                <th>Por Recibir</th>
                                                 <th>Acciones</th>
                                             </tr>
                                         </thead> 
@@ -364,7 +427,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                         <td>{linea.repuesto.nombre}</td>
                                                         <td>{linea.cantidad}</td>
                                                         <td>{linea.precio}</td>
-                                                        <td>{linea.pendiente}</td>
+                                                        <td>{linea.cantidad - linea.por_recibir}</td>
                                                         <td>{linea.por_recibir}</td>
                                                         <td>
                                                             <PencilFill className="mr-3 pencil" onClick={event => {editLinea(linea)}}/>
@@ -380,7 +443,55 @@ const PedidoForm = ({pedido, setPedido}) => {
                                 </Col>
                             </Form.Row>                                                
                         </React.Fragment> 
-                        : null}                       
+                        : null} 
+                        {datos.numero ? 
+                        <React.Fragment>
+                            <Form.Row>
+                                <Col>
+                                    <Row>
+                                        <Col>
+                                        <h5 className="pb-3 pt-1 mt-2">Lineas Adicionales:</h5>
+                                        </Col>
+                                        <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
+                                                <PlusCircle className="plus mr-2" size={30} onClick={abrirAddLineaAdi}/>
+                                        </Col>
+                                    </Row>
+                                    <Table striped bordered hover>
+                                        <thead>
+                                            <tr>
+                                                <th>Descripción</th>
+                                                <th>Cantidad</th>
+                                                <th>Precio</th>
+                                                <th>Recibido</th>
+                                                <th>Pendiente Recibir</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead> 
+                                                                                  
+                                        <tbody>
+                                            {datos.lineas_adicionales && datos.lineas_adicionales.map( lineaAdicional => {
+                                                return (
+                                                    <tr key={lineaAdicional.id}>
+                                                        <td>{lineaAdicional.descripcion}</td>
+                                                        <td>{lineaAdicional.cantidad}</td>
+                                                        <td>{lineaAdicional.precio}</td>
+                                                        <td>{lineaAdicional.cantidad - lineaAdicional.por_recibir}</td>
+                                                        <td>{lineaAdicional.por_recibir}</td>
+                                                        <td>
+                                                            <PencilFill className="mr-3 pencil" onClick={event => {editLineaAdicional(lineaAdicional)}}/>
+                                                            <Truck className="mr-3 pencil" onClick={event => {creaEntrega(lineaAdicional)}}/>
+                                                            <Receipt className="mr-3 pencil" onClick={event =>{listarEntrega(lineaAdicional)}}/>
+                                                            <Trash className="trash"  onClick={event =>{BorrarLineaAdicional(lineaAdicional)}} />
+                                                        </td>
+                                                    </tr>
+                                                )})
+                                            }
+                                        </tbody>
+                                    </Table>                                     
+                                </Col>
+                            </Form.Row>                                                
+                        </React.Fragment> 
+                        : null}                                            
                     </Form>
                 </Col>
             </Row>    
@@ -391,15 +502,32 @@ const PedidoForm = ({pedido, setPedido}) => {
                         proveedor_id={datos.proveedor}
                         updateLinea={updateLinea}
             />
+            <LineaAdicionalForm show={show_linea_adicional}
+                                pedido_id={pedido ? pedido.id : null}
+                                linea_adicional={linea_adicionalEditar}
+                                handleCloseLineaAdicional ={cerrarAddLineaAdicional}
+                                proveedor_id={datos.proveedor}
+                                updateLinea={updateLinea}
+            />
             <MovimientoForm show={show_movimiento}
                             handleCloseMovimiento ={cerrarMovimiento}
                             linea={lineaMovimiento}
                             empresa={datos.empresa}
                             updateLinea={updateLinea}
             />
+            <EntregaForm show={show_entrega}
+                            handleCloseEntrega ={cerrarEntrega}
+                            linea_adicional={lineaEntrega}
+                            //empresa={datos.empresa}
+                            updateLinea={updateLinea}
+            />
             <MovLista   show={show_listmovimiento}
                         handleCloseListMovimiento ={cerrarListMovimiento}
                         linea={listMovimiento}
+            />
+            <EntLista   show={show_listentrega}
+                        handleCloseListEntrega ={cerrarListEntrega}
+                        linea_adicional={listEntrega}
             />
         </Container>
     )

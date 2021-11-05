@@ -1,10 +1,11 @@
+//son entregas de lineas adicionales.
 import React, { useState, useEffect } from 'react';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { Button, Modal, Form, Col, Row } from 'react-bootstrap';
 
-const MovimientoForm = ({show, updateLinea, linea, handleCloseMovimiento, empresa}) => {
+const EntregaForm = ({show, updateLinea, linea_adicional, handleCloseEntrega}) => {
     
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
@@ -12,31 +13,29 @@ const MovimientoForm = ({show, updateLinea, linea, handleCloseMovimiento, empres
     const hoy = new Date();
     const fechaString = hoy.getFullYear() + '-' + ('0' + (hoy.getMonth()+1)).slice(-2) + '-' + ('0' + hoy.getDate()).slice(-2);
     const [almacenes, setAlmacenes]=useState(null)
-    const [movimiento, setMovimiento]=useState(null)
+    const [entrega, setEntrega]=useState(null)
 
     const [datos, setDatos] = useState({  
-        linea_pedido:linea ? linea.id : '',
-        inventario: '',
-        repuesto:  linea ? linea.repuesto.nombre : '',
-        cantidad:  linea ? linea.cantidad : '',
-        precio: linea ? linea.precio : '', 
-        //fecha: (('0'+hoy.getDay()) + '-'+(hoy.getMonth()+1)+'-'+ hoy.getFullYear()),
+        linea_adicional:linea_adicional ? linea_adicional.id : '',
+        descripcion:  linea_adicional ? linea_adicional.descripcion : '',
+        cantidad:  linea_adicional ? linea_adicional.cantidad : '',
+        precio: linea_adicional ? linea_adicional.precio : '',         
         fecha: fechaString,
         recibido: null,
         albaran: null,
-        almacen: '',
+        //almacen: '',
         usuario: user['tec-user'],
     });
 
     const handlerCancelar = () => {      
-        handleCloseMovimiento();
+        handleCloseEntrega();
         datos.recibido= '';
         datos.albaran = '';
-        datos.almacen = '';
+        //datos.almacen = '';
     } 
 
-    useEffect(()=>{
-        linea && axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimo_detalle/?almacen__empresa__id=${empresa}&repuesto=${linea.repuesto.id}`, {
+/*     useEffect(()=>{
+        linea_adicional && axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimo_detalle/?almacen__empresa__id=${empresa}&repuesto=${linea_adicional.repuesto.id}`, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }     
@@ -45,26 +44,25 @@ const MovimientoForm = ({show, updateLinea, linea, handleCloseMovimiento, empres
             setAlmacenes(res.data);
         })
         .catch(err => { console.log(err);})
-    },[token, linea]);
+    },[token, linea_adicional]); */
 
     useEffect(()=>{
         setDatos({
-            linea_pedido:linea ? linea.id : '',
-            inventario: '',
-            repuesto:  linea ? linea.repuesto.nombre : '',
-            cantidad:  linea ? linea.cantidad : '',
-            precio: linea ? linea.precio : '', 
+            linea_adicional:linea_adicional ? linea_adicional.id : '',
+            descripcion:  linea_adicional ? linea_adicional.descripcion : '',
+            cantidad:  linea_adicional ? linea_adicional.cantidad : '',
+            precio: linea_adicional ? linea_adicional.precio : '', 
             fecha: fechaString,
             recibido: datos ? datos.recibido : '',
             albaran: datos ? datos.albaran : '',
-            almacen: datos ? datos.almacen : '',
+           // almacen: datos ? datos.almacen : '',
             usuario: user['tec-user'].id,
         });
-    },[linea]);
+    },[linea_adicional]);
 
     const actualizarRecibir = () =>{
-        axios.patch(BACKEND_SERVER + `/api/repuestos/linea_pedido/${linea.id}/`, {
-            por_recibir: linea.por_recibir - datos.recibido,            
+        axios.patch(BACKEND_SERVER + `/api/repuestos/linea_adicional_pedido/${linea_adicional.id}/`, {
+            por_recibir: linea_adicional.por_recibir - datos.recibido,            
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -78,13 +76,12 @@ const MovimientoForm = ({show, updateLinea, linea, handleCloseMovimiento, empres
 
     const guardarMovimiento = (event) => {
         event.preventDefault();
-        axios.post(BACKEND_SERVER + `/api/repuestos/movimiento/`, {
+        axios.post(BACKEND_SERVER + `/api/repuestos/entrega/`, {
             fecha: datos.fecha,
             cantidad: datos.recibido,
-            almacen: datos.almacen,
+            //almacen: datos.almacen,
             usuario: user['tec-user'].id,
-            linea_pedido: datos.linea_pedido,
-            linea_inventario: datos.inventario,
+            linea_adicional: datos.linea_adicional,            
             albaran: datos.albaran
         }, {
             headers: {
@@ -92,7 +89,7 @@ const MovimientoForm = ({show, updateLinea, linea, handleCloseMovimiento, empres
               }     
         })
         .then( res => { 
-            setMovimiento(res.data); 
+            setEntrega(res.data); 
             actualizarRecibir();           
             handlerCancelar();
             
@@ -116,11 +113,11 @@ const MovimientoForm = ({show, updateLinea, linea, handleCloseMovimiento, empres
                     <Form >
                         <Row>
                             <Col>
-                                <Form.Group controlId="repuesto">
-                                    <Form.Label>Repuesto</Form.Label>
+                                <Form.Group controlId="descripcion">
+                                    <Form.Label>Descripcion</Form.Label>
                                     <Form.Control type="text"  
-                                                name='repuesto' 
-                                                value={datos.repuesto}
+                                                name='descripcion' 
+                                                value={datos.descripcion}
                                                 disabled>  
                                     </Form.Control>
                                 </Form.Group>
@@ -185,7 +182,7 @@ const MovimientoForm = ({show, updateLinea, linea, handleCloseMovimiento, empres
                                     </Form.Control>
                                 </Form.Group>
                             </Col>
-                            <Col>
+                            {/* <Col>
                                 <Form.Group controlId="almacen">
                                     <Form.Label>Almacén</Form.Label>
                                     <Form.Control as="select"  
@@ -205,7 +202,7 @@ const MovimientoForm = ({show, updateLinea, linea, handleCloseMovimiento, empres
                                                 })}                                                                                                 
                                     </Form.Control>
                                 </Form.Group>
-                            </Col>                            
+                            </Col> */}
                         </Row>
                     </Form>
                 </Modal.Body>
@@ -218,4 +215,4 @@ const MovimientoForm = ({show, updateLinea, linea, handleCloseMovimiento, empres
          </Modal>
     );
 } 
-export default MovimientoForm;
+export default EntregaForm;
