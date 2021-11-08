@@ -93,7 +93,7 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updateLinea
     
     const handlerEditar = async () => {
         let entregaTotal = await prueba();    
-        if (datos.cantidad<linea.por_recibir){            
+        if (datos.cantidad<linea.por_recibir || datos.por_recibir<0){            
             alert('Cantidad erronea, revisa cantidad recibida');            
             handlerCancelar();
         }

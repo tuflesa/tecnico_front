@@ -217,6 +217,61 @@ const PedidoForm = ({pedido, setPedido}) => {
         })
         .then( res => {  
             setPedido(res.data); 
+            finalizarPedido(res.data);
+        })
+        .catch(err => { console.log(err);})
+    }
+
+    const updatePedido = () => {
+        axios.get(BACKEND_SERVER + `/api/repuestos/pedido_detalle/${pedido.id}/`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => {  
+            setPedido(res.data); 
+        })
+        .catch(err => { console.log(err);})
+    }
+
+    const finalizarPedido = (pedido) =>{
+        var x = 0;
+        var y = 0;
+        console.log('que valen pedido');
+        console.log(pedido);
+        for(y=0; y<pedido.lineas_pedido.length;y++){
+            if(pedido.lineas_pedido[y].por_recibir>0){
+                datos.finalizado=false;
+                console.log('dentro del for y los datos valen____');
+                console.log(datos.finalizado);
+                break;
+            } 
+        }
+        console.log('qeu vale la y antes de entrar a la x');
+        console.log(y);
+        if(y>=pedido.lineas_pedido.length){
+            for(x=0; x<pedido.lineas_adicionales.length;x++){
+                if(pedido.lineas_adicionales[x].por_recibir>0){
+                    datos.finalizado=false;
+                    console.log('dentro del for x los datos valen____');
+                    console.log(datos.finalizado);
+                    break;
+                } 
+                else{
+                    datos.finalizado=true;
+                }
+            }
+        }
+        axios.patch(BACKEND_SERVER + `/api/repuestos/pedido/${pedido.id}/`, {
+            finalizado: datos.finalizado,            
+        }, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => {   
+            console.log('mando actualizar desde el for if.....') ;
+            updatePedido();
         })
         .catch(err => { console.log(err);})
     }
