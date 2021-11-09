@@ -12,7 +12,7 @@ const NotificacionFiltro = ({ actualizaFiltro }) => {
     const [datos, setDatos] = useState({
         que: '',
         empresa: user['tec-user'].perfil.empresa.id,
-        revisado: false,
+        revisado: '',
         descartado: false,
         finalizado: false
     });
@@ -35,8 +35,8 @@ const NotificacionFiltro = ({ actualizaFiltro }) => {
 
     useEffect(()=>{
         const filtro = `?que__icontains=${datos.que}&empresa=${datos.empresa}&revisado=${datos.revisado}&descartado=${datos.descartado}&finalizado=${datos.finalizado}`;
+        console.log('filtro = ', filtro);
         actualizaFiltro(filtro);
-        // console.log(filtro);
     },[datos, actualizaFiltro]);
 
     const handleInputChange = (event) => {

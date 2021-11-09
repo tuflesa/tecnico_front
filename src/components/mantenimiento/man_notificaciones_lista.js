@@ -14,6 +14,7 @@ const NotificacionesLista = () => {
     const [notificaciones, setNotificaciones] = useState(null);
 
     useEffect(()=>{
+        console.log('filtro ...');
         console.log(filtro);
         axios.get(BACKEND_SERVER + '/api/mantenimiento/notificaciones/' + filtro,{
             headers: {
@@ -21,7 +22,8 @@ const NotificacionesLista = () => {
               }
         })
         .then( res => {
-            // console.log(res.data); 
+            console.log('respuesta ...');
+            console.log(res.data); 
             setNotificaciones(res.data);
         })
         .catch( err => {
