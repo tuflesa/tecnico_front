@@ -97,7 +97,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                 alert('Se va a eliminar la linea');
             }) 
             .then( res => { 
-                updateLinea();
+                updatePedido();
             })
         }
     }
@@ -116,7 +116,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                 alert('Se va a eliminar la linea');
             }) 
             .then( res => { 
-                updateLinea();
+                updatePedido();
             })
         }
     }
@@ -209,7 +209,7 @@ const PedidoForm = ({pedido, setPedido}) => {
 
     }
 
-    const updateLinea = () => {
+    const updatePedido = () => {
         axios.get(BACKEND_SERVER + `/api/repuestos/pedido_detalle/${pedido.id}/`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -222,7 +222,7 @@ const PedidoForm = ({pedido, setPedido}) => {
         .catch(err => { console.log(err);})
     }
 
-    const updatePedido = () => {
+    const updateFinalizado = () => {
         axios.get(BACKEND_SERVER + `/api/repuestos/pedido_detalle/${pedido.id}/`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -237,30 +237,28 @@ const PedidoForm = ({pedido, setPedido}) => {
     const finalizarPedido = (pedido) =>{
         var x = 0;
         var y = 0;
-        console.log('que valen pedido');
-        console.log(pedido);
         for(y=0; y<pedido.lineas_pedido.length;y++){
             if(pedido.lineas_pedido[y].por_recibir>0){
                 datos.finalizado=false;
-                console.log('dentro del for y los datos valen____');
-                console.log(datos.finalizado);
                 break;
             } 
         }
-        console.log('qeu vale la y antes de entrar a la x');
-        console.log(y);
         if(y>=pedido.lineas_pedido.length){
-            for(x=0; x<pedido.lineas_adicionales.length;x++){
-                if(pedido.lineas_adicionales[x].por_recibir>0){
-                    datos.finalizado=false;
-                    console.log('dentro del for x los datos valen____');
-                    console.log(datos.finalizado);
-                    break;
-                } 
-                else{
-                    datos.finalizado=true;
+            if(pedido.lineas_adicionales!=''){
+                for(x=0; x<pedido.lineas_adicionales.length;x++){                
+
+                    if(pedido.lineas_adicionales[x].por_recibir>0){
+                        datos.finalizado=false;
+                        break;
+                    } 
+                    else{
+                        datos.finalizado=true;
+                    }
                 }
             }
+            else{
+                    datos.finalizado=true;
+                }
         }
         axios.patch(BACKEND_SERVER + `/api/repuestos/pedido/${pedido.id}/`, {
             finalizado: datos.finalizado,            
@@ -271,7 +269,7 @@ const PedidoForm = ({pedido, setPedido}) => {
         })
         .then( res => {   
             console.log('mando actualizar desde el for if.....') ;
-            updatePedido();
+            updateFinalizado();
         })
         .catch(err => { console.log(err);})
     }
@@ -555,26 +553,26 @@ const PedidoForm = ({pedido, setPedido}) => {
                         linea={lineaEditar}
                         handleCloseLinea ={cerrarAddLinea}
                         proveedor_id={datos.proveedor}
-                        updateLinea={updateLinea}
+                        updatePedido={updatePedido}
             />
             <LineaAdicionalForm show={show_linea_adicional}
                                 pedido_id={pedido ? pedido.id : null}
                                 linea_adicional={linea_adicionalEditar}
                                 handleCloseLineaAdicional ={cerrarAddLineaAdicional}
                                 proveedor_id={datos.proveedor}
-                                updateLinea={updateLinea}
+                                updatePedido={updatePedido}
             />
             <MovimientoForm show={show_movimiento}
                             handleCloseMovimiento ={cerrarMovimiento}
                             linea={lineaMovimiento}
                             empresa={datos.empresa}
-                            updateLinea={updateLinea}
+                            updatePedido={updatePedido}
             />
             <EntregaForm show={show_entrega}
                             handleCloseEntrega ={cerrarEntrega}
                             linea_adicional={lineaEntrega}
                             //empresa={datos.empresa}
-                            updateLinea={updateLinea}
+                            updatePedido={updatePedido}
             />
             <MovLista   show={show_listmovimiento}
                         handleCloseListMovimiento ={cerrarListMovimiento}

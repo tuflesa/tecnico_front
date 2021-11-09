@@ -5,7 +5,7 @@ import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { Button, Modal, Form, Col, Row } from 'react-bootstrap';
 
-const EntregaForm = ({show, updateLinea, linea_adicional, handleCloseEntrega}) => {
+const EntregaForm = ({show, updatePedido, linea_adicional, handleCloseEntrega}) => {
     
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
@@ -69,7 +69,7 @@ const EntregaForm = ({show, updateLinea, linea_adicional, handleCloseEntrega}) =
               }     
         })
         .then( res => {    
-            updateLinea();
+            updatePedido();
         })
         .catch(err => { console.log(err);})
     }

@@ -4,7 +4,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 
-const LineaAdicionalForm = ({show, pedido_id, handleCloseLineaAdicional, updateLinea, linea_adicional}) => {
+const LineaAdicionalForm = ({show, pedido_id, handleCloseLineaAdicional, updatePedido, linea_adicional}) => {
     
     const [token] = useCookies(['tec-token']);
 
@@ -53,7 +53,7 @@ const LineaAdicionalForm = ({show, pedido_id, handleCloseLineaAdicional, updateL
             }
         })
         .then( res => {
-            updateLinea();
+            updatePedido();
             handlerCancelar();
         })
         .catch( err => {
@@ -80,7 +80,7 @@ const LineaAdicionalForm = ({show, pedido_id, handleCloseLineaAdicional, updateL
     
     const handlerEditar = async () => {
         let entregaTotal = await prueba();    
-        if (datos.cantidad<linea_adicional.por_recibir || datos.por_recibir<0){            
+        if (datos.cantidad<(linea_adicional.cantidad - linea_adicional.por_recibir) || datos.por_recibir<0){            
             alert('Cantidad erronea, revisa cantidad recibida');            
             handlerCancelar();
         }
@@ -98,7 +98,7 @@ const LineaAdicionalForm = ({show, pedido_id, handleCloseLineaAdicional, updateL
                 }
             })
             .then( res => {
-                updateLinea();
+                updatePedido();
                 handlerCancelar();
             })
             .catch( err => {           

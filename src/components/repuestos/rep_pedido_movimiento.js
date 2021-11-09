@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { Button, Modal, Form, Col, Row } from 'react-bootstrap';
 
-const MovimientoForm = ({show, updateLinea, linea, handleCloseMovimiento, empresa}) => {
+const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empresa}) => {
     
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
@@ -71,7 +71,7 @@ const MovimientoForm = ({show, updateLinea, linea, handleCloseMovimiento, empres
               }     
         })
         .then( res => {    
-            updateLinea();
+            updatePedido();
         })
         .catch(err => { console.log(err);})
     }
