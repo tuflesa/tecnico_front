@@ -10,13 +10,13 @@ import NotificacionFiltro from './man_notificacion_filtro';
 const NotificacionesLista = () => {
     const [token] = useCookies(['tec-token']);
 
-    const [filtro, setFiltro] = useState('');
+    const [filtro, setFiltro] = useState(null);
     const [notificaciones, setNotificaciones] = useState(null);
 
     useEffect(()=>{
-        console.log('filtro ...');
-        console.log(filtro);
-        axios.get(BACKEND_SERVER + '/api/mantenimiento/notificaciones/' + filtro,{
+        // console.log('filtro ...');
+        // console.log(filtro);
+        filtro && axios.get(BACKEND_SERVER + '/api/mantenimiento/notificaciones/' + filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
