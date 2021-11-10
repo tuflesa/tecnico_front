@@ -18,7 +18,7 @@ const NotificacionForm = ({notificacion, user}) => {
         porque: notificacion ? notificacion.porque : null,
         numero: notificacion ? notificacion.numero : null,
         empresa: notificacion ? notificacion.empresa : user.perfil.empresa.id,
-        fecha_creacion: notificacion ? notificacion.fecha_creacion : null,
+        fecha_creacion: notificacion ? notificacion.fecha_creacion : new Date(),
         para: notificacion ? notificacion.para : null,
         revisado: notificacion ? notificacion.revisado : false,
         descartado: notificacion ? notificacion.descartado : false,
@@ -49,6 +49,10 @@ const NotificacionForm = ({notificacion, user}) => {
         });
     }
 
+    const handleDisabled = () => {
+        return user.perfil.nivel_acceso.nombre === 'local'
+    }
+
     return (
         <Container>
             <Row className="justify-content-center"> 
@@ -63,7 +67,8 @@ const NotificacionForm = ({notificacion, user}) => {
                                         name='empresa' 
                                         value={datos.empresa}
                                         onChange={handleInputChange}
-                                        placeholder="Empresa">
+                                        placeholder="Empresa"
+                                        disabled={handleDisabled()}>
                                         {empresas && empresas.map( empresa => {
                                             return (
                                             <option key={empresa.id} value={empresa.id}>
@@ -72,6 +77,27 @@ const NotificacionForm = ({notificacion, user}) => {
                                             )
                                         })}
                             </Form.Control>
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="numero">
+                            <Form.Label>Número</Form.Label>
+                            <Form.Control type="text" 
+                                        name='numero' 
+                                        value={datos.numero}
+                                        disabled={true} 
+                                        placeholder="Número de notificación"
+                            />
+                            </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="fecha_creacion">
+                            <Form.Label>Fecha Creación</Form.Label>
+                            <Form.Control type="date" 
+                                        name='fecha_creacion' 
+                                        value={datos.fecha_creacion}
+                                        onChange={handleInputChange} 
+                                        placeholder="Fecha creación" />
                         </Form.Group>
                     </Col>
                 </Row>
