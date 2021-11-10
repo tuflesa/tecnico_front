@@ -1,8 +1,14 @@
 import React, {useEffect, useState} from 'react';
+import { useCookies } from 'react-cookie';
+import NotificacionForm from './man_notificacion_form';
 
 const NotificacionNueva = () => {
+    const [user] = useCookies(['tec-user']);
+
+    const [notificacion, setNotificacion] = useState(null);
+
     return (
-        <h4>Nueva notificación</h4>
+        <NotificacionForm notificacion={notificacion} user={user['tec-user']}/>
     )
 }
 
