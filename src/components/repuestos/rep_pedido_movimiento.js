@@ -82,45 +82,45 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
     }
 
     const actualizarStock = () =>{
-        // console.log(movimiento);
-        axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimo_detalle/?almacen=${movimiento.almacen}&repuesto=${linea.repuesto.id}`, {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }     
-        })
-        /* axios.patch(BACKEND_SERVER + `/api/repuestos/stocks_minimos/${res.data.id}/`,{
-            stock_act: res.data.stock_act + movimiento.recibido,
-        },
-        {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-            }
-        })
-        .then( res => {
-            updatePedido();
-        })
-        .catch(err => { console.log(err);}) */
-        .then( res => {    
-            //updatePedido();  
-            console.log('pintando res.data');
-            console.log(movimiento.cantidad);
-            axios.patch(BACKEND_SERVER + `/api/repuestos/stocks_minimos/${res.data[0].id}/`,{
-                stock_act: res.data[0].stock_act + movimiento.cantidad,
-            },
-            {
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                }
-            })
-            .then( res => {
-                updatePedido();
-                console.log('estamos en actualizarStock');
-                console.log(res.data);
-            })
-            .catch(err => { console.log(err);})
+        console.log(movimiento);
+        // axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimo_detalle/?almacen=${movimiento.almacen}&repuesto=${linea.repuesto.id}`, {
+        //     headers: {
+        //         'Authorization': `token ${token['tec-token']}`
+        //       }     
+        // })
+        // /* axios.patch(BACKEND_SERVER + `/api/repuestos/stocks_minimos/${res.data.id}/`,{
+        //     stock_act: res.data.stock_act + movimiento.recibido,
+        // },
+        // {
+        //     headers: {
+        //         'Authorization': `token ${token['tec-token']}`
+        //     }
+        // })
+        // .then( res => {
+        //     updatePedido();
+        // })
+        // .catch(err => { console.log(err);}) */
+        // .then( res => {    
+        //     //updatePedido();  
+        //     console.log('pintando res.data');
+        //     console.log(movimiento.cantidad);
+        //     axios.patch(BACKEND_SERVER + `/api/repuestos/stocks_minimos/${res.data[0].id}/`,{
+        //         stock_act: res.data[0].stock_act + movimiento.cantidad,
+        //     },
+        //     {
+        //         headers: {
+        //             'Authorization': `token ${token['tec-token']}`
+        //         }
+        //     })
+        //     .then( res => {
+        //         updatePedido();
+        //         console.log('estamos en actualizarStock');
+        //         console.log(res.data);
+        //     })
+        //     .catch(err => { console.log(err);})
 
-        })
-        .catch(err => { console.log(err);})
+        // })
+        // .catch(err => { console.log(err);})
 
     }
 
