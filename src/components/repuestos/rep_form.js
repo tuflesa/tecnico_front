@@ -33,6 +33,8 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     const [show_proveedor, setShowProveedor] = useState(false);
     const [stock_editar, setStockEditar] = useState(null);
     const [stock_minimo_editar, setStockMinimoEditar] = useState(null);
+    const [empresas, setEmpresas] = useState(null);
+    const [stock_empresa, setStockEmpresa] = useState(null);
 
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/repuestos/tipo_repuesto/`, {
@@ -46,6 +48,20 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         })
         .catch(err => { console.log(err);})
     },[token]);
+
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setEmpresas(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
 
     useEffect(()=>{
         // console.log('Cambio en repuesto, actualizando datos ...');
@@ -63,14 +79,14 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             equipos: repuesto.equipos,
             proveedores: repuesto.proveedores}
             );
-            //console.log(datos);
+            // console.log(datos);
     },[repuesto]);
 
     useEffect(()=>{
         let stock_T = 0;
         datos.stock && datos.stock.forEach(element => {
             stock_T += element.suma;
-            const sm = datos.stocks_minimos.filter(e => e.almacen === element.almacen__id);
+            const sm = datos.stocks_minimos.filter(e => e.almacen.id === element.almacen__id);
             if (sm.length > 0) {
                 element.stock_minimo = sm[0].cantidad;
             } 
@@ -85,6 +101,18 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         })
         // eslint-disable-next-line react-hooks/exhaustive-deps
     },[datos.stock]);
+
+    useEffect(()=>{
+        const stock_por_empresa = [];
+        repuesto && empresas && empresas.map( empresa => {
+            const almacenes_por_empresa = repuesto.stocks_minimos.filter( s => s.almacen.empresa_id === empresa.id);
+            const stock_empresa = almacenes_por_empresa.reduce((a, b) => a + b.stock_act, 0);
+            const stock_minimo_empresa = almacenes_por_empresa.reduce((a, b) => a + b.cantidad, 0);
+            stock_por_empresa.push({empresa: empresa, stock: stock_empresa, stock_minimo: stock_minimo_empresa});
+        });
+        // console.log(stock_por_empresa);
+        setStockEmpresa(stock_por_empresa);
+    },[repuesto, empresas]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -362,6 +390,40 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                 </Button>
                             </Link>
                         </Form.Row>
+
+                        {repuesto.id ?
+                            <React.Fragment>
+                                <Form.Row>
+                                    <Col>
+                                        <Row>
+                                            <Col>
+                                            <h5 className="pb-3 pt-1 mt-2">Stock por empresa:</h5>
+                                            </Col>
+                                        </Row>
+                                    </Col>
+                                </Form.Row>
+                                <Table striped bordered hover>
+                                    <thead>
+                                        <tr>
+                                            <th>Empresa</th>
+                                            <th>Stock Actual</th>
+                                            <th>Stock Mínimo</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {stock_empresa && stock_empresa.map( stock => {
+                                            return (
+                                                <tr key={stock.empresa.id}>
+                                                    <td>{stock.empresa.nombre}</td>
+                                                    <td>{stock.stock}</td>
+                                                    <td>{stock.stock_minimo}</td>
+                                                </tr>
+                                            )})
+                                        }
+                                    </tbody>
+                                </Table>
+                            </React.Fragment> : null}
+
                         {repuesto.id ?
                             <React.Fragment>
                                 <Form.Row>
@@ -382,6 +444,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                     <th>Almacén</th>
                                                     <th>Stock</th>
                                                     <th>Stock Mínimo</th>
+                                                    <th>Campo</th>
                                                     <th>Acciones</th>
                                                 </tr>
                                             </thead>
@@ -393,6 +456,13 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                             <td>{stock.almacen__nombre}</td>
                                                             <td>{stock.suma}</td>
                                                             <td>{stock.stock_minimo}</td>
+                                                            <td> 
+                                                                <Form.Control type="text" 
+                                                                            name='campo' 
+                                                                            value= {stock.suma}
+                                                                            placeholder="Campo"
+                                                                /> 
+                                                            </td>
                                                             <td>
                                                                 <PencilFill className="mr-3 pencil" onClick={event => {handleEditStock(stock)}}/>
                                                                 {/* <Trash className="trash"  onClick={null} /> */}
