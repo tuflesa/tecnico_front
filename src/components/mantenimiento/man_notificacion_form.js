@@ -7,6 +7,7 @@ import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 const NotificacionForm = ({notificacion, user}) => {
     const [token] = useCookies(['tec-token']);
 
+    const hoy = new Date();
     const [datos, setDatos] = useState({
         id: notificacion ? notificacion.id : null,
         que: notificacion ? notificacion.que : null,
@@ -18,7 +19,7 @@ const NotificacionForm = ({notificacion, user}) => {
         porque: notificacion ? notificacion.porque : null,
         numero: notificacion ? notificacion.numero : null,
         empresa: notificacion ? notificacion.empresa : user.perfil.empresa.id,
-        fecha_creacion: notificacion ? notificacion.fecha_creacion : new Date(),
+        fecha_creacion: notificacion ? notificacion.fecha_creacion : (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate()),
         para: notificacion ? notificacion.para : null,
         revisado: notificacion ? notificacion.revisado : false,
         descartado: notificacion ? notificacion.descartado : false,
@@ -96,8 +97,21 @@ const NotificacionForm = ({notificacion, user}) => {
                             <Form.Control type="date" 
                                         name='fecha_creacion' 
                                         value={datos.fecha_creacion}
-                                        onChange={handleInputChange} 
+                                        disabled={true}
                                         placeholder="Fecha creación" />
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="quien">
+                            <Form.Label>Creado Por</Form.Label>
+                            <Form.Control as="select"  
+                                        name='quien' 
+                                        value={datos.quien}
+                                        disabled={true}>
+                                        <option key={user.id} value={user.id}>
+                                                {user.get_full_name}
+                                            </option>
+                            </Form.Control>
                         </Form.Group>
                     </Col>
                 </Row>
