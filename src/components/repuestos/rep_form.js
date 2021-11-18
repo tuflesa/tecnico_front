@@ -4,11 +4,12 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
-import { PlusCircle, PencilFill, Trash } from 'react-bootstrap-icons';
+import { PlusCircle, PencilFill, Trash, SignpostSplitFill, Building, GeoFill, GeoAltFill, HouseDoorFill } from 'react-bootstrap-icons';
 import './repuestos.css';
 import StockMinimoForm from './rep_stock_minimo';
 import EquipoForm from './rep_equipo';
 import ProveedorForm from './rep_proveedor';
+import RepPorAlmacen from './rep_por_almacen';
 
 const RepuestoForm = ({repuesto, setRepuesto}) => {
     const [token] = useCookies(['tec-token']);
@@ -18,7 +19,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         nombre: repuesto.nombre,
         fabricante: repuesto.fabricante ? repuesto.fabricante : '',
         modelo: repuesto.modelo ? repuesto.modelo : '',
-        stock: repuesto.stock,
+        //stock: repuesto.stock,
         stock_T: 0,
         stocks_minimos: repuesto.stocks_minimos,
         es_critico: repuesto.es_critico,
@@ -33,7 +34,11 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     const [show_proveedor, setShowProveedor] = useState(false);
     const [stock_editar, setStockEditar] = useState(null);
     const [stock_minimo_editar, setStockMinimoEditar] = useState(null);
-
+    const [empresas, setEmpresas] = useState(null);
+    const [stock_empresa, setStockEmpresa] = useState(null);
+    const [show_listalmacen, setShowListAlmacen] = useState(null);
+    const [almacenes_empresa, setAlmacenesEmpresa] = useState(null);
+    
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/repuestos/tipo_repuesto/`, {
             headers: {
@@ -47,6 +52,20 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         .catch(err => { console.log(err);})
     },[token]);
 
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setEmpresas(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
+
     useEffect(()=>{
         // console.log('Cambio en repuesto, actualizando datos ...');
         setDatos({
@@ -54,7 +73,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             nombre: repuesto.nombre,
             fabricante: repuesto.fabricante ? repuesto.fabricante : '',
             modelo: repuesto.modelo ? repuesto.modelo : '',
-            stock: repuesto.stock,
+            //stock: repuesto.stock,
             stock_T: 0,
             stocks_minimos: repuesto.stocks_minimos,
             es_critico: repuesto.es_critico,
@@ -63,14 +82,33 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             equipos: repuesto.equipos,
             proveedores: repuesto.proveedores}
             );
-            //console.log(datos);
+            // console.log(datos);
     },[repuesto]);
 
     useEffect(()=>{
         let stock_T = 0;
+        datos.stocks_minimos && datos.stocks_minimos.forEach(element => {
+            stock_T += element.stock_act;
+            /* const sm = datos.stocks_minimos.filter(e => e.almacen.id === element.almacen__id);
+            if (sm.length > 0) {
+                element.stock_minimo = sm[0].cantidad;
+            } 
+            else {
+                element.stock_minimo = 0;
+            } */
+        });        
+        setDatos({
+            ...datos,
+            stock_T : stock_T
+        })        
+    },[datos.stocks_minimos]);
+
+
+/*     useEffect(()=>{
+        let stock_T = 0;
         datos.stock && datos.stock.forEach(element => {
             stock_T += element.suma;
-            const sm = datos.stocks_minimos.filter(e => e.almacen === element.almacen__id);
+            const sm = datos.stocks_minimos.filter(e => e.almacen.id === element.almacen__id);
             if (sm.length > 0) {
                 element.stock_minimo = sm[0].cantidad;
             } 
@@ -78,13 +116,25 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                 element.stock_minimo = 0;
             }
         });
-        // console.log(stock_T);
+
         setDatos({
             ...datos,
             stock_T : stock_T
         })
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    },[datos.stock]);
+        eslint-disable-next-line react-hooks/exhaustive-deps
+    },[datos.stock]); */
+
+    useEffect(()=>{
+        const stock_por_empresa = [];
+        repuesto && empresas && empresas.map( empresa => {
+            const almacenes_por_empresa = repuesto.stocks_minimos.filter( s => s.almacen.empresa_id === empresa.id);
+            const stock_empresa = almacenes_por_empresa.reduce((a, b) => a + b.stock_act, 0);
+            const stock_minimo_empresa = almacenes_por_empresa.reduce((a, b) => a + b.cantidad, 0);
+            stock_por_empresa.push({empresa: empresa, stock: stock_empresa, stock_minimo: stock_minimo_empresa});
+        });
+        // console.log(stock_por_empresa);
+        setStockEmpresa(stock_por_empresa);
+    },[repuesto, empresas]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -160,12 +210,18 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     }
 
     const handleEditStock = (stock) => {
-        const almacen_id = stock.almacen__id;
-        const repuesto_id = datos.id;
-        const stock_minimo = datos.stocks_minimos.filter(stock_minimmo => stock_minimmo.almacen === almacen_id && stock_minimmo.repuesto === repuesto_id)[0]
-        // console.log(stock_minimo);
+        console.log('que entra como stock');
+        console.log(stock);
+        const almacen_id = stock.almacen.id;
+        const repuesto_id = stock.repuesto;
+        const stock_minimo = stock.cantidad;
+        //const stock_minimo = datos.stocks_minimos.filter(stock_minimmo => stock_minimmo.almacen === almacen_id && stock_minimmo.repuesto === repuesto_id)[0]
+        console.log('datos de almacen_id, repuesto_id y stock_minimo');
+        console.log(almacen_id);
+        console.log(repuesto_id);
+        console.log(stock_minimo);
         setStockMinimoEditar(stock_minimo);
-        setStockEditar(stock);
+        setStockEditar(stock.stock_act);
         setShowStock(true);
     }
 
@@ -189,6 +245,16 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
 
     const cerrarAddProveedor = () => {
         setShowProveedor(false);
+    }
+
+    const abrirListAlmacen = (empresa) => {
+        setAlmacenesEmpresa(empresa);
+        setShowListAlmacen(true);
+    }
+
+    const cerrarListAlmacen = () => {
+        setShowListAlmacen(false);
+        updateRepuesto();
     }
 
     const updateRepuesto = () => {
@@ -246,7 +312,6 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
               }     
         })
         .then( res => { 
-                // console.log(res.data);
                 updateRepuesto();
             }
         )
@@ -362,23 +427,63 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                 </Button>
                             </Link>
                         </Form.Row>
+
                         {repuesto.id ?
                             <React.Fragment>
                                 <Form.Row>
                                     <Col>
                                         <Row>
                                             <Col>
-                                            <h5 className="pb-3 pt-1 mt-2">Stock por almacén:</h5>
+                                            <h5 className="pb-3 pt-1 mt-2">Stock por empresa:</h5>
                                             </Col>
                                             <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
-                                                    <PlusCircle className="plus mr-2" size={30} onClick={abrirNuevoStock}/>
+                                                <PlusCircle className="plus mr-2" size={30} onClick={abrirNuevoStock}/>
                                             </Col>
+                                        </Row>
+                                    </Col>
+                                </Form.Row>
+                                <Table striped bordered hover>
+                                    <thead>
+                                        <tr>
+                                            <th>Empresa</th>
+                                            <th>Stock Actual</th>
+                                            <th>Stock Mínimo</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {stock_empresa && stock_empresa.map( stock => {
+                                            return (
+                                                <tr key={stock.empresa.id}>
+                                                    <td>{stock.empresa.nombre}</td>
+                                                    <td>{stock.stock}</td>
+                                                    <td>{stock.stock_minimo}</td>
+                                                    <td>
+                                                        <HouseDoorFill className="mr-3 pencil" onClick={event => {abrirListAlmacen(stock.empresa.id)}}/>
+                                                        <Building className="mr-3 pencil" onClick={null}/>
+                                                        <GeoFill className="mr-3 pencil" onClick={null}/>
+                                                        <GeoAltFill className="mr-3 pencil" onClick={null}/>
+                                                        {/* <Trash className="trash"  onClick={null} /> */}
+                                                    </td>
+                                                </tr>
+                                            )})
+                                        }
+                                    </tbody>
+                                </Table>
+                            </React.Fragment> : null}
 
+                        {repuesto.id ?
+                            <React.Fragment>
+                               {/*  <Form.Row>
+                                    <Col>
+                                        <Row>
+                                            <Col>
+                                            <h5 className="pb-3 pt-1 mt-2">Stock por almacén:</h5>
+                                            </Col>                                            
                                         </Row>
                                         <Table striped bordered hover>
                                             <thead>
                                                 <tr>
-                                                    <th>Empresa</th>
                                                     <th>Almacén</th>
                                                     <th>Stock</th>
                                                     <th>Stock Mínimo</th>
@@ -386,16 +491,15 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {datos.stock && datos.stock.map( stock => {
+                                                {datos.stocks_minimos && datos.stocks_minimos.map( stock => {
                                                     return (
-                                                        <tr key={stock.almacen__nombre}>
-                                                            <td>{stock.almacen__empresa__siglas}</td>
-                                                            <td>{stock.almacen__nombre}</td>
-                                                            <td>{stock.suma}</td>
-                                                            <td>{stock.stock_minimo}</td>
+                                                        <tr key={stock.id}>
+                                                            <td>{stock.almacen.nombre}</td>
+                                                            <td>{stock.stock_act}</td>
+                                                            <td>{stock.cantidad}</td>                                                           
                                                             <td>
                                                                 <PencilFill className="mr-3 pencil" onClick={event => {handleEditStock(stock)}}/>
-                                                                {/* <Trash className="trash"  onClick={null} /> */}
+                                                            
                                                             </td>
                                                         </tr>
                                                     )})
@@ -403,7 +507,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                             </tbody>
                                         </Table>
                                     </Col>
-                                </Form.Row>
+                                </Form.Row> */}
                                 <Form.Row>
                                     <Col>
                                         <Row>
@@ -495,6 +599,11 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                            proveedoresAsignados={datos.proveedores}
                            repuesto_id={repuesto.id}
                            updateRepuesto = {updateRepuesto}/>
+
+            <RepPorAlmacen  show={show_listalmacen}
+                            cerrarListAlmacen={cerrarListAlmacen}
+                            repuesto={repuesto}
+                            empresa={almacenes_empresa}/>                        
         </Container> 
     )
 }

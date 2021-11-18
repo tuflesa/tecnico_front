@@ -32,6 +32,7 @@ const PedidoForm = ({pedido, setPedido}) => {
     const [listEntrega, setListEntrega] = useState(null);
     const [hoy] = useState(new Date);
     const [borrar] = useState(false);
+    const [proveedores, setProveedores]= useState(null);
     
     const [datos, setDatos] = useState({
         id: pedido ? pedido.id : null,
@@ -44,9 +45,51 @@ const PedidoForm = ({pedido, setPedido}) => {
         finalizado: pedido ? pedido.finalizado : false,
         lineas_pedido: pedido ? pedido.lineas_pedido : null,
         lineas_adicionales: pedido ? pedido.lineas_adicionales : null
-    }); 
+    });     
 
-    const [proveedores, setProveedores]= useState(null);
+    useEffect(()=>{
+        axios.get(BACKEND_SERVER + `/api/repuestos/proveedor/`, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => { 
+            setProveedores(res.data);
+        })
+        .catch(err => { console.log(err);})
+    },[token]);
+
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setEmpresas(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
+
+    useEffect(()=>{
+        // console.log('Cambio en pedido, actualizando datos ...');
+        pedido && setDatos({
+            id: pedido ? pedido.id : null,
+            proveedor: pedido ? pedido.proveedor.id : null,
+            empresa: pedido ? pedido.empresa : user['tec-user'].perfil.empresa.id,
+            numero: pedido ? pedido.numero : '',
+            creado_por: pedido ? pedido.creado_por.get_full_name : '',
+            fecha_creacion: pedido ? pedido.fecha_creacion : (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate()),
+            fecha_cierre: pedido ? pedido.fecha_entrega : '',
+            finalizado: pedido ? pedido.finalizado : false,
+            lineas_pedido: pedido.lineas_pedido ? pedido.lineas_pedido : null,
+            lineas_adicionales: pedido ? pedido.lineas_adicionales : null
+        });
+            //console.log(datos);
+    },[pedido]);
+
 
     const handleInputChange = (event) => {
         setDatos({
@@ -122,6 +165,8 @@ const PedidoForm = ({pedido, setPedido}) => {
     }
 
     const creaMoviviento = (linea) => {
+        console.log('estamos en crea movimiento');
+        console.log(linea);
         setLineaMovimiento(linea);
         setShowMovimiento(true);
     }
@@ -274,49 +319,7 @@ const PedidoForm = ({pedido, setPedido}) => {
         .catch(err => { console.log(err);})
     }
 
-    useEffect(()=>{
-        axios.get(BACKEND_SERVER + `/api/repuestos/proveedor/`, {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }     
-        })
-        .then( res => { 
-            setProveedores(res.data);
-        })
-        .catch(err => { console.log(err);})
-    },[token]);
-
-    useEffect(() => {
-        axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            setEmpresas(res.data);
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    }, [token]);
-
-    useEffect(()=>{
-        // console.log('Cambio en pedido, actualizando datos ...');
-        pedido && setDatos({
-            id: pedido ? pedido.id : null,
-            proveedor: pedido ? pedido.proveedor.id : null,
-            empresa: pedido ? pedido.empresa : user['tec-user'].perfil.empresa.id,
-            numero: pedido ? pedido.numero : '',
-            creado_por: pedido ? pedido.creado_por.get_full_name : '',
-            fecha_creacion: pedido ? pedido.fecha_creacion : (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate()),
-            fecha_cierre: pedido ? pedido.fecha_entrega : '',
-            finalizado: pedido ? pedido.finalizado : false,
-            lineas_pedido: pedido.lineas_pedido ? pedido.lineas_pedido : null,
-            lineas_adicionales: pedido ? pedido.lineas_adicionales : null
-        });
-            //console.log(datos);
-    },[pedido]);
-
+    
     const handleDeshabilitar = () =>{
         if (pedido){
             //console.log('ya hay pedido....');
@@ -484,7 +487,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                         <td>{linea.por_recibir}</td>
                                                         <td>
                                                             <PencilFill className="mr-3 pencil" onClick={event => {editLinea(linea)}}/>
-                                                            <Truck className="mr-3 pencil" onClick={event => {creaMoviviento(linea)}}/>
+                                                            <Truck className="mr-3 pencil" onClick={event =>{creaMoviviento(linea)}}/>
                                                             <Receipt className="mr-3 pencil" onClick={event =>{listarMovimiento(linea)}}/>
                                                             <Trash className="trash"  onClick={event =>{BorrarLinea(linea)}} />
                                                         </td>

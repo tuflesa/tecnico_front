@@ -7,7 +7,11 @@ import { useCookies } from 'react-cookie';
 const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_minimo, updateRepuesto, stocks_utilizados}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
-
+    //console.log('que vale lo que entra, repuesto_id, stock, stock_minimo,stocks_utilizados');
+    //console.log(repuesto_id);
+    //console.log(stock);
+    //console.log(stock_minimo);
+    //console.log(stocks_utilizados);
     const [datos, setDatos] = useState({
         empresa: user['tec-user'].perfil.empresa.id,
         repuesto: repuesto_id,
@@ -33,17 +37,16 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
             console.log(err);
         });
     }, [token]);
-
+   
     useEffect(() => {
-        // console.log('recalculando almacenes ...');
         axios.get(BACKEND_SERVER + `/api/repuestos/almacen/?empresa=${datos.empresa}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
         .then( res => {
-            // console.log('datos recibidos DB ...')
-            // console.log(res.data);
+            console.log('datos recibidos DB...')
+            console.log(res.data);
             // console.log('Lista de stocks utilizados ...');
             // console.log(stocks_utilizados);
             let almacenes_utilizados = [];
@@ -52,11 +55,12 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
                 stocks_utilizados.forEach( s => {
                     almacenes_utilizados.push(s.almacen);
                 })
-                // console.log(almacenes_utilizados)
+                console.log('almacenes utilizados....');
+                console.log(almacenes_utilizados)
             }
-            const almacenes_disponible = res.data.filter( a =>  !almacenes_utilizados.includes(a.id));
-            // console.log('almacenes disponibles ...')
-            // console.log(almacenes_disponible)
+            const almacenes_disponible = res.data.filter( a =>!almacenes_utilizados.includes(a.id));
+            console.log('almacenes disponibles ...')
+            console.log(almacenes_disponible)
             setGuardarDisabled(almacenes_disponible.length === 0);
             setAlmacenes(almacenes_disponible);
         })
@@ -131,7 +135,8 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
                 axios.post(BACKEND_SERVER + `/api/repuestos/stocks_minimos/`, {
                     repuesto: repuesto_id,
                     almacen: datos.almacen,
-                    cantidad: datos.stock_minimo_cantidad ? datos.stock_minimo_cantidad : 0
+                    cantidad: datos.stock_minimo_cantidad ? datos.stock_minimo_cantidad : 0,
+                    stock_act: datos.stock_actual ? datos.stock_actual : 0
                 }, {
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
