@@ -14,7 +14,7 @@ const RepPorAlmacen = ({empresa, repuesto, cerrarListAlmacen, show})=>{
         //stock_act: repuesto ? repuesto.stocks_minimos.stock_act : null,
         stock_actual: null,
         stock_minimo: null, 
-        habilitar: null,   
+        habilitar: true,   
     });  
     const handleInputChange = (event) => {
         setDatos({
@@ -23,12 +23,6 @@ const RepPorAlmacen = ({empresa, repuesto, cerrarListAlmacen, show})=>{
         })        
     }
 
-    const habilitar_linea = (r) =>{
-        
-        datos.habilitar = r.id;
-    }
-    console.log('que vale habilitar');
-    console.log(datos.habilitar);
     const ActualizaStock = (r) =>{
         let r_id = r.id;
         let r_almacen = r.almacen.id;
@@ -103,6 +97,38 @@ const RepPorAlmacen = ({empresa, repuesto, cerrarListAlmacen, show})=>{
         datos.stock_actual= '';
         datos.stock_minimo= '';
     } 
+
+    //var mostrar = true;
+    //function habilitar_linea(r){
+      //  var input = document.getElementById("input_min");
+       // input.enabled = datos.habilitar;
+        //var mostrar = document.getElementById(r.id);
+        //if(datos.habilitar===r.id){
+            //datos.habilitar = !datos.habilitar;
+        //}
+        //else (mostrar = true); 
+        //console.log('que vale mostrar');
+        //console.log(mostrar);
+        //console.log(datos.habilitar);
+    //}
+    const habilitar_linea = (r)=>{
+        var input_min = document.getElementById('input_min');
+        var input_act = document.getElementById('input_act');
+        var lapiz1 = document.getElementById('lapiz1');
+        var tr = document.getElementById('tr');
+        console.log(r.id);
+        console.log(input_min);
+        console.log(lapiz1);
+        console.log(tr);
+        //console.log(lapiz1);
+        //if(document.getElementById('r.id')){
+        //if(input_min.value_id === r.id){ 
+            console.log('vamos a hablitar el input text');
+            input_min.disabled = !input_min.disabled;
+            input_act.disabled = !input_act.disabled;
+        //}
+    }
+
     return (
         <Modal show={show} backdrop="static" keyboard={ false } animation={false} size="lg">
             <Modal.Header closeButton>                
@@ -128,38 +154,37 @@ const RepPorAlmacen = ({empresa, repuesto, cerrarListAlmacen, show})=>{
                             </thead>
                             {repuesto ?
                                 <tbody>
-                                    {datos.stocks_minimos && datos.stocks_minimos.map( r => {
-                                        var mostrar = false;
-                                        if(datos.habilitar===r.id){
-                                            mostrar = true;
-                                        }
-                                        else (mostrar = false);
-                                            if(r.almacen.empresa === empresa){
-                                                return (
-                                                    
-                                                    <tr key={r.id}>
+                                    {datos.stocks_minimos && datos.stocks_minimos.map( r => {                                                                      
+                                            if(r.almacen.empresa === empresa){                                                
+                                                return (                                                    
+                                                    <tr id="tr" key={r.id}>
                                                         <td>{r.almacen.nombre}</td> 
                                                         <td>{r.localizacion}</td>                                                                                                       
                                                         <td>
-                                                        <input type = "text" 
+                                                        <input          id="input_act"
+                                                                        type = "text" 
                                                                         name='stock_actual' 
+                                                                        key={r.id}
                                                                         value= {datos.stock_act}
                                                                         onChange={handleInputChange}
                                                                         placeholder={r.stock_act}
-                                                                        disabled={mostrar}
+                                                                        //disabled={mostrar}
+                                                                        disabled
                                                         />
                                                         </td>
                                                         <td>
-                                                        <input type = "text" 
+                                                        <input  key={r.id} id="input_min" 
+                                                                        type = "text"                                                                        
                                                                         name='stock_minimo' 
                                                                         value= {datos.stock_min}
                                                                         onChange={handleInputChange}
                                                                         placeholder={r.cantidad}
-                                                                        disabled={mostrar}
+                                                                        //disabled={mostrar}
+                                                                        disabled
                                                         />
                                                         </td>
-                                                        <td>
-                                                            <PencilFill className="mr-3 pencil" onClick= {async => {habilitar_linea(r)}}/>                                               
+                                                        <td>                                                            
+                                                            <PencilFill className="mr-3 pencil" id= "lapiz1" id_value={r.id} onClick= {event => {habilitar_linea(r)}}/>                                               
                                                             <PencilFill className="mr-3 pencil" onClick= {async => {ActualizaStock(r)}}/>
                                                         </td>
                                                     </tr>
