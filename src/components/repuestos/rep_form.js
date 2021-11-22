@@ -36,9 +36,13 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     const [stock_minimo_editar, setStockMinimoEditar] = useState(null);
     const [empresas, setEmpresas] = useState(null);
     const [stock_empresa, setStockEmpresa] = useState(null);
+<<<<<<< HEAD
     const [show_listalmacen, setShowListAlmacen] = useState(null);
     const [almacenes_empresa, setAlmacenesEmpresa] = useState(null);
     
+=======
+
+>>>>>>> cd5aa4d5895231f94563ee89f0f869951b717a51
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/repuestos/tipo_repuesto/`, {
             headers: {
@@ -123,6 +127,18 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         })
         eslint-disable-next-line react-hooks/exhaustive-deps
     },[datos.stock]); */
+
+    useEffect(()=>{
+        const stock_por_empresa = [];
+        repuesto && empresas && empresas.map( empresa => {
+            const almacenes_por_empresa = repuesto.stocks_minimos.filter( s => s.almacen.empresa_id === empresa.id);
+            const stock_empresa = almacenes_por_empresa.reduce((a, b) => a + b.stock_act, 0);
+            const stock_minimo_empresa = almacenes_por_empresa.reduce((a, b) => a + b.cantidad, 0);
+            stock_por_empresa.push({empresa: empresa, stock: stock_empresa, stock_minimo: stock_minimo_empresa});
+        });
+        // console.log(stock_por_empresa);
+        setStockEmpresa(stock_por_empresa);
+    },[repuesto, empresas]);
 
     useEffect(()=>{
         const stock_por_empresa = [];
@@ -428,6 +444,42 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                             </Link>
                         </Form.Row>
 
+<<<<<<< HEAD
+=======
+                        {repuesto.id ?
+                            <React.Fragment>
+                                <Form.Row>
+                                    <Col>
+                                        <Row>
+                                            <Col>
+                                            <h5 className="pb-3 pt-1 mt-2">Stock por empresa:</h5>
+                                            </Col>
+                                        </Row>
+                                    </Col>
+                                </Form.Row>
+                                <Table striped bordered hover>
+                                    <thead>
+                                        <tr>
+                                            <th>Empresa</th>
+                                            <th>Stock Actual</th>
+                                            <th>Stock Mínimo</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {stock_empresa && stock_empresa.map( stock => {
+                                            return (
+                                                <tr key={stock.empresa.id}>
+                                                    <td>{stock.empresa.nombre}</td>
+                                                    <td>{stock.stock}</td>
+                                                    <td>{stock.stock_minimo}</td>
+                                                </tr>
+                                            )})
+                                        }
+                                    </tbody>
+                                </Table>
+                            </React.Fragment> : null}
+
+>>>>>>> cd5aa4d5895231f94563ee89f0f869951b717a51
                         {repuesto.id ?
                             <React.Fragment>
                                 <Form.Row>
@@ -487,16 +539,32 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                     <th>Almacén</th>
                                                     <th>Stock</th>
                                                     <th>Stock Mínimo</th>
+                                                    <th>Campo</th>
                                                     <th>Acciones</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 {datos.stocks_minimos && datos.stocks_minimos.map( stock => {
                                                     return (
+<<<<<<< HEAD
                                                         <tr key={stock.id}>
                                                             <td>{stock.almacen.nombre}</td>
                                                             <td>{stock.stock_act}</td>
                                                             <td>{stock.cantidad}</td>                                                           
+=======
+                                                        <tr key={stock.almacen__nombre}>
+                                                            <td>{stock.almacen__empresa__siglas}</td>
+                                                            <td>{stock.almacen__nombre}</td>
+                                                            <td>{stock.suma}</td>
+                                                            <td>{stock.stock_minimo}</td>
+                                                            <td> 
+                                                                <Form.Control type="text" 
+                                                                            name='campo' 
+                                                                            value= {stock.suma}
+                                                                            placeholder="Campo"
+                                                                /> 
+                                                            </td>
+>>>>>>> cd5aa4d5895231f94563ee89f0f869951b717a51
                                                             <td>
                                                                 <PencilFill className="mr-3 pencil" onClick={event => {handleEditStock(stock)}}/>
                                                             

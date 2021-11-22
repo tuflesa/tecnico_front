@@ -75,14 +75,24 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
               }     
         })
         .then( res => {    
+<<<<<<< HEAD
             //actualizarStock();
             updatePedido();
+=======
+            actualizarStock();
+            //updatePedido();
+>>>>>>> cd5aa4d5895231f94563ee89f0f869951b717a51
         })
         .catch(err => { console.log(err);})
     }
 
+<<<<<<< HEAD
     //const actualizarStock = () =>{
         //console.log(movimiento);
+=======
+    const actualizarStock = () =>{
+        console.log(movimiento);
+>>>>>>> cd5aa4d5895231f94563ee89f0f869951b717a51
         // axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimo_detalle/?almacen=${movimiento.almacen}&repuesto=${linea.repuesto.id}`, {
         //     headers: {
         //         'Authorization': `token ${token['tec-token']}`
@@ -122,7 +132,11 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
         // })
         // .catch(err => { console.log(err);})
 
+<<<<<<< HEAD
     //}
+=======
+    }
+>>>>>>> cd5aa4d5895231f94563ee89f0f869951b717a51
 
     const guardarMovimiento = (event) => {
         event.preventDefault();
