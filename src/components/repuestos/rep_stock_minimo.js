@@ -53,7 +53,7 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
             if (stocks_utilizados) {
                 // console.log('Calculando almacenes utilizados')
                 stocks_utilizados.forEach( s => {
-                    almacenes_utilizados.push(s.almacen);
+                    almacenes_utilizados.push(s.almacen.id);
                 })
                 console.log('almacenes utilizados....');
                 console.log(almacenes_utilizados)
