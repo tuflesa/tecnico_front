@@ -178,7 +178,8 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             modelo: datos.modelo,
             es_critico: datos.es_critico,
             descatalogado: datos.descatalogado,
-            tipo_repuesto: datos.tipo_repuesto
+            tipo_repuesto: datos.tipo_repuesto,
+            stocks_minimos: datos.stocks_minimos? datos.stocks_minimos:null
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -475,7 +476,6 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                         <Building className="mr-3 pencil" onClick={null}/>
                                                         <GeoFill className="mr-3 pencil" onClick={null}/> */}
                                                         <GeoAltFill className="mr-3 pencil" onClick={event => {abrirListAlmacen(stock.empresa.id)}}/>
-                                                        {/* <Trash className="trash"  onClick={null} /> */}
                                                     </td>
                                                 </tr>
                                             )})
@@ -485,42 +485,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                             </React.Fragment> : null}
 
                         {repuesto.id ?
-                            <React.Fragment>
-                               {/*  <Form.Row>
-                                    <Col>
-                                        <Row>
-                                            <Col>
-                                            <h5 className="pb-3 pt-1 mt-2">Stock por almacén:</h5>
-                                            </Col>                                            
-                                        </Row>
-                                        <Table striped bordered hover>
-                                            <thead>
-                                                <tr>
-                                                    <th>Almacén</th>
-                                                    <th>Stock</th>
-                                                    <th>Stock Mínimo</th>
-                                                    <th>Campo</th>
-                                                    <th>Acciones</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {datos.stocks_minimos && datos.stocks_minimos.map( stock => {
-                                                    return (
-                                                        <tr key={stock.id}>
-                                                            <td>{stock.almacen.nombre}</td>
-                                                            <td>{stock.stock_act}</td>
-                                                            <td>{stock.cantidad}</td>                                                           
-                                                            <td>
-                                                                <PencilFill className="mr-3 pencil" onClick={event => {handleEditStock(stock)}}/>
-                                                            
-                                                            </td>
-                                                        </tr>
-                                                    )})
-                                                }
-                                            </tbody>
-                                        </Table>
-                                    </Col>
-                                </Form.Row> */}
+                            <React.Fragment>                              
                                 <Form.Row>
                                     <Col>
                                         <Row>
@@ -616,7 +581,9 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             <RepPorAlmacen  show={show_listalmacen}
                             cerrarListAlmacen={cerrarListAlmacen}
                             repuesto={repuesto}
-                            empresa={almacenes_empresa}/>                        
+                            setRepuesto={setRepuesto}
+                            empresa={almacenes_empresa}/> 
+
         </Container> 
     )
 }
