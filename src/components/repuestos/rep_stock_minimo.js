@@ -7,11 +7,6 @@ import { useCookies } from 'react-cookie';
 const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_minimo, updateRepuesto, stocks_utilizados}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
-    //console.log('que vale lo que entra, repuesto_id, stock, stock_minimo,stocks_utilizados');
-    //console.log(repuesto_id);
-    //console.log(stock);
-    //console.log(stock_minimo);
-    //console.log(stocks_utilizados);
     const [datos, setDatos] = useState({
         empresa: user['tec-user'].perfil.empresa.id,
         repuesto: repuesto_id,
@@ -30,7 +25,6 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
               }
         })
         .then( res => {
-            // console.log(res.data);
             setEmpresas(res.data);
         })
         .catch( err => {
@@ -45,22 +39,13 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
               }
         })
         .then( res => {
-            console.log('datos recibidos DB...')
-            console.log(res.data);
-            // console.log('Lista de stocks utilizados ...');
-            // console.log(stocks_utilizados);
             let almacenes_utilizados = [];
             if (stocks_utilizados) {
-                // console.log('Calculando almacenes utilizados')
                 stocks_utilizados.forEach( s => {
                     almacenes_utilizados.push(s.almacen.id);
                 })
-                console.log('almacenes utilizados....');
-                console.log(almacenes_utilizados)
             }
             const almacenes_disponible = res.data.filter( a =>!almacenes_utilizados.includes(a.id));
-            console.log('almacenes disponibles ...')
-            console.log(almacenes_disponible)
             setGuardarDisabled(almacenes_disponible.length === 0);
             setAlmacenes(almacenes_disponible);
         })
@@ -78,7 +63,6 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
             stock_actual_inicial : stock ? stock.suma : null,
             stock_minimo : stock_minimo ? stock_minimo : null,
         })
-        // console.log(datos);
     },[stock, stock_minimo, almacenes]);
 
     useEffect(()=>{
@@ -86,7 +70,6 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
             ...datos,
             almacen : stock ? stock.almacen__id : almacenes.length > 0 ? almacenes[0].id : '',
         })
-        // console.log(datos);
     },[almacenes]);
 
     const handleInputChange = (event) => {
@@ -94,7 +77,6 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
             ...datos,
             [event.target.name] : event.target.value
         });
-        // console.log(datos);
     }
 
     const handleDisabled = () => {
@@ -113,7 +95,6 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
     const handleGuardar = () => {
         if (datos.stock_minimo_cantidad !== datos.stock_minimo_inicial){
             // Stock mínimo
-            //console.log('Actualizar stock mínimo ...');
             if (datos.stock_minimo) { // Actualizar stock mínimo
                 // datos.stock_minimo.cantidad = parseInt(datos.stock_minimo_cantidad);
                 axios.patch(BACKEND_SERVER + `/api/repuestos/stocks_minimos/${datos.stock_minimo.id}/`, {
@@ -124,7 +105,6 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
                       }     
                 })
                 .then( res => { 
-                        // console.log(res.data);
                         updateRepuesto();
                     }
                 )
@@ -143,7 +123,6 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
                       }     
                 })
                 .then( res => { 
-                        // console.log(res.data);
                         if (!datos.stock_actual) {
                             console.log('no hay valor inicial de stock ...')
                         }
@@ -176,7 +155,6 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
                   }     
             })
             .then( res => { 
-                    // console.log(res.data);
                     const inventario = res.data
                     axios.post(BACKEND_SERVER + `/api/repuestos/lineainventario/`, {
                         inventario : inventario.id,
@@ -189,7 +167,6 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
                           }     
                     })
                     .then( res => {
-                        // console.log(res.data);
                         const linea_inventario = res.data;
                         axios.post(BACKEND_SERVER + `/api/repuestos/movimiento/`, {
                             fecha : yyyy + '-' + mm + '-' + dd,
@@ -203,7 +180,6 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
                               }     
                         })
                         .then( res => {
-                            // console.log(res.data);
                             updateRepuesto();
                         })
                         .catch( err => {console.log(err);})
@@ -266,17 +242,6 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
                         </Row>
                         <Row>
                             <Col>
-                                <Form.Group controlId="stock_minimo_cantidad">
-                                    <Form.Label>Stock Mínimo</Form.Label>
-                                    <Form.Control type="text" 
-                                                name='stock_minimo_cantidad' 
-                                                value={datos.stock_minimo_cantidad}
-                                                onChange={handleInputChange} 
-                                                placeholder="Stock Mínimo"
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col>
                                 <Form.Group controlId="stock_actual">
                                     <Form.Label>Stock Actual</Form.Label>
                                     <Form.Control type="text" 
@@ -285,6 +250,17 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
                                                 onChange={handleInputChange} 
                                                 placeholder="Stock Actual"
                                                 // disabled
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col>
+                                <Form.Group controlId="stock_minimo_cantidad">
+                                    <Form.Label>Stock Mínimo</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='stock_minimo_cantidad' 
+                                                value={datos.stock_minimo_cantidad}
+                                                onChange={handleInputChange} 
+                                                placeholder="Stock Mínimo"
                                     />
                                 </Form.Group>
                             </Col>

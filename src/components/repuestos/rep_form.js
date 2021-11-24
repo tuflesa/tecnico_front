@@ -46,7 +46,6 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
               }     
         })
         .then( res => { 
-            // console.log(res.data);
             setTiposRepuesto(res.data);
         })
         .catch(err => { console.log(err);})
@@ -67,7 +66,6 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     }, [token]);
 
     useEffect(()=>{
-        // console.log('Cambio en repuesto, actualizando datos ...');
         setDatos({
             id: repuesto.id ? repuesto.id : null,
             nombre: repuesto.nombre,
@@ -82,7 +80,6 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             equipos: repuesto.equipos,
             proveedores: repuesto.proveedores}
             );
-            // console.log(datos);
     },[repuesto]);
 
     useEffect(()=>{
@@ -132,7 +129,6 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             const stock_minimo_empresa = almacenes_por_empresa.reduce((a, b) => a + b.cantidad, 0);
             stock_por_empresa.push({empresa: empresa, stock: stock_empresa, stock_minimo: stock_minimo_empresa});
         });
-        // console.log(stock_por_empresa);
         setStockEmpresa(stock_por_empresa);
     },[repuesto, empresas]);
 
@@ -144,7 +140,6 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             const stock_minimo_empresa = almacenes_por_empresa.reduce((a, b) => a + b.cantidad, 0);
             stock_por_empresa.push({empresa: empresa, stock: stock_empresa, stock_minimo: stock_minimo_empresa});
         });
-        // console.log(stock_por_empresa);
         setStockEmpresa(stock_por_empresa);
     },[repuesto, empresas]);
 
@@ -171,7 +166,6 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
 
     const actualizarDatos = (event) => {
         event.preventDefault();
-        // console.log(datos);
         axios.put(BACKEND_SERVER + `/api/repuestos/detalle/${datos.id}/`, {
             nombre: datos.nombre,
             fabricante: datos.fabricante,
@@ -186,7 +180,6 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
               }     
         })
         .then( res => { 
-            // console.log(res.data);
             setRepuesto(res.data);
             window.location.href = "/repuestos";
         })
@@ -209,7 +202,6 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
               }     
         })
         .then( res => { 
-            // console.log(res.data);
             setRepuesto(res.data);
             // window.location.href = "/repuestos";
         })
@@ -223,16 +215,10 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     }
 
     const handleEditStock = (stock) => {
-        console.log('que entra como stock');
-        console.log(stock);
         const almacen_id = stock.almacen.id;
         const repuesto_id = stock.repuesto;
         const stock_minimo = stock.cantidad;
         //const stock_minimo = datos.stocks_minimos.filter(stock_minimmo => stock_minimmo.almacen === almacen_id && stock_minimmo.repuesto === repuesto_id)[0]
-        console.log('datos de almacen_id, repuesto_id y stock_minimo');
-        console.log(almacen_id);
-        console.log(repuesto_id);
-        console.log(stock_minimo);
         setStockMinimoEditar(stock_minimo);
         setStockEditar(stock.stock_act);
         setShowStock(true);
@@ -277,7 +263,6 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
               }     
         })
         .then( res => { 
-            // console.log(res.data);
             setRepuesto(res.data);
             // window.location.href = "/repuestos";
         })
@@ -285,7 +270,6 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     }
 
     const handlerBorrarEquipo = (id) => {
-        // console.log(id);
         let newEquipos = [];
         datos.equipos && datos.equipos.forEach( e => {
             if (e.id !== id) {
@@ -301,7 +285,6 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
               }     
         })
         .then( res => { 
-                // console.log(res.data);
                 updateRepuesto();
             }
         )
@@ -309,7 +292,6 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     }
 
     const handlerBorrarProveedor = (id) => {
-        // console.log(id);
         let newProveedores = [];
         datos.proveedores && datos.proveedores.forEach( p => {
             if (p.id !== id) {

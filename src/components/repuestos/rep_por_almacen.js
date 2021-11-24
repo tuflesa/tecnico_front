@@ -7,7 +7,6 @@ import { PencilFill, HandThumbsUpFill, CheckCircleFill } from 'react-bootstrap-i
 const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show})=>{
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
-    const [rep_almacen, setRepAlmacen] = useState(null);
     const [datos, setDatos] = useState({
         stocks_minimos: repuesto ? repuesto.stocks_minimos : null,
         cantidad: repuesto ? repuesto.stocks_minimos.cantidad : null,
@@ -22,23 +21,7 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
             [event.target.name] : event.target.value
         })        
     }
-    console.log('que entra en repuesto');
-    console.log(repuesto);
     
-    useEffect(()=>{
-        axios.get(BACKEND_SERVER + `/api/repuestos/detalle/${repuesto.id}/`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }     
-        })
-        .then( res => { 
-            console.log(res.data);
-            setRepuesto(res.data);
-            datos.stocks_minimos=res.data.stocks_minimos;
-        })
-        .catch(err => { console.log(err);})
-    },[datos.stock_actual, datos.stock_minimo]);
-
     const ActualizaStock = (r) =>{
         let r_id = r.id;
         let r_almacen = r.almacen.id;
@@ -142,7 +125,7 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
                             </thead>
                             {repuesto ?
                                 <tbody>
-                                    {datos.stocks_minimos && datos.stocks_minimos.map( r => {                                                                      
+                                    {repuesto.stocks_minimos && repuesto.stocks_minimos.map( r => {                                                                      
                                             if(r.almacen.empresa === empresa){                                                
                                                 return (                                                    
                                                     <tr key={r.id}>
