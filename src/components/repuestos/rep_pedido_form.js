@@ -12,6 +12,8 @@ import EntLista from './rep_pedido_listentrega';
 import EntregaForm from './rep_pedido_entrega';
 import { Link } from 'react-router-dom';
 import { now } from 'd3-timer';
+import VistaPdf from './rep_pedidoPdf';
+import { PDFViewer } from '@react-pdf/renderer';
 
 const PedidoForm = ({pedido, setPedido}) => {
     const [token] = useCookies(['tec-token']);
@@ -33,6 +35,7 @@ const PedidoForm = ({pedido, setPedido}) => {
     const [hoy] = useState(new Date);
     const [borrar] = useState(false);
     const [proveedores, setProveedores]= useState(null);
+    const [verPdf, setVerPdf] = useState(false);
     
     const [datos, setDatos] = useState({
         id: pedido ? pedido.id : null,
@@ -165,8 +168,6 @@ const PedidoForm = ({pedido, setPedido}) => {
     }
 
     const creaMoviviento = (linea) => {
-        console.log('estamos en crea movimiento');
-        console.log(linea);
         setLineaMovimiento(linea);
         setShowMovimiento(true);
     }
@@ -179,6 +180,21 @@ const PedidoForm = ({pedido, setPedido}) => {
     const listarMovimiento = (linea)=>{
         setListMovimiento(linea);
         setShowListMovimiento(true);
+    }
+
+    const visualizarPdf = () =>{
+        setVerPdf(true);
+        console.log('que vale verpdf');
+        console.log(verPdf);
+        /* return(
+            <PDFViewer style={{width: "100%", height: "90vh"}}>
+                <VistaPdf pedido={pedido} />
+            </PDFViewer>
+        ) */
+    }
+
+    const cerrarPdf = () =>{
+        setVerPdf(false);
     }
 
     const listarEntrega = (lineaAdicional)=>{
@@ -444,7 +460,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                         <Form.Row className="justify-content-center">
                             {pedido ? 
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button> :
-                                <Button variant="info" type="submit" className={'mx-2'} onClick={crearPedido}>Guardar</Button>
+                                <Button variant="info" type="submit" className={'mx-2'} onClick={crearPedido}>Guardar</Button>                                
                             }
                             <Link to='/repuestos/pedidos'>
                                 <Button variant="warning" >
@@ -452,6 +468,18 @@ const PedidoForm = ({pedido, setPedido}) => {
                                 </Button>
                             </Link>
                         </Form.Row> 
+                        <Form className="justify-content-center">
+                            {!verPdf ?  
+                                <Button variant="info" type="submit" className={'mx-2'} onClick={visualizarPdf}>Visualizar</Button> :
+                                <Form>
+                                    <Button variant="info" type="submit" className={'mx-2'} onClick={cerrarPdf}>Cancelar Pdf</Button>
+                                    <PDFViewer style={{width: "100%", height: "90vh"}}>
+                                        <VistaPdf   pedido={pedido} 
+                                                    VerPdf={verPdf}/>
+                                    </PDFViewer> 
+                                </Form>                                                                  
+                            }
+                         </Form>
                         {datos.numero ? 
                         <React.Fragment>
                             <Form.Row>
@@ -585,6 +613,10 @@ const PedidoForm = ({pedido, setPedido}) => {
                         handleCloseListEntrega ={cerrarListEntrega}
                         linea_adicional={listEntrega}
             />
+            {/* <PDFViewer style={{width: "100%", height: "90vh"}}>
+                <VistaPdf   pedido={pedido} 
+                            VerPdf={verPdf}/>
+            </PDFViewer> */}
         </Container>
     )
 }
