@@ -50,8 +50,8 @@ const PedidoForm = ({pedido, setPedido}) => {
         finalizado: pedido ? pedido.finalizado : false,
         lineas_pedido: pedido ? pedido.lineas_pedido : null,
         lineas_adicionales: pedido ? pedido.lineas_adicionales : null,
-        direccion_envio: pedido.direccion_envio ? pedido.direccion_envio.id : null,
-        contacto: pedido.contacto ? pedido.contacto.id : null
+        direccion_envio: pedido ? pedido.direccion_envio : null,
+        contacto: pedido ? pedido.contacto : null
     });     
 
     useEffect(()=>{
