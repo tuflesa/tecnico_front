@@ -36,6 +36,8 @@ const PedidoForm = ({pedido, setPedido}) => {
     const [borrar] = useState(false);
     const [proveedores, setProveedores]= useState(null);
     const [verPdf, setVerPdf] = useState(false);
+    const [direcciones, setDirecciones]= useState(null);
+    const [contactos, setContactos]= useState(null);
     
     const [datos, setDatos] = useState({
         id: pedido ? pedido.id : null,
@@ -47,10 +49,13 @@ const PedidoForm = ({pedido, setPedido}) => {
         fecha_cierre: pedido ? pedido.fecha_entrega : '',
         finalizado: pedido ? pedido.finalizado : false,
         lineas_pedido: pedido ? pedido.lineas_pedido : null,
-        lineas_adicionales: pedido ? pedido.lineas_adicionales : null
+        lineas_adicionales: pedido ? pedido.lineas_adicionales : null,
+        direccion_envio: pedido.direccion_envio ? pedido.direccion_envio.id : null,
+        contacto: pedido.contacto ? pedido.contacto.id : null
     });     
 
     useEffect(()=>{
+        console.log(pedido);
         axios.get(BACKEND_SERVER + `/api/repuestos/proveedor/`, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -62,6 +67,34 @@ const PedidoForm = ({pedido, setPedido}) => {
         .catch(err => { console.log(err);})
     },[token]);
 
+    useEffect(()=>{
+        //console.log(pedido);
+        datos.proveedor && axios.get(BACKEND_SERVER + `/api/repuestos/contacto/?proveedor=${datos.proveedor}`, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => { 
+            console.log(res.data);
+            setContactos(res.data);
+        })
+        .catch(err => { console.log(err);})
+    },[token, datos.proveedor]);
+    
+    useEffect(()=>{
+        //console.log(pedido);
+        datos.empresa && axios.get(BACKEND_SERVER + `/api/estructura/direcciones/?empresa=${datos.empresa}`, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => { 
+            console.log(res.data);
+            setDirecciones(res.data);
+        })
+        .catch(err => { console.log(err);})
+    },[token, datos.empresa]);
+
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
             headers: {
@@ -69,6 +102,7 @@ const PedidoForm = ({pedido, setPedido}) => {
               }
         })
         .then( res => {
+            //console.log(res.data);
             setEmpresas(res.data);
         })
         .catch( err => {
@@ -88,7 +122,10 @@ const PedidoForm = ({pedido, setPedido}) => {
             fecha_cierre: pedido ? pedido.fecha_entrega : '',
             finalizado: pedido ? pedido.finalizado : false,
             lineas_pedido: pedido.lineas_pedido ? pedido.lineas_pedido : null,
-            lineas_adicionales: pedido ? pedido.lineas_adicionales : null
+            lineas_adicionales: pedido ? pedido.lineas_adicionales : null,
+            direccion_envio: pedido.direccion_envio ? pedido.direccion_envio.id : null,
+            contacto: pedido.contacto ? pedido.contacto.id : null
+
         });
             //console.log(datos);
     },[pedido]);
@@ -180,17 +217,10 @@ const PedidoForm = ({pedido, setPedido}) => {
     const listarMovimiento = (linea)=>{
         setListMovimiento(linea);
         setShowListMovimiento(true);
-    }
+    }   
 
     const visualizarPdf = () =>{
-        setVerPdf(true);
-        console.log('que vale verpdf');
-        console.log(verPdf);
-        /* return(
-            <PDFViewer style={{width: "100%", height: "90vh"}}>
-                <VistaPdf pedido={pedido} />
-            </PDFViewer>
-        ) */
+        setVerPdf(true); 
     }
 
     const cerrarPdf = () =>{
@@ -236,7 +266,9 @@ const PedidoForm = ({pedido, setPedido}) => {
             fecha_cierre: datos.fecha_cierre,
             fecha_creacion: datos.fecha_creacion,
             finalizado: datos.finalizado,
-            creado_por: user['tec-user'].id
+            creado_por: user['tec-user'].id,
+            direccion_envio: datos.direccion_envio,
+            contacto: datos.contacto
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -251,12 +283,14 @@ const PedidoForm = ({pedido, setPedido}) => {
 
     const actualizarDatos = (event) => {
         event.preventDefault();
-        axios.put(BACKEND_SERVER + `/api/repuestos/pedido_detalle/${pedido.id}/`, {
+        axios.put(BACKEND_SERVER + `/api/repuestos/pedido/${pedido.id}/`, {
             proveedor: datos.proveedor,
             empresa: datos.empresa,
             fecha_cierre: datos.fecha_cierre,
             fecha_creacion: datos.fecha_creacion,
-            finalizado: datos.finalizado
+            finalizado: datos.finalizado,
+            direccion_envio: datos.direccion_envio,
+            contacto: datos.contacto
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -364,7 +398,86 @@ const PedidoForm = ({pedido, setPedido}) => {
                     <h5 className="pb-3 pt-1 mt-2">Datos básicos:</h5>
                     <Form >
                         <Row> 
+                        <Col>
+                                <Form.Group controlId="numero">
+                                    <Form.Label>Numero Pedido</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='numero' 
+                                                disabled
+                                                value={datos.numero}/>
+                                </Form.Group>
+                            </Col> 
                             <Col>
+                                <Form.Group controlId="creado_por">
+                                    <Form.Label>Creado por</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='creado_por' 
+                                                disabled
+                                                value={pedido ? pedido.creado_por.get_full_name : user['tec-user'].get_full_name}/>
+                                </Form.Group>
+                            </Col> 
+                            <Col>
+                                <Form.Group controlId="fecha_creacion">
+                                    <Form.Label>Fecha Creación</Form.Label>
+                                    <Form.Control type="date" 
+                                                name='fecha_creacion' 
+                                                value={datos.fecha_creacion}
+                                                onChange={handleInputChange} 
+                                                placeholder="Fecha creación" />
+                                </Form.Group>
+                            </Col>
+                            <Col>
+                                <Form.Group controlId="fecha_cierre">
+                                    <Form.Label>Fecha Cierre</Form.Label>
+                                    <Form.Control type="date" 
+                                                name='fecha_cierre' 
+                                                value={datos.fecha_cierre}
+                                                onChange={handleInputChange} 
+                                                placeholder="Fecha cierre" />
+                                </Form.Group>
+                            </Col>                           
+                        </Row>
+                        <Row>                                                        
+                            <Col>
+                                <Form.Group controlId="empresa">
+                                    <Form.Label>Empresa</Form.Label>
+                                    <Form.Control as="select"  
+                                                name='empresa' 
+                                                value={datos.empresa}
+                                                onChange={handleInputChange}
+                                                disabled={handleDisabled()}
+                                                placeholder="Empresa">                                                    
+                                                {empresas && empresas.map( empresa => {
+                                                    return (
+                                                    <option key={empresa.id} value={empresa.id}>
+                                                        {empresa.nombre}
+                                                    </option>
+                                                    )
+                                                })}
+                                    </Form.Control>
+                                </Form.Group>
+                            </Col>                                             
+                            <Col>
+                                <Form.Group controlId="direccion_envio">
+                                    <Form.Label>Direccion de Envío</Form.Label>
+                                    <Form.Control as="select"  
+                                                name='direccion_envio' 
+                                                value={datos.direccion_envio}
+                                                onChange={handleInputChange}                                                
+                                                placeholder="Direccion de Envío">                                                   
+                                                {direcciones && direcciones.map( direccion => {
+                                                    return (
+                                                    <option key={direccion.id} value={direccion.id}>
+                                                        {direccion.direccion}
+                                                    </option>
+                                                    )
+                                                })}
+                                    </Form.Control>
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                        <Row>
+                        <Col>
                                 <Form.Group controlId="proveedor">
                                     <Form.Label>Proveedor</Form.Label>
                                     <Form.Control as="select"  
@@ -385,65 +498,23 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                 })}
                                     </Form.Control>
                                 </Form.Group>
-                            </Col>                            
+                            </Col>
                             <Col>
-                                <Form.Group controlId="empresa">
-                                    <Form.Label>Empresa</Form.Label>
+                                <Form.Group controlId="contacto">
+                                    <Form.Label>Contacto</Form.Label>
                                     <Form.Control as="select"  
-                                                name='empresa' 
-                                                value={datos.empresa}
-                                                onChange={handleInputChange}
-                                                disabled={handleDisabled()}
-                                                placeholder="Empresa">
-                                                <option key={0} value={''}>Todas</option>    
-                                                {empresas && empresas.map( empresa => {
+                                                name='contacto' 
+                                                value={datos.contacto}
+                                                onChange={handleInputChange}                                                
+                                                placeholder="Contacto">                                                   
+                                                {contactos && contactos.map( contacto => {
                                                     return (
-                                                    <option key={empresa.id} value={empresa.id}>
-                                                        {empresa.nombre}
+                                                    <option key={contacto.id} value={contacto.id}>
+                                                        {contacto.nombre}
                                                     </option>
                                                     )
                                                 })}
                                     </Form.Control>
-                                </Form.Group>
-                            </Col>
-                            <Col>
-                                <Form.Group controlId="numero">
-                                    <Form.Label>Numero Pedido</Form.Label>
-                                    <Form.Control type="text" 
-                                                name='numero' 
-                                                disabled
-                                                value={datos.numero}/>
-                                </Form.Group>
-                            </Col> 
-                            <Col>
-                                <Form.Group controlId="creado_por">
-                                    <Form.Label>Creado por</Form.Label>
-                                    <Form.Control type="text" 
-                                                name='creado_por' 
-                                                disabled
-                                                value={pedido ? pedido.creado_por.get_full_name : user['tec-user'].get_full_name}/>
-                                </Form.Group>
-                            </Col> 
-                        </Row>
-                        <Row>                                             
-                            <Col>
-                                <Form.Group controlId="fecha_creacion">
-                                    <Form.Label>Fecha Creación</Form.Label>
-                                    <Form.Control type="date" 
-                                                name='fecha_creacion' 
-                                                value={datos.fecha_creacion}
-                                                onChange={handleInputChange} 
-                                                placeholder="Fecha creación" />
-                                </Form.Group>
-                            </Col>
-                            <Col>
-                                <Form.Group controlId="fecha_cierre">
-                                    <Form.Label>Fecha Cierre</Form.Label>
-                                    <Form.Control type="date" 
-                                                name='fecha_cierre' 
-                                                value={datos.fecha_cierre}
-                                                onChange={handleInputChange} 
-                                                placeholder="Fecha cierre" />
                                 </Form.Group>
                             </Col>
                         </Row>
@@ -474,13 +545,17 @@ const PedidoForm = ({pedido, setPedido}) => {
                                 <Form>
                                     <Button variant="info" type="submit" className={'mx-2'} onClick={cerrarPdf}>Cancelar Pdf</Button>
                                     <PDFViewer style={{width: "100%", height: "90vh"}}>
-                                        <VistaPdf   pedido={pedido} 
-                                                    VerPdf={verPdf}/>
+                                        <VistaPdf   pedido={pedido}
+                                                    linea={datos.lineas_pedido} 
+                                                    VerPdf={verPdf}
+                                                    empresa={empresas.filter( s => s.id === pedido.empresa)[0]} 
+                                                    proveedor={pedido.proveedor}                                                   
+                                                    lineas_adicionales={pedido.lineas_adicionales}/>
                                     </PDFViewer> 
                                 </Form>                                                                  
                             }
                          </Form>
-                        {datos.numero ? 
+                        {datos.numero && !verPdf ? 
                         <React.Fragment>
                             <Form.Row>
                                 <Col>
@@ -528,7 +603,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                             </Form.Row>                                                
                         </React.Fragment> 
                         : null} 
-                        {datos.numero ? 
+                        {datos.numero && !verPdf ? 
                         <React.Fragment>
                             <Form.Row>
                                 <Col>
@@ -613,10 +688,6 @@ const PedidoForm = ({pedido, setPedido}) => {
                         handleCloseListEntrega ={cerrarListEntrega}
                         linea_adicional={listEntrega}
             />
-            {/* <PDFViewer style={{width: "100%", height: "90vh"}}>
-                <VistaPdf   pedido={pedido} 
-                            VerPdf={verPdf}/>
-            </PDFViewer> */}
         </Container>
     )
 }
