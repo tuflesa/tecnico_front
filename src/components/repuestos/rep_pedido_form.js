@@ -46,16 +46,16 @@ const PedidoForm = ({pedido, setPedido}) => {
         numero: pedido ? pedido.numero : '',
         creado_por: pedido ? pedido.creado_por.get_full_name : '',
         fecha_creacion: pedido ? pedido.fecha_creacion : (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate()),
-        fecha_cierre: pedido ? pedido.fecha_entrega : '',
+        fecha_entrega: pedido ? pedido.fecha_entrega : '',
+        fecha_prevista_entrega: pedido ? pedido.fecha_prevista_entrega : '',
         finalizado: pedido ? pedido.finalizado : false,
         lineas_pedido: pedido ? pedido.lineas_pedido : null,
         lineas_adicionales: pedido ? pedido.lineas_adicionales : null,
-        direccion_envio: pedido ? pedido.direccion_envio : null,
-        contacto: pedido ? pedido.contacto : null
+        direccion_envio: pedido ? pedido.direccion_envio.id : null,
+        contacto: pedido ? pedido.contacto.id : null
     });     
 
     useEffect(()=>{
-        console.log(pedido);
         axios.get(BACKEND_SERVER + `/api/repuestos/proveedor/`, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -75,7 +75,7 @@ const PedidoForm = ({pedido, setPedido}) => {
               }     
         })
         .then( res => { 
-            console.log(res.data);
+            //console.log(res.data);
             setContactos(res.data);
         })
         .catch(err => { console.log(err);})
@@ -89,7 +89,7 @@ const PedidoForm = ({pedido, setPedido}) => {
               }     
         })
         .then( res => { 
-            console.log(res.data);
+            //console.log(res.data);
             setDirecciones(res.data);
         })
         .catch(err => { console.log(err);})
@@ -102,7 +102,8 @@ const PedidoForm = ({pedido, setPedido}) => {
               }
         })
         .then( res => {
-            //console.log(res.data);
+            console.log('que valen los datos cuando recogen el pedido');
+            console.log(datos);
             setEmpresas(res.data);
         })
         .catch( err => {
@@ -119,12 +120,13 @@ const PedidoForm = ({pedido, setPedido}) => {
             numero: pedido ? pedido.numero : '',
             creado_por: pedido ? pedido.creado_por.get_full_name : '',
             fecha_creacion: pedido ? pedido.fecha_creacion : (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate()),
-            fecha_cierre: pedido ? pedido.fecha_entrega : '',
+            fecha_prevista_entrega: pedido ? pedido.fecha_prevista_entrega : '',
+            fecha_entrega: pedido ? pedido.fecha_entrega : '',
             finalizado: pedido ? pedido.finalizado : false,
             lineas_pedido: pedido.lineas_pedido ? pedido.lineas_pedido : null,
             lineas_adicionales: pedido ? pedido.lineas_adicionales : null,
-            direccion_envio: pedido.direccion_envio ? pedido.direccion_envio.id : null,
-            contacto: pedido.contacto ? pedido.contacto.id : null
+            direccion_envio: pedido ? pedido.direccion_envio.id : null,
+            contacto: pedido ? pedido.contacto.id : null
 
         });
             //console.log(datos);
@@ -263,8 +265,9 @@ const PedidoForm = ({pedido, setPedido}) => {
         axios.post(BACKEND_SERVER + `/api/repuestos/pedido/`, {
             proveedor: datos.proveedor,
             empresa: datos.empresa,
-            fecha_cierre: datos.fecha_cierre,
+            fecha_entrega: datos.fecha_entrega,
             fecha_creacion: datos.fecha_creacion,
+            fecha_prevista_entrega: datos.fecha_prevista_entrega,
             finalizado: datos.finalizado,
             creado_por: user['tec-user'].id,
             direccion_envio: datos.direccion_envio,
@@ -286,8 +289,9 @@ const PedidoForm = ({pedido, setPedido}) => {
         axios.put(BACKEND_SERVER + `/api/repuestos/pedido/${pedido.id}/`, {
             proveedor: datos.proveedor,
             empresa: datos.empresa,
-            fecha_cierre: datos.fecha_cierre,
+            fecha_entrega: datos.fecha_entrega,
             fecha_creacion: datos.fecha_creacion,
+            fecha_prevista_entrega: datos.fecha_prevista_entrega,
             finalizado: datos.finalizado,
             direccion_envio: datos.direccion_envio,
             contacto: datos.contacto
@@ -311,6 +315,8 @@ const PedidoForm = ({pedido, setPedido}) => {
               }     
         })
         .then( res => {  
+            console.log('que recojo en el get de updatePedido');
+            console.log(res.data);
             setPedido(res.data); 
             finalizarPedido(res.data);
         })
@@ -335,6 +341,7 @@ const PedidoForm = ({pedido, setPedido}) => {
         for(y=0; y<pedido.lineas_pedido.length;y++){
             if(pedido.lineas_pedido[y].por_recibir>0){
                 datos.finalizado=false;
+                datos.fecha_entrega=null;
                 break;
             } 
         }
@@ -344,19 +351,23 @@ const PedidoForm = ({pedido, setPedido}) => {
 
                     if(pedido.lineas_adicionales[x].por_recibir>0){
                         datos.finalizado=false;
+                        datos.fecha_entrega=null;
                         break;
                     } 
                     else{
                         datos.finalizado=true;
+                        datos.fecha_entrega= (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate());
                     }
                 }
             }
             else{
                     datos.finalizado=true;
+                    datos.fecha_entrega= (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate())
                 }
         }
         axios.patch(BACKEND_SERVER + `/api/repuestos/pedido/${pedido.id}/`, {
-            finalizado: datos.finalizado,            
+            finalizado: datos.finalizado, 
+            fecha_entrega: datos.fecha_entrega,           
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -427,15 +438,25 @@ const PedidoForm = ({pedido, setPedido}) => {
                                 </Form.Group>
                             </Col>
                             <Col>
-                                <Form.Group controlId="fecha_cierre">
+                                <Form.Group controlId="fecha_entrega">
                                     <Form.Label>Fecha Cierre</Form.Label>
                                     <Form.Control type="date" 
-                                                name='fecha_cierre' 
-                                                value={datos.fecha_cierre}
+                                                name='fecha_entrega' 
+                                                value={datos.fecha_entrega}
                                                 onChange={handleInputChange} 
                                                 placeholder="Fecha cierre" />
                                 </Form.Group>
-                            </Col>                           
+                            </Col>
+                            <Col>
+                                <Form.Group controlId="fecha_prevista_entrega">
+                                    <Form.Label>Fecha Prevista Entrega</Form.Label>
+                                    <Form.Control type="date" 
+                                                name='fecha_prevista_entrega' 
+                                                value={datos.fecha_prevista_entrega}
+                                                onChange={handleInputChange} 
+                                                placeholder="Fecha prevista entrega" />
+                                </Form.Group>
+                            </Col>                            
                         </Row>
                         <Row>                                                        
                             <Col>
@@ -463,7 +484,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                                     <Form.Control as="select"  
                                                 name='direccion_envio' 
                                                 value={datos.direccion_envio}
-                                                onChange={handleInputChange}                                                
+                                                onChange={handleInputChange}                                               
                                                 placeholder="Direccion de Envío">                                                   
                                                 {direcciones && direcciones.map( direccion => {
                                                     return (
@@ -550,7 +571,9 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                     VerPdf={verPdf}
                                                     empresa={empresas.filter( s => s.id === pedido.empresa)[0]} 
                                                     proveedor={pedido.proveedor}                                                   
-                                                    lineas_adicionales={pedido.lineas_adicionales}/>
+                                                    lineas_adicionales={pedido.lineas_adicionales}
+                                                    contacto={pedido.contacto}
+                                                    direccion_envio={pedido.direccion_envio}/>
                                     </PDFViewer> 
                                 </Form>                                                                  
                             }
@@ -570,12 +593,14 @@ const PedidoForm = ({pedido, setPedido}) => {
                                     <Table striped bordered hover>
                                         <thead>
                                             <tr>
-                                                <th>repuesto</th>
-                                                <th>Cantidad</th>
-                                                <th>Precio</th>
-                                                <th>Recibido</th>
-                                                <th>Pendiente Recibir</th>
-                                                <th>Acciones</th>
+                                                <th>Repuesto</th>
+                                                <th style={{width:20}}>Cantidad</th>
+                                                <th style={{width:30}}>Precio</th>
+                                                <th style={{width:20}}>Dto.</th>
+                                                <th style={{width:30}}>Total</th>
+                                                <th style={{width:20}}>Recibido</th>
+                                                <th style={{width:20}}>Pendiente Recibir</th>
+                                                <th style={{width:150}}>Acciones</th>
                                             </tr>
                                         </thead> 
                                                                                   
@@ -585,7 +610,9 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                     <tr key={linea.id}>
                                                         <td>{linea.repuesto.nombre}</td>
                                                         <td>{linea.cantidad}</td>
-                                                        <td>{linea.precio}</td>
+                                                        <td>{linea.precio + '€'}</td>
+                                                        <td>{linea.descuento + '%'}</td>
+                                                        <td>{linea.total + '€'}</td>
                                                         <td>{linea.cantidad - linea.por_recibir}</td>
                                                         <td>{linea.por_recibir}</td>
                                                         <td>
@@ -619,11 +646,13 @@ const PedidoForm = ({pedido, setPedido}) => {
                                         <thead>
                                             <tr>
                                                 <th>Descripción</th>
-                                                <th>Cantidad</th>
-                                                <th>Precio</th>
-                                                <th>Recibido</th>
-                                                <th>Pendiente Recibir</th>
-                                                <th>Acciones</th>
+                                                <th style={{width:20}}>Cantidad</th>
+                                                <th style={{width:30}}>Precio</th>
+                                                <th style={{width:20}}>Dto.</th>
+                                                <th style={{width:30}}>Total</th>
+                                                <th style={{width:20}}>Recibido</th>
+                                                <th style={{width:20}}>Pendiente Recibir</th>
+                                                <th style={{width:150}}>Acciones</th>
                                             </tr>
                                         </thead> 
                                                                                   
@@ -633,7 +662,9 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                     <tr key={lineaAdicional.id}>
                                                         <td>{lineaAdicional.descripcion}</td>
                                                         <td>{lineaAdicional.cantidad}</td>
-                                                        <td>{lineaAdicional.precio}</td>
+                                                        <td>{lineaAdicional.precio + '€'}</td>
+                                                        <td>{lineaAdicional.descuento + '%'}</td>
+                                                        <td>{lineaAdicional.total + '€'}</td>
                                                         <td>{lineaAdicional.cantidad - lineaAdicional.por_recibir}</td>
                                                         <td>{lineaAdicional.por_recibir}</td>
                                                         <td>

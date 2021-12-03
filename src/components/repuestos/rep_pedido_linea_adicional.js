@@ -13,8 +13,10 @@ const LineaAdicionalForm = ({show, pedido_id, handleCloseLineaAdicional, updateP
     
     const [datos, setDatos] = useState({  
         descripcion: linea_adicional ? linea_adicional.descripcion : '',
-        cantidad: linea_adicional ? linea_adicional.cantidad : '',
-        precio:linea_adicional ? linea_adicional.precio : '',
+        cantidad: linea_adicional ? linea_adicional.cantidad : 0,
+        precio:linea_adicional ? linea_adicional.precio : 0,
+        descuento: linea_adicional ? linea_adicional.descuento : 0,
+        total: linea_adicional ? linea_adicional.total : 0,
         pedido: pedido_id,
         por_recibir:''
     });   
@@ -22,11 +24,17 @@ const LineaAdicionalForm = ({show, pedido_id, handleCloseLineaAdicional, updateP
     useEffect(()=>{
         setDatos({  
             descripcion: linea_adicional ? linea_adicional.descripcion : '',
-            cantidad: linea_adicional ? linea_adicional.cantidad : '',
-            precio: linea_adicional ? linea_adicional.precio : '',
+            cantidad: linea_adicional ? linea_adicional.cantidad : 0,
+            precio: linea_adicional ? linea_adicional.precio : 0,
+            descuento: linea_adicional ? linea_adicional.descuento : 0,
+            total: linea_adicional ? linea_adicional.total : 0,
             pedido: pedido_id,
         });
     },[linea_adicional, pedido_id]);
+
+    useEffect(()=>{ 
+        datos.total = ((datos.precio*datos.cantidad)-(datos.precio*datos.cantidad*datos.descuento/100));
+    },[datos.cantidad, datos.precio, datos.descuento]);
     
     const handleInputChange = (event) => {
         setDatos({
@@ -44,6 +52,8 @@ const LineaAdicionalForm = ({show, pedido_id, handleCloseLineaAdicional, updateP
             descripcion: datos.descripcion,
             cantidad: datos.cantidad,
             precio: datos.precio,
+            descuento: datos.descuento,
+            total: datos.total,
             pedido: datos.pedido,
             por_recibir: datos.cantidad,
         },
@@ -89,6 +99,8 @@ const LineaAdicionalForm = ({show, pedido_id, handleCloseLineaAdicional, updateP
                 descripcion: datos.descripcion,
                 cantidad: datos.cantidad,
                 precio: datos.precio,
+                descuento: datos.descuento,
+                total: datos.total,
                 pedido: datos.pedido,
                 por_recibir: datos.por_recibir,
             },
@@ -144,6 +156,15 @@ const LineaAdicionalForm = ({show, pedido_id, handleCloseLineaAdicional, updateP
                                                 value={datos.precio}
                                                 onChange={handleInputChange}
                                                 placeholder="Precio">  
+                                    </Form.Control>
+                                </Form.Group>
+                                <Form.Group controlId="descuento">
+                                    <Form.Label>Descuento</Form.Label>
+                                    <Form.Control imput type="text"  
+                                                name='descuento' 
+                                                value={datos.descuento + '%'}
+                                                onChange={handleInputChange}
+                                                placeholder="Descuento">  
                                     </Form.Control>
                                 </Form.Group>
                             </Col>

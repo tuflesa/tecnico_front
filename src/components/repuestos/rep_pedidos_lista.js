@@ -101,6 +101,7 @@ const PedLista = () => {
                                 <th>Proveedor</th>
                                 <th>Fecha Pedido</th>
                                 <th>Fecha Entrega</th>
+                                <th>Fecha Prevista Entrega</th>
                                 <th>Finalizado</th>
                                 <th>Acciones</th>
                             </tr>
@@ -114,6 +115,7 @@ const PedLista = () => {
                                         <td>{pedido.proveedor.nombre}</td>
                                         <td>{invertirFecha(String(pedido.fecha_creacion))}</td>
                                         <td>{pedido.fecha_entrega && invertirFecha(String(pedido.fecha_entrega))}</td>                                        
+                                        <td>{pedido.fecha_prevista_entrega && invertirFecha(String(pedido.fecha_prevista_entrega))}</td> 
                                         <td>{pedido.finalizado ? 'Si' : 'No'}</td>
                                         <td>
                                             <Link to={`/repuestos/pedido_detalle/${pedido.id}`}>

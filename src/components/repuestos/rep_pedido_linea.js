@@ -13,8 +13,10 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
     
     const [datos, setDatos] = useState({  
         repuesto: linea ? linea.repuesto : '',
-        cantidad: linea ? linea.cantidad : '',
-        precio:linea ? linea.precio : '',
+        cantidad: linea ? linea.cantidad : 0,
+        precio:linea ? linea.precio : 0,
+        descuento: linea ? linea.descuento : 0,
+        total: linea ? linea.total : 0,
         pedido: pedido_id,
         por_recibir:''
     });   
@@ -22,11 +24,17 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
     useEffect(()=>{
         setDatos({  
             repuesto: linea ? linea.repuesto.id : 0,
-            cantidad: linea ? linea.cantidad : '',
-            precio: linea ? linea.precio : '',
+            cantidad: linea ? linea.cantidad : 0,
+            precio: linea ? linea.precio : 0,
+            descuento: linea ? linea.descuento : 0,
+            total: linea ? linea.total : 0,
             pedido: pedido_id,
         });
     },[linea, pedido_id]);
+
+    useEffect(()=>{ 
+        datos.total = ((datos.precio*datos.cantidad)-(datos.precio*datos.cantidad*datos.descuento/100));
+    },[datos.cantidad, datos.precio, datos.descuento]);
 
     useEffect(()=>{
         proveedor_id && axios.get(BACKEND_SERVER + `/api/repuestos/lista/?proveedores__id=${proveedor_id}&descatalogado=${false}`, {
@@ -52,11 +60,13 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
         handleCloseLinea();
     } 
 
-    const handlerGuardar = () => {
+    const handlerGuardar = () => {      
         axios.post(BACKEND_SERVER + `/api/repuestos/linea_pedido/`,{
             repuesto: datos.repuesto,
             cantidad: datos.cantidad,
             precio: datos.precio,
+            descuento: datos.descuento,
+            total: datos.total,
             pedido: datos.pedido,
             por_recibir: datos.cantidad,
         },
@@ -101,6 +111,8 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
             axios.patch(BACKEND_SERVER + `/api/repuestos/linea_pedido/${linea.id}/`,{
                 cantidad: datos.cantidad,
                 precio: datos.precio,
+                descuento: datos.descuento,
+                total: datos.total,
                 pedido: datos.pedido,
                 por_recibir: datos.por_recibir,
             },
@@ -174,6 +186,15 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
                                                 value={datos.precio}
                                                 onChange={handleInputChange}
                                                 placeholder="Precio">  
+                                    </Form.Control>
+                                </Form.Group>
+                                <Form.Group controlId="descuento">
+                                    <Form.Label>Descuento</Form.Label>
+                                    <Form.Control imput type="text"  
+                                                name='descuento' 
+                                                value={datos.descuento + '%'}
+                                                onChange={handleInputChange}
+                                                placeholder="Descuento">  
                                     </Form.Control>
                                 </Form.Group>
                             </Col>
