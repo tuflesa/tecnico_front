@@ -8,7 +8,7 @@ const LineaAdicionalForm = ({show, pedido_id, handleCloseLineaAdicional, updateP
     
     const [token] = useCookies(['tec-token']);
 
-    const [repuestos, setRepuestos]= useState(null);
+    //const [repuestos, setRepuestos]= useState(null);
     //const[unidades, setUnidades]=useState(null);
     
     const [datos, setDatos] = useState({  

@@ -14,6 +14,7 @@ import { Link } from 'react-router-dom';
 import { now } from 'd3-timer';
 import VistaPdf from './rep_pedidoPdf';
 import { PDFViewer } from '@react-pdf/renderer';
+import VistaIngPdf from './rep_pedidoIngPdf';
 
 const PedidoForm = ({pedido, setPedido}) => {
     const [token] = useCookies(['tec-token']);
@@ -36,6 +37,7 @@ const PedidoForm = ({pedido, setPedido}) => {
     const [borrar] = useState(false);
     const [proveedores, setProveedores]= useState(null);
     const [verPdf, setVerPdf] = useState(false);
+    const [verIngPdf, setVerIngPdf] = useState(false);
     const [direcciones, setDirecciones]= useState(null);
     const [contactos, setContactos]= useState(null);
     
@@ -225,8 +227,16 @@ const PedidoForm = ({pedido, setPedido}) => {
         setVerPdf(true); 
     }
 
+    const visualizarIngPdf = () =>{
+        setVerIngPdf(true); 
+    }
+
     const cerrarPdf = () =>{
         setVerPdf(false);
+    }
+
+    const cerrarIngPdf = () =>{
+        setVerIngPdf(false);
     }
 
     const listarEntrega = (lineaAdicional)=>{
@@ -561,24 +571,44 @@ const PedidoForm = ({pedido, setPedido}) => {
                             </Link>
                         </Form.Row> 
                         <Form className="justify-content-center">
-                            {!verPdf ?  
-                                <Button variant="info" type="submit" className={'mx-2'} onClick={visualizarPdf}>Visualizar</Button> :
+                            {!verPdf && !verIngPdf && datos.numero ?  
                                 <Form>
-                                    <Button variant="info" type="submit" className={'mx-2'} onClick={cerrarPdf}>Cancelar Pdf</Button>
-                                    <PDFViewer style={{width: "100%", height: "90vh"}}>
-                                        <VistaPdf   pedido={pedido}
-                                                    linea={datos.lineas_pedido} 
-                                                    VerPdf={verPdf}
-                                                    empresa={empresas.filter( s => s.id === pedido.empresa)[0]} 
-                                                    proveedor={pedido.proveedor}                                                   
-                                                    lineas_adicionales={pedido.lineas_adicionales}
-                                                    contacto={pedido.contacto}
-                                                    direccion_envio={pedido.direccion_envio}/>
-                                    </PDFViewer> 
+                                    <Button variant="info" type="submit" className={'mx-2'} onClick={visualizarPdf}>Ver Pdf</Button>
+                                    <Button variant="info" type="submit" className={'mx-2'} onClick={visualizarIngPdf}>Pdf Ing</Button> 
+                                </Form>:
+                                <Form>
+                                    {verPdf ?
+                                    <Form>
+                                        <Button variant="info" type="submit" className={'mx-2'} onClick={cerrarPdf}>Cancelar Pdf</Button>
+                                        <PDFViewer style={{width: "100%", height: "90vh"}}>
+                                            <VistaPdf   pedido={pedido}
+                                                        linea={datos.lineas_pedido} 
+                                                        VerPdf={verPdf}
+                                                        empresa={empresas.filter( s => s.id === pedido.empresa)[0]} 
+                                                        proveedor={pedido.proveedor}                                                   
+                                                        lineas_adicionales={pedido.lineas_adicionales}
+                                                        contacto={pedido.contacto}
+                                                        direccion_envio={pedido.direccion_envio}/>
+                                        </PDFViewer> 
+                                    </Form>:
+                                    <Form>
+                                        <Button variant="info" type="submit" className={'mx-2'} onClick={cerrarIngPdf}>Cancelar Pdf Ing</Button>
+                                        <PDFViewer style={{width: "100%", height: "90vh"}}>
+                                            <VistaIngPdf    pedido={pedido}
+                                                            linea={datos.lineas_pedido} 
+                                                            VerIngPdf={verIngPdf}
+                                                            empresa={empresas.filter( s => s.id === pedido.empresa)[0]} 
+                                                            proveedor={pedido.proveedor}                                                   
+                                                            lineas_adicionales={pedido.lineas_adicionales}
+                                                            contacto={pedido.contacto}
+                                                            direccion_envio={pedido.direccion_envio}/>
+                                        </PDFViewer> 
+                                    </Form>
+                                    }
                                 </Form>                                                                  
-                            }
-                         </Form>
-                        {datos.numero && !verPdf ? 
+                            }                                
+                        </Form>
+                        {datos.numero && !verPdf && !verIngPdf ? 
                         <React.Fragment>
                             <Form.Row>
                                 <Col>
@@ -630,7 +660,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                             </Form.Row>                                                
                         </React.Fragment> 
                         : null} 
-                        {datos.numero && !verPdf ? 
+                        {datos.numero && !verPdf && !verIngPdf ? 
                         <React.Fragment>
                             <Form.Row>
                                 <Col>
