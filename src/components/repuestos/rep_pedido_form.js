@@ -47,7 +47,7 @@ const PedidoForm = ({pedido, setPedido}) => {
         empresa: pedido ? pedido.empresa : user['tec-user'].perfil.empresa.id,
         numero: pedido ? pedido.numero : '',
         creado_por: pedido ? pedido.creado_por.get_full_name : '',
-        fecha_creacion: pedido ? pedido.fecha_creacion : (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate()),
+        fecha_creacion: pedido ? pedido.fecha_creacion : (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
         fecha_entrega: pedido ? pedido.fecha_entrega : null,
         fecha_prevista_entrega: pedido ? pedido.fecha_prevista_entrega : null,
         finalizado: pedido ? pedido.finalizado : false,
