@@ -590,19 +590,23 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                         contacto={pedido.contacto}
                                                         direccion_envio={pedido.direccion_envio}/>
                                         </PDFViewer> 
-                                    </Form>:
+                                    </Form>:                                    
                                     <Form>
-                                        <Button variant="info" type="submit" className={'mx-2'} onClick={cerrarIngPdf}>Cancelar Pdf Ing</Button>
-                                        <PDFViewer style={{width: "100%", height: "90vh"}}>
-                                            <VistaIngPdf    pedido={pedido}
-                                                            linea={datos.lineas_pedido} 
-                                                            VerIngPdf={verIngPdf}
-                                                            empresa={empresas.filter( s => s.id === pedido.empresa)[0]} 
-                                                            proveedor={pedido.proveedor}                                                   
-                                                            lineas_adicionales={pedido.lineas_adicionales}
-                                                            contacto={pedido.contacto}
-                                                            direccion_envio={pedido.direccion_envio}/>
-                                        </PDFViewer> 
+                                        {verIngPdf ?
+                                            <Form>
+                                                <Button variant="info" type="submit" className={'mx-2'} onClick={cerrarIngPdf}>Cancelar Pdf Ing</Button>
+                                                <PDFViewer style={{width: "100%", height: "90vh"}}>
+                                                    <VistaIngPdf    pedido={pedido}
+                                                                    linea={datos.lineas_pedido} 
+                                                                    VerIngPdf={verIngPdf}
+                                                                    empresa={empresas.filter( s => s.id === pedido.empresa)[0]} 
+                                                                    proveedor={pedido.proveedor}                                                   
+                                                                    lineas_adicionales={pedido.lineas_adicionales}
+                                                                    contacto={pedido.contacto}
+                                                                    direccion_envio={pedido.direccion_envio}/>
+                                                </PDFViewer> 
+                                            </Form>
+                                            :null}
                                     </Form>
                                     }
                                 </Form>                                                                  
