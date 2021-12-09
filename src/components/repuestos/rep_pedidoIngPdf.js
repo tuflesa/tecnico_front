@@ -180,7 +180,7 @@ const VistaIngPdf = ({pedido, VerIngPdf, linea, empresa, lineas_adicionales, pro
                             </View>
                             <View style={styles.section4}>
                                 <Text>{pedido.fecha_creacion}</Text>
-                                <Text>{contacto.nombre}</Text>
+                                {contacto ? <Text>{contacto.nombre}</Text>:<Text>   </Text>}
                                 <Text>{proveedor.nombre}</Text>
                                 <Text>Order:</Text>
                                 <Text>{pedido.creado_por.get_full_name}</Text>

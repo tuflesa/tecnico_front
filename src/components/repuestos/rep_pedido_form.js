@@ -53,8 +53,8 @@ const PedidoForm = ({pedido, setPedido}) => {
         finalizado: pedido ? pedido.finalizado : false,
         lineas_pedido: pedido ? pedido.lineas_pedido : null,
         lineas_adicionales: pedido ? pedido.lineas_adicionales : null,
-        direccion_envio: pedido ? pedido.direccion_envio.id : null,
-        contacto: pedido ? pedido.contacto.id : null
+        direccion_envio: pedido ? pedido.direccion_envio : null,
+        contacto: pedido ? pedido.contacto : null,
     });     
 
     useEffect(()=>{
@@ -91,7 +91,8 @@ const PedidoForm = ({pedido, setPedido}) => {
               }     
         })
         .then( res => { 
-            //console.log(res.data);
+            console.log('que vale direcciones.....');
+            console.log(res.data);
             setDirecciones(res.data);
         })
         .catch(err => { console.log(err);})
@@ -104,8 +105,6 @@ const PedidoForm = ({pedido, setPedido}) => {
               }
         })
         .then( res => {
-            console.log('que valen los datos cuando recogen el pedido');
-            console.log(datos);
             setEmpresas(res.data);
         })
         .catch( err => {
@@ -127,8 +126,8 @@ const PedidoForm = ({pedido, setPedido}) => {
             finalizado: pedido ? pedido.finalizado : false,
             lineas_pedido: pedido.lineas_pedido ? pedido.lineas_pedido : null,
             lineas_adicionales: pedido ? pedido.lineas_adicionales : null,
-            direccion_envio: pedido ? pedido.direccion_envio.id : null,
-            contacto: pedido ? pedido.contacto.id : null
+            direccion_envio: pedido ? pedido.direccion_envio : null,
+            contacto: pedido ? pedido.contacto : null
 
         });
             //console.log(datos);
@@ -281,7 +280,7 @@ const PedidoForm = ({pedido, setPedido}) => {
             finalizado: datos.finalizado,
             creado_por: user['tec-user'].id,
             direccion_envio: datos.direccion_envio,
-            contacto: datos.contacto
+            contacto: datos.contacto,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
