@@ -201,7 +201,7 @@ const VistaPdf = ({pedido, VerPdf, linea, empresa, lineas_adicionales, proveedor
                             </View>
                         </View>
                     </View>
-                    { linea.length>0 ?
+                    { linea != null ?
                         <View style={styles.page}>
                             <View style={styles.sectionTabla}>
                                 <View style={styles.section7}><Text>Cant.</Text></View>
@@ -213,7 +213,7 @@ const VistaPdf = ({pedido, VerPdf, linea, empresa, lineas_adicionales, proveedor
                         </View>                    
                     :null}
                     {parseData()}
-                    { lineas_adicionales.length>0 ?
+                    { lineas_adicionales != null ?
                         <View style={styles.page}>
                             <View style={styles.sectionTabla}>
                                 <View style={styles.section7}><Text>Cant.</Text></View>

@@ -108,7 +108,7 @@ const PedidoForm = ({pedido, setPedido}) => {
     useEffect(()=>{
         contactos && setDatos({
             ...datos,
-            contacto: pedido ? (pedido.contacto ? pedido.contacto.id : null) : contactos[0].id
+            contacto: pedido ? (pedido.contacto ? pedido.contacto.id : null) : (contactos [0] ? contactos[0].id : null)
         })
     },[contactos]);
 
@@ -285,6 +285,7 @@ const PedidoForm = ({pedido, setPedido}) => {
 
     const crearPedido = (event) => {
         event.preventDefault();
+        console.log('que vale datos antes de crear el pedido');
         console.log(datos);
         axios.post(BACKEND_SERVER + `/api/repuestos/pedido/`, {
             proveedor: datos.proveedor,

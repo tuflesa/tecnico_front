@@ -209,7 +209,7 @@ const VistaIngPdf = ({pedido, VerIngPdf, linea, empresa, lineas_adicionales, pro
                             </View>
                         </View>
                     </View>
-                    { linea.length>0 ?
+                    { linea != null ?
                         <View style={styles.page}>
                             <View style={styles.sectionTabla}>
                                 <View style={styles.section7}><Text>Qty</Text></View>
@@ -221,7 +221,7 @@ const VistaIngPdf = ({pedido, VerIngPdf, linea, empresa, lineas_adicionales, pro
                         </View>                    
                     :null}
                     {parseData()}
-                    { lineas_adicionales.length>0 ?
+                    { lineas_adicionales != null ?
                         <View style={styles.page}>
                             <View style={styles.sectionTabla}>
                                 <View style={styles.section7}><Text>Qty</Text></View>
