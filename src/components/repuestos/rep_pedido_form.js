@@ -99,11 +99,18 @@ const PedidoForm = ({pedido, setPedido}) => {
     },[token, datos.empresa]);
 
     useEffect(()=>{
-        setDatos({
+        direcciones && setDatos({
             ...datos,
             direccion_envio: pedido ? (pedido.direccion_envio ? pedido.direccion_envio.id : null) : direcciones[0].id
         })
     },[direcciones]);
+
+    useEffect(()=>{
+        contactos && setDatos({
+            ...datos,
+            contacto: pedido ? (pedido.contacto ? pedido.contacto.id : null) : contactos[0].id
+        })
+    },[contactos]);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
