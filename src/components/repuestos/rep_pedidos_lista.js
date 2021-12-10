@@ -63,7 +63,8 @@ const PedLista = () => {
             .catch( err => {
                 console.log(err);
             });
-            actualizaFiltro();
+            // actualizaFiltro();
+            setShow(!show);
         }
 
     }
