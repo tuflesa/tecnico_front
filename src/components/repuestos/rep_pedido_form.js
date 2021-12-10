@@ -53,8 +53,8 @@ const PedidoForm = ({pedido, setPedido}) => {
         finalizado: pedido ? pedido.finalizado : false,
         lineas_pedido: pedido ? pedido.lineas_pedido : null,
         lineas_adicionales: pedido ? pedido.lineas_adicionales : null,
-        direccion_envio: pedido.direccion_envio ? pedido.direccion_envio.id : null,
-        contacto: pedido.contacto ? pedido.contacto.id : null,
+        direccion_envio: pedido ? (pedido.direccion_envio ? pedido.direccion_envio.id : null) : null,
+        contacto: pedido ? (pedido.contacto ? pedido.contacto.id : null) : null
     });     
 
     useEffect(()=>{
@@ -98,6 +98,13 @@ const PedidoForm = ({pedido, setPedido}) => {
         .catch(err => { console.log(err);})
     },[token, datos.empresa]);
 
+    useEffect(()=>{
+        setDatos({
+            ...datos,
+            direccion_envio: pedido ? (pedido.direccion_envio ? pedido.direccion_envio.id : null) : direcciones[0].id
+        })
+    },[direcciones]);
+
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
             headers: {
@@ -126,8 +133,8 @@ const PedidoForm = ({pedido, setPedido}) => {
             finalizado: pedido ? pedido.finalizado : false,
             lineas_pedido: pedido.lineas_pedido ? pedido.lineas_pedido : null,
             lineas_adicionales: pedido ? pedido.lineas_adicionales : null,
-            direccion_envio: pedido ? pedido.direccion_envio.id : direcciones[0].id,
-            contacto: pedido ? pedido.contacto.id : null
+            direccion_envio: pedido ? (pedido.direccion_envio ? pedido.direccion_envio.id : null) : direcciones[0].id,
+            contacto: pedido ? (pedido.contacto ? pedido.contacto.id : null) : null
 
         });
             //console.log(datos);
@@ -271,6 +278,7 @@ const PedidoForm = ({pedido, setPedido}) => {
 
     const crearPedido = (event) => {
         event.preventDefault();
+        console.log(datos);
         axios.post(BACKEND_SERVER + `/api/repuestos/pedido/`, {
             proveedor: datos.proveedor,
             empresa: datos.empresa,
