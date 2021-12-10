@@ -9,7 +9,7 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
     const [user] = useCookies(['tec-user']);
     const [datos, setDatos] = useState({
         stocks_minimos: repuesto ? repuesto.stocks_minimos : null,
-        cantidad: repuesto ? repuesto.stocks_minimos.cantidad : null,
+        cantidad: repuesto.stocks_minimos ? repuesto.stocks_minimos.cantidad : null,
         almacen: null,
         stock_actual: null,
         stock_minimo: null, 

@@ -123,7 +123,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
 
     useEffect(()=>{
         const stock_por_empresa = [];
-        repuesto && empresas && empresas.map( empresa => {
+        datos.stocks_minimos && empresas && empresas.map( empresa => {
             const almacenes_por_empresa = repuesto.stocks_minimos.filter( s => s.almacen.empresa_id === empresa.id);
             const stock_empresa = almacenes_por_empresa.reduce((a, b) => a + b.stock_act, 0);
             const stock_minimo_empresa = almacenes_por_empresa.reduce((a, b) => a + b.cantidad, 0);
@@ -132,7 +132,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         setStockEmpresa(stock_por_empresa);
     },[repuesto, empresas]);
 
-    useEffect(()=>{
+    /* useEffect(()=>{
         const stock_por_empresa = [];
         repuesto && empresas && empresas.map( empresa => {
             const almacenes_por_empresa = repuesto.stocks_minimos.filter( s => s.almacen.empresa_id === empresa.id);
@@ -141,7 +141,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             stock_por_empresa.push({empresa: empresa, stock: stock_empresa, stock_minimo: stock_minimo_empresa});
         });
         setStockEmpresa(stock_por_empresa);
-    },[repuesto, empresas]);
+    },[repuesto, empresas]); */
 
     const handleInputChange = (event) => {
         setDatos({

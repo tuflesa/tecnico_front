@@ -11,8 +11,8 @@ const VistaPdf = ({pedido, VerPdf, linea, empresa, lineas_adicionales, proveedor
     const [user] = useCookies(['tec-user']);
     const [hoy] = useState(new Date);
     useEffect(()=>{
-        console.log('mostramos como recibimos la empresa');
-        console.log(empresa);
+        console.log('mostramos como recibimos direccion_envio');
+        console.log(direccion_envio);
     },[token]);
     function parseData(){
         if(linea){

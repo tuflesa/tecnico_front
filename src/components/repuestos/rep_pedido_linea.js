@@ -192,7 +192,7 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
                                     <Form.Label>Descuento</Form.Label>
                                     <Form.Control imput type="text"  
                                                 name='descuento' 
-                                                value={datos.descuento + '%'}
+                                                value={datos.descuento}
                                                 onChange={handleInputChange}
                                                 placeholder="Descuento">  
                                     </Form.Control>

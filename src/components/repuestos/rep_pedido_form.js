@@ -53,8 +53,8 @@ const PedidoForm = ({pedido, setPedido}) => {
         finalizado: pedido ? pedido.finalizado : false,
         lineas_pedido: pedido ? pedido.lineas_pedido : null,
         lineas_adicionales: pedido ? pedido.lineas_adicionales : null,
-        direccion_envio: pedido ? pedido.direccion_envio : null,
-        contacto: pedido ? pedido.contacto : null,
+        direccion_envio: pedido.direccion_envio ? pedido.direccion_envio.id : null,
+        contacto: pedido.contacto ? pedido.contacto.id : null,
     });     
 
     useEffect(()=>{
@@ -65,6 +65,8 @@ const PedidoForm = ({pedido, setPedido}) => {
         })
         .then( res => { 
             setProveedores(res.data);
+            console.log('que vale contacto');
+            console.log(pedido.contacto);
         })
         .catch(err => { console.log(err);})
     },[token]);
@@ -90,9 +92,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                 'Authorization': `token ${token['tec-token']}`
               }     
         })
-        .then( res => { 
-            console.log('que vale direcciones.....');
-            console.log(res.data);
+        .then( res => {                       
             setDirecciones(res.data);
         })
         .catch(err => { console.log(err);})
@@ -126,8 +126,8 @@ const PedidoForm = ({pedido, setPedido}) => {
             finalizado: pedido ? pedido.finalizado : false,
             lineas_pedido: pedido.lineas_pedido ? pedido.lineas_pedido : null,
             lineas_adicionales: pedido ? pedido.lineas_adicionales : null,
-            direccion_envio: pedido ? pedido.direccion_envio : null,
-            contacto: pedido ? pedido.contacto : null
+            direccion_envio: pedido ? pedido.direccion_envio.id : direcciones[0].id,
+            contacto: pedido ? pedido.contacto.id : null
 
         });
             //console.log(datos);
