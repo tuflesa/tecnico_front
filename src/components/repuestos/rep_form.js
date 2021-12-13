@@ -10,6 +10,7 @@ import StockMinimoForm from './rep_stock_minimo';
 import EquipoForm from './rep_equipo';
 import ProveedorForm from './rep_proveedor';
 import RepPorAlmacen from './rep_por_almacen';
+import { useBarcode } from 'react-barcodes';
 
 const RepuestoForm = ({repuesto, setRepuesto}) => {
     const [token] = useCookies(['tec-token']);
@@ -313,6 +314,34 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         .catch(err => { console.log(err);});
     }
 
+    function Barcode({datos}) {
+        const {inputRef}  = useBarcode({
+          value: String(datos.id).padStart(12,'0'),
+          options: {
+            format: "ean13",
+            flat: true,
+            height: 60,
+            // width: 1.2,
+            fontSize: 16,
+            text: datos.id + ' - ' + datos.nombre
+          }
+        });
+        return <svg id="barcode-canvas" ref={inputRef}/>;
+    };
+
+    const ImprimirBarcode = () => {
+        var container = document.getElementById('barcode');
+        // var mySVG = document.getElementById("barcode-canvas");
+        var width = "100%";
+        var height = "100%";
+        var printWindow = window.open('', 'PrintMap',
+        'width=' + width + ',height=' + height);
+        printWindow.document.writeln(container.innerHTML);
+        printWindow.document.close();
+        printWindow.print();
+        printWindow.close();
+    }
+
     return (
         <Container>
             <Row className="justify-content-center"> 
@@ -392,6 +421,11 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                     />
                                 </Form.Group>
                             </Col>
+                            <Col>
+                                <div id='barcode'>
+                                    {datos.id && <Barcode datos={datos}/>}
+                                </div>
+                            </Col>
                         </Row>
                         <Row>
                             <Col>
@@ -421,6 +455,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                     Cancelar
                                 </Button>
                             </Link>
+                            {datos.id && <Button variant='info' className={'mx-2'} onClick={ImprimirBarcode}>Imprimir Etiqueta</Button>}
                         </Form.Row>
 
                         {repuesto.id ?
