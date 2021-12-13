@@ -6,6 +6,7 @@ import { Container, Row, Col, Table, Modal, Button } from 'react-bootstrap';
 import { Trash, PencilFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import RepListaFilto from './rep_lista_filtro';
+import ReactExport from 'react-data-export';
 
 const RepLista = () => {
     const [token] = useCookies(['tec-token']);
@@ -14,6 +15,9 @@ const RepLista = () => {
     const [show, setShow] = useState(false);
     const [repuestoBorrar, setRepuestoBorrar] = useState(null);
     const [filtro, setFiltro] = useState(`?equipos__seccion__zona__empresa__id=${user['tec-user'].perfil.empresa.id}&&descatalogado=${false}`);
+    const ExcelFile = ReactExport.ExcelFile;
+    const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
+    const ExcelColumn = ReactExport.ExcelFile.ExcelColumn;
 
     const actualizaFiltro = str => {
         // console.log(str);
@@ -72,6 +76,16 @@ const RepLista = () => {
             <Row>
                 <Col>
                     <h5 className="mb-3 mt-3">Lista de Repuestos</h5>
+                    <ExcelFile filename={"ExcelExportExample"} element={<button>Exportar a Excel</button>}>
+                        <ExcelSheet data={repuestos} name="Repuestos">
+                            <ExcelColumn label="Id" value="id"/>
+                            <ExcelColumn label="Nombre" value="nombre"/>
+                            <ExcelColumn label="Fabricante" value="fabricante"/>
+                            <ExcelColumn label="Modelo" value="modelo"/>
+                            <ExcelColumn label="Crítico" value="es_critico"/>
+                            <ExcelColumn label="Descatalogado" value="descatalogado"/>
+                        </ExcelSheet>
+                    </ExcelFile>
                     <Table striped bordered hover>
                         <thead>
                             <tr>
