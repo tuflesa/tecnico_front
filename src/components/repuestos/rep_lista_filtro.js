@@ -7,8 +7,12 @@ import { useCookies } from 'react-cookie';
 const RepListaFilto = ({actualizaFiltro}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
+    const [suma, setSuma] = useState(null);
+    var sumar = null;
+    
 
     const [datos, setDatos] = useState({
+        id:'',
         nombre: '',
         fabricante: '',
         modelo: '',
@@ -20,6 +24,8 @@ const RepListaFilto = ({actualizaFiltro}) => {
         seccion: '',
         equipo: ''
     });
+    const [numeroBar, setnumeroBar] = useState({id:''});
+
     const [tiposRepuesto, setTiposRepuesto] = useState(null);
     const [empresas, setEmpresas] = useState(null);
     const [secciones, setSecciones] = useState(null);
@@ -151,7 +157,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
     }, [token, datos.seccion]);
 
     useEffect(()=>{
-        const filtro1 = `?nombre__icontains=${datos.nombre}&fabricante__icontains=${datos.fabricante}&modelo__icontains=${datos.modelo}&es_critico=${datos.critico}&descatalogado=${datos.descatalogado}&tipo_repuesto=${datos.tipo_repuesto}`;
+        const filtro1 = `?nombre__icontains=${datos.nombre}&fabricante__icontains=${datos.fabricante}&modelo__icontains=${datos.modelo}&id=${datos.id}&es_critico=${datos.critico}&descatalogado=${datos.descatalogado}&tipo_repuesto=${datos.tipo_repuesto}`;
         let filtro2 = `&equipos__seccion__zona__empresa__id=${datos.empresa}`;
         if (datos.empresa !== ''){
             filtro2 = filtro2 + `&equipos__seccion__zona__id=${datos.zona}`;
@@ -166,16 +172,27 @@ const RepListaFilto = ({actualizaFiltro}) => {
         const filtro = filtro1 + filtro2;
         
         actualizaFiltro(filtro);
-    },[datos.nombre, datos.fabricante, datos.modelo, datos.critico, datos.descatalogado, datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.tipo_repuesto]);
+    },[datos.nombre, datos.fabricante, datos.modelo, datos.id, datos.critico, datos.descatalogado, datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.tipo_repuesto]);
 
 
     const handleInputChange = (event) => {
+        //datos.id = parseInt (numeroBar.id);
         setDatos({
             ...datos,
             [event.target.name] : event.target.value
         })
     }
 
+    const handleInputChange2 = (event) => {             
+            setnumeroBar ({
+                ...numeroBar,
+                [event.target.name] : event.target.value                 
+            }) 
+            if(numeroBar.id.length===11){
+                datos.id = parseInt (numeroBar.id);
+            }
+    }
+    
     const handleDisabled = () => {
         return user['tec-user'].perfil.nivel_acceso.nombre === 'local'
     }
@@ -185,6 +202,16 @@ const RepListaFilto = ({actualizaFiltro}) => {
             <h5 className="mb-3 mt-3">Filtro</h5>
             <Form>
                 <Row>
+                    <Col>
+                        <Form.Group controlId="formId">
+                            <Form.Label>Codigo Barras</Form.Label>
+                            <Form.Control type="text" 
+                                        name='id' 
+                                        value={numeroBar.id}
+                                        onChange={handleInputChange2} 
+                                        placeholder="Codigo de barras" />
+                        </Form.Group>
+                    </Col>
                     <Col>
                         <Form.Group controlId="formNombre">
                             <Form.Label>Nombre contiene</Form.Label>

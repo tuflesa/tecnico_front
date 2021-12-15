@@ -11,6 +11,7 @@ import EquipoForm from './rep_equipo';
 import ProveedorForm from './rep_proveedor';
 import RepPorAlmacen from './rep_por_almacen';
 import { useBarcode } from 'react-barcodes';
+import { text } from 'd3';
 
 const RepuestoForm = ({repuesto, setRepuesto}) => {
     const [token] = useCookies(['tec-token']);
@@ -86,41 +87,13 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     useEffect(()=>{
         let stock_T = 0;
         datos.stocks_minimos && datos.stocks_minimos.forEach(element => {
-            stock_T += element.stock_act;
-            /* const sm = datos.stocks_minimos.filter(e => e.almacen.id === element.almacen__id);
-            if (sm.length > 0) {
-                element.stock_minimo = sm[0].cantidad;
-            } 
-            else {
-                element.stock_minimo = 0;
-            } */
+            stock_T += element.stock_act;           
         });        
         setDatos({
             ...datos,
             stock_T : stock_T
         })        
     },[datos.stocks_minimos]);
-
-
-/*     useEffect(()=>{
-        let stock_T = 0;
-        datos.stock && datos.stock.forEach(element => {
-            stock_T += element.suma;
-            const sm = datos.stocks_minimos.filter(e => e.almacen.id === element.almacen__id);
-            if (sm.length > 0) {
-                element.stock_minimo = sm[0].cantidad;
-            } 
-            else {
-                element.stock_minimo = 0;
-            }
-        });
-
-        setDatos({
-            ...datos,
-            stock_T : stock_T
-        })
-        eslint-disable-next-line react-hooks/exhaustive-deps
-    },[datos.stock]); */
 
     useEffect(()=>{
         const stock_por_empresa = [];
@@ -132,17 +105,6 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         });
         setStockEmpresa(stock_por_empresa);
     },[repuesto, empresas]);
-
-    /* useEffect(()=>{
-        const stock_por_empresa = [];
-        repuesto && empresas && empresas.map( empresa => {
-            const almacenes_por_empresa = repuesto.stocks_minimos.filter( s => s.almacen.empresa_id === empresa.id);
-            const stock_empresa = almacenes_por_empresa.reduce((a, b) => a + b.stock_act, 0);
-            const stock_minimo_empresa = almacenes_por_empresa.reduce((a, b) => a + b.cantidad, 0);
-            stock_por_empresa.push({empresa: empresa, stock: stock_empresa, stock_minimo: stock_minimo_empresa});
-        });
-        setStockEmpresa(stock_por_empresa);
-    },[repuesto, empresas]); */
 
     const handleInputChange = (event) => {
         setDatos({
@@ -314,6 +276,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         .catch(err => { console.log(err);});
     }
 
+    
     function Barcode({datos}) {
         const {inputRef}  = useBarcode({
           value: String(datos.id).padStart(12,'0'),
@@ -324,10 +287,11 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             // width: 1.2,
             fontSize: 16,
             text: datos.id + ' - ' + datos.nombre
-          }
-        });
+            //text: Barcode.data
+          }            
+        }); 
         return <svg id="barcode-canvas" ref={inputRef}/>;
-    };
+    };   
 
     const ImprimirBarcode = () => {
         var container = document.getElementById('barcode');
