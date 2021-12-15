@@ -3,6 +3,7 @@ import { Container, Row, Form, Col } from 'react-bootstrap';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
+import { Keyboard } from "react-bootstrap-icons";
 
 const RepListaFilto = ({actualizaFiltro}) => {
     const [token] = useCookies(['tec-token']);
@@ -184,15 +185,18 @@ const RepListaFilto = ({actualizaFiltro}) => {
     }
 
     const handleInputChange2 = (event) => {             
-            setnumeroBar ({
-                ...numeroBar,
-                [event.target.name] : event.target.value                 
-            }) 
-            if(numeroBar.id.length===11){
-                datos.id = parseInt (numeroBar.id);
-            }
+        setnumeroBar ({
+            ...numeroBar,
+            [event.target.name] : event.target.value                 
+        }) 
+        if(numeroBar.id.length===11){
+            datos.id = parseInt (numeroBar.id);
+        }
+        if(numeroBar.id.length===12){
+            datos.id ='';
+        }
     }
-    
+   
     const handleDisabled = () => {
         return user['tec-user'].perfil.nivel_acceso.nombre === 'local'
     }
@@ -208,7 +212,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
                             <Form.Control type="text" 
                                         name='id' 
                                         value={numeroBar.id}
-                                        onChange={handleInputChange2} 
+                                        onChange={handleInputChange2}
                                         placeholder="Codigo de barras" />
                         </Form.Group>
                     </Col>
@@ -218,7 +222,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
                             <Form.Control type="text" 
                                         name='nombre' 
                                         value={datos.nombre}
-                                        onChange={handleInputChange} 
+                                        onChange={handleInputChange}                                        
                                         placeholder="Nombre contiene" />
                         </Form.Group>
                     </Col>
