@@ -192,7 +192,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
         if(numeroBar.id.length===11){
             datos.id = parseInt (numeroBar.id);
         }
-        if(numeroBar.id.length===12){
+        else{
             datos.id ='';
         }
     }
