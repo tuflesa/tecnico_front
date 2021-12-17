@@ -24,6 +24,8 @@ const RepNavBar = () => {
                             <NavDropdown.Divider />
                             <NavDropdown.Item href="/repuestos/pedidos">Lista de pedidos</NavDropdown.Item>
                             <NavDropdown.Item href="/repuestos/pedido/nuevo">Nuevo pedido</NavDropdown.Item>
+                            <NavDropdown.Divider />
+                            <NavDropdown.Item href="/repuestos/salidas">Salidas</NavDropdown.Item>
                         </NavDropdown>
                     </Nav>    
                     <Navbar.Text className="mr-4" >

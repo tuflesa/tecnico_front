@@ -13,6 +13,7 @@ import RepProveedorEdit from './rep_proveedor_editar';
 import PedLista from './rep_pedidos_lista';
 import PedidoEditar from './rep_pedido_editar';
 import RepPedidoNuevo from './rep_pedido_nuevo';
+import RepSalidas from './rep_salidas';
 
 const Repuestos = () => {
     
@@ -21,7 +22,8 @@ const Repuestos = () => {
             <RepNavBar />
             <Switch>
                 <Route path='/repuestos' exact component={RepLista} />
-                <Route path='/repuestos/pedidos' component={PedLista} />                
+                <Route path='/repuestos/pedidos' component={PedLista} /> 
+                <Route path='/repuestos/salidas' component={RepSalidas} />               
                 <Route path='/repuestos/pedido_detalle/:id' component={PedidoEditar} />                
                 <Route path='/repuestos/pedido/nuevo' component={RepPedidoNuevo} />
                 <Route path='/repuestos/nuevo' component={RepNuevo} />
@@ -31,7 +33,7 @@ const Repuestos = () => {
                 <Route path='/repuestos/proveedores' component={RepProveedoresLista} />  
                 <Route path='/repuestos/proveedor/nuevo' component={RepProveedorNuevo} />
                 <Route path='/repuestos/proveedor/:id' component={RepProveedorEdit} />                              
-                <Route path='/repuestos/:id' component={RepDetalle} />
+                <Route path='/repuestos/:id' component={RepDetalle} />                
             </Switch>
         </React.Fragment>
     )

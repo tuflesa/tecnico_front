@@ -7,10 +7,7 @@ import { Keyboard } from "react-bootstrap-icons";
 
 const RepListaFilto = ({actualizaFiltro}) => {
     const [token] = useCookies(['tec-token']);
-    const [user] = useCookies(['tec-user']);
-    const [suma, setSuma] = useState(null);
-    var sumar = null;
-    
+    const [user] = useCookies(['tec-user']);  
 
     const [datos, setDatos] = useState({
         id:'',
