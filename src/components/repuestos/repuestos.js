@@ -13,7 +13,8 @@ import RepProveedorEdit from './rep_proveedor_editar';
 import PedLista from './rep_pedidos_lista';
 import PedidoEditar from './rep_pedido_editar';
 import RepPedidoNuevo from './rep_pedido_nuevo';
-import RepSalidas from './rep_salidas';
+import RepSalidasGenerico from './rep_salidas_generico';
+import RepSalidasID from './rep_salidas_id';
 
 const Repuestos = () => {
     
@@ -23,7 +24,8 @@ const Repuestos = () => {
             <Switch>
                 <Route path='/repuestos' exact component={RepLista} />
                 <Route path='/repuestos/pedidos' component={PedLista} /> 
-                <Route path='/repuestos/salidas' component={RepSalidas} />               
+                <Route path='/repuestos/salidas/:id' component={RepSalidasID} /> 
+                <Route path='/repuestos/salidas' component={RepSalidasGenerico} />    
                 <Route path='/repuestos/pedido_detalle/:id' component={PedidoEditar} />                
                 <Route path='/repuestos/pedido/nuevo' component={RepPedidoNuevo} />
                 <Route path='/repuestos/nuevo' component={RepNuevo} />
