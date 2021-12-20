@@ -52,19 +52,19 @@ const VistaIngPdf = ({pedido, VerIngPdf, linea, empresa, lineas_adicionales, pro
     }
     const styles = StyleSheet.create({
         page:{
-           // backgroundColor: "green",
             margin: 30,
-            wrap: true,
-            marginBottom: 30,
-            //marginTop: 30,
-            //marginLeft: 30,
-            //marginRight: 30
         },
         page2:{
            // backgroundColor: "green",
             marginLeft: 30,
             marginRight: 30,
-        },        
+        },
+        page3:{
+            marginLeft: 30,
+            marginRight: 30,
+            marginTop: 15,
+            marginBottom: 15
+        },
         section: {
             flexDirection: 'row',
             flexGrow: 1,
@@ -74,10 +74,18 @@ const VistaIngPdf = ({pedido, VerIngPdf, linea, empresa, lineas_adicionales, pro
             fixed: true,
             margin: 5,
             padding: 5,
-            flex: 1,
+            flex: 0.7,
             flexDirection: "column",
-            //backgroundColor: "yellow",
-            fontSize: 13
+           // backgroundColor: "blue",
+            //fontSize: 13
+        },
+        iconos: {
+            fixed: true,
+            margin: 5,
+            padding: 5,
+            flex: 1,
+           // backgroundColor: "yellow",
+            flexDirection: "column",
         },
         section3: {
             margin: 5,
@@ -110,7 +118,6 @@ const VistaIngPdf = ({pedido, VerIngPdf, linea, empresa, lineas_adicionales, pro
             flexDirection: "column",
             //backgroundColor: "blue",
             fontSize: 13,
-            //borderBottomColor: 'black'
         },
         section7: {
             margin: 5,
@@ -119,7 +126,6 @@ const VistaIngPdf = ({pedido, VerIngPdf, linea, empresa, lineas_adicionales, pro
             flexDirection: "column",
             //backgroundColor: "blue",
             fontSize: 13,
-            //borderBottomColor: 'black'
         },
         section8: {
             margin: 5,
@@ -129,7 +135,6 @@ const VistaIngPdf = ({pedido, VerIngPdf, linea, empresa, lineas_adicionales, pro
             //backgroundColor: "blue",
             textAlign: 'center',
             fontSize: 13,
-            //borderBottomColor: 'black'
         },
         section9: {
             margin: 5,
@@ -139,12 +144,10 @@ const VistaIngPdf = ({pedido, VerIngPdf, linea, empresa, lineas_adicionales, pro
             textAlign: 'right',
             //backgroundColor: "blue",
             fontSize: 13,
-            //borderBottomColor: 'black'
         },
         section10: {
-            margin: 1,
-            //padding: 5,
-            flex: 2,
+            margin: 2,
+            flex: 3,
             flexDirection: "column",
             //backgroundColor: "yellow",
             fontSize: 11
@@ -154,21 +157,30 @@ const VistaIngPdf = ({pedido, VerIngPdf, linea, empresa, lineas_adicionales, pro
             flexGrow: 1,
             borderBottom: true
            // backgroundColor: "red"
-        }
+        },
+        pageNumber: {
+            position: 'absolute',
+            fontSize: 12,
+            bottom: 30,
+            left: 0,
+            right: 0,
+            textAlign: 'center',
+            color: 'grey',
+          },
     });
     return(     
         <Document>
             <Page size="A4">
                 <Text render={({ pageNumber, totalPages }) => ("  ")} fixed />
                 <View style={styles.page}>
-                    <View style={styles.section}>
+                    <View style={styles.section} fixed>
                         <View style={styles.imagen}>
                             <Image src= {empresa.logo}/>
                         </View>
                         <View style={styles.section3}>
-                            <Text>Iconos # 2</Text>
+                            <Image style={styles.iconos} src="components\repuestos\images\logo-AENOR-9001.jpg"/>
                         </View>
-                    </View>                
+                    </View>            
                     <View style={styles.page2}>               
                         <View style={styles.section}>
                             <View style={styles.section3}>
@@ -209,8 +221,8 @@ const VistaIngPdf = ({pedido, VerIngPdf, linea, empresa, lineas_adicionales, pro
                             </View>
                         </View>
                     </View>
-                    { linea != null ?
-                        <View style={styles.page}>
+                    { linea != '' ?
+                        <View style={styles.page3}>
                             <View style={styles.sectionTabla}>
                                 <View style={styles.section7}><Text>Qty</Text></View>
                                 <View style={styles.section6}><Text>description</Text></View>
@@ -221,8 +233,8 @@ const VistaIngPdf = ({pedido, VerIngPdf, linea, empresa, lineas_adicionales, pro
                         </View>                    
                     :null}
                     {parseData()}
-                    { lineas_adicionales != null ?
-                        <View style={styles.page}>
+                    { lineas_adicionales != '' ?
+                        <View style={styles.page3}>
                             <View style={styles.sectionTabla}>
                                 <View style={styles.section7}><Text>Qty</Text></View>
                                 <View style={styles.section6}><Text>Description</Text></View>
@@ -233,10 +245,10 @@ const VistaIngPdf = ({pedido, VerIngPdf, linea, empresa, lineas_adicionales, pro
                         </View>                    
                     :null}
                     {parse2Data()}
-                    <View style={styles.page2}> 
-                        <View style={styles.section}>
+                    <View style={styles.page}wrap={false}> 
+                        {/* <View style={styles.section}>
                             <View style={styles.section5}><Text>Looking forward to hearing from you soon,</Text></View>                                              
-                        </View>
+                        </View> */}
                         <View style={styles.section}> 
                             <View style={styles.section7}></View>                        
                             <View style={styles.section10}><Text>{pedido.creado_por.get_full_name}</Text></View>                       
@@ -246,8 +258,9 @@ const VistaIngPdf = ({pedido, VerIngPdf, linea, empresa, lineas_adicionales, pro
                             <View style={styles.section10}><Text>Technical Department</Text></View>
                         </View>
                     </View>
-                    <Text render={({ pageNumber, totalPages }) => ("  ")} fixed />
                 </View>
+                <Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => (`${pageNumber} / ${totalPages}`)} fixed />
+                <View style={styles.page}fixed></View>  
             </Page>
         </Document> 
     )    

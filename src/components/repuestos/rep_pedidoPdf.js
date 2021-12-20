@@ -60,7 +60,13 @@ const VistaPdf = ({pedido, VerPdf, linea, empresa, lineas_adicionales, proveedor
         page2:{
            // backgroundColor: "green",
             marginLeft: 30,
-            marginRight: 30
+            marginRight: 30,
+        },
+        page3:{
+            marginLeft: 30,
+            marginRight: 30,
+            marginTop: 15,
+            marginBottom: 15
         },
         section: {
             flexDirection: 'row',
@@ -71,10 +77,18 @@ const VistaPdf = ({pedido, VerPdf, linea, empresa, lineas_adicionales, proveedor
             fixed: true,
             margin: 5,
             padding: 5,
-            flex: 1,
+            flex: 0.7,
             flexDirection: "column",
-            //backgroundColor: "yellow",
-            fontSize: 13
+           // backgroundColor: "blue",
+            //fontSize: 13
+        },
+        iconos: {
+            fixed: true,
+            margin: 5,
+            padding: 5,
+            flex: 1,
+           // backgroundColor: "yellow",
+            flexDirection: "column",
         },
         section3: {
             margin: 5,
@@ -135,8 +149,8 @@ const VistaPdf = ({pedido, VerPdf, linea, empresa, lineas_adicionales, proveedor
             fontSize: 13,
         },
         section10: {
-            margin: 1,
-            flex: 2,
+            margin: 2,
+            flex: 3,
             flexDirection: "column",
             //backgroundColor: "yellow",
             fontSize: 11
@@ -146,19 +160,28 @@ const VistaPdf = ({pedido, VerPdf, linea, empresa, lineas_adicionales, proveedor
             flexGrow: 1,
             borderBottom: true
            // backgroundColor: "red"
-        }
+        },
+        pageNumber: {
+            position: 'absolute',
+            fontSize: 12,
+            bottom: 30,
+            left: 0,
+            right: 0,
+            textAlign: 'center',
+            color: 'grey',
+          },
     });
     return(     
         <Document>
             <Page size="A4">
                 <Text render={({ pageNumber, totalPages }) => ("  ")} fixed />            
-                <View style={styles.page}>
-                    <View style={styles.section}>
+                <View style={styles.page} >
+                    <View style={styles.section} fixed>
                         <View style={styles.imagen}>
                             <Image src= {empresa.logo}/>
                         </View>
                         <View style={styles.section3}>
-                            <Text>Iconos # 2</Text>
+                            <Image style={styles.iconos} src="components\repuestos\images\logo-AENOR-9001.jpg"/>
                         </View>
                     </View>
                     <View style={styles.page2}>               
@@ -201,8 +224,8 @@ const VistaPdf = ({pedido, VerPdf, linea, empresa, lineas_adicionales, proveedor
                             </View>
                         </View>
                     </View>
-                    { linea != null ?
-                        <View style={styles.page}>
+                    { linea != '' ?
+                        <View style={styles.page3} fixed>
                             <View style={styles.sectionTabla}>
                                 <View style={styles.section7}><Text>Cant.</Text></View>
                                 <View style={styles.section6}><Text>Descripción</Text></View>
@@ -213,8 +236,8 @@ const VistaPdf = ({pedido, VerPdf, linea, empresa, lineas_adicionales, proveedor
                         </View>                    
                     :null}
                     {parseData()}
-                    { lineas_adicionales != null ?
-                        <View style={styles.page}>
+                    { lineas_adicionales != '' ?
+                        <View style={styles.page3}>
                             <View style={styles.sectionTabla}>
                                 <View style={styles.section7}><Text>Cant.</Text></View>
                                 <View style={styles.section6}><Text>Descripción</Text></View>
@@ -225,10 +248,10 @@ const VistaPdf = ({pedido, VerPdf, linea, empresa, lineas_adicionales, proveedor
                         </View>                    
                     :null}
                     {parse2Data()}
-                    <View style={styles.page2}>
-                        <View style={styles.section}>
+                    <View style={styles.page}wrap={false}>
+                        {/* <View style={styles.section}>
                             <View style={styles.section5}><Text>Sin más por el momento, reciban un afectuoso saludo.</Text></View>                                              
-                        </View>
+                        </View> */}
                         <View style={styles.section}> 
                             <View style={styles.section7}></View>                        
                             <View style={styles.section10}><Text>{pedido.creado_por.get_full_name}</Text></View>                       
@@ -239,7 +262,8 @@ const VistaPdf = ({pedido, VerPdf, linea, empresa, lineas_adicionales, proveedor
                         </View>
                     </View>
                 </View>
-                <Text render={({ pageNumber, totalPages }) => ("  ")} fixed />
+                <Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => (`${pageNumber} / ${totalPages}`)} fixed />
+                <View style={styles.page}fixed></View>                
             </Page>
         </Document>         
     )    
