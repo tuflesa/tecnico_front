@@ -1,5 +1,4 @@
 import React , { useState, useEffect } from "react";
-import RepAlmacenForm from './rep_almacen_form';
 import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
@@ -28,6 +27,8 @@ const RepSalidas = ({alm}) => {
     const [lineasSalida, setLineasSalida] = useState([]);
     const [cambioCodigo, setCambioCodigo] = useState(false);
     const [almacenesBloqueado, setAlmacenesBloqueado] = useState(false);
+    const [salida, setSalida] = useState(null);
+    const [movimientos, setMovimientos] = useState([]);
 
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/repuestos/almacen/?empresa=${datos.usuario.perfil.empresa.id}`,{
@@ -147,6 +148,58 @@ const RepSalidas = ({alm}) => {
         setLineasSalida(newLineas);
     }
 
+    const GenerarSalida = () => {
+        if (lineasSalida.length > 0) {
+            axios.post(BACKEND_SERVER + `/api/repuestos/salida/`, {
+                nombre: 'Salida de almacen',
+                responsable: user['tec-user'].id
+            }, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                  }     
+            })
+            .then( res => { 
+                setSalida(res.data);
+            })
+            .catch(err => { console.log(err);})
+        }
+    }
+
+    useEffect(()=>{
+        salida && lineasSalida.length>0 && lineasSalida.forEach(l => {
+            axios.post(BACKEND_SERVER + `/api/repuestos/lineasalida/`, {
+                salida: salida.id,
+                repuesto: l.repuesto,
+                almacen: l.almacen,
+                cantidad: l.cantidad,
+            }, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                    }     
+            })
+            .then( res => { 
+                setMovimientos([...movimientos, res.data]);
+            })
+            .catch(err => { console.log(err)});
+            });
+    },[salida]);
+    useEffect(()=>{
+        (movimientos.length === lineasSalida.length) && movimientos.forEach(m => {
+            axios.post(BACKEND_SERVER + `/api/repuestos/movimiento/`,{
+            cantidad : -m.cantidad,
+            almacen : m.almacen,
+            usuario : salida.responsable,
+            linea_salida: m.id
+            }, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                    }     
+        })
+        .then( res => { console.log(res.data)})
+        .catch( err => {console.log(err)});
+    });
+    },[movimientos]);
+
     return (
         <Container>
             <Row>                
@@ -162,23 +215,13 @@ const RepSalidas = ({alm}) => {
                                     {!alm && <option key={0} value={''}>
                                             ----
                                     </option>}
-                                    {!alm && almacenes && almacenes.map( almacen => {
+                                    {almacenes && almacenes.map( almacen => {
                                         return (
                                         <option key={almacen.id} value={almacen.id}>
                                             {almacen.nombre}
                                         </option>
                                         )
-                                    })}   
-                                    {/* {alm && almacenes && <option key={alm} value={alm}>
-                                            {almacenes[0].nombre}
-                                    </option>}  */}  
-                                    {alm && almacenes && almacenes.map( almacen => {
-                                        return (
-                                        <option key={almacen.id} value={almacen.id}>
-                                            {almacen.nombre}
-                                        </option>
-                                        )
-                                    })}                                                                                          
+                                    })}                                                                                       
                         </Form.Control>
                     </Form.Group>
                 </Col>
@@ -227,7 +270,7 @@ const RepSalidas = ({alm}) => {
             </Row>
             <Form.Row className="justify-content-center">
                 {lineasSalida.length>0 ? 
-                    <Button variant="info" type="submit" className={'mx-2'} onClick={null}>Hacer Salida</Button> :
+                    <Button variant="info" type="submit" className={'mx-2'} onClick={GenerarSalida}>Hacer Salida</Button> :
                     null
                 }
                 <Link to='/home'>

@@ -126,6 +126,7 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
 
     const guardarMovimiento = (event) => {
         event.preventDefault();
+        console.log(datos);
         axios.post(BACKEND_SERVER + `/api/repuestos/movimiento/`, {
             fecha: datos.fecha,
             cantidad: datos.recibido,
