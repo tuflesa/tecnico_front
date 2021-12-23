@@ -205,7 +205,7 @@ const VistaPdf = ({pedido, VerPdf, linea, empresa, lineas_adicionales, proveedor
                                 <Text>{empresa.nombre}</Text>
                                 <Text>{direccion_envio.direccion}</Text>
                                 <Text>{direccion_envio.poblacion}</Text>
-                                <Text>{direccion_envio.codpostal}</Text>
+                                <Text>{direccion_envio.codpostal + ' - ' + direccion_envio.provincia}</Text>
                             </View>
                         </View>
                     </View>
