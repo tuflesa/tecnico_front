@@ -12,7 +12,8 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
         repuesto: repuesto_id,
         almacen: '',
         stock_minimo_cantidad: null,
-        stock_actual: null
+        stock_actual: null,
+        localizacion: null,
     });
     const [empresas, setEmpresas] = useState([]);
     const [almacenes, setAlmacenes] = useState([]);
@@ -87,9 +88,11 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
         setDatos({
             ...datos,
             stock_minimo_cantidad : null,
-            stock_actual : null
+            stock_actual : null,
+            localizacion : null,
         });
         handleCloseStock();
+       
     }
 
     const handleGuardar = () => {
@@ -116,7 +119,8 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
                     repuesto: repuesto_id,
                     almacen: datos.almacen,
                     cantidad: datos.stock_minimo_cantidad ? datos.stock_minimo_cantidad : 0,
-                    stock_act: 0, 
+                    stock_act: 0,
+                    localizacion: datos.localizacion, 
                 }, {
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
@@ -237,6 +241,20 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
                                                     )
                                                 })}
                                     </Form.Control>
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <Form.Group controlId="localizacion">
+                                    <Form.Label>Ubicación</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='localizacion' 
+                                                value={datos.localizacion}
+                                                onChange={handleInputChange} 
+                                                placeholder="Localización en Almacén"
+                                                // disabled
+                                    />
                                 </Form.Group>
                             </Col>
                         </Row>

@@ -168,7 +168,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         })
         .then( res => { 
             setRepuesto(res.data);
-            // window.location.href = "/repuestos";
+            setShowStock(true);
         })
         .catch(err => { console.log(err);})
     }
