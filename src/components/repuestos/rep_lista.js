@@ -20,7 +20,6 @@ const RepLista = () => {
     const ExcelColumn = ReactExport.ExcelFile.ExcelColumn;
 
     const actualizaFiltro = str => {
-        // console.log(str);
         setFiltro(str);
     }
 
@@ -48,7 +47,6 @@ const RepLista = () => {
     }
 
     const borrarRepuesto = () => {
-        // console.log(repuestoBorrar);
         axios.patch(BACKEND_SERVER + `/api/repuestos/lista/${repuestoBorrar.id}/`,{
             descatalogado: true
         }, {
@@ -57,9 +55,6 @@ const RepLista = () => {
                 }
             })
             .then(res => {
-                // const repuestosActual = repuestos.filter(repuesto => repuesto.id !== repuestoBorrar.id);
-                // setRepuestos(repuestosActual);
-                // console.log(res.data);
                 setShow(false);
                 setRepuestoBorrar(null);
             })

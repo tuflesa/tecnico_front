@@ -101,9 +101,11 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             const almacenes_por_empresa = repuesto.stocks_minimos.filter( s => s.almacen.empresa_id === empresa.id);
             const stock_empresa = almacenes_por_empresa.reduce((a, b) => a + b.stock_act, 0);
             const stock_minimo_empresa = almacenes_por_empresa.reduce((a, b) => a + b.cantidad, 0);
-            stock_por_empresa.push({empresa: empresa, stock: stock_empresa, stock_minimo: stock_minimo_empresa});
+            if(almacenes_por_empresa.length>0){
+                stock_por_empresa.push({empresa: empresa, stock: stock_empresa, stock_minimo: stock_minimo_empresa});            
+            }
         });
-        setStockEmpresa(stock_por_empresa);
+        setStockEmpresa(stock_por_empresa);        
     },[repuesto, empresas]);
 
     const handleInputChange = (event) => {
@@ -447,7 +449,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                     </thead>
                                     <tbody>
                                         {stock_empresa && stock_empresa.map( stock => {
-                                            return (
+                                            return (                                                
                                                 <tr key={stock.empresa.id}>
                                                     <td>{stock.empresa.nombre}</td>
                                                     <td>{stock.stock}</td>
