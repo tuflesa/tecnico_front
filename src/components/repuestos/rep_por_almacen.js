@@ -27,7 +27,7 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
         let r_almacen = r.almacen.id;
         axios.patch(BACKEND_SERVER + `/api/repuestos/stocks_minimos/${r_id}/`, {
             cantidad: datos.stock_minimo ? datos.stock_minimo : repuesto.stocks_minimos.cantidad,  
-            stock_act: datos.stock_actual ? datos.stock_actual : repuesto.stocks_minimos.stock_act,          
+            stock_act: datos.stock_actual ? 0 : repuesto.stocks_minimos.stock_act,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`

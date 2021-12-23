@@ -116,7 +116,7 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
                     repuesto: repuesto_id,
                     almacen: datos.almacen,
                     cantidad: datos.stock_minimo_cantidad ? datos.stock_minimo_cantidad : 0,
-                    stock_act: datos.stock_actual ? datos.stock_actual : 0
+                    stock_act: 0, 
                 }, {
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
