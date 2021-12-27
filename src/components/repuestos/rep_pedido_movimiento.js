@@ -25,6 +25,7 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
         recibido: null,
         albaran: null,
         almacen: '',
+        localizacion: '',
         usuario: user['tec-user'],
     });
 
@@ -36,9 +37,6 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
     } 
 
     useEffect(()=>{
-        console.log('en useeffect');
-        console.log(empresa);
-        console.log(linea && linea.repuesto.id);
         linea && axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimo_detalle/?almacen__empresa__id=${empresa}&repuesto=${linea.repuesto.id}`, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -46,7 +44,6 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
         })
         .then( res => { 
             setAlmacenes(res.data);
-            console.log(res.data);
         })
         .catch(err => { console.log(err);})
     },[token, linea]);
@@ -62,6 +59,7 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
             recibido: datos ? datos.recibido : '',
             albaran: datos ? datos.albaran : '',
             almacen: datos ? datos.almacen : '',
+            localizacion: datos ? datos.localizacion : '',
             usuario: user['tec-user'].id,
         });
     },[linea]);
@@ -80,53 +78,9 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
         })
         .catch(err => { console.log(err);})
     }
-
-    //const actualizarStock = () =>{
-        //console.log(movimiento);
-        // axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimo_detalle/?almacen=${movimiento.almacen}&repuesto=${linea.repuesto.id}`, {
-        //     headers: {
-        //         'Authorization': `token ${token['tec-token']}`
-        //       }     
-        // })
-        // /* axios.patch(BACKEND_SERVER + `/api/repuestos/stocks_minimos/${res.data.id}/`,{
-        //     stock_act: res.data.stock_act + movimiento.recibido,
-        // },
-        // {
-        //     headers: {
-        //         'Authorization': `token ${token['tec-token']}`
-        //     }
-        // })
-        // .then( res => {
-        //     updatePedido();
-        // })
-        // .catch(err => { console.log(err);}) */
-        // .then( res => {    
-        //     //updatePedido();  
-        //     console.log('pintando res.data');
-        //     console.log(movimiento.cantidad);
-        //     axios.patch(BACKEND_SERVER + `/api/repuestos/stocks_minimos/${res.data[0].id}/`,{
-        //         stock_act: res.data[0].stock_act + movimiento.cantidad,
-        //     },
-        //     {
-        //         headers: {
-        //             'Authorization': `token ${token['tec-token']}`
-        //         }
-        //     })
-        //     .then( res => {
-        //         updatePedido();
-        //         console.log('estamos en actualizarStock');
-        //         console.log(res.data);
-        //     })
-        //     .catch(err => { console.log(err);})
-
-        // })
-        // .catch(err => { console.log(err);})
-
-    //}
-
+ 
     const guardarMovimiento = (event) => {
         event.preventDefault();
-        console.log(datos);
         axios.post(BACKEND_SERVER + `/api/repuestos/movimiento/`, {
             fecha: datos.fecha,
             cantidad: datos.recibido,
@@ -248,13 +202,14 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
                                                 {almacenes && almacenes.map( stock => {
                                                     return (
                                                     <option key={stock.id} value={stock.almacen.id}>
-                                                        {stock.almacen.nombre}
-                                                    </option>
-                                                    )
-                                                })}                                                                                                 
+                                                        {stock.almacen.nombre + ' => En: ' + stock.localizacion}                                                       
+                                                    </option>                                                    
+                                                    )                                                    
+                                                })}   
+                                                                                                                                              
                                     </Form.Control>
                                 </Form.Group>
-                            </Col>                            
+                            </Col>                                                       
                         </Row>
                     </Form>
                 </Modal.Body>

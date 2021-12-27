@@ -13,9 +13,14 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
         almacen: null,
         stock_actual: null,
         stock_minimo: null, 
+        localizaciones: null,
         habilitar: true,   
     });  
     const handleInputChange = (event) => {
+        console.log('localizacion');
+        console.log(datos.localizaciones);
+        console.log(datos.stock_act);
+        console.log(datos.stock_actual);
         setDatos({
             ...datos,
             [event.target.name] : event.target.value
@@ -25,9 +30,13 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
     const ActualizaStock = (r) =>{
         let r_id = r.id;
         let r_almacen = r.almacen.id;
+        console.log('que vale localizacion');
+        console.log(datos.localizacion);
+        console.log(datos.stock_minimo);
         axios.patch(BACKEND_SERVER + `/api/repuestos/stocks_minimos/${r_id}/`, {
             cantidad: datos.stock_minimo ? datos.stock_minimo : repuesto.stocks_minimos.cantidad,  
             stock_act: datos.stock_actual ? 0 : repuesto.stocks_minimos.stock_act,
+            localizacion: datos.localizaciones ? datos.localizaciones : repuesto.stocks_minimos.localizacion,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -91,6 +100,7 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
         cerrarListAlmacen();
         datos.stock_actual= '';
         datos.stock_minimo= '';
+        datos.localizaciones= '';
     } 
 
     const habilitar_linea = (r)=>{
@@ -130,7 +140,16 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
                                                 return (                                                    
                                                     <tr key={r.id}>
                                                         <td>{r.almacen.nombre}</td> 
-                                                        <td>{r.localizacion}</td>                                                                                                       
+                                                        <td>
+                                                        <input          className={r.almacen.nombre} 
+                                                                        type = "text" 
+                                                                        name='localizaciones'
+                                                                        value= {datos.localizacion}
+                                                                        onChange={handleInputChange}
+                                                                        placeholder={r.localizacion}
+                                                                        disabled
+                                                        />
+                                                        </td>                                                                                                       
                                                         <td>
                                                         <input          className={r.almacen.nombre} 
                                                                         type = "text" 

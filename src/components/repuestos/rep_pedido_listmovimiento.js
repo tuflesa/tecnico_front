@@ -10,6 +10,7 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
     const [user] = useCookies(['tec-user']);
 
     const [listados, setListados] = useState(null);
+    const [localizaciones, setLocalizaciones] = useState(null);
 
     useEffect(()=>{
         linea && axios.get(BACKEND_SERVER + `/api/repuestos/movimiento_detalle/?linea_pedido__id=${linea.id}`,{
@@ -18,7 +19,17 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
             }
         })
         .then( res => {
-            setListados(res.data);
+            setListados(res.data);            
+            for(var x=0;x<res.data.length;x++){
+                axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimos/?almacen=${res.data[x].almacen.id}&repuesto=${linea.repuesto.id}`,{
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }
+                })
+                .then( r => {
+                    setLocalizaciones(r.data);
+                })
+            }
         })
         .catch( err => {
             console.log(err);
@@ -54,7 +65,8 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
                                         <th>Fecha</th>
                                         <th>Cantidad Recibida</th>
                                         <th>Albarán</th>
-                                        <th>Almacén</th>                                        
+                                        <th>Almacén</th> 
+                                        <th>Localización</th>                                        
                                     </tr>
                                 </thead>                                
                                 <tbody>                                
@@ -64,10 +76,15 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
                                                 <td>{invertirFecha(String(lista.fecha))}</td>
                                                 <td>{lista.cantidad}</td>
                                                 <td>{lista.albaran}</td> 
-                                                <td>{lista.almacen.nombre}</td>                                                                    
+                                                <td>{lista.almacen.nombre}</td> 
+                                                <td>{localizaciones && localizaciones.map( loc => {
+                                                    if(loc.almacen === lista.almacen.id){
+                                                        return (loc.localizacion)
+                                                    }
+                                                })}</td>                                                                    
                                             </tr>
                                         )})
-                                    }                                    
+                                    }                                                                       
                                 </tbody>                                
                             </Table>
                         </Col>

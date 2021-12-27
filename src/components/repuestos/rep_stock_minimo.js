@@ -4,7 +4,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 
-const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_minimo, updateRepuesto, stocks_utilizados}) => {
+const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_minimo, updateRepuesto, stocks_utilizados, setShowStock}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
     const [datos, setDatos] = useState({
@@ -109,6 +109,7 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
                 })
                 .then( res => { 
                         updateRepuesto();
+                        setShowStock(false);
                     }
                 )
                 .catch(err => { console.log(err);})
@@ -131,6 +132,7 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
                             console.log('no hay valor inicial de stock ...')
                         }
                         updateRepuesto();
+                        setShowStock(false);
                     }
                 )
                 .catch(err => { console.log(err);})

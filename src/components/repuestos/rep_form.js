@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
-import { PlusCircle, PencilFill, Trash, SignpostSplitFill, Building, GeoFill, GeoAltFill, HouseDoorFill } from 'react-bootstrap-icons';
+import { PlusCircle, PencilFill, Trash, SignpostSplitFill, Building, GeoFill, GeoAltFill, HouseDoorFill, EaselFill } from 'react-bootstrap-icons';
 import './repuestos.css';
 import StockMinimoForm from './rep_stock_minimo';
 import EquipoForm from './rep_equipo';
@@ -32,6 +32,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     });
     const [tiposRepuesto, setTiposRepuesto] = useState(null);
     const [show_stock, setShowStock] = useState(false);
+    const [show_heGuardado, setShowHeGuardado] = useState(false);
     const [show_equipo, setShowEquipo] = useState(false);
     const [show_proveedor, setShowProveedor] = useState(false);
     const [stock_editar, setStockEditar] = useState(null);
@@ -167,16 +168,21 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
               }     
         })
         .then( res => { 
-            setRepuesto(res.data);
+            setRepuesto(res.data);            
             setShowStock(true);
         })
         .catch(err => { console.log(err);})
     }
 
     const handleCloseStock = () => {
-        setShowStock(false);
-        setStockEditar(null);
-        setStockMinimoEditar(null);
+        if(datos.stocks_minimos.length > 0 || stock_empresa.length > 0 || setShowStock===false){            
+            setShowStock(false);
+            setStockEditar(null);
+            setStockMinimoEditar(null);
+        }
+        if (setShowStock===true){
+            alert('Todo Repuesto debe tener como mínimo un almacén');
+        }
     }
 
     const handleEditStock = (stock) => {
@@ -229,6 +235,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         })
         .then( res => { 
             setRepuesto(res.data);
+            setShowHeGuardado(true);
             // window.location.href = "/repuestos";
         })
         .catch(err => { console.log(err);})
@@ -547,7 +554,8 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                              stock = {stock_editar}
                              stock_minimo =  {stock_minimo_editar}
                              updateRepuesto = {updateRepuesto}
-                             stocks_utilizados = {datos.stocks_minimos}/>
+                             stocks_utilizados = {datos.stocks_minimos}
+                             setShowStock = {setShowStock}/>
 
             <EquipoForm show={show_equipo}
                         handleCloseEquipo={cerrarAddEquipo}
