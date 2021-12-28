@@ -5,12 +5,15 @@ import { Link } from 'react-router-dom';
 import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table, Modal, Button, Form } from 'react-bootstrap';
 import { Trash, PlusSquare, DashSquare } from 'react-bootstrap-icons';
+import BuscarRepuestos from "./rep_salida_buscar";
 
 const RepSalidas = ({alm}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
 
     const [almacenes, setAlmacenes] = useState(null);
+    const [show_listrepuestos, setShowListRepuestos] = useState(null);
+
     const [numeroBar, setNumeroBar] = useState({
         id: '',
         almacen: alm ? alm : ''
@@ -62,7 +65,6 @@ const RepSalidas = ({alm}) => {
                 }
         })
         .then( res => {
-            // setStock_minimo(res);
             console.log('esto es stock_minimo');
             console.log(res.data);
             if(res.data.length === 0){
@@ -91,12 +93,10 @@ const RepSalidas = ({alm}) => {
                             critico: r.data.es_critico ? 'Si' : 'No' }]);
                     }
                     else {
-                        // console.log('repuesto repetido ...')
                         const newLineas = [...lineasSalida];
                         newLineas.forEach( l => {
                             if (l.repuesto === res.data[0].repuesto) l.cantidad = l.cantidad + 1;
                         });
-                        // console.log(res);
                         setLineasSalida(newLineas);
                     }
                 })
@@ -110,6 +110,41 @@ const RepSalidas = ({alm}) => {
         });
     }, [token, cambioCodigo]);
 
+    useEffect(()=>{
+        salida && lineasSalida.length>0 && lineasSalida.forEach(l => {
+            axios.post(BACKEND_SERVER + `/api/repuestos/lineasalida/`, {
+                salida: salida.id,
+                repuesto: l.repuesto,
+                almacen: l.almacen,
+                cantidad: l.cantidad,
+            }, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                    }     
+            })
+            .then( res => { 
+                setMovimientos([...movimientos, res.data]);
+            })
+            .catch(err => { console.log(err)});
+            });
+    },[salida]);
+
+    useEffect(()=>{
+        (movimientos.length === lineasSalida.length) && movimientos.forEach(m => {
+            axios.post(BACKEND_SERVER + `/api/repuestos/movimiento/`,{
+            cantidad : -m.cantidad,
+            almacen : m.almacen,
+            usuario : salida.responsable,
+            linea_salida: m.id
+            }, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                    }     
+        })
+        .then( res => { console.log(res.data)})
+        .catch( err => {console.log(err)});
+    });
+    },[movimientos]);
 
     const handleInputChange = (event) => { 
         setNumeroBar ({
@@ -128,7 +163,6 @@ const RepSalidas = ({alm}) => {
                 id: ''
             });
             setCambioCodigo(!cambioCodigo);
-            console.log('pasa pr aqui')
         }
     }
 
@@ -163,42 +197,22 @@ const RepSalidas = ({alm}) => {
             })
             .catch(err => { console.log(err);})
         }
+    }    
+
+    const abrirListRepuestos = () => {
+        setShowListRepuestos(true);
     }
 
-    useEffect(()=>{
-        salida && lineasSalida.length>0 && lineasSalida.forEach(l => {
-            axios.post(BACKEND_SERVER + `/api/repuestos/lineasalida/`, {
-                salida: salida.id,
-                repuesto: l.repuesto,
-                almacen: l.almacen,
-                cantidad: l.cantidad,
-            }, {
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                    }     
-            })
-            .then( res => { 
-                setMovimientos([...movimientos, res.data]);
-            })
-            .catch(err => { console.log(err)});
-            });
-    },[salida]);
-    useEffect(()=>{
-        (movimientos.length === lineasSalida.length) && movimientos.forEach(m => {
-            axios.post(BACKEND_SERVER + `/api/repuestos/movimiento/`,{
-            cantidad : -m.cantidad,
-            almacen : m.almacen,
-            usuario : salida.responsable,
-            linea_salida: m.id
-            }, {
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                    }     
-        })
-        .then( res => { console.log(res.data)})
-        .catch( err => {console.log(err)});
-    });
-    },[movimientos]);
+    const cerrarListRepuestos = () => {
+        setShowListRepuestos(false);
+    }
+
+    const elegirRepuesto = (r) => {      
+        datos.id=r;
+        datos.almacen=numeroBar.almacen;
+        setCambioCodigo(!cambioCodigo);
+        cerrarListRepuestos();      
+    }
 
     return (
         <Container>
@@ -234,8 +248,12 @@ const RepSalidas = ({alm}) => {
                                     onChange={handleInputChange}
                                     placeholder="Codigo de barras" />
                     </Form.Group>
-                </Col>                
-            </Row> 
+                </Col>                                
+                <Col>
+                <br></br>
+                    <Button variant="info" className={'btn-lg'} onClick={event => {abrirListRepuestos()}}>Buscar Repuesto</Button>                 
+                </Col>
+            </Row>             
             <Row>
                 <Col>
                     <h5 className="mb-3 mt-3">Lista de Repuestos</h5>
@@ -279,6 +297,10 @@ const RepSalidas = ({alm}) => {
                     </Button>
                 </Link>                            
             </Form.Row>
+            <BuscarRepuestos    show={show_listrepuestos}
+                                cerrarListRepuestos={cerrarListRepuestos}
+                                almacen={numeroBar.almacen}
+                                elegirRepuesto={elegirRepuesto}/> 
         </Container>
     )
 }

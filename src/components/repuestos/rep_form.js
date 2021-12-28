@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
-import { PlusCircle, PencilFill, Trash, SignpostSplitFill, Building, GeoFill, GeoAltFill, HouseDoorFill, EaselFill } from 'react-bootstrap-icons';
+import { PlusCircle, Trash, GeoAltFill} from 'react-bootstrap-icons';
 import './repuestos.css';
 import StockMinimoForm from './rep_stock_minimo';
 import EquipoForm from './rep_equipo';
