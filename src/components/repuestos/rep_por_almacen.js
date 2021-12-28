@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
-import { Button, Row, Form, Modal, Col, Table } from 'react-bootstrap';
+import Modal from 'react-bootstrap/Modal'
+import { Button, Row, Form, Col, Table } from 'react-bootstrap';
 import { PencilFill, HandThumbsUpFill, CheckCircleFill } from 'react-bootstrap-icons';
 const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show})=>{
     const [token] = useCookies(['tec-token']);
@@ -17,22 +18,15 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
         habilitar: true,   
     });  
     const handleInputChange = (event) => {
-        console.log('localizacion');
-        console.log(datos.localizaciones);
-        console.log(datos.stock_act);
-        console.log(datos.stock_actual);
         setDatos({
             ...datos,
             [event.target.name] : event.target.value
         })        
     }
     
-    const ActualizaStock = (r) =>{
+    const ActualizaStock = (r) =>{ 
         let r_id = r.id;
         let r_almacen = r.almacen.id;
-        console.log('que vale localizacion');
-        console.log(datos.localizacion);
-        console.log(datos.stock_minimo);
         axios.patch(BACKEND_SERVER + `/api/repuestos/stocks_minimos/${r_id}/`, {
             cantidad: datos.stock_minimo ? datos.stock_minimo : repuesto.stocks_minimos.cantidad,  
             stock_act: datos.stock_actual ? 0 : repuesto.stocks_minimos.stock_act,
@@ -43,6 +37,7 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
               }     
         })
         .then( res => { 
+            habilitar_linea(r);
             if (datos.stock_actual){
                 const hoy = new Date();
                 var dd = String(hoy.getDate()).padStart(2, '0');
@@ -84,7 +79,6 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
                                 }     
                             })
                             .then( res => {
-                                //console.log('FINNN');
                             })
                             .catch( err => {console.log(err);})
                         })
@@ -111,7 +105,7 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
     }
 
     return (
-        <Modal show={show} backdrop="static" keyboard={ false } animation={false} size="lg">
+        <Modal show={show} backdrop="static" keyboard={ false } animation={false} size="xl">
             <Modal.Header closeButton>                
                 <Modal.Title>Repuestos por almacén</Modal.Title>
             </Modal.Header>

@@ -21,7 +21,7 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
         .then( res => {
             setListados(res.data);            
             for(var x=0;x<res.data.length;x++){
-                axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimos/?almacen=${res.data[x].almacen.id}&repuesto=${linea.repuesto.id}`,{
+                axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimos/?repuesto=${linea.repuesto.id}`,{
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
                     }
@@ -41,7 +41,7 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
     } 
 
     return (
-        <Modal show={show} backdrop="static" keyboard={ false } animation={false} size="lg">
+        <Modal show={show} backdrop="static" keyboard={ false } animation={false} size="xl">
                 <Modal.Header closeButton>                
                     <Modal.Title>Listado de Entregas</Modal.Title>
                 </Modal.Header>
