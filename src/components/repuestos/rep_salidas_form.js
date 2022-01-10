@@ -148,7 +148,7 @@ const RepSalidas = ({alm}) => {
         setNumeroBar ({
             ...numeroBar,
             [event.target.name] : event.target.value                
-        });
+        });        
         // console.log(numeroBar.id);
         if(numeroBar.id.length===11){
             setDatos({
@@ -219,39 +219,45 @@ const RepSalidas = ({alm}) => {
                 <Col>
                     <Form.Group controlId="almacen">
                         <Form.Label>Almacén</Form.Label>
-                        <Form.Control as="select"  
+                        <Form.Control as="select"
+                                    tabIndex={1}  
                                     name='almacen' 
                                     value={numeroBar.almacen}
                                     disabled = {lineasSalida.length>0 || almacenesBloqueado}
                                     placeholder="Almacén"
-                                    onChange={handleInputChange}> 
+                                    onChange={handleInputChange}
+                                    autoFocus> 
                                     {!alm && <option key={0} value={''}>
                                             ----
                                     </option>}
                                     {almacenes && almacenes.map( almacen => {
                                         return (
                                         <option key={almacen.id} value={almacen.id}>
-                                            {almacen.nombre}
-                                        </option>
+                                            {almacen.nombre}                                            
+                                        </option>                                        
                                         )
-                                    })}                                                                                       
+                                    })}                                                                                                                                                          
                         </Form.Control>
                     </Form.Group>
-                </Col>
-                {numeroBar.almacen ?
+                </Col>                 
+                {numeroBar.almacen ?                            
                 <Col>
                     <Form.Group controlId="formId">
                         <Form.Label>Codigo Barras</Form.Label>
-                        <Form.Control type="text" 
+                        <Form.Control
+                                    type="text"
+                                    id="prueba"
+                                    tabIndex={2}
                                     name='id' 
                                     value={numeroBar.id}
                                     onChange={handleInputChange}
-                                    placeholder="Codigo de barras" />
+                                    placeholder="Codigo de barras" 
+                                    autoFocus/>
                     </Form.Group>
-                </Col> : null}                               
+                </Col> : null}                             
                 <Col>
                 <br></br>
-                    {numeroBar.almacen? <Button variant="info" className={'btn-lg'} onClick={event => {abrirListRepuestos()}}>Buscar Repuesto</Button> : null}                 
+                    {numeroBar.almacen? <Button variant="info" tabIndex={3} className={'btn-lg'} onClick={event => {abrirListRepuestos()}}>Buscar Repuesto</Button> : null}                 
                 </Col>
             </Row>             
             <Row>
