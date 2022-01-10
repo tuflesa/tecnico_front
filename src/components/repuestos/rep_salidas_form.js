@@ -239,6 +239,7 @@ const RepSalidas = ({alm}) => {
                         </Form.Control>
                     </Form.Group>
                 </Col>
+                {numeroBar.almacen ?
                 <Col>
                     <Form.Group controlId="formId">
                         <Form.Label>Codigo Barras</Form.Label>
@@ -248,10 +249,10 @@ const RepSalidas = ({alm}) => {
                                     onChange={handleInputChange}
                                     placeholder="Codigo de barras" />
                     </Form.Group>
-                </Col>                                
+                </Col> : null}                               
                 <Col>
                 <br></br>
-                    <Button variant="info" className={'btn-lg'} onClick={event => {abrirListRepuestos()}}>Buscar Repuesto</Button>                 
+                    {numeroBar.almacen? <Button variant="info" className={'btn-lg'} onClick={event => {abrirListRepuestos()}}>Buscar Repuesto</Button> : null}                 
                 </Col>
             </Row>             
             <Row>

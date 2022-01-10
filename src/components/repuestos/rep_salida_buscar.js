@@ -16,7 +16,7 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
     });
 
     useEffect(()=>{
-        axios.get(BACKEND_SERVER + `/api/repuestos/detalle/?stocks_minimos__almacen__id=${almacen}`,{
+        axios.get(BACKEND_SERVER + `/api/repuestos/detalle/`+ filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }     
@@ -25,14 +25,23 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
             setRepuesto(res.data);
         })
         .catch(err => { console.log(err);})
-    },[almacen]);
+    },[filtro]);    
+
+    const actualizaFiltro = str => {
+        setFiltro(str);
+    }
     
     const handleInputChange = (event) => {
         setDatos({
             ...datos,
             [event.target.name] : event.target.value
         })
-    }   
+    }  
+    
+    useEffect(()=>{
+        const filtro = `?stocks_minimos__almacen__id=${almacen}&nombre__icontains=${datos.nombre}`;
+        actualizaFiltro(filtro);
+    },[datos, almacen]);
 
     return(
         <Modal show={show} backdrop="static" keyboard={ false } animation={false} size="xl">
