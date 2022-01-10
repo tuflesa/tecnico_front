@@ -4,8 +4,7 @@ import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import Modal from 'react-bootstrap/Modal'
 import { Button, Row, Form, Col, Table } from 'react-bootstrap';
-import { GeoAltFill} from 'react-bootstrap-icons';
-import { PencilFill, HandThumbsUpFill, CheckCircleFill } from 'react-bootstrap-icons';
+import { ArrowDownCircle} from 'react-bootstrap-icons';
 const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>{
     const [token] = useCookies(['tec-token']);
     const [filtro, setFiltro] = useState('');
@@ -65,7 +64,8 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
                                         name='nombre' 
                                         value={datos.nombre}
                                         onChange={handleInputChange}                                        
-                                        placeholder="Nombre contiene" />
+                                        placeholder="Nombre contiene" 
+                                        autoFocus/>
                         </Form.Group>
                     </Col>
                 </Row>
@@ -91,7 +91,7 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
                                                 if(localizacion.repuesto=== rep.id){return(localizacion.localizacion)}
                                             })} </td>
                                             <td>
-                                            <GeoAltFill className="mr-3 pencil" onClick={event => {elegirRepuesto(rep.id)}}/>
+                                            <ArrowDownCircle className="mr-3 pencil" onClick={event => {elegirRepuesto(rep.id)}}/>
                                             </td>                                                
                                         </tr>
                                     )})
