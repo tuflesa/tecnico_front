@@ -64,9 +64,7 @@ const RepSalidas = ({alm}) => {
                 'Authorization': `token ${token['tec-token']}`
                 }
         })
-        .then( res => {
-            console.log('esto es stock_minimo');
-            console.log(res.data);
+        .then( res => {            
             if(res.data.length === 0){
                 console.log ('no hay stock');
                 alert('Este Repuesto NO existe en este almacen, revise almacen seleccionado');
@@ -194,6 +192,7 @@ const RepSalidas = ({alm}) => {
             })
             .then( res => { 
                 setSalida(res.data);
+                window.location.reload();
             })
             .catch(err => { console.log(err);})
         }

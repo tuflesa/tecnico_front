@@ -10,6 +10,7 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
     const [token] = useCookies(['tec-token']);
     const [filtro, setFiltro] = useState('');
     const [repuesto, setRepuesto] = useState(null);
+    const [localizaciones, setLocalizaciones] = useState(null);
     const [datos, setDatos] = useState({
         id:'',
         nombre: '',     
@@ -23,6 +24,15 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
         })
         .then( res => {   
             setRepuesto(res.data);
+            axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimos/?almacen=${almacen}`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                  }     
+            })
+            .then( r => {   
+                setLocalizaciones(r.data);                
+            })
+            .catch(err => { console.log(err);})
         })
         .catch(err => { console.log(err);})
     },[filtro]);    
@@ -77,8 +87,8 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
                                         <tr key={rep.id}>
                                             <td>{rep.nombre}</td>  
                                             {/* <td>{repuesto.stocks_minimos.localizacion}</td> */}
-                                            <td>{rep.stocks_minimos.map(s =>{
-                                                if(s.almacen__id===almacen){return(s.localizacion)}
+                                            <td>{localizaciones && localizaciones.map(localizacion =>{
+                                                if(localizacion.repuesto=== rep.id){return(localizacion.localizacion)}
                                             })} </td>
                                             <td>
                                             <GeoAltFill className="mr-3 pencil" onClick={event => {elegirRepuesto(rep.id)}}/>
