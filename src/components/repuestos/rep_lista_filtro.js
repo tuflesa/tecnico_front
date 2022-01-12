@@ -161,7 +161,6 @@ const RepListaFilto = ({actualizaFiltro}) => {
 
 
     const handleInputChange = (event) => {
-        //datos.id = parseInt (numeroBar.id);
         setDatos({
             ...datos,
             [event.target.name] : event.target.value
@@ -228,6 +227,16 @@ const RepListaFilto = ({actualizaFiltro}) => {
                                         value={datos.modelo}
                                         onChange={handleInputChange} 
                                         placeholder="Modelo contiene" />
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="id">
+                            <Form.Label>Id Repuesto</Form.Label>
+                            <Form.Control type="text" 
+                                        name='id' 
+                                        value={datos.id}
+                                        onChange={handleInputChange} 
+                                        placeholder="Id repuesto" />
                         </Form.Group>
                     </Col>
                 </Row>
