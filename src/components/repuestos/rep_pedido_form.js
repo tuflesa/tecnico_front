@@ -177,18 +177,18 @@ const PedidoForm = ({pedido, setPedido}) => {
             alert('No se puede eliminar la linea, ya tiene movimientos de recepción');            
         }
         else{  
-            fetch (BACKEND_SERVER + `/api/repuestos/linea_pedido/${linea.id}`,{
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                }
-            })
-            .then( res => { 
-                alert('Se va a eliminar la linea');
-            }) 
-            .then( res => { 
-                updatePedido();
-            })
+            var confirmacion = window.confirm('¿Deseas eliminar la línea?');
+            if(confirmacion){
+                fetch (BACKEND_SERVER + `/api/repuestos/linea_pedido/${linea.id}`,{
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }
+                })
+                .then( res => { 
+                    updatePedido();
+                })
+            }
         }
     }
     const BorrarLineaAdicional =(lineaAdicional) =>{     
@@ -196,18 +196,21 @@ const PedidoForm = ({pedido, setPedido}) => {
             alert('No se puede eliminar la linea, ya tiene movimientos de recepción');            
         }
         else{  
-            fetch (BACKEND_SERVER + `/api/repuestos/linea_adicional_pedido/${lineaAdicional.id}`,{
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                }
-            })
-            .then( res => { 
-                alert('Se va a eliminar la linea');
-            }) 
-            .then( res => { 
-                updatePedido();
-            })
+            var confirmacion = window.confirm('¿Deseas eliminar la línea?');
+            if(confirmacion){
+                fetch (BACKEND_SERVER + `/api/repuestos/linea_adicional_pedido/${lineaAdicional.id}`,{
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }
+                })
+                /* .then( res => { 
+                    alert('Se va a eliminar la linea');
+                }) */ 
+                .then( res => { 
+                    updatePedido();
+                })
+            }
         }
     }
 

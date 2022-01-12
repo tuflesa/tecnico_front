@@ -64,14 +64,14 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
             stock_actual_inicial : stock ? stock.suma : null,
             stock_minimo : stock_minimo ? stock_minimo : null,
         })
-    },[stock, stock_minimo, almacenes]);
+    },[stock, stock_minimo, almacenes, datos]);
 
     useEffect(()=>{
         setDatos({
             ...datos,
             almacen : stock ? stock.almacen__id : almacenes.length > 0 ? almacenes[0].id : '',
         })
-    },[almacenes]);
+    },[almacenes, datos, stock]);
 
     const handleInputChange = (event) => {
         setDatos({

@@ -47,18 +47,23 @@ const PedLista = () => {
             }
         }while (y<pedido.lineas_pedido.length);
         if (y===pedido.lineas_pedido.length||pedido.lineas_pedido.length===0){            
-            fetch (BACKEND_SERVER + `/api/repuestos/pedido_detalle/${pedido.id}/`,{
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                }
-            })
-            .then( res => {  
-                return alert ('Se va a borrar el pedido'); 
-            })
-            .catch( err => {
-                console.log(err);
-            });
+            var confirmacion = window.confirm('¿Deseas eliminar el pedido?');
+            console.log('esto es confirmacion de pedido');
+            console.log(confirmacion);
+            if(confirmacion){
+                fetch (BACKEND_SERVER + `/api/repuestos/pedido_detalle/${pedido.id}/`,{
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }
+                })
+                .then( res => {  
+                    //return alert('Se va a borrar el pedido'); 
+                })
+                .catch( err => {
+                    console.log(err);
+                });
+            }
             // actualizaFiltro();
             setShow(!show);
         }
