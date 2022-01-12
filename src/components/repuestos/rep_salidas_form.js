@@ -3,7 +3,7 @@ import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { BACKEND_SERVER } from '../../constantes';
-import { Container, Row, Col, Table, Modal, Button, Form } from 'react-bootstrap';
+import { Container, Row, Col, Table, Button, Form } from 'react-bootstrap';
 import { Trash, PlusSquare, DashSquare } from 'react-bootstrap-icons';
 import BuscarRepuestos from "./rep_salida_buscar";
 
@@ -66,7 +66,6 @@ const RepSalidas = ({alm}) => {
         })
         .then( res => {            
             if(res.data.length === 0){
-                console.log ('no hay stock');
                 alert('Este Repuesto NO existe en este almacen, revise almacen seleccionado');
                 numeroBar.id='';
                 numeroBar.almacen='';
@@ -148,8 +147,7 @@ const RepSalidas = ({alm}) => {
         setNumeroBar ({
             ...numeroBar,
             [event.target.name] : event.target.value                
-        });        
-        // console.log(numeroBar.id);
+        }); 
         if(numeroBar.id.length===11){
             setDatos({
                 ...datos,

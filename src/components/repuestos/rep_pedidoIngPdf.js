@@ -1,16 +1,6 @@
-import React, { Component, useState, useEffect } from 'react';
 import { Document, Page, Image, View, Text, StyleSheet} from "@react-pdf/renderer";
-import { Container, Row, Col, Table, Modal } from 'react-bootstrap';
-import {invertirFecha} from '../utilidades/funciones_fecha';
-import { useCookies } from 'react-cookie';
-import { Border, ListTask } from 'react-bootstrap-icons';
-import { line } from 'd3-shape';
 
 const VistaIngPdf = ({pedido, VerIngPdf, linea, empresa, lineas_adicionales, proveedor, contacto, direccion_envio}) =>{
-    const [token] = useCookies(['tec-token']);
-    const [user] = useCookies(['tec-user']);
-    const [hoy] = useState(new Date);
-
     function parseData(){
         if(linea){
             return linea.map((data, i)=>{
@@ -221,7 +211,7 @@ const VistaIngPdf = ({pedido, VerIngPdf, linea, empresa, lineas_adicionales, pro
                             </View>
                         </View>
                     </View>
-                    { linea != '' ?
+                    { linea !== '' ?
                         <View style={styles.page3}>
                             <View style={styles.sectionTabla}>
                                 <View style={styles.section7}><Text>Qty</Text></View>
@@ -233,7 +223,7 @@ const VistaIngPdf = ({pedido, VerIngPdf, linea, empresa, lineas_adicionales, pro
                         </View>                    
                     :null}
                     {parseData()}
-                    { lineas_adicionales != '' ?
+                    {/* { lineas_adicionales != '' ?
                         <View style={styles.page3}>
                             <View style={styles.sectionTabla}>
                                 <View style={styles.section7}><Text>Qty</Text></View>
@@ -243,7 +233,7 @@ const VistaIngPdf = ({pedido, VerIngPdf, linea, empresa, lineas_adicionales, pro
                                 <View style={styles.section8}><Text>Total</Text></View>
                             </View>                                          
                         </View>                    
-                    :null}
+                    :null} */}
                     {parse2Data()}
                     <View style={styles.page}wrap={false}> 
                         {/* <View style={styles.section}>

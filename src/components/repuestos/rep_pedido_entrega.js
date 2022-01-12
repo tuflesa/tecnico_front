@@ -12,7 +12,6 @@ const EntregaForm = ({show, updatePedido, linea_adicional, handleCloseEntrega}) 
  
     const hoy = new Date();
     const fechaString = hoy.getFullYear() + '-' + ('0' + (hoy.getMonth()+1)).slice(-2) + '-' + ('0' + hoy.getDate()).slice(-2);
-    const [almacenes, setAlmacenes]=useState(null)
     const [entrega, setEntrega]=useState(null)
 
     const [datos, setDatos] = useState({  
@@ -31,20 +30,7 @@ const EntregaForm = ({show, updatePedido, linea_adicional, handleCloseEntrega}) 
         handleCloseEntrega();
         datos.recibido= '';
         datos.albaran = '';
-        //datos.almacen = '';
     } 
-
-/*     useEffect(()=>{
-        linea_adicional && axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimo_detalle/?almacen__empresa__id=${empresa}&repuesto=${linea_adicional.repuesto.id}`, {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }     
-        })
-        .then( res => { 
-            setAlmacenes(res.data);
-        })
-        .catch(err => { console.log(err);})
-    },[token, linea_adicional]); */
 
     useEffect(()=>{
         setDatos({

@@ -21,14 +21,12 @@ const RepAlmacenesLista = () => {
               }
         })
         .then( res => {
-            console.log(res.data); 
             setAlmacenes(res.data);
         })
         .catch( err => {
             console.log(err);
         });
     }, [token, filtro]);
-    console.log('estoy viendo los almacenes....' + almacenes);
 
     const actualizaFiltro = str => {
         setFiltro(str);

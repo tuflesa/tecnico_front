@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import Modal from 'react-bootstrap/Modal'
-import { Button, Row, Form, Col, Table } from 'react-bootstrap';
-import { PencilFill, HandThumbsUpFill, CheckCircleFill } from 'react-bootstrap-icons';
+import { Button, Row, Col, Table } from 'react-bootstrap';
+import { PencilFill, HandThumbsUpFill } from 'react-bootstrap-icons';
 const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show})=>{
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);

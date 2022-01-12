@@ -38,8 +38,6 @@ const RepAlmacenForm = ({nombre, empresa, almacen_id}) => {
     }
     const actualizarDatos = (event) => {
         event.preventDefault()
-     //   console.log('Actualizar datos...' + almacen_id + ' ' + datos.nombre + ' ' + datos.empresa)
-
         axios.put(BACKEND_SERVER + `/api/repuestos/almacen/${almacen_id}/`, {
             nombre: datos.nombre,
             empresa: datos.empresa
@@ -49,7 +47,6 @@ const RepAlmacenForm = ({nombre, empresa, almacen_id}) => {
               }     
         })
         .then( res => { 
-            console.log('esto es res' + res[0]);
             window.location.href = "/repuestos/almacenes/";
         })
         .catch(err => { console.log(err);})
@@ -57,8 +54,6 @@ const RepAlmacenForm = ({nombre, empresa, almacen_id}) => {
     }
     const nuevoDatos = (event) => {
         event.preventDefault()
-        console.log('Actualizar datos...' + almacen_id + ' ' + datos.nombre + ' ' + datos.empresa)
-
         axios.post(BACKEND_SERVER + `/api/repuestos/almacen/`, {
             nombre: datos.nombre,
             empresa: datos.empresa

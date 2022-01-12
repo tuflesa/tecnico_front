@@ -28,8 +28,7 @@ const RepProveedorForm = ({proveedor}) => {
     }
 
     const actualizarDatos = (event) => {
-        event.preventDefault()
-        console.log('Actualizar datos...' + datos.proveedor_id + ' ' + datos.nombre + ' ' + datos.telefono + ' ' + datos.direccion);
+        event.preventDefault()       
         axios.put(BACKEND_SERVER + `/api/repuestos/proveedor/${proveedor.id}/`, {
             nombre: datos.nombre,
             direccion: datos.direccion,
@@ -40,7 +39,6 @@ const RepProveedorForm = ({proveedor}) => {
               }     
         })
         .then( res => { 
-            // console.log('esto es res' + res);
             window.location.href = "/repuestos/proveedores/";
         })
         .catch(err => { console.log(err);})
@@ -60,8 +58,6 @@ const RepProveedorForm = ({proveedor}) => {
 
     const nuevoDatos = (event) => {
         event.preventDefault()
-        console.log('Nuevo datos...' + proveedor.id + ' ' + datos.nombre + ' ' + datos.telefono + ' ' + datos.direccion);
-
         axios.post(BACKEND_SERVER + `/api/repuestos/proveedor/`, {
             nombre: datos.nombre,
             direccion: datos.direccion,
@@ -72,7 +68,6 @@ const RepProveedorForm = ({proveedor}) => {
               }     
         })
         .then( res => { 
-            console.log(res);
             window.location.href = "/repuestos/proveedores";
         })
         .catch(err => { console.log(err);})
@@ -95,20 +90,8 @@ const RepProveedorForm = ({proveedor}) => {
         })
         .catch (err=>{console.log((err));});
     }
-    const RecogerContacto = (id) =>{
-        // axios.get(BACKEND_SERVER + `/api/repuestos/contacto/${id}/`,{            
-        //     headers: {
-        //         'Authorization': `token ${token['tec-token']}`
-        //     } 
-        // })
-        // .then(res =>{
-        //     setContacto(res.data);
-        //     setShowContacto(true);
-        // })
-
-        // .catch (err=>{console.log((err));});
+    const RecogerContacto = (id) =>{        
         const contacto_editar = datos.contactos.filter(c => c.id === id)[0];
-        console.log(contacto_editar);
         setContactoEditar(contacto_editar);
         setShowContacto(true);
     }

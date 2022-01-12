@@ -9,14 +9,12 @@ const RepDetalle = ({ match }) => {
     const [repuesto, setRepuesto] = useState(null)
 
     useEffect(() => {
-        // console.log('Detalle');
         axios.get(BACKEND_SERVER + `/api/repuestos/detalle/${match.params.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
         .then( res => {
-            // console.log(res.data);
             setRepuesto(res.data);
         })
         .catch( err => {

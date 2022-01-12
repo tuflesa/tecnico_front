@@ -21,7 +21,6 @@ const RepProveedoresLista = () => {
               }
         })
         .then( res => {
-            console.log(res.data); 
             setProveedores(res.data);
         })
         .catch( err => {

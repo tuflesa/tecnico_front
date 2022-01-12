@@ -11,7 +11,6 @@ import MovLista from './rep_pedido_listmovimiento';
 import EntLista from './rep_pedido_listentrega';
 import EntregaForm from './rep_pedido_entrega';
 import { Link } from 'react-router-dom';
-import { now } from 'd3-timer';
 import VistaPdf from './rep_pedidoPdf';
 import { PDFViewer } from '@react-pdf/renderer';
 import VistaIngPdf from './rep_pedidoIngPdf';
@@ -34,7 +33,6 @@ const PedidoForm = ({pedido, setPedido}) => {
     const [listMovimiento, setListMovimiento] = useState(null);
     const [listEntrega, setListEntrega] = useState(null);
     const [hoy] = useState(new Date);
-    const [borrar] = useState(false);
     const [proveedores, setProveedores]= useState(null);
     const [verPdf, setVerPdf] = useState(false);
     const [verIngPdf, setVerIngPdf] = useState(false);
@@ -65,28 +63,23 @@ const PedidoForm = ({pedido, setPedido}) => {
         })
         .then( res => { 
             setProveedores(res.data);
-            console.log('que vale contacto');
-            console.log(pedido.contacto);
         })
         .catch(err => { console.log(err);})
     },[token]);
 
     useEffect(()=>{
-        //console.log(pedido);
         datos.proveedor && axios.get(BACKEND_SERVER + `/api/repuestos/contacto/?proveedor=${datos.proveedor}`, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }     
         })
-        .then( res => { 
-            //console.log(res.data);
+        .then( res => {
             setContactos(res.data);
         })
         .catch(err => { console.log(err);})
     },[token, datos.proveedor]);
     
     useEffect(()=>{
-        //console.log(pedido);
         datos.empresa && axios.get(BACKEND_SERVER + `/api/estructura/direcciones/?empresa=${datos.empresa}`, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -127,7 +120,6 @@ const PedidoForm = ({pedido, setPedido}) => {
     }, [token]);
 
     useEffect(()=>{
-        // console.log('Cambio en pedido, actualizando datos ...');
         pedido && setDatos({
             id: pedido ? pedido.id : null,
             proveedor: pedido ? pedido.proveedor.id : null,
@@ -144,9 +136,7 @@ const PedidoForm = ({pedido, setPedido}) => {
             contacto: pedido ? (pedido.contacto ? pedido.contacto.id : null) : null
 
         });
-            //console.log(datos);
     },[pedido]);
-
 
     const handleInputChange = (event) => {
         setDatos({
@@ -285,8 +275,6 @@ const PedidoForm = ({pedido, setPedido}) => {
 
     const crearPedido = (event) => {
         event.preventDefault();
-        console.log('que vale datos antes de crear el pedido');
-        console.log(datos);
         axios.post(BACKEND_SERVER + `/api/repuestos/pedido/`, {
             proveedor: datos.proveedor,
             empresa: datos.empresa,
@@ -304,7 +292,6 @@ const PedidoForm = ({pedido, setPedido}) => {
         })
         .then( res => { 
             setPedido(res.data);
-            //console.log(res);
         })
         .catch(err => { console.log(err);})
     }
@@ -339,9 +326,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                 'Authorization': `token ${token['tec-token']}`
               }     
         })
-        .then( res => {  
-            console.log('que recojo en el get de updatePedido');
-            console.log(res.data);
+        .then( res => {
             setPedido(res.data); 
             finalizarPedido(res.data);
         })
@@ -398,8 +383,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                 'Authorization': `token ${token['tec-token']}`
               }     
         })
-        .then( res => {   
-            console.log('mando actualizar desde el for if.....') ;
+        .then( res => {
             updateFinalizado();
         })
         .catch(err => { console.log(err);})
@@ -408,12 +392,9 @@ const PedidoForm = ({pedido, setPedido}) => {
     
     const handleDeshabilitar = () =>{
         if (pedido){
-            //console.log('ya hay pedido....');
-            //console.log(pedido.id);
             return true
         } 
         else {
-            //console.log('No hay id de pedido');
             return false
         }
     }

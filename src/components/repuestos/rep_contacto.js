@@ -64,8 +64,7 @@ const ContactoForm = ({show, proveedor_id, handleCloseContacto, updateProveedorC
             updateProveedorCont();    
             handlerCancelar();
         })
-        .catch( err => {
-            console.log(err);            
+        .catch( err => {           
             handlerCancelar();
         });
     }

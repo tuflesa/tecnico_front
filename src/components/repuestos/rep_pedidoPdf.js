@@ -1,18 +1,10 @@
-import React, { Component, useState, useEffect } from 'react';
-import { Document, Page, Image, View, Text, StyleSheet, source} from "@react-pdf/renderer";
-import { Container, Row, Col, Table, Modal } from 'react-bootstrap';
-import {invertirFecha} from '../utilidades/funciones_fecha';
+import React, { useEffect } from 'react';
+import { Document, Page, Image, View, Text, StyleSheet } from "@react-pdf/renderer";
 import { useCookies } from 'react-cookie';
-import { Border, ListTask } from 'react-bootstrap-icons';
-import { line } from 'd3-shape';
 
 const VistaPdf = ({pedido, VerPdf, linea, empresa, lineas_adicionales, proveedor, contacto, direccion_envio}) =>{
     const [token] = useCookies(['tec-token']);
-    const [user] = useCookies(['tec-user']);
-    const [hoy] = useState(new Date);
     useEffect(()=>{
-        console.log('mostramos como recibimos direccion_envio');
-        console.log(direccion_envio);
     },[token]);
     function parseData(){
         if(linea){
@@ -224,7 +216,7 @@ const VistaPdf = ({pedido, VerPdf, linea, empresa, lineas_adicionales, proveedor
                             </View>
                         </View>
                     </View>
-                    { linea != '' ?
+                    { linea !== '' ?
                         <View style={styles.page3} fixed>
                             <View style={styles.sectionTabla}>
                                 <View style={styles.section7}><Text>Cant.</Text></View>
@@ -236,7 +228,7 @@ const VistaPdf = ({pedido, VerPdf, linea, empresa, lineas_adicionales, proveedor
                         </View>                    
                     :null}
                     {parseData()}
-                    { lineas_adicionales != '' ?
+                    {/* { lineas_adicionales != '' ?
                         <View style={styles.page3}>
                             <View style={styles.sectionTabla}>
                                 <View style={styles.section7}><Text>Cant.</Text></View>
@@ -246,7 +238,7 @@ const VistaPdf = ({pedido, VerPdf, linea, empresa, lineas_adicionales, proveedor
                                 <View style={styles.section8}><Text>Total</Text></View>
                             </View>                                          
                         </View>                    
-                    :null}
+                    :null} */}
                     {parse2Data()}
                     <View style={styles.page}wrap={false}>
                         {/* <View style={styles.section}>

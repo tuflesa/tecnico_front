@@ -4,12 +4,10 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 
-const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedido, linea}) => {
-    
+const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedido, linea}) => {    
     const [token] = useCookies(['tec-token']);
 
     const [repuestos, setRepuestos]= useState(null);
-    //const[unidades, setUnidades]=useState(null);
     
     const [datos, setDatos] = useState({  
         repuesto: linea ? linea.repuesto : '',
@@ -18,7 +16,7 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
         descuento: linea ? linea.descuento : 0,
         total: linea ? linea.total : 0,
         pedido: pedido_id,
-        por_recibir:''
+        por_recibir: linea ? linea.por_recibir : '',
     });   
 
     useEffect(()=>{
@@ -29,11 +27,13 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
             descuento: linea ? linea.descuento : 0,
             total: linea ? linea.total : 0,
             pedido: pedido_id,
+            por_recibir: linea ? linea.por_recibir : 0,
         });
     },[linea, pedido_id]);
 
     useEffect(()=>{ 
         datos.total = ((datos.precio*datos.cantidad)-(datos.precio*datos.cantidad*datos.descuento/100));
+        datos.por_recibir = linea ? (linea.por_recibir+(datos.cantidad-linea.cantidad)) : datos.cantidad;
     },[datos.cantidad, datos.precio, datos.descuento]);
 
     useEffect(()=>{
@@ -44,7 +44,6 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
         })
         .then( res => { 
             setRepuestos(res.data);
-            console.log(res.data);
         })
         .catch(err => { console.log(err);})
     },[token, proveedor_id]);
@@ -84,30 +83,13 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
             handlerCancelar();
         });
     }
-
-    const prueba = async() => {         
-        const res = await axios.get(BACKEND_SERVER + `/api/repuestos/movimiento/?linea_pedido__id=${linea.id}`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-                }  
-            
-        })                            
-        const suma = datos.cantidad - total(res.data, 'cantidad');
-        datos.por_recibir = suma;
-        return datos.por_recibir;                    
-    }  
-
-    function total (unidades,fn){
-        return unidades.map(d => d[fn]).reduce((a,v)=> a + v,0);
-    }   
-    
-    const handlerEditar = async () => {
-        let entregaTotal = await prueba();    
+     
+    const handlerEditar = async () => {   
         if (datos.cantidad<(linea.cantidad - linea.por_recibir) || datos.por_recibir<0){            
             alert('Cantidad erronea, revisa cantidad recibida');            
             handlerCancelar();
         }
-        else{  
+        else{              
             axios.patch(BACKEND_SERVER + `/api/repuestos/linea_pedido/${linea.id}/`,{
                 cantidad: datos.cantidad,
                 precio: datos.precio,

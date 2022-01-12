@@ -72,24 +72,11 @@ const LineaAdicionalForm = ({show, pedido_id, handleCloseLineaAdicional, updateP
         });
     }
 
-    const prueba = async() => {         
-        const res = await axios.get(BACKEND_SERVER + `/api/repuestos/entrega/?linea_adicional__id=${linea_adicional.id}`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-                }  
-            
-        })                            
-        const suma = datos.cantidad - total(res.data, 'cantidad');
-        datos.por_recibir = suma;
-        return datos.por_recibir;                    
-    }  
-
     function total (unidades,fn){
         return unidades.map(d => d[fn]).reduce((a,v)=> a + v,0);
     }   
     
-    const handlerEditar = async () => {
-        let entregaTotal = await prueba();    
+    const handlerEditar = async () => {   
         if (datos.cantidad<(linea_adicional.cantidad - linea_adicional.por_recibir) || datos.por_recibir<0){            
             alert('Cantidad erronea, revisa cantidad recibida');            
             handlerCancelar();

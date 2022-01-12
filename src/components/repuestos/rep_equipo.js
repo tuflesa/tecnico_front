@@ -22,26 +22,21 @@ const EquipoForm = ({show, repuesto_id, handleCloseEquipo, equiposAsignados, upd
     const [listaAsignados, setListaAsignados] = useState([]);
 
     useEffect(() => {
-        // console.log('Leer empresas ...');
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
         .then( res => {
-            // console.log(res.data);
             setEmpresas(res.data);
         })
         .catch( err => {
             console.log(err);
         });
-        // console.log(empresas);
     }, [token]);
 
     useEffect(() => {
-        // console.log('Cambio en zonas ...');
         if (datos.empresa === '') {
-            // console.log('Zonas vacio...');
             setZonas([]);
             setDatos({
                 ...datos,
@@ -57,8 +52,6 @@ const EquipoForm = ({show, repuesto_id, handleCloseEquipo, equiposAsignados, upd
                 }
             })
             .then( res => {
-                // console.log(res.data);
-                // console.log('Zonas lectura...');
                 setZonas(res.data);
                 setDatos({
                     ...datos,
@@ -74,7 +67,6 @@ const EquipoForm = ({show, repuesto_id, handleCloseEquipo, equiposAsignados, upd
     }, [token, datos.empresa]);
 
     useEffect(() => {
-        // console.log('Cambio en secciones ...');
         if (datos.zona === '') {
             setSecciones([]);
             setDatos({
@@ -90,7 +82,6 @@ const EquipoForm = ({show, repuesto_id, handleCloseEquipo, equiposAsignados, upd
                 }
             })
             .then( res => {
-                // console.log(res.data);
                 setSecciones(res.data);
                 setDatos({
                     ...datos,
@@ -105,7 +96,6 @@ const EquipoForm = ({show, repuesto_id, handleCloseEquipo, equiposAsignados, upd
     }, [token, datos.zona]);
 
     useEffect(() => {
-        // console.log('Cambio en equipos ...');
         if (datos.seccion === ''){
             setEquipos([]);
             setDatos({
@@ -120,7 +110,6 @@ const EquipoForm = ({show, repuesto_id, handleCloseEquipo, equiposAsignados, upd
                 }
             })
             .then( res => {
-                // console.log(res.data);
                 const equiposDisponibles = res.data.filter(e => {return !listaAsignados.includes(e.id)});
                 setEquipos(equiposDisponibles);
                 setDatos({
@@ -150,7 +139,6 @@ const EquipoForm = ({show, repuesto_id, handleCloseEquipo, equiposAsignados, upd
     }
 
     useEffect(() =>{
-        // console.log(equiposAsignados);
         let equiposAsignadosID = [];
         equiposAsignados && equiposAsignados.forEach(e => {
             equiposAsignadosID.push(e.id);
@@ -169,7 +157,6 @@ const EquipoForm = ({show, repuesto_id, handleCloseEquipo, equiposAsignados, upd
     }
     
     const handlerGuardar = () => {
-        // console.log('Guardar ...');
         const newEquipos = [...listaAsignados, parseInt(datos.equipo)];
         axios.patch(BACKEND_SERVER + `/api/repuestos/lista/${repuesto_id}/`, {
             equipos: newEquipos
@@ -179,7 +166,6 @@ const EquipoForm = ({show, repuesto_id, handleCloseEquipo, equiposAsignados, upd
               }     
         })
         .then( res => { 
-                // console.log(res.data);
                 updateRepuesto();
                 handlerCancelar();
             }

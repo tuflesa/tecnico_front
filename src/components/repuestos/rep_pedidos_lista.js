@@ -37,27 +37,23 @@ const PedLista = () => {
         var y=0;
         do{
             if(pedido.lineas_pedido.length===0){
-                console.log('no hay lineas en el pedido');
                 y=pedido.lineas_pedido.length;
             }
             else if(pedido.lineas_pedido[y].cantidad === pedido.lineas_pedido[y].por_recibir){
                 y++;
-                console.log('Hay lineas sin movimientos');
             }
             else{
-                console.log('Hay lineas con movimientos');
                 return alert ('no se puede borrar el pedido,hay lineas con movimientos de recepción');
             }
         }while (y<pedido.lineas_pedido.length);
-        if (y==pedido.lineas_pedido.length||pedido.lineas_pedido.length==0){            
+        if (y===pedido.lineas_pedido.length||pedido.lineas_pedido.length===0){            
             fetch (BACKEND_SERVER + `/api/repuestos/pedido_detalle/${pedido.id}/`,{
                 method: 'DELETE',
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
             })
-            .then( res => {
-                console.log(res);   
+            .then( res => {  
                 return alert ('Se va a borrar el pedido'); 
             })
             .catch( err => {

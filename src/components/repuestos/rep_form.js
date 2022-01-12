@@ -11,7 +11,6 @@ import EquipoForm from './rep_equipo';
 import ProveedorForm from './rep_proveedor';
 import RepPorAlmacen from './rep_por_almacen';
 import { useBarcode } from 'react-barcodes';
-import { text } from 'd3';
 
 const RepuestoForm = ({repuesto, setRepuesto}) => {
     const [token] = useCookies(['tec-token']);
@@ -32,7 +31,6 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     });
     const [tiposRepuesto, setTiposRepuesto] = useState(null);
     const [show_stock, setShowStock] = useState(false);
-    const [show_heGuardado, setShowHeGuardado] = useState(false);
     const [show_equipo, setShowEquipo] = useState(false);
     const [show_proveedor, setShowProveedor] = useState(false);
     const [stock_editar, setStockEditar] = useState(null);
@@ -108,6 +106,19 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         });
         setStockEmpresa(stock_por_empresa);        
     },[repuesto, empresas]);
+
+    const updateRepuesto = () => {
+        axios.get(BACKEND_SERVER + `/api/repuestos/detalle/${datos.id}/`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => { 
+            setRepuesto(res.data);
+            //setShowHeGuardado(true);
+        })
+        .catch(err => { console.log(err);})
+    }
 
     const handleInputChange = (event) => {
         setDatos({
@@ -185,16 +196,6 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         }
     }
 
-    const handleEditStock = (stock) => {
-        const almacen_id = stock.almacen.id;
-        const repuesto_id = stock.repuesto;
-        const stock_minimo = stock.cantidad;
-        //const stock_minimo = datos.stocks_minimos.filter(stock_minimmo => stock_minimmo.almacen === almacen_id && stock_minimmo.repuesto === repuesto_id)[0]
-        setStockMinimoEditar(stock_minimo);
-        setStockEditar(stock.stock_act);
-        setShowStock(true);
-    }
-
     const abrirNuevoStock = () => {
         setStockEditar(null);
         setStockMinimoEditar(null);
@@ -226,21 +227,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         setShowListAlmacen(false);
         updateRepuesto();
     }
-
-    const updateRepuesto = () => {
-        axios.get(BACKEND_SERVER + `/api/repuestos/detalle/${datos.id}/`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }     
-        })
-        .then( res => { 
-            setRepuesto(res.data);
-            setShowHeGuardado(true);
-            // window.location.href = "/repuestos";
-        })
-        .catch(err => { console.log(err);})
-    }
-
+    
     const handlerBorrarEquipo = (id) => {
         let newEquipos = [];
         datos.equipos && datos.equipos.forEach( e => {

@@ -15,8 +15,6 @@ const PedidoEditar = ({ match }) => {
               }
         })
         .then( res => {
-            console.log('esto son los datos enviados de editar');
-            console.log(res.data);
             setPedido(res.data);
         })
         .catch( err => {

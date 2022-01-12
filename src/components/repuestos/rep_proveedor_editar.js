@@ -9,14 +9,12 @@ const RepProveedorEdit = ({ match }) => {
     const [proveedor, setProveedor] = useState(null);
 
     useEffect(() => {
-        console.log('proveedor detalle ...');
         axios.get(BACKEND_SERVER + `/api/repuestos/proveedor_detalle/${match.params.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
         .then( res => {
-            console.log(res.data)
             setProveedor (res.data);
         })
         .catch( err => {

@@ -8,7 +8,6 @@ import {invertirFecha} from '../utilidades/funciones_fecha';
 
 const EntLista = ({linea_adicional, handleCloseListEntrega, show}) => {
     const [token] = useCookies(['tec-token']);
-    const [user] = useCookies(['tec-user']);
 
     const [listados, setListados] = useState(null);
 

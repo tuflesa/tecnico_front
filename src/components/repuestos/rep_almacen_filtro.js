@@ -22,7 +22,6 @@ const AlmacenFiltro = ({ actualizaFiltro }) => {
               }
         })
         .then( res => {
-            //console.log(res.data);
             setEmpresas(res.data);
         })
         .catch( err => {
@@ -33,12 +32,9 @@ const AlmacenFiltro = ({ actualizaFiltro }) => {
     useEffect(()=>{
         const filtro = `?nombre__icontains=${datos.nombre}&empresa=${datos.empresa}`;
         actualizaFiltro(filtro);
-        console.log(filtro);
     },[datos, actualizaFiltro]);
 
     const handleInputChange = (event) => {
-        // console.log(event.target.name)
-        // console.log(event.target.value)
         setDatos({
             ...datos,
             [event.target.name] : event.target.value

@@ -7,7 +7,6 @@ import {invertirFecha} from '../utilidades/funciones_fecha';
 
 const MovLista = ({linea, handleCloseListMovimiento, show}) => {
     const [token] = useCookies(['tec-token']);
-    const [user] = useCookies(['tec-user']);
 
     const [listados, setListados] = useState(null);
     const [localizaciones, setLocalizaciones] = useState(null);

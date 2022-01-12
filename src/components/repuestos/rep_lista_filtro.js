@@ -3,7 +3,6 @@ import { Container, Row, Form, Col } from 'react-bootstrap';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
-import { Keyboard } from "react-bootstrap-icons";
 
 const RepListaFilto = ({actualizaFiltro}) => {
     const [token] = useCookies(['tec-token']);
@@ -31,27 +30,23 @@ const RepListaFilto = ({actualizaFiltro}) => {
     const [equipos, setEquipos] = useState(null);
 
     useEffect(() => {
-        // console.log('Leer empresas ...');
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
         .then( res => {
-            // console.log(res.data);
             setEmpresas(res.data);
         })
         .catch( err => {
             console.log(err);
         });
-        // console.log(empresas);
         axios.get(BACKEND_SERVER + '/api/repuestos/tipo_repuesto/',{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
         .then( res => {
-            // console.log(res.data);
             setTiposRepuesto(res.data);
         })
         .catch( err => {
@@ -60,9 +55,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
     }, [token]);
 
     useEffect(() => {
-        // console.log('Cambio en zonas ...');
         if (datos.empresa === '') {
-            // console.log('Zonas vacio...');
             setZonas([]);
             setDatos({
                 ...datos,
@@ -78,8 +71,6 @@ const RepListaFilto = ({actualizaFiltro}) => {
                 }
             })
             .then( res => {
-                // console.log(res.data);
-                // console.log('Zonas lectura...');
                 setZonas(res.data);
                 setDatos({
                     ...datos,
@@ -95,7 +86,6 @@ const RepListaFilto = ({actualizaFiltro}) => {
     }, [token, datos.empresa]);
 
     useEffect(() => {
-        // console.log('Cambio en secciones ...');
         if (datos.zona === '') {
             setSecciones([]);
             setDatos({
@@ -111,7 +101,6 @@ const RepListaFilto = ({actualizaFiltro}) => {
                 }
             })
             .then( res => {
-                // console.log(res.data);
                 setSecciones(res.data);
                 setDatos({
                     ...datos,
@@ -126,7 +115,6 @@ const RepListaFilto = ({actualizaFiltro}) => {
     }, [token, datos.zona]);
 
     useEffect(() => {
-        // console.log('Cambio en equipos ...');
         if (datos.seccion === ''){
             setEquipos([]);
             setDatos({
@@ -141,7 +129,6 @@ const RepListaFilto = ({actualizaFiltro}) => {
                 }
             })
             .then( res => {
-                // console.log(res.data);
                 setEquipos(res.data);
                 setDatos({
                     ...datos,

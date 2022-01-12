@@ -20,7 +20,6 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
             }
         })
         .then( res => {
-            // console.log(res.data);
             const proveedoresDisponibles = res.data.filter(p => {return !listaAsignados.includes(p.id)});
             setProveedores(proveedoresDisponibles);
             if (proveedoresDisponibles.length>0){
@@ -58,10 +57,7 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
     }
 
     const handlerGuardar = () => {
-        console.log('Guardar ...');
-        // console.log(datos.proveedor);
         const newProveedores = [...listaAsignados, parseInt(datos.proveedor)];
-        console.log(newProveedores);
         axios.patch(BACKEND_SERVER + `/api/repuestos/lista/${repuesto_id}/`, {
             proveedores: newProveedores
         }, {
@@ -70,7 +66,6 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
               }     
         })
         .then( res => { 
-                // console.log(res.data);
                 updateRepuesto();
                 handlerCancelar();
             }
