@@ -31,7 +31,8 @@ const ProveedorFiltro = ({ actualizaFiltro }) => {
                                         name='nombre' 
                                         value={datos.nombre}
                                         onChange={handleInputChange} 
-                                        placeholder="Nombre contiene" />
+                                        placeholder="Nombre contiene" 
+                                        autoFocus />
                         </Form.Group>
                     </Col>
                 </Row>

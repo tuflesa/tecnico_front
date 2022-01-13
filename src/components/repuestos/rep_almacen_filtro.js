@@ -57,7 +57,8 @@ const AlmacenFiltro = ({ actualizaFiltro }) => {
                                         name='empresa' 
                                         value={datos.empresa}
                                         onChange={handleInputChange} 
-                                        disabled={handleDisabled()}>
+                                        disabled={handleDisabled()}
+                                        autoFocus >
                                 <option key={0} value={''}>-------</option>
                                 {empresas && empresas.map( empresa => {
                                     return (

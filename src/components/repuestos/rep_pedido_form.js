@@ -515,7 +515,8 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                 value={datos.proveedor}
                                                 onChange={handleInputChange}
                                                 disabled={handleDeshabilitar()}
-                                                placeholder="Elige Proveedor">
+                                                placeholder="Elige Proveedor"
+                                                autoFocus >
                                                     <option key={0} value={''}>
                                                         ----
                                                     </option>

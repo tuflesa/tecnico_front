@@ -16,7 +16,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
         critico: '',
         tipo_repuesto: '',
         descatalogado: false,
-        empresa: user['tec-user'].perfil.empresa.id,
+        empresa: '',
         zona: '',
         seccion: '',
         equipo: ''
@@ -196,7 +196,8 @@ const RepListaFilto = ({actualizaFiltro}) => {
                                         name='id' 
                                         value={numeroBar.id}
                                         onChange={handleInputChange2}
-                                        placeholder="Codigo de barras" />
+                                        placeholder="Codigo de barras" 
+                                        autoFocus/>
                         </Form.Group>
                     </Col>
                     <Col>
@@ -206,7 +207,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
                                         name='nombre' 
                                         value={datos.nombre}
                                         onChange={handleInputChange}                                        
-                                        placeholder="Nombre contiene" />
+                                        placeholder="Nombre contiene"/>
                         </Form.Group>
                     </Col>
                     <Col>

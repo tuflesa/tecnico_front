@@ -119,6 +119,7 @@ const RepProveedorForm = ({proveedor}) => {
                                                 value={datos.nombre}
                                                 onChange={handleInputChange} 
                                                 placeholder="Nombre"
+                                                autoFocus
                                     />
                                     </Form.Group>
                             </Col>

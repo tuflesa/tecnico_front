@@ -64,14 +64,14 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
             stock_actual_inicial : stock ? stock.suma : null,
             stock_minimo : stock_minimo ? stock_minimo : null,
         })
-    },[stock, stock_minimo, almacenes, datos]);
+    },[stock, stock_minimo, almacenes]);
 
     useEffect(()=>{
         setDatos({
             ...datos,
             almacen : stock ? stock.almacen__id : almacenes.length > 0 ? almacenes[0].id : '',
         })
-    },[almacenes, datos, stock]);
+    },[almacenes]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -114,7 +114,8 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
                 )
                 .catch(err => { console.log(err);})
             }
-            else { // Crear stock mínimo               
+            else { // Crear stock mínimo
+                // console.log('Crear stock mínimo: repuesto:' + repuesto_id + ' almacen:  ' + datos.almacen + ' cantidad: ' + datos.stock_minimo_cantidad);
                 axios.post(BACKEND_SERVER + `/api/repuestos/stocks_minimos/`, {
                     repuesto: repuesto_id,
                     almacen: datos.almacen,
@@ -140,6 +141,7 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
 
         // Ajustar Stock
         if (datos.stock_actual !== datos.stock_actual_inicial || !datos.stock_actual){ // Si hay cambios o se deja sin valor el campo stock
+            // console.log('Guardar ajuste stock ' + datos.stock_actual);
             // 1 Crear un inventario
             // 2 Añadir una línea de inventario
             // 3 Generar un movimiento correspondiente al inventario

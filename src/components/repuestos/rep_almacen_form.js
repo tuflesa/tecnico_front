@@ -110,6 +110,7 @@ const RepAlmacenForm = ({nombre, empresa, almacen_id}) => {
                                             value={datos.nombre}
                                             onChange={handleInputChange} 
                                             placeholder="Nombre"
+                                            autoFocus
                                 />
                                 </Form.Group>
                         </Col>
