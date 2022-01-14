@@ -138,7 +138,7 @@ const RepSalidas = ({alm}) => {
                     'Authorization': `token ${token['tec-token']}`
                     }     
         })
-        .then( res => { console.log(res.data)})
+        .then( res => { window.location.reload();})
         .catch( err => {console.log(err)});
     });
     },[movimientos]);
@@ -190,7 +190,6 @@ const RepSalidas = ({alm}) => {
             })
             .then( res => { 
                 setSalida(res.data);
-                window.location.reload();
             })
             .catch(err => { console.log(err);})
         }
