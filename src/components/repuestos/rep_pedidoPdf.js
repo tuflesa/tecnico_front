@@ -1,11 +1,17 @@
-import React, { useEffect } from 'react';
+import React, { useState } from 'react';
 import { Document, Page, Image, View, Text, StyleSheet } from "@react-pdf/renderer";
 import { useCookies } from 'react-cookie';
 
 const VistaPdf = ({pedido, VerPdf, linea, empresa, lineas_adicionales, proveedor, contacto, direccion_envio}) =>{
     const [token] = useCookies(['tec-token']);
-    useEffect(()=>{
-    },[token]);
+    const [im, setIm] = useState({
+        uri: empresa.logo,
+        method:'GET',
+        headers:{
+            'Authorization': `token ${token['tec-token']}`
+            }
+    });
+
     function parseData(){
         if(linea){
             return linea.map((data, i)=>{
@@ -170,7 +176,7 @@ const VistaPdf = ({pedido, VerPdf, linea, empresa, lineas_adicionales, proveedor
                 <View style={styles.page} >
                     <View style={styles.section} fixed>
                         <View style={styles.imagen}>
-                            <Image src= {empresa.logo}/>
+                            <Image src= { im }/>
                         </View>
                     </View>
                     <View style={styles.page2}>               
@@ -225,22 +231,9 @@ const VistaPdf = ({pedido, VerPdf, linea, empresa, lineas_adicionales, proveedor
                         </View>                    
                     :null}
                     {parseData()}
-                    {/* { lineas_adicionales != '' ?
-                        <View style={styles.page3}>
-                            <View style={styles.sectionTabla}>
-                                <View style={styles.section7}><Text>Cant.</Text></View>
-                                <View style={styles.section6}><Text>Descripción</Text></View>
-                                <View style={styles.section8}><Text>Precio</Text></View>
-                                <View style={styles.section8}><Text>Dto.</Text></View>
-                                <View style={styles.section8}><Text>Total</Text></View>
-                            </View>                                          
-                        </View>                    
-                    :null} */}
+                    
                     {parse2Data()}
-                    <View style={styles.page}wrap={false}>
-                        {/* <View style={styles.section}>
-                            <View style={styles.section5}><Text>Sin más por el momento, reciban un afectuoso saludo.</Text></View>                                              
-                        </View> */}
+                    {/* <View style={styles.page}wrap={false}>
                         <View style={styles.section}> 
                             <View style={styles.section7}></View>                        
                             <View style={styles.section10}><Text>{pedido.creado_por.get_full_name}</Text></View>                       
@@ -249,7 +242,7 @@ const VistaPdf = ({pedido, VerPdf, linea, empresa, lineas_adicionales, proveedor
                             <View style={styles.section7}></View>                                            
                             <View style={styles.section10}><Text>Dpto. Técnico</Text></View>
                         </View>
-                    </View>
+                    </View> */}
                 </View>
                 <Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => (`${pageNumber} / ${totalPages}`)} fixed />
                 <View style={styles.page}fixed></View>                
