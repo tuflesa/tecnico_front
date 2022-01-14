@@ -215,7 +215,7 @@ const RepSalidas = ({alm}) => {
         <Container>
             <Row>                
                 <Col>
-                    <Form.Group controlId="almacen">
+                    <Form.Group>
                         <Form.Label>Almacén</Form.Label>
                         <Form.Control as="select"
                                     tabIndex={1}  
@@ -240,7 +240,7 @@ const RepSalidas = ({alm}) => {
                 </Col>                 
                 {numeroBar.almacen ?                            
                 <Col>
-                    <Form.Group controlId="formId">
+                    <Form.Group >
                         <Form.Label>Codigo Barras</Form.Label>
                         <Form.Control
                                     type="text"
