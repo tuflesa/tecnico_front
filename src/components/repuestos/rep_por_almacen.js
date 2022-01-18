@@ -98,10 +98,13 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
     } 
 
     const habilitar_linea = (r)=>{
-        var input_min =  document.getElementsByClassName(r.almacen.nombre);
-        for(var i = 0; i < input_min.length; i++) {
-            input_min[i].disabled = !input_min[i].disabled;
+        if(user['tec-user'].perfil.nivel_acceso.nombre !== 'local'){
+            var input_min =  document.getElementsByClassName(r.almacen.nombre);
+            for(var i = 0; i < input_min.length; i++) {
+                input_min[i].disabled = !input_min[i].disabled;
+            }
         }
+        else (alert('no tienes permisos'))
     }
 
     return (
