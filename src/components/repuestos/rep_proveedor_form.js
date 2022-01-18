@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, Table } from 'react-bootstrap';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
@@ -11,15 +11,15 @@ const RepProveedorForm = ({proveedor}) => {
     const [token] = useCookies(['tec-token']);
     const [show_contacto, setShowContacto] = useState(false);
     const [contactoEditar, setContactoEditar]=useState(null);
+    const [newProveedor, setNewProveedor]=useState(null);
     
-
-    const [datos, setDatos] = useState({
-        proveedor_id: proveedor.id ? proveedor.id : null,         
+    const [datos, setDatos] = useState({     
         nombre: proveedor.nombre,
         direccion: proveedor.direccion,
         telefono: proveedor.telefono,
         contactos: proveedor.contactos ? proveedor.contactos : null
     });
+
     const handleInputChange = (event) => {
         setDatos({
             ...datos,
@@ -68,7 +68,9 @@ const RepProveedorForm = ({proveedor}) => {
               }     
         })
         .then( res => { 
-            window.location.href = "/repuestos/proveedores";
+            setNewProveedor(res.data);
+            window.location.href = `/repuestos/proveedor/${res.data.id}`;
+           // window.location.href = "/repuestos/proveedores";
         })
         .catch(err => { console.log(err);})
         
@@ -102,7 +104,7 @@ const RepProveedorForm = ({proveedor}) => {
     return (
         <Container>
             <Row className="justify-content-center"> 
-            {proveedor.id ?
+            {proveedor.id?
                 <h5 className="pb-3 pt-1 mt-2">proveedor Detalle</h5>:
                 <h5 className="pb-3 pt-1 mt-2">Nuevo Proveedor</h5>}
             </Row>
@@ -151,7 +153,7 @@ const RepProveedorForm = ({proveedor}) => {
                             </Col>
                         </Row>
                         <Form.Row className="justify-content-center">                
-                            {proveedor.id ?
+                            {proveedor.id?
                                 <Button variant="info" type="submit" className={'mr-1'} onClick={actualizarDatos}>Actualizar</Button> :
                                 <Button variant="info" type="submit" className={'mr-1'} onClick={nuevoDatos}>Guardar</Button>
                             }                       

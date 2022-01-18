@@ -14,6 +14,7 @@ import { Link } from 'react-router-dom';
 import VistaPdf from './rep_pedidoPdf';
 import { PDFViewer } from '@react-pdf/renderer';
 import VistaIngPdf from './rep_pedidoIngPdf';
+import moment from 'moment';
 
 const PedidoForm = ({pedido, setPedido}) => {
     const [token] = useCookies(['tec-token']);
@@ -582,6 +583,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                                         <Button variant="info" type="submit" className={'mx-2'} onClick={cerrarPdf}>Cancelar Pdf</Button>
                                         <PDFViewer style={{width: "100%", height: "90vh"}}>
                                             <VistaPdf   pedido={pedido}
+                                                        fecha_creacion = {moment(pedido.fecha_creacion).format('DD-MM-YYYY')}
                                                         linea={datos.lineas_pedido} 
                                                         VerPdf={verPdf}
                                                         empresa={empresas.filter( s => s.id === pedido.empresa)[0]} 
@@ -597,6 +599,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                 <Button variant="info" type="submit" className={'mx-2'} onClick={cerrarIngPdf}>Cancelar Pdf Ing</Button>
                                                 <PDFViewer style={{width: "100%", height: "90vh"}}>
                                                     <VistaIngPdf    pedido={pedido}
+                                                                    fecha_creacion = {moment(pedido.fecha_creacion).format('DD-MM-YYYY')}
                                                                     linea={datos.lineas_pedido} 
                                                                     VerIngPdf={verIngPdf}
                                                                     empresa={empresas.filter( s => s.id === pedido.empresa)[0]} 

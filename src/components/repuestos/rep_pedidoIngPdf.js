@@ -1,6 +1,17 @@
 import { Document, Page, Image, View, Text, StyleSheet} from "@react-pdf/renderer";
+import React, { useState } from 'react';
+import { useCookies } from 'react-cookie';
 
-const VistaIngPdf = ({pedido, VerIngPdf, linea, empresa, lineas_adicionales, proveedor, contacto, direccion_envio}) =>{
+const VistaIngPdf = ({pedido, VerIngPdf, fecha_creacion, linea, empresa, lineas_adicionales, proveedor, contacto, direccion_envio}) =>{
+    const [token] = useCookies(['tec-token']);
+    const [im, setIm] = useState({
+        uri: empresa.logo,
+        method:'GET',
+        headers:{
+            'Authorization': `token ${token['tec-token']}`
+            }
+    });
+    
     function parseData(){
         if(linea){
             return linea.map((data, i)=>{
@@ -181,7 +192,7 @@ const VistaIngPdf = ({pedido, VerIngPdf, linea, empresa, lineas_adicionales, pro
                                 <Text>From:</Text>
                             </View>
                             <View style={styles.section4}>
-                                <Text>{pedido.fecha_creacion}</Text>
+                                <Text>{fecha_creacion}</Text>
                                 {contacto ? <Text>{contacto.nombre}</Text>:<Text>   </Text>}
                                 <Text>{proveedor.nombre}</Text>
                                 <Text>Order:</Text>

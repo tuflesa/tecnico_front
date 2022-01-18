@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Document, Page, Image, View, Text, StyleSheet } from "@react-pdf/renderer";
 import { useCookies } from 'react-cookie';
 
-const VistaPdf = ({pedido, VerPdf, linea, empresa, lineas_adicionales, proveedor, contacto, direccion_envio}) =>{
+
+const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicionales, proveedor, contacto, direccion_envio}) =>{
     const [token] = useCookies(['tec-token']);
     const [im, setIm] = useState({
         uri: empresa.logo,
@@ -178,6 +179,9 @@ const VistaPdf = ({pedido, VerPdf, linea, empresa, lineas_adicionales, proveedor
                         <View style={styles.imagen}>
                             <Image src= { im }/>
                         </View>
+                        <View style={styles.section3}>
+                            <Image style={styles.iconos} src="components\repuestos\images\logo-AENOR-9001.jpg"/>
+                        </View>
                     </View>
                     <View style={styles.page2}>               
                         <View style={styles.section}>
@@ -189,7 +193,7 @@ const VistaPdf = ({pedido, VerPdf, linea, empresa, lineas_adicionales, proveedor
                                 <Text>De:</Text>
                             </View>
                             <View style={styles.section4}>
-                                <Text>{pedido.fecha_creacion}</Text>
+                                <Text>{fecha_creacion}</Text>
                                 {contacto ? <Text>{contacto.nombre}</Text>:<Text>   </Text>}
                                 <Text>{proveedor.nombre}</Text>
                                 <Text>Pedido</Text>
