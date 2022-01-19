@@ -5,6 +5,7 @@ const RepProveedorNuevo = () => {
     return (
         <RepProvedorForm proveedor= {
             {
+                id: '',
                 nombre: '',
                 direccion: '',
                 telefono: ''

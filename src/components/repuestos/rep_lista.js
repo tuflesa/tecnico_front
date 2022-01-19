@@ -31,7 +31,7 @@ const RepLista = () => {
                   }
             })
             .then( res => {
-                setRepuestos(res.data);
+                setRepuestos(res.data);                
             })
             .catch( err => {
                 console.log(err);

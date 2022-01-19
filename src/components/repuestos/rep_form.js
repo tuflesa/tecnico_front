@@ -27,7 +27,8 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         descatalogado: repuesto.descatalogado,
         tipo_repuesto: repuesto.tipo_repuesto,
         equipos: repuesto.equipos,
-        proveedores: repuesto.proveedores
+        proveedores: repuesto.proveedores,
+        observaciones: repuesto.observaciones ? repuesto.observaciones : ''
     });
     const [tiposRepuesto, setTiposRepuesto] = useState(null);
     const [show_stock, setShowStock] = useState(false);
@@ -79,8 +80,9 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             descatalogado: repuesto.descatalogado,
             tipo_repuesto: repuesto.tipo_repuesto,
             equipos: repuesto.equipos,
-            proveedores: repuesto.proveedores}
-            );
+            proveedores: repuesto.proveedores,
+            observaciones: repuesto.observaciones ? repuesto.observaciones : ''
+        });
     },[repuesto]);
 
     useEffect(()=>{
@@ -150,7 +152,8 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             es_critico: datos.es_critico,
             descatalogado: datos.descatalogado,
             tipo_repuesto: datos.tipo_repuesto,
-            stocks_minimos: datos.stocks_minimos? datos.stocks_minimos:null
+            stocks_minimos: datos.stocks_minimos? datos.stocks_minimos:null,
+            observaciones: datos.observaciones
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -158,7 +161,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         })
         .then( res => { 
             setRepuesto(res.data);
-            window.location.href = "/repuestos";
+            //window.location.href = "/repuestos";
         })
         .catch(err => { console.log(err);})
 
@@ -172,7 +175,8 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             modelo: datos.modelo,
             es_critico: datos.es_critico,
             descatalogado: datos.descatalogado,
-            tipo_repuesto: datos.tipo_repuesto
+            tipo_repuesto: datos.tipo_repuesto,
+            observaciones: datos.observaciones
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -190,9 +194,6 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             setShowStock(false);
             setStockEditar(null);
             setStockMinimoEditar(null);
-        }
-        if (setShowStock===true){
-            alert('Todo Repuesto debe tener como mínimo un almacén');
         }
     }
 
@@ -315,7 +316,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                     <Form >
                         <Row>
                             <Col>
-                                <Form.Group controlId="nombre">
+                                <Form.Group id="nombre">
                                     <Form.Label>Nombre</Form.Label>
                                     <Form.Control type="text" 
                                                 name='nombre' 
@@ -327,7 +328,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                 </Form.Group>
                             </Col>
                             <Col>
-                                <Form.Group controlId="tipo">
+                                <Form.Group id="tipo">
                                     <Form.Label>Tipo</Form.Label>
                                     <Form.Control as="select"  
                                                 name='tipo_repuesto' 
@@ -347,7 +348,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                         </Row>
                         <Row>
                             <Col>
-                                <Form.Group controlId="fabricante">
+                                <Form.Group id="fabricante">
                                     <Form.Label>Fabricante</Form.Label>
                                     <Form.Control type="text" 
                                                 name='fabricante' 
@@ -358,7 +359,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                 </Form.Group>
                             </Col>
                             <Col>
-                                <Form.Group controlId="model">
+                                <Form.Group id="model">
                                     <Form.Label>Modelo</Form.Label>
                                     <Form.Control type="text" 
                                                 name='modelo' 
@@ -371,7 +372,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                         </Row>
                         <Row>
                             <Col>
-                                <Form.Group controlId="stock_T">
+                                <Form.Group id="stock_T">
                                     <Form.Label>Stock</Form.Label>
                                     <Form.Control type="text" 
                                                 name='stock_T' 
@@ -387,10 +388,21 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                     {datos.id && <Barcode datos={datos}/>}
                                 </div>
                             </Col>
+                            <Col>
+                                <Form.Group id="observaciones">
+                                    <Form.Label>Observaciones</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='observaciones' 
+                                                value={datos.observaciones}
+                                                onChange={handleInputChange} 
+                                                placeholder="Observaciones"
+                                    />
+                                </Form.Group>
+                            </Col>
                         </Row>
                         <Row>
                             <Col>
-                                <Form.Group className="mb-3" controlId="es_critico">
+                                <Form.Group className="mb-3" id="es_critico">
                                     <Form.Check type="checkbox" 
                                                 label="Es crítico"
                                                 checked = {datos.es_critico}
@@ -398,7 +410,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                 </Form.Group>
                             </Col>
                             <Col>
-                                <Form.Group className="mb-3" controlId="descatalogado">
+                                <Form.Group className="mb-3" id="descatalogado">
                                     <Form.Check type="checkbox" 
                                                 label="Descatalogado"
                                                 checked = {datos.descatalogado}
@@ -413,7 +425,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                             }
                             <Link to='/repuestos'>
                                 <Button variant="warning" >
-                                    Cancelar
+                                    Cancelar / Cerrar
                                 </Button>
                             </Link>
                             {datos.id && <Button variant='info' className={'mx-2'} onClick={ImprimirBarcode}>Imprimir Etiqueta</Button>}
