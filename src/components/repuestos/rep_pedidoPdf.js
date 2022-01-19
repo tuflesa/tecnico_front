@@ -9,7 +9,7 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
         uri: empresa.logo,
         method:'GET',
         headers: { "Cache-Control": "no-cache" }, 
-        body: "" }
+        body: "" 
     });
 
     function parseData(){
