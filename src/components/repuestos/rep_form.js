@@ -161,7 +161,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         })
         .then( res => { 
             setRepuesto(res.data);
-            window.location.href = "/repuestos";
+            //window.location.href = "/repuestos";
         })
         .catch(err => { console.log(err);})
 
@@ -425,7 +425,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                             }
                             <Link to='/repuestos'>
                                 <Button variant="warning" >
-                                    Cancelar
+                                    Cancelar / Cerrar
                                 </Button>
                             </Link>
                             {datos.id && <Button variant='info' className={'mx-2'} onClick={ImprimirBarcode}>Imprimir Etiqueta</Button>}
