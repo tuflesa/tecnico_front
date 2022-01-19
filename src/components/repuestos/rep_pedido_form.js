@@ -53,7 +53,8 @@ const PedidoForm = ({pedido, setPedido}) => {
         lineas_pedido: pedido ? pedido.lineas_pedido : null,
         lineas_adicionales: pedido ? pedido.lineas_adicionales : null,
         direccion_envio: pedido ? (pedido.direccion_envio ? pedido.direccion_envio.id : null) : null,
-        contacto: pedido ? (pedido.contacto ? pedido.contacto.id : null) : null
+        contacto: pedido ? (pedido.contacto ? pedido.contacto.id : null) : null,
+        observaciones: pedido ? pedido.observaciones : ''
     });     
 
     useEffect(()=>{
@@ -134,7 +135,8 @@ const PedidoForm = ({pedido, setPedido}) => {
             lineas_pedido: pedido.lineas_pedido ? pedido.lineas_pedido : null,
             lineas_adicionales: pedido ? pedido.lineas_adicionales : null,
             direccion_envio: pedido ? (pedido.direccion_envio ? pedido.direccion_envio.id : null) : direcciones[0].id,
-            contacto: pedido ? (pedido.contacto ? pedido.contacto.id : null) : null
+            contacto: pedido ? (pedido.contacto ? pedido.contacto.id : null) : null,
+            observaciones: pedido ? pedido.observaciones : ''
 
         });
     },[pedido]);
@@ -289,6 +291,7 @@ const PedidoForm = ({pedido, setPedido}) => {
             creado_por: user['tec-user'].id,
             direccion_envio: datos.direccion_envio,
             contacto: datos.contacto,
+            observaciones: datos.observaciones
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -310,7 +313,8 @@ const PedidoForm = ({pedido, setPedido}) => {
             fecha_prevista_entrega: datos.fecha_prevista_entrega,
             finalizado: datos.finalizado,
             direccion_envio: datos.direccion_envio,
-            contacto: datos.contacto
+            contacto: datos.contacto,
+            observaciones: datos.observaciones
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -318,7 +322,7 @@ const PedidoForm = ({pedido, setPedido}) => {
         })
         .then( res => { 
             setPedido(res.data);
-            window.location.href = "/repuestos/pedidos";
+            //window.location.href = "/repuestos/pedidos";
         })
         .catch(err => { console.log(err);})
 
@@ -559,6 +563,17 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                 onChange = {handleFinalizado} />
                                 </Form.Group>
                             </Col>
+                            <Col>
+                                <Form.Group controlId="observaciones">
+                                    <Form.Label>Observaciones pedido</Form.Label>
+                                    <Form.Control imput type="text" 
+                                                name='observaciones'
+                                                value = {datos.observaciones}
+                                                onChange = {handleInputChange}
+                                                placeholder="Observaciones">
+                                    </Form.Control>
+                                </Form.Group>
+                            </Col>
                         </Row>                        
                         <Form.Row className="justify-content-center">
                             {pedido ? 
@@ -567,7 +582,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                             }
                             <Link to='/repuestos/pedidos'>
                                 <Button variant="warning" >
-                                    Cancelar
+                                    Cancelar / Cerrar
                                 </Button>
                             </Link>
                         </Form.Row> 

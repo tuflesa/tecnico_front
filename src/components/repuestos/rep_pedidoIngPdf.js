@@ -260,6 +260,13 @@ const VistaIngPdf = ({pedido, VerIngPdf, fecha_creacion, linea, empresa, lineas_
                         </View>
                     </View>
                 </View>
+                <View style={styles.page2}>
+                    <View style={styles.section}>
+                        <View style={styles.section3}>
+                            <Text>Observaciones pedido: {pedido.observaciones}</Text>                            
+                        </View>
+                    </View>
+                </View>
                 <Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => (`${pageNumber} / ${totalPages}`)} fixed />
                 <View style={styles.page}fixed></View>  
             </Page>

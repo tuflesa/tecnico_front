@@ -237,16 +237,13 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
                     {parseData()}
                     
                     {parse2Data()}
-                    {/* <View style={styles.page}wrap={false}>
-                        <View style={styles.section}> 
-                            <View style={styles.section7}></View>                        
-                            <View style={styles.section10}><Text>{pedido.creado_por.get_full_name}</Text></View>                       
+                </View>
+                <View style={styles.page2}>
+                    <View style={styles.section}>
+                        <View style={styles.section3}>
+                            <Text>Observaciones pedido: {pedido.observaciones}</Text>                            
                         </View>
-                        <View style={styles.section}> 
-                            <View style={styles.section7}></View>                                            
-                            <View style={styles.section10}><Text>Dpto. Técnico</Text></View>
-                        </View>
-                    </View> */}
+                    </View>
                 </View>
                 <Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => (`${pageNumber} / ${totalPages}`)} fixed />
                 <View style={styles.page}fixed></View>                
