@@ -8,9 +8,8 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
     const [im, setIm] = useState({
         uri: empresa.logo,
         method:'GET',
-        headers:{
-            'Authorization': `token ${token['tec-token']}`
-            }
+        headers: { "Cache-Control": "no-cache" }, 
+        body: "" }
     });
 
     function parseData(){
