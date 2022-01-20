@@ -14,7 +14,8 @@ const EstEquipoLista = () => {
     const [equipos, setEquipos] = useState([]);
     const [equipoBorrar, setEquipoBorrar] = useState(null);
     const [show, setShow] = useState(false);
-    const [filtro, setFiltro] = useState('');
+    const [user] = useCookies(['tec-user']);
+    const [filtro, setFiltro] = useState({empresa: user['tec-user'].perfil.empresa.id});
 
     const actualizaFiltro = str => {
         setFiltro(str);

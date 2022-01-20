@@ -2,7 +2,7 @@ import { Document, Page, Image, View, Text, StyleSheet} from "@react-pdf/rendere
 import React, { useState } from 'react';
 import { useCookies } from 'react-cookie';
 
-const VistaIngPdf = ({pedido, VerIngPdf, fecha_creacion, linea, empresa, lineas_adicionales, proveedor, contacto, direccion_envio}) =>{
+const VistaIngPdf = ({pedido, fecha_creacion, linea, empresa, lineas_adicionales, proveedor, contacto, direccion_envio}) =>{
     const [token] = useCookies(['tec-token']);
     const [im, setIm] = useState({
         uri: empresa.logo,
@@ -234,17 +234,7 @@ const VistaIngPdf = ({pedido, VerIngPdf, fecha_creacion, linea, empresa, lineas_
                         </View>                    
                     :null}
                     {parseData()}
-                    {/* { lineas_adicionales != '' ?
-                        <View style={styles.page3}>
-                            <View style={styles.sectionTabla}>
-                                <View style={styles.section7}><Text>Qty</Text></View>
-                                <View style={styles.section6}><Text>Description</Text></View>
-                                <View style={styles.section8}><Text>Price/Unit</Text></View>
-                                <View style={styles.section8}><Text>Dcnt.</Text></View>
-                                <View style={styles.section8}><Text>Total</Text></View>
-                            </View>                                          
-                        </View>                    
-                    :null} */}
+                    
                     {parse2Data()}
                     <View style={styles.page}wrap={false}> 
                         {/* <View style={styles.section}>
