@@ -33,6 +33,7 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
 
     useEffect(()=>{ 
         datos.total = ((datos.precio*datos.cantidad)-(datos.precio*datos.cantidad*datos.descuento/100));
+        datos.total=datos.total.toFixed(2);
         datos.por_recibir = linea ? (linea.por_recibir+(datos.cantidad-linea.cantidad)) : datos.cantidad;
     },[datos.cantidad, datos.precio, datos.descuento]);
 
