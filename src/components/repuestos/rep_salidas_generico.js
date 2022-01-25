@@ -1,3 +1,4 @@
+import React from 'react';
 import RepSalidas from './rep_salidas_form';
 
 const RepSalidasGenerico = () => {
