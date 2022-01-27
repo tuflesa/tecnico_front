@@ -13,7 +13,8 @@ const RepNavBar = () => {
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="mr-auto">
                         <NavDropdown title="Repuestos" id="basic-nav-dropdown">
-                            <NavDropdown.Item href="/repuestos">Lista de repuestos</NavDropdown.Item>
+                            <NavDropdown.Item href="/repuestos">Repuestos Pendientes</NavDropdown.Item>
+                            <NavDropdown.Item href="/repuestos/listado">Lista de repuestos</NavDropdown.Item>
                             <NavDropdown.Item href="/repuestos/nuevo">Nuevo repuesto</NavDropdown.Item>
                             <NavDropdown.Divider />
                             <NavDropdown.Item href="/repuestos/almacenes">Lista de almacenes</NavDropdown.Item>
@@ -25,7 +26,7 @@ const RepNavBar = () => {
                             <NavDropdown.Item href="/repuestos/pedidos">Lista de pedidos</NavDropdown.Item>
                             <NavDropdown.Item href="/repuestos/pedido/nuevo">Nuevo pedido</NavDropdown.Item>
                             <NavDropdown.Divider />
-                            <NavDropdown.Item href="/repuestos/salidas">Salidas</NavDropdown.Item>
+                            <NavDropdown.Item href="/repuestos/salidas">Salidas</NavDropdown.Item>                            
                         </NavDropdown>
                     </Nav>    
                     <Navbar.Text className="mr-4" >

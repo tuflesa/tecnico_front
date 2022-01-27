@@ -14,7 +14,7 @@ const RepLista = () => {
     const [repuestos, setRepuestos] = useState(null);
     const [show, setShow] = useState(false);
     const [repuestoBorrar, setRepuestoBorrar] = useState(null);
-    const [filtro, setFiltro] = useState(`?equipos__seccion__zona__empresa__id=${user['tec-user'].perfil.empresa.id}&&descatalogado=${false}`);
+    const [filtro, setFiltro] = useState(`?descatalogado=${false}`);
     const ExcelFile = ReactExport.ExcelFile;
     const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
     const ExcelColumn = ReactExport.ExcelFile.ExcelColumn;
@@ -80,7 +80,7 @@ const RepLista = () => {
                             <ExcelColumn label="Crítico" value="es_critico"/>
                             <ExcelColumn label="Descatalogado" value="descatalogado"/>
                         </ExcelSheet>
-                    </ExcelFile>
+                    </ExcelFile> 
                     <Table striped bordered hover>
                         <thead>
                             <tr>

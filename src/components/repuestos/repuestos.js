@@ -15,6 +15,7 @@ import PedidoEditar from './rep_pedido_editar';
 import RepPedidoNuevo from './rep_pedido_nuevo';
 import RepSalidasGenerico from './rep_salidas_generico';
 import RepSalidasID from './rep_salidas_id';
+import RepPendientes from './rep_pendientes';
 
 const Repuestos = () => {
     
@@ -22,7 +23,8 @@ const Repuestos = () => {
         <React.Fragment>
             <RepNavBar />
             <Switch>
-                <Route path='/repuestos' exact component={RepLista} />
+                <Route path='/repuestos' exact component={RepPendientes} />
+                <Route path='/repuestos/listado' component={RepLista} />
                 <Route path='/repuestos/pedidos' component={PedLista} /> 
                 <Route path='/repuestos/salidas/:id' component={RepSalidasID} /> 
                 <Route path='/repuestos/salidas' component={RepSalidasGenerico} />    
