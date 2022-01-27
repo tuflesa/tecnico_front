@@ -39,7 +39,7 @@ const RepPendientes = () => {
     }, [token]);   
 
     useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/repuestos/linea_pedido_pend/?pedido__finalizado=${'False'}`,{
+        axios.get(BACKEND_SERVER + `/api/repuestos/linea_pedido_pend/?pedido__finalizado=${'False'}&&pedido__empresa=${datos.empresa}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }
@@ -70,14 +70,13 @@ const RepPendientes = () => {
         <Container>
             <Row>
                 <Col>
-                    <h5 className="mb-3 mt-3">Repuestos Por Debajo del Stock Mínimo</h5>                    
+                    <h5 className="mb-3 mt-3">Repuestos por debajo del stock mínimo</h5>                    
                     <Table striped bordered hover>
                         <thead>
                             <tr>
                                 <th>Nombre</th>
                                 <th>Stock Actual</th>
                                 <th>Stock Mínimo</th>
-                                <th>Pedido</th>
                                 <th>Cant. por recibir</th>
                             </tr>
                         </thead>
@@ -87,18 +86,14 @@ const RepPendientes = () => {
                                     <tr key={pendiente.id}>
                                         <td>{pendiente.repuesto.nombre}</td>
                                         <td>{pendiente.stock_act}</td>
-                                        <td>{pendiente.cantidad}</td>
-                                        <td>{lineasPendientes && lineasPendientes.map( lineas => {
-                                            if(lineas.repuesto === pendiente.repuesto.id){                                               
-                                                return(lineas.pedido.numero) 
+                                        <td>{pendiente.cantidad}</td> 
+                                        <td>{lineasPendientes && lineasPendientes.map( linea => {
+                                            let suma = 0;
+                                            if(linea.repuesto === pendiente.repuesto.id){                                        
+                                                suma = suma + parseInt(linea.por_recibir);
                                             }
-                                        })}                                            
-                                        </td> 
-                                        <td>{lineasPendientes && lineasPendientes.map( lineas => {
-                                            if(lineas.repuesto === pendiente.repuesto.id){                                               
-                                                return(lineas.por_recibir) 
-                                            }
-                                        })}                                            
+                                            return suma;
+                                        }).reduce((partialSum, a) => partialSum + a, 0)}                                            
                                         </td>
 
                                     </tr>
@@ -111,7 +106,7 @@ const RepPendientes = () => {
             </Row>
             <Row>
                 <Col>
-                    <h5 className="mb-3 mt-3">Pedidos Fecha Prevista Pasada</h5>                    
+                    <h5 className="mb-3 mt-3">Pedidos con fecha prevista vencida</h5>                    
                     <Table striped bordered hover>
                         <thead>
                         <tr>
