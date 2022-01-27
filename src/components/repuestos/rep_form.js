@@ -423,7 +423,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button> :
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={crearDatos}>Guardar</Button>
                             }
-                            <Link to='/repuestos'>
+                            <Link to='/repuestos/listado'>
                                 <Button variant="warning" >
                                     Cancelar / Cerrar
                                 </Button>

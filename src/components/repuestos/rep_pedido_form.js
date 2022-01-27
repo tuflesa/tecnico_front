@@ -322,6 +322,7 @@ const PedidoForm = ({pedido, setPedido}) => {
         })
         .then( res => { 
             setPedido(res.data);
+            updatePedido();
             //window.location.href = "/repuestos/pedidos";
         })
         .catch(err => { console.log(err);})

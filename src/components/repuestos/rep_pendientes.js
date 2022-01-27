@@ -4,15 +4,22 @@ import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table } from 'react-bootstrap';
 import ReactExport from 'react-data-export';
+import {invertirFecha} from '../utilidades/funciones_fecha';
+import { PencilFill } from 'react-bootstrap-icons';
+import { Link } from 'react-router-dom';
 
 const RepPendientes = () => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
     const [pendientes, setPendientes] = useState(null);
     const [lineasPendientes, setLineasPendientes] = useState(null);
+    const [pedfueradefecha, setPedFueradeFecha] = useState(null);
+    var fecha = new Date();
     
     const [datos, setDatos] = useState({
         empresa: user['tec-user'].perfil.empresa.id,
+        hoy: (fecha.getFullYear() + "/" + (fecha.getMonth()+1) + "/" + fecha.getDate()),
+        //hoy: fecha,
     });
 
     const [filtro, setFiltro] = useState(`?empresa=${datos.empresa}&&finalizado=${false}`);
@@ -23,7 +30,7 @@ const RepPendientes = () => {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
-        .then( res => {
+        .then( res => {            
             setPendientes(res.data.filter( s => s.stock_act < s.cantidad));
         })
         .catch( err => {
@@ -32,7 +39,7 @@ const RepPendientes = () => {
     }, [token]);   
 
     useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/repuestos/linea_pedido/?pedido__finalizado=${'False'}`,{
+        axios.get(BACKEND_SERVER + `/api/repuestos/linea_pedido_pend/?pedido__finalizado=${'False'}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }
@@ -45,11 +52,25 @@ const RepPendientes = () => {
         });
     }, [token]);
 
+    useEffect(()=>{
+        axios.get(BACKEND_SERVER + `/api/repuestos/lista_pedidos/` + filtro,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( res => {
+            setPedFueradeFecha(res.data.filter( s => s.fecha_prevista_entrega < datos.hoy));
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    },[token]); 
+
     return (
         <Container>
             <Row>
                 <Col>
-                    <h5 className="mb-3 mt-3">Lista de Repuestos Stock Pendiente</h5>                    
+                    <h5 className="mb-3 mt-3">Repuestos Por Debajo del Stock Mínimo</h5>                    
                     <Table striped bordered hover>
                         <thead>
                             <tr>
@@ -88,8 +109,46 @@ const RepPendientes = () => {
                     </Table>
                 </Col>
             </Row>
+            <Row>
+                <Col>
+                    <h5 className="mb-3 mt-3">Pedidos Fecha Prevista Pasada</h5>                    
+                    <Table striped bordered hover>
+                        <thead>
+                        <tr>
+                                <th>Num-Pedido</th>
+                                <th>Empresa</th>
+                                <th>Proveedor</th>
+                                <th>Fecha Pedido</th>
+                                <th>Fecha Entrega</th>
+                                <th>Fecha Prevista Entrega</th>
+                                <th>Finalizado</th>
+                                <th>Ir al pedido</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {pedfueradefecha && pedfueradefecha.map( pedido => {
+                                return (
+                                    <tr key={pedido.id}>
+                                        <td>{pedido.numero}</td>
+                                        <td>{pedido.empresa.nombre}</td>
+                                        <td>{pedido.proveedor.nombre}</td>
+                                        <td>{invertirFecha(String(pedido.fecha_creacion))}</td>
+                                        <td>{pedido.fecha_entrega && invertirFecha(String(pedido.fecha_entrega))}</td>                                        
+                                        <td>{pedido.fecha_prevista_entrega && invertirFecha(String(pedido.fecha_prevista_entrega))}</td> 
+                                        <td>{pedido.finalizado ? 'Si' : 'No'}</td>
+                                        <td>
+                                            <Link to={`/repuestos/pedido_detalle/${pedido.id}`}>
+                                                <PencilFill className="mr-3 pencil"/>
+                                            </Link>
+                                        </td>
+                                    </tr>
+                                )})
+                            }
+                        </tbody>
+                    </Table>
+                </Col>
+            </Row>
         </Container>
-
     )
 }
 export default RepPendientes;

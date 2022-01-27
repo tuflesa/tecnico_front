@@ -18,7 +18,7 @@ const LineaAdicionalForm = ({show, pedido_id, handleCloseLineaAdicional, updateP
         descuento: linea_adicional ? linea_adicional.descuento : 0,
         total: linea_adicional ? linea_adicional.total : 0,
         pedido: pedido_id,
-        por_recibir:''
+        por_recibir:linea_adicional ? linea_adicional.por_recibir : '',
     });   
 
     useEffect(()=>{
@@ -29,6 +29,8 @@ const LineaAdicionalForm = ({show, pedido_id, handleCloseLineaAdicional, updateP
             descuento: linea_adicional ? linea_adicional.descuento : 0,
             total: linea_adicional ? linea_adicional.total : 0,
             pedido: pedido_id,
+            pedido: pedido_id,
+            por_recibir: linea_adicional ? linea_adicional.por_recibir : 0,
         });
     },[linea_adicional, pedido_id]);
 
@@ -36,8 +38,8 @@ const LineaAdicionalForm = ({show, pedido_id, handleCloseLineaAdicional, updateP
         datos.cantidad=Number.parseFloat(datos.cantidad).toFixed(2);
         datos.precio=Number.parseFloat(datos.precio).toFixed(2);
         datos.descuento=Number.parseFloat(datos.descuento).toFixed(2);
-        datos.total = ((datos.precio*datos.cantidad)-(datos.precio*datos.cantidad*datos.descuento/100));
-        datos.total=Number.parseFloat(datos.total).toFixed(2);
+        datos.total = Number.parseFloat((datos.precio*datos.cantidad)-(datos.precio*datos.cantidad*datos.descuento/100)).toFixed(2);
+        //datos.total=Number.parseFloat(datos.total).toFixed(2);
         datos.por_recibir = linea_adicional ? (linea_adicional.por_recibir+(datos.cantidad-linea_adicional.cantidad)) : datos.cantidad;
     },[datos.cantidad, datos.precio, datos.descuento]);
     
