@@ -7,6 +7,7 @@ import ReactExport from 'react-data-export';
 import {invertirFecha} from '../utilidades/funciones_fecha';
 import { PencilFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
+import { format } from 'd3';
 
 const RepPendientes = () => {
     const [token] = useCookies(['tec-token']);
@@ -18,20 +19,18 @@ const RepPendientes = () => {
     
     const [datos, setDatos] = useState({
         empresa: user['tec-user'].perfil.empresa.id,
-        hoy: (fecha.getFullYear() + "/" + (fecha.getMonth()+1) + "/" + fecha.getDate()),
-        //hoy: fecha,
+        hoy: (fecha.getFullYear() + "-" + (fecha.getMonth()+1) + "-" + fecha.getDate()),
     });
 
-    const [filtro, setFiltro] = useState(`?empresa=${datos.empresa}&&finalizado=${false}`);
-
+    const [filtro, setFiltro] = useState(`?empresa=${datos.empresa}&finalizado=${false}&fecha_prevista_entrega__lte=${datos.hoy}`);
     useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimo_detalle/?almacen__empresa__id=${datos.empresa}&&stock_act<cantidad`,{
+        axios.get(BACKEND_SERVER + `/api/repuestos/articulos_fuera_stock/?almacen__empresa__id=${datos.empresa}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
         .then( res => {            
-            setPendientes(res.data.filter( s => s.stock_act < s.cantidad));
+            setPendientes(res.data);
         })
         .catch( err => {
             console.log(err);
@@ -59,7 +58,7 @@ const RepPendientes = () => {
             }
         })
         .then( res => {
-            setPedFueradeFecha(res.data.filter( s => s.fecha_prevista_entrega < datos.hoy));
+            setPedFueradeFecha(res.data);
         })
         .catch( err => {
             console.log(err);
