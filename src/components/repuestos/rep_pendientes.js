@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
-import { Container, Row, Col, Table } from 'react-bootstrap';
+import { Container, Row, Col, Table, Modal, Button } from 'react-bootstrap';
 import ReactExport from 'react-data-export';
 import {invertirFecha} from '../utilidades/funciones_fecha';
-import { PencilFill } from 'react-bootstrap-icons';
+import { PencilFill, Receipt } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import { format } from 'd3';
+import ListaPedidos from './rep_pendientes_pedidos';
 
 const RepPendientes = () => {
     const [token] = useCookies(['tec-token']);
@@ -15,7 +16,10 @@ const RepPendientes = () => {
     const [pendientes, setPendientes] = useState(null);
     const [lineasPendientes, setLineasPendientes] = useState(null);
     const [pedfueradefecha, setPedFueradeFecha] = useState(null);
+    const [show, setShow] = useState(false);
+    const [repuesto_id, setRepuesto_id] = useState(null);
     var fecha = new Date();
+    var LineasConRepuestos = '';
     
     const [datos, setDatos] = useState({
         empresa: user['tec-user'].perfil.empresa.id,
@@ -23,34 +27,21 @@ const RepPendientes = () => {
     });
 
     const [filtro, setFiltro] = useState(`?empresa=${datos.empresa}&finalizado=${false}&fecha_prevista_entrega__lte=${datos.hoy}`);
+    
     useEffect(() => {
         axios.get(BACKEND_SERVER + `/api/repuestos/articulos_fuera_stock/?almacen__empresa__id=${datos.empresa}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
-        .then( res => {            
+        .then( res => { ;
             setPendientes(res.data);
         })
         .catch( err => {
             console.log(err);
         });
     }, [token]);   
-
-    useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/repuestos/linea_pedido_pend/?pedido__finalizado=${'False'}&&pedido__empresa=${datos.empresa}`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-            }
-        })
-        .then( rs => {
-            setLineasPendientes(rs.data);
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    }, [token]);
-
+    
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/repuestos/lista_pedidos/` + filtro,{
             headers: {
@@ -65,6 +56,29 @@ const RepPendientes = () => {
         });
     },[token]); 
 
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + `/api/repuestos/linea_pedido_pend/?pedido__finalizado=${'False'}&pedido__empresa=${datos.empresa}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( rs => {
+            setLineasPendientes(rs.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
+
+    const listarPedidos = (repuesto)=>{
+        setRepuesto_id(repuesto);
+        setShow(true);
+    }
+
+    const handlerListCancelar = ()=>{
+        setShow(false);
+    }
+
     return (
         <Container>
             <Row>
@@ -77,6 +91,7 @@ const RepPendientes = () => {
                                 <th>Stock Actual</th>
                                 <th>Stock Mínimo</th>
                                 <th>Cant. por recibir</th>
+                                <th>Pedidos</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -93,6 +108,9 @@ const RepPendientes = () => {
                                             }
                                             return suma;
                                         }).reduce((partialSum, a) => partialSum + a, 0)}                                            
+                                        </td>
+                                        <td>
+                                        <Receipt className="mr-3 pencil" onClick={event =>{listarPedidos(pendiente.repuesto.id)}}/>
                                         </td>
 
                                     </tr>
@@ -119,7 +137,7 @@ const RepPendientes = () => {
                                 <th>Ir al pedido</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody>                        
                             {pedfueradefecha && pedfueradefecha.map( pedido => {
                                 return (
                                     <tr key={pedido.id}>
@@ -142,6 +160,11 @@ const RepPendientes = () => {
                     </Table>
                 </Col>
             </Row>
+            <ListaPedidos   show={show}
+                            repuesto_id ={repuesto_id}
+                            lineasPendientes={lineasPendientes}
+                            handlerListCancelar={handlerListCancelar}
+            />
         </Container>
     )
 }
