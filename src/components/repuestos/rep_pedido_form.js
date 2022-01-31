@@ -141,6 +141,21 @@ const PedidoForm = ({pedido, setPedido}) => {
         });
     },[pedido]);
 
+    useEffect(() =>{
+        // Ordena el listado de proveedores
+        if (proveedores){
+            proveedores.sort(function(a, b){
+                if(a.nombre > b.nombre){
+                    return 1;
+                }
+                if(a.nombre < b.nombre){
+                    return -1;
+                }
+                return 0;
+            })
+        }
+    }, [proveedores]);
+
     const handleInputChange = (event) => {
         setDatos({
             ...datos,

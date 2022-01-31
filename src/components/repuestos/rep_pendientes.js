@@ -19,7 +19,6 @@ const RepPendientes = () => {
     const [show, setShow] = useState(false);
     const [repuesto_id, setRepuesto_id] = useState(null);
     var fecha = new Date();
-    var LineasConRepuestos = '';
     
     const [datos, setDatos] = useState({
         empresa: user['tec-user'].perfil.empresa.id,
@@ -34,13 +33,28 @@ const RepPendientes = () => {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
-        .then( res => { ;
+        .then( res => { 
             setPendientes(res.data);
         })
         .catch( err => {
             console.log(err);
         });
-    }, [token]);   
+    }, [token]);  
+    
+    useEffect(() =>{
+        //Ordena el listado de los repuestos por debajo del stock mínimo
+        if (pendientes){
+            pendientes.sort(function(a, b){
+                if(a.repuesto.nombre > b.repuesto.nombre){
+                    return 1;
+                }
+                if(a.repuesto.nombre < b.repuesto.nombre){
+                    return -1;
+                }
+                return 0;
+            })
+        }
+    }, [pendientes]);
     
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/repuestos/lista_pedidos/` + filtro,{
