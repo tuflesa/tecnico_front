@@ -3,9 +3,10 @@ import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table, Modal, Button } from 'react-bootstrap';
-import { Trash, PencilFill } from 'react-bootstrap-icons';
+import { Trash, PencilFill, Receipt } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import RepListaFilto from './rep_lista_filtro';
+import ListaTrazabilidad from './rep_trazabilidad';
 import ReactExport from 'react-data-export';
 
 const RepLista = () => {
@@ -18,6 +19,8 @@ const RepLista = () => {
     const ExcelFile = ReactExport.ExcelFile;
     const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
     const ExcelColumn = ReactExport.ExcelFile.ExcelColumn;
+    const [showTrazabilidad, setShowTrazabilidad] = useState(false);
+    const [traza_repuesto, setTrazaRepuesto] = useState(null);
 
     const actualizaFiltro = str => {
         setFiltro(str);
@@ -31,7 +34,7 @@ const RepLista = () => {
                   }
             })
             .then( res => {
-                setRepuestos(res.data);                
+                setRepuestos(res.data);
             })
             .catch( err => {
                 console.log(err);
@@ -59,6 +62,13 @@ const RepLista = () => {
                 setRepuestoBorrar(null);
             })
             .catch(err => {console.log(err);})
+    }
+
+    const handleCloseTraza = () => setShowTrazabilidad(false);
+
+    const trazabilidad = (repuesto) => {
+        setTrazaRepuesto(repuesto);
+        setShowTrazabilidad(true);
     }
 
     return (
@@ -107,7 +117,8 @@ const RepLista = () => {
                                             <Link to={`/repuestos/${repuesto.id}`}>
                                                 <PencilFill className="mr-3 pencil"/>
                                             </Link>
-                                            <Trash className="trash"  onClick={event => {handleTrashClick(repuesto)}} />
+                                            <Trash className="mr-3 trash"  onClick={event => {handleTrashClick(repuesto)}} />
+                                            <Receipt className="pencil" onClick={event => {trazabilidad(repuesto)}}/>
                                         </td>
                                     </tr>
                                 )})
@@ -130,6 +141,11 @@ const RepLista = () => {
                     </Button>
                 </Modal.Footer>
             </Modal>
+            <ListaTrazabilidad  showTrazabilidad={showTrazabilidad}
+                                repuesto ={traza_repuesto}
+                                handlerListCancelar={handleCloseTraza}
+            />
+
         </Container>
     )
 }

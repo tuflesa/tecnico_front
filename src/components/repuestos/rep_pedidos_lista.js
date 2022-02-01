@@ -48,8 +48,6 @@ const PedLista = () => {
         }while (y<pedido.lineas_pedido.length);
         if (y===pedido.lineas_pedido.length||pedido.lineas_pedido.length===0){            
             var confirmacion = window.confirm('¿Deseas eliminar el pedido?');
-            console.log('esto es confirmacion de pedido');
-            console.log(confirmacion);
             if(confirmacion){
                 fetch (BACKEND_SERVER + `/api/repuestos/pedido_detalle/${pedido.id}/`,{
                     method: 'DELETE',
@@ -64,7 +62,6 @@ const PedLista = () => {
                     console.log(err);
                 });
             }
-            // actualizaFiltro();
             setShow(!show);
         }
 
