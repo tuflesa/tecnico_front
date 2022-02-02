@@ -5,8 +5,7 @@ import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import {invertirFecha} from '../utilidades/funciones_fecha';
-import { PencilFill } from 'react-bootstrap-icons';
-import { Link } from 'react-router-dom';
+import ReactExport from 'react-data-export';
 
 const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar}) => {
     const [token] = useCookies(['tec-token']);
@@ -14,33 +13,38 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar}) =>
 
     const [listado, setListado] = useState(null);
     const [datos, setDatos] = useState({usuario: user['tec-user']}); 
+    const ExcelFile = ReactExport.ExcelFile;
+    const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
+    const ExcelColumn = ReactExport.ExcelFile.ExcelColumn;
 
     useEffect(() => {
-        console.log(datos.usuario.perfil.empresa.id);
         repuesto && axios.get(BACKEND_SERVER + `/api/repuestos/movimiento_trazabilidad/?linea_inventario__repuesto=${repuesto.id}&almacen__empresa=${datos.usuario.perfil.empresa.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }
         })
         .then( res => {
-            console.log('esto son los inventarios');
-            console.log(res.data);
+            {res.data && res.data.map( r => {
+                r.albaran=r.linea_inventario.inventario.nombre;
+            })}
             axios.get(BACKEND_SERVER + `/api/repuestos/movimiento_trazabilidad/?linea_pedido__repuesto=${repuesto.id}&almacen__empresa=${datos.usuario.perfil.empresa.id}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
             })
             .then( re => {
-                console.log('esto son los pedidos');
-                console.log(re.data);
+                {re.data && re.data.map( r => {
+                    r.albaran=r.linea_pedido.pedido.numero;
+                })}
                 axios.get(BACKEND_SERVER + `/api/repuestos/movimiento_trazabilidad/?linea_salida__repuesto=${repuesto.id}&almacen__empresa=${datos.usuario.perfil.empresa.id}`,{
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
                     }
                 })
                 .then( r => {
-                    console.log('esto son las salidas');
-                    console.log(r.data);
+                    {r.data && r.data.map( res => {
+                        res.albaran=res.linea_salida.salida.nombre;
+                    })}
                     setListado(r.data.concat(re.data, res.data));
                 })
                 .catch( err => {
@@ -82,6 +86,14 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar}) =>
             <Modal.Body>
                 <Row> 
                     <Col><h5>{repuesto?repuesto.nombre:''}</h5></Col>
+                    <ExcelFile filename={"ExcelExportExample"} element={<button>Exportar a Excel</button>}>
+                        <ExcelSheet data={listado} name="Listados">
+                            <ExcelColumn label="Id" value="id"/>
+                            <ExcelColumn label="Movimiento" value="albaran"/>
+                            <ExcelColumn label="Fecha" value="fecha"/>
+                            <ExcelColumn label="Cantidad" value="cantidad"/>
+                        </ExcelSheet>
+                    </ExcelFile> 
                 </Row>
                 <Row>
                     <Col>
@@ -89,6 +101,7 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar}) =>
                             <thead>                                
                                 <tr>
                                     <th>Movimiento</th>
+                                    <th>Almacén</th>
                                     <th>Fecha</th>
                                     <th>Cantidad</th>
                                 </tr>
@@ -97,7 +110,8 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar}) =>
                                 {listado && listado.map( movimiento => {
                                     return (
                                         <tr key={movimiento.id}>                                            
-                                            <td>{movimiento.linea_inventario?'Inventario' : movimiento.linea_salida?'Salida' : 'Pedido'}</td>
+                                            <td>{movimiento.linea_inventario?movimiento.albaran : movimiento.linea_salida?movimiento.albaran : movimiento.linea_pedido?movimiento.albaran : ''}</td>
+                                            <td>{movimiento.almacen.nombre}</td>
                                             <td>{invertirFecha(String(movimiento.fecha))}</td>
                                             <td>{movimiento.cantidad}</td>
                                         </tr>
