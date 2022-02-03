@@ -6,7 +6,6 @@ import { Container, Row, Col, Table, Modal, Button } from 'react-bootstrap';
 import { Trash, PencilFill, Receipt } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import RepListaFilto from './rep_lista_filtro';
-import ListaTrazabilidad from './rep_trazabilidad';
 import ReactExport from 'react-data-export';
 
 const RepLista = () => {
@@ -19,8 +18,6 @@ const RepLista = () => {
     const ExcelFile = ReactExport.ExcelFile;
     const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
     const ExcelColumn = ReactExport.ExcelFile.ExcelColumn;
-    const [showTrazabilidad, setShowTrazabilidad] = useState(false);
-    const [traza_repuesto, setTrazaRepuesto] = useState(null);
 
     const actualizaFiltro = str => {
         setFiltro(str);
@@ -64,13 +61,6 @@ const RepLista = () => {
             .catch(err => {console.log(err);})
     }
 
-    const handleCloseTraza = () => setShowTrazabilidad(false);
-
-    const trazabilidad = (repuesto) => {
-        setTrazaRepuesto(repuesto);
-        setShowTrazabilidad(true);
-    }
-
     return (
         <Container>
             <Row>
@@ -97,7 +87,6 @@ const RepLista = () => {
                                 <th>Nombre</th>
                                 <th>Fabricante</th>
                                 <th>Modelo</th>
-                                {/* <th>Stock</th> */}
                                 <th>Crítico</th>
                                 <th>Descatalogado</th>
                                 <th>Acciones</th>
@@ -110,7 +99,6 @@ const RepLista = () => {
                                         <td>{repuesto.nombre}</td>
                                         <td>{repuesto.fabricante}</td>
                                         <td>{repuesto.modelo}</td>
-                                        {/* <td>{repuesto.stock}</td> */}
                                         <td>{repuesto.es_critico ? 'Si' : 'No'}</td>
                                         <td>{repuesto.descatalogado ? 'Si' : 'No'}</td>
                                         <td>
@@ -118,7 +106,6 @@ const RepLista = () => {
                                                 <PencilFill className="mr-3 pencil"/>
                                             </Link>
                                             <Trash className="mr-3 trash"  onClick={event => {handleTrashClick(repuesto)}} />
-                                            <Receipt className="pencil" onClick={event => {trazabilidad(repuesto)}}/>
                                         </td>
                                     </tr>
                                 )})
@@ -141,10 +128,6 @@ const RepLista = () => {
                     </Button>
                 </Modal.Footer>
             </Modal>
-            <ListaTrazabilidad  showTrazabilidad={showTrazabilidad}
-                                repuesto ={traza_repuesto}
-                                handlerListCancelar={handleCloseTraza}
-            />
 
         </Container>
     )

@@ -4,13 +4,14 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
-import { PlusCircle, Trash, GeoAltFill} from 'react-bootstrap-icons';
+import { PlusCircle, Trash, GeoAltFill, Receipt} from 'react-bootstrap-icons';
 import './repuestos.css';
 import StockMinimoForm from './rep_stock_minimo';
 import EquipoForm from './rep_equipo';
 import ProveedorForm from './rep_proveedor';
 import RepPorAlmacen from './rep_por_almacen';
 import { useBarcode } from 'react-barcodes';
+import ListaTrazabilidad from './rep_trazabilidad';
 
 const RepuestoForm = ({repuesto, setRepuesto}) => {
     const [token] = useCookies(['tec-token']);
@@ -40,6 +41,9 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     const [stock_empresa, setStockEmpresa] = useState(null);
     const [show_listalmacen, setShowListAlmacen] = useState(null);
     const [almacenes_empresa, setAlmacenesEmpresa] = useState(null);
+    const [showTrazabilidad, setShowTrazabilidad] = useState(false);
+    const [traza_repuesto, setTrazaRepuesto] = useState(null);
+    const [empresatraza, setEmpresaTraza] = useState(null);
     
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/repuestos/tipo_repuesto/`, {
@@ -303,6 +307,14 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         printWindow.close();
     }
 
+    const handleCloseTraza = () => setShowTrazabilidad(false);
+
+    const trazabilidad = (empresa_id) => {
+        setTrazaRepuesto(repuesto);
+        setEmpresaTraza(empresa_id);
+        setShowTrazabilidad(true);
+    }
+
     return (
         <Container>
             <Row className="justify-content-center"> 
@@ -462,10 +474,8 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                     <td>{stock.stock}</td>
                                                     <td>{stock.stock_minimo}</td>
                                                     <td>
-                                                        {/* <HouseDoorFill className="mr-3 pencil" onClick={event => {abrirListAlmacen(stock.empresa.id)}}/>
-                                                        <Building className="mr-3 pencil" onClick={null}/>
-                                                        <GeoFill className="mr-3 pencil" onClick={null}/> */}
                                                         <GeoAltFill className="mr-3 pencil" onClick={event => {abrirListAlmacen(stock.empresa.id)}}/>
+                                                        <Receipt className="pencil" onClick={event => {trazabilidad(stock.empresa.id)}}/>
                                                     </td>
                                                 </tr>
                                             )})
@@ -574,7 +584,11 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                             repuesto={repuesto}
                             setRepuesto={setRepuesto}
                             empresa={almacenes_empresa}/> 
-
+            <ListaTrazabilidad  showTrazabilidad={showTrazabilidad}
+                                repuesto ={traza_repuesto}
+                                handlerListCancelar={handleCloseTraza}
+                                empresa={empresatraza}
+                    />
         </Container> 
     )
 }
