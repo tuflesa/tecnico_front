@@ -30,6 +30,7 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, emp
         .then( res => {
             {res.data && res.data.map( r => {
                 r.albaran=r.linea_inventario.inventario.nombre;
+                r['alm'] = r.almacen.nombre;
             })}
             axios.get(BACKEND_SERVER + `/api/repuestos/movimiento_trazabilidad/?linea_pedido__repuesto=${repuesto.id}&almacen__empresa=${empresa}`,{
                 headers: {
@@ -39,6 +40,7 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, emp
             .then( re => {
                 {re.data && re.data.map( r => {
                     r.albaran=r.linea_pedido.pedido.numero;
+                    r['alm'] = r.almacen.nombre;
                 })}
                 axios.get(BACKEND_SERVER + `/api/repuestos/movimiento_trazabilidad/?linea_salida__repuesto=${repuesto.id}&almacen__empresa=${empresa}`,{
                     headers: {
@@ -48,6 +50,7 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, emp
                 .then( r => {
                     {r.data && r.data.map( res => {
                         res.albaran=res.linea_salida.salida.nombre;
+                        res['alm'] = res.almacen.nombre;
                     })}
                     setListado(r.data.concat(re.data, res.data).sort(function(a, b){
                         if(a.id < b.id){
@@ -57,7 +60,7 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, emp
                             return -1;
                         }
                         return 0;
-                    }))                    
+                    })) 
                 })
                 .catch( err => {
                     console.log(err);
@@ -69,7 +72,7 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, emp
         })
         .catch( err => {
             console.log(err);
-        });        
+        });                
     }, [repuesto, empresa]);
 
     const handlerListCerrar = () => {      
@@ -88,8 +91,9 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, emp
                         <ExcelSheet data={listado} name="Listados">
                             <ExcelColumn label="Id" value="id"/>
                             <ExcelColumn label="Movimiento" value="albaran"/>
+                            <ExcelColumn label="Almacén" value="alm"/>
                             <ExcelColumn label="Fecha" value="fecha"/>
-                            <ExcelColumn label="Cantidad" value="cantidad"/>
+                            <ExcelColumn label="Cantidad" value="cantidad"/>                            
                         </ExcelSheet>
                     </ExcelFile> 
                 </Row>
@@ -109,7 +113,7 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, emp
                                         return (
                                             <tr key={movimiento.id}>                                            
                                                 <td>{movimiento.linea_inventario?movimiento.albaran : movimiento.linea_salida?movimiento.albaran : movimiento.linea_pedido?movimiento.albaran : ''}</td>
-                                                <td>{movimiento.almacen.nombre}</td>
+                                                <td>{movimiento.alm}</td>
                                                 <td>{invertirFecha(String(movimiento.fecha))}</td>
                                                 <td>{movimiento.cantidad}</td>
                                             </tr>
