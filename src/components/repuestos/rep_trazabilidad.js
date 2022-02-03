@@ -50,10 +50,10 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, emp
                         res.albaran=res.linea_salida.salida.nombre;
                     })}
                     setListado(r.data.concat(re.data, res.data).sort(function(a, b){
-                        if(a.id > b.id){
+                        if(a.id < b.id){
                             return 1;
                         }
-                        if(a.id < b.id){
+                        if(a.id > b.id){
                             return -1;
                         }
                         return 0;
