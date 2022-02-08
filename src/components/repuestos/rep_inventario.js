@@ -4,6 +4,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Table } from 'react-bootstrap';
 import ReactExport from 'react-data-export';
+import RepInventarioFiltro from './rep_inventario_filtro';
 
 const RepInventario = () => {
     const [token] = useCookies(['tec-token']);
@@ -16,9 +17,14 @@ const RepInventario = () => {
     const ExcelFile = ReactExport.ExcelFile;
     const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
     const ExcelColumn = ReactExport.ExcelFile.ExcelColumn;
+    const [filtro, setFiltro] = useState(`?almacen__empresa__id=${datos.empresa}&repuesto__descatalogado=${false}`);
+
+    const actualizaFiltro = str => {
+        setFiltro(str);
+    }
 
     useEffect(()=>{
-        axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimo_detalle/?almacen__empresa__id=${datos.empresa}&repuesto__descatalogado=${false}`,{
+        axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimo_detalle/` + filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
                 }
@@ -27,6 +33,7 @@ const RepInventario = () => {
             {res.data && res.data.map( r => {
                 r['alm'] = r.almacen.nombre;
                 r['articulo'] = r.repuesto.nombre;
+                r['fabricante'] = r.repuesto.fabricante;
             })}
             setListInventario(res.data.sort(function(a, b){
                 if(a.articulo > b.articulo){
@@ -41,9 +48,14 @@ const RepInventario = () => {
         .catch( err => {
             console.log(err);
         });
-    }, [token]);
+    }, [token, filtro]);
     return (
         <Container>
+            <Row>
+                <Col>
+                    <RepInventarioFiltro actualizaFiltro={actualizaFiltro}/>
+                </Col>
+            </ Row>
             <Row>
                 <Col>
                     <h5 className="mb-3 mt-3">Inventario empresa {datos.empresa__nombre}</h5>
@@ -51,6 +63,7 @@ const RepInventario = () => {
                         <ExcelSheet data={listInventario} name="Inventario">
                             <ExcelColumn label="Id" value="id"/>
                             <ExcelColumn label="Nombre" value="articulo"/>
+                            <ExcelColumn label="Fabricante" value="fabricante"/>
                             <ExcelColumn label="Almacén" value="alm"/>
                             <ExcelColumn label="Cantidad" value="stock_act"/>
                         </ExcelSheet>
@@ -60,7 +73,8 @@ const RepInventario = () => {
                             <tr>
                                 <th>Nombre</th>
                                 <th>Almacén</th>
-                                <th>Cantidad</th>
+                                <th>Fabricante</th>
+                                <th>Stock Actual</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -69,6 +83,7 @@ const RepInventario = () => {
                                     <tr key={inventario.id}>
                                         <td>{inventario.articulo}</td>
                                         <td>{inventario.alm}</td>
+                                        <td>{inventario.fabricante}</td>
                                         <td>{inventario.stock_act}</td>
                                     </tr>
                                 )})

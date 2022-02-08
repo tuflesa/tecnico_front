@@ -13,13 +13,10 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, emp
     const [user] = useCookies(['tec-user']);
 
     const [listado, setListado] = useState(null);
-    const [listado_ordenado, setListadoOrdenado] = useState(null)
+    //const [listado_ordenado, setListadoOrdenado] = useState(null)
     const ExcelFile = ReactExport.ExcelFile;
     const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
     const ExcelColumn = ReactExport.ExcelFile.ExcelColumn;
-
-    useEffect(()=>{
-    },[empresa, token])
 
     useEffect(() => {        
         repuesto && empresa && axios.get(BACKEND_SERVER + `/api/repuestos/movimiento_trazabilidad/?linea_inventario__repuesto=${repuesto.id}&almacen__empresa=${empresa}`,{
@@ -31,6 +28,7 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, emp
             {res.data && res.data.map( r => {
                 r.albaran=r.linea_inventario.inventario.nombre;
                 r['alm'] = r.almacen.nombre;
+                r['stock']='';
             })}
             axios.get(BACKEND_SERVER + `/api/repuestos/movimiento_trazabilidad/?linea_pedido__repuesto=${repuesto.id}&almacen__empresa=${empresa}`,{
                 headers: {
@@ -41,6 +39,7 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, emp
                 {re.data && re.data.map( r => {
                     r.albaran=r.linea_pedido.pedido.numero;
                     r['alm'] = r.almacen.nombre;
+                    r['stock']='';
                 })}
                 axios.get(BACKEND_SERVER + `/api/repuestos/movimiento_trazabilidad/?linea_salida__repuesto=${repuesto.id}&almacen__empresa=${empresa}`,{
                     headers: {
@@ -51,6 +50,7 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, emp
                     {r.data && r.data.map( res => {
                         res.albaran=res.linea_salida.salida.nombre;
                         res['alm'] = res.almacen.nombre;
+                        res['stock']='';
                     })}
                     setListado(r.data.concat(re.data, res.data).sort(function(a, b){
                         if(a.id < b.id){
@@ -60,11 +60,11 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, emp
                             return -1;
                         }
                         return 0;
-                    })) 
+                    }))
                 })
                 .catch( err => {
                     console.log(err);
-                });
+                });            
             })
             .catch( err => {
                 console.log(err);
@@ -72,9 +72,26 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, emp
         })
         .catch( err => {
             console.log(err);
-        });                
+        });     
+                     
     }, [repuesto, empresa]);
 
+    useEffect(()=>{
+        var x;
+        if(listado){          
+            for(x=(listado.length-1);x>=0;x--){ 
+                var y=x+1;  
+                if(x===listado.length-1) y=listado.length-1;             
+                if(listado[x].albaran==='Ajuste de stock')
+                    listado[x].stock=listado[x].cantidad;
+                    else if (listado[x].albaran==='Ajuste Inicial')
+                        listado[x].stock=listado[x].cantidad;
+                        else 
+                            listado[x].stock= listado[y].stock + listado[x].cantidad;
+            }
+        }
+    },[listado])
+    
     const handlerListCerrar = () => {      
         handlerListCancelar();
     }
@@ -105,7 +122,8 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, emp
                                     <th>Movimiento</th>
                                     <th>Almacén</th>
                                     <th>Fecha</th>
-                                    <th>Cantidad</th>
+                                    <th>Cant. Movimiento</th>
+                                    <th>Cantidad Total</th>
                                 </tr>
                             </thead>                               
                             <tbody>
@@ -116,6 +134,7 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, emp
                                                 <td>{movimiento.alm}</td>
                                                 <td>{invertirFecha(String(movimiento.fecha))}</td>
                                                 <td>{movimiento.cantidad}</td>
+                                                <td>{movimiento.stock}</td>
                                             </tr>
                                         )
                                     })}                              
