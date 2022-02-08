@@ -13,11 +13,15 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, alm
     const [user] = useCookies(['tec-user']);
 
     const [listado, setListado] = useState(null);
+    const [listainventario, setListaInventario] = useState(null);
+    const [listapedidos, setListaPedidos] = useState(null);
+    const [listasalidas, setListaSalidas] = useState(null);
     //const [listado_ordenado, setListadoOrdenado] = useState(null)
     const ExcelFile = ReactExport.ExcelFile;
     const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
     const ExcelColumn = ReactExport.ExcelFile.ExcelColumn;
-
+    
+    //leer todos los movimientos del repuesto por inventario
     useEffect(() => {        
         repuesto && almacen && axios.get(BACKEND_SERVER + `/api/repuestos/movimiento_trazabilidad/?linea_inventario__repuesto=${repuesto.id}&almacen__id=${almacen}`,{
             headers: {
@@ -31,64 +35,82 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, alm
                 r['stock']='';
                 r['usuario']=r.usuario.get_full_name;
             })
-            axios.get(BACKEND_SERVER + `/api/repuestos/movimiento_trazabilidad/?linea_pedido__repuesto=${repuesto.id}&almacen__id=${almacen}`,{
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                }
-            })
-            .then( re => {
-                {re.data && re.data.map( r => {
-                    r.albaran=r.linea_pedido.pedido.numero;
-                    r['alm'] = r.almacen.nombre;
-                    r['stock']='';
-                    r['usuario']=r.usuario.get_full_name;
-                })}
-                axios.get(BACKEND_SERVER + `/api/repuestos/movimiento_trazabilidad/?linea_salida__repuesto=${repuesto.id}&almacen__id=${almacen}`,{
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`
-                    }
-                })
-                .then( r => {
-                    {r.data && r.data.map( res => {
-                        res.albaran=res.linea_salida.salida.nombre;
-                        res['alm'] = res.almacen.nombre;
-                        res['stock']='';
-                        res['usuario']=res.usuario.get_full_name;
-                    })}
-                    const listado_completo = r.data.concat(re.data, res.data).sort(function(a, b){
-                        if(a.id < b.id){
-                            return 1;
-                        }
-                        if(a.id > b.id){
-                            return -1;
-                        }
-                        return 0;
-                    })
-                    for(let x=(listado_completo.length-1);x>=0;x--){ 
-                        let y=x+1;  
-                        if(x===listado_completo.length-1) y=listado_completo.length-1;             
-                        if(listado_completo[x].albaran==='Ajuste de stock')
-                            listado_completo[x].stock=listado_completo[x].cantidad;
-                            else if (listado_completo[x].albaran==='Ajuste Inicial')
-                                listado_completo[x].stock=listado_completo[x].cantidad;
-                                else 
-                                listado_completo[x].stock= listado_completo[y].stock + listado_completo[x].cantidad;
-                    }
-                    setListado(listado_completo);
-                })
-                .catch( err => {
-                    console.log(err);
-                });            
-            })
-            .catch( err => {
-                console.log(err);
-            });
+            setListaInventario(res.data);
         })
         .catch( err => {
             console.log(err);
-        });     
-                     
+        });
     }, [repuesto, almacen]);
+
+    //leer todos los movimientos del repuesto por pedido
+    useEffect(() => {   
+        listainventario && axios.get(BACKEND_SERVER + `/api/repuestos/movimiento_trazabilidad/?linea_pedido__repuesto=${repuesto.id}&almacen__id=${almacen}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( res => {
+            res.data.map( r => {
+                r.albaran=r.linea_pedido.pedido.numero;
+                r['alm'] = r.almacen.nombre;
+                r['stock']='';
+                r['usuario']=r.usuario.get_full_name;
+            })
+            setListaPedidos(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        }); 
+    },[listainventario]);
+
+    //leer todos los movimientos del repuesto por salidas
+    useEffect(() => {  
+        listapedidos && axios.get(BACKEND_SERVER + `/api/repuestos/movimiento_trazabilidad/?linea_salida__repuesto=${repuesto.id}&almacen__id=${almacen}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( res => {
+            res.data.map( r => {
+                r.albaran=r.linea_salida.salida.nombre;
+                r['alm'] = r.almacen.nombre;
+                r['stock']='';
+                r['usuario']=r.usuario.get_full_name;
+            })
+            setListaSalidas(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    },[listapedidos]);
+
+    //concatenar las 3 listas, ordenar y calcular stock
+    useEffect(() => { 
+        if(listasalidas){
+            //concatenar y ordenar
+            const listado_completo = listainventario.concat(listapedidos, listasalidas).sort(function(a, b){
+                if(a.id < b.id){
+                    return 1;
+                }
+                if(a.id > b.id){
+                    return -1;
+                }
+                return 0;
+            })
+            //calcular stock
+            for(let x=(listado_completo.length-1);x>=0;x--){ 
+                let y=x+1;  
+                if(x===listado_completo.length-1) y=listado_completo.length-1;             
+                if(listado_completo[x].albaran==='Ajuste de stock')
+                    listado_completo[x].stock=listado_completo[x].cantidad;
+                    else if (listado_completo[x].albaran==='Ajuste Inicial')
+                        listado_completo[x].stock=listado_completo[x].cantidad;
+                        else 
+                        listado_completo[x].stock= listado_completo[y].stock + listado_completo[x].cantidad;
+            }
+            setListado(listado_completo);
+        }
+    },[listasalidas]);
     
     const handlerListCerrar = () => {      
         handlerListCancelar();
