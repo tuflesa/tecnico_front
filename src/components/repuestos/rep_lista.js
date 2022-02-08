@@ -3,7 +3,7 @@ import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table, Modal, Button } from 'react-bootstrap';
-import { Trash, PencilFill } from 'react-bootstrap-icons';
+import { Trash, PencilFill, Receipt } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import RepListaFilto from './rep_lista_filtro';
 import ReactExport from 'react-data-export';
@@ -14,7 +14,7 @@ const RepLista = () => {
     const [repuestos, setRepuestos] = useState(null);
     const [show, setShow] = useState(false);
     const [repuestoBorrar, setRepuestoBorrar] = useState(null);
-    const [filtro, setFiltro] = useState(`?equipos__seccion__zona__empresa__id=${user['tec-user'].perfil.empresa.id}&&descatalogado=${false}`);
+    const [filtro, setFiltro] = useState(`?descatalogado=${false}`);
     const ExcelFile = ReactExport.ExcelFile;
     const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
     const ExcelColumn = ReactExport.ExcelFile.ExcelColumn;
@@ -31,7 +31,7 @@ const RepLista = () => {
                   }
             })
             .then( res => {
-                setRepuestos(res.data);                
+                setRepuestos(res.data);
             })
             .catch( err => {
                 console.log(err);
@@ -80,14 +80,13 @@ const RepLista = () => {
                             <ExcelColumn label="Crítico" value="es_critico"/>
                             <ExcelColumn label="Descatalogado" value="descatalogado"/>
                         </ExcelSheet>
-                    </ExcelFile>
+                    </ExcelFile> 
                     <Table striped bordered hover>
                         <thead>
                             <tr>
                                 <th>Nombre</th>
                                 <th>Fabricante</th>
                                 <th>Modelo</th>
-                                {/* <th>Stock</th> */}
                                 <th>Crítico</th>
                                 <th>Descatalogado</th>
                                 <th>Acciones</th>
@@ -100,14 +99,13 @@ const RepLista = () => {
                                         <td>{repuesto.nombre}</td>
                                         <td>{repuesto.fabricante}</td>
                                         <td>{repuesto.modelo}</td>
-                                        {/* <td>{repuesto.stock}</td> */}
                                         <td>{repuesto.es_critico ? 'Si' : 'No'}</td>
                                         <td>{repuesto.descatalogado ? 'Si' : 'No'}</td>
                                         <td>
                                             <Link to={`/repuestos/${repuesto.id}`}>
                                                 <PencilFill className="mr-3 pencil"/>
                                             </Link>
-                                            <Trash className="trash"  onClick={event => {handleTrashClick(repuesto)}} />
+                                            <Trash className="mr-3 trash"  onClick={event => {handleTrashClick(repuesto)}} />
                                         </td>
                                     </tr>
                                 )})
@@ -130,6 +128,7 @@ const RepLista = () => {
                     </Button>
                 </Modal.Footer>
             </Modal>
+
         </Container>
     )
 }

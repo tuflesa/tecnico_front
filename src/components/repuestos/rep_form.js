@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
-import { PlusCircle, Trash, GeoAltFill} from 'react-bootstrap-icons';
+import { PlusCircle, Trash, GeoAltFill, Receipt} from 'react-bootstrap-icons';
 import './repuestos.css';
 import StockMinimoForm from './rep_stock_minimo';
 import EquipoForm from './rep_equipo';
@@ -40,6 +40,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     const [stock_empresa, setStockEmpresa] = useState(null);
     const [show_listalmacen, setShowListAlmacen] = useState(null);
     const [almacenes_empresa, setAlmacenesEmpresa] = useState(null);
+    
     
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/repuestos/tipo_repuesto/`, {
@@ -423,7 +424,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button> :
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={crearDatos}>Guardar</Button>
                             }
-                            <Link to='/repuestos'>
+                            <Link to='/repuestos/listado'>
                                 <Button variant="warning" >
                                     Cancelar / Cerrar
                                 </Button>
@@ -462,10 +463,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                     <td>{stock.stock}</td>
                                                     <td>{stock.stock_minimo}</td>
                                                     <td>
-                                                        {/* <HouseDoorFill className="mr-3 pencil" onClick={event => {abrirListAlmacen(stock.empresa.id)}}/>
-                                                        <Building className="mr-3 pencil" onClick={null}/>
-                                                        <GeoFill className="mr-3 pencil" onClick={null}/> */}
-                                                        <GeoAltFill className="mr-3 pencil" onClick={event => {abrirListAlmacen(stock.empresa.id)}}/>
+                                                        <GeoAltFill className="mr-3 pencil" onClick={event => {abrirListAlmacen(stock.empresa.id)}}/>                                                        
                                                     </td>
                                                 </tr>
                                             )})
@@ -574,7 +572,6 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                             repuesto={repuesto}
                             setRepuesto={setRepuesto}
                             empresa={almacenes_empresa}/> 
-
         </Container> 
     )
 }

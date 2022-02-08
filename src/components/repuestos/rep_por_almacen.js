@@ -4,10 +4,16 @@ import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import Modal from 'react-bootstrap/Modal'
 import { Button, Row, Col, Table } from 'react-bootstrap';
-import { PencilFill, HandThumbsUpFill } from 'react-bootstrap-icons';
+import { PencilFill, HandThumbsUpFill, Receipt } from 'react-bootstrap-icons';
+import ListaTrazabilidad from './rep_trazabilidad';
+
 const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show})=>{
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
+
+    const [showTrazabilidad, setShowTrazabilidad] = useState(false);
+    const [traza_repuesto, setTrazaRepuesto] = useState(null);
+    const [almacentraza, setAlmacenTraza] = useState(null);
     const [datos, setDatos] = useState({
         stocks_minimos: repuesto ? repuesto.stocks_minimos : null,
         cantidad: repuesto.stocks_minimos ? repuesto.stocks_minimos.cantidad : null,
@@ -107,6 +113,14 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
         else (alert('no tienes permisos'))
     }
 
+    const handleCloseTraza = () => setShowTrazabilidad(false);
+
+    const trazabilidad = (almacen_id) => {
+        setTrazaRepuesto(repuesto);
+        setAlmacenTraza(almacen_id);
+        setShowTrazabilidad(true);
+    }
+
     return (
         <Modal show={show} backdrop="static" keyboard={ false } animation={false} size="xl">
             <Modal.Header closeButton>                
@@ -127,7 +141,7 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
                                     <th>Ubicación</th>
                                     <th>Stock Actual</th>
                                     <th>Stock Mínimo</th>
-                                    <th>Actualizar</th>
+                                    <th>Acciones</th>
                                 </tr>
                             </thead>
                             {repuesto ?
@@ -170,6 +184,7 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
                                                         <td>                                                            
                                                             <PencilFill className="mr-3 pencil" onClick= {event => {habilitar_linea(r)}}/>                                               
                                                             <HandThumbsUpFill className="mr-3 pencil" onClick= {async => {ActualizaStock(r)}}/>
+                                                            <Receipt className="pencil" onClick={event => {trazabilidad(r.almacen.id)}}/>
                                                         </td>
                                                     </tr>
                                                 )}
@@ -187,7 +202,13 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
                     Cerrar
                 </Button>
             </Modal.Footer>
+            <ListaTrazabilidad  showTrazabilidad={showTrazabilidad}
+                                repuesto ={traza_repuesto}
+                                handlerListCancelar={handleCloseTraza}
+                                almacen={almacentraza}
+                    />
         </Modal>
+        
     )
 }
 export default RepPorAlmacen;
