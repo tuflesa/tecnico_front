@@ -18,6 +18,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     const [datos, setDatos] = useState({
         id: repuesto.id ? repuesto.id : null,
         nombre: repuesto.nombre,
+        nombre_comun: repuesto.nombre_comun? repuesto.nombre_comun : '',
         fabricante: repuesto.fabricante ? repuesto.fabricante : '',
         modelo: repuesto.modelo ? repuesto.modelo : '',
         //stock: repuesto.stock,
@@ -72,6 +73,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         setDatos({
             id: repuesto.id ? repuesto.id : null,
             nombre: repuesto.nombre,
+            nombre_comun: repuesto.nombre_comun ? repuesto.nombre_comun : '',
             fabricante: repuesto.fabricante ? repuesto.fabricante : '',
             modelo: repuesto.modelo ? repuesto.modelo : '',
             //stock: repuesto.stock,
@@ -148,6 +150,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         event.preventDefault();
         axios.put(BACKEND_SERVER + `/api/repuestos/detalle/${datos.id}/`, {
             nombre: datos.nombre,
+            nombre_comun: datos.nombre_comun,
             fabricante: datos.fabricante,
             modelo: datos.modelo,
             es_critico: datos.es_critico,
@@ -172,6 +175,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         event.preventDefault();
         axios.post(BACKEND_SERVER + `/api/repuestos/detalle/`, {
             nombre: datos.nombre,
+            nombre_comun: datos.nombre_comun,
             fabricante: datos.fabricante,
             modelo: datos.modelo,
             es_critico: datos.es_critico,
@@ -324,6 +328,18 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                 value={datos.nombre}
                                                 onChange={handleInputChange} 
                                                 placeholder="Nombre"
+                                                autoFocus
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col>
+                                <Form.Group id="nombre_comun">
+                                    <Form.Label>Nombre Genérico</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='nombre_comun' 
+                                                value={datos.nombre_comun}
+                                                onChange={handleInputChange} 
+                                                placeholder="Nombre Genérico"
                                                 autoFocus
                                     />
                                 </Form.Group>
