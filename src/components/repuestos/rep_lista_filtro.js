@@ -11,6 +11,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
     const [datos, setDatos] = useState({
         id:'',
         nombre: '',
+        nombre_comun: '',
         fabricante: '',
         modelo: '',
         critico: '',
@@ -170,7 +171,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
     }, [token, datos.seccion]);
 
     useEffect(()=>{
-        const filtro1 = `?nombre__icontains=${datos.nombre}&fabricante__icontains=${datos.fabricante}&modelo__icontains=${datos.modelo}&id=${datos.id}&es_critico=${datos.critico}&descatalogado=${datos.descatalogado}&tipo_repuesto=${datos.tipo_repuesto}&proveedores__id=${datos.proveedor}`;
+        const filtro1 = `?nombre__icontains=${datos.nombre}&nombre_comun__icontains=${datos.nombre_comun}&fabricante__icontains=${datos.fabricante}&modelo__icontains=${datos.modelo}&id=${datos.id}&es_critico=${datos.critico}&descatalogado=${datos.descatalogado}&tipo_repuesto=${datos.tipo_repuesto}&proveedores__id=${datos.proveedor}`;
         let filtro2 = `&equipos__seccion__zona__empresa__id=${datos.empresa}`;
         if (datos.empresa !== ''){
             filtro2 = filtro2 + `&equipos__seccion__zona__id=${datos.zona}`;
@@ -185,7 +186,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
         const filtro = filtro1 + filtro2;
         
         actualizaFiltro(filtro);
-    },[datos.nombre, datos.fabricante, datos.modelo, datos.id, datos.critico, datos.descatalogado, datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.tipo_repuesto, datos.proveedor]);
+    },[datos.nombre, datos.nombre_comun, datos.fabricante, datos.modelo, datos.id, datos.critico, datos.descatalogado, datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.tipo_repuesto, datos.proveedor]);
 
 
     const handleInputChange = (event) => {
@@ -232,6 +233,16 @@ const RepListaFilto = ({actualizaFiltro}) => {
                                         value={datos.nombre}
                                         onChange={handleInputChange}                                        
                                         placeholder="Nombre contiene"/>
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="formNombreGenerico">
+                            <Form.Label>Nombre Genérico</Form.Label>
+                            <Form.Control type="text" 
+                                        name='nombre_comun' 
+                                        value={datos.nombre_comun}
+                                        onChange={handleInputChange}                                        
+                                        placeholder="Nombre Genérico contiene"/>
                         </Form.Group>
                     </Col>
                     <Col>
