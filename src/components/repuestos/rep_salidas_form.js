@@ -294,7 +294,7 @@ const RepSalidas = ({alm}) => {
                     <Button variant="info" type="submit" className={'mx-2'} onClick={GenerarSalida}>Hacer Salida</Button> :
                     null
                 }
-                <Link to='/home'>
+                <Link to='/repuestos'>
                     <Button variant="warning" >
                         Cancelar
                     </Button>
