@@ -340,7 +340,6 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                 value={datos.nombre_comun}
                                                 onChange={handleInputChange} 
                                                 placeholder="Nombre Genérico"
-                                                autoFocus
                                     />
                                 </Form.Group>
                             </Col>
