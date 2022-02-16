@@ -297,6 +297,11 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
 
     
     function Barcode({datos}) {
+        var descripcion;
+        if(datos.nombre_comun){
+            descripcion=datos.nombre_comun;
+        }
+        else {descripcion = datos.nombre;}
         const {inputRef}  = useBarcode({
           value: String(datos.id).padStart(12,'0'),
           options: {
@@ -305,7 +310,8 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             height: 60,
             // width: 1.2,
             fontSize: 16,
-            text: datos.id + ' - ' + datos.nombre
+            //text: datos.id + ' - ' + datos.nombre
+            text: datos.id + ' - ' + descripcion
             //text: Barcode.data
           }            
         }); 
@@ -351,7 +357,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                             </Col>
                             <Col>
                                 <Form.Group id="nombre_comun">
-                                    <Form.Label>Nombre Genérico</Form.Label>
+                                    <Form.Label>Descripción Etiqueta</Form.Label>
                                     <Form.Control type="text" 
                                                 name='nombre_comun' 
                                                 value={datos.nombre_comun}
@@ -404,7 +410,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                             </Col>
                             <Col>
                                 <Form.Group id="tipound">
-                                    <Form.Label>Tipo</Form.Label>
+                                    <Form.Label>Unidades</Form.Label>
                                     <Form.Control as="select"  
                                                 name='tipo_unidad' 
                                                 value={datos.tipo_unidad}

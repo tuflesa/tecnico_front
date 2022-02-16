@@ -213,18 +213,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
         <Container>
             <h5 className="mb-3 mt-3">Filtro</h5>
             <Form>
-                <Row>
-                    <Col>
-                        <Form.Group controlId="formId">
-                            <Form.Label>Codigo Barras</Form.Label>
-                            <Form.Control type="text" 
-                                        name='id' 
-                                        value={numeroBar.id}
-                                        onChange={handleInputChange2}
-                                        placeholder="Codigo de barras" 
-                                        autoFocus/>
-                        </Form.Group>
-                    </Col>
+                <Row>                    
                     <Col>
                         <Form.Group controlId="formNombre">
                             <Form.Label>Nombre contiene</Form.Label>
@@ -232,17 +221,18 @@ const RepListaFilto = ({actualizaFiltro}) => {
                                         name='nombre' 
                                         value={datos.nombre}
                                         onChange={handleInputChange}                                        
-                                        placeholder="Nombre contiene"/>
+                                        placeholder="Nombre contiene"
+                                        autoFocus/>
                         </Form.Group>
                     </Col>
                     <Col>
-                        <Form.Group controlId="formNombreGenerico">
-                            <Form.Label>Nombre Genérico</Form.Label>
+                        <Form.Group controlId="formDescripcionEtiq">
+                            <Form.Label>Descripción Etiqueta</Form.Label>
                             <Form.Control type="text" 
                                         name='nombre_comun' 
                                         value={datos.nombre_comun}
                                         onChange={handleInputChange}                                        
-                                        placeholder="Nombre Genérico contiene"/>
+                                        placeholder="Descripción contiene"/>
                         </Form.Group>
                     </Col>
                     <Col>
@@ -263,6 +253,17 @@ const RepListaFilto = ({actualizaFiltro}) => {
                                         value={datos.modelo}
                                         onChange={handleInputChange} 
                                         placeholder="Modelo contiene" />
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="formId">
+                            <Form.Label>Codigo Barras</Form.Label>
+                            <Form.Control type="text" 
+                                        name='id' 
+                                        value={numeroBar.id}
+                                        onChange={handleInputChange2}
+                                        placeholder="Codigo de barras" 
+                                        />
                         </Form.Group>
                     </Col>
                     <Col>
