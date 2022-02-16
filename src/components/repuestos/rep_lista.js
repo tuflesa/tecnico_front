@@ -83,7 +83,7 @@ const RepLista = () => {
                         <ExcelSheet data={repuestos} name="Repuestos">
                             <ExcelColumn label="Id" value="id"/>
                             <ExcelColumn label="Nombre" value="nombre"/>
-                            <ExcelColumn label="Nombre Genérico" value="nombre_comun"/>
+                            <ExcelColumn label="Descripción Etiqueta" value="nombre_comun"/>
                             <ExcelColumn label="Fabricante" value="fabricante"/>
                             <ExcelColumn label="Modelo" value="modelo"/>
                             <ExcelColumn label="Crítico" value="es_critico"/>
@@ -94,7 +94,7 @@ const RepLista = () => {
                         <thead>
                             <tr>
                                 <th>Nombre</th>
-                                <th>Nombre Genérico</th>
+                                <th>Descripción Etiqueta</th>
                                 <th>Fabricante</th>
                                 <th>Modelo</th>
                                 <th>Crítico</th>
