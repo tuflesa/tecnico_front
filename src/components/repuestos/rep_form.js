@@ -53,8 +53,6 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         })
         .then( res => { 
             setTiposRepuesto(res.data);
-            console.log('repuesto en rep_form: ');
-            console.log(repuesto);
         })
         .catch(err => { console.log(err);})
     },[token]);
