@@ -663,6 +663,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                                             <tr>
                                                 <th>Repuesto</th>
                                                 <th style={{width:20}}>Cantidad</th>
+                                                <th style={{width:20}}>Unidad Medida</th>
                                                 <th style={{width:30}}>Precio</th>
                                                 <th style={{width:20}}>Dto.</th>
                                                 <th style={{width:30}}>Total</th>
@@ -678,6 +679,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                     <tr key={linea.id}>
                                                         <td>{linea.repuesto.nombre}</td>
                                                         <td>{linea.cantidad}</td>
+                                                        <td>{linea.repuesto.unidad_nombre}</td>
                                                         <td>{linea.precio + '€'}</td>
                                                         <td>{linea.descuento + '%'}</td>
                                                         <td>{linea.total + '€'}</td>

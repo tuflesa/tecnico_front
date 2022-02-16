@@ -48,7 +48,15 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
             }
             const almacenes_disponible = res.data.filter( a =>!almacenes_utilizados.includes(a.id));
             setGuardarDisabled(almacenes_disponible.length === 0);
-            setAlmacenes(almacenes_disponible);
+            setAlmacenes(almacenes_disponible.sort(function(a, b){
+                if(a.nombre > b.nombre){
+                    return 1;
+                }
+                if(a.nombre < b.nombre){
+                    return -1;
+                }
+                return 0;
+            }));
         })
         .catch( err => {
             console.log(err);

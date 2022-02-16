@@ -14,12 +14,13 @@ const RepInventarioFiltro = ({actualizaFiltro}) => {
         nombre: '',
         fabricante: '',        
         almacen: '',
+        nombre_comun: '',
     });
 
     useEffect(()=>{  
-        const filtro = `?repuesto__nombre__icontains=${datos.nombre}&repuesto__fabricante__icontains=${datos.fabricante}&almacen__nombre__icontains=${datos.almacen}&almacen__empresa__id=${datos.empresa}&repuesto__descatalogado=${false}`;      
+        const filtro = `?repuesto__nombre__icontains=${datos.nombre}&repuesto__nombre_comun__icontains=${datos.nombre_comun}&repuesto__fabricante__icontains=${datos.fabricante}&almacen__nombre__icontains=${datos.almacen}&almacen__empresa__id=${datos.empresa}&repuesto__descatalogado=${false}`;      
         actualizaFiltro(filtro);
-    },[datos.nombre, datos.fabricante, datos.almacen]);
+    },[datos.nombre, datos.fabricante, datos.almacen, datos.nombre_comun]);
 
 
     const handleInputChange = (event) => {
@@ -42,6 +43,16 @@ const RepInventarioFiltro = ({actualizaFiltro}) => {
                                         value={datos.nombre}
                                         onChange={handleInputChange}                                        
                                         placeholder="Nombre contiene"/>
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="formNombreComun">
+                            <Form.Label>Genérico contiene</Form.Label>
+                            <Form.Control type="text" 
+                                        name='nombre_comun' 
+                                        value={datos.nombre_comun}
+                                        onChange={handleInputChange}                                        
+                                        placeholder="Genérico contiene"/>
                         </Form.Group>
                     </Col>
                     <Col>

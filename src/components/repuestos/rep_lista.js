@@ -31,7 +31,15 @@ const RepLista = () => {
                   }
             })
             .then( res => {
-                setRepuestos(res.data);
+                setRepuestos(res.data.sort(function(a, b){
+                    if(a.nombre > b.nombre){
+                        return 1;
+                    }
+                    if(a.nombre < b.nombre){
+                        return -1;
+                    }
+                    return 0;
+                }));
             })
             .catch( err => {
                 console.log(err);
@@ -75,6 +83,7 @@ const RepLista = () => {
                         <ExcelSheet data={repuestos} name="Repuestos">
                             <ExcelColumn label="Id" value="id"/>
                             <ExcelColumn label="Nombre" value="nombre"/>
+                            <ExcelColumn label="Nombre Genérico" value="nombre_comun"/>
                             <ExcelColumn label="Fabricante" value="fabricante"/>
                             <ExcelColumn label="Modelo" value="modelo"/>
                             <ExcelColumn label="Crítico" value="es_critico"/>
@@ -85,6 +94,7 @@ const RepLista = () => {
                         <thead>
                             <tr>
                                 <th>Nombre</th>
+                                <th>Nombre Genérico</th>
                                 <th>Fabricante</th>
                                 <th>Modelo</th>
                                 <th>Crítico</th>
@@ -97,6 +107,7 @@ const RepLista = () => {
                                 return (
                                     <tr key={repuesto.id}>
                                         <td>{repuesto.nombre}</td>
+                                        <td>{repuesto.nombre_comun}</td>
                                         <td>{repuesto.fabricante}</td>
                                         <td>{repuesto.modelo}</td>
                                         <td>{repuesto.es_critico ? 'Si' : 'No'}</td>

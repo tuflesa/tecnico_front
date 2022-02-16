@@ -18,6 +18,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     const [datos, setDatos] = useState({
         id: repuesto.id ? repuesto.id : null,
         nombre: repuesto.nombre,
+        nombre_comun: repuesto.nombre_comun? repuesto.nombre_comun : '',
         fabricante: repuesto.fabricante ? repuesto.fabricante : '',
         modelo: repuesto.modelo ? repuesto.modelo : '',
         //stock: repuesto.stock,
@@ -26,11 +27,13 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         es_critico: repuesto.es_critico,
         descatalogado: repuesto.descatalogado,
         tipo_repuesto: repuesto.tipo_repuesto,
+        tipo_unidad: repuesto.tipo_unidad,
         equipos: repuesto.equipos,
         proveedores: repuesto.proveedores,
         observaciones: repuesto.observaciones ? repuesto.observaciones : ''
     });
     const [tiposRepuesto, setTiposRepuesto] = useState(null);
+    const [tiposUnidad, setTiposUnidad] = useState(null);
     const [show_stock, setShowStock] = useState(false);
     const [show_equipo, setShowEquipo] = useState(false);
     const [show_proveedor, setShowProveedor] = useState(false);
@@ -54,6 +57,18 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         .catch(err => { console.log(err);})
     },[token]);
 
+    useEffect(()=>{
+        axios.get(BACKEND_SERVER + `/api/repuestos/tipo_unidad/`, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => { 
+            setTiposUnidad(res.data);
+        })
+        .catch(err => { console.log(err);})
+    },[token]);
+
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
             headers: {
@@ -72,6 +87,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         setDatos({
             id: repuesto.id ? repuesto.id : null,
             nombre: repuesto.nombre,
+            nombre_comun: repuesto.nombre_comun ? repuesto.nombre_comun : '',
             fabricante: repuesto.fabricante ? repuesto.fabricante : '',
             modelo: repuesto.modelo ? repuesto.modelo : '',
             //stock: repuesto.stock,
@@ -80,6 +96,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             es_critico: repuesto.es_critico,
             descatalogado: repuesto.descatalogado,
             tipo_repuesto: repuesto.tipo_repuesto,
+            tipo_unidad: repuesto.tipo_unidad,
             equipos: repuesto.equipos,
             proveedores: repuesto.proveedores,
             observaciones: repuesto.observaciones ? repuesto.observaciones : ''
@@ -148,11 +165,13 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         event.preventDefault();
         axios.put(BACKEND_SERVER + `/api/repuestos/detalle/${datos.id}/`, {
             nombre: datos.nombre,
+            nombre_comun: datos.nombre_comun,
             fabricante: datos.fabricante,
             modelo: datos.modelo,
             es_critico: datos.es_critico,
             descatalogado: datos.descatalogado,
             tipo_repuesto: datos.tipo_repuesto,
+            tipo_unidad: datos.tipo_unidad,
             stocks_minimos: datos.stocks_minimos? datos.stocks_minimos:null,
             observaciones: datos.observaciones
         }, {
@@ -172,11 +191,13 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         event.preventDefault();
         axios.post(BACKEND_SERVER + `/api/repuestos/detalle/`, {
             nombre: datos.nombre,
+            nombre_comun: datos.nombre_comun,
             fabricante: datos.fabricante,
             modelo: datos.modelo,
             es_critico: datos.es_critico,
             descatalogado: datos.descatalogado,
             tipo_repuesto: datos.tipo_repuesto,
+            tipo_unidad: datos.tipo_unidad,
             observaciones: datos.observaciones
         }, {
             headers: {
@@ -329,6 +350,17 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                 </Form.Group>
                             </Col>
                             <Col>
+                                <Form.Group id="nombre_comun">
+                                    <Form.Label>Nombre Genérico</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='nombre_comun' 
+                                                value={datos.nombre_comun}
+                                                onChange={handleInputChange} 
+                                                placeholder="Nombre Genérico"
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col>
                                 <Form.Group id="tipo">
                                     <Form.Label>Tipo</Form.Label>
                                     <Form.Control as="select"  
@@ -368,6 +400,24 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                 onChange={handleInputChange} 
                                                 placeholder="Modelo"
                                     />
+                                </Form.Group>
+                            </Col>
+                            <Col>
+                                <Form.Group id="tipound">
+                                    <Form.Label>Tipo</Form.Label>
+                                    <Form.Control as="select"  
+                                                name='tipo_unidad' 
+                                                value={datos.tipo_unidad}
+                                                onChange={handleInputChange}
+                                                placeholder="Tipo unidad">
+                                                {tiposUnidad && tiposUnidad.map( tipo => {
+                                                    return (
+                                                    <option key={tipo.id} value={tipo.id}>
+                                                        {tipo.nombre}
+                                                    </option>
+                                                    )
+                                                })}
+                                    </Form.Control>
                                 </Form.Group>
                             </Col>
                         </Row>
