@@ -226,13 +226,13 @@ const RepListaFilto = ({actualizaFiltro}) => {
                         </Form.Group>
                     </Col>
                     <Col>
-                        <Form.Group controlId="formNombreGenerico">
+                        <Form.Group controlId="formDescripcionEtiq">
                             <Form.Label>Descripción Etiqueta</Form.Label>
                             <Form.Control type="text" 
                                         name='nombre_comun' 
                                         value={datos.nombre_comun}
                                         onChange={handleInputChange}                                        
-                                        placeholder="Nombre Genérico contiene"/>
+                                        placeholder="Descripción contiene"/>
                         </Form.Group>
                     </Col>
                     <Col>
