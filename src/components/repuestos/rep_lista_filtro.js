@@ -11,6 +11,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
     const [datos, setDatos] = useState({
         id:'',
         nombre: '',
+        nombre_comun: '',
         fabricante: '',
         modelo: '',
         critico: '',
@@ -170,7 +171,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
     }, [token, datos.seccion]);
 
     useEffect(()=>{
-        const filtro1 = `?nombre__icontains=${datos.nombre}&fabricante__icontains=${datos.fabricante}&modelo__icontains=${datos.modelo}&id=${datos.id}&es_critico=${datos.critico}&descatalogado=${datos.descatalogado}&tipo_repuesto=${datos.tipo_repuesto}&proveedores__id=${datos.proveedor}`;
+        const filtro1 = `?nombre__icontains=${datos.nombre}&nombre_comun__icontains=${datos.nombre_comun}&fabricante__icontains=${datos.fabricante}&modelo__icontains=${datos.modelo}&id=${datos.id}&es_critico=${datos.critico}&descatalogado=${datos.descatalogado}&tipo_repuesto=${datos.tipo_repuesto}&proveedores__id=${datos.proveedor}`;
         let filtro2 = `&equipos__seccion__zona__empresa__id=${datos.empresa}`;
         if (datos.empresa !== ''){
             filtro2 = filtro2 + `&equipos__seccion__zona__id=${datos.zona}`;
@@ -185,7 +186,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
         const filtro = filtro1 + filtro2;
         
         actualizaFiltro(filtro);
-    },[datos.nombre, datos.fabricante, datos.modelo, datos.id, datos.critico, datos.descatalogado, datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.tipo_repuesto, datos.proveedor]);
+    },[datos.nombre, datos.nombre_comun, datos.fabricante, datos.modelo, datos.id, datos.critico, datos.descatalogado, datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.tipo_repuesto, datos.proveedor]);
 
 
     const handleInputChange = (event) => {
@@ -212,18 +213,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
         <Container>
             <h5 className="mb-3 mt-3">Filtro</h5>
             <Form>
-                <Row>
-                    <Col>
-                        <Form.Group controlId="formId">
-                            <Form.Label>Codigo Barras</Form.Label>
-                            <Form.Control type="text" 
-                                        name='id' 
-                                        value={numeroBar.id}
-                                        onChange={handleInputChange2}
-                                        placeholder="Codigo de barras" 
-                                        autoFocus/>
-                        </Form.Group>
-                    </Col>
+                <Row>                    
                     <Col>
                         <Form.Group controlId="formNombre">
                             <Form.Label>Nombre contiene</Form.Label>
@@ -231,7 +221,18 @@ const RepListaFilto = ({actualizaFiltro}) => {
                                         name='nombre' 
                                         value={datos.nombre}
                                         onChange={handleInputChange}                                        
-                                        placeholder="Nombre contiene"/>
+                                        placeholder="Nombre contiene"
+                                        autoFocus/>
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="formDescripcionEtiq">
+                            <Form.Label>Descripción Etiqueta</Form.Label>
+                            <Form.Control type="text" 
+                                        name='nombre_comun' 
+                                        value={datos.nombre_comun}
+                                        onChange={handleInputChange}                                        
+                                        placeholder="Descripción contiene"/>
                         </Form.Group>
                     </Col>
                     <Col>
@@ -252,6 +253,17 @@ const RepListaFilto = ({actualizaFiltro}) => {
                                         value={datos.modelo}
                                         onChange={handleInputChange} 
                                         placeholder="Modelo contiene" />
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="formId">
+                            <Form.Label>Codigo Barras</Form.Label>
+                            <Form.Control type="text" 
+                                        name='id' 
+                                        value={numeroBar.id}
+                                        onChange={handleInputChange2}
+                                        placeholder="Codigo de barras" 
+                                        />
                         </Form.Group>
                     </Col>
                     <Col>

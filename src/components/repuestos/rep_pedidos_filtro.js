@@ -15,7 +15,7 @@ const PedidosFiltro = ({ actualizaFiltro }) => {
         fecha_creacion_lte:'',
         fecha_creacion_gte:'',
         finalizado: false,
-        numero:''
+        numero:'',
 
     });
 
