@@ -34,6 +34,7 @@ const RepSalidas = ({alm}) => {
     const [movimientos, setMovimientos] = useState([]);
 
     useEffect(()=>{
+
         axios.get(BACKEND_SERVER + `/api/repuestos/almacen/?empresa=${datos.usuario.perfil.empresa.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`

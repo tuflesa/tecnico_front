@@ -321,8 +321,8 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     const ImprimirBarcode = () => {
         var container = document.getElementById('barcode');
         // var mySVG = document.getElementById("barcode-canvas");
-        var width = "100%";
-        var height = "100%";
+        var width = "90%";
+        var height = "90%";
         var printWindow = window.open('', 'PrintMap',
         'width=' + width + ',height=' + height);
         printWindow.document.writeln(container.innerHTML);
@@ -362,7 +362,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                 name='nombre_comun' 
                                                 value={datos.nombre_comun}
                                                 onChange={handleInputChange} 
-                                                placeholder="Nombre Genérico"
+                                                placeholder="Descripción Etiqueta"
                                     />
                                 </Form.Group>
                             </Col>

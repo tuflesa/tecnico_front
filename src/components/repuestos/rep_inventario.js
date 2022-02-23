@@ -64,7 +64,7 @@ const RepInventario = () => {
                         <ExcelSheet data={listInventario} name="Inventario">
                             <ExcelColumn label="Id" value="id"/>
                             <ExcelColumn label="Nombre" value="articulo"/>
-                            <ExcelColumn label="Nombre Genérico" value="nombre_comun"/>
+                            <ExcelColumn label="Descripción Etiqueta" value="nombre_comun"/>
                             <ExcelColumn label="Fabricante" value="fabricante"/>
                             <ExcelColumn label="Almacén" value="alm"/>
                             <ExcelColumn label="Cantidad" value="stock_act"/>
@@ -74,7 +74,7 @@ const RepInventario = () => {
                         <thead>
                             <tr>
                                 <th>Nombre</th>
-                                <th>Nombre Genérico</th>
+                                <th>Descripción Etiqueta</th>
                                 <th>Almacén</th>
                                 <th>Fabricante</th>
                                 <th>Stock Actual</th>

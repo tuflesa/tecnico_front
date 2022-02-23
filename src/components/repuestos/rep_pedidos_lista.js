@@ -74,7 +74,15 @@ const PedLista = () => {
             }
         })
         .then( res => {
-            setPedidos(res.data);
+            setPedidos(res.data.sort(function(a, b){
+                if(a.numero > b.numero){
+                    return 1;
+                }
+                if(a.numero < b.numero){
+                    return -1;
+                }
+                return 0;
+            }))
             setShow(true);
         })
         .catch( err => {
