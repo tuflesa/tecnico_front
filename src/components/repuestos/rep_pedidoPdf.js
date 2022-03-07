@@ -98,42 +98,42 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
             padding: 5,
             flex: 1,
             flexDirection: "column",
-            fontSize: 13
+            fontSize: 10
         },
         section44: {
             margin: 5,
             padding: 5,
             flex: 5,
             flexDirection: "column",
-            fontSize: 13
+            fontSize: 10
         },
         section4: {
             margin: 5,
             padding: 5,
             flex: 2,
             flexDirection: "column",
-            fontSize: 13
+            fontSize: 10
         },
         section5: {
             margin: 5,
             padding: 5,
             flex: 1,
             flexDirection: "column",
-            fontSize: 11
+            fontSize: 8
         },
         section6: {
             margin: 5,
             padding: 5,
             flex: 6,
             flexDirection: "column",
-            fontSize: 13,
+            fontSize: 10,
         },
         section7: {
             margin: 5,
             padding: 5,
             flex: 1,
             flexDirection: "column",
-            fontSize: 13,
+            fontSize: 10,
         },
         section8: {
             margin: 5,
@@ -141,7 +141,7 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
             flex: 2,
             flexDirection: "column",
             textAlign: 'center',
-            fontSize: 13,
+            fontSize: 10,
         },
         section9: {
             margin: 5,
@@ -149,13 +149,13 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
             flex: 2,
             flexDirection: "column",
             textAlign: 'right',
-            fontSize: 13,
+            fontSize: 10,
         },
         section10: {
             margin: 2,
             flex: 3,
             flexDirection: "column",
-            fontSize: 11
+            fontSize: 8
         },
         sectionTabla: {
             flexDirection: 'row',
@@ -164,7 +164,7 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
         },
         pageNumber: {
             position: 'absolute',
-            fontSize: 12,
+            fontSize: 9,
             bottom: 30,
             left: 0,
             right: 0,

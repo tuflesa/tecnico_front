@@ -7,14 +7,27 @@ import { useCookies } from 'react-cookie';
 const ManListaFiltro = ({actualizaFiltro}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']); 
+    const [empresas, setEmpresas] = useState(null);
+    const [secciones, setSecciones] = useState(null);
+    const [zonas, setZonas] = useState(null);
+    const [equipos, setEquipos] = useState(null);
 
     const [datos, setDatos] = useState({
         id: '',
         nombre: '',
         especialidad: '',
+        tipotarea: '',
+        prioridad_menor: '',
+        prioridad_mayor: '',
+        pendiente: true,
+        /* empresa: '',
+        zona: '',
+        seccion: '',
+        equipo: '', */
     });
 
-    const [especialidades, setEspecialidades]=useState(null);
+    const [especialidades, setEspecialidades] = useState(null);
+    const [tipotarea, setTipoTarea] = useState(null);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/mantenimiento/especialidades/',{
@@ -38,10 +51,154 @@ const ManListaFiltro = ({actualizaFiltro}) => {
         })       
     }, [token]);
 
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + '/api/mantenimiento/tipo_tarea/',{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setTipoTarea(res.data.sort(function(a, b){
+                if(a.nombre > b.nombre){
+                    return 1;
+                }
+                if(a.nombre < b.nombre){
+                    return -1;
+                }
+                return 0;
+            }))
+        })
+        .catch( err => {
+            console.log(err); 
+        })       
+    }, [token]);
+
+    /* useEffect(() => {
+        axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setEmpresas(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
+
+    useEffect(() => {
+        if (datos.empresa === '') {
+            setZonas([]);
+            setDatos({
+                ...datos,
+                zona: '',
+                seccion: '',
+                equipo: ''
+            });
+        }
+        else {
+            axios.get(BACKEND_SERVER + `/api/estructura/zona/?empresa=${datos.empresa}`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }
+            })
+            .then( res => {
+                setZonas(res.data);
+                setDatos({
+                    ...datos,
+                    zona: '',
+                    seccion: '',
+                    equipo: ''
+                });
+            })
+            .catch( err => {
+                console.log(err);
+            });
+        }
+    }, [token, datos.empresa]);
+
+    useEffect(() => {
+        if (datos.zona === '') {
+            setSecciones([]);
+            setDatos({
+                ...datos,
+                seccion: '',
+                equipo: ''
+            });
+        }
+        else {
+            axios.get(BACKEND_SERVER + `/api/estructura/seccion/?zona=${datos.zona}`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }
+            })
+            .then( res => {
+                setSecciones(res.data);
+                setDatos({
+                    ...datos,
+                    seccion: '',
+                    equipo: ''
+                });
+            })
+            .catch( err => {
+                console.log(err);
+            });
+        }
+    }, [token, datos.zona]);
+
+    useEffect(() => {
+        if (datos.seccion === ''){
+            setEquipos([]);
+            setDatos({
+                ...datos,
+                equipo: ''
+            });
+        }
+        else{
+            axios.get(BACKEND_SERVER + `/api/estructura/equipo/?seccion=${datos.seccion}`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }
+            })
+            .then( res => {
+                setEquipos(res.data.sort(function(a, b){
+                    if(a.nombre > b.nombre){
+                        return 1;
+                    }
+                    if(a.nombre < b.nombre){
+                        return -1;
+                    }
+                    return 0;
+                }))
+                setDatos({
+                    ...datos,
+                    equipo: ''
+                });
+            })
+            .catch( err => {
+                console.log(err);
+            });
+        }
+    }, [token, datos.seccion]); */
+
     useEffect(()=>{
-        const filtro = `?nombre__icontains=${datos.nombre}&especialidad=${datos.especialidad}`;        
+        const filtro = `?nombre__icontains=${datos.nombre}&especialidad=${datos.especialidad}&tipo=${datos.tipotarea}&prioridad__lte=${datos.prioridad_menor}&prioridad__gte=${datos.prioridad_mayor}&pendiente=${datos.pendiente}`;
+        /* let filtro2 = `&equipo__seccion__zona__empresa__id=${datos.empresa}`;
+        if (datos.empresa !== ''){
+            filtro2 = filtro2 + `&equipo__seccion__zona__id=${datos.zona}`;
+            if (datos.zona !== ''){
+                filtro2 = filtro2 + `&equipo__seccion__id=${datos.seccion}`;
+                if (datos.seccion !== ''){
+                    filtro2 = filtro2 + `&equipo__id=${datos.equipo}`
+                }
+            }
+        } */
+        
+        //const filtro = filtro1 + filtro2;
+        
         actualizaFiltro(filtro);
-    },[datos.id, datos.nombre, datos.especialidad, token]);
+    },[datos.id, datos.nombre, datos.especialidad, datos.tipotarea, datos.prioridad_mayor, datos.prioridad_menor, datos.pendiente, token/* , datos.empresa, datos.zona, datos.seccion, datos.equipo */]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -65,17 +222,17 @@ const ManListaFiltro = ({actualizaFiltro}) => {
                                         placeholder="Nombre contiene"
                                         autoFocus/>
                         </Form.Group>
-                    </Col>                
-                    {/* <Col>
-                        <Form.Group controlId="tipo">
-                            <Form.Label>Tipo</Form.Label>
+                    </Col>  
+                    <Col>
+                        <Form.Group controlId="tipotarea">
+                            <Form.Label>Tipo Mantenimiento</Form.Label>
                             <Form.Control as="select"  
-                                        name='tipo_repuesto' 
-                                        value={datos.tipo_repuesto}
+                                        name='tipotarea' 
+                                        value={datos.tipotarea}
                                         onChange={handleInputChange}
-                                        placeholder="Tipo repuesto">
+                                        placeholder="Tipo Mantenimiento">
                                             <option key={0} value={''}>Todos</option>
-                                        {tiposRepuesto && tiposRepuesto.map( tipo => {
+                                        {tipotarea && tipotarea.map( tipo => {
                                             return (
                                             <option key={tipo.id} value={tipo.id}>
                                                 {tipo.nombre}
@@ -84,7 +241,7 @@ const ManListaFiltro = ({actualizaFiltro}) => {
                                         })}
                             </Form.Control>
                         </Form.Group>
-                    </Col> */}                    
+                    </Col>                                        
                     <Col>
                         <Form.Group controlId="especialidades">
                             <Form.Label>Especialidades</Form.Label>
@@ -101,6 +258,41 @@ const ManListaFiltro = ({actualizaFiltro}) => {
                                             </option>
                                             )
                                         })}
+                            </Form.Control>
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="menorque">
+                            <Form.Label>Prioridad menor que:</Form.Label>
+                            <Form.Control type="text" 
+                                        name='prioridad_menor' 
+                                        value={datos.prioridad_menor}
+                                        onChange={handleInputChange}                                        
+                                        placeholder="Prioridad menor que"
+                            />
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="mayorque">
+                            <Form.Label>Prioridad mayor que:</Form.Label>
+                            <Form.Control type="text" 
+                                        name='prioridad_mayor' 
+                                        value={datos.prioridad_mayor}
+                                        onChange={handleInputChange}                                        
+                                        placeholder="Prioridad mayor que"
+                            />
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="pendiente">
+                            <Form.Label>Pendientes</Form.Label>
+                            <Form.Control as="select" 
+                                            value={datos.pendiente}
+                                            name='pendiente'
+                                            onChange={handleInputChange}>
+                                <option key={0} value={''}>Todos</option>
+                                <option key={1} value={true}>Si</option>
+                                <option key={2} value={false}>No</option>
                             </Form.Control>
                         </Form.Group>
                     </Col>
