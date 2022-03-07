@@ -42,14 +42,12 @@ const EstEquipoLista = () => {
     const handleClose = () => setShow(false);
 
     const borrarEquipo = () => {
-        console.log('Borrar ' + equipoBorrar.nombre);
         axios.delete(BACKEND_SERVER + `/api/estructura/equipo/${equipoBorrar.id}/`, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
             })
             .then(res => {
-                // console.log(res);
                 // Actualiza la lista de empresas
                 const equiposActual = equipos.filter(equipo => equipo.id !== equipoBorrar.id);
                 setEquipos(equiposActual);

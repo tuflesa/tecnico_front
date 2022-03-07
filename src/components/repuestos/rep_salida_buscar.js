@@ -22,7 +22,15 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
               }     
         })
         .then( res => {   
-            setRepuesto(res.data);
+            setRepuesto(res.data.sort(function(a, b){
+                if(a.nombre > b.nombre){
+                    return 1;
+                }
+                if(a.nombre < b.nombre){
+                    return -1;
+                }
+                return 0;
+            }))
             axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimos/?almacen=${almacen}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`

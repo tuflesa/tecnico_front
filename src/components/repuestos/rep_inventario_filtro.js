@@ -47,12 +47,12 @@ const RepInventarioFiltro = ({actualizaFiltro}) => {
                     </Col>
                     <Col>
                         <Form.Group controlId="formNombreComun">
-                            <Form.Label>Genérico contiene</Form.Label>
+                            <Form.Label>Descripción Etiqueta</Form.Label>
                             <Form.Control type="text" 
                                         name='nombre_comun' 
                                         value={datos.nombre_comun}
                                         onChange={handleInputChange}                                        
-                                        placeholder="Genérico contiene"/>
+                                        placeholder="Descripción Etiqueta"/>
                         </Form.Group>
                     </Col>
                     <Col>

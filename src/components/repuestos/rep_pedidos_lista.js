@@ -74,7 +74,15 @@ const PedLista = () => {
             }
         })
         .then( res => {
-            setPedidos(res.data);
+            setPedidos(res.data.sort(function(a, b){
+                if(a.numero > b.numero){
+                    return 1;
+                }
+                if(a.numero < b.numero){
+                    return -1;
+                }
+                return 0;
+            }))
             setShow(true);
         })
         .catch( err => {
@@ -96,6 +104,7 @@ const PedLista = () => {
                         <thead>
                             <tr>
                                 <th>Num-Pedido</th>
+                                <th>Creado por</th>
                                 <th>Empresa</th>
                                 <th>Proveedor</th>
                                 <th>Fecha Pedido</th>
@@ -110,6 +119,7 @@ const PedLista = () => {
                                 return (
                                     <tr key={pedido.id}>
                                         <td>{pedido.numero}</td>
+                                        <td>{pedido.creado_por.get_full_name}</td>
                                         <td>{pedido.empresa.nombre}</td>
                                         <td>{pedido.proveedor.nombre}</td>
                                         <td>{invertirFecha(String(pedido.fecha_creacion))}</td>
