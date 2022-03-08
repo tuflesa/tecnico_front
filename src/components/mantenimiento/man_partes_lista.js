@@ -70,7 +70,7 @@ const ManListaPartes = () => {
                                         <td>{parte.creado_nombre}</td>
                                         <td>{parte.observaciones}</td>
                                         <td>
-                                            <Link to={`/mantenimiento/listado/${parte.id}`}>
+                                            <Link to={`/mantenimiento/parte/${parte.id}`}>
                                                 <PencilFill className="mr-3 pencil"/>                                                
                                             </Link>                                            
                                         </td>
