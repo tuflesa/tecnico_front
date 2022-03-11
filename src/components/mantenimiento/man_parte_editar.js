@@ -9,7 +9,7 @@ const ManParteDetalle = ({ match }) => {
     const [parte, setParte] = useState(null)
     
     useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${match.params.id}`,{
+        axios.get(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo_detalle/${match.params.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }

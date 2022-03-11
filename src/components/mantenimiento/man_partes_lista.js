@@ -11,6 +11,7 @@ import ManPartesFiltro from './man_partes_filtro';
 
 const ManListaPartes = () => {
     const [token] = useCookies(['tec-token']);
+    const [user] = useCookies(['tec-user']);
     
     const [partes, SetPartes]  = useState(null);
     const [filtro, setFiltro] = useState('');
@@ -20,17 +21,17 @@ const ManListaPartes = () => {
     }
     
     useEffect(()=>{
-        axios.get(BACKEND_SERVER + '/api/mantenimiento/parte_trabajo/' + filtro,{
+        axios.get(BACKEND_SERVER + '/api/mantenimiento/parte_trabajo_detalle/' + filtro ,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
                 }
         })
         .then( res => {
             SetPartes(res.data.sort(function(a, b){
-                if(a.id > b.id){
+                if(a.nombre > b.nombre){
                     return 1;
                 }
-                if(a.id < b.id){
+                if(a.nombre < b.nombre){
                     return -1;
                 }
                 return 0;
@@ -67,7 +68,7 @@ const ManListaPartes = () => {
                                     <tr key={parte.id}>
                                         <td>{parte.nombre}</td>
                                         <td>{parte.tipo_nombre}</td>
-                                        <td>{parte.creado_nombre}</td>
+                                        <td>{parte.creado_por.get_full_name}</td>
                                         <td>{parte.observaciones}</td>
                                         <td>
                                             <Link to={`/mantenimiento/parte/${parte.id}`}>

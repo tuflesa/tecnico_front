@@ -19,13 +19,15 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
         id: '',
         nombre: '',
         tipotarea: '',
-        creada_por: '',
+        creado_nombre: '',
         observaciones: '',
         finalizado: false,
         empresa: user['tec-user'].perfil.empresa.id,
         zona: '',
         seccion: '',
         equipo: '',
+        fecha_prevista_inicio_lte:'',
+        fecha_prevista_inicio_gte:'',
     });    
 
     useEffect(() => {
@@ -182,7 +184,7 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
     }, [token, datos.seccion]);
 
     useEffect(()=>{
-        const filtro1 = `?nombre__icontains=${datos.nombre}&tipo=${datos.tipotarea}&observaciones__icontains=${datos.observaciones}&creada_por=${datos.creada_por}&finalizado=${datos.finalizado}`;
+        const filtro1 = `?nombre__icontains=${datos.nombre}&tipo=${datos.tipotarea}&observaciones__icontains=${datos.observaciones}&creado_nombre=${datos.creado_nombre}&finalizado=${datos.finalizado}&fecha_prevista_inicio__lte=${datos.fecha_prevista_inicio_lte}&fecha_prevista_inicio__gte=${datos.fecha_prevista_inicio_gte}`;
         let filtro2 = `&equipo__seccion__zona__empresa__id=${datos.empresa}`;
         if (datos.empresa !== ''){
             filtro2 = filtro2 + `&equipo__seccion__zona__id=${datos.zona}`;
@@ -195,7 +197,7 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
         }
         const filtro = filtro1 + filtro2;
         actualizaFiltro(filtro);
-    },[datos.id, datos.nombre, datos.tipotarea, datos.observaciones, datos.creada_por, datos.finalizado, , datos.empresa, datos.zona, datos.seccion, datos.equipo, token]);
+    },[datos.id, datos.nombre, datos.tipotarea, datos.observaciones, datos.creado_nombre, datos.finalizado, , datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.fecha_prevista_inicio_gte, datos.fecha_prevista_inicio_lte, token]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -238,23 +240,13 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
                                         })}
                             </Form.Control>
                         </Form.Group>
-                    </Col>
+                    </Col>                    
                     <Col>
-                        <Form.Group controlId="observaciones">
-                            <Form.Label>Observaciones contiene</Form.Label>
-                            <Form.Control type="text" 
-                                        name='observaciones' 
-                                        value={datos.observaciones}
-                                        onChange={handleInputChange}                                        
-                                        placeholder="Observaciones contiene"/>
-                        </Form.Group>
-                    </Col>
-                    <Col>
-                        <Form.Group controlId="creada_por">
+                        <Form.Group controlId="creado_nombre">
                             <Form.Label>Creado Por</Form.Label>
                             <Form.Control as="select"  
-                                        name='creada_por' 
-                                        value={datos.creada_por}
+                                        name='creado_nombre' 
+                                        value={datos.creado_nombre}
                                         onChange={handleInputChange}
                                         placeholder="Creado por">
                                         <option key={0} value={''}>Todas</option>    
@@ -269,18 +261,25 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
                         </Form.Group>
                     </Col>
                     <Col>
-                        <Form.Group controlId="finalizado">
-                            <Form.Label>Finalizado</Form.Label>
-                            <Form.Control as="select" 
-                                            value={datos.finalizado}
-                                            name='finalizado'
-                                            onChange={handleInputChange}>
-                                <option key={0} value={''}>Todos</option>
-                                <option key={1} value={true}>Si</option>
-                                <option key={2} value={false}>No</option>
-                            </Form.Control>
+                        <Form.Group controlId="fecha_prevista_inicio_gte">
+                            <Form.Label>Fecha Prevista Posterior a</Form.Label>
+                            <Form.Control type="date" 
+                                        name='fecha_creacion_gte' 
+                                        value={datos.fecha_prevista_inicio_gte}
+                                        onChange={handleInputChange} 
+                                        placeholder="Fecha creación posterior a..." />
                         </Form.Group>
                     </Col>
+                    <Col>
+                        <Form.Group controlId="fecha_prevista_inicio_lte">
+                            <Form.Label>Fecha Prevista Anterior a</Form.Label>
+                            <Form.Control type="date" 
+                                        name='fecha_prevista_inicio_lte' 
+                                        value={datos.fecha_prevista_inicio_lte}
+                                        onChange={handleInputChange} 
+                                        placeholder="Fecha creación anterior a..." />
+                        </Form.Group>
+                    </Col>                    
                 </Row>
                 <Row>
                     <Col>
@@ -353,6 +352,31 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
                                     </option>
                                     )
                                 })}
+                            </Form.Control>
+                        </Form.Group>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
+                        <Form.Group controlId="observaciones">
+                            <Form.Label>Observaciones contiene</Form.Label>
+                            <Form.Control type="text" 
+                                        name='observaciones' 
+                                        value={datos.observaciones}
+                                        onChange={handleInputChange}                                        
+                                        placeholder="Observaciones contiene"/>
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="finalizado">
+                            <Form.Label>Finalizado</Form.Label>
+                            <Form.Control as="select" 
+                                            value={datos.finalizado}
+                                            name='finalizado'
+                                            onChange={handleInputChange}>
+                                <option key={0} value={''}>Todos</option>
+                                <option key={1} value={true}>Si</option>
+                                <option key={2} value={false}>No</option>
                             </Form.Control>
                         </Form.Group>
                     </Col>

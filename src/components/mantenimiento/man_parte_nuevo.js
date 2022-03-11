@@ -4,8 +4,9 @@ import { useCookies } from 'react-cookie';
 
 const ManParteNuevo = () => {
     const [user] = useCookies(['tec-user']);
-    const [parte, setParte] = useState({nombre: '', creada_por: user['tec-user']});
+    const [parte, setParte] = useState({creado_por: user['tec-user'], empresa:user['tec-user'].perfil.empresa.id});
     return ( 
+        
         <ParteForm  parte={parte} 
                     setParte={setParte}
         />

@@ -13,7 +13,7 @@ const ManTarea = () => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
     const [tareas, setTareas] = useState(null);
-    const [filtro, setFiltro] = useState(`?equipo__seccion__zona__empresa__id=${user['tec-user'].perfil.empresa.id}&pendiente=${true}`);
+    const [filtro, setFiltro] = useState(`?equipo__seccion__zona__empresa__id=${user['tec-user'].perfil.empresa.id}`);
     const [show, setShow] = useState(false);
     const [show2, setShow2] = useState(false);
     const [tareaBorrar, setTareaBorrar] = useState(null);
@@ -29,9 +29,6 @@ const ManTarea = () => {
                 }
         })
         .then( res => {
-            /* {res.data && res.data.map( r => {
-                r['checked'] = false;
-            })} */
             setTareas(res.data.sort(function(a, b){
                 if(a.nombre > b.nombre){
                     return 1;
@@ -67,14 +64,25 @@ const ManTarea = () => {
     const handleClose2 = () => setShow2(false);
 
     const handleTrashClick = (tarea) => {
-        if(tarea.pendiente===false){
-            setTareaBorrar(tarea);
-            setShow(true);
-        }
-        else{
-            setShow2(true)
-            setTareaBorrar(tarea);
-        }
+        axios.get(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo_lineas/?tarea=${tarea.id}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            console.log(res.data.length);
+            if(res.data.length===0){
+                setTareaBorrar(tarea);
+                setShow(true);                
+            }
+            else{
+                setShow2(true)
+                setTareaBorrar(tarea);
+            }
+        })
+        .catch( err => {
+            console.log(err); 
+        })
     }
 
     return (
@@ -91,11 +99,8 @@ const ManTarea = () => {
                         <thead>
                             <tr>
                                 <th>Nombre</th>
-                                {/* <th>Equipo</th> */}
-                                <th>Tipo</th>
                                 <th>Especialidad</th>                               
                                 <th>Prioridad</th>
-                                <th>Pendientes</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -104,11 +109,8 @@ const ManTarea = () => {
                                 return (
                                     <tr key={tarea.id}>
                                         <td>{tarea.nombre}</td>
-                                        {/* <td>{tarea.equipo_nombre}</td> */}
-                                        <td>{tarea.tipo_nombre}</td>
                                         <td>{tarea.especialidad_nombre}</td>
                                         <td>{tarea.prioridad}</td>
-                                        <td>{tarea.pendiente ? 'Si' : 'No'}</td>
                                         <td>                                            
                                             <Link to={`/mantenimiento/tarea/${tarea.id}`}>
                                                 <PencilFill className="mr-3 pencil"/>                                                
@@ -127,7 +129,7 @@ const ManTarea = () => {
                 <Modal.Header closeButton>
                     <Modal.Title>Borrar</Modal.Title>
                 </Modal.Header>
-                <Modal.Body>Está a punto de borrar el equipo: <strong>{tareaBorrar && tareaBorrar.nombre}</strong></Modal.Body>
+                <Modal.Body>Está a punto de borrar la tarea: <strong>{tareaBorrar && tareaBorrar.nombre}</strong></Modal.Body>
                 <Modal.Footer>
                     <Button variant="danger" onClick={BorrarT}>
                         Borrar
