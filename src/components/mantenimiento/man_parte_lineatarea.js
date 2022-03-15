@@ -4,7 +4,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 
-const LineaTareaForm = ({show, handleCloseLinea, tareaAsignadas, parte_id}) => {
+const LineaTareaForm = ({show, handleCloseLinea, tareaAsignadas, parte_id, updateTarea}) => {
     
     const [token] = useCookies(['tec-token']);
     const [especialidades, setEspecialidades] = useState(null);
@@ -72,7 +72,6 @@ const LineaTareaForm = ({show, handleCloseLinea, tareaAsignadas, parte_id}) => {
             }
         })
         .then( res => {
-            //updateTarea();
             const newTareaParte = [...listaAsignados, parseInt(res.data.id)];      
             axios.post(BACKEND_SERVER + `/api/mantenimiento/linea_nueva/`,{
                 parte: parte_id,
@@ -86,7 +85,6 @@ const LineaTareaForm = ({show, handleCloseLinea, tareaAsignadas, parte_id}) => {
                 }
             })
             .then( r => {
-                //updateTarea();
                 handlerCancelar();
             })
             .catch( err => {
@@ -115,6 +113,7 @@ const LineaTareaForm = ({show, handleCloseLinea, tareaAsignadas, parte_id}) => {
             console.log(err);            
             handlerCancelar();
         });
+        updateTarea();
     }
     
     return (        

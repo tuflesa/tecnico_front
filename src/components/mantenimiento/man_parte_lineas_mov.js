@@ -10,9 +10,6 @@ const LineasPartes = ({tarea, handleCloseList, show, parte}) => {
     const [listados, setListados] = useState(null);
 
     useEffect(()=>{
-        console.log('que entra en lineas de partes');
-        console.log(parte);
-        console.log(tarea);
         tarea && axios.get(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_mov/?tarea=${tarea.id}&parte=${parte.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`

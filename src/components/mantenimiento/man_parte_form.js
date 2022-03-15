@@ -72,8 +72,7 @@ const ParteForm = ({parte, setParte}) => {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
-        .then( res => {  
-            console.log(res.data.tarea);
+        .then( res => { 
             setLineasParte(res.data.tarea);
            
             /* setLineasParte(res.data.sort(function(a, b){
@@ -220,7 +219,19 @@ const ParteForm = ({parte, setParte}) => {
         .catch( err => {
             console.log(err); 
         })       
-    }, [token]);    
+    }, [token]);   
+    
+    const updateTarea = () => {
+        axios.get(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo_detalle/${datos.id}/`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => { 
+            setParte(res.data);
+        })
+        .catch(err => { console.log(err);})
+    }
 
     const handleInputChange = (event) => {
         setDatos({
@@ -587,6 +598,7 @@ const ParteForm = ({parte, setParte}) => {
                                 handleCloseLinea ={cerrarAddLinea}
                                 tareaAsignadas={datos.tarea}
                                 parte_id={parte.id}
+                                updateTarea = {updateTarea}
             />
             <LineasPartes       show={show_listlineastareas}
                                 handleCloseList ={cerrarAddLineaPartes}

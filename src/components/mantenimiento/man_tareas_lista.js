@@ -70,7 +70,6 @@ const ManTarea = () => {
               }
         })
         .then( res => {
-            console.log(res.data.length);
             if(res.data.length===0){
                 setTareaBorrar(tarea);
                 setShow(true);                
