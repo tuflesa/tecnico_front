@@ -4,10 +4,11 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 
-const LineaTareaForm = ({show, handleCloseLinea, tarea, parte_id}) => {
+const LineaTareaForm = ({show, handleCloseLinea, tareaAsignadas, parte_id}) => {
     
     const [token] = useCookies(['tec-token']);
     const [especialidades, setEspecialidades] = useState(null);
+    const [listaAsignados, setListaAsignados] = useState([]);
     
     const [datos, setDatos] = useState({  
         id: null,
@@ -38,6 +39,14 @@ const LineaTareaForm = ({show, handleCloseLinea, tarea, parte_id}) => {
             console.log(err); 
         })       
     }, [token]);
+
+    useEffect(()=>{
+        let TareasAsignadosID = [];
+        tareaAsignadas && tareaAsignadas.forEach(p => {
+            TareasAsignadosID.push(p.id);
+        });
+        setListaAsignados(TareasAsignadosID);
+    },[tareaAsignadas]);
     
     const handleInputChange = (event) => {
         setDatos({
@@ -64,6 +73,7 @@ const LineaTareaForm = ({show, handleCloseLinea, tarea, parte_id}) => {
         })
         .then( res => {
             //updateTarea();
+            const newTareaParte = [...listaAsignados, parseInt(res.data.id)];      
             axios.post(BACKEND_SERVER + `/api/mantenimiento/linea_nueva/`,{
                 parte: parte_id,
                 tarea: res.data.id,
@@ -75,7 +85,23 @@ const LineaTareaForm = ({show, handleCloseLinea, tarea, parte_id}) => {
                     'Authorization': `token ${token['tec-token']}`
                 }
             })
-            .then( res => {
+            .then( r => {
+                //updateTarea();
+                handlerCancelar();
+            })
+            .catch( err => {
+                console.log(err);            
+                handlerCancelar();
+            });
+            axios.patch(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${parte_id}/`,{
+                tarea: newTareaParte,
+            },
+            {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }
+            })
+            .then( re => {
                 //updateTarea();
                 handlerCancelar();
             })

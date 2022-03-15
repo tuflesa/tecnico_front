@@ -41,6 +41,7 @@ const ParteForm = ({parte, setParte}) => {
         equipo: parte? parte.equipo : '',
         tipo_periodo: parte.tipo_periodo? parte.tipo_periodo : '',
         periodo: parte.periodo? parte.periodo : 0,
+        tarea: parte.tarea,
     });        
   
     useEffect(() => {
@@ -66,13 +67,16 @@ const ParteForm = ({parte, setParte}) => {
     }, [token]);
 
     useEffect(() => {
-        parte.id && axios.get(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_trabajo/?parte=${parte.id}`,{
+        parte.id && axios.get(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo_detalle/${parte.id}/`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
-        .then( res => {
-            setLineasParte(res.data.sort(function(a, b){
+        .then( res => {  
+            console.log(res.data.tarea);
+            setLineasParte(res.data.tarea);
+           
+            /* setLineasParte(res.data.sort(function(a, b){
                 if(a.tarea.prioridad < b.tarea.prioridad){
                     return 1;
                 }
@@ -80,7 +84,7 @@ const ParteForm = ({parte, setParte}) => {
                     return -1;
                 }
                 return 0;
-            }))
+            })) */
         })
         .catch( err => {
             console.log(err); 
@@ -562,13 +566,13 @@ const ParteForm = ({parte, setParte}) => {
                                 <tbody>
                                     {lineasparte && lineasparte.map( linea => {
                                         return (
-                                            <tr key={linea.tarea.id}>
-                                                <td>{linea.tarea.prioridad}</td>
-                                                <td>{linea.tarea.nombre}</td>
-                                                <td>{linea.tarea.especialidad_nombre}</td>
-                                                <td>{linea.tarea.observaciones}</td>
+                                            <tr key={linea.id}>
+                                                <td>{linea.prioridad}</td>
+                                                <td>{linea.nombre}</td>
+                                                <td>{linea.especialidad_nombre}</td>
+                                                <td>{linea.observaciones}</td>
                                                 <td>                                            
-                                                    <Receipt className="mr-3 pencil" onClick={event =>{listarLineasTareas(linea.tarea)}}/>
+                                                    <Receipt className="mr-3 pencil" onClick={event =>{listarLineasTareas(linea)}}/>
                                                 </td>
                                             </tr>
                                         )})
@@ -581,7 +585,7 @@ const ParteForm = ({parte, setParte}) => {
             : null} 
             <LineaTareaForm     show={show_linea}
                                 handleCloseLinea ={cerrarAddLinea}
-                                tarea={null}
+                                tareaAsignadas={datos.tarea}
                                 parte_id={parte.id}
             />
             <LineasPartes       show={show_listlineastareas}
