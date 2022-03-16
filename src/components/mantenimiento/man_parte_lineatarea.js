@@ -96,7 +96,10 @@ const LineaTareaForm = ({show, handleCloseLinea, tareaAsignadas, parte_id, updat
                 .then( re => {
                     updateTarea();
                     handlerCancelar(); 
-                    //limpiar datos                   
+                    datos.nombre='';
+                    datos.especialidad='';
+                    datos.prioridad='';
+                    datos.observaciones='';
                 })
                 .catch( err => {
                     console.log(err);            
