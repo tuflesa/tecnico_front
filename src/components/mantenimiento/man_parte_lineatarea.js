@@ -8,7 +8,7 @@ const LineaTareaForm = ({show, handleCloseLinea, tareaAsignadas, parte_id, updat
     
     const [token] = useCookies(['tec-token']);
     const [especialidades, setEspecialidades] = useState(null);
-    const [listaAsignados, setListaAsignados] = useState([]);
+    const [listaAsignadas, setListaAsignadas] = useState([]);
     
     const [datos, setDatos] = useState({  
         id: null,
@@ -41,11 +41,11 @@ const LineaTareaForm = ({show, handleCloseLinea, tareaAsignadas, parte_id, updat
     }, [token]);
 
     useEffect(()=>{
-        let TareasAsignadosID = [];
+        let TareasAsignadasID = [];
         tareaAsignadas && tareaAsignadas.forEach(p => {
-            TareasAsignadosID.push(p.id);
+            TareasAsignadasID.push(p.id);
         });
-        setListaAsignados(TareasAsignadosID);
+        setListaAsignadas(TareasAsignadasID);
     },[tareaAsignadas]);
     
     const handleInputChange = (event) => {
@@ -72,7 +72,7 @@ const LineaTareaForm = ({show, handleCloseLinea, tareaAsignadas, parte_id, updat
             }
         })
         .then( res => {
-            const newTareaParte = [...listaAsignados, parseInt(res.data.id)];      
+            const newTareaParte = [...listaAsignadas, parseInt(res.data.id)];      
             axios.post(BACKEND_SERVER + `/api/mantenimiento/linea_nueva/`,{
                 parte: parte_id,
                 tarea: res.data.id,
@@ -85,35 +85,34 @@ const LineaTareaForm = ({show, handleCloseLinea, tareaAsignadas, parte_id, updat
                 }
             })
             .then( r => {
-                handlerCancelar();
+                axios.patch(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${parte_id}/`,{
+                    tarea: newTareaParte,
+                },
+                {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }
+                })
+                .then( re => {
+                    updateTarea();
+                    handlerCancelar(); 
+                    //limpiar datos                   
+                })
+                .catch( err => {
+                    console.log(err);            
+                    handlerCancelar();
+                });
             })
             .catch( err => {
                 console.log(err);            
                 handlerCancelar();
             });
-            axios.patch(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${parte_id}/`,{
-                tarea: newTareaParte,
-            },
-            {
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                }
-            })
-            .then( re => {
-                //updateTarea();
-                handlerCancelar();
-            })
-            .catch( err => {
-                console.log(err);            
-                handlerCancelar();
-            });
-            handlerCancelar();
+            
         })
         .catch( err => {
             console.log(err);            
             handlerCancelar();
-        });
-        updateTarea();
+        });              
     }
     
     return (        

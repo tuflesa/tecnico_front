@@ -5,7 +5,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import { Button, Row, Form, Modal, Col, Table } from 'react-bootstrap';
 import {invertirFecha} from '../utilidades/funciones_fecha';
 
-const LineasPartes = ({tarea, handleCloseList, show, parte}) => {
+const LineasPartesMov = ({tarea, handleCloseList, show, parte}) => {
     const [token] = useCookies(['tec-token']);
     const [listados, setListados] = useState(null);
 
@@ -88,4 +88,4 @@ const LineasPartes = ({tarea, handleCloseList, show, parte}) => {
         </Modal>
     )
 }
-export default LineasPartes;
+export default LineasPartesMov;

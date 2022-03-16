@@ -6,7 +6,7 @@ import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import LineaTareaForm from './man_parte_lineatarea';
-import LineasPartes from './man_parte_lineas_mov';
+import LineasPartesMov from './man_parte_lineas_mov';
 
 const ParteForm = ({parte, setParte}) => {
     const [token] = useCookies(['tec-token']);
@@ -73,17 +73,17 @@ const ParteForm = ({parte, setParte}) => {
               }
         })
         .then( res => { 
-            setLineasParte(res.data.tarea);
+            //setLineasParte(res.data.tarea);
            
-            /* setLineasParte(res.data.sort(function(a, b){
-                if(a.tarea.prioridad < b.tarea.prioridad){
+            setLineasParte(res.data.tarea.sort(function(a, b){
+                if(a.prioridad < b.prioridad){
                     return 1;
                 }
-                if(a.tarea.prioridad > b.tarea.prioridad){
+                if(a.prioridad > b.prioridad){
                     return -1;
                 }
                 return 0;
-            })) */
+            }))
         })
         .catch( err => {
             console.log(err); 
@@ -222,7 +222,7 @@ const ParteForm = ({parte, setParte}) => {
     }, [token]);   
     
     const updateTarea = () => {
-        axios.get(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo_detalle/${datos.id}/`,{
+        parte.id && axios.get(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo_detalle/${parte.id}/`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }     
@@ -272,6 +272,7 @@ const ParteForm = ({parte, setParte}) => {
         })
         .then( res => { 
             setParte(res.data);
+            //updateTarea(res.data.id);
         })
         .catch(err => { console.log(err);})
     }  
@@ -298,6 +299,7 @@ const ParteForm = ({parte, setParte}) => {
         })
         .then( res => { 
             setParte(res.data);
+            //updateTarea();
         })
         .catch(err => { console.log(err);})
 
@@ -596,11 +598,11 @@ const ParteForm = ({parte, setParte}) => {
             : null} 
             <LineaTareaForm     show={show_linea}
                                 handleCloseLinea ={cerrarAddLinea}
-                                tareaAsignadas={datos.tarea}
+                                tareaAsignadas={parte.tarea}
                                 parte_id={parte.id}
                                 updateTarea = {updateTarea}
             />
-            <LineasPartes       show={show_listlineastareas}
+            <LineasPartesMov    show={show_listlineastareas}
                                 handleCloseList ={cerrarAddLineaPartes}
                                 tarea={lineaLineasTareas}
                                 parte={parte}
