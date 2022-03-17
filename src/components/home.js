@@ -17,7 +17,7 @@ const Home = () => {
               }
         })
         .then(res => {
-            // console.log(res.data);
+            //console.log(res.data);
             setApps(res.data);
         })
     },[token]);

@@ -10,13 +10,12 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
         headers:{
             'Authorization': `token ${token['tec-token']}`
             }
-    });
+    }); */
     
     useEffect(() => {
         console.log('esto es lo que recoge');
-        console.log(im);
-        console.log(empresa);
-    }) */
+        console.log(linea);
+    })
 
     function parseData(){
         if(linea){
@@ -27,7 +26,7 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
                             <View style={styles.section}>
                                 <View style={styles.section7}><Text>{data.cantidad}</Text></View>
                                 <View style={styles.section7}><Text>{data.repuesto.unidad_siglas}</Text></View>
-                                <View style={styles.section6}><Text>{data.repuesto.nombre}</Text></View>
+                                <View style={styles.section6}><Text>{data.repuesto.nombre + " - " + data.repuesto.fabricante + " - " + data.repuesto.modelo}</Text></View>
                                 <View style={styles.section9}><Text>{data.precio + '€'}</Text></View>
                                 <View style={styles.section9}><Text>{data.descuento + '%'}</Text></View>
                                 <View style={styles.section9}><Text>{data.total + '€'}</Text></View>
@@ -98,42 +97,42 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
             padding: 5,
             flex: 1,
             flexDirection: "column",
-            fontSize: 13
+            fontSize: 10
         },
         section44: {
             margin: 5,
             padding: 5,
             flex: 5,
             flexDirection: "column",
-            fontSize: 13
+            fontSize: 10
         },
         section4: {
             margin: 5,
             padding: 5,
             flex: 2,
             flexDirection: "column",
-            fontSize: 13
+            fontSize: 10
         },
         section5: {
             margin: 5,
             padding: 5,
             flex: 1,
             flexDirection: "column",
-            fontSize: 11
+            fontSize: 8
         },
         section6: {
             margin: 5,
             padding: 5,
             flex: 6,
             flexDirection: "column",
-            fontSize: 13,
+            fontSize: 10,
         },
         section7: {
             margin: 5,
             padding: 5,
             flex: 1,
             flexDirection: "column",
-            fontSize: 13,
+            fontSize: 10,
         },
         section8: {
             margin: 5,
@@ -141,7 +140,7 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
             flex: 2,
             flexDirection: "column",
             textAlign: 'center',
-            fontSize: 13,
+            fontSize: 10,
         },
         section9: {
             margin: 5,
@@ -149,13 +148,13 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
             flex: 2,
             flexDirection: "column",
             textAlign: 'right',
-            fontSize: 13,
+            fontSize: 10,
         },
         section10: {
             margin: 2,
             flex: 3,
             flexDirection: "column",
-            fontSize: 11
+            fontSize: 8
         },
         sectionTabla: {
             flexDirection: 'row',
@@ -164,7 +163,7 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
         },
         pageNumber: {
             position: 'absolute',
-            fontSize: 12,
+            fontSize: 9,
             bottom: 30,
             left: 0,
             right: 0,
