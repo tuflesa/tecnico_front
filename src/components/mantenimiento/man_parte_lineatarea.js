@@ -78,6 +78,7 @@ const LineaTareaForm = ({show, handleCloseLinea, tareaAsignadas, parte_id, updat
                 tarea: res.data.id,
                 fecha_inicio:null,
                 fecha_fin:null,
+                finalizada: false,
             },
             {
                 headers: {

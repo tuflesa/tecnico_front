@@ -7,6 +7,7 @@ import ManNuevo from './man_tarea_nueva';
 import ManListaPartes from './man_partes_lista';
 import ManParteDetalle from './man_parte_editar';
 import ManParteNuevo from './man_parte_nuevo';
+import ManTareasListado from './man_tareas_listado';
 
 
 const Mantenimiento = () => {
@@ -21,6 +22,7 @@ const Mantenimiento = () => {
                 <Route path='/mantenimiento/parte/nuevo' component={ManParteNuevo} />               
                 <Route path='/mantenimiento/partes' component={ManListaPartes} /> 
                 <Route path='/mantenimiento/parte/:id' component={ManParteDetalle} />
+                <Route path='/mantenimiento/listado_tareas' component={ManTareasListado} /> 
             </Switch>
         </React.Fragment>
     )
