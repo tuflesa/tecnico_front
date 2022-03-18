@@ -4,7 +4,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 
-const ManListaFiltro = ({actualizaFiltro}) => {
+const ManLineasFiltro = ({actualizaFiltro}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']); 
     const [empresas, setEmpresas] = useState(null);
@@ -410,4 +410,4 @@ const ManListaFiltro = ({actualizaFiltro}) => {
         </Container>
     );
 }
-export default ManListaFiltro;
+export default ManLineasFiltro;
