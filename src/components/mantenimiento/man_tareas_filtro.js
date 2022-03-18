@@ -4,33 +4,77 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 
-const RepListaFilto = ({actualizaFiltro}) => {
+const ManListaFiltro = ({actualizaFiltro}) => {
     const [token] = useCookies(['tec-token']);
-    const [user] = useCookies(['tec-user']);  
-
-    const [datos, setDatos] = useState({
-        id:'',
-        nombre: '',
-        nombre_comun: '',
-        fabricante: '',
-        modelo: '',
-        critico: '',
-        tipo_repuesto: '',
-        descatalogado: false,
-        empresa: '',
-        zona: '',
-        seccion: '',
-        equipo: '',
-        proveedor: '',
-    });
-    const [numeroBar, setnumeroBar] = useState({id:''});
-
-    const [tiposRepuesto, setTiposRepuesto] = useState(null);
+    const [user] = useCookies(['tec-user']); 
     const [empresas, setEmpresas] = useState(null);
-    const [proveedores, setProveedores] = useState(null);
     const [secciones, setSecciones] = useState(null);
     const [zonas, setZonas] = useState(null);
     const [equipos, setEquipos] = useState(null);
+
+    const [datos, setDatos] = useState({
+        id: '',
+        nombre_tarea: '',
+        nombre_parte: '',
+        especialidad: '',
+        prioridad_menor: '',
+        prioridad_mayor: '',
+        tipo: '',
+        empresa: user['tec-user'].perfil.empresa.id,
+        zona: '',
+        seccion: '',
+        equipo: '',
+        finalizada:false,
+        fecha_inicio_lte:'',
+        fecha_inicio_gte:'',
+    });
+
+    const [especialidades, setEspecialidades] = useState(null);
+    const [tipotarea, setTipoTarea] = useState(null);
+
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + '/api/mantenimiento/especialidades/',{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setEspecialidades(res.data.sort(function(a, b){
+                if(a.nombre > b.nombre){
+                    return 1;
+                }
+                if(a.nombre < b.nombre){
+                    return -1;
+                }
+                return 0;
+            }))
+        })
+        .catch( err => {
+            console.log(err); 
+        })       
+    }, [token]);   
+    
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + '/api/mantenimiento/tipo_tarea/',{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setTipoTarea(res.data.sort(function(a, b){
+                if(a.nombre > b.nombre){
+                    return 1;
+                }
+                if(a.nombre < b.nombre){
+                    return -1;
+                }
+                return 0;
+            }))
+        })
+        .catch( err => {
+            console.log(err); 
+        })       
+    }, [token]);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
@@ -40,36 +84,6 @@ const RepListaFilto = ({actualizaFiltro}) => {
         })
         .then( res => {
             setEmpresas(res.data);
-        })
-        .catch( err => {
-            console.log(err);
-        });
-        axios.get(BACKEND_SERVER + '/api/repuestos/tipo_repuesto/',{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            setTiposRepuesto(res.data);
-        })
-        .catch( err => {
-            console.log(err);
-        });
-        axios.get(BACKEND_SERVER + '/api/repuestos/proveedor/',{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            setProveedores(res.data.sort(function(a, b){
-                if(a.nombre > b.nombre){
-                    return 1;
-                }
-                if(a.nombre < b.nombre){
-                    return -1;
-                }
-                return 0;
-            }))
         })
         .catch( err => {
             console.log(err);
@@ -172,23 +186,20 @@ const RepListaFilto = ({actualizaFiltro}) => {
     }, [token, datos.seccion]);
 
     useEffect(()=>{
-        const filtro1 = `?nombre__icontains=${datos.nombre}&nombre_comun__icontains=${datos.nombre_comun}&fabricante__icontains=${datos.fabricante}&modelo__icontains=${datos.modelo}&id=${datos.id}&es_critico=${datos.critico}&descatalogado=${datos.descatalogado}&tipo_repuesto=${datos.tipo_repuesto}&proveedores__id=${datos.proveedor}`;
-        let filtro2 = `&equipos__seccion__zona__empresa__id=${datos.empresa}`;
+        const filtro1 = `?tarea__nombre__icontains=${datos.nombre_tarea}&parte__nombre__icontains=${datos.nombre_parte}&tarea__especialidad=${datos.especialidad}&tarea__prioridad__lte=${datos.prioridad_menor}&tarea__prioridad__gte=${datos.prioridad_mayor}&parte__tipo=${datos.tipo}&parte__empresa=${user['tec-user'].perfil.empresa.id}&finalizada=${datos.finalizada}&fecha_inicio__lte=${datos.fecha_inicio_lte}&fecha_inicio__gte=${datos.fecha_inicio_gte}`;
+        let filtro2 = `&parte__empresa__id=${datos.empresa}`;
         if (datos.empresa !== ''){
-            filtro2 = filtro2 + `&equipos__seccion__zona__id=${datos.zona}`;
+            filtro2 = filtro2 + `&parte__zona__id=${datos.zona}`;
             if (datos.zona !== ''){
-                filtro2 = filtro2 + `&equipos__seccion__id=${datos.seccion}`;
+                filtro2 = filtro2 + `&parte__seccion__id=${datos.seccion}`;
                 if (datos.seccion !== ''){
-                    filtro2 = filtro2 + `&equipos__id=${datos.equipo}`
+                    filtro2 = filtro2 + `&parte__equipo__id=${datos.equipo}`
                 }
             }
         }
-        
         const filtro = filtro1 + filtro2;
-        
         actualizaFiltro(filtro);
-    },[datos.nombre, datos.nombre_comun, datos.fabricante, datos.modelo, datos.id, datos.critico, datos.descatalogado, datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.tipo_repuesto, datos.proveedor]);
-
+    },[ datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.id, datos.nombre_tarea, datos.tipo, datos.especialidad,datos.prioridad_mayor, datos.prioridad_menor, datos.finalizada, datos.nombre_parte, datos.fecha_inicio_gte, datos.fecha_inicio_lte, token]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -197,98 +208,43 @@ const RepListaFilto = ({actualizaFiltro}) => {
         })
     }
 
-    const handleInputChange2 = (event) => {             
-        setnumeroBar ({
-            ...numeroBar,
-            [event.target.name] : event.target.value                 
-        }) 
-        if(numeroBar.id.length===11){
-            datos.id = parseInt (numeroBar.id);
-        }
-        else{
-            datos.id ='';
-        }
-    }
-
-    return ( 
+    return (
         <Container>
             <h5 className="mb-3 mt-3">Filtro</h5>
             <Form>
-                <Row>                    
+                <Row>
+                    <Col>
+                        <Form.Group controlId="formNombreParte">
+                            <Form.Label>Nombre Parte contiene</Form.Label>
+                            <Form.Control type="text" 
+                                        name='nombre_parte' 
+                                        value={datos.nombre_parte}
+                                        onChange={handleInputChange}                                        
+                                        placeholder="Nombre Parte contiene"
+                                        autoFocus/>
+                        </Form.Group>
+                    </Col> 
                     <Col>
                         <Form.Group controlId="formNombre">
-                            <Form.Label>Nombre contiene</Form.Label>
+                            <Form.Label>Nombre Tarea contiene</Form.Label>
                             <Form.Control type="text" 
-                                        name='nombre' 
-                                        value={datos.nombre}
+                                        name='nombre_tarea' 
+                                        value={datos.nombre_tarea}
                                         onChange={handleInputChange}                                        
-                                        placeholder="Nombre contiene"
+                                        placeholder="Nombre Tarea contiene"
                                         autoFocus/>
                         </Form.Group>
                     </Col>
                     <Col>
-                        <Form.Group controlId="formDescripcionEtiq">
-                            <Form.Label>Descripción Etiqueta</Form.Label>
-                            <Form.Control type="text" 
-                                        name='nombre_comun' 
-                                        value={datos.nombre_comun}
-                                        onChange={handleInputChange}                                        
-                                        placeholder="Descripción contiene"/>
-                        </Form.Group>
-                    </Col>
-                    <Col>
-                        <Form.Group controlId="fabricante">
-                            <Form.Label>Fabricante contiene</Form.Label>
-                            <Form.Control type="text" 
-                                        name='fabricante' 
-                                        value={datos.fabricante}
-                                        onChange={handleInputChange} 
-                                        placeholder="Fabricante contiene" />
-                        </Form.Group>
-                    </Col>
-                    <Col>
-                        <Form.Group controlId="modelo">
-                            <Form.Label>Modelo contiene</Form.Label>
-                            <Form.Control type="text" 
-                                        name='modelo' 
-                                        value={datos.modelo}
-                                        onChange={handleInputChange} 
-                                        placeholder="Modelo contiene" />
-                        </Form.Group>
-                    </Col>
-                    <Col>
-                        <Form.Group controlId="formId">
-                            <Form.Label>Codigo Barras</Form.Label>
-                            <Form.Control type="text" 
-                                        name='id' 
-                                        value={numeroBar.id}
-                                        onChange={handleInputChange2}
-                                        placeholder="Codigo de barras" 
-                                        />
-                        </Form.Group>
-                    </Col>
-                    <Col>
-                        <Form.Group controlId="id">
-                            <Form.Label>Id Repuesto</Form.Label>
-                            <Form.Control type="text" 
-                                        name='id' 
-                                        value={datos.id}
-                                        onChange={handleInputChange} 
-                                        placeholder="Id repuesto" />
-                        </Form.Group>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col>
                         <Form.Group controlId="tipo">
                             <Form.Label>Tipo</Form.Label>
                             <Form.Control as="select"  
-                                        name='tipo_repuesto' 
-                                        value={datos.tipo_repuesto}
+                                        name='tipo' 
+                                        value={datos.tipo}
                                         onChange={handleInputChange}
-                                        placeholder="Tipo repuesto">
+                                        placeholder="Tipo">
                                             <option key={0} value={''}>Todos</option>
-                                        {tiposRepuesto && tiposRepuesto.map( tipo => {
+                                        {tipotarea && tipotarea.map( tipo => {
                                             return (
                                             <option key={tipo.id} value={tipo.id}>
                                                 {tipo.nombre}
@@ -297,52 +253,26 @@ const RepListaFilto = ({actualizaFiltro}) => {
                                         })}
                             </Form.Control>
                         </Form.Group>
-                    </Col>
+                    </Col>                                                           
                     <Col>
-                        <Form.Group controlId="critico">
-                            <Form.Label>Critico</Form.Label>
-                            <Form.Control as="select" 
-                                            value={datos.critico}
-                                            name='critico'
-                                            onChange={handleInputChange}>
-                                <option key={0} value={''}>Todos</option>
-                                <option key={1} value={true}>Si</option>
-                                <option key={2} value={false}>No</option>
-                            </Form.Control>
-                        </Form.Group>
-                    </Col>
-                    <Col>
-                        <Form.Group controlId="descatalogado">
-                            <Form.Label>Descatalogado</Form.Label>
-                            <Form.Control as="select" 
-                                            value={datos.descatalogado}
-                                            name='descatalogado'
-                                            onChange={handleInputChange}>
-                                <option key={0} value={''}>Todos</option>
-                                <option key={1} value={true}>Si</option>
-                                <option key={2} value={false}>No</option>
-                            </Form.Control>
-                        </Form.Group>
-                    </Col>
-                    <Col>
-                        <Form.Group controlId="proveedor">
-                            <Form.Label>Proveedor</Form.Label>
+                        <Form.Group controlId="especialidades">
+                            <Form.Label>Especialidades</Form.Label>
                             <Form.Control as="select"  
-                                        name='proveedor' 
-                                        value={datos.proveedor}
+                                        name='especialidad' 
+                                        value={datos.especialidad}
                                         onChange={handleInputChange}
-                                        placeholder="Proveedor">
+                                        placeholder="Especialidad">
                                             <option key={0} value={''}>Todos</option>
-                                        {proveedores && proveedores.map( prov => {
+                                        {especialidades && especialidades.map( especialidad => {
                                             return (
-                                            <option key={prov.id} value={prov.id}>
-                                                {prov.nombre}
+                                            <option key={especialidad.id} value={especialidad.id}>
+                                                {especialidad.nombre}
                                             </option>
                                             )
                                         })}
                             </Form.Control>
                         </Form.Group>
-                    </Col>
+                    </Col>         
                 </Row>
                 <Row>
                     <Col>
@@ -418,10 +348,66 @@ const RepListaFilto = ({actualizaFiltro}) => {
                             </Form.Control>
                         </Form.Group>
                     </Col>
-                </Row>
+                </Row> 
+                <Row>
+                    <Col>
+                        <Form.Group controlId="finalizada">
+                            <Form.Label>Tareas Finalizadas</Form.Label>
+                            <Form.Control as="select" 
+                                            value={datos.finalizada}
+                                            name='finalizada'
+                                            onChange={handleInputChange}>
+                                <option key={0} value={''}>Todos</option>
+                                <option key={1} value={true}>Si</option>
+                                <option key={2} value={false}>No</option>
+                            </Form.Control>
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="fecha_inicio_gte">
+                            <Form.Label>Fecha Inicio Posterior a</Form.Label>
+                            <Form.Control type="date" 
+                                        name='fecha_inicio_gte' 
+                                        value={datos.fecha_inicio_gte}
+                                        onChange={handleInputChange} 
+                                        placeholder="Fecha inicio posterior a..." />
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="fecha_inicio_lte">
+                            <Form.Label>Fecha Inicio Anterior a</Form.Label>
+                            <Form.Control type="date" 
+                                        name='fecha_inicio_lte' 
+                                        value={datos.fecha_inicio_lte}
+                                        onChange={handleInputChange} 
+                                        placeholder="Fecha inicio anterior a..." />
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="menorque">
+                            <Form.Label>Prioridad menor que:</Form.Label>
+                            <Form.Control type="text" 
+                                        name='prioridad_menor' 
+                                        value={datos.prioridad_menor}
+                                        onChange={handleInputChange}                                        
+                                        placeholder="Prioridad menor que"
+                            />
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="mayorque">
+                            <Form.Label>Prioridad mayor que:</Form.Label>
+                            <Form.Control type="text" 
+                                        name='prioridad_mayor' 
+                                        value={datos.prioridad_mayor}
+                                        onChange={handleInputChange}                                        
+                                        placeholder="Prioridad mayor que"
+                            />
+                        </Form.Group>
+                    </Col>
+                </Row>              
             </Form>
         </Container>
-     );
+    );
 }
- 
-export default RepListaFilto;
+export default ManListaFiltro;

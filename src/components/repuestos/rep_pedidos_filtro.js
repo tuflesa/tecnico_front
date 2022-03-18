@@ -6,6 +6,7 @@ import axios from 'axios';
 
 const PedidosFiltro = ({ actualizaFiltro }) => {
     const [empresas, setEmpresas] = useState(null);
+    const [usuarios, setUsuarios] = useState(null);
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
 
@@ -16,11 +17,12 @@ const PedidosFiltro = ({ actualizaFiltro }) => {
         fecha_creacion_gte:'',
         finalizado: false,
         numero:'',
+        creado_por: '',
 
     });
 
     useEffect(()=>{
-        const filtro = `?proveedor__nombre__icontains=${datos.nombre}&fecha_creacion__lte=${datos.fecha_creacion_lte}&fecha_creacion__gte=${datos.fecha_creacion_gte}&finalizado=${datos.finalizado}&numero__icontains=${datos.numero}&empresa=${datos.empresa}`;
+        const filtro = `?proveedor__nombre__icontains=${datos.nombre}&fecha_creacion__lte=${datos.fecha_creacion_lte}&fecha_creacion__gte=${datos.fecha_creacion_gte}&finalizado=${datos.finalizado}&numero__icontains=${datos.numero}&empresa=${datos.empresa}&creado_por=${datos.creado_por}`;
         actualizaFiltro(filtro);
     },[datos, actualizaFiltro]);
 
@@ -46,6 +48,28 @@ const PedidosFiltro = ({ actualizaFiltro }) => {
             console.log(err);
         });
     }, [token]);
+
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + `/api/administracion/usuarios/?perfil__empresa__id=${datos.empresa}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setUsuarios(res.data.sort(function(a, b){
+                if(a.get_full_name > b.get_full_name){
+                    return 1;
+                }
+                if(a.get_full_name < b.get_full_name){
+                    return -1;
+                }
+                return 0;
+            }))
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token, datos.empresa]);
 
     return (
         <Container>
@@ -84,6 +108,25 @@ const PedidosFiltro = ({ actualizaFiltro }) => {
                         </Form.Group>
                     </Col>
                     <Col>
+                        <Form.Group controlId="creado_por">
+                            <Form.Label>Creado Por</Form.Label>
+                            <Form.Control as="select"  
+                                        name='creado_por' 
+                                        value={datos.creado_por}
+                                        onChange={handleInputChange}
+                                        placeholder="Creado por">
+                                        <option key={0} value={''}>Todas</option>    
+                                        {usuarios && usuarios.map( usuario => {
+                                            return (
+                                            <option key={usuario.id} value={usuario.id}>
+                                                {usuario.get_full_name}
+                                            </option>
+                                            )
+                                        })}
+                        </Form.Control>
+                        </Form.Group>
+                    </Col>
+                    <Col>
                         <Form.Group controlId="numero">
                             <Form.Label>Numero Pedido</Form.Label>
                             <Form.Control type="text" 
@@ -93,6 +136,8 @@ const PedidosFiltro = ({ actualizaFiltro }) => {
                                         placeholder="Numero de pedido" />
                         </Form.Group>
                     </Col>
+                </Row>
+                <Row>
                     <Col>
                         <Form.Group controlId="fecha_creacion_gte">
                             <Form.Label>Fecha Creación Posterior a</Form.Label>
