@@ -26,7 +26,7 @@ const ManTareasListado = () => {
                 }
         })
         .then( res => {
-            //setLineas(res.data);
+            console.log(res.data);
             setLineas(res.data.sort(function(a, b){
                 if(a.tarea.prioridad < b.tarea.prioridad){
                     return 1;

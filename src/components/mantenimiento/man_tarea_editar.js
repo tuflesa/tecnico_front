@@ -9,7 +9,7 @@ const ManDetalle = ({ match }) => {
     const [tarea, setTarea] = useState(null)
     
     useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/mantenimiento/tareas/${match.params.id}`,{
+        axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/${match.params.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }

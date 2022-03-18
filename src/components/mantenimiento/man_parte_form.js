@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Form, Button, Table } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, Table, Modal } from 'react-bootstrap';
 import { PlusCircle, Receipt } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
@@ -21,7 +21,7 @@ const ParteForm = ({parte, setParte}) => {
     const [hoy] = useState(new Date);
     const [tipo_periodo, setTipoPeriodo] = useState(null);
     const [show_linea, setShowLinea] = useState(false);
-    const [show_lineas_partes, setShowLineasPartes] = useState(false);
+    const [show_error, setShowError] = useState(false);
     const [show_listlineastareas, setShowListLineasTareas] = useState(false);
     const [lineaLineasTareas, setListLineasTareas] = useState(null);
 
@@ -32,15 +32,15 @@ const ParteForm = ({parte, setParte}) => {
         creado_por: parte.creado_por,
         finalizado: parte? parte.finalizado : false,
         observaciones: parte.observaciones? parte.observaciones : '',
-        fecha_creacion: parte ? parte.fecha_creacion : (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
+        fecha_creacion: parte.id ? parte.fecha_creacion :(hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
         fecha_prevista_inicio: parte? parte.fecha_prevista_inicio : '',
         fecha_finalizacion: parte? parte.fecha_finalizacion : '',
         empresa: parte.empresa,
         zona: parte? parte.zona : '',
         seccion: parte? parte.seccion : '',
         equipo: parte? parte.equipo : '',
-        tipo_periodo: parte.tipo_periodo? parte.tipo_periodo : '',
-        periodo: parte.periodo? parte.periodo : 0,
+        tipo_periodo: parte.id? parte.tipo_periodo : '',
+        periodo: parte.id? parte.periodo : 0,
         tarea: parte.tarea,
     });        
   
@@ -241,6 +241,10 @@ const ParteForm = ({parte, setParte}) => {
     }
 
     const handleDisabled = () => {
+        if (datos.tipo !== '1') {
+            datos.periodo = 0;
+            datos.tipo_periodo = '';
+        } 
         return datos.tipo!=='1'
     }
     
@@ -274,7 +278,10 @@ const ParteForm = ({parte, setParte}) => {
             setParte(res.data);
             //updateTarea(res.data.id);
         })
-        .catch(err => { console.log(err);})
+        .catch(err => { 
+            setShowError(true);
+            console.log(err);
+        })
     }  
     
     const actualizarDatos = (event) => {
@@ -301,7 +308,9 @@ const ParteForm = ({parte, setParte}) => {
             setParte(res.data);
             //updateTarea();
         })
-        .catch(err => { console.log(err);})
+        .catch(err => { 
+            setShowError(true);
+            console.log(err);})
 
     }
 
@@ -321,6 +330,8 @@ const ParteForm = ({parte, setParte}) => {
         setListLineasTareas(tarea);
         setShowListLineasTareas(true);
     }
+
+    const handleCloseError = () => setShowError(false);
 
     return(
         <Container>
@@ -607,6 +618,17 @@ const ParteForm = ({parte, setParte}) => {
                                 tarea={lineaLineasTareas}
                                 parte={parte}
             />
+            <Modal show={show_error} onHide={handleCloseError} backdrop="static" keyboard={ false } animation={false}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Error</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>Error al guardar formulario. Revise que todos los campos con asterisco esten cumplimentados</Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseError}>
+                        Cerrar
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </Container>
     )
 }

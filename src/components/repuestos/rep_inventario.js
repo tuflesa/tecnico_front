@@ -5,6 +5,8 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Table } from 'react-bootstrap';
 import ReactExport from 'react-data-export';
 import RepInventarioFiltro from './rep_inventario_filtro';
+import { Link } from 'react-router-dom';
+import { PencilFill } from 'react-bootstrap-icons';
 
 const RepInventario = () => {
     const [token] = useCookies(['tec-token']);
@@ -36,6 +38,8 @@ const RepInventario = () => {
                 r['fabricante'] = r.repuesto.fabricante;
                 r['nombre_comun']=r.repuesto.nombre_comun;
             })}
+            console.log('inventario:----');
+            console.log(res.data);
             setListInventario(res.data.sort(function(a, b){
                 if(a.articulo > b.articulo){
                     return 1;
@@ -80,6 +84,7 @@ const RepInventario = () => {
                                 <th>Localización</th>
                                 <th>Fabricante</th>
                                 <th>Stock Actual</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -91,7 +96,12 @@ const RepInventario = () => {
                                         <td>{inventario.alm}</td>
                                         <td>{inventario.localizacion}</td>
                                         <td>{inventario.fabricante}</td>
-                                        <td>{inventario.stock_act}</td>
+                                        <td>{inventario.stock_act}</td>                                        
+                                        <td>
+                                            <Link to={`/repuestos/${inventario.repuesto.id}`}>
+                                                <PencilFill className="mr-3 pencil"/>
+                                            </Link>
+                                        </td>
                                     </tr>
                                 )})
                             }
