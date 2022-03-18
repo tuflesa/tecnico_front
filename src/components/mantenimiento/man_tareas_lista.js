@@ -5,7 +5,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table, Modal, Button } from 'react-bootstrap';
 import { Trash, PencilFill, Receipt } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
-import ManListaFiltro from './man_tareas_filtro';
+//import ManLineasFiltro from './man_lineas_filtro';
 import { filter } from 'd3';
 
 
@@ -86,11 +86,11 @@ const ManTarea = () => {
 
     return (
         <Container>            
-            <Row>
+            {/* <Row>
                 <Col>
-                    <ManListaFiltro actualizaFiltro={actualizaFiltro}/>
+                    <ManLineasFiltro actualizaFiltro={actualizaFiltro}/>
                 </Col>
-            </ Row>
+            </ Row> */}
             <Row>                
                 <Col>
                     <h5 className="mb-3 mt-3">Lista de Tareas</h5>                    

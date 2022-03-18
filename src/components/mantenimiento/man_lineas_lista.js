@@ -5,11 +5,11 @@ import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table, Modal, Button } from 'react-bootstrap';
 import { Trash, PencilFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
-import ManListadoFiltro from './man_tareas_filtro';
+import ManLineasFiltro from './man_lineas_filtro';
 import { filter } from 'd3';
 
 
-const ManTareasListado = () => {
+const ManLineasListado = () => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
     const [lineas, setLineas] = useState(null);
@@ -47,12 +47,12 @@ const ManTareasListado = () => {
         <Container>            
             <Row>
                 <Col>
-                    <ManListadoFiltro actualizaFiltro={actualizaFiltro}/>
+                    <ManLineasFiltro actualizaFiltro={actualizaFiltro}/>
                 </Col>
             </ Row>
             <Row>                
                 <Col>
-                    <h5 className="mb-3 mt-3">Listado de Tareas</h5>                    
+                    <h5 className="mb-3 mt-3">Listado de Trabajos</h5>                    
                     <Table striped bordered hover>
                         <thead>
                             <tr>
@@ -93,4 +93,4 @@ const ManTareasListado = () => {
     )
 }
 
-export default ManTareasListado;
+export default ManLineasListado;

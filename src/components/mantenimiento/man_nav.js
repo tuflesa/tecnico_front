@@ -15,7 +15,7 @@ const ManNavBar = () => {
                         <NavDropdown title="Mantenimiento" id="basic-nav-dropdown">
                             <NavDropdown.Item href="/mantenimiento">Página de Inicio</NavDropdown.Item>
                             <NavDropdown.Divider />
-                            <NavDropdown.Item href="/mantenimiento/listado_tareas">Listado de Tareas</NavDropdown.Item>
+                            <NavDropdown.Item href="/mantenimiento/listado_tareas">Listado de Trabajos</NavDropdown.Item>
                             <NavDropdown.Divider />
                             <NavDropdown.Item href="/mantenimiento/partes">Lista de partes de trabajo</NavDropdown.Item>
                             <NavDropdown.Item href="/mantenimiento/parte/nuevo">Nuevo parte de trabajo</NavDropdown.Item>                            
