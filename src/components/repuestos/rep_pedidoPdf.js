@@ -8,15 +8,21 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
         uri: empresa.logo,
         method:'GET',
 <<<<<<< HEAD
+<<<<<<< HEAD
         headers: { "Cache-Control": "no-cache" }, 
         body: "" 
     });
 =======
+=======
+>>>>>>> 6cffe02d6a0f372fb08fedb54f012d156e4ea892
         headers:{
             'Authorization': `token ${token['tec-token']}`
             }
     }); */
+<<<<<<< HEAD
 >>>>>>> dev
+=======
+>>>>>>> 6cffe02d6a0f372fb08fedb54f012d156e4ea892
     
     useEffect(() => {
         console.log('esto es lo que recoge');
