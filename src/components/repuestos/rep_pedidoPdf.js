@@ -19,11 +19,6 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
             'Authorization': `token ${token['tec-token']}`
             }
     }); */
-<<<<<<< HEAD
->>>>>>> dev
-=======
->>>>>>> 6cffe02d6a0f372fb08fedb54f012d156e4ea892
-    
     useEffect(() => {
         console.log('esto es lo que recoge');
         console.log(linea);
