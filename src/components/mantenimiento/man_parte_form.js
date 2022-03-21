@@ -610,7 +610,7 @@ const ParteForm = ({parte, setParte}) => {
             <LineaTareaForm     show={show_linea}
                                 handleCloseLinea ={cerrarAddLinea}
                                 tareaAsignadas={parte.tarea}
-                                parte_id={parte.id}
+                                parte={parte}
                                 updateTarea = {updateTarea}
             />
             <LineasPartesMov    show={show_listlineastareas}

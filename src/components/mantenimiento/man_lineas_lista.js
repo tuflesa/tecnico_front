@@ -7,6 +7,7 @@ import { Trash, PencilFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import ManLineasFiltro from './man_lineas_filtro';
 import { filter } from 'd3';
+import {invertirFecha} from '../utilidades/funciones_fecha';
 
 
 const ManLineasListado = () => {
@@ -26,7 +27,6 @@ const ManLineasListado = () => {
                 }
         })
         .then( res => {
-            console.log(res.data);
             setLineas(res.data.sort(function(a, b){
                 if(a.tarea.prioridad < b.tarea.prioridad){
                     return 1;
@@ -61,6 +61,7 @@ const ManLineasListado = () => {
                                 <th>Nombre Tarea</th>
                                 <th>Tipo</th>
                                 <th>Especialidad</th>
+                                <th>Fecha Plan</th>
                                 <th>Fecha Inicio</th>
                                 <th>Fecha Fin</th>
                                 <th>Acciones</th>
@@ -75,10 +76,11 @@ const ManLineasListado = () => {
                                         <td>{linea.tarea.nombre}</td>
                                         <td>{linea.parte.tipo_nombre}</td>
                                         <td>{linea.tarea.especialidad_nombre}</td>
-                                        <td>{linea.fecha_inicio}</td>
-                                        <td>{linea.fecha_fin}</td>
+                                        <td>{linea.fecha_plan? invertirFecha(String(linea.fecha_plan)):''}</td>
+                                        <td>{linea.fecha_inicio?invertirFecha(String(linea.fecha_inicio)):''}</td>
+                                        <td>{linea.fecha_fin?invertirFecha(String(linea.fecha_fin)):''}</td>
                                         <td>                                            
-                                            <Link to={`/mantenimiento/tarea/${linea.id}`}>
+                                            <Link to={`/mantenimiento/linea_tarea/${linea.id}`}>
                                                 <PencilFill className="mr-3 pencil"/>                                                
                                             </Link>                                         
                                         </td>

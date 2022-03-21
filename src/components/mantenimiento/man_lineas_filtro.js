@@ -27,6 +27,8 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
         finalizada:false,
         fecha_inicio_lte:'',
         fecha_inicio_gte:'',
+        fecha_plan_lte:'',
+        fecha_plan_gte:'',
     });
 
     const [especialidades, setEspecialidades] = useState(null);
@@ -186,7 +188,7 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
     }, [token, datos.seccion]);
 
     useEffect(()=>{
-        const filtro1 = `?tarea__nombre__icontains=${datos.nombre_tarea}&parte__nombre__icontains=${datos.nombre_parte}&tarea__especialidad=${datos.especialidad}&tarea__prioridad__lte=${datos.prioridad_menor}&tarea__prioridad__gte=${datos.prioridad_mayor}&parte__tipo=${datos.tipo}&parte__empresa=${user['tec-user'].perfil.empresa.id}&finalizada=${datos.finalizada}&fecha_inicio__lte=${datos.fecha_inicio_lte}&fecha_inicio__gte=${datos.fecha_inicio_gte}`;
+        const filtro1 = `?tarea__nombre__icontains=${datos.nombre_tarea}&parte__nombre__icontains=${datos.nombre_parte}&tarea__especialidad=${datos.especialidad}&tarea__prioridad__lte=${datos.prioridad_menor}&tarea__prioridad__gte=${datos.prioridad_mayor}&parte__tipo=${datos.tipo}&parte__empresa=${user['tec-user'].perfil.empresa.id}&finalizada=${datos.finalizada}&fecha_inicio__lte=${datos.fecha_inicio_lte}&fecha_inicio__gte=${datos.fecha_inicio_gte}&fecha_plan__lte=${datos.fecha_plan_lte}&fecha_plan__gte=${datos.fecha_plan_gte}`;
         let filtro2 = `&parte__empresa__id=${datos.empresa}`;
         if (datos.empresa !== ''){
             filtro2 = filtro2 + `&parte__zona__id=${datos.zona}`;
@@ -199,7 +201,7 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
         }
         const filtro = filtro1 + filtro2;
         actualizaFiltro(filtro);
-    },[ datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.id, datos.nombre_tarea, datos.tipo, datos.especialidad,datos.prioridad_mayor, datos.prioridad_menor, datos.finalizada, datos.nombre_parte, datos.fecha_inicio_gte, datos.fecha_inicio_lte, token]);
+    },[ datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.id, datos.nombre_tarea, datos.tipo, datos.especialidad,datos.prioridad_mayor, datos.prioridad_menor, datos.finalizada, datos.nombre_parte, datos.fecha_inicio_gte, datos.fecha_inicio_lte, datos.fecha_plan_gte, datos.fecha_plan_lte, token]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -351,16 +353,23 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
                 </Row> 
                 <Row>
                     <Col>
-                        <Form.Group controlId="finalizada">
-                            <Form.Label>Tareas Finalizadas</Form.Label>
-                            <Form.Control as="select" 
-                                            value={datos.finalizada}
-                                            name='finalizada'
-                                            onChange={handleInputChange}>
-                                <option key={0} value={''}>Todos</option>
-                                <option key={1} value={true}>Si</option>
-                                <option key={2} value={false}>No</option>
-                            </Form.Control>
+                        <Form.Group controlId="fecha_plan_gte">
+                            <Form.Label>Fecha Plan posterior a:</Form.Label>
+                            <Form.Control type="date" 
+                                        name='fecha_plan_gte' 
+                                        value={datos.fecha_plan_gte}
+                                        onChange={handleInputChange} 
+                                        placeholder="Fecha plan posterior a..." />
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="fecha_plan_lte">
+                            <Form.Label>Fecha Plan Anterior a</Form.Label>
+                            <Form.Control type="date" 
+                                        name='fecha_plan_lte' 
+                                        value={datos.fecha_plan_lte}
+                                        onChange={handleInputChange} 
+                                        placeholder="Fecha plan anterior a..." />
                         </Form.Group>
                     </Col>
                     <Col>
@@ -383,6 +392,8 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
                                         placeholder="Fecha inicio anterior a..." />
                         </Form.Group>
                     </Col>
+                </Row>
+                <Row>
                     <Col>
                         <Form.Group controlId="menorque">
                             <Form.Label>Prioridad menor que:</Form.Label>
@@ -403,6 +414,19 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
                                         onChange={handleInputChange}                                        
                                         placeholder="Prioridad mayor que"
                             />
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="finalizada">
+                            <Form.Label>Tareas Finalizadas</Form.Label>
+                            <Form.Control as="select" 
+                                            value={datos.finalizada}
+                                            name='finalizada'
+                                            onChange={handleInputChange}>
+                                <option key={0} value={''}>Todos</option>
+                                <option key={1} value={true}>Si</option>
+                                <option key={2} value={false}>No</option>
+                            </Form.Control>
                         </Form.Group>
                     </Col>
                 </Row>              

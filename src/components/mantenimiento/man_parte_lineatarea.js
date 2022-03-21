@@ -3,8 +3,9 @@ import { Button, Modal, Form, Col, Row } from 'react-bootstrap';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
+import {invertirFecha} from '../utilidades/funciones_fecha';
 
-const LineaTareaForm = ({show, handleCloseLinea, tareaAsignadas, parte_id, updateTarea}) => {
+const LineaTareaForm = ({show, handleCloseLinea, tareaAsignadas, parte, updateTarea}) => {
     
     const [token] = useCookies(['tec-token']);
     const [especialidades, setEspecialidades] = useState(null);
@@ -16,6 +17,7 @@ const LineaTareaForm = ({show, handleCloseLinea, tareaAsignadas, parte_id, updat
         especialidad: '',
         prioridad: '',
         observaciones: '',
+        fecha_plan: '',
     }); 
 
     useEffect(() => {
@@ -74,10 +76,11 @@ const LineaTareaForm = ({show, handleCloseLinea, tareaAsignadas, parte_id, updat
         .then( res => {
             const newTareaParte = [...listaAsignadas, parseInt(res.data.id)];      
             axios.post(BACKEND_SERVER + `/api/mantenimiento/linea_nueva/`,{
-                parte: parte_id,
+                parte: parte.id,
                 tarea: res.data.id,
                 fecha_inicio:null,
                 fecha_fin:null,
+                fecha_plan: datos.fecha_plan?datos.fecha_plan: parte.fecha_prevista_inicio,
                 finalizada: false,
             },
             {
@@ -86,7 +89,7 @@ const LineaTareaForm = ({show, handleCloseLinea, tareaAsignadas, parte_id, updat
                 }
             })
             .then( r => {
-                axios.patch(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${parte_id}/`,{
+                axios.patch(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${parte.id}/`,{
                     tarea: newTareaParte,
                 },
                 {
@@ -186,7 +189,19 @@ const LineaTareaForm = ({show, handleCloseLinea, tareaAsignadas, parte_id, updat
                                 />
                             </Form.Group>
                         </Col>
-                    </Row>                      
+                    </Row>  
+                    <Row>
+                        <Col>
+                            <Form.Group controlId="fecha_plan">
+                                <Form.Label>Fecha Plan</Form.Label>
+                                <Form.Control type="date" 
+                                            name='fecha_pan' 
+                                            value={datos.fecha_plan}
+                                            onChange={handleInputChange} 
+                                            placeholder="Fecha Plan" />
+                            </Form.Group>
+                        </Col> 
+                    </Row>                    
                 </Form>
             </Modal.Body>
             <Modal.Footer>                    
