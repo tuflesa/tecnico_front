@@ -11,6 +11,7 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
     const [secciones, setSecciones] = useState(null);
     const [zonas, setZonas] = useState(null);
     const [equipos, setEquipos] = useState(null);
+    const [estados, setEstados] = useState(null);
 
     const [datos, setDatos] = useState({
         id: '',
@@ -29,6 +30,7 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
         fecha_inicio_gte:'',
         fecha_plan_lte:'',
         fecha_plan_gte:'',
+        estados:'',
     });
 
     const [especialidades, setEspecialidades] = useState(null);
@@ -188,7 +190,7 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
     }, [token, datos.seccion]);
 
     useEffect(()=>{
-        const filtro1 = `?tarea__nombre__icontains=${datos.nombre_tarea}&parte__nombre__icontains=${datos.nombre_parte}&tarea__especialidad=${datos.especialidad}&tarea__prioridad__lte=${datos.prioridad_menor}&tarea__prioridad__gte=${datos.prioridad_mayor}&parte__tipo=${datos.tipo}&parte__empresa=${user['tec-user'].perfil.empresa.id}&finalizada=${datos.finalizada}&fecha_inicio__lte=${datos.fecha_inicio_lte}&fecha_inicio__gte=${datos.fecha_inicio_gte}&fecha_plan__lte=${datos.fecha_plan_lte}&fecha_plan__gte=${datos.fecha_plan_gte}`;
+        const filtro1 = `?tarea__nombre__icontains=${datos.nombre_tarea}&parte__nombre__icontains=${datos.nombre_parte}&tarea__especialidad=${datos.especialidad}&tarea__prioridad__lte=${datos.prioridad_menor}&tarea__prioridad__gte=${datos.prioridad_mayor}&parte__tipo=${datos.tipo}&parte__empresa=${user['tec-user'].perfil.empresa.id}&finalizada=${datos.finalizada}&fecha_inicio__lte=${datos.fecha_inicio_lte}&fecha_inicio__gte=${datos.fecha_inicio_gte}&fecha_plan__lte=${datos.fecha_plan_lte}&fecha_plan__gte=${datos.fecha_plan_gte}&estado=${datos.estados}`;
         let filtro2 = `&parte__empresa__id=${datos.empresa}`;
         if (datos.empresa !== ''){
             filtro2 = filtro2 + `&parte__zona__id=${datos.zona}`;
@@ -201,7 +203,7 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
         }
         const filtro = filtro1 + filtro2;
         actualizaFiltro(filtro);
-    },[ datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.id, datos.nombre_tarea, datos.tipo, datos.especialidad,datos.prioridad_mayor, datos.prioridad_menor, datos.finalizada, datos.nombre_parte, datos.fecha_inicio_gte, datos.fecha_inicio_lte, datos.fecha_plan_gte, datos.fecha_plan_lte, token]);
+    },[ datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.id, datos.nombre_tarea, datos.tipo, datos.especialidad,datos.prioridad_mayor, datos.prioridad_menor, datos.finalizada, datos.nombre_parte, datos.fecha_inicio_gte, datos.fecha_inicio_lte, datos.fecha_plan_gte, datos.fecha_plan_lte, datos.estados, token]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -209,6 +211,20 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
             [event.target.name] : event.target.value
         })
     }
+
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + '/api/mantenimiento/estados/',{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setEstados(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
 
     return (
         <Container>
@@ -233,8 +249,7 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
                                         name='nombre_tarea' 
                                         value={datos.nombre_tarea}
                                         onChange={handleInputChange}                                        
-                                        placeholder="Nombre Tarea contiene"
-                                        autoFocus/>
+                                        placeholder="Nombre Tarea contiene"/>
                         </Form.Group>
                     </Col>
                     <Col>
@@ -417,18 +432,24 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
                         </Form.Group>
                     </Col>
                     <Col>
-                        <Form.Group controlId="finalizada">
-                            <Form.Label>Tareas Finalizadas</Form.Label>
-                            <Form.Control as="select" 
-                                            value={datos.finalizada}
-                                            name='finalizada'
-                                            onChange={handleInputChange}>
-                                <option key={0} value={''}>Todos</option>
-                                <option key={1} value={true}>Si</option>
-                                <option key={2} value={false}>No</option>
+                        <Form.Group controlId="estados">
+                            <Form.Label>Estado Trabajo</Form.Label>
+                            <Form.Control as="select"  
+                                        name='estados' 
+                                        value={datos.estados}
+                                        onChange={handleInputChange}
+                                        placeholder="Estados">
+                                            <option key={0} value={''}>Todos</option>
+                                        {estados && estados.map( estado => {
+                                            return (
+                                            <option key={estado.id} value={estado.id}>
+                                                {estado.nombre}
+                                            </option>
+                                            )
+                                        })}
                             </Form.Control>
                         </Form.Group>
-                    </Col>
+                    </Col>         
                 </Row>              
             </Form>
         </Container>

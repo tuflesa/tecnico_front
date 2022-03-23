@@ -5,7 +5,7 @@ import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import {invertirFecha} from '../utilidades/funciones_fecha';
 
-const LineaTareaForm = ({show, handleCloseLinea, tareaAsignadas, parte, updateTarea}) => {
+const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateTarea}) => {
     
     const [token] = useCookies(['tec-token']);
     const [especialidades, setEspecialidades] = useState(null);
@@ -82,6 +82,7 @@ const LineaTareaForm = ({show, handleCloseLinea, tareaAsignadas, parte, updateTa
                 fecha_fin:null,
                 fecha_plan: datos.fecha_plan?datos.fecha_plan: parte.fecha_prevista_inicio,
                 finalizada: false,
+                estado: parte.fecha_prevista_inicio? 1:4,
             },
             {
                 headers: {
@@ -214,4 +215,4 @@ const LineaTareaForm = ({show, handleCloseLinea, tareaAsignadas, parte, updateTa
     );
 }
 
-export default LineaTareaForm;
+export default LineaTareaNueva;

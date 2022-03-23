@@ -8,7 +8,7 @@ import { strToArrBuffer } from 'react-data-export/dist/ExcelPlugin/utils/DataUti
 
 const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
     const [token] = useCookies(['tec-token']);
-    //const [especialidades, setEspecialidades] = useState(null);
+    const [estados, setEstados] = useState(null);
 
     const [datos, setDatos] = useState({
         id: linea_tarea.id,
@@ -19,17 +19,40 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
         fecha_plan: linea_tarea.fecha_plan,
         fecha_inicio: linea_tarea.fecha_inicio,
         fecha_fin: linea_tarea.fecha_fin,
+        estado: linea_tarea.estado,
     });
+
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + '/api/mantenimiento/estados/',{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setEstados(res.data.sort(function(a, b){
+                if(a.id > b.id){
+                    return 1;
+                }
+                if(a.id < b.id){
+                    return -1;
+                }
+                return 0;
+            }))
+        })
+        .catch( err => {
+            console.log(err); 
+        })       
+    }, [token]);
     
     const handleInputChange = (event) => {
         setDatos({
             ...datos,
             [event.target.name] : event.target.value
         })
-    }  
-
+    } 
+        
     const actualizarDatos = (event) => {
-        event.preventDefault();
+        event.preventDefault();        
         axios.patch(BACKEND_SERVER + `/api/mantenimiento/tarea_nueva/${linea_tarea.tarea.id}/`, {
             nombre: datos.nombre,
             prioridad: datos.prioridad,
@@ -39,11 +62,13 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                 'Authorization': `token ${token['tec-token']}`
               }     
         })
-        .then( res => {
+        .then( res => {        
+            console.log(datos.fecha_inicio);    
             axios.patch(BACKEND_SERVER + `/api/mantenimiento/linea_nueva/${linea_tarea.id}/`, {
                 fecha_inicio:datos.fecha_inicio,
                 fecha_fin:datos.fecha_fin,
                 fecha_plan:datos.fecha_plan,
+                estado: datos.estado,
             }, {
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
@@ -80,6 +105,26 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                                     />
                                 </Form.Group>
                             </Col> 
+                            <Col>
+                                <Form.Group controlId="estado">
+                                    <Form.Label>Estado</Form.Label>
+                                    <Form.Control as="select"  
+                                                name='estado' 
+                                                value={datos.estado}
+                                                onChange={handleInputChange}
+                                                disabled='true'
+                                                placeholder="Estado">
+                                                    <option key={0} value={''}>Todos</option>
+                                                    {estados && estados.map( estado => {
+                                                    return (
+                                                    <option key={estado.id} value={estado.id}>
+                                                        {estado.nombre}
+                                                    </option>
+                                                    )
+                                                })}                                                
+                                    </Form.Control>
+                                </Form.Group>
+                            </Col>
                             <Col>
                                 <Form.Group id="nombre">
                                     <Form.Label>Nombre</Form.Label>
@@ -120,7 +165,8 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                                                 name='fecha_inicio' 
                                                 value={datos.fecha_inicio}
                                                 onChange={handleInputChange} 
-                                                placeholder="Fecha Inicio" />
+                                                placeholder="Fecha Inicio"
+                                                disabled='true' />
                                 </Form.Group>
                             </Col> 
                             <Col>
@@ -130,7 +176,8 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                                                 name='fecha_fin' 
                                                 value={datos.fecha_fin}
                                                 onChange={handleInputChange} 
-                                                placeholder="Fecha Fin" />
+                                                placeholder="Fecha Fin"
+                                                disabled='true'/>
                                 </Form.Group>
                             </Col> 
                         </Row>                                                  
@@ -149,11 +196,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                         </Row>                     
                         <Form.Row className="justify-content-center">
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button>
-                            <Link to='/mantenimiento/listado_tareas'>
-                                <Button variant="warning" >
-                                    Cancelar / Cerrar
-                                </Button>
-                            </Link>
+                                <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar</Button>
                         </Form.Row>
                     </Form>
                 </Col>

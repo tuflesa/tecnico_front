@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
-import LineaTareaForm from './man_parte_lineatarea';
+import LineaTareaNueva from './man_parte_lineatarea';
 import LineasPartesMov from './man_parte_lineas_mov';
 
 const ParteForm = ({parte, setParte}) => {
@@ -234,10 +234,11 @@ const ParteForm = ({parte, setParte}) => {
     }
 
     const handleInputChange = (event) => {
+        console.log(datos.fecha_prevista_inicio);
         setDatos({
             ...datos,
             [event.target.name] : event.target.value
-        })        
+        })  
     }
 
     const handleDisabled = () => {
@@ -285,6 +286,11 @@ const ParteForm = ({parte, setParte}) => {
     }  
     
     const actualizarDatos = (event) => {
+        console.log('esto vale datos.tarea');
+        console.log(datos.tarea);
+        //Si borramos la fecha, ponemos un null para que no falle el put
+        if(datos.fecha_prevista_inicio===''){datos.fecha_prevista_inicio=null}
+        if(datos.fecha_finalizacion===''){datos.fecha_finalizacion=null}
         event.preventDefault();
         axios.put(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${parte.id}/`, {
             nombre: datos.nombre,
@@ -305,8 +311,7 @@ const ParteForm = ({parte, setParte}) => {
               }     
         })
         .then( res => { 
-            setParte(res.data);
-            //updateTarea();
+            setParte(res.data);      
         })
         .catch(err => { 
             setShowError(true);
@@ -519,7 +524,7 @@ const ParteForm = ({parte, setParte}) => {
                             </Col> 
                             <Col>
                                 <Form.Group controlId="fecha_prevista_inicio">
-                                    <Form.Label>Fecha Prevista Inicio (*)</Form.Label>
+                                    <Form.Label>Fecha Prevista Inicio</Form.Label>
                                     <Form.Control type="date" 
                                                 name='fecha_prevista_inicio' 
                                                 value={datos.fecha_prevista_inicio}
@@ -607,7 +612,7 @@ const ParteForm = ({parte, setParte}) => {
                     </Form.Row>                                                
                 </React.Fragment> 
             : null} 
-            <LineaTareaForm     show={show_linea}
+            <LineaTareaNueva     show={show_linea}
                                 handleCloseLinea ={cerrarAddLinea}
                                 tareaAsignadas={parte.tarea}
                                 parte={parte}

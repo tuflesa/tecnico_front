@@ -4,6 +4,8 @@ import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { Button, Row, Form, Modal, Col, Table } from 'react-bootstrap';
 import {invertirFecha} from '../utilidades/funciones_fecha';
+import { PencilFill } from 'react-bootstrap-icons';
+import { Link } from 'react-router-dom';
 
 const LineasPartesMov = ({tarea, handleCloseList, show, parte}) => {
     const [token] = useCookies(['tec-token']);
@@ -70,6 +72,11 @@ const LineasPartesMov = ({tarea, handleCloseList, show, parte}) => {
                                                 <td>{lista.fecha_plan?invertirFecha(String(lista.fecha_plan)): ''}</td>
                                                 <td>{lista.fecha_inicio?invertirFecha(String(lista.fecha_inicio)):'Tarea NO iniciada'}</td> 
                                                 <td>{lista.fecha_fin?invertirFecha(String(lista.fecha_fin)):'Tarea NO finalizada'}</td>
+                                                <td>                                            
+                                                    <Link to={`/mantenimiento/linea_tarea/${lista.id}`}>
+                                                        <PencilFill className="mr-3 pencil"/>                                                
+                                                    </Link>                                         
+                                                </td>
                                             </tr>
                                         )})
                                     }                                                                       
