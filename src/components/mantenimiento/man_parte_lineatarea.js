@@ -17,7 +17,8 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateT
         especialidad: '',
         prioridad: '',
         observaciones: '',
-        fecha_plan: '',
+        fecha_plan: null,
+        estado: parte.fecha_prevista_inicio!==null?1:4,
     }); 
 
     useEffect(() => {
@@ -62,6 +63,9 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateT
     } 
 
     const handlerGuardar = () => {
+        if(datos.fecha_plan!==null){
+            datos.estado=1;
+        }
         axios.post(BACKEND_SERVER + `/api/mantenimiento/tarea_nueva/`,{
             nombre: datos.nombre,
             especialidad: datos.especialidad,
@@ -82,7 +86,7 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateT
                 fecha_fin:null,
                 fecha_plan: datos.fecha_plan?datos.fecha_plan: parte.fecha_prevista_inicio,
                 finalizada: false,
-                estado: parte.fecha_prevista_inicio? 1:4,
+                estado: datos.estado,
             },
             {
                 headers: {
@@ -105,6 +109,7 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateT
                     datos.especialidad='';
                     datos.prioridad='';
                     datos.observaciones='';
+                    datos.fecha_plan=null;
                 })
                 .catch( err => {
                     console.log(err);            
@@ -196,7 +201,7 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateT
                             <Form.Group controlId="fecha_plan">
                                 <Form.Label>Fecha Plan</Form.Label>
                                 <Form.Control type="date" 
-                                            name='fecha_pan' 
+                                            name='fecha_plan' 
                                             value={datos.fecha_plan}
                                             onChange={handleInputChange} 
                                             placeholder="Fecha Plan" />

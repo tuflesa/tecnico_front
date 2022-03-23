@@ -42,7 +42,7 @@ const ParteForm = ({parte, setParte}) => {
         tipo_periodo: parte.id? parte.tipo_periodo : '',
         periodo: parte.id? parte.periodo : 0,
         tarea: parte.tarea,
-    });        
+    });
   
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/mantenimiento/tipo_tarea/',{
@@ -234,7 +234,6 @@ const ParteForm = ({parte, setParte}) => {
     }
 
     const handleInputChange = (event) => {
-        console.log(datos.fecha_prevista_inicio);
         setDatos({
             ...datos,
             [event.target.name] : event.target.value
@@ -286,8 +285,6 @@ const ParteForm = ({parte, setParte}) => {
     }  
     
     const actualizarDatos = (event) => {
-        console.log('esto vale datos.tarea');
-        console.log(datos.tarea);
         //Si borramos la fecha, ponemos un null para que no falle el put
         if(datos.fecha_prevista_inicio===''){datos.fecha_prevista_inicio=null}
         if(datos.fecha_finalizacion===''){datos.fecha_finalizacion=null}
@@ -311,7 +308,8 @@ const ParteForm = ({parte, setParte}) => {
               }     
         })
         .then( res => { 
-            setParte(res.data);      
+            setParte(res.data);   
+            updateTarea();   
         })
         .catch(err => { 
             setShowError(true);

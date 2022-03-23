@@ -50,6 +50,25 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
             [event.target.name] : event.target.value
         })
     } 
+
+    const handleInputChangeF = (event) => {  
+        if(datos.fecha_fin!==null){
+            datos.estado=3;
+        }
+        else if(datos.fecha_inicio!==null){
+            datos.estado=2;
+        }
+        else if(datos.fecha_plan!==null){
+            datos.estado=1;
+        }
+        else{
+            datos.estado=4;
+        }
+        setDatos({
+            ...datos,
+            [event.target.name] : event.target.value
+        })
+    }
         
     const actualizarDatos = (event) => {
         event.preventDefault();        
@@ -62,8 +81,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                 'Authorization': `token ${token['tec-token']}`
               }     
         })
-        .then( res => {        
-            console.log(datos.fecha_inicio);    
+        .then( res => {  
             axios.patch(BACKEND_SERVER + `/api/mantenimiento/linea_nueva/${linea_tarea.id}/`, {
                 fecha_inicio:datos.fecha_inicio,
                 fecha_fin:datos.fecha_fin,
@@ -154,7 +172,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                                     <Form.Control type="date" 
                                                 name='fecha_plan' 
                                                 value={datos.fecha_plan}
-                                                onChange={handleInputChange} 
+                                                onChange={handleInputChangeF} 
                                                 placeholder="Fecha Plan" />
                                 </Form.Group>
                             </Col> 

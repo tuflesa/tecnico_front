@@ -185,11 +185,11 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
 
     useEffect(()=>{
         const filtro1 = `?nombre__icontains=${datos.nombre}&tipo=${datos.tipotarea}&observaciones__icontains=${datos.observaciones}&creado_nombre=${datos.creado_nombre}&finalizado=${datos.finalizado}&fecha_prevista_inicio__lte=${datos.fecha_prevista_inicio_lte}&fecha_prevista_inicio__gte=${datos.fecha_prevista_inicio_gte}`;
-        let filtro2 = `&equipo__seccion__zona__empresa__id=${datos.empresa}`;
+        let filtro2 = `&empresa__id=${datos.empresa}`;
         if (datos.empresa !== ''){
-            filtro2 = filtro2 + `&equipo__seccion__zona__id=${datos.zona}`;
+            filtro2 = filtro2 + `&zona__id=${datos.zona}`;
             if (datos.zona !== ''){
-                filtro2 = filtro2 + `&equipo__seccion__id=${datos.seccion}`;
+                filtro2 = filtro2 + `&seccion__id=${datos.seccion}`;
                 if (datos.seccion !== ''){
                     filtro2 = filtro2 + `&equipo__id=${datos.equipo}`
                 }
@@ -197,7 +197,7 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
         }
         const filtro = filtro1 + filtro2;
         actualizaFiltro(filtro);
-    },[datos.id, datos.nombre, datos.tipotarea, datos.observaciones, datos.creado_nombre, datos.finalizado, , datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.fecha_prevista_inicio_gte, datos.fecha_prevista_inicio_lte, token]);
+    },[datos.id, datos.nombre, datos.tipotarea, datos.observaciones, datos.creado_nombre, datos.finalizado, datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.fecha_prevista_inicio_gte, datos.fecha_prevista_inicio_lte, token]);
 
     const handleInputChange = (event) => {
         setDatos({
