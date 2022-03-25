@@ -205,13 +205,6 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
         actualizaFiltro(filtro);
     },[ datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.id, datos.nombre_tarea, datos.tipo, datos.especialidad,datos.prioridad_mayor, datos.prioridad_menor, datos.finalizada, datos.nombre_parte, datos.fecha_inicio_gte, datos.fecha_inicio_lte, datos.fecha_plan_gte, datos.fecha_plan_lte, datos.estados, token]);
 
-    const handleInputChange = (event) => {
-        setDatos({
-            ...datos,
-            [event.target.name] : event.target.value
-        })
-    }
-
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/mantenimiento/estados/',{
             headers: {
@@ -225,6 +218,13 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
             console.log(err);
         });
     }, [token]);
+
+    const handleInputChange = (event) => {
+        setDatos({
+            ...datos,
+            [event.target.name] : event.target.value
+        })
+    }
 
     return (
         <Container>

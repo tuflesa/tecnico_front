@@ -43,6 +43,20 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
             console.log(err); 
         })       
     }, [token]);
+
+    const updateTarea = () => {
+        linea_tarea.id && axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/${linea_tarea.id}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setLineaTarea(res.data); 
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }
     
     const handleInputChange = (event) => {
         setDatos({
@@ -50,27 +64,13 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
             [event.target.name] : event.target.value
         })
     } 
-
-    const handleInputChangeF = (event) => {  
-        if(datos.fecha_fin!==null){
-            datos.estado=3;
-        }
-        else if(datos.fecha_inicio!==null){
-            datos.estado=2;
-        }
-        else if(datos.fecha_plan!==null){
-            datos.estado=1;
-        }
-        else{
-            datos.estado=4;
-        }
-        setDatos({
-            ...datos,
-            [event.target.name] : event.target.value
-        })
-    }
         
     const actualizarDatos = (event) => {
+        if(datos.fecha_plan===''){datos.fecha_plan=null;}
+        if(datos.fecha_fin!==null){datos.estado=3;}
+        else if(datos.fecha_inicio!==null){datos.estado=2;}
+        else if(datos.fecha_plan!==null){datos.estado=1;}
+        else if(datos.fecha_plan===null){datos.estado=4;}
         event.preventDefault();        
         axios.patch(BACKEND_SERVER + `/api/mantenimiento/tarea_nueva/${linea_tarea.tarea.id}/`, {
             nombre: datos.nombre,
@@ -92,14 +92,22 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                     'Authorization': `token ${token['tec-token']}`
                   }     
             })
-            .then( res => { 
-                console.log(res.data);
+            .then( res => {
+                updateTarea();
+                datos.nombre= '';
+                datos.especialidad='';
+                datos.prioridad='';
+                datos.observaciones='';
+                datos.fecha_plan=null;
+                datos.fecha_inicio=null;
+                datos.fecha_fin=null;
+                datos.estado='';
             })
             .catch(err => { console.log(err);})
         })
         .catch(err => { console.log(err);})
 
-    }    
+    }
 
     return (
         <Container>
@@ -168,12 +176,13 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                         <Row>
                             <Col>
                                 <Form.Group controlId="fecha_plan">
-                                    <Form.Label>Fecha Plan</Form.Label>
+                                    <Form.Label>Fecha Plan{linea_tarea.parte.fecha_prevista_inicio===null?' (Parte pendiente)':''}</Form.Label>
                                     <Form.Control type="date" 
                                                 name='fecha_plan' 
                                                 value={datos.fecha_plan}
-                                                onChange={handleInputChangeF} 
-                                                placeholder="Fecha Plan" />
+                                                onChange={handleInputChange} 
+                                                placeholder="Fecha Plan"
+                                                disabled={linea_tarea.parte.fecha_prevista_inicio===null?true:false} />
                                 </Form.Group>
                             </Col> 
                             <Col>

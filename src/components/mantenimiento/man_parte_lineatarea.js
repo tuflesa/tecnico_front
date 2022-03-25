@@ -18,7 +18,8 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateT
         prioridad: '',
         observaciones: '',
         fecha_plan: null,
-        estado: parte.fecha_prevista_inicio!==null?1:4,
+        estado: parte.fecha_prevista_inicio?1:4,
+        //estado: '',
     }); 
 
     useEffect(() => {
@@ -60,12 +61,9 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateT
 
     const handlerCancelar = () => {      
         handleCloseLinea();
-    } 
+    }    
 
     const handlerGuardar = () => {
-        if(datos.fecha_plan!==null){
-            datos.estado=1;
-        }
         axios.post(BACKEND_SERVER + `/api/mantenimiento/tarea_nueva/`,{
             nombre: datos.nombre,
             especialidad: datos.especialidad,
@@ -78,7 +76,7 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateT
             }
         })
         .then( res => {
-            const newTareaParte = [...listaAsignadas, parseInt(res.data.id)];      
+            const newTareaParte = [...listaAsignadas, parseInt(res.data.id)];
             axios.post(BACKEND_SERVER + `/api/mantenimiento/linea_nueva/`,{
                 parte: parte.id,
                 tarea: res.data.id,
@@ -199,12 +197,13 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateT
                     <Row>
                         <Col>
                             <Form.Group controlId="fecha_plan">
-                                <Form.Label>Fecha Plan</Form.Label>
+                                <Form.Label>Fecha Plan{parte.fecha_prevista_inicio===null?' (Parte Pendiente)':''}</Form.Label>
                                 <Form.Control type="date" 
                                             name='fecha_plan' 
                                             value={datos.fecha_plan}
                                             onChange={handleInputChange} 
-                                            placeholder="Fecha Plan" />
+                                            placeholder="Fecha Plan" 
+                                            disabled={parte.fecha_prevista_inicio===null?true:false}/>
                             </Form.Group>
                         </Col> 
                     </Row>                    

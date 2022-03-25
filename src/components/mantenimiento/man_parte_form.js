@@ -24,6 +24,7 @@ const ParteForm = ({parte, setParte}) => {
     const [show_error, setShowError] = useState(false);
     const [show_listlineastareas, setShowListLineasTareas] = useState(false);
     const [lineaLineasTareas, setListLineasTareas] = useState(null);
+    const [cambio_fecha, setCambioFecha] = useState(false);
 
     const [datos, setDatos] = useState({
         id: parte.id ? parte.id : null,
@@ -73,8 +74,6 @@ const ParteForm = ({parte, setParte}) => {
               }
         })
         .then( res => { 
-            //setLineasParte(res.data.tarea);
-           
             setLineasParte(res.data.tarea.sort(function(a, b){
                 if(a.prioridad < b.prioridad){
                     return 1;
@@ -83,7 +82,7 @@ const ParteForm = ({parte, setParte}) => {
                     return -1;
                 }
                 return 0;
-            }))
+            }))            
         })
         .catch( err => {
             console.log(err); 
@@ -240,6 +239,15 @@ const ParteForm = ({parte, setParte}) => {
         })  
     }
 
+    const handleInputChangeF = (event) => {
+        setCambioFecha(true);
+        setDatos({
+            ...datos,
+            [event.target.name] : event.target.value
+        })  
+    }
+    
+    //desactivamos los tipos de periodo y los periodos si no es opcion preventivo
     const handleDisabled = () => {
         if (datos.tipo !== '1') {
             datos.periodo = 0;
@@ -276,14 +284,56 @@ const ParteForm = ({parte, setParte}) => {
         })
         .then( res => { 
             setParte(res.data);
-            //updateTarea(res.data.id);
         })
         .catch(err => { 
             setShowError(true);
             console.log(err);
         })
-    }  
-    
+    } 
+
+    //actualiza el estado y la fecha de la linea si cambia la fecha_prevista_inicio del parte
+    const actualizarLinea = () => { 
+        var fecha=null;
+        var estado='';
+        if(parte.fecha_prevista_inicio===null&& datos.fecha_prevista_inicio!==null){
+            fecha=datos.fecha_prevista_inicio;
+            estado=1;
+        }
+        else if(parte.fecha_prevista_inicio!==null && datos.fecha_prevista_inicio===null){
+            fecha=null;
+            estado=4;
+        }
+        else{
+            estado=0;
+        }
+        if(estado!==0){
+            axios.get(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_mov/?parte=${parte.id}`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }
+            })
+            .then( res => {
+                for(var x=0;x<res.data.length;x++){
+                    axios.patch(BACKEND_SERVER + `/api/mantenimiento/linea_nueva/${res.data[x].id}/`, {
+                        fecha_plan: fecha,
+                        estado: estado,
+                    }, {
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                        }     
+                    })
+                    .then( res => {
+                        updateTarea();
+                    })
+                    .catch(err => { console.log(err);})
+                }         
+            })
+            .catch( err => {
+                console.log(err);
+            });
+        }
+    }
+
     const actualizarDatos = (event) => {
         //Si borramos la fecha, ponemos un null para que no falle el put
         if(datos.fecha_prevista_inicio===''){datos.fecha_prevista_inicio=null}
@@ -308,7 +358,10 @@ const ParteForm = ({parte, setParte}) => {
               }     
         })
         .then( res => { 
-            setParte(res.data);   
+            if(cambio_fecha){
+                actualizarLinea();
+            }
+            setParte(res.data); 
             updateTarea();   
         })
         .catch(err => { 
@@ -526,7 +579,7 @@ const ParteForm = ({parte, setParte}) => {
                                     <Form.Control type="date" 
                                                 name='fecha_prevista_inicio' 
                                                 value={datos.fecha_prevista_inicio}
-                                                onChange={handleInputChange} 
+                                                onChange={handleInputChangeF} 
                                                 placeholder="Fecha prevista inicio" />
                                 </Form.Group>
                             </Col>                         
