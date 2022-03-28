@@ -25,6 +25,7 @@ const ParteForm = ({parte, setParte}) => {
     const [show_listlineastareas, setShowListLineasTareas] = useState(false);
     const [lineaLineasTareas, setListLineasTareas] = useState(null);
     const [cambio_fecha, setCambioFecha] = useState(false);
+    const [estados, setEstados] = useState(null);
 
     const [datos, setDatos] = useState({
         id: parte.id ? parte.id : null,
@@ -43,7 +44,30 @@ const ParteForm = ({parte, setParte}) => {
         tipo_periodo: parte.id? parte.tipo_periodo : '',
         periodo: parte.id? parte.periodo : 0,
         tarea: parte.tarea,
+        estado: parte.estado,
     });
+
+    useEffect(()=>{
+        setDatos({
+            id: parte.id ? parte.id : null,
+            nombre: parte.nombre,
+            tipo: parte.tipo,
+            creado_por: parte.creado_por,
+            finalizado: parte? parte.finalizado : false,
+            observaciones: parte.observaciones? parte.observaciones : '',
+            fecha_creacion: parte.id ? parte.fecha_creacion :(hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
+            fecha_prevista_inicio: parte? parte.fecha_prevista_inicio : '',
+            fecha_finalizacion: parte? parte.fecha_finalizacion : '',
+            empresa: parte.empresa,
+            zona: parte? parte.zona : '',
+            seccion: parte? parte.seccion : '',
+            equipo: parte? parte.equipo : '',
+            tipo_periodo: parte.id? parte.tipo_periodo : '',
+            periodo: parte.id? parte.periodo : 0,
+            tarea: parte.tarea,
+            estado: parte.estado,
+        });
+    },[parte]);
   
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/mantenimiento/tipo_tarea/',{
@@ -218,15 +242,37 @@ const ParteForm = ({parte, setParte}) => {
         .catch( err => {
             console.log(err); 
         })       
-    }, [token]);   
+    }, [token]);  
     
-    const updateTarea = () => {
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + '/api/mantenimiento/estados/',{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setEstados(res.data.sort(function(a, b){
+                if(a.id > b.id){
+                    return 1;
+                }
+                if(a.id < b.id){
+                    return -1;
+                }
+                return 0;
+            }))
+        })
+        .catch( err => {
+            console.log(err); 
+        })       
+    }, [token]);
+    
+    const updateParte = () => {
         parte.id && axios.get(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo_detalle/${parte.id}/`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }     
         })
-        .then( res => { 
+        .then( res => {
             setParte(res.data);
         })
         .catch(err => { console.log(err);})
@@ -277,6 +323,7 @@ const ParteForm = ({parte, setParte}) => {
             seccion: datos.seccion,
             tipo_periodo: datos.tipo==='1'? datos.tipo_periodo : '',
             periodo: datos.tipo==='1'? datos.periodo : 0,
+            estado: datos.fecha_prevista_inicio?1:4,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -323,7 +370,7 @@ const ParteForm = ({parte, setParte}) => {
                         }     
                     })
                     .then( res => {
-                        updateTarea();
+                        updateParte();
                     })
                     .catch(err => { console.log(err);})
                 }         
@@ -352,6 +399,7 @@ const ParteForm = ({parte, setParte}) => {
             equipo: datos.equipo,
             tipo_periodo: datos.tipo==='1'? datos.tipo_periodo : '',
             periodo: datos.tipo==='1'? datos.periodo : 0,
+            estado: datos.fecha_prevista_inicio?1:4,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -362,7 +410,7 @@ const ParteForm = ({parte, setParte}) => {
                 actualizarLinea();
             }
             setParte(res.data); 
-            updateTarea();   
+            updateParte();   
         })
         .catch(err => { 
             setShowError(true);
@@ -420,6 +468,26 @@ const ParteForm = ({parte, setParte}) => {
                                                     name='creado_nombre' 
                                                     disabled
                                                     value={datos.creado_por.get_full_name}/>
+                                </Form.Group>
+                            </Col>
+                            <Col>
+                                <Form.Group controlId="estado">
+                                    <Form.Label>Estado</Form.Label>
+                                    <Form.Control as="select"  
+                                                name='estado' 
+                                                value={datos.estado}
+                                                onChange={handleInputChange}
+                                                disabled='true'
+                                                placeholder="Estado">
+                                                    <option key={0} value={''}>Todos</option>
+                                                    {estados && estados.map( estado => {
+                                                    return (
+                                                    <option key={estado.id} value={estado.id}>
+                                                        {estado.nombre}
+                                                    </option>
+                                                    )
+                                                })}                                                
+                                    </Form.Control>
                                 </Form.Group>
                             </Col>           
                         </Row>
@@ -667,7 +735,7 @@ const ParteForm = ({parte, setParte}) => {
                                 handleCloseLinea ={cerrarAddLinea}
                                 tareaAsignadas={parte.tarea}
                                 parte={parte}
-                                updateTarea = {updateTarea}
+                                updateParte = {updateParte}
             />
             <LineasPartesMov    show={show_listlineastareas}
                                 handleCloseList ={cerrarAddLineaPartes}

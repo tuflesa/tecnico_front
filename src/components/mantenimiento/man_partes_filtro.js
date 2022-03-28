@@ -14,6 +14,7 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
     const [secciones, setSecciones] = useState(null);
     const [zonas, setZonas] = useState(null);
     const [equipos, setEquipos] = useState(null);
+    const [estados, setEstados] = useState(null);
 
     const [datos, setDatos] = useState({
         id: '',
@@ -28,6 +29,7 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
         equipo: '',
         fecha_prevista_inicio_lte:'',
         fecha_prevista_inicio_gte:'',
+        estados: '',
     });    
 
     useEffect(() => {
@@ -183,8 +185,22 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
         }
     }, [token, datos.seccion]);
 
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + '/api/mantenimiento/estados/',{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setEstados(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
+
     useEffect(()=>{
-        const filtro1 = `?nombre__icontains=${datos.nombre}&tipo=${datos.tipotarea}&observaciones__icontains=${datos.observaciones}&creado_por=${datos.creado_por}&finalizado=${datos.finalizado}&fecha_prevista_inicio__lte=${datos.fecha_prevista_inicio_lte}&fecha_prevista_inicio__gte=${datos.fecha_prevista_inicio_gte}`;
+        const filtro1 = `?nombre__icontains=${datos.nombre}&tipo=${datos.tipotarea}&observaciones__icontains=${datos.observaciones}&creado_por=${datos.creado_por}&finalizado=${datos.finalizado}&fecha_prevista_inicio__lte=${datos.fecha_prevista_inicio_lte}&fecha_prevista_inicio__gte=${datos.fecha_prevista_inicio_gte}&estado=${datos.estados}`;
         let filtro2 = `&empresa__id=${datos.empresa}`;
         if (datos.empresa !== ''){
             filtro2 = filtro2 + `&zona__id=${datos.zona}`;
@@ -197,7 +213,7 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
         }
         const filtro = filtro1 + filtro2;
         actualizaFiltro(filtro);
-    },[datos.id, datos.nombre, datos.tipotarea, datos.observaciones, datos.creado_por, datos.finalizado, datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.fecha_prevista_inicio_gte, datos.fecha_prevista_inicio_lte, token]);
+    },[datos.id, datos.nombre, datos.tipotarea, datos.observaciones, datos.creado_por, datos.finalizado, datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.fecha_prevista_inicio_gte, datos.fecha_prevista_inicio_lte, datos.estados, token]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -368,15 +384,21 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
                         </Form.Group>
                     </Col>
                     <Col>
-                        <Form.Group controlId="finalizado">
-                            <Form.Label>Finalizado</Form.Label>
-                            <Form.Control as="select" 
-                                            value={datos.finalizado}
-                                            name='finalizado'
-                                            onChange={handleInputChange}>
-                                <option key={0} value={''}>Todos</option>
-                                <option key={1} value={true}>Si</option>
-                                <option key={2} value={false}>No</option>
+                        <Form.Group controlId="estados">
+                            <Form.Label>Estado del Parte</Form.Label>
+                            <Form.Control as="select"  
+                                        name='estados' 
+                                        value={datos.estados}
+                                        onChange={handleInputChange}
+                                        placeholder="Estados">
+                                            <option key={0} value={''}>Todos</option>
+                                        {estados && estados.map( estado => {
+                                            return (
+                                            <option key={estado.id} value={estado.id}>
+                                                {estado.nombre}
+                                            </option>
+                                            )
+                                        })}
                             </Form.Control>
                         </Form.Group>
                     </Col>

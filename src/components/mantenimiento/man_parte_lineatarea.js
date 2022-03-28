@@ -5,7 +5,7 @@ import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import {invertirFecha} from '../utilidades/funciones_fecha';
 
-const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateTarea}) => {
+const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateParte}) => {
     
     const [token] = useCookies(['tec-token']);
     const [especialidades, setEspecialidades] = useState(null);
@@ -101,7 +101,7 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateT
                     }
                 })
                 .then( re => {
-                    updateTarea();
+                    updateParte();
                     handlerCancelar(); 
                     datos.nombre='';
                     datos.especialidad='';
