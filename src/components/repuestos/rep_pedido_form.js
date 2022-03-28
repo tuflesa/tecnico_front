@@ -678,7 +678,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                                             {datos.lineas_pedido && datos.lineas_pedido.map( linea => {
                                                 return (
                                                     <tr key={linea.id}>
-                                                        <td>{linea.repuesto.nombre}</td>
+                                                        <td>{linea.repuesto.nombre + ' - ' + linea.repuesto.fabricante + ' - ' + linea.repuesto.modelo}</td>
                                                         <td>{linea.cantidad}</td>
                                                         <td>{linea.repuesto.unidad_nombre}</td>
                                                         <td>{linea.precio + '€'}</td>
