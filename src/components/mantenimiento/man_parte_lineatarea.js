@@ -84,7 +84,7 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateT
                 fecha_fin:null,
                 fecha_plan: datos.fecha_plan?datos.fecha_plan: parte.fecha_prevista_inicio,
                 finalizada: false,
-                estado: datos.estado,
+                estado: parte.fecha_prevista_inicio?1:4,
             },
             {
                 headers: {

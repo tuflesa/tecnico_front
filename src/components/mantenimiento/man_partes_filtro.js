@@ -19,7 +19,7 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
         id: '',
         nombre: '',
         tipotarea: '',
-        creado_nombre: '',
+        creado_por: '',
         observaciones: '',
         finalizado: false,
         empresa: user['tec-user'].perfil.empresa.id,
@@ -184,7 +184,7 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
     }, [token, datos.seccion]);
 
     useEffect(()=>{
-        const filtro1 = `?nombre__icontains=${datos.nombre}&tipo=${datos.tipotarea}&observaciones__icontains=${datos.observaciones}&creado_nombre=${datos.creado_nombre}&finalizado=${datos.finalizado}&fecha_prevista_inicio__lte=${datos.fecha_prevista_inicio_lte}&fecha_prevista_inicio__gte=${datos.fecha_prevista_inicio_gte}`;
+        const filtro1 = `?nombre__icontains=${datos.nombre}&tipo=${datos.tipotarea}&observaciones__icontains=${datos.observaciones}&creado_por=${datos.creado_por}&finalizado=${datos.finalizado}&fecha_prevista_inicio__lte=${datos.fecha_prevista_inicio_lte}&fecha_prevista_inicio__gte=${datos.fecha_prevista_inicio_gte}`;
         let filtro2 = `&empresa__id=${datos.empresa}`;
         if (datos.empresa !== ''){
             filtro2 = filtro2 + `&zona__id=${datos.zona}`;
@@ -197,7 +197,7 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
         }
         const filtro = filtro1 + filtro2;
         actualizaFiltro(filtro);
-    },[datos.id, datos.nombre, datos.tipotarea, datos.observaciones, datos.creado_nombre, datos.finalizado, datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.fecha_prevista_inicio_gte, datos.fecha_prevista_inicio_lte, token]);
+    },[datos.id, datos.nombre, datos.tipotarea, datos.observaciones, datos.creado_por, datos.finalizado, datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.fecha_prevista_inicio_gte, datos.fecha_prevista_inicio_lte, token]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -242,11 +242,11 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
                         </Form.Group>
                     </Col>                    
                     <Col>
-                        <Form.Group controlId="creado_nombre">
+                        <Form.Group controlId="creado_por">
                             <Form.Label>Creado Por</Form.Label>
                             <Form.Control as="select"  
-                                        name='creado_nombre' 
-                                        value={datos.creado_nombre}
+                                        name='creado_por' 
+                                        value={datos.creado_por}
                                         onChange={handleInputChange}
                                         placeholder="Creado por">
                                         <option key={0} value={''}>Todas</option>    
@@ -264,7 +264,7 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
                         <Form.Group controlId="fecha_prevista_inicio_gte">
                             <Form.Label>Fecha Prevista Posterior a</Form.Label>
                             <Form.Control type="date" 
-                                        name='fecha_creacion_gte' 
+                                        name='fecha_prevista_inicio_gte' 
                                         value={datos.fecha_prevista_inicio_gte}
                                         onChange={handleInputChange} 
                                         placeholder="Fecha creación posterior a..." />
