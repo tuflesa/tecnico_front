@@ -165,7 +165,7 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
                                     </Form.Control>
                                 </Form.Group>
                                 <Form.Group controlId="repuesto">
-                                    <Form.Label>Repuesto</Form.Label>
+                                    <Form.Label>Modelo</Form.Label>
                                     <Form.Control as="select"  
                                                 name='repuesto' 
                                                 value={datos.repuesto}
