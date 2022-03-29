@@ -189,8 +189,31 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
         }
     }, [token, datos.seccion]);
 
+    
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + '/api/mantenimiento/estados/',{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setEstados(res.data.sort(function(a, b){
+                if(a.nombre > b.nombre){
+                    return 1;
+                }
+                if(a.nombre < b.nombre){
+                    return -1;
+                }
+                return 0;
+            }))
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
+
     useEffect(()=>{
-        const filtro1 = `?tarea__nombre__icontains=${datos.nombre_tarea}&parte__nombre__icontains=${datos.nombre_parte}&tarea__especialidad=${datos.especialidad}&tarea__prioridad__lte=${datos.prioridad_menor}&tarea__prioridad__gte=${datos.prioridad_mayor}&parte__tipo=${datos.tipo}&parte__empresa=${user['tec-user'].perfil.empresa.id}&finalizada=${datos.finalizada}&fecha_inicio__lte=${datos.fecha_inicio_lte}&fecha_inicio__gte=${datos.fecha_inicio_gte}&fecha_plan__lte=${datos.fecha_plan_lte}&fecha_plan__gte=${datos.fecha_plan_gte}&estado=${datos.estados}`;
+        const filtro1 = `?tarea__nombre__icontains=${datos.nombre_tarea}&parte__nombre__icontains=${datos.nombre_parte}&tarea__especialidad=${datos.especialidad}&tarea__prioridad__lte=${datos.prioridad_menor}&tarea__prioridad__gte=${datos.prioridad_mayor}&parte__tipo=${datos.tipo}&parte__empresa=${user['tec-user'].perfil.empresa.id}&finalizada=${datos.finalizada}&fecha_inicio__lte=${datos.fecha_inicio_lte}&fecha_inicio__gte=${datos.fecha_inicio_gte}&fecha_plan__lte=${datos.fecha_plan_lte}&fecha_plan__gte=${datos.fecha_plan_gte}&estado=${datos.estados==='5'?'':datos.estados}`;
         let filtro2 = `&parte__empresa__id=${datos.empresa}`;
         if (datos.empresa !== ''){
             filtro2 = filtro2 + `&parte__zona__id=${datos.zona}`;
@@ -201,25 +224,19 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
                 }
             }
         }
-        const filtro = filtro1 + filtro2;
-        actualizaFiltro(filtro);
+        const filtro = filtro1 + filtro2 ;
+        const activos = datos.estados;
+        actualizaFiltro(filtro, activos);
     },[ datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.id, datos.nombre_tarea, datos.tipo, datos.especialidad,datos.prioridad_mayor, datos.prioridad_menor, datos.finalizada, datos.nombre_parte, datos.fecha_inicio_gte, datos.fecha_inicio_lte, datos.fecha_plan_gte, datos.fecha_plan_lte, datos.estados, token]);
 
-    useEffect(() => {
-        axios.get(BACKEND_SERVER + '/api/mantenimiento/estados/',{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            setEstados(res.data);
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    }, [token]);
-
     const handleInputChange = (event) => {
+        setDatos({
+            ...datos,
+            [event.target.name] : event.target.value
+        })
+    }
+
+    const handleInputChangeE = (event) => {
         setDatos({
             ...datos,
             [event.target.name] : event.target.value
@@ -437,7 +454,7 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
                             <Form.Control as="select"  
                                         name='estados' 
                                         value={datos.estados}
-                                        onChange={handleInputChange}
+                                        onChange={handleInputChangeE}
                                         placeholder="Estados">
                                             <option key={0} value={''}>Todos</option>
                                         {estados && estados.map( estado => {

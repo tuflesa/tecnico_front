@@ -7,16 +7,15 @@ import { Trash, PencilFill, Receipt } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import ManPartesFiltro from './man_partes_filtro';
 
-
-
 const ManListaPartes = () => {
     const [token] = useCookies(['tec-token']);
-    const [user] = useCookies(['tec-user']);
     
-    const [partes, SetPartes]  = useState(null);
+    const [partes, setPartes]  = useState(null);
     const [filtro, setFiltro] = useState('');
+    const [activos, setActivos] = useState(null);
 
-    const actualizaFiltro = str => {
+    const actualizaFiltro = (str, act) => {
+        setActivos(act);
         setFiltro(str);
     }
     
@@ -27,20 +26,44 @@ const ManListaPartes = () => {
                 }
         })
         .then( res => {
-            SetPartes(res.data.sort(function(a, b){
-                if(a.nombre > b.nombre){
-                    return 1;
-                }
-                if(a.nombre < b.nombre){
-                    return -1;
-                }
-                return 0;
-            }))
+            //variable para filtrar en Activos las 2 opciones
+            if(activos==='5'){
+                //listaFil recoge toda las lineas para luego filtrarlas.
+                const listaFil=res.data;
+                //cogemos de todas solo las que estén planificadas
+                const planificadas = listaFil.filter(s=>s.estado===1);
+                //cogemos de todas solo las que estén en ejecución
+                const ejecucion = listaFil.filter(s=>s.estado===2);
+                //anidamos planificadas y en ejecución
+                const activas = planificadas.concat(ejecucion);
+                //las ordenamos pasandolas a la variable que muestra los datos 'lineas'
+                setPartes(activas.sort(function(a, b){
+                    if(a.tarea.prioridad < b.tarea.prioridad){
+                        return 1;
+                    }
+                    if(a.tarea.prioridad > b.tarea.prioridad){
+                        return -1;
+                    }
+                    return 0;
+                }));
+            }
+            else{
+                //si no hay opción 5 (Activos) filtramos de forma normal y aquí ordenamos
+                setPartes(res.data.sort(function(a, b){
+                    if(a.tarea.prioridad < b.tarea.prioridad){
+                        return 1;
+                    }
+                    if(a.tarea.prioridad > b.tarea.prioridad){
+                        return -1;
+                    }
+                    return 0;
+                }))
+            }
         })
         .catch( err => {
             console.log(err);
         });
-    }, [token, filtro]);    
+    }, [token, filtro, activos]);    
 
     return (
         <Container>            

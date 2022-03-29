@@ -14,9 +14,11 @@ const ManLineasListado = () => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
     const [lineas, setLineas] = useState(null);
-    const [filtro, setFiltro] = useState(`?parte__empresa__id=${user['tec-user'].perfil.empresa.id}&finalizada=${false}`);
+    const [filtro, setFiltro] = useState(`?parte__empresa__id=${user['tec-user'].perfil.empresa.id}`);
+    const [activos, setActivos] = useState(null);
 
-    const actualizaFiltro = str => {
+    const actualizaFiltro = (str, act) => {        
+        setActivos(act);
         setFiltro(str);
     }
     
@@ -27,20 +29,44 @@ const ManLineasListado = () => {
                 }
         })
         .then( res => {
-            setLineas(res.data.sort(function(a, b){
-                if(a.tarea.prioridad < b.tarea.prioridad){
-                    return 1;
-                }
-                if(a.tarea.prioridad > b.tarea.prioridad){
-                    return -1;
-                }
-                return 0;
-            }))
+            //variable para filtrar en Activos las 2 opciones
+            if(activos==='5'){
+                //listaFil recoge toda las lineas para luego filtrarlas.
+                const listaFil=res.data;
+                //cogemos de todas solo las que estén planificadas
+                const planificadas = listaFil.filter(s=>s.estado===1);
+                //cogemos de todas solo las que estén en ejecución
+                const ejecucion = listaFil.filter(s=>s.estado===2);
+                //anidamos planificadas y en ejecución
+                const activas = planificadas.concat(ejecucion);
+                //las ordenamos pasandolas a la variable que muestra los datos 'lineas'
+                setLineas(activas.sort(function(a, b){
+                    if(a.tarea.prioridad < b.tarea.prioridad){
+                        return 1;
+                    }
+                    if(a.tarea.prioridad > b.tarea.prioridad){
+                        return -1;
+                    }
+                    return 0;
+                }));
+            }
+            else{
+                //si no hay opción 5 (Activos) filtramos de forma normal y aquí ordenamos
+                setLineas(res.data.sort(function(a, b){
+                    if(a.tarea.prioridad < b.tarea.prioridad){
+                        return 1;
+                    }
+                    if(a.tarea.prioridad > b.tarea.prioridad){
+                        return -1;
+                    }
+                    return 0;
+                }))
+            }
         })
         .catch( err => {
             console.log(err);
         });
-    }, [token, filtro]);     
+    }, [token, filtro, activos]);     
 
     
     return (

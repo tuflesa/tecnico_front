@@ -192,7 +192,15 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
               }
         })
         .then( res => {
-            setEstados(res.data);
+            setEstados(res.data.sort(function(a, b){
+                if(a.nombre > b.nombre){
+                    return 1;
+                }
+                if(a.nombre < b.nombre){
+                    return -1;
+                }
+                return 0;
+            }))
         })
         .catch( err => {
             console.log(err);
@@ -200,7 +208,7 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
     }, [token]);
 
     useEffect(()=>{
-        const filtro1 = `?nombre__icontains=${datos.nombre}&tipo=${datos.tipotarea}&observaciones__icontains=${datos.observaciones}&creado_por=${datos.creado_por}&finalizado=${datos.finalizado}&fecha_prevista_inicio__lte=${datos.fecha_prevista_inicio_lte}&fecha_prevista_inicio__gte=${datos.fecha_prevista_inicio_gte}&estado=${datos.estados}`;
+        const filtro1 = `?nombre__icontains=${datos.nombre}&tipo=${datos.tipotarea}&observaciones__icontains=${datos.observaciones}&creado_por=${datos.creado_por}&finalizado=${datos.finalizado}&fecha_prevista_inicio__lte=${datos.fecha_prevista_inicio_lte}&fecha_prevista_inicio__gte=${datos.fecha_prevista_inicio_gte}&estado=${datos.estados==='5'?'':datos.estados}`;
         let filtro2 = `&empresa__id=${datos.empresa}`;
         if (datos.empresa !== ''){
             filtro2 = filtro2 + `&zona__id=${datos.zona}`;
@@ -212,7 +220,8 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
             }
         }
         const filtro = filtro1 + filtro2;
-        actualizaFiltro(filtro);
+        const activos = datos.estados;
+        actualizaFiltro(filtro, activos);
     },[datos.id, datos.nombre, datos.tipotarea, datos.observaciones, datos.creado_por, datos.finalizado, datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.fecha_prevista_inicio_gte, datos.fecha_prevista_inicio_lte, datos.estados, token]);
 
     const handleInputChange = (event) => {
