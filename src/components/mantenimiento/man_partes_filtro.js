@@ -400,7 +400,7 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
                                         value={datos.estados}
                                         onChange={handleInputChange}
                                         placeholder="Estados">
-                                            <option key={0} value={''}>Todos</option>
+                                            <option key={0} value={''}>Activos</option>
                                         {estados && estados.map( estado => {
                                             return (
                                             <option key={estado.id} value={estado.id}>

@@ -55,7 +55,7 @@ const PedidoForm = ({pedido, setPedido}) => {
         direccion_envio: pedido ? (pedido.direccion_envio ? pedido.direccion_envio.id : null) : null,
         contacto: pedido ? (pedido.contacto ? pedido.contacto.id : null) : null,
         observaciones: pedido ? pedido.observaciones : ''
-    });     
+    });
 
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/repuestos/proveedor/`, {
@@ -351,7 +351,7 @@ const PedidoForm = ({pedido, setPedido}) => {
               }     
         })
         .then( res => {
-            setPedido(res.data)
+            setPedido(res.data);
             finalizarPedido(res.data);
         })
         .catch(err => { console.log(err);})
@@ -727,7 +727,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                                             </tr>
                                         </thead> 
                                                                                   
-                                        <tbody>
+                                        <tbody>                                            
                                             {datos.lineas_adicionales && datos.lineas_adicionales.map( lineaAdicional => {
                                                 return (
                                                     <tr key={lineaAdicional.id}>

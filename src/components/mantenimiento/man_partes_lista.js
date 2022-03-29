@@ -27,7 +27,7 @@ const ManListaPartes = () => {
         })
         .then( res => {
             //variable para filtrar en Activos las 2 opciones
-            if(activos==='5'){
+            if(activos===''){
                 //listaFil recoge toda las lineas para luego filtrarlas.
                 const listaFil=res.data;
                 //cogemos de todas solo las que estén planificadas

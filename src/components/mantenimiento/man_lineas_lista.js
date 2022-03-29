@@ -14,6 +14,7 @@ const ManLineasListado = () => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
     const [lineas, setLineas] = useState(null);
+    const [lineas_finalizadas, setLineasFinalizadas] = useState(null);
     const [filtro, setFiltro] = useState(`?parte__empresa__id=${user['tec-user'].perfil.empresa.id}`);
     const [activos, setActivos] = useState(null);
 
@@ -30,7 +31,7 @@ const ManLineasListado = () => {
         })
         .then( res => {
             //variable para filtrar en Activos las 2 opciones
-            if(activos==='5'){
+            if(activos===''){
                 //listaFil recoge toda las lineas para luego filtrarlas.
                 const listaFil=res.data;
                 //cogemos de todas solo las que estén planificadas
@@ -68,6 +69,48 @@ const ManLineasListado = () => {
         });
     }, [token, filtro, activos]);     
 
+    const BorrarLinea =(linea) =>{  
+        console.log(linea);
+        axios.get(BACKEND_SERVER + `/api/mantenimiento/linea_nueva/?tarea=${linea.tarea.id}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+                }
+        })
+        .then( res => {
+            console.log(res.data.length);
+            console.log(res.data.fecha_fin);
+            setLineasFinalizadas(res.data);
+            if(res.data.length===1 && setLineasFinalizadas.data.fecha_fin==='null'){
+                console.log('vamos a eliminar la tarea y linea');
+            }
+            else{
+                console.log('no se puede eliminar ya que tiene lineas cerradas');
+            }
+            console.log('lineas con esta tarea');
+            console.log(res.data);
+            
+        })
+        .catch( err => {
+            console.log(err);
+        });
+        /* if (linea.cantidad>linea.por_recibir){
+            alert('No se puede eliminar la linea, ya tiene movimientos de recepción');            
+        }
+        else{  
+            var confirmacion = window.confirm('¿Deseas eliminar la línea?');
+            if(confirmacion){
+                fetch (BACKEND_SERVER + `/api/repuestos/linea_pedido/${linea.id}`,{
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }
+                })
+                .then( res => { 
+                    updatePedido();
+                })
+            }
+        } */
+    }
     
     return (
         <Container>            
@@ -108,7 +151,8 @@ const ManLineasListado = () => {
                                         <td>                                            
                                             <Link to={`/mantenimiento/linea_tarea/${linea.id}`}>
                                                 <PencilFill className="mr-3 pencil"/>                                                
-                                            </Link>                                         
+                                            </Link>  
+                                            <Trash className="trash"  onClick={event =>{BorrarLinea(linea)}} />                                       
                                         </td>
                                     </tr>
                                 )})
