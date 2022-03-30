@@ -16,7 +16,7 @@ const ManLineasListado = () => {
     const [lineas, setLineas] = useState(null);
     //const [lineas_finalizadas, setLineasFinalizadas] = useState(null);
     const [filtro, setFiltro] = useState(`?parte__empresa__id=${user['tec-user'].perfil.empresa.id}&estado=${''}`);
-    const [activos, setActivos] = useState(null);
+    const [activos, setActivos] = useState('');
 
     const actualizaFiltro = (str, act) => {        
         setActivos(act);

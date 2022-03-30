@@ -12,7 +12,7 @@ const ManListaPartes = () => {
     
     const [partes, setPartes]  = useState(null);
     const [filtro, setFiltro] = useState(`?estado=${''}`);
-    const [activos, setActivos] = useState(null);
+    const [activos, setActivos] = useState('');
 
     const actualizaFiltro = (str, act) => {
         setActivos(act);
