@@ -69,8 +69,7 @@ const ManLineasListado = () => {
         });
     }, [token, filtro, activos]);     
 
-    const BorrarLinea =(linea) =>{  
-        console.log(linea);
+    const BorrarLinea =(linea) =>{ 
         axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/?tarea=${linea.tarea.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -93,7 +92,7 @@ const ManLineasListado = () => {
                             } 
                         })
                         .then(r =>{
-                            console.log('tarea eliminada');
+                            alert('tarea eliminada');
                         })
                         .catch (err=>{console.log((err));});
                     })
@@ -116,7 +115,7 @@ const ManLineasListado = () => {
                             } 
                         })
                         .then(ress =>{
-                            console.log('ultima linea eliminada, pero trazabilidad con tareas sin tocar');
+                            alert('Trabajo detenido, no volverá a generar linea');
                         })
                         .catch (err=>{console.log((err));});
                     }
@@ -125,24 +124,7 @@ const ManLineasListado = () => {
         })
         .catch( err => {
             console.log(err);
-        });
-        /* if (linea.cantidad>linea.por_recibir){
-            alert('No se puede eliminar la linea, ya tiene movimientos de recepción');            
-        }
-        else{  
-            var confirmacion = window.confirm('¿Deseas eliminar la línea?');
-            if(confirmacion){
-                fetch (BACKEND_SERVER + `/api/repuestos/linea_pedido/${linea.id}`,{
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`
-                    }
-                })
-                .then( res => { 
-                    updatePedido();
-                })
-            }
-        } */
+        });        
     }
     
     return (

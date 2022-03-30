@@ -65,6 +65,24 @@ const ManListaPartes = () => {
         });
     }, [token, filtro, activos]);    
 
+    const BorrarParte =(parte) =>{ 
+        if(parte.tarea.length===0){
+            var eliminarParte = window.confirm('Se va a eliminar el parte de trabajo');
+            if(eliminarParte){
+                axios.delete(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${parte.id}/`,{            
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    } 
+                })
+                .then(res =>{
+                    alert('Parte eliminado');
+                })
+                .catch (err=>{console.log((err));});
+            }
+        }
+        else{alert('No se puede elimnar, este parte tiene lineas de trabajos');}
+    }
+
     return (
         <Container>            
             <Row>
@@ -96,7 +114,8 @@ const ManListaPartes = () => {
                                         <td>
                                             <Link to={`/mantenimiento/parte/${parte.id}`}>
                                                 <PencilFill className="mr-3 pencil"/>                                                
-                                            </Link>                                            
+                                            </Link>
+                                            <Trash className="trash"  onClick={event =>{BorrarParte(parte)}} /> 
                                         </td>
                                     </tr>
                                 )})
