@@ -14,8 +14,8 @@ const ManLineasListado = () => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
     const [lineas, setLineas] = useState(null);
-    const [lineas_finalizadas, setLineasFinalizadas] = useState(null);
-    const [filtro, setFiltro] = useState(`?parte__empresa__id=${user['tec-user'].perfil.empresa.id}`);
+    //const [lineas_finalizadas, setLineasFinalizadas] = useState(null);
+    const [filtro, setFiltro] = useState(`?parte__empresa__id=${user['tec-user'].perfil.empresa.id}&estado=${''}`);
     const [activos, setActivos] = useState(null);
 
     const actualizaFiltro = (str, act) => {        
@@ -71,24 +71,57 @@ const ManLineasListado = () => {
 
     const BorrarLinea =(linea) =>{  
         console.log(linea);
-        axios.get(BACKEND_SERVER + `/api/mantenimiento/linea_nueva/?tarea=${linea.tarea.id}`,{
+        axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/?tarea=${linea.tarea.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
                 }
         })
         .then( res => {
-            console.log(res.data.length);
-            console.log(res.data.fecha_fin);
-            setLineasFinalizadas(res.data);
-            if(res.data.length===1 && setLineasFinalizadas.data.fecha_fin==='null'){
-                console.log('vamos a eliminar la tarea y linea');
+            //si solo hay una linea y la fecha fin esta vacía, podemos eliminar linea y tarea.
+            if(res.data.length===1 && res.data[0].fecha_fin===null){
+                var confirmacion = window.confirm('¿Deseas eliminar la línea?');
+                if(confirmacion){
+                    axios.delete(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/${res.data[0].id}/`,{            
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                        } 
+                    })
+                    .then(re =>{
+                        axios.delete(BACKEND_SERVER + `/api/mantenimiento/tareas/${res.data[0].tarea.id}/`,{            
+                            headers: {
+                                'Authorization': `token ${token['tec-token']}`
+                            } 
+                        })
+                        .then(r =>{
+                            console.log('tarea eliminada');
+                        })
+                        .catch (err=>{console.log((err));});
+                    })
+                    .catch (err=>{console.log((err));});
+                }
             }
             else{
-                console.log('no se puede eliminar ya que tiene lineas cerradas');
-            }
-            console.log('lineas con esta tarea');
-            console.log(res.data);
-            
+                //Si la ultima linea tiene fecha fin, no se puede eliminar
+                if(res.data[res.data.length-1].fecha_fin!==null){
+                    alert('No se puede elimnar, trabajo ya ejecutado y terminado');
+                }
+                //en un preventivo, queremos detener el ciclo del trabajo.
+                else{
+                    var detenerTrabajo = window.confirm('No se puede eliminar, tiene trabajos finalizados. ¿Deseas detener el proceso?');
+                    if(detenerTrabajo){
+                        //eliminamos la linea que es la que ejecuta de nuevo la tarea'
+                        axios.delete(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/${res.data[res.data.length-1].id}/`,{            
+                            headers: {
+                                'Authorization': `token ${token['tec-token']}`
+                            } 
+                        })
+                        .then(ress =>{
+                            console.log('ultima linea eliminada, pero trazabilidad con tareas sin tocar');
+                        })
+                        .catch (err=>{console.log((err));});
+                    }
+                }
+            }            
         })
         .catch( err => {
             console.log(err);

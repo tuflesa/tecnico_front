@@ -11,7 +11,7 @@ const ManListaPartes = () => {
     const [token] = useCookies(['tec-token']);
     
     const [partes, setPartes]  = useState(null);
-    const [filtro, setFiltro] = useState('');
+    const [filtro, setFiltro] = useState(`?estado=${''}`);
     const [activos, setActivos] = useState(null);
 
     const actualizaFiltro = (str, act) => {
