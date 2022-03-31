@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
-import TareaForm from './man_tarea_form';
+import LineaTareaForm from './man_linea_tarea_form';
 
-const ManDetalle = ({ match }) => {
+const ManLineaDetalle = ({ match }) => {
     const [token] = useCookies(['tec-token']);
-    const [tarea, setTarea] = useState(null)
+    const [linea_tarea, setLineaTarea] = useState(null)
     
     useEffect(() => {
         axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/${match.params.id}`,{
@@ -15,7 +15,7 @@ const ManDetalle = ({ match }) => {
               }
         })
         .then( res => {
-            setTarea(res.data);            
+            setLineaTarea(res.data); 
         })
         .catch( err => {
             console.log(err);
@@ -24,9 +24,9 @@ const ManDetalle = ({ match }) => {
 
     return ( 
         <React.Fragment>
-            {tarea ? <TareaForm tarea={tarea} setTarea={setTarea} /> : null}
+            {linea_tarea ? <LineaTareaForm linea_tarea={linea_tarea} setLineaTarea={setLineaTarea} /> : null}
         </React.Fragment>
      )
 }
  
-export default ManDetalle;
+export default ManLineaDetalle;

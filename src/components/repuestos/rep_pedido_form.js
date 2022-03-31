@@ -351,7 +351,7 @@ const PedidoForm = ({pedido, setPedido}) => {
               }     
         })
         .then( res => {
-            setPedido(res.data); 
+            setPedido(res.data)
             finalizarPedido(res.data);
         })
         .catch(err => { console.log(err);})
@@ -596,11 +596,12 @@ const PedidoForm = ({pedido, setPedido}) => {
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button> :
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={crearPedido}>Guardar</Button>                                
                             }
-                            <Link to='/repuestos/pedidos'>
+                            <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
+                            {/* <Link to='/repuestos/pedidos'>
                                 <Button variant="warning" >
                                     Cancelar / Cerrar
                                 </Button>
-                            </Link>
+                            </Link> */}
                         </Form.Row> 
                         <Form className="justify-content-center">
                             {!verPdf && !verIngPdf && datos.numero ?  

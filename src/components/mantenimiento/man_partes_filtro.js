@@ -14,12 +14,13 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
     const [secciones, setSecciones] = useState(null);
     const [zonas, setZonas] = useState(null);
     const [equipos, setEquipos] = useState(null);
+    const [estados, setEstados] = useState(null);
 
     const [datos, setDatos] = useState({
         id: '',
         nombre: '',
         tipotarea: '',
-        creado_nombre: '',
+        creado_por: '',
         observaciones: '',
         finalizado: false,
         empresa: user['tec-user'].perfil.empresa.id,
@@ -28,6 +29,7 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
         equipo: '',
         fecha_prevista_inicio_lte:'',
         fecha_prevista_inicio_gte:'',
+        estados: '',
     });    
 
     useEffect(() => {
@@ -183,13 +185,27 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
         }
     }, [token, datos.seccion]);
 
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + '/api/mantenimiento/estados/',{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setEstados(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
+
     useEffect(()=>{
-        const filtro1 = `?nombre__icontains=${datos.nombre}&tipo=${datos.tipotarea}&observaciones__icontains=${datos.observaciones}&creado_nombre=${datos.creado_nombre}&finalizado=${datos.finalizado}&fecha_prevista_inicio__lte=${datos.fecha_prevista_inicio_lte}&fecha_prevista_inicio__gte=${datos.fecha_prevista_inicio_gte}`;
-        let filtro2 = `&equipo__seccion__zona__empresa__id=${datos.empresa}`;
+        const filtro1 = `?nombre__icontains=${datos.nombre}&tipo=${datos.tipotarea}&observaciones__icontains=${datos.observaciones}&creado_por=${datos.creado_por}&finalizado=${datos.finalizado}&fecha_prevista_inicio__lte=${datos.fecha_prevista_inicio_lte}&fecha_prevista_inicio__gte=${datos.fecha_prevista_inicio_gte}&estado=${datos.estados}`;
+        let filtro2 = `&empresa__id=${datos.empresa}`;
         if (datos.empresa !== ''){
-            filtro2 = filtro2 + `&equipo__seccion__zona__id=${datos.zona}`;
+            filtro2 = filtro2 + `&zona__id=${datos.zona}`;
             if (datos.zona !== ''){
-                filtro2 = filtro2 + `&equipo__seccion__id=${datos.seccion}`;
+                filtro2 = filtro2 + `&seccion__id=${datos.seccion}`;
                 if (datos.seccion !== ''){
                     filtro2 = filtro2 + `&equipo__id=${datos.equipo}`
                 }
@@ -197,7 +213,7 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
         }
         const filtro = filtro1 + filtro2;
         actualizaFiltro(filtro);
-    },[datos.id, datos.nombre, datos.tipotarea, datos.observaciones, datos.creado_nombre, datos.finalizado, , datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.fecha_prevista_inicio_gte, datos.fecha_prevista_inicio_lte, token]);
+    },[datos.id, datos.nombre, datos.tipotarea, datos.observaciones, datos.creado_por, datos.finalizado, datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.fecha_prevista_inicio_gte, datos.fecha_prevista_inicio_lte, datos.estados, token]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -242,11 +258,11 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
                         </Form.Group>
                     </Col>                    
                     <Col>
-                        <Form.Group controlId="creado_nombre">
+                        <Form.Group controlId="creado_por">
                             <Form.Label>Creado Por</Form.Label>
                             <Form.Control as="select"  
-                                        name='creado_nombre' 
-                                        value={datos.creado_nombre}
+                                        name='creado_por' 
+                                        value={datos.creado_por}
                                         onChange={handleInputChange}
                                         placeholder="Creado por">
                                         <option key={0} value={''}>Todas</option>    
@@ -264,7 +280,7 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
                         <Form.Group controlId="fecha_prevista_inicio_gte">
                             <Form.Label>Fecha Prevista Posterior a</Form.Label>
                             <Form.Control type="date" 
-                                        name='fecha_creacion_gte' 
+                                        name='fecha_prevista_inicio_gte' 
                                         value={datos.fecha_prevista_inicio_gte}
                                         onChange={handleInputChange} 
                                         placeholder="Fecha creación posterior a..." />
@@ -368,15 +384,21 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
                         </Form.Group>
                     </Col>
                     <Col>
-                        <Form.Group controlId="finalizado">
-                            <Form.Label>Finalizado</Form.Label>
-                            <Form.Control as="select" 
-                                            value={datos.finalizado}
-                                            name='finalizado'
-                                            onChange={handleInputChange}>
-                                <option key={0} value={''}>Todos</option>
-                                <option key={1} value={true}>Si</option>
-                                <option key={2} value={false}>No</option>
+                        <Form.Group controlId="estados">
+                            <Form.Label>Estado del Parte</Form.Label>
+                            <Form.Control as="select"  
+                                        name='estados' 
+                                        value={datos.estados}
+                                        onChange={handleInputChange}
+                                        placeholder="Estados">
+                                            <option key={0} value={''}>Todos</option>
+                                        {estados && estados.map( estado => {
+                                            return (
+                                            <option key={estado.id} value={estado.id}>
+                                                {estado.nombre}
+                                            </option>
+                                            )
+                                        })}
                             </Form.Control>
                         </Form.Group>
                     </Col>

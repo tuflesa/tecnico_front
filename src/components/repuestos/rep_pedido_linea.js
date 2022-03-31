@@ -31,7 +31,7 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
         });
     },[linea, pedido_id]);
 
-    useEffect(()=>{         
+    useEffect(()=>{ 
         datos.cantidad=Number.parseFloat(datos.cantidad).toFixed(2);
         datos.precio=Number.parseFloat(datos.precio).toFixed(2);
         datos.descuento=Number.parseFloat(datos.descuento).toFixed(2);
@@ -158,7 +158,27 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
                                                 {repuestos && repuestos.map( repuesto => {
                                                     return (
                                                     <option key={repuesto.id} value={repuesto.id}>
-                                                        {repuesto.nombre}
+                                                        {repuesto.nombre + ' - ' + repuesto.modelo}
+                                                    </option>
+                                                    )
+                                                })}
+                                    </Form.Control>
+                                </Form.Group>
+                                <Form.Group controlId="repuesto">
+                                    <Form.Label>Modelo</Form.Label>
+                                    <Form.Control as="select"  
+                                                name='repuesto' 
+                                                value={datos.repuesto}
+                                                onChange={handleInputChange}
+                                                disabled={handleRepuestoEnabled()}
+                                                placeholder="Repuesto">
+                                                    <option key={0} value={''}>
+                                                        ----
+                                                    </option>
+                                                {repuestos && repuestos.map( repuesto => {
+                                                    return (
+                                                    <option key={repuesto.id} value={repuesto.id}>
+                                                        {repuesto.modelo}
                                                     </option>
                                                     )
                                                 })}

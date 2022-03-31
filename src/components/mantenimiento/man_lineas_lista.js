@@ -5,11 +5,12 @@ import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table, Modal, Button } from 'react-bootstrap';
 import { Trash, PencilFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
-import ManListadoFiltro from './man_tareas_filtro';
+import ManLineasFiltro from './man_lineas_filtro';
 import { filter } from 'd3';
+import {invertirFecha} from '../utilidades/funciones_fecha';
 
 
-const ManTareasListado = () => {
+const ManLineasListado = () => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
     const [lineas, setLineas] = useState(null);
@@ -26,7 +27,6 @@ const ManTareasListado = () => {
                 }
         })
         .then( res => {
-            console.log(res.data);
             setLineas(res.data.sort(function(a, b){
                 if(a.tarea.prioridad < b.tarea.prioridad){
                     return 1;
@@ -47,12 +47,12 @@ const ManTareasListado = () => {
         <Container>            
             <Row>
                 <Col>
-                    <ManListadoFiltro actualizaFiltro={actualizaFiltro}/>
+                    <ManLineasFiltro actualizaFiltro={actualizaFiltro}/>
                 </Col>
             </ Row>
             <Row>                
                 <Col>
-                    <h5 className="mb-3 mt-3">Listado de Tareas</h5>                    
+                    <h5 className="mb-3 mt-3">Listado de Trabajos</h5>                    
                     <Table striped bordered hover>
                         <thead>
                             <tr>
@@ -61,6 +61,7 @@ const ManTareasListado = () => {
                                 <th>Nombre Tarea</th>
                                 <th>Tipo</th>
                                 <th>Especialidad</th>
+                                <th>Fecha Plan</th>
                                 <th>Fecha Inicio</th>
                                 <th>Fecha Fin</th>
                                 <th>Acciones</th>
@@ -75,10 +76,11 @@ const ManTareasListado = () => {
                                         <td>{linea.tarea.nombre}</td>
                                         <td>{linea.parte.tipo_nombre}</td>
                                         <td>{linea.tarea.especialidad_nombre}</td>
-                                        <td>{linea.fecha_inicio}</td>
-                                        <td>{linea.fecha_fin}</td>
+                                        <td>{linea.fecha_plan? invertirFecha(String(linea.fecha_plan)):''}</td>
+                                        <td>{linea.fecha_inicio?invertirFecha(String(linea.fecha_inicio)):''}</td>
+                                        <td>{linea.fecha_fin?invertirFecha(String(linea.fecha_fin)):''}</td>
                                         <td>                                            
-                                            <Link to={`/mantenimiento/tarea/${linea.id}`}>
+                                            <Link to={`/mantenimiento/linea_tarea/${linea.id}`}>
                                                 <PencilFill className="mr-3 pencil"/>                                                
                                             </Link>                                         
                                         </td>
@@ -93,4 +95,4 @@ const ManTareasListado = () => {
     )
 }
 
-export default ManTareasListado;
+export default ManLineasListado;

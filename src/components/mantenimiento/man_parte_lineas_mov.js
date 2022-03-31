@@ -4,6 +4,8 @@ import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { Button, Row, Form, Modal, Col, Table } from 'react-bootstrap';
 import {invertirFecha} from '../utilidades/funciones_fecha';
+import { PencilFill } from 'react-bootstrap-icons';
+import { Link } from 'react-router-dom';
 
 const LineasPartesMov = ({tarea, handleCloseList, show, parte}) => {
     const [token] = useCookies(['tec-token']);
@@ -38,7 +40,7 @@ const LineasPartesMov = ({tarea, handleCloseList, show, parte}) => {
     return (
         <Modal show={show} backdrop="static" keyboard={ false } animation={false} size="xl">
                 <Modal.Header closeButton>                
-                    <Modal.Title>Listado Lineas de Tareas</Modal.Title>
+                    <Modal.Title>{parte.nombre}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Row>
@@ -57,8 +59,7 @@ const LineasPartesMov = ({tarea, handleCloseList, show, parte}) => {
                             <Table striped bordered hover>
                                 <thead>
                                     <tr>
-                                        <th>Parte</th>
-                                        <th>Tarea</th>
+                                        <th>Fecha Plan</th>
                                         <th>Fecha Inicio</th>
                                         <th>Fecha Fin</th> 
                                         <th>Personal</th>                                        
@@ -68,10 +69,14 @@ const LineasPartesMov = ({tarea, handleCloseList, show, parte}) => {
                                     {listados && listados.map( lista => {
                                         return (
                                             <tr key={lista.id}>
-                                                <td>{parte.nombre}</td>
-                                                <td>{tarea.nombre}</td>
+                                                <td>{lista.fecha_plan?invertirFecha(String(lista.fecha_plan)): ''}</td>
                                                 <td>{lista.fecha_inicio?invertirFecha(String(lista.fecha_inicio)):'Tarea NO iniciada'}</td> 
                                                 <td>{lista.fecha_fin?invertirFecha(String(lista.fecha_fin)):'Tarea NO finalizada'}</td>
+                                                <td>                                            
+                                                    <Link to={`/mantenimiento/linea_tarea/${lista.id}`}>
+                                                        <PencilFill className="mr-3 pencil"/>                                                
+                                                    </Link>                                         
+                                                </td>
                                             </tr>
                                         )})
                                     }                                                                       

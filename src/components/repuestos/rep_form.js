@@ -480,11 +480,12 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button> :
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={crearDatos}>Guardar</Button>
                             }
-                            <Link to='/repuestos/listado'>
+                            <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
+                            {/* <Link to='/repuestos/listado'>
                                 <Button variant="warning" >
                                     Cancelar / Cerrar
                                 </Button>
-                            </Link>
+                            </Link> */}
                             {datos.id && <Button variant='info' className={'mx-2'} onClick={ImprimirBarcode}>Imprimir Etiqueta</Button>}
                         </Form.Row>
 
