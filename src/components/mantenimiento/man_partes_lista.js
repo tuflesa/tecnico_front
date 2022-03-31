@@ -13,6 +13,7 @@ const ManListaPartes = () => {
     const [partes, setPartes]  = useState(null);
     const [filtro, setFiltro] = useState(`?estado=${''}`);
     const [activos, setActivos] = useState('');
+    const [lineas, setLineas] = useState(null);
 
     const actualizaFiltro = (str, act) => {
         setActivos(act);
@@ -67,7 +68,7 @@ const ManListaPartes = () => {
 
     const BorrarParte =(parte) =>{ 
         if(parte.tarea.length===0){
-            var eliminarParte = window.confirm('Se va a eliminar el parte de trabajo');
+            var eliminarParte = window.confirm('Se va a eliminar el parte de trabajo ¿Desea continuar?');
             if(eliminarParte){
                 axios.delete(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${parte.id}/`,{            
                     headers: {
@@ -80,7 +81,50 @@ const ManListaPartes = () => {
                 .catch (err=>{console.log((err));});
             }
         }
-        else{alert('No se puede elimnar, este parte tiene lineas de trabajos');}
+        else{
+            axios.get(BACKEND_SERVER + `/api/mantenimiento/linea_nueva/?parte=${parte.id}`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                    }
+            })
+            .then( res => {
+                for(var x=0;x<res.data.length;x++){
+                    if(res.data[x].estado===3){
+                        return(alert('No se puede elimnar, este parte tiene trabajos finalizados. Si es un preventivo en curso, puede finalizar sus tareas.'));
+                    }
+                }
+                if(x===res.data.length){
+                    var eliminarParteLineasTareas = window.confirm('Se va a eliminiar el parte con sus tareas ¿Deseas continuar?');
+                    if(eliminarParteLineasTareas){
+                        //eliminamos todas la tareas del parte y en cascada se eliminan sus lineas
+                        for(var y=0; y<res.data.length;y++){
+                            axios.delete(BACKEND_SERVER + `/api/mantenimiento/tarea_nueva/${res.data[y].tarea}/`,{            
+                                headers: {
+                                    'Authorization': `token ${token['tec-token']}`
+                                } 
+                            })
+                            .then(res =>{
+                                console.log(res.data)                           ;
+                            })
+                            .catch (err=>{console.log((err));});
+                        } 
+                        //por último eliminamos el parte
+                        axios.delete(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${parte.id}/`,{            
+                            headers: {
+                                'Authorization': `token ${token['tec-token']}`
+                            } 
+                        })
+                        .then(res =>{
+                            alert('Parte y trabajos eliminados satisfactoriamente');
+                        })
+                        .catch (err=>{console.log((err));});
+                    }
+                }
+            })
+            .catch( err => {
+                console.log(err); 
+            })
+        }
     }
 
     return (
@@ -98,7 +142,8 @@ const ManListaPartes = () => {
                             <tr>
                                 <th>Nombre</th>
                                 <th>Tipo</th>
-                                <th>Creado Por</th>                               
+                                <th>Creado Por</th>
+                                <th>Estado</th>                                
                                 <th>Observaciones</th>
                                 <th>Acciones</th>
                             </tr>
@@ -110,6 +155,7 @@ const ManListaPartes = () => {
                                         <td>{parte.nombre}</td>
                                         <td>{parte.tipo_nombre}</td>
                                         <td>{parte.creado_por.get_full_name}</td>
+                                        <td>{parte.estado_nombre}</td>
                                         <td>{parte.observaciones}</td>
                                         <td>
                                             <Link to={`/mantenimiento/parte/${parte.id}`}>
