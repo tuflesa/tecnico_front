@@ -43,7 +43,7 @@ const RepSalidas = ({alm}) => {
         .then( res => { 
             let newAlmacenes = [];
             if (alm) {
-                newAlmacenes = res.data.filter( a => a.id === alm);
+                newAlmacenes = res.data.filter( a => a.id === parseInt(alm));
                 setNumeroBar({
                     ...numeroBar,
                     almacen: alm
