@@ -139,7 +139,11 @@ const RepSalidas = ({alm}) => {
                     'Authorization': `token ${token['tec-token']}`
                     }     
         })
-        .then( res => { window.location.reload();})
+        .then( res => { 
+            alert("Salida realizada con exito!!!!");
+            window.location.href = '/home';
+            // window.location.reload();
+        })
         .catch( err => {console.log(err)});
     });
     },[movimientos]);
@@ -295,11 +299,13 @@ const RepSalidas = ({alm}) => {
                     <Button variant="info" type="submit" className={'mx-2'} onClick={GenerarSalida}>Hacer Salida</Button> :
                     null
                 }
-                <Link to='/repuestos'>
+                
+                <Link to = '/home'>
                     <Button variant="warning" >
                         Cancelar
                     </Button>
-                </Link>                            
+                </Link>
+                                          
             </Form.Row>
             <BuscarRepuestos    show={show_listrepuestos}
                                 cerrarListRepuestos={cerrarListRepuestos}

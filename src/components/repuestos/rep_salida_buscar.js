@@ -7,7 +7,7 @@ import { Button, Row, Form, Col, Table } from 'react-bootstrap';
 import { ArrowDownCircle} from 'react-bootstrap-icons';
 const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>{
     const [token] = useCookies(['tec-token']);
-    const [filtro, setFiltro] = useState('');
+    const [filtro, setFiltro] = useState(null);
     const [repuesto, setRepuesto] = useState(null);
     const [localizaciones, setLocalizaciones] = useState(null);
     const [datos, setDatos] = useState({
@@ -16,12 +16,15 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
     });
 
     useEffect(()=>{
-        axios.get(BACKEND_SERVER + `/api/repuestos/detalle/`+ filtro,{
+        console.log('filtro ...');
+        console.log(filtro);
+        filtro && almacen && axios.get(BACKEND_SERVER + `/api/repuestos/detalle/`+ filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }     
         })
         .then( res => {   
+            console.log(res.data);
             setRepuesto(res.data.sort(function(a, b){
                 if(a.nombre > b.nombre){
                     return 1;
