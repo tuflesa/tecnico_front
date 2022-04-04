@@ -6,7 +6,7 @@ const Logout = () => {
     const [ ,  , deleteToken] = useCookies(['tec-token']);
 
     const logout = () => {
-        deleteToken('tec-token', { Path: '/' });
+        deleteToken('tec-token', {path: '/'});
     }
 
     return (

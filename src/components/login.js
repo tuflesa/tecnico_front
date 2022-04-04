@@ -34,7 +34,7 @@ const Login = () => {
         .then( resp => {
             // console.log(resp.data);
             setUser('tec-user',resp.data.usuario);
-            setToken('tec-token', resp.data.token);
+            setToken('tec-token', resp.data.token, {path: '/'});
         })
         .catch( err => {
             // console.log(err);

@@ -5,10 +5,11 @@ import { BACKEND_SERVER } from '../constantes';
 import Logout from './logout';
 import {Container, Row, Col, Card, Button, Navbar, Form } from 'react-bootstrap';
 import {Link } from "react-router-dom";
+import useInterval from './utilidades/use_interval';
 
 const Home = () => {
     const [apps, setApps] = useState([]);
-    const [token] = useCookies(['tec-token']);
+    const [token, , deleteToken] = useCookies(['tec-token']);
 
     useEffect(()=>{
         axios.get(BACKEND_SERVER + '/api/administracion/roles/', {
@@ -21,6 +22,12 @@ const Home = () => {
             setApps(res.data);
         })
     },[token]);
+
+    const logout = () => {
+        deleteToken('tec-token', {path: '/'});
+    }
+
+    useInterval(logout, 60000);
 
     return ( 
         <React.Fragment>
