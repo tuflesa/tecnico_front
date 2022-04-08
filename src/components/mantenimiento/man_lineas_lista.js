@@ -3,11 +3,12 @@ import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table, Modal, Button } from 'react-bootstrap';
-import { Trash, PencilFill } from 'react-bootstrap-icons';
+import { Trash, PencilFill, Receipt } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import ManLineasFiltro from './man_lineas_filtro';
 import { filter } from 'd3';
 import {invertirFecha} from '../utilidades/funciones_fecha';
+import ListaDePersonal from './man_equipo_trabajadores';
 
 
 const ManLineasListado = () => {
@@ -17,6 +18,8 @@ const ManLineasListado = () => {
     //const [lineas_finalizadas, setLineasFinalizadas] = useState(null);
     const [filtro, setFiltro] = useState(`?parte__empresa__id=${user['tec-user'].perfil.empresa.id}&estado=${''}`);
     const [activos, setActivos] = useState('');
+    const [linea_id, setLinea_id] = useState(null);
+    const [show, setShow] = useState(false);
 
     const actualizaFiltro = (str, act) => {        
         setActivos(act);
@@ -126,6 +129,15 @@ const ManLineasListado = () => {
             console.log(err);
         });        
     }
+
+    const listarTrabajadores = (linea_id)=>{
+        setLinea_id(linea_id);
+        setShow(true);
+    }
+
+    const handlerClose = () => {
+        setShow(false);
+    }
     
     return (
         <Container>            
@@ -145,7 +157,6 @@ const ManLineasListado = () => {
                                 <th>Nombre Tarea</th>
                                 <th>Tipo</th>
                                 <th>Especialidad</th>
-                                <th>Creado por</th>
                                 <th>Fecha Plan</th>
                                 <th>Fecha Inicio</th>
                                 <th>Fecha Fin</th>
@@ -161,7 +172,6 @@ const ManLineasListado = () => {
                                         <td>{linea.tarea.nombre}</td>
                                         <td>{linea.parte.tipo_nombre}</td>
                                         <td>{linea.tarea.especialidad_nombre}</td>
-                                        <td>{linea.parte.creado_por.get_full_name}</td>
                                         <td>{linea.fecha_plan? invertirFecha(String(linea.fecha_plan)):''}</td>
                                         <td>{linea.fecha_inicio?invertirFecha(String(linea.fecha_inicio)):''}</td>
                                         <td>{linea.fecha_fin?invertirFecha(String(linea.fecha_fin)):''}</td>
@@ -169,7 +179,8 @@ const ManLineasListado = () => {
                                             <Link to={`/mantenimiento/linea_tarea/${linea.id}`}>
                                                 <PencilFill className="mr-3 pencil"/>                                                
                                             </Link>  
-                                            <Trash className="trash"  onClick={event =>{BorrarLinea(linea)}} />                                       
+                                            <Trash className="mr-3 pencil"  onClick={event =>{BorrarLinea(linea)}} />                                       
+                                            <Receipt className="mr-3 pencil" onClick={event =>{listarTrabajadores(linea.id)}}/>
                                         </td>
                                     </tr>
                                 )})
@@ -178,6 +189,10 @@ const ManLineasListado = () => {
                     </Table>
                 </Col>
             </Row>
+            <ListaDePersonal    show={show}
+                                linea_id ={linea_id}
+                                handlerClose={handlerClose}
+        />
         </Container>
     )
 }

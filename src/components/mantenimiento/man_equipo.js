@@ -6,6 +6,7 @@ import { Container, Row, Col, Table, Modal, Button  } from 'react-bootstrap';
 import {invertirFecha} from '../utilidades/funciones_fecha';
 import { Tools, StopCircle, UiChecks, FileCheck, Receipt } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
+import ListaDePersonal from './man_equipo_trabajadores';
 
 
 const ManPorEquipos = () => {
@@ -16,6 +17,7 @@ const ManPorEquipos = () => {
     const [filtro, setFiltro] = useState(`?parte__empresa__id=${user['tec-user'].perfil.empresa.id}`);
     const [hoy] = useState(new Date);
     const [show, setShow] = useState(false);
+    const [linea_id, setLinea_id] = useState(null);
 
     const [datos, setDatos] = useState({
         fecha_inicio: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
@@ -127,29 +129,11 @@ const ManPorEquipos = () => {
         .catch(err => { console.log(err);}) 
     }
 
-    const ListarPersonalTarea = (linea_id) => { 
-        axios.get(BACKEND_SERVER + `/api/mantenimiento/trabajadores_en_linea/?linea=${linea_id}`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-                }
-        })
-        .then( res => {
-            setTrabajadoresLineas(res.data.sort(function(a, b){
-                if(a.fecha_inicio < b.fecha_inicio){
-                    return 1;
-                }
-                if(a.fecha_inicio > b.fecha_inicio){
-                    return -1;
-                }
-                return 0;
-            }))            
-        })
-        .catch( err => {
-            console.log(err);
-        });
+    const listarTrabajadores = (linea_id)=>{
+        setLinea_id(linea_id);
         setShow(true);
     }
-
+    
     const handlerClose = () => {
         setShow(false);
     }
@@ -187,7 +171,7 @@ const ManPorEquipos = () => {
                                         <Tools className="mr-3 pencil"  onClick={event =>{InicioTarea(linea)}}/>
                                         <StopCircle className="mr-3 pencil"  onClick={null} />
                                         <FileCheck className="mr-3 pencil"  onClick={null} />
-                                        <Receipt className="mr-3 pencil" onClick={event =>{ListarPersonalTarea(linea.id)}}/>
+                                        <Receipt className="mr-3 pencil" onClick={event =>{listarTrabajadores(linea.id)}}/>
                                         </td>
                                     </tr>
                                 )})
@@ -195,41 +179,11 @@ const ManPorEquipos = () => {
                         </tbody>
                     </Table>
                 </Col>
-            </Row>           
-            <Modal show={show} onHide={handlerClose} backdrop="static" keyboard={ false } animation={false} size="xl">
-            <Modal.Header closeButton>                
-                <Modal.Title>Trabajadores en la tarea: </Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <Row>
-                    <Col>
-                        <Table striped bordered hover>
-                            <thead>
-                                <tr>
-                                    <th>Trabajador</th>
-                                    <th>Fecha Inicio</th>
-                                    <th>Fecha Fin</th>
-                                </tr>
-                            </thead>                               
-                            <tbody>                                    
-                                {trabajadores_lineas && trabajadores_lineas.map(t =>{
-                                    return(
-                                        <tr key={t.id}>
-                                            <td>{t.trabajador.get_full_name}</td>
-                                            <td>{invertirFecha(String(t.fecha_inicio))}</td>
-                                            <td>{t.fecha_fin?invertirFecha(String(t.fecha_fin)):''}</td>
-                                        </tr>
-                                    )
-                                })}                                
-                            </tbody>
-                        </Table>
-                    </Col>
-                </Row>
-            </Modal.Body>
-            <Modal.Footer>
-                    <Button variant="secondary" onClick={handlerClose}>Cerrar</Button>
-            </Modal.Footer>
-        </Modal>
+            </Row> 
+        <ListaDePersonal    show={show}
+                            linea_id ={linea_id}
+                            handlerClose={handlerClose}
+        />
         </Container>
     )
 }

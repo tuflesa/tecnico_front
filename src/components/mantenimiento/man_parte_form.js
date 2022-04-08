@@ -26,6 +26,7 @@ const ParteForm = ({parte, setParte}) => {
     const [lineaLineasTareas, setListLineasTareas] = useState(null);
     const [cambio_fecha, setCambioFecha] = useState(false);
     const [estados, setEstados] = useState(null);
+    const [lineas, setLineas] = useState(null);
 
     const [datos, setDatos] = useState({
         id: parte.id ? parte.id : null,
