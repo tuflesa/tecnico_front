@@ -80,6 +80,7 @@ const ManPorEquipos = () => {
             if(linea.fecha_inicio===null){
                 axios.patch(BACKEND_SERVER + `/api/mantenimiento/linea_nueva/${linea.id}/`, {
                     fecha_inicio:datos.fecha_inicio,
+                    estado: 2,
                 }, {
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
