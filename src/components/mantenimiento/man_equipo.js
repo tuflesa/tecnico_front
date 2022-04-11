@@ -4,7 +4,7 @@ import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table, Modal, Button  } from 'react-bootstrap';
 import {invertirFecha} from '../utilidades/funciones_fecha';
-import { Tools, StopCircle, UiChecks, FileCheck, Receipt } from 'react-bootstrap-icons';
+import { Tools, StopCircle, UiChecks, FileCheck, Receipt, TruckFlatbed } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import ListaDePersonal from './man_equipo_trabajadores';
 
@@ -21,7 +21,7 @@ const ManPorEquipos = () => {
 
     const [datos, setDatos] = useState({
         fecha_inicio: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
-        fecha_fin: null,
+        fecha_fin: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
         linea: '',
         trabajador: user['tec-user'].perfil.usuario,
     });
@@ -110,7 +110,7 @@ const ManPorEquipos = () => {
                     axios.post(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea/`, {
                         linea:linea.id,
                         fecha_inicio:datos.fecha_inicio,
-                        fecha_fin:datos.fecha_fin,
+                        fecha_fin:null,
                         trabajador:datos.trabajador,
                     }, {
                         headers: {
@@ -130,6 +130,62 @@ const ManPorEquipos = () => {
         .catch(err => { console.log(err);}) 
     }
 
+    const FinalizarTarea = (linea) => { 
+        axios.get(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea/?linea=${linea.id}`, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => {
+            if(linea.fecha_inicio===null){
+                alert('Esta tarea todavía no se ha iniciado');
+            }
+            else{
+                const trabajador_activo = res.data.filter(s => s.trabajador === user['tec-user'].perfil.usuario);
+                if(trabajador_activo.length===0){
+                    alert('No tienes esta tarea inicada, no la puedes finalizar');
+                }
+                else if(trabajador_activo.length!==0){
+                    var FinalizarTarea = window.confirm('Vas a finalizar la tarea ¿Desea continuar?');
+                    if (FinalizarTarea){
+                        for(var x=0;x<res.data.length;x++){
+                            axios.patch(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea/${res.data[x].id}/`,{
+                                fecha_fin: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
+                            },
+                            {
+                                headers: {
+                                    'Authorization': `token ${token['tec-token']}`
+                                }
+                            })
+                            .then( r => {
+                                console.log(r.data);
+                            })
+                            .catch( err => {
+                                console.log(err);
+                            });
+                        }
+                        axios.patch(BACKEND_SERVER + `/api/mantenimiento/linea_nueva/${linea.id}/`,{
+                            fecha_fin: datos.fecha_fin,
+                            estado: 3,
+                        },
+                        {
+                            headers: {
+                                'Authorization': `token ${token['tec-token']}`
+                            }
+                        })
+                        .then( re => {
+                            console.log(re.data);
+                        })
+                        .catch( err => {
+                            console.log(err);
+                        });
+                    }
+                }
+            }
+        })
+        .catch(err => { console.log(err);}) 
+    }
+
     const listarTrabajadores = (linea_id)=>{
         setLinea_id(linea_id);
         setShow(true);
@@ -139,9 +195,9 @@ const ManPorEquipos = () => {
         setShow(false);
     }
 
-    return (
-        <Container>
-            <Row>                
+    return(
+        <Container class extends>
+            <Row class extends>                
                 <Col>
                     <h5 className="mb-3 mt-3">Listado de Trabajos {user['tec-user'].get_full_name}</h5>                    
                     <Table striped bordered hover>
@@ -150,7 +206,8 @@ const ManPorEquipos = () => {
                                 <th>Prioridad</th>
                                 <th>Nombre Tarea</th>
                                 <th>Observaciones</th>
-                                <th>Especialidad</th>
+                                {/* <th>Especialidad</th> */}
+                                <th>Estado</th>
                                 <th>Fecha Plan</th>
                                 <th>Fecha Inicio</th>
                                 <th>Fecha Fin</th>
@@ -164,14 +221,15 @@ const ManPorEquipos = () => {
                                         <td>{linea.tarea.prioridad}</td>
                                         <td>{linea.tarea.nombre}</td>
                                         <td>{linea.tarea.observaciones}</td>
-                                        <td>{linea.tarea.especialidad_nombre}</td>
+                                        {/* <td>{linea.tarea.especialidad_nombre}</td> */}
+                                        <td>{linea.estado.nombre}</td>
                                         <td>{linea.fecha_plan? invertirFecha(String(linea.fecha_plan)):''}</td>
                                         <td>{linea.fecha_inicio?invertirFecha(String(linea.fecha_inicio)):''}</td>
                                         <td>{linea.fecha_fin?invertirFecha(String(linea.fecha_fin)):''}</td>
                                         <td>
                                         <Tools className="mr-3 pencil"  onClick={event =>{InicioTarea(linea)}}/>
-                                        <StopCircle className="mr-3 pencil"  onClick={null} />
-                                        <FileCheck className="mr-3 pencil"  onClick={null} />
+                                        {/* <StopCircle className="mr-3 pencil"  onClick={null} /> */}
+                                        <FileCheck className="mr-3 pencil"  onClick={event =>{FinalizarTarea(linea)}} />
                                         <Receipt className="mr-3 pencil" onClick={event =>{listarTrabajadores(linea.id)}}/>
                                         </td>
                                     </tr>
