@@ -112,7 +112,7 @@ const RepPendientes = () => {
                             {pendientes && pendientes.map( pendiente => {
                                 return (
                                     <tr key={pendiente.id}>
-                                        <td>{pendiente.repuesto.nombre}</td>
+                                        <td>{pendiente.repuesto.nombre_comun?pendiente.repuesto.nombre_comun:pendiente.repuesto.nombre}</td>
                                         <td>{pendiente.stock_act}</td>
                                         <td>{pendiente.cantidad}</td> 
                                         <td>{lineasPendientes && lineasPendientes.map( linea => {
