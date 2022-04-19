@@ -297,11 +297,11 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
 
     
     function Barcode({datos}) {
-        var descripcion;
+        /* var descripcion;
         if(datos.nombre_comun){
             descripcion=datos.nombre_comun;
         }
-        else {descripcion = datos.nombre;}
+        else {descripcion = datos.nombre;} */
         const {inputRef}  = useBarcode({
           value: String(datos.id).padStart(12,'0'),
           options: {
@@ -311,7 +311,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             // width: 1.2,
             fontSize: 16,
             //text: datos.id + ' - ' + datos.nombre
-            text: datos.id + ' - ' + descripcion
+            //text: datos.id + ' - ' + descripcion
             //text: Barcode.data
           }            
         }); 
@@ -319,13 +319,18 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     };   
 
     const ImprimirBarcode = () => {
+        var descripcion;
+        if(datos.nombre_comun){
+            descripcion=datos.nombre_comun;
+        }
+        else {descripcion = datos.nombre;}
         var container = document.getElementById('barcode');
         // var mySVG = document.getElementById("barcode-canvas");
         var width = "90%";
         var height = "90%";
         var printWindow = window.open('', 'PrintMap',
         'width=' + width + ',height=' + height);
-        printWindow.document.writeln(container.innerHTML);
+        printWindow.document.writeln('<center>'+container.innerHTML + '</br>' + datos.id + '-' + descripcion + '</center>');
         printWindow.document.close();
         printWindow.print();
         printWindow.close();

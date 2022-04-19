@@ -90,7 +90,7 @@ const ManPorEquipos = () => {
                     axios.post(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea/`, {
                         linea:linea.id,
                         fecha_inicio:datos.fecha_inicio,
-                        fecha_fin:datos.fecha_fin,
+                        fecha_fin:null,
                         trabajador:datos.trabajador,
                     }, {
                         headers: {
@@ -101,6 +101,7 @@ const ManPorEquipos = () => {
                         updateTarea(); 
                     })
                     .catch(err => { console.log(err);})
+                    updateTarea();
                 })
                 .catch(err => { console.log(err);})
             }
@@ -146,8 +147,8 @@ const ManPorEquipos = () => {
                     alert('No tienes esta tarea inicada, no la puedes finalizar');
                 }
                 else if(trabajador_activo.length!==0){
-                    var FinalizarTarea = window.confirm('Vas a finalizar la tarea ¿Desea continuar?');
-                    if (FinalizarTarea){
+                    var Finalizar_Tarea = window.confirm('Vas a finalizar la tarea ¿Desea continuar?');
+                    if (Finalizar_Tarea){
                         for(var x=0;x<res.data.length;x++){
                             axios.patch(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea/${res.data[x].id}/`,{
                                 fecha_fin: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
@@ -159,6 +160,7 @@ const ManPorEquipos = () => {
                             })
                             .then( r => {
                                 console.log(r.data);
+                                updateTarea();
                             })
                             .catch( err => {
                                 console.log(err);
@@ -182,6 +184,7 @@ const ManPorEquipos = () => {
                     }
                 }
             }
+            updateTarea();
         })
         .catch(err => { console.log(err);}) 
     }
