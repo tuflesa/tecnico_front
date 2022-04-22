@@ -138,6 +138,8 @@ const ManPorEquipos = () => {
               }     
         })
         .then( res => {
+            console.log('que recogemos en res.data');
+            console.log(res.data);
             if(linea.fecha_inicio===null){
                 alert('Esta tarea todavía no se ha iniciado');
             }
@@ -176,6 +178,7 @@ const ManPorEquipos = () => {
                             }
                         })
                         .then( re => {
+                            console.log('dddd');
                             console.log(re.data);
                         })
                         .catch( err => {
@@ -210,7 +213,7 @@ const ManPorEquipos = () => {
                                 <th>Nombre Tarea</th>
                                 <th>Observaciones</th>
                                 {/* <th>Especialidad</th> */}
-                                <th>Estado</th>
+                                {/* <th>Estado</th> */}
                                 <th>Fecha Plan</th>
                                 <th>Fecha Inicio</th>
                                 <th>Fecha Fin</th>
@@ -225,7 +228,7 @@ const ManPorEquipos = () => {
                                         <td>{linea.tarea.nombre}</td>
                                         <td>{linea.tarea.observaciones}</td>
                                         {/* <td>{linea.tarea.especialidad_nombre}</td> */}
-                                        <td>{linea.estado.nombre}</td>
+                                        {/* <td>{linea.estado.nombre}</td> */}
                                         <td>{linea.fecha_plan? invertirFecha(String(linea.fecha_plan)):''}</td>
                                         <td>{linea.fecha_inicio?invertirFecha(String(linea.fecha_inicio)):''}</td>
                                         <td>{linea.fecha_fin?invertirFecha(String(linea.fecha_fin)):''}</td>
