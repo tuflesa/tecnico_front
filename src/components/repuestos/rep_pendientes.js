@@ -147,7 +147,7 @@ const RepPendientes = () => {
                                 <th>Fecha Pedido</th>
                                 <th>Fecha Entrega</th>
                                 <th>Fecha Prevista Entrega</th>
-                                <th>Finalizado</th>
+                                <th>Crado Por</th>
                                 <th>Ir al pedido</th>
                             </tr>
                         </thead>
@@ -161,7 +161,7 @@ const RepPendientes = () => {
                                         <td>{invertirFecha(String(pedido.fecha_creacion))}</td>
                                         <td>{pedido.fecha_entrega && invertirFecha(String(pedido.fecha_entrega))}</td>                                        
                                         <td>{pedido.fecha_prevista_entrega && invertirFecha(String(pedido.fecha_prevista_entrega))}</td> 
-                                        <td>{pedido.finalizado ? 'Si' : 'No'}</td>
+                                        <td>{pedido.creado_por.get_full_name}</td>
                                         <td>
                                             <Link to={`/repuestos/pedido_detalle/${pedido.id}`}>
                                                 <PencilFill className="mr-3 pencil"/>
