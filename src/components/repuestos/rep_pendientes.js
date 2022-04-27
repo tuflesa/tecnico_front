@@ -63,7 +63,15 @@ const RepPendientes = () => {
             }
         })
         .then( res => {
-            setPedFueradeFecha(res.data);
+            setPedFueradeFecha(res.data.sort(function(a, b){
+                if(a.numero > b.numero){
+                    return 1;
+                }
+                if(a.numero < b.numero){
+                    return -1;
+                }
+                return 0;
+            }))
         })
         .catch( err => {
             console.log(err);
@@ -92,6 +100,18 @@ const RepPendientes = () => {
     const handlerListCancelar = ()=>{
         setShow(false);
     }
+    
+    /* const OrdenarPorNombre = (lista)=>{
+        setPedFueradeFecha(lista.sort(function(a, b){
+            if(a.creado_por.get_full_name > b.creado_por.get_full_name){
+                return 1;
+            }
+            if(a.creado_por.get_full_name < b.creado_por.get_full_name){
+                return -1;
+            }
+            return 0;
+        }))
+    } */
 
     return (
         <Container>
@@ -147,7 +167,8 @@ const RepPendientes = () => {
                                 <th>Fecha Pedido</th>
                                 <th>Fecha Entrega</th>
                                 <th>Fecha Prevista Entrega</th>
-                                <th>Crado Por</th>
+                                <th>Creado por</th>
+                                {/* <th><Button variant="info" onClick={event =>{OrdenarPorNombre(pedfueradefecha)}}>Creado Por</Button></th> */}
                                 <th>Ir al pedido</th>
                             </tr>
                         </thead>

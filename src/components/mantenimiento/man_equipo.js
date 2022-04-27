@@ -138,8 +138,6 @@ const ManPorEquipos = () => {
               }     
         })
         .then( res => {
-            console.log('que recogemos en res.data');
-            console.log(res.data);
             if(linea.fecha_inicio===null){
                 alert('Esta tarea todavía no se ha iniciado');
             }
@@ -161,14 +159,13 @@ const ManPorEquipos = () => {
                                 }
                             })
                             .then( r => {
-                                console.log(r.data);
                                 updateTarea();
                             })
                             .catch( err => {
                                 console.log(err);
                             });
                         }
-                        axios.patch(BACKEND_SERVER + `/api/mantenimiento/linea_nueva/${linea.id}/`,{
+                        axios.patch(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_activas/${linea.id}/`,{
                             fecha_fin: datos.fecha_fin,
                             estado: 3,
                         },
@@ -178,8 +175,39 @@ const ManPorEquipos = () => {
                             }
                         })
                         .then( re => {
-                            console.log('dddd');
-                            console.log(re.data);
+                            /* let semanaEnMilisegundos = 1000 * 60 * 60 * 24 * 7;
+                            let fecha=Date.parse(re.data.fecha_fin);
+                            let suma = fecha + semanaEnMilisegundos;
+                            console.log('esto es el valor de la suma' + suma);
+                            let fechaPorSemanas = new Date(suma);
+                            let dia=Date.getDate(fechaPorSemanas);
+                            let mes=Date.getMonth(fechaPorSemanas);
+                            let year=Date.getFullYear(fechaPorSemanas);
+                            let fechaNow=dia + "/"+mes+"/"+year;
+                            console.log('esto es el valor de la fecha'+fechaNow); */
+                            if(re.data.parte.tipo===1){
+                                console.log('es preventivo y creará otra linea nueva');
+                                axios.post(BACKEND_SERVER + `/api/mantenimiento/linea_nueva/`,{
+                                    parte: re.data.parte.id,
+                                    tarea: re.data.tarea.id,
+                                    fecha_inicio:null,
+                                    fecha_fin:null,
+                                    fecha_plan: re.data.fecha_fin,
+                                    estado: 1,
+                                },
+                                {
+                                    headers: {
+                                        'Authorization': `token ${token['tec-token']}`
+                                    }
+                                })
+                                .then( r => {
+                                    console.log('linea hecha');
+                                })
+                                .catch( err => {
+                                    console.log(err);  
+                                });
+                                
+                            }
                         })
                         .catch( err => {
                             console.log(err);
