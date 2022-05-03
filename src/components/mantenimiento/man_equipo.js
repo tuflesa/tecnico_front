@@ -175,7 +175,6 @@ const ManPorEquipos = () => {
                             }
                         })
                         .then( re => {
-<<<<<<< HEAD
                             if(re.data.parte.tipo===1){
                                 console.log('es preventivo y creará otra linea nueva');
                                 if(re.data.parte.tipo_periodo===3){
@@ -212,40 +211,6 @@ const ManPorEquipos = () => {
                                         console.log(err);  
                                     });
                                 }
-=======
-                            /* let semanaEnMilisegundos = 1000 * 60 * 60 * 24 * 7;
-                            let fecha=Date.parse(re.data.fecha_fin);
-                            let suma = fecha + semanaEnMilisegundos;
-                            console.log('esto es el valor de la suma' + suma);
-                            let fechaPorSemanas = new Date(suma);
-                            let dia=Date.getDate(fechaPorSemanas);
-                            let mes=Date.getMonth(fechaPorSemanas);
-                            let year=Date.getFullYear(fechaPorSemanas);
-                            let fechaNow=dia + "/"+mes+"/"+year;
-                            console.log('esto es el valor de la fecha'+fechaNow); */
-                            if(re.data.parte.tipo===1){
-                                console.log('es preventivo y creará otra linea nueva');
-                                axios.post(BACKEND_SERVER + `/api/mantenimiento/linea_nueva/`,{
-                                    parte: re.data.parte.id,
-                                    tarea: re.data.tarea.id,
-                                    fecha_inicio:null,
-                                    fecha_fin:null,
-                                    fecha_plan: re.data.fecha_fin,
-                                    estado: 1,
-                                },
-                                {
-                                    headers: {
-                                        'Authorization': `token ${token['tec-token']}`
-                                    }
-                                })
-                                .then( r => {
-                                    console.log('linea hecha');
-                                })
-                                .catch( err => {
-                                    console.log(err);  
-                                });
-                                
->>>>>>> 810e7f5b79ad02fcb8f8059c4df247c110902dd3
                             }
                         })
                         .catch( err => {
