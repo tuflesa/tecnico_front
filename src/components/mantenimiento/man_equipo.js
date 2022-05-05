@@ -14,10 +14,12 @@ const ManPorEquipos = () => {
     const [user] = useCookies(['tec-user']);
     const [lineas, setLineas] = useState(null);
     const [trabajadores_lineas, setTrabajadoresLineas] = useState(null);
-    const [filtro, setFiltro] = useState(`?parte__empresa__id=${user['tec-user'].perfil.empresa.id}`);
+    const [filtro, setFiltro] = useState(`& parte__empresa__id=${user['tec-user'].perfil.empresa.id}`);
     const [hoy] = useState(new Date);
     const [show, setShow] = useState(false);
     const [linea_id, setLinea_id] = useState(null);
+    var dentrodeunmes=null;
+    var fechaenunmesString=null;
 
     const [datos, setDatos] = useState({
         fecha_inicio: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
@@ -27,7 +29,12 @@ const ManPorEquipos = () => {
     });
     
     useEffect(()=>{
-        axios.get(BACKEND_SERVER + '/api/mantenimiento/listado_lineas_activas/'+ filtro,{
+        var fecha_hoy=Date.parse(hoy);
+        var mesEnMilisegundos = 1000 * 60 * 60 * 24 * 30;
+        var enunmes=fecha_hoy+mesEnMilisegundos;
+        dentrodeunmes = new Date(enunmes);
+        fechaenunmesString = dentrodeunmes.getFullYear() + '-' + ('0' + (dentrodeunmes.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunmes.getDate()).slice(-2);
+        axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_activas/?fecha_plan__lte=${fechaenunmesString}`+ filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
                 }
@@ -177,7 +184,7 @@ const ManPorEquipos = () => {
                         .then( re => {
                             if(re.data.parte.tipo===1){
                                 var fechaString= null;
-                                var semanaEnMilisegundos = 1000 * 60 * 60 * 24 * 7;;
+                                var semanaEnMilisegundos = 1000 * 60 * 60 * 24 * 7;
                                 var fecha=Date.parse(re.data.fecha_fin);
                                 var fechaPorSemanas=null;
                                 var suma=null;
