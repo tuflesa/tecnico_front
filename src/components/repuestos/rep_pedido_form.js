@@ -54,7 +54,8 @@ const PedidoForm = ({pedido, setPedido}) => {
         lineas_adicionales: pedido ? pedido.lineas_adicionales : null,
         direccion_envio: pedido ? (pedido.direccion_envio ? pedido.direccion_envio.id : null) : null,
         contacto: pedido ? (pedido.contacto ? pedido.contacto.id : null) : null,
-        observaciones: pedido ? pedido.observaciones : ''
+        observaciones: pedido ? pedido.observaciones : '',
+        observaciones2: pedido ? pedido.observaciones2 : ''
     });
 
     useEffect(()=>{
@@ -136,7 +137,8 @@ const PedidoForm = ({pedido, setPedido}) => {
             lineas_adicionales: pedido ? pedido.lineas_adicionales : null,
             direccion_envio: pedido ? (pedido.direccion_envio ? pedido.direccion_envio.id : null) : direcciones[0].id,
             contacto: pedido ? (pedido.contacto ? pedido.contacto.id : null) : null,
-            observaciones: pedido ? pedido.observaciones : ''
+            observaciones: pedido ? pedido.observaciones : '',
+            observaciones2: pedido ? pedido.observaciones2 : ''
 
         });
     },[pedido]);
@@ -306,7 +308,8 @@ const PedidoForm = ({pedido, setPedido}) => {
             creado_por: user['tec-user'].id,
             direccion_envio: datos.direccion_envio,
             contacto: datos.contacto,
-            observaciones: datos.observaciones
+            observaciones: datos.observaciones,
+            observaciones2: datos.observaciones2,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -329,7 +332,8 @@ const PedidoForm = ({pedido, setPedido}) => {
             finalizado: datos.finalizado,
             direccion_envio: datos.direccion_envio,
             contacto: datos.contacto,
-            observaciones: datos.observaciones
+            observaciones: datos.observaciones,
+            observaciones2: datos.observaciones2,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -570,15 +574,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                                 </Form.Group>
                             </Col>
                         </Row>
-                        <Row>
-                            <Col>
-                                <Form.Group className="mb-3" controlId="finalizado">
-                                    <Form.Check type="checkbox" 
-                                                label="Finalizado"
-                                                checked = {datos.finalizado}
-                                                onChange = {handleFinalizado} />
-                                </Form.Group>
-                            </Col>
+                        <Row>                            
                             <Col>
                                 <Form.Group controlId="observaciones">
                                     <Form.Label>Observaciones pedido</Form.Label>
@@ -590,7 +586,28 @@ const PedidoForm = ({pedido, setPedido}) => {
                                     </Form.Control>
                                 </Form.Group>
                             </Col>
-                        </Row>                        
+                            <Col>
+                                <Form.Group controlId="observaciones2">
+                                    <Form.Label>Observaciones final pedido</Form.Label>
+                                    <Form.Control imput type="text" 
+                                                name='observaciones2'
+                                                value = {datos.observaciones2}
+                                                onChange = {handleInputChange}
+                                                placeholder="Observaciones final del pedido">
+                                    </Form.Control>
+                                </Form.Group>
+                            </Col>
+                        </Row>   
+                        <Row>
+                            <Col>
+                                <Form.Group className="mb-3" controlId="finalizado">
+                                    <Form.Check type="checkbox" 
+                                                label="Finalizado"
+                                                checked = {datos.finalizado}
+                                                onChange = {handleFinalizado} />
+                                </Form.Group>
+                            </Col>
+                        </Row>                     
                         <Form.Row className="justify-content-center">
                             {pedido ? 
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button> :

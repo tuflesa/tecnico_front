@@ -218,6 +218,13 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
                     </View>
                     <View style={styles.page2}>
                         <View style={styles.section}>
+                            <View style={styles.section3}>
+                                <Text>Observaciones pedido: {pedido.observaciones}</Text>                            
+                            </View>
+                        </View>
+                    </View>
+                    <View style={styles.page2}>
+                        <View style={styles.section}>
                             <View style={styles.section5}>
                                 <Text>Muy Sres. nuestros:</Text>
                                 <Text>Les confirmamos nuestro pedido para el suministro del material que detallamos a continuacion:</Text>
@@ -243,7 +250,14 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
                 <View style={styles.page2}>
                     <View style={styles.section}>
                         <View style={styles.section3}>
-                            <Text>Observaciones pedido: {pedido.observaciones}</Text>                            
+                            <Text>Observaciones pedido: {pedido.observaciones2}</Text>                            
+                        </View>
+                    </View>
+                </View>
+                <View style={styles.page2}>
+                    <View style={styles.section}>
+                        <View style={styles.section3}>
+                            <Text>Nota: Por favor indicar en nº de pedido en el albarán de entrega.</Text>
                         </View>
                     </View>
                 </View>

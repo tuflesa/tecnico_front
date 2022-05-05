@@ -219,6 +219,13 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, empresa, lineas_
                     </View>
                     <View style={styles.page2}>
                         <View style={styles.section}>
+                            <View style={styles.section3}>
+                                <Text>Observaciones pedido: {pedido.observaciones}</Text>                            
+                            </View>
+                        </View>
+                    </View>
+                    <View style={styles.page2}>
+                        <View style={styles.section}>
                             <View style={styles.section5}>
                                 <Text>Dear Sirs:</Text>
                                 <Text>We confirm you the order of the following items/spares:</Text>
@@ -244,7 +251,14 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, empresa, lineas_
                 <View style={styles.page2}>
                     <View style={styles.section}>
                         <View style={styles.section3}>
-                            <Text>Order remarks: {pedido.observaciones}</Text>                            
+                            <Text>Observaciones pedido: {pedido.observaciones2}</Text>                            
+                        </View>
+                    </View>
+                </View>
+                <View style={styles.page2}>
+                    <View style={styles.section}>
+                        <View style={styles.section3}>
+                            <Text>Nota: Por favor indicar en nº de pedido en el albarán de entrega.</Text>
                         </View>
                     </View>
                 </View>
