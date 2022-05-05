@@ -16,6 +16,7 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateP
         nombre: '',
         especialidad: '',
         prioridad: '',
+        trabajo: '',
         observaciones: '',
         fecha_plan: null,
         estado: parte.fecha_prevista_inicio?1:4,
@@ -68,6 +69,7 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateP
             nombre: datos.nombre,
             especialidad: datos.especialidad,
             prioridad: datos.prioridad,
+            trabajo: datos.trabajo,
             observaciones: datos.observaciones,
         },
         {
@@ -107,6 +109,7 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateP
                     datos.especialidad='';
                     datos.prioridad='';
                     datos.observaciones='';
+                    datos.trabajo='';
                     datos.fecha_plan=null;
                 })
                 .catch( err => {
@@ -181,6 +184,19 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateP
                             </Form.Group>
                         </Col>
                     </Row> 
+                    <Row>                            
+                        <Col>
+                            <Form.Group id="trabajo">
+                                <Form.Label>Trabajos a realizar</Form.Label>
+                                <Form.Control type="text" 
+                                            name='trabajo' 
+                                            value={datos.trabajo}
+                                            onChange={handleInputChange} 
+                                            placeholder="Trabajos a realizar"
+                                />
+                            </Form.Group>
+                        </Col>
+                    </Row>
                     <Row>                            
                         <Col>
                             <Form.Group id="observaciones">

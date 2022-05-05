@@ -708,6 +708,7 @@ const ParteForm = ({parte, setParte}) => {
                                         <th>Prioridad</th>
                                         <th>Nombre</th>
                                         <th>Especialidad</th>
+                                        <th>Trabajo a realizar</th>
                                         <th>Observaciones</th>
                                         <th>Acciones</th>
                                     </tr>
@@ -719,6 +720,7 @@ const ParteForm = ({parte, setParte}) => {
                                                 <td>{linea.prioridad}</td>
                                                 <td>{linea.nombre}</td>
                                                 <td>{linea.especialidad_nombre}</td>
+                                                <td>{linea.trabajo}</td>
                                                 <td>{linea.observaciones}</td>
                                                 <td>                                            
                                                     <Receipt className="mr-3 pencil" onClick={event =>{listarLineasTareas(linea)}}/>

@@ -142,8 +142,7 @@ const ManListaPartes = () => {
                                 <th>Nombre</th>
                                 <th>Tipo</th>
                                 <th>Creado Por</th>
-                                <th>Estado</th>                                
-                                <th>Observaciones</th>
+                                <th>Estado</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -155,7 +154,6 @@ const ManListaPartes = () => {
                                         <td>{parte.tipo_nombre}</td>
                                         <td>{parte.creado_por.get_full_name}</td>
                                         <td>{parte.estado_nombre}</td>
-                                        <td>{parte.observaciones}</td>
                                         <td>
                                             <Link to={`/mantenimiento/parte/${parte.id}`}>
                                                 <PencilFill className="mr-3 pencil"/>                                                

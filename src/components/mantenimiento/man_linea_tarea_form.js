@@ -16,6 +16,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
         especialidad: linea_tarea.tarea.especialidad_nombre,
         prioridad: linea_tarea.tarea.prioridad,
         observaciones: linea_tarea.tarea.observaciones,
+        trabajo: linea_tarea.tarea.trabajo,
         fecha_plan: linea_tarea.fecha_plan,
         fecha_inicio: linea_tarea.fecha_inicio,
         fecha_fin: linea_tarea.fecha_fin,
@@ -29,6 +30,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
               }
         })
         .then( res => {
+            console.log(linea_tarea);
             setEstados(res.data.sort(function(a, b){
                 if(a.id > b.id){
                     return 1;
@@ -76,6 +78,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
             nombre: datos.nombre,
             prioridad: datos.prioridad,
             observaciones: datos.observaciones,
+            trabajo: datos.trabajo,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -93,11 +96,12 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                   }     
             })
             .then( res => {
-                updateTarea();
+                //updateTarea();
                 datos.nombre= '';
                 datos.especialidad='';
                 datos.prioridad='';
                 datos.observaciones='';
+                datos.trabajo='';
                 datos.fecha_plan=null;
                 datos.fecha_inicio=null;
                 datos.fecha_fin=null;
@@ -106,7 +110,6 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
             .catch(err => { console.log(err);})
         })
         .catch(err => { console.log(err);})
-
     }
 
     return (
@@ -207,6 +210,19 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                                                 disabled='true'/>
                                 </Form.Group>
                             </Col> 
+                        </Row>
+                        <Row>                            
+                            <Col>
+                                <Form.Group id="trabajo">
+                                    <Form.Label>trabajos a realizar</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='trabajo' 
+                                                value={datos.trabajo}
+                                                onChange={handleInputChange} 
+                                                placeholder="Trabajos a realizar"
+                                    />
+                                </Form.Group>
+                            </Col>
                         </Row>                                                  
                         <Row>                            
                             <Col>

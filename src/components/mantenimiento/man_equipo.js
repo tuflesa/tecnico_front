@@ -253,6 +253,7 @@ const ManPorEquipos = () => {
                             <tr>
                                 <th>Prioridad</th>
                                 <th>Nombre Tarea</th>
+                                <th>Trabajos</th>
                                 <th>Observaciones</th>
                                 {/* <th>Especialidad</th> */}
                                 {/* <th>Estado</th> */}
@@ -268,6 +269,7 @@ const ManPorEquipos = () => {
                                     <tr key={linea.id}>
                                         <td>{linea.tarea.prioridad}</td>
                                         <td>{linea.tarea.nombre}</td>
+                                        <td>{linea.tarea.trabajo}</td>
                                         <td>{linea.tarea.observaciones}</td>
                                         {/* <td>{linea.tarea.especialidad_nombre}</td> */}
                                         {/* <td>{linea.estado.nombre}</td> */}
