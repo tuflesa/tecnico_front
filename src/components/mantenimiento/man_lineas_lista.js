@@ -16,7 +16,13 @@ const ManLineasListado = () => {
     const [user] = useCookies(['tec-user']);
     const [lineas, setLineas] = useState(null);
     //const [lineas_finalizadas, setLineasFinalizadas] = useState(null);
-    const [filtro, setFiltro] = useState(`?parte__empresa__id=${user['tec-user'].perfil.empresa.id}&estado=${''}`);
+    const [hoy] = useState(new Date);
+    var fecha_hoy=Date.parse(hoy);
+    var mesEnMilisegundos = 1000 * 60 * 60 * 24 * 30;
+    var enunmes=fecha_hoy+mesEnMilisegundos;
+    var dentrodeunmes = new Date(enunmes);
+    var fechaenunmesString = dentrodeunmes.getFullYear() + '-' + ('0' + (dentrodeunmes.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunmes.getDate()).slice(-2);
+    const [filtro, setFiltro] = useState(`?parte__empresa__id=${user['tec-user'].perfil.empresa.id}&estado=${''}&fecha_plan__lte=${fechaenunmesString}`);
     const [activos, setActivos] = useState('');
     const [linea_id, setLinea_id] = useState(null);
     const [show, setShow] = useState(false);

@@ -13,13 +13,18 @@ const ManPorEquipos = () => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
     const [lineas, setLineas] = useState(null);
-    const [trabajadores_lineas, setTrabajadoresLineas] = useState(null);
-    const [filtro, setFiltro] = useState(`& parte__empresa__id=${user['tec-user'].perfil.empresa.id}`);
+    const [trabajadores_lineas, setTrabajadoresLineas] = useState(null);    
     const [hoy] = useState(new Date);
     const [show, setShow] = useState(false);
     const [linea_id, setLinea_id] = useState(null);
     var dentrodeunmes=null;
     var fechaenunmesString=null;
+    var fecha_hoy=Date.parse(hoy);
+    var mesEnMilisegundos = 1000 * 60 * 60 * 24 * 30;
+    var enunmes=fecha_hoy+mesEnMilisegundos;
+    dentrodeunmes = new Date(enunmes);
+    fechaenunmesString = dentrodeunmes.getFullYear() + '-' + ('0' + (dentrodeunmes.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunmes.getDate()).slice(-2);
+    const [filtro, setFiltro] = useState(`? parte__empresa__id=${user['tec-user'].perfil.empresa.id}&fecha_plan__lte=${fechaenunmesString}`);
 
     const [datos, setDatos] = useState({
         fecha_inicio: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
@@ -28,13 +33,8 @@ const ManPorEquipos = () => {
         trabajador: user['tec-user'].perfil.usuario,
     });
     
-    useEffect(()=>{
-        var fecha_hoy=Date.parse(hoy);
-        var mesEnMilisegundos = 1000 * 60 * 60 * 24 * 30;
-        var enunmes=fecha_hoy+mesEnMilisegundos;
-        dentrodeunmes = new Date(enunmes);
-        fechaenunmesString = dentrodeunmes.getFullYear() + '-' + ('0' + (dentrodeunmes.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunmes.getDate()).slice(-2);
-        axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_activas/?fecha_plan__lte=${fechaenunmesString}`+ filtro,{
+    useEffect(()=>{        
+        axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_activas/`+ filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
                 }
@@ -228,6 +228,9 @@ const ManPorEquipos = () => {
                                 .catch( err => {
                                     console.log(err);  
                                 });
+                            }
+                            else{
+                                console.log('comprobamos si todas las tareas del parte están terminada para finalizar parte');
                             }
                         })
                         .catch( err => {
