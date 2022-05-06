@@ -11,7 +11,12 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
     const [secciones, setSecciones] = useState(null);
     const [zonas, setZonas] = useState(null);
     const [equipos, setEquipos] = useState(null);
-    const [estados, setEstados] = useState(null);  
+    const [estados, setEstados] = useState(null);
+    var fecha_hoy=Date.parse(new Date);
+    var mesEnMilisegundos = 1000 * 60 * 60 * 24 * 30;
+    var enunmes=fecha_hoy+mesEnMilisegundos;
+    var dentrodeunmes = new Date(enunmes);
+    var fechaenunmesString = dentrodeunmes.getFullYear() + '-' + ('0' + (dentrodeunmes.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunmes.getDate()).slice(-2);  
 
     const [datos, setDatos] = useState({
         id: '',
@@ -28,7 +33,7 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
         finalizada:false,
         fecha_inicio_lte:'',
         fecha_inicio_gte:'',
-        fecha_plan_lte: '',
+        fecha_plan_lte: fechaenunmesString,
         fecha_plan_gte:'',
         estados:'',
     });

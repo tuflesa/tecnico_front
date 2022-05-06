@@ -228,9 +228,46 @@ const ManPorEquipos = () => {
                                 .catch( err => {
                                     console.log(err);  
                                 });
-                            }
+                                updateTarea();
+                            }                            
                             else{
-                                console.log('comprobamos si todas las tareas del parte están terminada para finalizar parte');
+                                axios.get(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_trabajo/?parte=${re.data.parte.id}`, {
+                                    headers: {
+                                        'Authorization': `token ${token['tec-token']}`
+                                      }     
+                                })
+                                .then( res => {
+                                    var contador = 0;
+                                    for(var x=0;x<res.data.length;x++){
+                                        if(res.data[x].estado===3){
+                                            contador=contador+1;
+                                            if(contador===res.data.length){
+                                                axios.patch(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${res.data[0].parte}/`,{
+                                                    //fecha_finalizacion: hoy,
+                                                    estado: 3,
+                                                },
+                                                {
+                                                    headers: {
+                                                        'Authorization': `token ${token['tec-token']}`
+                                                    }
+                                                })
+                                                .then( re => {
+                                                    console.log('parte finalizado');
+                                                })
+                                                .catch( err => {
+                                                    console.log(err);  
+                                                });
+                                            }
+                                        }
+                                        else{
+                                            console.log('hay lineas sin finalizar');
+                                        }
+                                    }
+
+                                })
+                                .catch( err => {
+                                    console.log(err);  
+                                });
                             }
                         })
                         .catch( err => {

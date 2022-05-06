@@ -16,8 +16,8 @@ const ManLineasListado = () => {
     const [user] = useCookies(['tec-user']);
     const [lineas, setLineas] = useState(null);
     //const [lineas_finalizadas, setLineasFinalizadas] = useState(null);
-    const [hoy] = useState(new Date);
-    var fecha_hoy=Date.parse(hoy);
+    //const [hoy] = useState(new Date);
+    var fecha_hoy=Date.parse(new Date);
     var mesEnMilisegundos = 1000 * 60 * 60 * 24 * 30;
     var enunmes=fecha_hoy+mesEnMilisegundos;
     var dentrodeunmes = new Date(enunmes);
