@@ -94,8 +94,17 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateP
                 }
             })
             .then( r => {
+                var estado=null;
+                if(parte.estado===3){
+                    estado=1;
+                }
+                else{
+                    estado=parte.estado;
+                }
                 axios.patch(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${parte.id}/`,{
                     tarea: newTareaParte,
+                    fecha_finalizacion: null,
+                    estado: estado,
                 },
                 {
                     headers: {

@@ -30,43 +30,43 @@ const ParteForm = ({parte, setParte}) => {
 
     const [datos, setDatos] = useState({
         id: parte.id ? parte.id : null,
-        nombre: parte.nombre,
-        tipo: parte.tipo,
-        creado_por: parte.creado_por,
-        finalizado: parte? parte.finalizado : false,
-        observaciones: parte.observaciones? parte.observaciones : '',
-        fecha_creacion: parte.id ? parte.fecha_creacion :(hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
-        fecha_prevista_inicio: parte? parte.fecha_prevista_inicio : '',
-        fecha_finalizacion: parte? parte.fecha_finalizacion : '',
-        empresa: parte.empresa,
-        zona: parte? parte.zona : '',
-        seccion: parte? parte.seccion : '',
-        equipo: parte? parte.equipo : '',
-        tipo_periodo: parte.id? parte.tipo_periodo : '',
-        periodo: parte.id? parte.periodo : 0,
-        tarea: parte.tarea,
-        estado: parte.estado,
-    });
-
-    useEffect(()=>{
-        setDatos({
-            id: parte.id ? parte.id : null,
-            nombre: parte.nombre,
-            tipo: parte.tipo,
+            nombre: parte?parte.nombre:null,
+            tipo: parte?parte.tipo:null,
             creado_por: parte.creado_por,
             finalizado: parte? parte.finalizado : false,
             observaciones: parte.observaciones? parte.observaciones : '',
             fecha_creacion: parte.id ? parte.fecha_creacion :(hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
             fecha_prevista_inicio: parte? parte.fecha_prevista_inicio : '',
             fecha_finalizacion: parte? parte.fecha_finalizacion : '',
-            empresa: parte.empresa,
+            empresa: parte?parte.empresa:null,
             zona: parte? parte.zona : '',
             seccion: parte? parte.seccion : '',
             equipo: parte? parte.equipo : '',
             tipo_periodo: parte.id? parte.tipo_periodo : '',
             periodo: parte.id? parte.periodo : 0,
-            tarea: parte.tarea,
-            estado: parte.estado,
+            tarea: parte?parte.tarea:null,
+            estado: parte?parte.estado:null,
+    });
+
+    useEffect(()=>{
+        setDatos({
+            id: parte.id ? parte.id : null,
+            nombre: parte?parte.nombre:null,
+            tipo: parte?parte.tipo:null,
+            creado_por: parte.creado_por,
+            finalizado: parte? parte.finalizado : false,
+            observaciones: parte.observaciones? parte.observaciones : '',
+            fecha_creacion: parte.id ? parte.fecha_creacion :(hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
+            fecha_prevista_inicio: parte? parte.fecha_prevista_inicio : '',
+            fecha_finalizacion: parte? parte.fecha_finalizacion : '',
+            empresa: parte?parte.empresa:null,
+            zona: parte? parte.zona : '',
+            seccion: parte? parte.seccion : '',
+            equipo: parte? parte.equipo : '',
+            tipo_periodo: parte.id? parte.tipo_periodo : '',
+            periodo: parte.id? parte.periodo : 0,
+            tarea: parte?parte.tarea:null,
+            estado: parte?parte.estado:null,
         });
     },[parte]);
   
@@ -278,7 +278,23 @@ const ParteForm = ({parte, setParte}) => {
         })
         .catch(err => { console.log(err);})
     }
+    
+    //desactivamos los tipos de periodo y los periodos si no es opcion preventivo
+    const handleDisabled = () => {
+        if (datos.tipo !== 1){
+            return datos.tipo!=='1';
+        } 
+        else{
+            return datos.tipo!==1;
+        }
+        
+    }
+    
+    const handleDisabled2 = () => {
+        return user['tec-user'].perfil.nivel_acceso.nombre === 'local'
+    }
 
+    
     const handleInputChange = (event) => {
         setDatos({
             ...datos,
@@ -292,19 +308,6 @@ const ParteForm = ({parte, setParte}) => {
             ...datos,
             [event.target.name] : event.target.value
         })  
-    }
-    
-    //desactivamos los tipos de periodo y los periodos si no es opcion preventivo
-    const handleDisabled = () => {
-        if (datos.tipo !== '1') {
-            datos.periodo = 0;
-            datos.tipo_periodo = '';
-        } 
-        return datos.tipo!=='1'
-    }
-    
-    const handleDisabled2 = () => {
-        return user['tec-user'].perfil.nivel_acceso.nombre === 'local'
     }
 
     const crearParte = (event) => {
@@ -398,8 +401,8 @@ const ParteForm = ({parte, setParte}) => {
             zona: datos.zona,
             seccion: datos.seccion,
             equipo: datos.equipo,
-            tipo_periodo: datos.tipo==='1'? datos.tipo_periodo : '',
-            periodo: datos.tipo==='1'? datos.periodo : 0,
+            tipo_periodo: datos.tipo=== 1? datos.tipo_periodo : '',
+            periodo: datos.tipo=== 1? datos.periodo : 0,
             estado: datos.fecha_prevista_inicio?1:4,
         }, {
             headers: {
@@ -521,7 +524,8 @@ const ParteForm = ({parte, setParte}) => {
                                                 onChange={handleInputChange}
                                                 placeholder="Tipo Periodo"
                                                 disabled={handleDisabled()}>  
-                                                {datos.tipo_periodo===''?  <option key={0} value={''}>Seleccionar</option>:''}                                                  
+                                                {datos.tipo_periodo===''?  <option key={0} value={''}>Seleccionar</option>:''}   
+                                                {parte.tipo_periodo===null?  <option key={0} value={''}>Seleccionar</option>:''}                                               
                                                 {tipo_periodo && tipo_periodo.map( periodo => {
                                                     return (
                                                     <option key={periodo.id} value={periodo.id}>
