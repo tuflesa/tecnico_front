@@ -26,12 +26,13 @@ const ManLineasListado = () => {
     const [activos, setActivos] = useState('');
     const [linea_id, setLinea_id] = useState(null);
     const [show, setShow] = useState(false);
+    const [actualizar, setActualizar] = useState('');
 
     const actualizaFiltro = (str, act) => {        
         setActivos(act);
         setFiltro(str);
     }
-    
+
     useEffect(()=>{
         axios.get(BACKEND_SERVER + '/api/mantenimiento/listado_lineas_partes/'+ filtro,{
             headers: {
@@ -76,7 +77,7 @@ const ManLineasListado = () => {
         .catch( err => {
             console.log(err);
         });
-    }, [token, filtro, activos]);     
+    }, [token, filtro, activos, actualizar]); 
 
     const BorrarLinea =(linea) =>{ 
         axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/?tarea=${linea.tarea.id}`,{
@@ -102,6 +103,7 @@ const ManLineasListado = () => {
                         })
                         .then(r =>{
                             alert('tarea eliminada');
+                            setActualizar(linea);  
                         })
                         .catch (err=>{console.log((err));});
                     })
@@ -125,15 +127,16 @@ const ManLineasListado = () => {
                         })
                         .then(ress =>{
                             alert('Trabajo detenido, no volverá a generar linea');
+                            setActualizar(linea);  
                         })
                         .catch (err=>{console.log((err));});
                     }
                 }
-            }            
+            }       
         })
         .catch( err => {
             console.log(err);
-        });        
+        });                 
     }
 
     const listarTrabajadores = (linea_id)=>{

@@ -13,6 +13,7 @@ const ManListaPartes = () => {
     const [partes, setPartes]  = useState(null);
     const [filtro, setFiltro] = useState(`?estado=${''}`);
     const [activos, setActivos] = useState('');
+    const [actualizar, setActualizar] = useState('');
 
     const actualizaFiltro = (str, act) => {
         setActivos(act);
@@ -63,7 +64,7 @@ const ManListaPartes = () => {
         .catch( err => {
             console.log(err);
         });
-    }, [token, filtro, activos]);    
+    }, [token, filtro, activos, actualizar]);
 
     const BorrarParte =(parte) =>{ 
         if(parte.tarea.length===0){
@@ -76,6 +77,7 @@ const ManListaPartes = () => {
                 })
                 .then(res =>{
                     alert('Parte eliminado');
+                    setActualizar(parte); 
                 })
                 .catch (err=>{console.log((err));});
             }
@@ -115,6 +117,7 @@ const ManListaPartes = () => {
                         })
                         .then(res =>{
                             alert('Parte y trabajos eliminados satisfactoriamente');
+                            setActualizar(parte); 
                         })
                         .catch (err=>{console.log((err));});
                     }
@@ -123,7 +126,7 @@ const ManListaPartes = () => {
             .catch( err => {
                 console.log(err); 
             })
-        }
+        }         
     }
 
     return (
