@@ -20,7 +20,7 @@ const ManPorEquipos = () => {
     var dentrodeunmes=null;
     var fechaenunmesString=null;
     var fecha_hoy=Date.parse(hoy);
-    var mesEnMilisegundos = 1000 * 60 * 60 * 24 * 30;
+    var mesEnMilisegundos = 1000 * 60 * 60 * 24 * 6;  //cambiado a 7 días en vez del mes
     var enunmes=fecha_hoy+mesEnMilisegundos;
     dentrodeunmes = new Date(enunmes);
     fechaenunmesString = dentrodeunmes.getFullYear() + '-' + ('0' + (dentrodeunmes.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunmes.getDate()).slice(-2);
@@ -294,7 +294,12 @@ const ManPorEquipos = () => {
         <Container class extends>
             <Row class extends>                
                 <Col>
-                    <h5 className="mb-3 mt-3">Listado de Trabajos {user['tec-user'].get_full_name}</h5>                    
+                    <h5 className="mb-3 mt-3" style={ { color: 'red' } }>Listado de Trabajos {user['tec-user'].get_full_name}</h5>   
+                    <h5>Listado de trabajos por prioridades, si se puede realizar, no podemos saltarlo.</h5>                 
+                    <h5>Acciones:</h5>
+                    <h5><Tools/> ----> Para iniciar un trabajo</h5>
+                    <h5><FileCheck/> ----> Para finalizar un trabajo</h5>
+                    <h5><Receipt/> ----> Listado del personal que está interviniendo en este trabajo</h5>
                     <Table striped bordered hover>
                         <thead>
                             <tr>
@@ -304,7 +309,7 @@ const ManPorEquipos = () => {
                                 <th>Observaciones</th>
                                 {/* <th>Especialidad</th> */}
                                 {/* <th>Estado</th> */}
-                                <th>Fecha Plan</th>
+                                {/* {<th>Fecha Plan</th>} */}
                                 <th>Fecha Inicio</th>
                                 <th>Fecha Fin</th>
                                 <th>Acciones</th>
@@ -320,7 +325,7 @@ const ManPorEquipos = () => {
                                         <td>{linea.tarea.observaciones}</td>
                                         {/* <td>{linea.tarea.especialidad_nombre}</td> */}
                                         {/* <td>{linea.estado.nombre}</td> */}
-                                        <td>{linea.fecha_plan? invertirFecha(String(linea.fecha_plan)):''}</td>
+                                        {/* <td>{linea.fecha_plan? invertirFecha(String(linea.fecha_plan)):''}</td> */}
                                         <td>{linea.fecha_inicio?invertirFecha(String(linea.fecha_inicio)):''}</td>
                                         <td>{linea.fecha_fin?invertirFecha(String(linea.fecha_fin)):''}</td>
                                         <td>

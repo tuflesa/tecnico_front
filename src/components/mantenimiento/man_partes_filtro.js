@@ -192,7 +192,8 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
               }
         })
         .then( res => {
-            setEstados(res.data.sort(function(a, b){
+            var filtrado = res.data.filter(s=> s.id!==2);
+            setEstados(filtrado.sort(function(a, b){
                 if(a.nombre > b.nombre){
                     return 1;
                 }
