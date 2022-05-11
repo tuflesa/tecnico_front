@@ -142,6 +142,7 @@ const ManListaPartes = () => {
                     <Table striped bordered hover>
                         <thead>
                             <tr>
+                                <th>Numero</th>
                                 <th>Nombre</th>
                                 <th>Tipo</th>
                                 <th>Creado Por</th>
@@ -153,6 +154,7 @@ const ManListaPartes = () => {
                             {partes && partes.map( parte => {
                                 return (
                                     <tr key={parte.id}>
+                                        <td>{parte.num_parte}</td>
                                         <td>{parte.nombre}</td>
                                         <td>{parte.tipo_nombre}</td>
                                         <td>{parte.creado_por.get_full_name}</td>

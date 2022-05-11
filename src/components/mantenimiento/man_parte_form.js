@@ -46,6 +46,7 @@ const ParteForm = ({parte, setParte}) => {
             periodo: parte.id? parte.periodo : 0,
             tarea: parte?parte.tarea:null,
             estado: parte?parte.estado:null,
+            num_parte: parte? parte.num_parte:null,
     });
 
     useEffect(()=>{
@@ -67,6 +68,7 @@ const ParteForm = ({parte, setParte}) => {
             periodo: parte.id? parte.periodo : 0,
             tarea: parte?parte.tarea:null,
             estado: parte?parte.estado:null,
+            num_parte: parte? parte.num_parte:null,
         });
     },[parte]);
   
@@ -453,6 +455,15 @@ const ParteForm = ({parte, setParte}) => {
                     <h5 className="pb-3 pt-1 mt-2">Datos básicos:</h5>
                     <Form >
                         <Row>
+                            <Col>
+                                <Form.Group controlId="num_parte">
+                                    <Form.Label>Numero Parte</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='num_parte' 
+                                                disabled
+                                                value={datos.num_parte}/>
+                                </Form.Group>
+                            </Col> 
                             <Col>
                                 <Form.Group id="nombre">
                                     <Form.Label>Nombre(*)</Form.Label>

@@ -30,6 +30,7 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
         fecha_prevista_inicio_lte:'',
         fecha_prevista_inicio_gte:'',
         estados: '',
+        num_parte: '',
     });    
 
     useEffect(() => {
@@ -209,7 +210,7 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
     }, [token]);
 
     useEffect(()=>{
-        const filtro1 = `?nombre__icontains=${datos.nombre}&tipo=${datos.tipotarea}&observaciones__icontains=${datos.observaciones}&creado_por=${datos.creado_por}&finalizado=${datos.finalizado}&fecha_prevista_inicio__lte=${datos.fecha_prevista_inicio_lte}&fecha_prevista_inicio__gte=${datos.fecha_prevista_inicio_gte}&estado=${datos.estados==='5'?'':datos.estados}`;
+        const filtro1 = `?nombre__icontains=${datos.nombre}&tipo=${datos.tipotarea}&observaciones__icontains=${datos.observaciones}&creado_por=${datos.creado_por}&finalizado=${datos.finalizado}&fecha_prevista_inicio__lte=${datos.fecha_prevista_inicio_lte}&fecha_prevista_inicio__gte=${datos.fecha_prevista_inicio_gte}&estado=${datos.estados==='5'?'':datos.estados}&num_parte__icontains=${datos.num_parte}`;
         let filtro2 = `&empresa__id=${datos.empresa}`;
         if (datos.empresa !== ''){
             filtro2 = filtro2 + `&zona__id=${datos.zona}`;
@@ -223,7 +224,7 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
         const filtro = filtro1 + filtro2;
         const activos = datos.estados;
         actualizaFiltro(filtro, activos);
-    },[datos.id, datos.nombre, datos.tipotarea, datos.observaciones, datos.creado_por, datos.finalizado, datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.fecha_prevista_inicio_gte, datos.fecha_prevista_inicio_lte, datos.estados, token]);
+    },[datos.id, datos.nombre, datos.tipotarea, datos.observaciones, datos.creado_por, datos.finalizado, datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.fecha_prevista_inicio_gte, datos.fecha_prevista_inicio_lte, datos.estados, datos.num_parte, token]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -383,6 +384,16 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
                     </Col>
                 </Row>
                 <Row>
+                    <Col>
+                        <Form.Group controlId="num_parte">
+                            <Form.Label>Numero de Parte</Form.Label>
+                            <Form.Control type="text" 
+                                        name='num_parte' 
+                                        value={datos.num_parte}
+                                        onChange={handleInputChange}                                        
+                                        placeholder="Numero contiene"/>
+                        </Form.Group>
+                    </Col>  
                     <Col>
                         <Form.Group controlId="observaciones">
                             <Form.Label>Observaciones contiene</Form.Label>

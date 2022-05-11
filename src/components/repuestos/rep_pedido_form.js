@@ -443,7 +443,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                     <h5 className="pb-3 pt-1 mt-2">Datos básicos:</h5>
                     <Form >
                         <Row> 
-                        <Col>
+                            <Col>
                                 <Form.Group controlId="numero">
                                     <Form.Label>Numero Pedido</Form.Label>
                                     <Form.Control type="text" 
