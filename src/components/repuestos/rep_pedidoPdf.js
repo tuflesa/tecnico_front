@@ -12,6 +12,14 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
             }
     }); */
 
+    const formatNumber = (numero) =>{
+        return new Intl.NumberFormat('de-DE',{ style: 'currency', currency: 'EUR' }).format(numero)
+    }
+
+    const formatPorcentaje = (numero) =>{
+        return new Intl.NumberFormat('de-DE').format(numero)
+    }
+
     function parseData(){
         if(linea){
             return linea.map((data, i)=>{
@@ -22,9 +30,9 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
                                 <View style={styles.section6}><Text>{data.repuesto.nombre + " - " + data.repuesto.fabricante + " - " + data.repuesto.modelo}</Text></View>
                                 <View style={styles.section7}><Text>{data.cantidad}</Text></View>
                                 <View style={styles.section7}><Text>{data.repuesto.unidad_siglas}</Text></View>
-                                <View style={styles.section9}><Text>{data.precio + '€'}</Text></View>
-                                <View style={styles.section9}><Text>{data.descuento + '%'}</Text></View>
-                                <View style={styles.section9}><Text>{data.total + '€'}</Text></View>
+                                <View style={styles.section9}><Text>{formatNumber(data.precio)}</Text></View>
+                                <View style={styles.section9}><Text>{formatPorcentaje(data.descuento) + '%'}</Text></View>
+                                <View style={styles.section9}><Text>{formatNumber(data.total)}</Text></View>
                             </View>
                         </View>
                     </View>
@@ -43,9 +51,9 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
                                 <View style={styles.section6}><Text>{data.descripcion}</Text></View>
                                 <View style={styles.section7}><Text>{data.cantidad}</Text></View>
                                 <View style={styles.section7}><Text>{null}</Text></View>
-                                <View style={styles.section9}><Text>{data.precio + '€'}</Text></View>
-                                <View style={styles.section9}><Text>{data.descuento + '%'}</Text></View>
-                                <View style={styles.section9}><Text>{data.total + '€'}</Text></View>
+                                <View style={styles.section9}><Text>{formatNumber(data.precio)}</Text></View>
+                                <View style={styles.section9}><Text>{formatPorcentaje(data.descuento) + '%'}</Text></View>
+                                <View style={styles.section9}><Text>{formatNumber(data.total)}</Text></View>
                             </View>
                         </View>
                     </View>

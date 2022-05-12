@@ -113,6 +113,13 @@ const LineaAdicionalForm = ({show, pedido_id, handleCloseLineaAdicional, updateP
         }
     }
 
+    const formatNumber = (numero) =>{
+        return new Intl.NumberFormat("ES-ES", {
+            style: 'currency',
+            currency: 'EUR',
+        }).format(numero)
+    }
+
     return (
         <Modal show={show} backdrop="static" keyboard={ false } animation={false}>
                 <Modal.Header closeButton>  

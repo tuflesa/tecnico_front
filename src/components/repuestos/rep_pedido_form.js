@@ -15,6 +15,7 @@ import VistaPdf from './rep_pedidoPdf';
 import { PDFViewer } from '@react-pdf/renderer';
 import VistaIngPdf from './rep_pedidoIngPdf';
 import moment from 'moment';
+import { locales } from 'moment';
 
 const PedidoForm = ({pedido, setPedido}) => {
     const [token] = useCookies(['tec-token']);
@@ -427,6 +428,14 @@ const PedidoForm = ({pedido, setPedido}) => {
         }
     }
 
+    const formatNumber = (numero) =>{
+        return new Intl.NumberFormat('de-DE',{ style: 'currency', currency: 'EUR' }).format(numero)
+    }
+
+    const formatPorcentaje = (numero) =>{
+        return new Intl.NumberFormat('de-DE').format(numero)
+    }
+
     const handleDisabled = () => {
         return user['tec-user'].perfil.nivel_acceso.nombre === 'local' || handleDeshabilitar()
     }
@@ -698,9 +707,10 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                         <td>{linea.repuesto.nombre + ' - ' + linea.repuesto.fabricante + ' - ' + linea.repuesto.modelo}</td>
                                                         <td>{linea.cantidad}</td>
                                                         <td>{linea.repuesto.unidad_nombre}</td>
-                                                        <td>{linea.precio + '€'}</td>
-                                                        <td>{linea.descuento + '%'}</td>
-                                                        <td>{linea.total + '€'}</td>
+                                                        <td>{formatNumber(linea.precio)}</td>
+                                                        <td>{formatPorcentaje(linea.descuento)+'%'}</td>
+                                                        {/* <td>{linea.total + '€'}</td> */}
+                                                        <td>{formatNumber(linea.total)}</td>
                                                         <td>{linea.cantidad - linea.por_recibir}</td>
                                                         <td>{linea.por_recibir}</td>
                                                         <td>
@@ -750,9 +760,9 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                     <tr key={lineaAdicional.id}>
                                                         <td>{lineaAdicional.descripcion}</td>
                                                         <td>{lineaAdicional.cantidad}</td>
-                                                        <td>{lineaAdicional.precio + '€'}</td>
+                                                        <td>{formatNumber(lineaAdicional.precio)}</td>
                                                         <td>{lineaAdicional.descuento + '%'}</td>
-                                                        <td>{lineaAdicional.total + '€'}</td>
+                                                        <td>{formatNumber(lineaAdicional.total)}</td>
                                                         <td>{lineaAdicional.cantidad - lineaAdicional.por_recibir}</td>
                                                         <td>{lineaAdicional.por_recibir}</td>
                                                         <td>

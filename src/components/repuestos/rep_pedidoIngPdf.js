@@ -18,6 +18,14 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, empresa, lineas_
         console.log(empresa);
     }) */
 
+    const formatNumber = (numero) =>{
+        return new Intl.NumberFormat('de-DE',{ style: 'currency', currency: 'EUR' }).format(numero)
+    }
+
+    const formatPorcentaje = (numero) =>{
+        return new Intl.NumberFormat('de-DE').format(numero)
+    }
+
     function parseData(){
         if(linea){
             return linea.map((data, i)=>{
@@ -28,9 +36,9 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, empresa, lineas_
                                 <View style={styles.section6}><Text>{data.repuesto.nombre + " - " + data.repuesto.fabricante + " - " + data.repuesto.modelo}</Text></View>
                                 <View style={styles.section7}><Text>{data.cantidad}</Text></View>
                                 <View style={styles.section7}><Text>{data.repuesto.unidad_siglas}</Text></View>
-                                <View style={styles.section9}><Text>{data.precio + '€'}</Text></View>
-                                <View style={styles.section9}><Text>{data.descuento + '%'}</Text></View>
-                                <View style={styles.section9}><Text>{data.total + '€'}</Text></View>
+                                <View style={styles.section9}><Text>{formatNumber(data.precio)}</Text></View>
+                                <View style={styles.section9}><Text>{formatPorcentaje(data.descuento) + '%'}</Text></View>
+                                <View style={styles.section9}><Text>{formatNumber(data.total)}</Text></View>
                             </View>
                         </View>
                     </View>
@@ -49,9 +57,9 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, empresa, lineas_
                                 <View style={styles.section6}><Text>{data.descripcion}</Text></View>
                                 <View style={styles.section7}><Text>{data.cantidad}</Text></View>
                                 <View style={styles.section7}><Text>{null}</Text></View>
-                                <View style={styles.section9}><Text>{data.precio + '€'}</Text></View>
-                                <View style={styles.section9}><Text>{data.descuento + '%'}</Text></View>
-                                <View style={styles.section9}><Text>{data.total + '€'}</Text></View>
+                                <View style={styles.section9}><Text>{formatNumber(data.precio)}</Text></View>
+                                <View style={styles.section9}><Text>{formatPorcentaje(data.descuento) + '%'}</Text></View>
+                                <View style={styles.section9}><Text>{formatNumber(data.total)}</Text></View>
                             </View>
                         </View>
                     </View>
@@ -98,42 +106,42 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, empresa, lineas_
             padding: 5,
             flex: 1,
             flexDirection: "column",
-            fontSize: 13
+            fontSize: 10
         },
         section44: {
             margin: 5,
             padding: 5,
             flex: 5,
             flexDirection: "column",
-            fontSize: 13
+            fontSize: 10
         },
         section4: {
             margin: 5,
             padding: 5,
             flex: 2,
             flexDirection: "column",
-            fontSize: 13
+            fontSize: 10
         },
         section5: {
             margin: 5,
             padding: 5,
             flex: 1,
             flexDirection: "column",
-            fontSize: 11
+            fontSize: 8
         },
         section6: {
             margin: 5,
             padding: 5,
             flex: 6,
             flexDirection: "column",
-            fontSize: 13,
+            fontSize: 10,
         },
         section7: {
             margin: 5,
             padding: 5,
             flex: 1,
             flexDirection: "column",
-            fontSize: 13,
+            fontSize: 10,
         },
         section8: {
             margin: 5,
@@ -141,7 +149,7 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, empresa, lineas_
             flex: 2,
             flexDirection: "column",
             textAlign: 'center',
-            fontSize: 13,
+            fontSize: 10,
         },
         section9: {
             margin: 5,
@@ -149,13 +157,13 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, empresa, lineas_
             flex: 2,
             flexDirection: "column",
             textAlign: 'right',
-            fontSize: 13,
+            fontSize: 10,
         },
         section10: {
             margin: 2,
             flex: 3,
             flexDirection: "column",
-            fontSize: 11
+            fontSize: 8
         },
         sectionTabla: {
             flexDirection: 'row',
@@ -164,7 +172,7 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, empresa, lineas_
         },
         pageNumber: {
             position: 'absolute',
-            fontSize: 12,
+            fontSize: 9,
             bottom: 30,
             left: 0,
             right: 0,
@@ -220,7 +228,7 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, empresa, lineas_
                     <View style={styles.page2}>
                         <View style={styles.section}>
                             <View style={styles.section3}>
-                                <Text>Observaciones pedido: {pedido.observaciones}</Text>                            
+                                <Text>Ordering remarks: {pedido.observaciones}</Text>                            
                             </View>
                         </View>
                     </View>
@@ -251,14 +259,14 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, empresa, lineas_
                 <View style={styles.page2}>
                     <View style={styles.section}>
                         <View style={styles.section3}>
-                            <Text>Observaciones pedido: {pedido.observaciones2}</Text>                            
+                            <Text>Ordering remarks:  {pedido.observaciones2}</Text>                            
                         </View>
                     </View>
                 </View>
                 <View style={styles.page2}>
                     <View style={styles.section}>
                         <View style={styles.section3}>
-                            <Text>Nota: Por favor indicar en nº de pedido en el albarán de entrega.</Text>
+                            <Text>Note: Please indicate the order number on the delivery note.</Text>
                         </View>
                     </View>
                 </View>

@@ -161,7 +161,7 @@ const ManLineasListado = () => {
                     <Table striped bordered hover>
                         <thead>
                             <tr>
-                                <th>Prioridad</th>
+                                <th>Pr.</th>
                                 <th>Nombre Parte</th>
                                 <th>Nombre Tarea</th>
                                 <th>Tipo</th>
