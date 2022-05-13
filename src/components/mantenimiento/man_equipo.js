@@ -297,22 +297,22 @@ const ManPorEquipos = () => {
                     <h5 className="mb-3 mt-3" style={ { color: 'red' } }>Listado de Trabajos {user['tec-user'].get_full_name}</h5>   
                     <h5>Listado de trabajos por prioridades, si se puede realizar, no podemos saltarlo.</h5>                 
                     <h5>Acciones:</h5>
-                    <h5><Tools/> ----> Para iniciar un trabajo</h5>
-                    <h5><FileCheck/> ----> Para finalizar un trabajo</h5>
-                    <h5><Receipt/> ----> Listado del personal que está interviniendo en este trabajo</h5>
+                    <h5><Tools/> ---- Para iniciar un trabajo</h5>
+                    <h5><FileCheck/> ---- Para finalizar un trabajo</h5>
+                    <h5><Receipt/> ---- Listado del personal que está interviniendo en este trabajo</h5>
                     <Table striped bordered hover>
                         <thead>
                             <tr>
-                                <th>Prioridad</th>
+                                <th>Pr</th>
                                 <th>Nombre Tarea</th>
                                 <th>Trabajos</th>
                                 <th>Observaciones</th>
                                 {/* <th>Especialidad</th> */}
                                 {/* <th>Estado</th> */}
                                 {/* {<th>Fecha Plan</th>} */}
-                                <th>Fecha Inicio</th>
-                                <th>Fecha Fin</th>
-                                <th>Acciones</th>
+                                <th style={{width:110}}>Fecha Inicio</th>
+                                <th style={{width:110}}>Fecha Fin</th>
+                                <th style={{width:130}}>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>

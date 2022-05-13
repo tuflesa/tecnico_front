@@ -22,11 +22,11 @@ const ListaPedidos = ({lineasPendientes, repuesto_id, show, handlerListCancelar}
                         <Table striped bordered hover>
                             <thead>
                                 <tr>
-                                    <th>Num-Pedido</th>
+                                    <th style={{width:110}}>Num-Pedido</th>
                                     <th>Proveedor</th>
                                     <th>Cant. Pendiente</th>
-                                    <th>Fecha Pedido</th>
-                                    <th>Fecha Prevista Entrega</th>
+                                    <th style={{width:110}}>Fecha Pedido</th>
+                                    <th style={{width:150}}>Fecha Prevista Entrega</th>
                                     <th>Ir al pedido</th>
                                 </tr>
                             </thead>                               

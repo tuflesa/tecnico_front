@@ -142,12 +142,12 @@ const ManListaPartes = () => {
                     <Table striped bordered hover>
                         <thead>
                             <tr>
-                                <th>Numero</th>
+                                <th style={{width:150}}>Numero</th>
                                 <th>Nombre</th>
                                 <th>Tipo</th>
                                 <th>Creado Por</th>
                                 <th>Estado</th>
-                                <th>Acciones</th>
+                                <th style={{width:80}}>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>

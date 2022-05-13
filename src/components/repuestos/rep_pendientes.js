@@ -161,12 +161,12 @@ const RepPendientes = () => {
                     <Table striped bordered hover>
                         <thead>
                         <tr>
-                                <th>Num-Pedido</th>
+                                <th style={{width:130}}>Num-Pedido</th>
                                 <th>Empresa</th>
                                 <th>Proveedor</th>
-                                <th>Fecha Pedido</th>
-                                <th>Fecha Entrega</th>
-                                <th>Fecha Prevista Entrega</th>
+                                <th style={{width:110}}>Fecha Pedido</th>
+                                <th style={{width:110}}>Fecha Entrega</th>
+                                <th style={{width:150}}>Fecha Prevista Entrega</th>
                                 <th>Creado por</th>
                                 {/* <th><Button variant="info" onClick={event =>{OrdenarPorNombre(pedfueradefecha)}}>Creado Por</Button></th> */}
                                 <th>Ir al pedido</th>

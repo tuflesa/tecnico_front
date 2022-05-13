@@ -103,15 +103,15 @@ const PedLista = () => {
                     <Table striped bordered hover>
                         <thead>
                             <tr>
-                                <th>Num-Pedido</th>
+                                <th style={{width:130}}>Num-Pedido</th>
                                 <th>Creado por</th>
                                 <th>Empresa</th>
                                 <th>Proveedor</th>
-                                <th>Fecha Pedido</th>
-                                <th>Fecha Entrega</th>
-                                <th>Fecha Prevista Entrega</th>
+                                <th style={{width:110}}>Fecha Pedido</th>
+                                <th style={{width:110}}>Fecha Entrega</th>
+                                <th style={{width:110}}>Fecha Prevista Entrega</th>
                                 <th>Finalizado</th>
-                                <th>Acciones</th>
+                                <th style={{width:90}}>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
