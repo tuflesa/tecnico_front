@@ -7,6 +7,7 @@ import ManParteDetalle from './man_parte_editar';
 import ManParteNuevo from './man_parte_nuevo';
 import ManLineasListado from './man_lineas_lista';
 import ManPorEquipos from './man_equipo';
+import ManParteNuevoMediciones from './man_parte_nuevo_mediciones';
 
 
 const Mantenimiento = () => {
@@ -16,11 +17,13 @@ const Mantenimiento = () => {
             <ManNavBar />
             <Switch> 
                 <Route path='/mantenimiento/linea_tarea/:id' component={ManLineaDetalle} />                
-                <Route path='/mantenimiento/parte/nuevo' component={ManParteNuevo} />               
+                <Route path='/mantenimiento/parte/nuevo' component={ManParteNuevo} /> 
+                <Route path='/mantenimiento/parte/nuevo_mediciones' component={ManParteNuevoMediciones} />              
                 <Route path='/mantenimiento/partes' component={ManListaPartes} /> 
                 <Route path='/mantenimiento/parte/:id' component={ManParteDetalle} />
                 <Route path='/mantenimiento/listado_tareas' component={ManLineasListado} /> 
                 <Route path='/mantenimiento/listado_tarea' component={ManPorEquipos} /> 
+                
             </Switch>
         </React.Fragment>
     )

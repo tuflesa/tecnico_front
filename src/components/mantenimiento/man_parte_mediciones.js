@@ -8,7 +8,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import LineaTareaNueva from './man_parte_lineatarea';
 import LineasPartesMov from './man_parte_lineas_mov';
 
-const ParteForm = ({parte, setParte}) => {
+const ParteMediciones = ({parte, setParte}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
 
@@ -31,7 +31,7 @@ const ParteForm = ({parte, setParte}) => {
     const [datos, setDatos] = useState({
         id: parte.id ? parte.id : null,
             nombre: parte?parte.nombre:null,
-            tipo: parte?parte.tipo:null,
+            tipo: 4,
             creado_por: parte.creado_por,
             finalizado: parte? parte.finalizado : false,
             observaciones: parte.observaciones? parte.observaciones : '',
@@ -53,7 +53,7 @@ const ParteForm = ({parte, setParte}) => {
         setDatos({
             id: parte.id ? parte.id : null,
             nombre: parte?parte.nombre:null,
-            tipo: parte?parte.tipo:null,
+            tipo: 4,
             creado_por: parte.creado_por,
             finalizado: parte? parte.finalizado : false,
             observaciones: parte.observaciones? parte.observaciones : '',
@@ -72,28 +72,6 @@ const ParteForm = ({parte, setParte}) => {
         });
     },[parte]);
   
-    useEffect(() => {
-        axios.get(BACKEND_SERVER + '/api/mantenimiento/tipo_tarea/',{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            setTipoParte(res.data.sort(function(a, b){
-                if(a.nombre > b.nombre){
-                    return 1;
-                }
-                if(a.nombre < b.nombre){
-                    return -1;
-                }
-                return 0;
-            }))
-        })
-        .catch( err => {
-            console.log(err); 
-        })       
-    }, [token]);
-
     useEffect(() => {
         parte.id && axios.get(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo_detalle/${parte.id}/`,{
             headers: {
@@ -280,18 +258,7 @@ const ParteForm = ({parte, setParte}) => {
         })
         .catch(err => { console.log(err);})
     }
-    
-    //desactivamos los tipos de periodo y los periodos si no es opcion preventivo
-    const handleDisabled = () => {
-        if (datos.tipo !== 1){
-            return datos.tipo!=='1';
-        } 
-        else{
-            return datos.tipo!==1;
-        }
-        
-    }
-    
+
     const handleDisabled2 = () => {
         return user['tec-user'].perfil.nivel_acceso.nombre === 'local'
     }
@@ -510,19 +477,12 @@ const ParteForm = ({parte, setParte}) => {
                             <Col>
                                 <Form.Group controlId="tipo">
                                     <Form.Label>Tipo Mantenimiento (*)</Form.Label>
-                                    <Form.Control as="select"  
+                                    <Form.Control type='text' 
                                                 name='tipo' 
-                                                value={datos.tipo}
+                                                value="Mediciones"
                                                 onChange={handleInputChange}
-                                                placeholder="Tipo Mantenimiento"> 
-                                                {datos.id===null?  <option key={0} value={''}>Seleccionar</option>:''}                                                   
-                                                {tipoparte && tipoparte.map( tipo => {
-                                                    return (
-                                                    <option key={tipo.id} value={tipo.id}>
-                                                        {tipo.nombre}
-                                                    </option>
-                                                    )
-                                                })}
+                                                placeholder="Tipo Mantenimiento"
+                                                disabled={true} >
                                     </Form.Control>
                                 </Form.Group>
                             </Col> 
@@ -533,8 +493,7 @@ const ParteForm = ({parte, setParte}) => {
                                                 name='tipo_periodo' 
                                                 value={datos.tipo_periodo}
                                                 onChange={handleInputChange}
-                                                placeholder="Tipo Periodo"
-                                                disabled={handleDisabled()}>  
+                                                placeholder="Tipo Periodo">  
                                                 {datos.tipo_periodo===''?  <option key={0} value={''}>Seleccionar</option>:''}   
                                                 {parte.tipo_periodo===null?  <option key={0} value={''}>Seleccionar</option>:''}                                               
                                                 {tipo_periodo && tipo_periodo.map( periodo => {
@@ -553,8 +512,7 @@ const ParteForm = ({parte, setParte}) => {
                                     <Form.Control as="select" 
                                                     value={datos.periodo}
                                                     name='periodo'
-                                                    onChange={handleInputChange}
-                                                    disabled={handleDisabled()}>
+                                                    onChange={handleInputChange}>
                                                     {datos.periodo===0?  <option key={0} value={''}>Seleccionar</option>:''}
                                                     <option key={1} value={1}>1</option>
                                                     <option key={2} value={2}>2</option>
@@ -774,4 +732,4 @@ const ParteForm = ({parte, setParte}) => {
         </Container>
     )
 }
-export default ParteForm;
+export default ParteMediciones;

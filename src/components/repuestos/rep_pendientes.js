@@ -145,8 +145,10 @@ const RepPendientes = () => {
                                         </td>
                                         <td>
                                         <Receipt className="mr-3 pencil" onClick={event =>{listarPedidos(pendiente.repuesto.id)}}/>
+                                        <Link to={`/repuestos/${pendiente.repuesto.id}`}>
+                                                <PencilFill className="mr-3 pencil"/>
+                                        </Link>
                                         </td>
-
                                     </tr>
                                 )
                             })
