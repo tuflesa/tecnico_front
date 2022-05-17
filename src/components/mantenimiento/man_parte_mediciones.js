@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
-import LineaTareaNueva from './man_parte_lineatarea';
+import LineaMedicionNueva from './man_parte_lineamediciones';
 import LineasPartesMov from './man_parte_lineas_mov';
 
 const ParteMediciones = ({parte, setParte}) => {
@@ -707,11 +707,11 @@ const ParteMediciones = ({parte, setParte}) => {
                     </Form.Row>                                                
                 </React.Fragment> 
             : null} 
-            <LineaTareaNueva     show={show_linea}
-                                handleCloseLinea ={cerrarAddLinea}
-                                tareaAsignadas={parte.tarea}
-                                parte={parte}
-                                updateParte = {updateParte}
+            <LineaMedicionNueva     show={show_linea}
+                                    handleCloseLinea ={cerrarAddLinea}
+                                    tareaAsignadas={parte.tarea}
+                                    parte={parte}
+                                    updateParte = {updateParte}
             />
             <LineasPartesMov    show={show_listlineastareas}
                                 handleCloseList ={cerrarAddLineaPartes}

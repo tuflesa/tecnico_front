@@ -79,7 +79,8 @@ const ParteForm = ({parte, setParte}) => {
               }
         })
         .then( res => {
-            setTipoParte(res.data.sort(function(a, b){
+            var filtrado = res.data.filter(s=> s.id!==4);
+            setTipoParte(filtrado.sort(function(a, b){
                 if(a.nombre > b.nombre){
                     return 1;
                 }

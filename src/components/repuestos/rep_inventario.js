@@ -37,9 +37,8 @@ const RepInventario = () => {
                 r['articulo'] = r.repuesto.nombre;
                 r['fabricante'] = r.repuesto.fabricante;
                 r['nombre_comun']=r.repuesto.nombre_comun;
+                r['id_rep']=r.repuesto.id;
             })}
-            console.log('inventario:----');
-            console.log(res.data);
             setListInventario(res.data.sort(function(a, b){
                 if(a.articulo > b.articulo){
                     return 1;
@@ -66,7 +65,7 @@ const RepInventario = () => {
                     <h5 className="mb-3 mt-3">Inventario empresa {datos.empresa__nombre}</h5>
                     <ExcelFile filename={"ExcelExportExample"} element={<button>Exportar a Excel</button>}>
                         <ExcelSheet data={listInventario} name="Inventario">
-                            <ExcelColumn label="Id" value="id"/>
+                            <ExcelColumn label="Id" value="id_rep"/>
                             <ExcelColumn label="Nombre" value="articulo"/>
                             <ExcelColumn label="Descripción Etiqueta" value="nombre_comun"/>
                             <ExcelColumn label="Fabricante" value="fabricante"/>
