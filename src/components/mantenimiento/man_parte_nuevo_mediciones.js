@@ -1,5 +1,4 @@
 import React, {useState} from 'react';
-import ParteForm from './man_parte_form';
 import { useCookies } from 'react-cookie';
 import ParteMediciones from './man_parte_mediciones';
 

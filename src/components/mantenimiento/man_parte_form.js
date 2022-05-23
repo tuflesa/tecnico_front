@@ -30,23 +30,23 @@ const ParteForm = ({parte, setParte}) => {
 
     const [datos, setDatos] = useState({
         id: parte.id ? parte.id : null,
-            nombre: parte?parte.nombre:null,
-            tipo: parte?parte.tipo:null,
-            creado_por: parte.creado_por,
-            finalizado: parte? parte.finalizado : false,
-            observaciones: parte.observaciones? parte.observaciones : '',
-            fecha_creacion: parte.id ? parte.fecha_creacion :(hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
-            fecha_prevista_inicio: parte? parte.fecha_prevista_inicio : '',
-            fecha_finalizacion: parte? parte.fecha_finalizacion : '',
-            empresa: parte?parte.empresa:null,
-            zona: parte? parte.zona : '',
-            seccion: parte? parte.seccion : '',
-            equipo: parte? parte.equipo : '',
-            tipo_periodo: parte.id? parte.tipo_periodo : '',
-            periodo: parte.id? parte.periodo : 0,
-            tarea: parte?parte.tarea:null,
-            estado: parte?parte.estado:null,
-            num_parte: parte? parte.num_parte:null,
+        nombre: parte?parte.nombre:null,
+        tipo: parte?parte.tipo:null,
+        creado_por: parte.creado_por,
+        finalizado: parte? parte.finalizado : false,
+        observaciones: parte.observaciones? parte.observaciones : '',
+        fecha_creacion: parte.id ? parte.fecha_creacion :(hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
+        fecha_prevista_inicio: parte? parte.fecha_prevista_inicio : '',
+        fecha_finalizacion: parte? parte.fecha_finalizacion : '',
+        empresa: parte?parte.empresa:null,
+        zona: parte? parte.zona : '',
+        seccion: parte? parte.seccion : '',
+        equipo: parte? parte.equipo : '',
+        tipo_periodo: parte.id? parte.tipo_periodo : '',
+        periodo: parte.id? parte.periodo : 0,
+        tarea: parte?parte.tarea:null,
+        estado: parte?parte.estado:null,
+        num_parte: parte? parte.num_parte:null,
     });
 
     useEffect(()=>{
@@ -79,8 +79,7 @@ const ParteForm = ({parte, setParte}) => {
               }
         })
         .then( res => {
-            var filtrado = res.data.filter(s=> s.id!==4);
-            setTipoParte(filtrado.sort(function(a, b){
+            setTipoParte(res.data.sort(function(a, b){
                 if(a.nombre > b.nombre){
                     return 1;
                 }
@@ -314,6 +313,8 @@ const ParteForm = ({parte, setParte}) => {
     }
 
     const crearParte = (event) => {
+        console.log('datos en crear parte......');
+        console.log(datos);
         event.preventDefault();
         axios.post(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/`, {
             nombre: datos.nombre,

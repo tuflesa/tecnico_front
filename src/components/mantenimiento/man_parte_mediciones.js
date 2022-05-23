@@ -414,8 +414,8 @@ const ParteMediciones = ({parte, setParte}) => {
         <Container>
             <Row className="justify-content-center"> 
                 {parte.id ?
-                    <h5 className="pb-3 pt-1 mt-2">Detalle del parte de trabajo</h5>:
-                    <h5 className="pb-3 pt-1 mt-2">Nuevo Parte de trabajo</h5>}
+                    <h5 className="pb-3 pt-1 mt-2">Detalle del parte de mediciones</h5>:
+                    <h5 className="pb-3 pt-1 mt-2">Nuevo Parte de mediciones</h5>}
             </Row>
             <Row className="justify-content-center">
                 <Col>
@@ -682,7 +682,7 @@ const ParteMediciones = ({parte, setParte}) => {
                                         <th>Nombre</th>
                                         <th>Especialidad</th>
                                         <th>Trabajo a realizar</th>
-                                        <th>Observaciones</th>
+                                        {/* <th>Observaciones</th> */}
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>                                                                             
@@ -694,7 +694,7 @@ const ParteMediciones = ({parte, setParte}) => {
                                                 <td>{linea.nombre}</td>
                                                 <td>{linea.especialidad_nombre}</td>
                                                 <td>{linea.trabajo}</td>
-                                                <td>{linea.observaciones}</td>
+                                                {/* <td>{linea.observaciones}</td> */}
                                                 <td>                                            
                                                     <Receipt className="mr-3 pencil" onClick={event =>{listarLineasTareas(linea)}}/>
                                                 </td>

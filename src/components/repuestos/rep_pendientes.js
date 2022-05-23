@@ -122,10 +122,11 @@ const RepPendientes = () => {
                         <thead>
                             <tr>
                                 <th>Nombre</th>
+                                <th>Crítico</th>
                                 <th>Stock Actual</th>
                                 <th>Stock Mínimo</th>
                                 <th>Cant. por recibir</th>
-                                <th>Pedidos</th>
+                                <th style={{width:90}}>Pedidos</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -133,6 +134,7 @@ const RepPendientes = () => {
                                 return (
                                     <tr key={pendiente.id}>
                                         <td>{pendiente.repuesto.nombre_comun?pendiente.repuesto.nombre_comun:pendiente.repuesto.nombre}</td>
+                                        <td>{pendiente.repuesto.es_critico?'Si':'No'}</td>
                                         <td>{pendiente.stock_act}</td>
                                         <td>{pendiente.cantidad}</td> 
                                         <td>{lineasPendientes && lineasPendientes.map( linea => {

@@ -141,7 +141,7 @@ const LineaMedicionNueva = ({show, handleCloseLinea, tareaAsignadas, parte, upda
     return (        
         <Modal show={show} backdrop="static" keyboard={ false } animation={false}>            
             <Modal.Header closeButton>  
-                <h5>Nueva Tarea </h5>
+                <h5>Nueva Medición </h5>
             </Modal.Header>
             <Modal.Body>
                 <Form >

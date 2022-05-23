@@ -19,9 +19,11 @@ const ManNavBar = () => {
                             <NavDropdown.Item href="/mantenimiento/listado_tarea">Listado de Trabajos por Equipos</NavDropdown.Item>
                             <NavDropdown.Divider />
                             <NavDropdown.Item href="/mantenimiento/partes">Lista de partes de trabajo</NavDropdown.Item>
-                            <NavDropdown.Item href="/mantenimiento/parte/nuevo">Nuevo parte de trabajo</NavDropdown.Item>   
-                            <NavDropdown.Item href="/mantenimiento/parte/nuevo_mediciones">Nuevo parte de mediciones</NavDropdown.Item>                          
-                  
+                            <NavDropdown.Item href="/mantenimiento/parte/nuevo">Nuevo parte de trabajo</NavDropdown.Item> 
+                            <NavDropdown.Divider />
+                            <NavDropdown.Item href="/mantenimiento/notificaciones">Lista de notificaciones</NavDropdown.Item>
+                            <NavDropdown.Item href="/mantenimiento/notificacion/nueva">Nueva Notificacion</NavDropdown.Item>
+
                         </NavDropdown>
                     </Nav>    
                     <Navbar.Text className="mr-4" >

@@ -377,45 +377,50 @@ const PedidoForm = ({pedido, setPedido}) => {
     const finalizarPedido = (pedido) =>{
         var x = 0;
         var y = 0;
-        for(y=0; y<pedido.lineas_pedido.length;y++){
-            if(pedido.lineas_pedido[y].por_recibir>0){
-                datos.finalizado=false;
-                datos.fecha_entrega=null;
-                break;
-            } 
+        if(datos.finalizado===true){
+            console.log('pedido finalizado');
         }
-        if(y>=pedido.lineas_pedido.length){
-            if(pedido.lineas_adicionales!=''){
-                for(x=0; x<pedido.lineas_adicionales.length;x++){                
+        else{
+            for(y=0; y<pedido.lineas_pedido.length;y++){
+                if(pedido.lineas_pedido[y].por_recibir>0){
+                    datos.finalizado=false;
+                    datos.fecha_entrega=null;
+                    break;
+                } 
+            }
+            if(y>=pedido.lineas_pedido.length){
+                if(pedido.lineas_adicionales!=''){
+                    for(x=0; x<pedido.lineas_adicionales.length;x++){                
 
-                    if(pedido.lineas_adicionales[x].por_recibir>0){
-                        datos.finalizado=false;
-                        datos.fecha_entrega=null;
-                        break;
-                    } 
-                    else{
-                        datos.finalizado=true;
-                        datos.fecha_entrega= (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate());
+                        if(pedido.lineas_adicionales[x].por_recibir>0){
+                            datos.finalizado=false;
+                            datos.fecha_entrega=null;
+                            break;
+                        } 
+                        else{
+                            datos.finalizado=true;
+                            datos.fecha_entrega= (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate());
+                        }
                     }
                 }
+                else{
+                        datos.finalizado=true;
+                        datos.fecha_entrega= (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate())
+                    }
             }
-            else{
-                    datos.finalizado=true;
-                    datos.fecha_entrega= (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate())
-                }
+            axios.patch(BACKEND_SERVER + `/api/repuestos/pedido/${pedido.id}/`, {
+                finalizado: datos.finalizado, 
+                fecha_entrega: datos.fecha_entrega,           
+            }, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }     
+            })
+            .then( res => {
+                updateFinalizado();
+            })
+            .catch(err => { console.log(err);})
         }
-        axios.patch(BACKEND_SERVER + `/api/repuestos/pedido/${pedido.id}/`, {
-            finalizado: datos.finalizado, 
-            fecha_entrega: datos.fecha_entrega,           
-        }, {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }     
-        })
-        .then( res => {
-            updateFinalizado();
-        })
-        .catch(err => { console.log(err);})
     }
 
     

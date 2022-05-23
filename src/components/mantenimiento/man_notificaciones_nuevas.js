@@ -1,0 +1,16 @@
+import React, {useState} from 'react';
+import { useCookies } from 'react-cookie';
+//import ParteMediciones from './man_parte_mediciones';
+import NotificacionForm from './man_notificaciones_form';
+
+const ManNotificacionesNuevas = () => {
+    const [user] = useCookies(['tec-user']);
+    const [nota, setNota] = useState({quien: user['tec-user'], empresa:user['tec-user'].perfil.empresa.id});
+    return ( 
+        <NotificacionForm   nota={nota} 
+                            setNota={setNota}
+        />
+     )
+}
+ 
+export default ManNotificacionesNuevas;
