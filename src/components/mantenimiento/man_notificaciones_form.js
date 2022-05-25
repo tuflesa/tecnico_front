@@ -123,7 +123,7 @@ const NotificacionForm = ({nota, setNota}) => {
         console.log('que vale datos al actualizarNota.......');
         console.log(datos);
         event.preventDefault();
-        axios.put(BACKEND_SERVER + `/api/mantenimiento/notificacion_nueva/${nota.id}/`, {
+        axios.patch(BACKEND_SERVER + `/api/mantenimiento/notificacion_nueva/${nota.id}/`, {
             que: datos.que,
             cuando: datos.cuando,
             donde: datos.donde,
