@@ -19,7 +19,6 @@ const ParteForm = ({parte, setParte}) => {
     const [zonas, setZonas] = useState(null);
     const [equipos, setEquipos] = useState(null);
     const [hoy] = useState(new Date);
-    const [tipo_periodo, setTipoPeriodo] = useState(null);
     const [show_linea, setShowLinea] = useState(false);
     const [show_error, setShowError] = useState(false);
     const [show_listlineastareas, setShowListLineasTareas] = useState(false);
@@ -42,11 +41,11 @@ const ParteForm = ({parte, setParte}) => {
         zona: parte? parte.zona : '',
         seccion: parte? parte.seccion : '',
         equipo: parte? parte.equipo : '',
-        tipo_periodo: parte.id? parte.tipo_periodo : '',
-        periodo: parte.id? parte.periodo : 0,
         tarea: parte?parte.tarea:null,
         estado: parte?parte.estado:null,
         num_parte: parte? parte.num_parte:null,
+        tipo_periodo: parte.tipo===1? parte.tipo_periodo : '',
+        periodo: parte.tipo===1? parte.periodo : 0,
     });
 
     useEffect(()=>{
@@ -64,11 +63,11 @@ const ParteForm = ({parte, setParte}) => {
             zona: parte? parte.zona : '',
             seccion: parte? parte.seccion : '',
             equipo: parte? parte.equipo : '',
-            tipo_periodo: parte.id? parte.tipo_periodo : '',
-            periodo: parte.id? parte.periodo : 0,
             tarea: parte?parte.tarea:null,
             estado: parte?parte.estado:null,
             num_parte: parte? parte.num_parte:null,
+            tipo_periodo: parte.tipo===1? parte.tipo_periodo : '',
+            periodo: parte.tipo===1? parte.periodo : 0,
         });
     },[parte]);
   
@@ -100,8 +99,9 @@ const ParteForm = ({parte, setParte}) => {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
-        .then( res => { 
-            setLineasParte(res.data.tarea.sort(function(a, b){
+        .then( res => {
+            setLineasParte(res.data.tarea);
+            /* setLineasParte(res.data.tarea.id.sort(function(a, b){
                 if(a.prioridad < b.prioridad){
                     return 1;
                 }
@@ -109,9 +109,10 @@ const ParteForm = ({parte, setParte}) => {
                     return -1;
                 }
                 return 0;
-            }))            
+            }))  */           
         })
         .catch( err => {
+            console.log('aquí está el error');
             console.log(err); 
         })       
     }, [token, parte]);
@@ -199,7 +200,7 @@ const ParteForm = ({parte, setParte}) => {
             });
         }
         else{
-            datos.seccion && axios.get(BACKEND_SERVER + `/api/estructura/equipo/?seccion=${datos.seccion}`,{
+            datos.seccion && axios.get(BACKEND_SERVER + `/api/estructura/equipo/?seccion=${datos.seccion.id}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
@@ -224,28 +225,6 @@ const ParteForm = ({parte, setParte}) => {
             });            
         }
     }, [token, datos.seccion]);
-
-    useEffect(() => {
-        axios.get(BACKEND_SERVER + '/api/mantenimiento/tipo_periodo/',{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            setTipoPeriodo(res.data.sort(function(a, b){
-                if(a.nombre > b.nombre){
-                    return 1;
-                }
-                if(a.nombre < b.nombre){
-                    return -1;
-                }
-                return 0;
-            }))
-        })
-        .catch( err => {
-            console.log(err); 
-        })       
-    }, [token]);  
     
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/mantenimiento/estados/',{
@@ -278,18 +257,9 @@ const ParteForm = ({parte, setParte}) => {
         .then( res => {
             setParte(res.data);
         })
-        .catch(err => { console.log(err);})
-    }
-    
-    //desactivamos los tipos de periodo y los periodos si no es opcion preventivo
-    const handleDisabled = () => {
-        if (datos.tipo !== 1){
-            return datos.tipo!=='1';
-        } 
-        else{
-            return datos.tipo!==1;
-        }
-        
+        .catch(err => { 
+            console.log('aquí está el en el update');
+            console.log(err);})
     }
     
     const handleDisabled2 = () => {
@@ -313,8 +283,6 @@ const ParteForm = ({parte, setParte}) => {
     }
 
     const crearParte = (event) => {
-        console.log('datos en crear parte......');
-        console.log(datos);
         event.preventDefault();
         axios.post(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/`, {
             nombre: datos.nombre,
@@ -329,8 +297,6 @@ const ParteForm = ({parte, setParte}) => {
             equipo: datos.equipo,
             zona: datos.zona,
             seccion: datos.seccion,
-            tipo_periodo: datos.tipo==='1'? datos.tipo_periodo : '',
-            periodo: datos.tipo==='1'? datos.periodo : 0,
             estado: datos.fecha_prevista_inicio?1:4,
         }, {
             headers: {
@@ -394,7 +360,7 @@ const ParteForm = ({parte, setParte}) => {
         if(datos.fecha_prevista_inicio===''){datos.fecha_prevista_inicio=null}
         if(datos.fecha_finalizacion===''){datos.fecha_finalizacion=null}
         event.preventDefault();
-        axios.put(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${parte.id}/`, {
+        axios.put(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo_detalle/${parte.id}/`, {
             nombre: datos.nombre,
             tipo: datos.tipo,
             finalizado: datos.finalizado,
@@ -405,8 +371,6 @@ const ParteForm = ({parte, setParte}) => {
             zona: datos.zona,
             seccion: datos.seccion,
             equipo: datos.equipo,
-            tipo_periodo: datos.tipo=== 1? datos.tipo_periodo : '',
-            periodo: datos.tipo=== 1? datos.periodo : 0,
             estado: datos.fecha_prevista_inicio?1:4,
         }, {
             headers: {
@@ -529,49 +493,35 @@ const ParteForm = ({parte, setParte}) => {
                                 </Form.Group>
                             </Col> 
                             <Col>
-                                <Form.Group id="tipo_periodo">
-                                    <Form.Label>Tipo Periodo</Form.Label>
-                                    <Form.Control as="select"  
-                                                name='tipo_periodo' 
-                                                value={datos.tipo_periodo}
-                                                onChange={handleInputChange}
-                                                placeholder="Tipo Periodo"
-                                                disabled={handleDisabled()}>  
-                                                {datos.tipo_periodo===''?  <option key={0} value={''}>Seleccionar</option>:''}   
-                                                {parte.tipo_periodo===null?  <option key={0} value={''}>Seleccionar</option>:''}                                               
-                                                {tipo_periodo && tipo_periodo.map( periodo => {
-                                                    return (
-                                                    <option key={periodo.id} value={periodo.id}>
-                                                        {periodo.nombre}
-                                                    </option>
-                                                    )
-                                                })}
-                                    </Form.Control>
+                                <Form.Group controlId="fecha_creacion">
+                                    <Form.Label>Fecha Creación (*)</Form.Label>
+                                    <Form.Control type="date" 
+                                                name='fecha_creacion' 
+                                                value={datos.fecha_creacion}
+                                                onChange={handleInputChange} 
+                                                placeholder="Fecha creación" />
                                 </Form.Group>
-                            </Col>
+                            </Col> 
                             <Col>
-                                <Form.Group controlId="periodo">
-                                    <Form.Label>Cantidad de Periodos</Form.Label>
-                                    <Form.Control as="select" 
-                                                    value={datos.periodo}
-                                                    name='periodo'
-                                                    onChange={handleInputChange}
-                                                    disabled={handleDisabled()}>
-                                                    {datos.periodo===0?  <option key={0} value={''}>Seleccionar</option>:''}
-                                                    <option key={1} value={1}>1</option>
-                                                    <option key={2} value={2}>2</option>
-                                                    <option key={3} value={3}>3</option>
-                                                    <option key={4} value={4}>4</option>
-                                                    <option key={5} value={5}>5</option>
-                                                    <option key={6} value={6}>6</option>
-                                                    <option key={7} value={7}>7</option>
-                                                    <option key={8} value={8}>8</option>
-                                                    <option key={9} value={9}>9</option>
-                                                    <option key={10} value={10}>10</option>
-                                                    <option key={11} value={10}>11</option>                                        
-                                    </Form.Control>
+                                <Form.Group controlId="fecha_prevista_inicio">
+                                    <Form.Label>Fecha Prevista Inicio</Form.Label>
+                                    <Form.Control type="date" 
+                                                name='fecha_prevista_inicio' 
+                                                value={datos.fecha_prevista_inicio}
+                                                onChange={handleInputChangeF} 
+                                                placeholder="Fecha prevista inicio" />
                                 </Form.Group>
-                            </Col>                 
+                            </Col>                         
+                            <Col>
+                                <Form.Group controlId="fecha_finalizacion">
+                                    <Form.Label>Fecha Finalización</Form.Label>
+                                    <Form.Control type="date" 
+                                                name='fecha_finalizacion' 
+                                                value={datos.fecha_finalizacion}
+                                                onChange={handleInputChange} 
+                                                placeholder="Fecha Finalización" />
+                                </Form.Group>
+                            </Col>             
                         </Row>                          
                         <Row>                            
                             <Col>
@@ -613,7 +563,7 @@ const ParteForm = ({parte, setParte}) => {
                             </Col>
                             <Col>
                                 <Form.Group controlId="seccion">
-                                    <Form.Label>Seccion</Form.Label>
+                                    <Form.Label>Seccion (*)</Form.Label>
                                     <Form.Control   as="select" 
                                                     value={datos.seccion}
                                                     name='seccion'
@@ -647,38 +597,6 @@ const ParteForm = ({parte, setParte}) => {
                                     </Form.Control>
                                 </Form.Group>
                             </Col>
-                        </Row>
-                        <Row>
-                            <Col>
-                                <Form.Group controlId="fecha_creacion">
-                                    <Form.Label>Fecha Creación (*)</Form.Label>
-                                    <Form.Control type="date" 
-                                                name='fecha_creacion' 
-                                                value={datos.fecha_creacion}
-                                                onChange={handleInputChange} 
-                                                placeholder="Fecha creación" />
-                                </Form.Group>
-                            </Col> 
-                            <Col>
-                                <Form.Group controlId="fecha_prevista_inicio">
-                                    <Form.Label>Fecha Prevista Inicio</Form.Label>
-                                    <Form.Control type="date" 
-                                                name='fecha_prevista_inicio' 
-                                                value={datos.fecha_prevista_inicio}
-                                                onChange={handleInputChangeF} 
-                                                placeholder="Fecha prevista inicio" />
-                                </Form.Group>
-                            </Col>                         
-                            <Col>
-                                <Form.Group controlId="fecha_finalizacion">
-                                    <Form.Label>Fecha Finalización</Form.Label>
-                                    <Form.Control type="date" 
-                                                name='fecha_finalizacion' 
-                                                value={datos.fecha_finalizacion}
-                                                onChange={handleInputChange} 
-                                                placeholder="Fecha Finalización" />
-                                </Form.Group>
-                            </Col>  
                         </Row>
                         <Row>                                               
                             <Col>
@@ -725,8 +643,9 @@ const ParteForm = ({parte, setParte}) => {
                                         <th>Prioridad</th>
                                         <th>Nombre</th>
                                         <th>Especialidad</th>
-                                        <th>Trabajo a realizar</th>
                                         <th>Observaciones</th>
+                                        {datos.tipo===1? <th>Tipo Periodo</th>:null}
+                                        {datos.tipo===1?<th>Cantidad Periodos</th>:null}
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>                                                                             
@@ -737,8 +656,10 @@ const ParteForm = ({parte, setParte}) => {
                                                 <td>{linea.prioridad}</td>
                                                 <td>{linea.nombre}</td>
                                                 <td>{linea.especialidad_nombre}</td>
-                                                <td>{linea.trabajo}</td>
                                                 <td>{linea.observaciones}</td>
+                                                {datos.tipo===1 && linea.tipo_periodo? 
+                                                    <td>{linea.tipo_periodo.nombre}</td>:''}
+                                                {datos.tipo===1?<td>{linea.periodo}</td>:''}
                                                 <td>                                            
                                                     <Receipt className="mr-3 pencil" onClick={event =>{listarLineasTareas(linea)}}/>
                                                 </td>

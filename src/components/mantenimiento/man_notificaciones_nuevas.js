@@ -1,6 +1,5 @@
 import React, {useState} from 'react';
 import { useCookies } from 'react-cookie';
-//import ParteMediciones from './man_parte_mediciones';
 import NotificacionForm from './man_notificaciones_form';
 
 const ManNotificacionesNuevas = () => {

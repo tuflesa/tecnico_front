@@ -24,7 +24,7 @@ const ManPorEquipos = () => {
     var enunmes=fecha_hoy+mesEnMilisegundos;
     dentrodeunmes = new Date(enunmes);
     fechaenunmesString = dentrodeunmes.getFullYear() + '-' + ('0' + (dentrodeunmes.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunmes.getDate()).slice(-2);
-    const [filtro, setFiltro] = useState(`? parte__empresa__id=${user['tec-user'].perfil.empresa.id}&fecha_plan__lte=${fechaenunmesString}`);
+    const [filtro, setFiltro] = useState(`? parte__empresa__id=${user['tec-user'].perfil.empresa.id}&fecha_plan__lte=${fechaenunmesString}&parte__zona=${user['tec-user'].perfil.zona?user['tec-user'].perfil.zona.id:''}&parte__seccion=${user['tec-user'].perfil.seccion?user['tec-user'].perfil.seccion.id:''}`);
 
     const [datos, setDatos] = useState({
         fecha_inicio: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
@@ -48,7 +48,7 @@ const ManPorEquipos = () => {
                     return -1;
                 }
                 return 0;
-            }))    
+            }))  
         })
         .catch( err => {
             console.log(err);
@@ -151,7 +151,7 @@ const ManPorEquipos = () => {
             else{
                 const trabajador_activo = res.data.filter(s => s.trabajador === user['tec-user'].perfil.usuario);
                 if(trabajador_activo.length===0){
-                    alert('No tienes esta tarea inicada, no la puedes finalizar');
+                    alert('No tienes esta tarea iniciada, no la puedes finalizar');
                 }
                 else if(trabajador_activo.length!==0){
                     var Finalizar_Tarea = window.confirm('Vas a finalizar la tarea ¿Desea continuar?');
@@ -188,23 +188,23 @@ const ManPorEquipos = () => {
                                 var fecha=Date.parse(re.data.fecha_fin);
                                 var fechaPorSemanas=null;
                                 var suma=null;
-                                if(re.data.parte.tipo_periodo===1){ //si es opción mensual
-                                    suma = fecha + (semanaEnMilisegundos/7*30*re.data.parte.periodo);
+                                if(re.data.tarea.tipo_periodo.id===1){ //si es opción mensual
+                                    suma = fecha + (semanaEnMilisegundos/7*30*re.data.tarea.periodo);
                                     fechaPorSemanas = new Date(suma);
                                     fechaString = fechaPorSemanas.getFullYear() + '-' + ('0' + (fechaPorSemanas.getMonth()+1)).slice(-2) + '-' + ('0' + fechaPorSemanas.getDate()).slice(-2);
                                 }
-                                if(re.data.parte.tipo_periodo===2){ //si la opcion es anual
-                                    suma = fecha + (semanaEnMilisegundos/7*365*re.data.parte.periodo);
+                                if(re.data.tarea.tipo_periodo.id===2){ //si la opcion es anual
+                                    suma = fecha + (semanaEnMilisegundos/7*365*re.data.tarea.periodo);
                                     fechaPorSemanas = new Date(suma);
                                     fechaString = fechaPorSemanas.getFullYear() + '-' + ('0' + (fechaPorSemanas.getMonth()+1)).slice(-2) + '-' + ('0' + fechaPorSemanas.getDate()).slice(-2);
                                 }
-                                if(re.data.parte.tipo_periodo===3){ //si la opción es semanal
-                                    suma = fecha + (semanaEnMilisegundos*re.data.parte.periodo);
+                                if(re.data.tarea.tipo_periodo.id===3){ //si la opción es semanal
+                                    suma = fecha + (semanaEnMilisegundos*re.data.tarea.periodo);
                                     fechaPorSemanas = new Date(suma);
                                     fechaString = fechaPorSemanas.getFullYear() + '-' + ('0' + (fechaPorSemanas.getMonth()+1)).slice(-2) + '-' + ('0' + fechaPorSemanas.getDate()).slice(-2);
                                 }
-                                if(re.data.parte.tipo_periodo===4){ //si la opción es quincenal
-                                    suma = fecha + (semanaEnMilisegundos*2*re.data.parte.periodo);
+                                if(re.data.tarea.tipo_periodo.id===4){ //si la opción es quincenal
+                                    suma = fecha + (semanaEnMilisegundos*2*re.data.tarea.periodo);
                                     fechaPorSemanas = new Date(suma);
                                     fechaString = fechaPorSemanas.getFullYear() + '-' + ('0' + (fechaPorSemanas.getMonth()+1)).slice(-2) + '-' + ('0' + fechaPorSemanas.getDate()).slice(-2);
                                 }
@@ -305,11 +305,8 @@ const ManPorEquipos = () => {
                             <tr>
                                 <th>Pr</th>
                                 <th>Nombre Tarea</th>
-                                <th>Trabajos</th>
                                 <th>Observaciones</th>
-                                {/* <th>Especialidad</th> */}
-                                {/* <th>Estado</th> */}
-                                {/* {<th>Fecha Plan</th>} */}
+                                <th>Equipo</th>
                                 <th style={{width:110}}>Fecha Inicio</th>
                                 <th style={{width:110}}>Fecha Fin</th>
                                 <th style={{width:130}}>Acciones</th>
@@ -321,16 +318,12 @@ const ManPorEquipos = () => {
                                     <tr key={linea.id}>
                                         <td>{linea.tarea.prioridad}</td>
                                         <td>{linea.tarea.nombre}</td>
-                                        <td>{linea.tarea.trabajo}</td>
                                         <td>{linea.tarea.observaciones}</td>
-                                        {/* <td>{linea.tarea.especialidad_nombre}</td> */}
-                                        {/* <td>{linea.estado.nombre}</td> */}
-                                        {/* <td>{linea.fecha_plan? invertirFecha(String(linea.fecha_plan)):''}</td> */}
+                                        <td>{linea.parte.seccion?linea.parte.seccion.siglas_zona +' - '+linea.parte.seccion.nombre + (linea.parte.equipo?' - ' + linea.parte.equipo.nombre:''):null}</td>
                                         <td>{linea.fecha_inicio?invertirFecha(String(linea.fecha_inicio)):''}</td>
                                         <td>{linea.fecha_fin?invertirFecha(String(linea.fecha_fin)):''}</td>
                                         <td>
                                         <Tools className="mr-3 pencil"  onClick={event =>{InicioTarea(linea)}}/>
-                                        {/* <StopCircle className="mr-3 pencil"  onClick={null} /> */}
                                         <FileCheck className="mr-3 pencil"  onClick={event =>{FinalizarTarea(linea)}} />
                                         <Receipt className="mr-3 pencil" onClick={event =>{listarTrabajadores(linea.id)}}/>
                                         </td>

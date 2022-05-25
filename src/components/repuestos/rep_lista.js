@@ -93,7 +93,7 @@ const RepLista = () => {
                     <Table striped bordered hover>
                         <thead>
                             <tr>
-                                <th>Nombre</th>
+                                <th>Descripción Proveedor</th>
                                 <th>Descripción Etiqueta</th>
                                 <th>Fabricante</th>
                                 <th>Modelo</th>

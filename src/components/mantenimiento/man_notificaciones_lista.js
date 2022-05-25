@@ -11,7 +11,7 @@ const ManNotificacionesLista = () => {
     const [token] = useCookies(['tec-token']);
     
     const [notas, setNotas]  = useState(null);
-    const [filtro, setFiltro] = useState();
+    const [filtro, setFiltro] = useState('');
 
     const actualizaFiltro = (str) => {
         setFiltro(str);

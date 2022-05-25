@@ -350,7 +350,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                         <Row>
                             <Col>
                                 <Form.Group id="nombre">
-                                    <Form.Label>Nombre</Form.Label>
+                                    <Form.Label>Descripción Proveedor</Form.Label>
                                     <Form.Control type="text" 
                                                 name='nombre' 
                                                 value={datos.nombre}

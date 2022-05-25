@@ -356,7 +356,25 @@ const PedidoForm = ({pedido, setPedido}) => {
               }     
         })
         .then( res => {
+            /* console.log('res data del update');
+            console.log(res.data);
+            var ordenLineas=(res.data.lineas_pedido.sort(function(a, b){
+                if(a.id < b.id){
+                    return 1;
+                }
+                if(a.id > b.id){
+                    return -1;
+                }
+                return 0;
+            }))
+            console.log(ordenLineas);
+            res.data.lineas_pedido = ordenLineas;
+            console.log(res.data); */
             setPedido(res.data);
+            /* setPedido({
+                res.data,
+                lineas_pedido :ordenLineas
+            }) */
             finalizarPedido(res.data);
         })
         .catch(err => { console.log(err);})
@@ -709,7 +727,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                                             {datos.lineas_pedido && datos.lineas_pedido.map( linea => {
                                                 return (
                                                     <tr key={linea.id}>
-                                                        <td>{linea.repuesto.nombre + ' - ' + linea.repuesto.fabricante + ' - ' + linea.repuesto.modelo}</td>
+                                                        <td>{linea.repuesto.nombre + (linea.repuesto.fabricante? ' - ' + linea.repuesto.fabricante:'') + (linea.repuesto.modelo? ' - ' + linea.repuesto.modelo:'')}</td>
                                                         <td>{linea.cantidad}</td>
                                                         <td>{linea.repuesto.unidad_nombre}</td>
                                                         <td>{formatNumber(linea.precio)}</td>

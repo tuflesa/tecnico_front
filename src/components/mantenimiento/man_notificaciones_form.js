@@ -6,7 +6,7 @@ import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 
-const NotificacionForm = ({nota,setNota}) => {
+const NotificacionForm = ({nota, setNota}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
 
@@ -18,15 +18,17 @@ const NotificacionForm = ({nota,setNota}) => {
     const [datos, setDatos] = useState({
         id: nota.id? nota.id : null,
         que: nota.id?nota.que:null,
+        cuando: nota.id?nota.cuando:null,
         donde: nota.id?nota.donde:null,
         quien: nota? nota.quien: user['tec-user'].perfil.usuario,
         como: nota.id? nota.como : null,
         cuanto: nota.id? nota.cuanto : '',
         porque: nota.id? nota.porque : '',
         fecha_creacion: nota.id ? nota.fecha_creacion :(hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
-        para: nota.id? nota.para : user['tec-user'].perfil.usuario,
+        //para: nota? nota.para: '',
         revisado: nota.id? nota.revisado : false,
         descartado: nota.id?nota.descartado:false,
+        finalizado: nota.id?nota.finalizado:false,
         conclusion: nota.id? nota.conclusion : null,
         empresa: nota?nota.empresa:user['tec-user'].perfil.empresa.id,
         numero: nota.id? nota.numero:null,
@@ -36,19 +38,24 @@ const NotificacionForm = ({nota,setNota}) => {
         setDatos({
             id: nota.id? nota.id : null,
             que: nota.id?nota.que:null,
+            cuando: nota.id?nota.cuando:null,
             donde: nota.id?nota.donde:null,
             quien: nota? nota.quien: user['tec-user'].perfil.usuario,
             como: nota.id? nota.como : null,
             cuanto: nota.id? nota.cuanto : '',
             porque: nota.id? nota.porque : '',
             fecha_creacion: nota.id ? nota.fecha_creacion :(hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
-            para: nota.id? nota.para : user['tec-user'].perfil.usuario,
+            //para: nota.id? nota.para : '',
             revisado: nota.id? nota.revisado : false,
             descartado: nota.id?nota.descartado:false,
+            finalizado: nota.id?nota.finalizado:false,
             conclusion: nota.id? nota.conclusion : null,
             empresa: nota?nota.empresa:user['tec-user'].perfil.empresa.id,
             numero: nota.id? nota.numero:null,
         });
+        console.log('esto es nota');
+        console.log(nota);
+        console.log(datos);
     },[nota]);
 
     useEffect(() => {
@@ -81,12 +88,14 @@ const NotificacionForm = ({nota,setNota}) => {
     }
 
     const crearNota = (event) => {
+        console.log('que vale datos al crearNota------');
         console.log(datos);
         event.preventDefault();
         axios.post(BACKEND_SERVER + `/api/mantenimiento/notificacion_nueva/`, {
             que: datos.que,
+            cuando: datos.cuando,
             donde: datos.donde,
-            para: user['tec-user'].perfil.usuario,
+            //para: datos.para,
             quien: user['tec-user'].perfil.usuario,
             como: datos.como,
             cuanto: datos.cuanto,
@@ -110,10 +119,42 @@ const NotificacionForm = ({nota,setNota}) => {
         })
     } 
 
+    const actualizarNota = (event) => {
+        console.log('que vale datos al actualizarNota.......');
+        console.log(datos);
+        event.preventDefault();
+        axios.put(BACKEND_SERVER + `/api/mantenimiento/notificacion_nueva/${nota.id}/`, {
+            que: datos.que,
+            cuando: datos.cuando,
+            donde: datos.donde,
+            //para: datos.para,
+            //quien: datos.quien,
+            como: datos.como,
+            cuanto: datos.cuanto,
+            porque: datos.porque,
+            fecha_creacion: datos.fecha_creacion,            
+            revisado: datos.revisado,
+            descartado: datos.descartado,
+            conclusion: datos.conclusion,
+            //empresa: datos.empresa,
+        }, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => { 
+            setNota(res.data);
+        })
+        .catch(err => { 
+            setShowError(true);
+            console.log(err);
+        })
+    } 
+
     return(
         <Container>
             <Row className="justify-content-center"> 
-                {nota.id ?
+                {nota.id?
                     <h5 className="pb-3 pt-1 mt-2">Detalle de la Notificación</h5>:
                     <h5 className="pb-3 pt-1 mt-2">Nueva Notificación</h5>}
             </Row>
@@ -225,12 +266,12 @@ const NotificacionForm = ({nota,setNota}) => {
                             </Col>
                         </Row>
                         <Row> 
-                            <Col>
+                            {/* <Col>
                                 <Form.Group controlId="para">
                                     <Form.Label>Para quién (*)</Form.Label>
                                     <Form.Control as="select"  
                                                 name='para' 
-                                                value={datos.para.get_full_name}
+                                                value={datos.para}
                                                 onChange={handleInputChange}
                                                 placeholder="para">
                                                 <option key={0} value={''}>Todas</option>    
@@ -243,7 +284,7 @@ const NotificacionForm = ({nota,setNota}) => {
                                                 })}
                                 </Form.Control>
                                 </Form.Group>
-                            </Col>                            
+                            </Col> */}                            
                             <Col>
                                 <Form.Group id="conclusion">
                                     <Form.Label>Concusiones</Form.Label>
@@ -258,7 +299,7 @@ const NotificacionForm = ({nota,setNota}) => {
                         </Row>                                             
                         <Form.Row className="justify-content-center">
                             {nota.id ? 
-                                <Button variant="info" type="submit" className={'mx-2'} onClick={null}>Actualizar</Button> :
+                                <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarNota}>Actualizar</Button> :
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={crearNota}>Guardar</Button>
                             }
                             <Link to='/mantenimiento/notificaciones'>

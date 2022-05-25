@@ -15,7 +15,7 @@ const ManNotificacionesFiltro = ({actualizaFiltro}) => {
         id: '',
         quien: '',
         finalizado: false,
-        revisado: '',
+        revisado: false,
         descartado: false,
         empresa: user['tec-user'].perfil.empresa.id,
         fecha_creacion_lte:'',
@@ -64,7 +64,7 @@ const ManNotificacionesFiltro = ({actualizaFiltro}) => {
         let filtro2 = `&empresa__id=${datos.empresa}`;
         const filtro = filtro1 + filtro2;
         actualizaFiltro(filtro);
-    },[datos.quien, datos.finalizado, datos.empresa, datos.fecha_creacion_gte, datos.fecha_creacion_lte, datos.numero, token]);
+    },[datos.quien, datos.finalizado, datos.revisado, datos.descartado, datos.empresa, datos.fecha_creacion_gte, datos.fecha_creacion_lte, datos.numero, token]);
 
     const handleInputChange = (event) => {
         setDatos({
