@@ -10,13 +10,7 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, empresa, lineas_
         headers:{
             'Authorization': `token ${token['tec-token']}`
             }
-    });
-    
-    useEffect(() => {
-        console.log('esto es lo que recoge');
-        console.log(im);
-        console.log(empresa);
-    }) */
+    }); */
 
     const formatNumber = (numero) =>{
         return new Intl.NumberFormat('de-DE',{ style: 'currency', currency: 'EUR' }).format(numero)

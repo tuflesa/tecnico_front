@@ -25,7 +25,6 @@ const ParteForm = ({parte, setParte}) => {
     const [lineaLineasTareas, setListLineasTareas] = useState(null);
     const [cambio_fecha, setCambioFecha] = useState(false);
     const [estados, setEstados] = useState(null);
-    const [lineas, setLineas] = useState(null);
 
     const [datos, setDatos] = useState({
         id: parte.id ? parte.id : null,
@@ -39,8 +38,8 @@ const ParteForm = ({parte, setParte}) => {
         fecha_finalizacion: parte? parte.fecha_finalizacion : '',
         empresa: parte?parte.empresa:null,
         zona: parte? parte.zona : '',
-        seccion: parte? parte.seccion : '',
-        equipo: parte? parte.equipo : '',
+        seccion: parte? parte.seccion.id : '',
+        equipo: parte.equipo,
         tarea: parte?parte.tarea:null,
         estado: parte?parte.estado:null,
         num_parte: parte? parte.num_parte:null,
@@ -60,8 +59,8 @@ const ParteForm = ({parte, setParte}) => {
             fecha_prevista_inicio: parte? parte.fecha_prevista_inicio : '',
             fecha_finalizacion: parte? parte.fecha_finalizacion : '',
             empresa: parte?parte.empresa:null,
-            zona: parte? parte.zona : '',
-            seccion: parte? parte.seccion : '',
+            zona: parte? parte.zona.id : '',
+            seccion: parte.seccion.id,
             equipo: parte? parte.equipo : '',
             tarea: parte?parte.tarea:null,
             estado: parte?parte.estado:null,
@@ -100,8 +99,8 @@ const ParteForm = ({parte, setParte}) => {
               }
         })
         .then( res => {
-            setLineasParte(res.data.tarea);
-            /* setLineasParte(res.data.tarea.id.sort(function(a, b){
+            //setLineasParte(res.data.tarea);
+            setLineasParte(res.data.tarea.sort(function(a, b){
                 if(a.prioridad < b.prioridad){
                     return 1;
                 }
@@ -109,10 +108,9 @@ const ParteForm = ({parte, setParte}) => {
                     return -1;
                 }
                 return 0;
-            }))  */           
+            }))            
         })
         .catch( err => {
-            console.log('aquí está el error');
             console.log(err); 
         })       
     }, [token, parte]);
@@ -200,7 +198,7 @@ const ParteForm = ({parte, setParte}) => {
             });
         }
         else{
-            datos.seccion && axios.get(BACKEND_SERVER + `/api/estructura/equipo/?seccion=${datos.seccion.id}`,{
+            datos.seccion && axios.get(BACKEND_SERVER + `/api/estructura/equipo/?seccion=${datos.seccion}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
@@ -258,7 +256,6 @@ const ParteForm = ({parte, setParte}) => {
             setParte(res.data);
         })
         .catch(err => { 
-            console.log('aquí está el en el update');
             console.log(err);})
     }
     
@@ -276,6 +273,13 @@ const ParteForm = ({parte, setParte}) => {
 
     const handleInputChangeF = (event) => {
         setCambioFecha(true);
+        setDatos({
+            ...datos,
+            [event.target.name] : event.target.value
+        })  
+    }
+
+    const handleInputChange3 = (event) => {
         setDatos({
             ...datos,
             [event.target.name] : event.target.value
@@ -360,7 +364,7 @@ const ParteForm = ({parte, setParte}) => {
         if(datos.fecha_prevista_inicio===''){datos.fecha_prevista_inicio=null}
         if(datos.fecha_finalizacion===''){datos.fecha_finalizacion=null}
         event.preventDefault();
-        axios.put(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo_detalle/${parte.id}/`, {
+        axios.put(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${parte.id}/`, {
             nombre: datos.nombre,
             tipo: datos.tipo,
             finalizado: datos.finalizado,
@@ -550,7 +554,7 @@ const ParteForm = ({parte, setParte}) => {
                                                     value={datos.zona}
                                                     name='zona'
                                                     onChange={handleInputChange}> 
-                                                    {datos.zona===''?  <option key={0} value={''}>Seleccionar</option>:''}                                      
+                                                    <option key={0} value={''}>Seleccionar</option>                                      
                                                     {zonas && zonas.map( zona => {
                                                         return (
                                                         <option key={zona.id} value={zona.id}>
@@ -567,8 +571,8 @@ const ParteForm = ({parte, setParte}) => {
                                     <Form.Control   as="select" 
                                                     value={datos.seccion}
                                                     name='seccion'
-                                                    onChange={handleInputChange}>  
-                                                    {datos.seccion===''?  <option key={0} value={''}>Seleccionar</option>:''}                                      
+                                                    onChange={handleInputChange3}>  
+                                                    <option key={0} value={''}>Seleccionar</option>                                      
                                                     {secciones && secciones.map( seccion => {
                                                         return (
                                                         <option key={seccion.id} value={seccion.id}>
@@ -581,12 +585,12 @@ const ParteForm = ({parte, setParte}) => {
                             </Col>
                             <Col>
                                 <Form.Group controlId="equipo">
-                                    <Form.Label>Equipo</Form.Label>
-                                    <Form.Control as="select" 
+                                    <Form.Label>Equipo </Form.Label>
+                                    <Form.Control   as="select" 
                                                     value={datos.equipo}
                                                     name='equipo'
-                                                    onChange={handleInputChange}>
-                                                    {datos.equipo===''?  <option key={0} value={''}>Seleccionar</option>:''}                                       
+                                                    onChange={handleInputChange3}>  
+                                                    {/* {datos.equipo===''?  <option key={0} value={''}>Seleccionar</option>:''}                                    */}
                                                     {equipos && equipos.map( equipo => {
                                                         return (
                                                         <option key={equipo.id} value={equipo.id}>

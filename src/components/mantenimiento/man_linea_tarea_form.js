@@ -91,10 +91,6 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
     } 
         
     const actualizarDatos = (event) => {
-        console.log('que vale datos antes de actualizar');
-        console.log(datos);
-        console.log('que vale linea_tarea en actualizar');
-        console.log(linea_tarea);
         if(datos.fecha_plan===''){datos.fecha_plan=null;}
         if(datos.fecha_fin!==null){datos.estado=3;}
         else if(datos.fecha_inicio!==null){datos.estado=2;}
@@ -105,7 +101,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
             nombre: datos.nombre,
             prioridad: datos.prioridad,
             observaciones: datos.observaciones,
-            tipo_periodo: datos.tipo_periodo.id,
+            tipo_periodo: datos.tipo_periodo,
             periodo: datos.periodo,
             fecha_plan: datos.fecha_plan,
         }, {

@@ -356,9 +356,7 @@ const PedidoForm = ({pedido, setPedido}) => {
               }     
         })
         .then( res => {
-            /* console.log('res data del update');
-            console.log(res.data);
-            var ordenLineas=(res.data.lineas_pedido.sort(function(a, b){
+            /* var ordenLineas=(res.data.lineas_pedido.sort(function(a, b){
                 if(a.id < b.id){
                     return 1;
                 }
@@ -367,9 +365,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                 }
                 return 0;
             }))
-            console.log(ordenLineas);
-            res.data.lineas_pedido = ordenLineas;
-            console.log(res.data); */
+            res.data.lineas_pedido = ordenLineas;*/
             setPedido(res.data);
             /* setPedido({
                 res.data,

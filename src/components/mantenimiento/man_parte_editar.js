@@ -18,7 +18,6 @@ const ManParteDetalle = ({ match }) => {
             setParte(res.data);            
         })
         .catch( err => {
-            console.log('aquí está el editar');
             console.log(err);
         });
     }, [token, match]);

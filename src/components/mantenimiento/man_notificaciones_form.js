@@ -53,9 +53,6 @@ const NotificacionForm = ({nota, setNota}) => {
             empresa: nota?nota.empresa:user['tec-user'].perfil.empresa.id,
             numero: nota.id? nota.numero:null,
         });
-        console.log('esto es nota');
-        console.log(nota);
-        console.log(datos);
     },[nota]);
 
     useEffect(() => {
@@ -88,8 +85,6 @@ const NotificacionForm = ({nota, setNota}) => {
     }
 
     const crearNota = (event) => {
-        console.log('que vale datos al crearNota------');
-        console.log(datos);
         event.preventDefault();
         axios.post(BACKEND_SERVER + `/api/mantenimiento/notificacion_nueva/`, {
             que: datos.que,
@@ -120,8 +115,6 @@ const NotificacionForm = ({nota, setNota}) => {
     } 
 
     const actualizarNota = (event) => {
-        console.log('que vale datos al actualizarNota.......');
-        console.log(datos);
         event.preventDefault();
         axios.patch(BACKEND_SERVER + `/api/mantenimiento/notificacion_nueva/${nota.id}/`, {
             que: datos.que,

@@ -16,8 +16,6 @@ const ManNotificacionDetalle = ({ match }) => {
         })
         .then( res => {
             setNota(res.data);  
-            console.log('en ManNotificacionDetalle');
-            console.log(res.data);
         })
         .catch( err => {
             console.log(err);
