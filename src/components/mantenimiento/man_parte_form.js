@@ -652,6 +652,7 @@ const ParteForm = ({parte, setParte}) => {
                                                     name='equipo'
                                                     onChange={handleInputChange3}>  
                                                     {/* {datos.equipo===''?  <option key={0} value={''}>Seleccionar</option>:''}                                    */}
+                                                    <option key={0} value={''}>Seleccionar</option>   
                                                     {equipos && equipos.map( equipo => {
                                                         return (
                                                         <option key={equipo.id} value={equipo.id}>
