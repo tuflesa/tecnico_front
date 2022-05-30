@@ -39,8 +39,8 @@ const ParteForm = ({parte, setParte}) => {
         fecha_finalizacion: parte? parte.fecha_finalizacion : '',
         empresa: parte?parte.empresa:null,
         zona: parte? parte.zona : '',
-        seccion: parte? parte.seccion.id : '',
-        equipo: parte.equipo,
+        seccion: parte? parte.seccion : '',
+        equipo: parte? parte.equipo: '',
         tarea: parte?parte.tarea:null,
         estado: parte?parte.estado:null,
         num_parte: parte? parte.num_parte:null,
@@ -49,6 +49,8 @@ const ParteForm = ({parte, setParte}) => {
     });
 
     useEffect(()=>{
+        console.log('que entra en parte');
+        console.log(parte);
         setDatos({
             id: parte.id ? parte.id : null,
             nombre: parte?parte.nombre:null,
@@ -60,9 +62,9 @@ const ParteForm = ({parte, setParte}) => {
             fecha_prevista_inicio: parte? parte.fecha_prevista_inicio : '',
             fecha_finalizacion: parte? parte.fecha_finalizacion : '',
             empresa: parte?parte.empresa:null,
-            zona: parte? parte.zona.id : '',
-            seccion: parte.seccion.id,
-            equipo: parte? parte.equipo : '',
+            zona: parte? parte.zona : '',
+            seccion: parte? parte.seccion : '',
+            equipo: parte? parte.equipo: '',
             tarea: parte?parte.tarea:null,
             estado: parte?parte.estado:null,
             num_parte: parte? parte.num_parte:null,
@@ -205,6 +207,7 @@ const ParteForm = ({parte, setParte}) => {
                 }
             })
             .then( res => {
+                console.log('renovando equipios');
                 setEquipos(res.data.sort(function(a, b){
                     if(a.nombre > b.nombre){
                         return 1;
@@ -299,7 +302,7 @@ const ParteForm = ({parte, setParte}) => {
             fecha_prevista_inicio: datos.fecha_prevista_inicio,
             fecha_finalizacion: datos.fecha_finalizacion,
             empresa: datos.empresa,
-            equipo: datos.equipo,
+            equipo: datos.equipo?datos.equipo : '',
             zona: datos.zona,
             seccion: datos.seccion,
             estado: datos.fecha_prevista_inicio?1:4,

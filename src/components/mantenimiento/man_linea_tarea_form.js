@@ -22,7 +22,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
         fecha_fin: linea_tarea.fecha_fin,
         estado: linea_tarea.estado,
         periodo: linea_tarea.tarea.periodo?linea_tarea.tarea.periodo:0,
-        tipo_periodo: linea_tarea.tarea.tipo_periodo.id,
+        tipo_periodo: linea_tarea.tarea.tipo_periodo?linea_tarea.tarea.tipo_periodo.id:'',
     });
 
     useEffect(() => {
