@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, Table, Modal } from 'react-bootstrap';
-import { PlusCircle, Receipt } from 'react-bootstrap-icons';
+import { Trash, PlusCircle, Receipt } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
@@ -25,6 +25,7 @@ const ParteForm = ({parte, setParte}) => {
     const [lineaLineasTareas, setListLineasTareas] = useState(null);
     const [cambio_fecha, setCambioFecha] = useState(false);
     const [estados, setEstados] = useState(null);
+    const [actualizar, setActualizar] = useState('');
 
     const [datos, setDatos] = useState({
         id: parte.id ? parte.id : null,
@@ -113,7 +114,7 @@ const ParteForm = ({parte, setParte}) => {
         .catch( err => {
             console.log(err); 
         })       
-    }, [token, parte]);
+    }, [token, parte, actualizar]);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
@@ -413,6 +414,66 @@ const ParteForm = ({parte, setParte}) => {
 
     const handleCloseError = () => setShowError(false);
 
+    const BorrarLinea =(linea) =>{ 
+        axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/?tarea=${linea.id}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+                }
+        })
+        .then( res => {
+            //si solo hay una linea y la fecha fin esta vacía, podemos eliminar linea y tarea.
+            if(res.data.length===1 && res.data[0].fecha_fin===null){
+                var confirmacion = window.confirm('¿Deseas eliminar la línea?');
+                if(confirmacion){
+                    axios.delete(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/${res.data[0].id}/`,{            
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                        } 
+                    })
+                    .then(re =>{
+                        axios.delete(BACKEND_SERVER + `/api/mantenimiento/tareas/${res.data[0].tarea.id}/`,{            
+                            headers: {
+                                'Authorization': `token ${token['tec-token']}`
+                            } 
+                        })
+                        .then(r =>{
+                            alert('tarea eliminada');
+                            setActualizar(linea);  
+                        })
+                        .catch (err=>{console.log((err));});
+                    })
+                    .catch (err=>{console.log((err));});
+                }
+            }
+            else{
+                //Si la ultima linea tiene fecha fin, no se puede eliminar
+                if(res.data[res.data.length-1].fecha_fin!==null){
+                    alert('No se puede elimnar, trabajo ya ejecutado y terminado');
+                }
+                //en un preventivo, queremos detener el ciclo del trabajo.
+                else{
+                    var detenerTrabajo = window.confirm('No se puede eliminar, tiene trabajos finalizados. ¿Deseas detener el proceso?');
+                    if(detenerTrabajo){
+                        //eliminamos la linea que es la que ejecuta de nuevo la tarea'
+                        axios.delete(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/${res.data[res.data.length-1].id}/`,{            
+                            headers: {
+                                'Authorization': `token ${token['tec-token']}`
+                            } 
+                        })
+                        .then(ress =>{
+                            alert('Trabajo detenido, no volverá a generar linea');
+                            setActualizar(linea);  
+                        })
+                        .catch (err=>{console.log((err));});
+                    }
+                }
+            }       
+        })
+        .catch( err => {
+            console.log(err);
+        });                 
+    }
+
     return(
         <Container>
             <Row className="justify-content-center"> 
@@ -666,6 +727,7 @@ const ParteForm = ({parte, setParte}) => {
                                                 {datos.tipo===1?<td>{linea.periodo}</td>:''}
                                                 <td>                                            
                                                     <Receipt className="mr-3 pencil" onClick={event =>{listarLineasTareas(linea)}}/>
+                                                    <Trash className="mr-3 pencil"  onClick={event =>{BorrarLinea(linea)}} />
                                                 </td>
                                             </tr>
                                         )})
