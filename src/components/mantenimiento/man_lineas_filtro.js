@@ -302,7 +302,7 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
                                         onChange={handleInputChange}
                                         placeholder="Especialidad">
                                             <option key={0} value={''}>Todos</option>
-                                        {especialidades && especialidades.map( especialidad => {
+                                            {especialidades && especialidades.map( especialidad => {
                                             return (
                                             <option key={especialidad.id} value={especialidad.id}>
                                                 {especialidad.nombre}

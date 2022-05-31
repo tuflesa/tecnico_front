@@ -11,12 +11,12 @@ const ManNotificacionesLista = () => {
     const [token] = useCookies(['tec-token']);
     
     const [notas, setNotas]  = useState(null);
-    const [filtro, setFiltro] = useState('');
+    const [filtro, setFiltro] = useState(`?finalizado=${false}&revisao=${false}&descartado=${false}`);
 
     const actualizaFiltro = (str) => {
         setFiltro(str);
     }
-    
+  
     useEffect(()=>{
         axios.get(BACKEND_SERVER + '/api/mantenimiento/notificaciones/' + filtro ,{
             headers: {
@@ -24,7 +24,6 @@ const ManNotificacionesLista = () => {
                 }
         })
         .then( res => {
-            
             setNotas(res.data);
         })
         .catch( err => {

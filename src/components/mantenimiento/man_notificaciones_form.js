@@ -98,6 +98,7 @@ const NotificacionForm = ({nota, setNota}) => {
             fecha_creacion: datos.fecha_creacion,            
             revisado: datos.revisado,
             descartado: datos.descartado,
+            finalizado: datos.finalizado,
             conclusion: datos.conclusion,
             empresa: datos.empresa,
         }, {
@@ -128,6 +129,7 @@ const NotificacionForm = ({nota, setNota}) => {
             fecha_creacion: datos.fecha_creacion,            
             revisado: datos.revisado,
             descartado: datos.descartado,
+            finalizado: datos.finalizado,
             conclusion: datos.conclusion,
             //empresa: datos.empresa,
         }, {
@@ -277,8 +279,62 @@ const NotificacionForm = ({nota, setNota}) => {
                                                 })}
                                 </Form.Control>
                                 </Form.Group>
-                            </Col> */}                            
+                            </Col> */}                           
+                        </Row>     
+                        <Row> 
+                            {user['tec-user'].perfil.puesto.nombre==='Técnico'?
+                                <h5 className="pb-3 pt-1 mt-2">Estado de la notificación</h5>:null}
+                        </Row>
+                        <Row>
                             <Col>
+                            {user['tec-user'].perfil.puesto.nombre==='Técnico'?
+                                <Form.Group controlId="revisado">
+                                <Form.Label>Revisado</Form.Label>
+                                <Form.Control as="select" 
+                                                value={datos.revisado}
+                                                name='revisado'
+                                                onChange={handleInputChange}>
+                                    <option key={0} value={''}>Todos</option>
+                                    <option key={1} value={true}>Si</option>
+                                    <option key={2} value={false}>No</option>
+                                </Form.Control>
+                            </Form.Group>
+                            : null}
+                            </Col>
+                            <Col>
+                            {user['tec-user'].perfil.puesto.nombre==='Técnico'?
+                                <Form.Group controlId="descartado">
+                                <Form.Label>Descartado</Form.Label>
+                                <Form.Control as="select" 
+                                                value={datos.descartado}
+                                                name='descartado'
+                                                onChange={handleInputChange}>
+                                    <option key={0} value={''}>Todos</option>
+                                    <option key={1} value={true}>Si</option>
+                                    <option key={2} value={false}>No</option>
+                                </Form.Control>
+                            </Form.Group>
+                            : null}
+                            </Col>
+                            <Col>
+                            {user['tec-user'].perfil.puesto.nombre==='Técnico'?
+                                <Form.Group controlId="finalizado">
+                                    <Form.Label>Finalizado</Form.Label>
+                                    <Form.Control as="select" 
+                                                    value={datos.finalizado}
+                                                    name='finalizado'
+                                                    onChange={handleInputChange}>
+                                        <option key={0} value={''}>Todos</option>
+                                        <option key={1} value={true}>Si</option>
+                                        <option key={2} value={false}>No</option>
+                                    </Form.Control>
+                                </Form.Group>
+                            : null}
+                            </Col>
+                        </Row>   
+                        <Row>                        
+                            <Col>
+                            {user['tec-user'].perfil.puesto.nombre==='Técnico'?
                                 <Form.Group id="conclusion">
                                     <Form.Label>Concusiones</Form.Label>
                                     <Form.Control type="text" 
@@ -288,8 +344,9 @@ const NotificacionForm = ({nota, setNota}) => {
                                                 placeholder="Conclusiones"
                                     />
                                 </Form.Group>
+                            : null}
                             </Col>                            
-                        </Row>                                             
+                        </Row>                                      
                         <Form.Row className="justify-content-center">
                             {nota.id ? 
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarNota}>Actualizar</Button> :
