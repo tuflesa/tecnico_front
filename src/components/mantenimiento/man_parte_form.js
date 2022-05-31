@@ -39,8 +39,8 @@ const ParteForm = ({parte, setParte}) => {
         fecha_finalizacion: parte? parte.fecha_finalizacion : '',
         empresa: parte?parte.empresa:null,
         zona: parte? parte.zona : '',
-        seccion: parte? parte.seccion : '',
-        equipo: parte? parte.equipo: '',
+        seccion: parte? parte.seccion.id : '',
+        equipo: parte.equipo? parte.equipo.id: '',
         tarea: parte?parte.tarea:null,
         estado: parte?parte.estado:null,
         num_parte: parte? parte.num_parte:null,
@@ -63,8 +63,8 @@ const ParteForm = ({parte, setParte}) => {
             fecha_finalizacion: parte? parte.fecha_finalizacion : '',
             empresa: parte?parte.empresa:null,
             zona: parte? parte.zona : '',
-            seccion: parte? parte.seccion : '',
-            equipo: parte? parte.equipo: '',
+            seccion: parte? parte.seccion.id : '',
+            equipo: parte.equipo? parte.equipo.id: '',
             tarea: parte?parte.tarea:null,
             estado: parte?parte.estado:null,
             num_parte: parte? parte.num_parte:null,
@@ -150,12 +150,12 @@ const ParteForm = ({parte, setParte}) => {
             })
             .then( res => {
                 setZonas(res.data);
-                setDatos({
-                    ...datos,
-                    zona: '',
-                    seccion: '',
-                    equipo: ''
-                });
+                // setDatos({
+                //     ...datos,
+                //     zona: '',
+                //     seccion: '',
+                //     equipo: ''
+                // });
             })
             .catch( err => {
                 console.log(err);
@@ -180,11 +180,11 @@ const ParteForm = ({parte, setParte}) => {
             })
             .then( res => {
                 setSecciones(res.data);
-                setDatos({
-                    ...datos,
-                    seccion: '',
-                    equipo: ''
-                });
+                // setDatos({
+                //     ...datos,
+                //     seccion: '',
+                //     equipo: ''
+                // });
             })
             .catch( err => {
                 console.log(err);
@@ -217,10 +217,10 @@ const ParteForm = ({parte, setParte}) => {
                     }
                     return 0;
                 }))
-                setDatos({
-                    ...datos,
-                    equipo: ''
-                });
+                // setDatos({
+                //     ...datos,
+                //     equipo: ''
+                // });
             })
             .catch( err => {
                 console.log(err);
@@ -275,15 +275,44 @@ const ParteForm = ({parte, setParte}) => {
         })  
     }
 
-    const handleInputChangeF = (event) => {
-        setCambioFecha(true);
+    const handleInputChangeEmpresa = (event) => {
+        setDatos({
+            ...datos,
+            zona: '',
+            seccion: '',
+            equipo: ''
+                });
         setDatos({
             ...datos,
             [event.target.name] : event.target.value
         })  
     }
 
-    const handleInputChange3 = (event) => {
+    const handleInputChangeZona = (event) => {
+        setDatos({
+            ...datos,
+            seccion: '',
+            equipo: ''
+                });
+        setDatos({
+            ...datos,
+            [event.target.name] : event.target.value
+        })  
+    }
+
+    const handleInputChangeSeccion = (event) => {
+        setDatos({
+            ...datos,
+            equipo: ''
+                });
+        setDatos({
+            ...datos,
+            [event.target.name] : event.target.value
+        })  
+    }
+
+    const handleInputChangeF = (event) => {
+        setCambioFecha(true);
         setDatos({
             ...datos,
             [event.target.name] : event.target.value
@@ -598,7 +627,7 @@ const ParteForm = ({parte, setParte}) => {
                                     <Form.Control as="select"  
                                                 name='empresa' 
                                                 value={datos.empresa}
-                                                onChange={handleInputChange}
+                                                onChange={handleInputChangeEmpresa}
                                                 placeholder="Empresa"
                                                 disabled={parte.id ? true : handleDisabled2()}>                                               
                                                 {empresas && empresas.map( empresa => {
@@ -617,7 +646,7 @@ const ParteForm = ({parte, setParte}) => {
                                     <Form.Control   as="select" 
                                                     value={datos.zona}
                                                     name='zona'
-                                                    onChange={handleInputChange}> 
+                                                    onChange={handleInputChangeZona}> 
                                                     <option key={0} value={''}>Seleccionar</option>                                      
                                                     {zonas && zonas.map( zona => {
                                                         return (
@@ -635,7 +664,7 @@ const ParteForm = ({parte, setParte}) => {
                                     <Form.Control   as="select" 
                                                     value={datos.seccion}
                                                     name='seccion'
-                                                    onChange={handleInputChange3}>  
+                                                    onChange={handleInputChangeSeccion}>  
                                                     <option key={0} value={''}>Seleccionar</option>                                      
                                                     {secciones && secciones.map( seccion => {
                                                         return (
@@ -653,7 +682,7 @@ const ParteForm = ({parte, setParte}) => {
                                     <Form.Control   as="select" 
                                                     value={datos.equipo}
                                                     name='equipo'
-                                                    onChange={handleInputChange3}>  
+                                                    onChange={handleInputChange}>  
                                                     {/* {datos.equipo===''?  <option key={0} value={''}>Seleccionar</option>:''}                                    */}
                                                     <option key={0} value={''}>Seleccionar</option>   
                                                     {equipos && equipos.map( equipo => {
