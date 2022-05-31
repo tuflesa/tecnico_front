@@ -93,13 +93,13 @@ const CargaForm = ({ carga }) => {
         event.preventDefault()
         console.log('Actualizar datos...' + datos.empresa + ' ' + datos.bruto + ' ' + datos.remolque)
 
-        if (datos.fecha_salida === null && Number.isInteger(parseInt(datos.bruto))) {
+        if (datos.fecha_salida === null) { // && Number.isInteger(parseInt(datos.bruto))) {
             datos.fecha_salida = new Date()
         } 
-        if (datos.bruto===''){
-            datos.bruto = null;
-            datos.fecha_salida = null;
-        }
+        // if (datos.bruto===''){
+        //     datos.bruto = null;
+        //     datos.fecha_salida = null;
+        // }
         
         axios.put(BACKEND_SERVER + `/api/cargas/carga/${carga.id}/`, {
             empresa: datos.empresa,
