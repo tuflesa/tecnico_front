@@ -39,7 +39,7 @@ const ParteForm = ({parte, setParte}) => {
         fecha_finalizacion: parte? parte.fecha_finalizacion : '',
         empresa: parte?parte.empresa:null,
         zona: parte? parte.zona : '',
-        seccion: parte? parte.seccion.id : '',
+        seccion: parte.id? parte.seccion.id : '',
         equipo: parte.equipo? parte.equipo.id: '',
         tarea: parte?parte.tarea:null,
         estado: parte?parte.estado:null,
@@ -49,8 +49,6 @@ const ParteForm = ({parte, setParte}) => {
     });
 
     useEffect(()=>{
-        console.log('que entra en parte');
-        console.log(parte);
         setDatos({
             id: parte.id ? parte.id : null,
             nombre: parte?parte.nombre:null,
@@ -63,7 +61,7 @@ const ParteForm = ({parte, setParte}) => {
             fecha_finalizacion: parte? parte.fecha_finalizacion : '',
             empresa: parte?parte.empresa:null,
             zona: parte? parte.zona : '',
-            seccion: parte? parte.seccion.id : '',
+            seccion: parte.id? parte.seccion.id : '',
             equipo: parte.equipo? parte.equipo.id: '',
             tarea: parte?parte.tarea:null,
             estado: parte?parte.estado:null,
@@ -207,7 +205,6 @@ const ParteForm = ({parte, setParte}) => {
                 }
             })
             .then( res => {
-                console.log('renovando equipios');
                 setEquipos(res.data.sort(function(a, b){
                     if(a.nombre > b.nombre){
                         return 1;
