@@ -162,10 +162,11 @@ const ManLineasListado = () => {
                         <thead>
                             <tr>
                                 <th>Pr.</th>
-                                <th>Nombre Parte</th>
-                                <th>Nombre Tarea</th>
+                                <th>Parte</th>
+                                <th>Tarea</th>
                                 <th>Tipo</th>
                                 <th>Especialidad</th>
+                                <th>Equipo</th>
                                 <th style={{width:110}}>Fecha Plan</th>
                                 <th style={{width:110}}>Fecha Inicio</th>
                                 <th style={{width:110}}>Fecha Fin</th>
@@ -181,6 +182,7 @@ const ManLineasListado = () => {
                                         <td>{linea.tarea.nombre}</td>
                                         <td>{linea.parte.tipo_nombre}</td>
                                         <td>{linea.tarea.especialidad_nombre}</td>
+                                        <td>{linea.parte.seccion?linea.parte.seccion.siglas_zona +' - '+linea.parte.seccion.nombre + (linea.parte.equipo?' - ' + linea.parte.equipo.nombre:''):null}</td>
                                         <td>{linea.fecha_plan? invertirFecha(String(linea.fecha_plan)):''}</td>
                                         <td>{linea.fecha_inicio?invertirFecha(String(linea.fecha_inicio)):''}</td>
                                         <td>{linea.fecha_fin?invertirFecha(String(linea.fecha_fin)):''}</td>

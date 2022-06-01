@@ -295,7 +295,7 @@ const ManPorEquipos = () => {
             <Row class extends>                
                 <Col>
                     <h5 className="mb-3 mt-3" style={ { color: 'red' } }>Listado de Trabajos {user['tec-user'].get_full_name}</h5>   
-                    <h5>Listado de trabajos por prioridades, si se puede realizar, no podemos saltarlo.</h5>                 
+                    <h5>Listado de trabajos por prioridades.</h5>                 
                     <h5>Acciones:</h5>
                     <h5><Tools/> ---- Para iniciar un trabajo</h5>
                     <h5><FileCheck/> ---- Para finalizar un trabajo</h5>
