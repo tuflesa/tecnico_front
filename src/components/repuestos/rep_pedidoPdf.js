@@ -4,27 +4,6 @@ import { useCookies } from 'react-cookie';
 
 const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicionales, proveedor, contacto, direccion_envio}) =>{
     const [token] = useCookies(['tec-token']);
-    /* const [im, setIm] = useState({
-        uri: empresa.logo,
-        method:'GET',
-<<<<<<< HEAD
-<<<<<<< HEAD
-        headers: { "Cache-Control": "no-cache" }, 
-        body: "" 
-    });
-=======
-=======
->>>>>>> 6cffe02d6a0f372fb08fedb54f012d156e4ea892
-        headers:{
-            'Authorization': `token ${token['tec-token']}`
-            }
-    }); */
-<<<<<<< HEAD
-    useEffect(() => {
-        console.log('esto es lo que recoge');
-        console.log(linea);
-    })
-=======
 
     const formatNumber = (numero) =>{
         return new Intl.NumberFormat('de-DE',{ style: 'currency', currency: 'EUR' }).format(numero)
@@ -33,7 +12,6 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
     const formatPorcentaje = (numero) =>{
         return new Intl.NumberFormat('de-DE').format(numero)
     }
->>>>>>> dev
 
     function parseData(){
         if(linea){
