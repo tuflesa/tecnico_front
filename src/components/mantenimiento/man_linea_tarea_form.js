@@ -9,6 +9,7 @@ import { strToArrBuffer } from 'react-data-export/dist/ExcelPlugin/utils/DataUti
 const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
     const [token] = useCookies(['tec-token']);
     const [estados, setEstados] = useState(null);
+    const [tipo_periodo, setTipoPeriodo] = useState(null);
 
     const [datos, setDatos] = useState({
         id: linea_tarea.id,
@@ -20,6 +21,8 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
         fecha_inicio: linea_tarea.fecha_inicio,
         fecha_fin: linea_tarea.fecha_fin,
         estado: linea_tarea.estado,
+        periodo: linea_tarea.tarea.periodo?linea_tarea.tarea.periodo:0,
+        tipo_periodo: linea_tarea.tarea.tipo_periodo?linea_tarea.tarea.tipo_periodo.id:'',
     });
 
     useEffect(() => {
@@ -43,6 +46,28 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
             console.log(err); 
         })       
     }, [token]);
+
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + '/api/mantenimiento/tipo_periodo/',{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setTipoPeriodo(res.data.sort(function(a, b){
+                if(a.nombre > b.nombre){
+                    return 1;
+                }
+                if(a.nombre < b.nombre){
+                    return -1;
+                }
+                return 0;
+            }))
+        })
+        .catch( err => {
+            console.log(err); 
+        })       
+    }, [token]); 
 
     const updateTarea = () => {
         linea_tarea.id && axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/${linea_tarea.id}`,{
@@ -71,11 +96,14 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
         else if(datos.fecha_inicio!==null){datos.estado=2;}
         else if(datos.fecha_plan!==null){datos.estado=1;}
         else if(datos.fecha_plan===null){datos.estado=4;}
-        event.preventDefault();        
+        event.preventDefault(); 
         axios.patch(BACKEND_SERVER + `/api/mantenimiento/tarea_nueva/${linea_tarea.tarea.id}/`, {
             nombre: datos.nombre,
             prioridad: datos.prioridad,
             observaciones: datos.observaciones,
+            tipo_periodo: datos.tipo_periodo,
+            periodo: datos.periodo,
+            fecha_plan: datos.fecha_plan,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -93,7 +121,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                   }     
             })
             .then( res => {
-                updateTarea();
+                //updateTarea();
                 datos.nombre= '';
                 datos.especialidad='';
                 datos.prioridad='';
@@ -106,7 +134,6 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
             .catch(err => { console.log(err);})
         })
         .catch(err => { console.log(err);})
-
     }
 
     return (
@@ -175,6 +202,54 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                         </Row>
                         <Row>
                             <Col>
+                                {linea_tarea.parte.tipo===1?
+                                    <Form.Group id="tipo_periodo">
+                                        <Form.Label>Tipo Periodo</Form.Label>
+                                        <Form.Control as="select"  
+                                                    name='tipo_periodo' 
+                                                    value={datos.tipo_periodo}
+                                                    onChange={handleInputChange}
+                                                    placeholder="Tipo Periodo">  
+                                                    {datos.tipo_periodo===''?  <option key={0} value={''}>Seleccionar</option>:''}   
+                                                    {linea_tarea.tarea.tipo_periodo===null?  <option key={0} value={''}>Seleccionar</option>:''}                                               
+                                                    {tipo_periodo && tipo_periodo.map( periodo => {
+                                                        return (
+                                                        <option key={periodo.id} value={periodo.id}>
+                                                            {periodo.nombre}
+                                                        </option>
+                                                        )
+                                                    })}
+                                        </Form.Control>
+                                    </Form.Group>
+                                : null}
+                            </Col>
+                            <Col>
+                                {linea_tarea.parte.tipo===1?
+                                    <Form.Group controlId="periodo">
+                                        <Form.Label>Cantidad de Periodos</Form.Label>
+                                        <Form.Control as="select" 
+                                                        value={datos.periodo}
+                                                        name='periodo'
+                                                        onChange={handleInputChange}>
+                                                        {datos.periodo===0?  <option key={0} value={''}>Seleccionar</option>:''}
+                                                        <option key={1} value={1}>1</option>
+                                                        <option key={2} value={2}>2</option>
+                                                        <option key={3} value={3}>3</option>
+                                                        <option key={4} value={4}>4</option>
+                                                        <option key={5} value={5}>5</option>
+                                                        <option key={6} value={6}>6</option>
+                                                        <option key={7} value={7}>7</option>
+                                                        <option key={8} value={8}>8</option>
+                                                        <option key={9} value={9}>9</option>
+                                                        <option key={10} value={10}>10</option>
+                                                        <option key={11} value={10}>11</option>                                        
+                                        </Form.Control>
+                                    </Form.Group>
+                                : null}
+                            </Col>
+                        </Row> 
+                        <Row>
+                            <Col>
                                 <Form.Group controlId="fecha_plan">
                                     <Form.Label>Fecha Plan{linea_tarea.parte.fecha_prevista_inicio===null?' (Parte pendiente)':''}</Form.Label>
                                     <Form.Control type="date" 
@@ -207,7 +282,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                                                 disabled='true'/>
                                 </Form.Group>
                             </Col> 
-                        </Row>                                                  
+                        </Row>                                    
                         <Row>                            
                             <Col>
                                 <Form.Group id="observaciones">

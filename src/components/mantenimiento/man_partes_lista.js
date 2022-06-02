@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
-import { Container, Row, Col, Table, Modal, Button } from 'react-bootstrap';
-import { Trash, PencilFill, Receipt } from 'react-bootstrap-icons';
+import { Container, Row, Col, Table } from 'react-bootstrap';
+import { Trash, PencilFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import ManPartesFiltro from './man_partes_filtro';
 
@@ -13,6 +13,7 @@ const ManListaPartes = () => {
     const [partes, setPartes]  = useState(null);
     const [filtro, setFiltro] = useState(`?estado=${''}`);
     const [activos, setActivos] = useState('');
+    const [actualizar, setActualizar] = useState('');
 
     const actualizaFiltro = (str, act) => {
         setActivos(act);
@@ -63,7 +64,7 @@ const ManListaPartes = () => {
         .catch( err => {
             console.log(err);
         });
-    }, [token, filtro, activos]);    
+    }, [token, filtro, activos, actualizar]);
 
     const BorrarParte =(parte) =>{ 
         if(parte.tarea.length===0){
@@ -76,6 +77,7 @@ const ManListaPartes = () => {
                 })
                 .then(res =>{
                     alert('Parte eliminado');
+                    setActualizar(parte); 
                 })
                 .catch (err=>{console.log((err));});
             }
@@ -115,6 +117,7 @@ const ManListaPartes = () => {
                         })
                         .then(res =>{
                             alert('Parte y trabajos eliminados satisfactoriamente');
+                            setActualizar(parte); 
                         })
                         .catch (err=>{console.log((err));});
                     }
@@ -123,7 +126,7 @@ const ManListaPartes = () => {
             .catch( err => {
                 console.log(err); 
             })
-        }
+        }         
     }
 
     return (
@@ -139,23 +142,23 @@ const ManListaPartes = () => {
                     <Table striped bordered hover>
                         <thead>
                             <tr>
+                                <th style={{width:150}}>Numero</th>
                                 <th>Nombre</th>
                                 <th>Tipo</th>
                                 <th>Creado Por</th>
-                                <th>Estado</th>                                
-                                <th>Observaciones</th>
-                                <th>Acciones</th>
+                                <th>Estado</th>
+                                <th style={{width:80}}>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             {partes && partes.map( parte => {
                                 return (
                                     <tr key={parte.id}>
+                                        <td>{parte.num_parte}</td>
                                         <td>{parte.nombre}</td>
                                         <td>{parte.tipo_nombre}</td>
                                         <td>{parte.creado_por.get_full_name}</td>
                                         <td>{parte.estado_nombre}</td>
-                                        <td>{parte.observaciones}</td>
                                         <td>
                                             <Link to={`/mantenimiento/parte/${parte.id}`}>
                                                 <PencilFill className="mr-3 pencil"/>                                                

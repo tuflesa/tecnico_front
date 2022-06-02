@@ -63,7 +63,15 @@ const RepPendientes = () => {
             }
         })
         .then( res => {
-            setPedFueradeFecha(res.data);
+            setPedFueradeFecha(res.data.sort(function(a, b){
+                if(a.numero > b.numero){
+                    return 1;
+                }
+                if(a.numero < b.numero){
+                    return -1;
+                }
+                return 0;
+            }))
         })
         .catch( err => {
             console.log(err);
@@ -92,6 +100,18 @@ const RepPendientes = () => {
     const handlerListCancelar = ()=>{
         setShow(false);
     }
+    
+    /* const OrdenarPorNombre = (lista)=>{
+        setPedFueradeFecha(lista.sort(function(a, b){
+            if(a.creado_por.get_full_name > b.creado_por.get_full_name){
+                return 1;
+            }
+            if(a.creado_por.get_full_name < b.creado_por.get_full_name){
+                return -1;
+            }
+            return 0;
+        }))
+    } */
 
     return (
         <Container>
@@ -102,17 +122,19 @@ const RepPendientes = () => {
                         <thead>
                             <tr>
                                 <th>Nombre</th>
+                                <th>Crítico</th>
                                 <th>Stock Actual</th>
                                 <th>Stock Mínimo</th>
                                 <th>Cant. por recibir</th>
-                                <th>Pedidos</th>
+                                <th style={{width:90}}>Pedidos</th>
                             </tr>
                         </thead>
                         <tbody>
                             {pendientes && pendientes.map( pendiente => {
                                 return (
                                     <tr key={pendiente.id}>
-                                        <td>{pendiente.repuesto.nombre}</td>
+                                        <td>{pendiente.repuesto.nombre_comun?pendiente.repuesto.nombre_comun:pendiente.repuesto.nombre}</td>
+                                        <td>{pendiente.repuesto.es_critico?'Si':'No'}</td>
                                         <td>{pendiente.stock_act}</td>
                                         <td>{pendiente.cantidad}</td> 
                                         <td>{lineasPendientes && lineasPendientes.map( linea => {
@@ -125,8 +147,10 @@ const RepPendientes = () => {
                                         </td>
                                         <td>
                                         <Receipt className="mr-3 pencil" onClick={event =>{listarPedidos(pendiente.repuesto.id)}}/>
+                                        <Link to={`/repuestos/${pendiente.repuesto.id}`}>
+                                                <PencilFill className="mr-3 pencil"/>
+                                        </Link>
                                         </td>
-
                                     </tr>
                                 )
                             })
@@ -141,13 +165,14 @@ const RepPendientes = () => {
                     <Table striped bordered hover>
                         <thead>
                         <tr>
-                                <th>Num-Pedido</th>
+                                <th style={{width:130}}>Num-Pedido</th>
                                 <th>Empresa</th>
                                 <th>Proveedor</th>
-                                <th>Fecha Pedido</th>
-                                <th>Fecha Entrega</th>
-                                <th>Fecha Prevista Entrega</th>
-                                <th>Finalizado</th>
+                                <th style={{width:110}}>Fecha Pedido</th>
+                                <th style={{width:110}}>Fecha Entrega</th>
+                                <th style={{width:150}}>Fecha Prevista Entrega</th>
+                                <th>Creado por</th>
+                                {/* <th><Button variant="info" onClick={event =>{OrdenarPorNombre(pedfueradefecha)}}>Creado Por</Button></th> */}
                                 <th>Ir al pedido</th>
                             </tr>
                         </thead>
@@ -161,7 +186,7 @@ const RepPendientes = () => {
                                         <td>{invertirFecha(String(pedido.fecha_creacion))}</td>
                                         <td>{pedido.fecha_entrega && invertirFecha(String(pedido.fecha_entrega))}</td>                                        
                                         <td>{pedido.fecha_prevista_entrega && invertirFecha(String(pedido.fecha_prevista_entrega))}</td> 
-                                        <td>{pedido.finalizado ? 'Si' : 'No'}</td>
+                                        <td>{pedido.creado_por.get_full_name}</td>
                                         <td>
                                             <Link to={`/repuestos/pedido_detalle/${pedido.id}`}>
                                                 <PencilFill className="mr-3 pencil"/>

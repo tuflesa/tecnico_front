@@ -16,15 +16,12 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
     });
 
     useEffect(()=>{
-        console.log('filtro ...');
-        console.log(filtro);
         filtro && almacen && axios.get(BACKEND_SERVER + `/api/repuestos/detalle/`+ filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }     
         })
-        .then( res => {   
-            console.log(res.data);
+        .then( res => {  
             setRepuesto(res.data.sort(function(a, b){
                 if(a.nombre > b.nombre){
                     return 1;
@@ -40,7 +37,7 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
                   }     
             })
             .then( r => {   
-                setLocalizaciones(r.data);                
+                setLocalizaciones(r.data);           
             })
             .catch(err => { console.log(err);})
         })
@@ -59,7 +56,7 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
     }  
     
     useEffect(()=>{
-        const filtro = `?stocks_minimos__almacen__id=${almacen}&nombre__icontains=${datos.nombre}`;
+        const filtro = `?stocks_minimos__almacen__id=${almacen}&nombre__icontains=${datos.nombre}&id=${datos.id}`;
         actualizaFiltro(filtro);
     },[datos, almacen]);
 
@@ -78,6 +75,14 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
                                         placeholder="Nombre contiene" 
                                         autoFocus/>
                         </Form.Group>
+                        <Form.Group>
+                        <Form.Label>Id Repuesto (sin el último dígito)</Form.Label>
+                        <Form.Control   type="text" 
+                                        name='id' 
+                                        value={datos.id}
+                                        onChange={handleInputChange} 
+                                        placeholder="Id repuesto" />
+                    </Form.Group>
                     </Col>
                 </Row>
             </Modal.Header>

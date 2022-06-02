@@ -16,7 +16,8 @@ const RepSalidas = ({alm}) => {
 
     const [numeroBar, setNumeroBar] = useState({
         id: '',
-        almacen: alm ? alm : ''
+        almacen: alm ? alm : '',
+        idCod: '',
     });
     const [datos, setDatos] = useState({
         usuario: user['tec-user'],
@@ -25,7 +26,7 @@ const RepSalidas = ({alm}) => {
         nombre: '',
         stock: '',
         critico: '',
-        cantidad: ''
+        cantidad: '',
     }); 
     const [lineasSalida, setLineasSalida] = useState([]);
     const [cambioCodigo, setCambioCodigo] = useState(false);
@@ -51,10 +52,7 @@ const RepSalidas = ({alm}) => {
                 setAlmacenesBloqueado(true);
             }
             else newAlmacenes = res.data;
-
-
             setAlmacenes(newAlmacenes); 
-            
         })
         .catch(err => { console.log(err);})
     },[token, alm]);
@@ -70,6 +68,7 @@ const RepSalidas = ({alm}) => {
                 alert('Este Repuesto NO existe en este almacen, revise almacen seleccionado');
                 numeroBar.id='';
                 numeroBar.almacen='';
+                numeroBar.codRepuesto='';
                 datos.id='';
                 datos.almacen='';
             }
@@ -141,18 +140,19 @@ const RepSalidas = ({alm}) => {
         })
         .then( res => { 
             alert("Salida realizada con exito!!!!");
-            window.location.href = '/home';
+            window.location.href = "javascript: history.go(-1)";
+            //window.location.href = '/home';
             // window.location.reload();
         })
         .catch( err => {console.log(err)});
     });
     },[movimientos]);
-
+    
     const handleInputChange = (event) => { 
         setNumeroBar ({
             ...numeroBar,
             [event.target.name] : event.target.value                
-        }); 
+        });
         if(numeroBar.id.length===11){
             setDatos({
                 ...datos,
@@ -256,7 +256,7 @@ const RepSalidas = ({alm}) => {
                                     placeholder="Codigo de barras" 
                                     autoFocus/>
                     </Form.Group>
-                </Col> : null}                             
+                </Col>: null}                             
                 <Col>
                 <br></br>
                     {numeroBar.almacen? <Button variant="info" tabIndex={3} className={'btn-lg'} onClick={event => {abrirListRepuestos()}}>Buscar Repuesto</Button> : null}                 

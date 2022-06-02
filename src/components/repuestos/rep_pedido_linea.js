@@ -3,6 +3,7 @@ import { Button, Modal, Form, Col, Row } from 'react-bootstrap';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
+import { locales } from 'moment';
 
 const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedido, linea}) => {    
     const [token] = useCookies(['tec-token']);
@@ -33,10 +34,9 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
 
     useEffect(()=>{ 
         datos.cantidad=Number.parseFloat(datos.cantidad).toFixed(2);
-        datos.precio=Number.parseFloat(datos.precio).toFixed(2);
+        datos.precio=Number.parseFloat(datos.precio).toFixed(3);
         datos.descuento=Number.parseFloat(datos.descuento).toFixed(2);
         datos.total = Number.parseFloat((datos.precio*datos.cantidad)-(datos.precio*datos.cantidad*datos.descuento/100)).toFixed(2);
-       // datos.total=Number.parseFloat(datos.total).toFixed(2);
         datos.por_recibir = linea ? (linea.por_recibir+(datos.cantidad-linea.cantidad)) : datos.cantidad;     
     },[datos.cantidad, datos.precio, datos.descuento]);
 

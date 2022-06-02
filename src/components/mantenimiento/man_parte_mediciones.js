@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, Table, Modal } from 'react-bootstrap';
-import { Trash, PlusCircle, Receipt } from 'react-bootstrap-icons';
+import { PlusCircle, Receipt } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
-import LineaTareaNueva from './man_parte_lineatarea';
+import LineaMedicionNueva from './man_parte_lineamediciones';
 import LineasPartesMov from './man_parte_lineas_mov';
 
-const ParteForm = ({parte, setParte}) => {
+const ParteMediciones = ({parte, setParte}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
 
@@ -19,40 +19,19 @@ const ParteForm = ({parte, setParte}) => {
     const [zonas, setZonas] = useState(null);
     const [equipos, setEquipos] = useState(null);
     const [hoy] = useState(new Date);
+    const [tipo_periodo, setTipoPeriodo] = useState(null);
     const [show_linea, setShowLinea] = useState(false);
     const [show_error, setShowError] = useState(false);
     const [show_listlineastareas, setShowListLineasTareas] = useState(false);
     const [lineaLineasTareas, setListLineasTareas] = useState(null);
     const [cambio_fecha, setCambioFecha] = useState(false);
     const [estados, setEstados] = useState(null);
-    const [actualizar, setActualizar] = useState('');
+    const [lineas, setLineas] = useState(null);
 
     const [datos, setDatos] = useState({
         id: parte.id ? parte.id : null,
-        nombre: parte?parte.nombre:null,
-        tipo: parte?parte.tipo:null,
-        creado_por: parte.creado_por,
-        finalizado: parte? parte.finalizado : false,
-        observaciones: parte.observaciones? parte.observaciones : '',
-        fecha_creacion: parte.id ? parte.fecha_creacion :(hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
-        fecha_prevista_inicio: parte? parte.fecha_prevista_inicio : '',
-        fecha_finalizacion: parte? parte.fecha_finalizacion : '',
-        empresa: parte?parte.empresa:null,
-        zona: parte? parte.zona : '',
-        seccion: parte.id? parte.seccion.id : '',
-        equipo: parte.equipo? parte.equipo.id: '',
-        tarea: parte?parte.tarea:null,
-        estado: parte?parte.estado:null,
-        num_parte: parte? parte.num_parte:null,
-        tipo_periodo: parte.tipo===1? parte.tipo_periodo : '',
-        periodo: parte.tipo===1? parte.periodo : 0,
-    });
-
-    useEffect(()=>{
-        setDatos({
-            id: parte.id ? parte.id : null,
             nombre: parte?parte.nombre:null,
-            tipo: parte?parte.tipo:null,
+            tipo: 4,
             creado_por: parte.creado_por,
             finalizado: parte? parte.finalizado : false,
             observaciones: parte.observaciones? parte.observaciones : '',
@@ -61,46 +40,45 @@ const ParteForm = ({parte, setParte}) => {
             fecha_finalizacion: parte? parte.fecha_finalizacion : '',
             empresa: parte?parte.empresa:null,
             zona: parte? parte.zona : '',
-            seccion: parte.id? parte.seccion.id : '',
-            equipo: parte.equipo? parte.equipo.id: '',
+            seccion: parte? parte.seccion : '',
+            equipo: parte? parte.equipo : '',
+            tipo_periodo: parte.id? parte.tipo_periodo : '',
+            periodo: parte.id? parte.periodo : 0,
             tarea: parte?parte.tarea:null,
             estado: parte?parte.estado:null,
             num_parte: parte? parte.num_parte:null,
-            tipo_periodo: parte.tipo===1? parte.tipo_periodo : '',
-            periodo: parte.tipo===1? parte.periodo : 0,
+    });
+
+    useEffect(()=>{
+        setDatos({
+            id: parte.id ? parte.id : null,
+            nombre: parte?parte.nombre:null,
+            tipo: 4,
+            creado_por: parte.creado_por,
+            finalizado: parte? parte.finalizado : false,
+            observaciones: parte.observaciones? parte.observaciones : '',
+            fecha_creacion: parte.id ? parte.fecha_creacion :(hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
+            fecha_prevista_inicio: parte? parte.fecha_prevista_inicio : '',
+            fecha_finalizacion: parte? parte.fecha_finalizacion : '',
+            empresa: parte?parte.empresa:null,
+            zona: parte? parte.zona : '',
+            seccion: parte? parte.seccion : '',
+            equipo: parte? parte.equipo : '',
+            tipo_periodo: parte.id? parte.tipo_periodo : '',
+            periodo: parte.id? parte.periodo : 0,
+            tarea: parte?parte.tarea:null,
+            estado: parte?parte.estado:null,
+            num_parte: parte? parte.num_parte:null,
         });
     },[parte]);
   
-    useEffect(() => {
-        axios.get(BACKEND_SERVER + '/api/mantenimiento/tipo_tarea/',{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            setTipoParte(res.data.sort(function(a, b){
-                if(a.nombre > b.nombre){
-                    return 1;
-                }
-                if(a.nombre < b.nombre){
-                    return -1;
-                }
-                return 0;
-            }))
-        })
-        .catch( err => {
-            console.log(err); 
-        })       
-    }, [token]);
-
     useEffect(() => {
         parte.id && axios.get(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo_detalle/${parte.id}/`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
-        .then( res => {
-            //setLineasParte(res.data.tarea);
+        .then( res => { 
             setLineasParte(res.data.tarea.sort(function(a, b){
                 if(a.prioridad < b.prioridad){
                     return 1;
@@ -114,7 +92,7 @@ const ParteForm = ({parte, setParte}) => {
         .catch( err => {
             console.log(err); 
         })       
-    }, [token, parte, actualizar]);
+    }, [token, parte]);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
@@ -148,12 +126,12 @@ const ParteForm = ({parte, setParte}) => {
             })
             .then( res => {
                 setZonas(res.data);
-                // setDatos({
-                //     ...datos,
-                //     zona: '',
-                //     seccion: '',
-                //     equipo: ''
-                // });
+                setDatos({
+                    ...datos,
+                    zona: '',
+                    seccion: '',
+                    equipo: ''
+                });
             })
             .catch( err => {
                 console.log(err);
@@ -178,11 +156,11 @@ const ParteForm = ({parte, setParte}) => {
             })
             .then( res => {
                 setSecciones(res.data);
-                // setDatos({
-                //     ...datos,
-                //     seccion: '',
-                //     equipo: ''
-                // });
+                setDatos({
+                    ...datos,
+                    seccion: '',
+                    equipo: ''
+                });
             })
             .catch( err => {
                 console.log(err);
@@ -214,16 +192,38 @@ const ParteForm = ({parte, setParte}) => {
                     }
                     return 0;
                 }))
-                // setDatos({
-                //     ...datos,
-                //     equipo: ''
-                // });
+                setDatos({
+                    ...datos,
+                    equipo: ''
+                });
             })
             .catch( err => {
                 console.log(err);
             });            
         }
     }, [token, datos.seccion]);
+
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + '/api/mantenimiento/tipo_periodo/',{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setTipoPeriodo(res.data.sort(function(a, b){
+                if(a.nombre > b.nombre){
+                    return 1;
+                }
+                if(a.nombre < b.nombre){
+                    return -1;
+                }
+                return 0;
+            }))
+        })
+        .catch( err => {
+            console.log(err); 
+        })       
+    }, [token]);  
     
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/mantenimiento/estados/',{
@@ -256,52 +256,15 @@ const ParteForm = ({parte, setParte}) => {
         .then( res => {
             setParte(res.data);
         })
-        .catch(err => { 
-            console.log(err);})
+        .catch(err => { console.log(err);})
     }
-    
+
     const handleDisabled2 = () => {
         return user['tec-user'].perfil.nivel_acceso.nombre === 'local'
     }
 
     
     const handleInputChange = (event) => {
-        setDatos({
-            ...datos,
-            [event.target.name] : event.target.value
-        })  
-    }
-
-    const handleInputChangeEmpresa = (event) => {
-        setDatos({
-            ...datos,
-            zona: '',
-            seccion: '',
-            equipo: ''
-                });
-        setDatos({
-            ...datos,
-            [event.target.name] : event.target.value
-        })  
-    }
-
-    const handleInputChangeZona = (event) => {
-        setDatos({
-            ...datos,
-            seccion: '',
-            equipo: ''
-                });
-        setDatos({
-            ...datos,
-            [event.target.name] : event.target.value
-        })  
-    }
-
-    const handleInputChangeSeccion = (event) => {
-        setDatos({
-            ...datos,
-            equipo: ''
-                });
         setDatos({
             ...datos,
             [event.target.name] : event.target.value
@@ -328,9 +291,11 @@ const ParteForm = ({parte, setParte}) => {
             fecha_prevista_inicio: datos.fecha_prevista_inicio,
             fecha_finalizacion: datos.fecha_finalizacion,
             empresa: datos.empresa,
-            equipo: datos.equipo?datos.equipo : '',
+            equipo: datos.equipo,
             zona: datos.zona,
             seccion: datos.seccion,
+            tipo_periodo: datos.tipo==='1'? datos.tipo_periodo : '',
+            periodo: datos.tipo==='1'? datos.periodo : 0,
             estado: datos.fecha_prevista_inicio?1:4,
         }, {
             headers: {
@@ -405,6 +370,8 @@ const ParteForm = ({parte, setParte}) => {
             zona: datos.zona,
             seccion: datos.seccion,
             equipo: datos.equipo,
+            tipo_periodo: datos.tipo=== 1? datos.tipo_periodo : '',
+            periodo: datos.tipo=== 1? datos.periodo : 0,
             estado: datos.fecha_prevista_inicio?1:4,
         }, {
             headers: {
@@ -443,72 +410,12 @@ const ParteForm = ({parte, setParte}) => {
 
     const handleCloseError = () => setShowError(false);
 
-    const BorrarLinea =(linea) =>{ 
-        axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/?tarea=${linea.id}`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-                }
-        })
-        .then( res => {
-            //si solo hay una linea y la fecha fin esta vacía, podemos eliminar linea y tarea.
-            if(res.data.length===1 && res.data[0].fecha_fin===null){
-                var confirmacion = window.confirm('¿Deseas eliminar la línea?');
-                if(confirmacion){
-                    axios.delete(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/${res.data[0].id}/`,{            
-                        headers: {
-                            'Authorization': `token ${token['tec-token']}`
-                        } 
-                    })
-                    .then(re =>{
-                        axios.delete(BACKEND_SERVER + `/api/mantenimiento/tareas/${res.data[0].tarea.id}/`,{            
-                            headers: {
-                                'Authorization': `token ${token['tec-token']}`
-                            } 
-                        })
-                        .then(r =>{
-                            alert('tarea eliminada');
-                            setActualizar(linea);  
-                        })
-                        .catch (err=>{console.log((err));});
-                    })
-                    .catch (err=>{console.log((err));});
-                }
-            }
-            else{
-                //Si la ultima linea tiene fecha fin, no se puede eliminar
-                if(res.data[res.data.length-1].fecha_fin!==null){
-                    alert('No se puede elimnar, trabajo ya ejecutado y terminado');
-                }
-                //en un preventivo, queremos detener el ciclo del trabajo.
-                else{
-                    var detenerTrabajo = window.confirm('No se puede eliminar, tiene trabajos finalizados. ¿Deseas detener el proceso?');
-                    if(detenerTrabajo){
-                        //eliminamos la linea que es la que ejecuta de nuevo la tarea'
-                        axios.delete(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/${res.data[res.data.length-1].id}/`,{            
-                            headers: {
-                                'Authorization': `token ${token['tec-token']}`
-                            } 
-                        })
-                        .then(ress =>{
-                            alert('Trabajo detenido, no volverá a generar linea');
-                            setActualizar(linea);  
-                        })
-                        .catch (err=>{console.log((err));});
-                    }
-                }
-            }       
-        })
-        .catch( err => {
-            console.log(err);
-        });                 
-    }
-
     return(
         <Container>
             <Row className="justify-content-center"> 
                 {parte.id ?
-                    <h5 className="pb-3 pt-1 mt-2">Detalle del parte de trabajo</h5>:
-                    <h5 className="pb-3 pt-1 mt-2">Nuevo Parte de trabajo</h5>}
+                    <h5 className="pb-3 pt-1 mt-2">Detalle del parte de mediciones</h5>:
+                    <h5 className="pb-3 pt-1 mt-2">Nuevo Parte de mediciones</h5>}
             </Row>
             <Row className="justify-content-center">
                 <Col>
@@ -570,22 +477,134 @@ const ParteForm = ({parte, setParte}) => {
                             <Col>
                                 <Form.Group controlId="tipo">
                                     <Form.Label>Tipo Mantenimiento (*)</Form.Label>
-                                    <Form.Control as="select"  
+                                    <Form.Control type='text' 
                                                 name='tipo' 
-                                                value={datos.tipo}
+                                                value="Mediciones"
                                                 onChange={handleInputChange}
-                                                placeholder="Tipo Mantenimiento"> 
-                                                {datos.id===null?  <option key={0} value={''}>Seleccionar</option>:''}                                                   
-                                                {tipoparte && tipoparte.map( tipo => {
+                                                placeholder="Tipo Mantenimiento"
+                                                disabled={true} >
+                                    </Form.Control>
+                                </Form.Group>
+                            </Col> 
+                            <Col>
+                                <Form.Group id="tipo_periodo">
+                                    <Form.Label>Tipo Periodo</Form.Label>
+                                    <Form.Control as="select"  
+                                                name='tipo_periodo' 
+                                                value={datos.tipo_periodo}
+                                                onChange={handleInputChange}
+                                                placeholder="Tipo Periodo">  
+                                                {datos.tipo_periodo===''?  <option key={0} value={''}>Seleccionar</option>:''}   
+                                                {parte.tipo_periodo===null?  <option key={0} value={''}>Seleccionar</option>:''}                                               
+                                                {tipo_periodo && tipo_periodo.map( periodo => {
                                                     return (
-                                                    <option key={tipo.id} value={tipo.id}>
-                                                        {tipo.nombre}
+                                                    <option key={periodo.id} value={periodo.id}>
+                                                        {periodo.nombre}
                                                     </option>
                                                     )
                                                 })}
                                     </Form.Control>
                                 </Form.Group>
-                            </Col> 
+                            </Col>
+                            <Col>
+                                <Form.Group controlId="periodo">
+                                    <Form.Label>Cantidad de Periodos</Form.Label>
+                                    <Form.Control as="select" 
+                                                    value={datos.periodo}
+                                                    name='periodo'
+                                                    onChange={handleInputChange}>
+                                                    {datos.periodo===0?  <option key={0} value={''}>Seleccionar</option>:''}
+                                                    <option key={1} value={1}>1</option>
+                                                    <option key={2} value={2}>2</option>
+                                                    <option key={3} value={3}>3</option>
+                                                    <option key={4} value={4}>4</option>
+                                                    <option key={5} value={5}>5</option>
+                                                    <option key={6} value={6}>6</option>
+                                                    <option key={7} value={7}>7</option>
+                                                    <option key={8} value={8}>8</option>
+                                                    <option key={9} value={9}>9</option>
+                                                    <option key={10} value={10}>10</option>
+                                                    <option key={11} value={10}>11</option>                                        
+                                    </Form.Control>
+                                </Form.Group>
+                            </Col>                 
+                        </Row>                          
+                        <Row>                            
+                            <Col>
+                                <Form.Group controlId="empresa">
+                                    <Form.Label>Empresa (*)</Form.Label>
+                                    <Form.Control as="select"  
+                                                name='empresa' 
+                                                value={datos.empresa}
+                                                onChange={handleInputChange}
+                                                placeholder="Empresa"
+                                                disabled={parte.id ? true : handleDisabled2()}>                                               
+                                                {empresas && empresas.map( empresa => {
+                                                    return (
+                                                    <option key={empresa.id} value={empresa.id}>
+                                                        {empresa.nombre}
+                                                    </option>
+                                                    )
+                                                })}
+                                </Form.Control>
+                                </Form.Group>
+                            </Col>
+                            <Col>
+                                <Form.Group controlId="zona">
+                                    <Form.Label>Zona (*)</Form.Label>
+                                    <Form.Control   as="select" 
+                                                    value={datos.zona}
+                                                    name='zona'
+                                                    onChange={handleInputChange}> 
+                                                    {datos.zona===''?  <option key={0} value={''}>Seleccionar</option>:''}                                      
+                                                    {zonas && zonas.map( zona => {
+                                                        return (
+                                                        <option key={zona.id} value={zona.id}>
+                                                            {zona.siglas}
+                                                        </option>
+                                                        )
+                                                    })}
+                                    </Form.Control>
+                                </Form.Group>
+                            </Col>
+                            <Col>
+                                <Form.Group controlId="seccion">
+                                    <Form.Label>Seccion</Form.Label>
+                                    <Form.Control   as="select" 
+                                                    value={datos.seccion}
+                                                    name='seccion'
+                                                    onChange={handleInputChange}>  
+                                                    {datos.seccion===''?  <option key={0} value={''}>Seleccionar</option>:''}                                      
+                                                    {secciones && secciones.map( seccion => {
+                                                        return (
+                                                        <option key={seccion.id} value={seccion.id}>
+                                                            {seccion.nombre}
+                                                        </option>
+                                                        )
+                                                    })}
+                                    </Form.Control>
+                                </Form.Group>
+                            </Col>
+                            <Col>
+                                <Form.Group controlId="equipo">
+                                    <Form.Label>Equipo</Form.Label>
+                                    <Form.Control as="select" 
+                                                    value={datos.equipo}
+                                                    name='equipo'
+                                                    onChange={handleInputChange}>
+                                                    {datos.equipo===''?  <option key={0} value={''}>Seleccionar</option>:''}                                       
+                                                    {equipos && equipos.map( equipo => {
+                                                        return (
+                                                        <option key={equipo.id} value={equipo.id}>
+                                                            {equipo.nombre}
+                                                        </option>
+                                                        )
+                                                    })}
+                                    </Form.Control>
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                        <Row>
                             <Col>
                                 <Form.Group controlId="fecha_creacion">
                                     <Form.Label>Fecha Creación (*)</Form.Label>
@@ -615,83 +634,7 @@ const ParteForm = ({parte, setParte}) => {
                                                 onChange={handleInputChange} 
                                                 placeholder="Fecha Finalización" />
                                 </Form.Group>
-                            </Col>             
-                        </Row>                          
-                        <Row>                            
-                            <Col>
-                                <Form.Group controlId="empresa">
-                                    <Form.Label>Empresa (*)</Form.Label>
-                                    <Form.Control as="select"  
-                                                name='empresa' 
-                                                value={datos.empresa}
-                                                onChange={handleInputChangeEmpresa}
-                                                placeholder="Empresa"
-                                                disabled={parte.id ? true : handleDisabled2()}>                                               
-                                                {empresas && empresas.map( empresa => {
-                                                    return (
-                                                    <option key={empresa.id} value={empresa.id}>
-                                                        {empresa.nombre}
-                                                    </option>
-                                                    )
-                                                })}
-                                </Form.Control>
-                                </Form.Group>
-                            </Col>
-                            <Col>
-                                <Form.Group controlId="zona">
-                                    <Form.Label>Zona (*)</Form.Label>
-                                    <Form.Control   as="select" 
-                                                    value={datos.zona}
-                                                    name='zona'
-                                                    onChange={handleInputChangeZona}> 
-                                                    <option key={0} value={''}>Seleccionar</option>                                      
-                                                    {zonas && zonas.map( zona => {
-                                                        return (
-                                                        <option key={zona.id} value={zona.id}>
-                                                            {zona.siglas}
-                                                        </option>
-                                                        )
-                                                    })}
-                                    </Form.Control>
-                                </Form.Group>
-                            </Col>
-                            <Col>
-                                <Form.Group controlId="seccion">
-                                    <Form.Label>Seccion (*)</Form.Label>
-                                    <Form.Control   as="select" 
-                                                    value={datos.seccion}
-                                                    name='seccion'
-                                                    onChange={handleInputChangeSeccion}>  
-                                                    <option key={0} value={''}>Seleccionar</option>                                      
-                                                    {secciones && secciones.map( seccion => {
-                                                        return (
-                                                        <option key={seccion.id} value={seccion.id}>
-                                                            {seccion.nombre}
-                                                        </option>
-                                                        )
-                                                    })}
-                                    </Form.Control>
-                                </Form.Group>
-                            </Col>
-                            <Col>
-                                <Form.Group controlId="equipo">
-                                    <Form.Label>Equipo </Form.Label>
-                                    <Form.Control   as="select" 
-                                                    value={datos.equipo}
-                                                    name='equipo'
-                                                    onChange={handleInputChange}>  
-                                                    {/* {datos.equipo===''?  <option key={0} value={''}>Seleccionar</option>:''}                                    */}
-                                                    <option key={0} value={''}>Seleccionar</option>   
-                                                    {equipos && equipos.map( equipo => {
-                                                        return (
-                                                        <option key={equipo.id} value={equipo.id}>
-                                                            {equipo.nombre}
-                                                        </option>
-                                                        )
-                                                    })}
-                                    </Form.Control>
-                                </Form.Group>
-                            </Col>
+                            </Col>  
                         </Row>
                         <Row>                                               
                             <Col>
@@ -738,9 +681,8 @@ const ParteForm = ({parte, setParte}) => {
                                         <th>Prioridad</th>
                                         <th>Nombre</th>
                                         <th>Especialidad</th>
-                                        <th>Observaciones</th>
-                                        {datos.tipo===1? <th>Tipo Periodo</th>:null}
-                                        {datos.tipo===1?<th>Cantidad Periodos</th>:null}
+                                        <th>Trabajo a realizar</th>
+                                        {/* <th>Observaciones</th> */}
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>                                                                             
@@ -751,13 +693,10 @@ const ParteForm = ({parte, setParte}) => {
                                                 <td>{linea.prioridad}</td>
                                                 <td>{linea.nombre}</td>
                                                 <td>{linea.especialidad_nombre}</td>
-                                                <td>{linea.observaciones}</td>
-                                                {datos.tipo===1 && linea.tipo_periodo? 
-                                                    <td>{linea.tipo_periodo.nombre}</td>:''}
-                                                {datos.tipo===1?<td>{linea.periodo}</td>:''}
+                                                <td>{linea.trabajo}</td>
+                                                {/* <td>{linea.observaciones}</td> */}
                                                 <td>                                            
                                                     <Receipt className="mr-3 pencil" onClick={event =>{listarLineasTareas(linea)}}/>
-                                                    <Trash className="mr-3 pencil"  onClick={event =>{BorrarLinea(linea)}} />
                                                 </td>
                                             </tr>
                                         )})
@@ -768,11 +707,11 @@ const ParteForm = ({parte, setParte}) => {
                     </Form.Row>                                                
                 </React.Fragment> 
             : null} 
-            <LineaTareaNueva     show={show_linea}
-                                handleCloseLinea ={cerrarAddLinea}
-                                tareaAsignadas={parte.tarea}
-                                parte={parte}
-                                updateParte = {updateParte}
+            <LineaMedicionNueva     show={show_linea}
+                                    handleCloseLinea ={cerrarAddLinea}
+                                    tareaAsignadas={parte.tarea}
+                                    parte={parte}
+                                    updateParte = {updateParte}
             />
             <LineasPartesMov    show={show_listlineastareas}
                                 handleCloseList ={cerrarAddLineaPartes}
@@ -793,4 +732,4 @@ const ParteForm = ({parte, setParte}) => {
         </Container>
     )
 }
-export default ParteForm;
+export default ParteMediciones;

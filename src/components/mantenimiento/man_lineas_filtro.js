@@ -12,6 +12,11 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
     const [zonas, setZonas] = useState(null);
     const [equipos, setEquipos] = useState(null);
     const [estados, setEstados] = useState(null);
+    var fecha_hoy=Date.parse(new Date);
+    var mesEnMilisegundos = 1000 * 60 * 60 * 24 * 30;
+    var enunmes=fecha_hoy+mesEnMilisegundos;
+    var dentrodeunmes = new Date(enunmes);
+    var fechaenunmesString = dentrodeunmes.getFullYear() + '-' + ('0' + (dentrodeunmes.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunmes.getDate()).slice(-2);  
 
     const [datos, setDatos] = useState({
         id: '',
@@ -28,9 +33,9 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
         finalizada:false,
         fecha_inicio_lte:'',
         fecha_inicio_gte:'',
-        fecha_plan_lte:'',
+        fecha_plan_lte: fechaenunmesString,
         fecha_plan_gte:'',
-        estados:'',
+        estado:'',
     });
 
     const [especialidades, setEspecialidades] = useState(null);
@@ -213,21 +218,21 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
     }, [token]);
 
     useEffect(()=>{
-        const filtro1 = `?tarea__nombre__icontains=${datos.nombre_tarea}&parte__nombre__icontains=${datos.nombre_parte}&tarea__especialidad=${datos.especialidad}&tarea__prioridad__lte=${datos.prioridad_menor}&tarea__prioridad__gte=${datos.prioridad_mayor}&parte__tipo=${datos.tipo}&parte__empresa=${user['tec-user'].perfil.empresa.id}&finalizada=${datos.finalizada}&fecha_inicio__lte=${datos.fecha_inicio_lte}&fecha_inicio__gte=${datos.fecha_inicio_gte}&fecha_plan__lte=${datos.fecha_plan_lte}&fecha_plan__gte=${datos.fecha_plan_gte}&estado=${datos.estados==='5'?'':datos.estados}`;
+        const filtro1 = `?tarea__nombre__icontains=${datos.nombre_tarea}&parte__nombre__icontains=${datos.nombre_parte}&tarea__especialidad=${datos.especialidad}&tarea__prioridad__lte=${datos.prioridad_menor}&tarea__prioridad__gte=${datos.prioridad_mayor}&parte__tipo=${datos.tipo}&parte__empresa=${user['tec-user'].perfil.empresa.id}&finalizada=${datos.finalizada}&fecha_inicio__lte=${datos.fecha_inicio_lte}&fecha_inicio__gte=${datos.fecha_inicio_gte}&fecha_plan__lte=${datos.fecha_plan_lte}&fecha_plan__gte=${datos.fecha_plan_gte}&estado=${datos.estado==='5' ?'':datos.estado}`;
         let filtro2 = `&parte__empresa__id=${datos.empresa}`;
         if (datos.empresa !== ''){
             filtro2 = filtro2 + `&parte__zona__id=${datos.zona}`;
             if (datos.zona !== ''){
                 filtro2 = filtro2 + `&parte__seccion__id=${datos.seccion}`;
                 if (datos.seccion !== ''){
-                    filtro2 = filtro2 + `&parte__equipo__id=${datos.equipo}`
+                    filtro2 = filtro2 + `&parte__equipo__id=${datos.equipo}`;
                 }
             }
         }
         const filtro = filtro1 + filtro2 ;
-        const activos = datos.estados;
+        const activos = datos.estado;
         actualizaFiltro(filtro, activos);
-    },[ datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.id, datos.nombre_tarea, datos.tipo, datos.especialidad,datos.prioridad_mayor, datos.prioridad_menor, datos.finalizada, datos.nombre_parte, datos.fecha_inicio_gte, datos.fecha_inicio_lte, datos.fecha_plan_gte, datos.fecha_plan_lte, datos.estados, token]);
+    },[ datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.id, datos.nombre_tarea, datos.tipo, datos.especialidad,datos.prioridad_mayor, datos.prioridad_menor, datos.finalizada, datos.nombre_parte, datos.fecha_inicio_gte, datos.fecha_inicio_lte, datos.fecha_plan_gte, datos.fecha_plan_lte, datos.estado, token]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -297,7 +302,7 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
                                         onChange={handleInputChange}
                                         placeholder="Especialidad">
                                             <option key={0} value={''}>Todos</option>
-                                        {especialidades && especialidades.map( especialidad => {
+                                            {especialidades && especialidades.map( especialidad => {
                                             return (
                                             <option key={especialidad.id} value={especialidad.id}>
                                                 {especialidad.nombre}
@@ -449,13 +454,13 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
                         </Form.Group>
                     </Col>
                     <Col>
-                        <Form.Group controlId="estados">
+                        <Form.Group controlId="estado">
                             <Form.Label>Estado Trabajo</Form.Label>
                             <Form.Control as="select"  
-                                        name='estados' 
-                                        value={datos.estados}
+                                        name='estado' 
+                                        value={datos.estado}
                                         onChange={handleInputChangeE}
-                                        placeholder="Estados">
+                                        placeholder="Estado">
                                             <option key={0} value={''}>Activos</option>
                                         {estados && estados.map( estado => {
                                             return (

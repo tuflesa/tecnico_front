@@ -19,10 +19,21 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
             'Authorization': `token ${token['tec-token']}`
             }
     }); */
+<<<<<<< HEAD
     useEffect(() => {
         console.log('esto es lo que recoge');
         console.log(linea);
     })
+=======
+
+    const formatNumber = (numero) =>{
+        return new Intl.NumberFormat('de-DE',{ style: 'currency', currency: 'EUR' }).format(numero)
+    }
+
+    const formatPorcentaje = (numero) =>{
+        return new Intl.NumberFormat('de-DE').format(numero)
+    }
+>>>>>>> dev
 
     function parseData(){
         if(linea){
@@ -31,12 +42,12 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
                     <View key={i}>
                         <View style={styles.page2}>
                             <View style={styles.section}>
+                                <View style={styles.section6}><Text>{data.repuesto.nombre + (data.repuesto.fabricante? " - " + data.repuesto.fabricante:'') + (" - " + data.repuesto.modelo? data.repuesto.modelo:'')}</Text></View>
                                 <View style={styles.section7}><Text>{data.cantidad}</Text></View>
                                 <View style={styles.section7}><Text>{data.repuesto.unidad_siglas}</Text></View>
-                                <View style={styles.section6}><Text>{data.repuesto.nombre + " - " + data.repuesto.fabricante + " - " + data.repuesto.modelo}</Text></View>
-                                <View style={styles.section9}><Text>{data.precio + '€'}</Text></View>
-                                <View style={styles.section9}><Text>{data.descuento + '%'}</Text></View>
-                                <View style={styles.section9}><Text>{data.total + '€'}</Text></View>
+                                <View style={styles.section9}><Text>{formatNumber(data.precio)}</Text></View>
+                                <View style={styles.section9}><Text>{formatPorcentaje(data.descuento) + '%'}</Text></View>
+                                <View style={styles.section9}><Text>{formatNumber(data.total)}</Text></View>
                             </View>
                         </View>
                     </View>
@@ -52,12 +63,12 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
                     <View key={i}>
                         <View style={styles.page2}>
                             <View style={styles.section}>
+                                <View style={styles.section6}><Text>{data.descripcion}</Text></View>
                                 <View style={styles.section7}><Text>{data.cantidad}</Text></View>
                                 <View style={styles.section7}><Text>{null}</Text></View>
-                                <View style={styles.section6}><Text>{data.descripcion}</Text></View>
-                                <View style={styles.section9}><Text>{data.precio + '€'}</Text></View>
-                                <View style={styles.section9}><Text>{data.descuento + '%'}</Text></View>
-                                <View style={styles.section9}><Text>{data.total + '€'}</Text></View>
+                                <View style={styles.section9}><Text>{formatNumber(data.precio)}</Text></View>
+                                <View style={styles.section9}><Text>{formatPorcentaje(data.descuento) + '%'}</Text></View>
+                                <View style={styles.section9}><Text>{formatNumber(data.total)}</Text></View>
                             </View>
                         </View>
                     </View>
@@ -225,6 +236,13 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
                     </View>
                     <View style={styles.page2}>
                         <View style={styles.section}>
+                            <View style={styles.section3}>
+                                <Text>Observaciones pedido: {pedido.observaciones}</Text>                            
+                            </View>
+                        </View>
+                    </View>
+                    <View style={styles.page2}>
+                        <View style={styles.section}>
                             <View style={styles.section5}>
                                 <Text>Muy Sres. nuestros:</Text>
                                 <Text>Les confirmamos nuestro pedido para el suministro del material que detallamos a continuacion:</Text>
@@ -234,9 +252,9 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
                     { linea !== '' ?
                         <View style={styles.page3} fixed>
                             <View style={styles.sectionTabla}>
+                                <View style={styles.section6}><Text>Descripción</Text></View>
                                 <View style={styles.section7}><Text>Cant.</Text></View>
                                 <View style={styles.section7}><Text>Und.</Text></View>
-                                <View style={styles.section6}><Text>Descripción</Text></View>
                                 <View style={styles.section8}><Text>Precio</Text></View>
                                 <View style={styles.section8}><Text>Dto.</Text></View>
                                 <View style={styles.section8}><Text>Total</Text></View>
@@ -250,7 +268,14 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
                 <View style={styles.page2}>
                     <View style={styles.section}>
                         <View style={styles.section3}>
-                            <Text>Observaciones pedido: {pedido.observaciones}</Text>                            
+                            <Text>Observaciones pedido: {pedido.observaciones2}</Text>                            
+                        </View>
+                    </View>
+                </View>
+                <View style={styles.page2}>
+                    <View style={styles.section}>
+                        <View style={styles.section3}>
+                            <Text>Nota: Por favor indicar en nº de pedido en el albarán de entrega.</Text>
                         </View>
                     </View>
                 </View>

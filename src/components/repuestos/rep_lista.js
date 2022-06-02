@@ -93,12 +93,12 @@ const RepLista = () => {
                     <Table striped bordered hover>
                         <thead>
                             <tr>
-                                <th>Nombre</th>
+                                <th>Descripción Proveedor</th>
                                 <th>Descripción Etiqueta</th>
                                 <th>Fabricante</th>
                                 <th>Modelo</th>
-                                <th>Crítico</th>
-                                <th>Descatalogado</th>
+                                {/* <th>Crítico</th>
+                                <th>Descatalogado</th> */}
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -110,13 +110,13 @@ const RepLista = () => {
                                         <td>{repuesto.nombre_comun}</td>
                                         <td>{repuesto.fabricante}</td>
                                         <td>{repuesto.modelo}</td>
-                                        <td>{repuesto.es_critico ? 'Si' : 'No'}</td>
-                                        <td>{repuesto.descatalogado ? 'Si' : 'No'}</td>
+                                        {/* <td>{repuesto.es_critico ? 'Si' : 'No'}</td>
+                                        <td>{repuesto.descatalogado ? 'Si' : 'No'}</td> */}
                                         <td>
-                                            <Link to={`/repuestos/${repuesto.id}`}>
+                                            <Link title='Detalle/Modificar'to={`/repuestos/${repuesto.id}`}>
                                                 <PencilFill className="mr-3 pencil"/>
                                             </Link>
-                                            <Trash className="mr-3 trash"  onClick={event => {handleTrashClick(repuesto)}} />
+                                            <Trash className="mr-3 trash" onClick={event => {handleTrashClick(repuesto)}} />
                                         </td>
                                     </tr>
                                 )})

@@ -15,6 +15,7 @@ import VistaPdf from './rep_pedidoPdf';
 import { PDFViewer } from '@react-pdf/renderer';
 import VistaIngPdf from './rep_pedidoIngPdf';
 import moment from 'moment';
+import { locales } from 'moment';
 
 const PedidoForm = ({pedido, setPedido}) => {
     const [token] = useCookies(['tec-token']);
@@ -54,7 +55,8 @@ const PedidoForm = ({pedido, setPedido}) => {
         lineas_adicionales: pedido ? pedido.lineas_adicionales : null,
         direccion_envio: pedido ? (pedido.direccion_envio ? pedido.direccion_envio.id : null) : null,
         contacto: pedido ? (pedido.contacto ? pedido.contacto.id : null) : null,
-        observaciones: pedido ? pedido.observaciones : ''
+        observaciones: pedido ? pedido.observaciones : '',
+        observaciones2: pedido ? pedido.observaciones2 : ''
     });
 
     useEffect(()=>{
@@ -136,7 +138,8 @@ const PedidoForm = ({pedido, setPedido}) => {
             lineas_adicionales: pedido ? pedido.lineas_adicionales : null,
             direccion_envio: pedido ? (pedido.direccion_envio ? pedido.direccion_envio.id : null) : direcciones[0].id,
             contacto: pedido ? (pedido.contacto ? pedido.contacto.id : null) : null,
-            observaciones: pedido ? pedido.observaciones : ''
+            observaciones: pedido ? pedido.observaciones : '',
+            observaciones2: pedido ? pedido.observaciones2 : ''
 
         });
     },[pedido]);
@@ -306,7 +309,8 @@ const PedidoForm = ({pedido, setPedido}) => {
             creado_por: user['tec-user'].id,
             direccion_envio: datos.direccion_envio,
             contacto: datos.contacto,
-            observaciones: datos.observaciones
+            observaciones: datos.observaciones,
+            observaciones2: datos.observaciones2,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -329,7 +333,8 @@ const PedidoForm = ({pedido, setPedido}) => {
             finalizado: datos.finalizado,
             direccion_envio: datos.direccion_envio,
             contacto: datos.contacto,
-            observaciones: datos.observaciones
+            observaciones: datos.observaciones,
+            observaciones2: datos.observaciones2,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -351,7 +356,21 @@ const PedidoForm = ({pedido, setPedido}) => {
               }     
         })
         .then( res => {
+            /* var ordenLineas=(res.data.lineas_pedido.sort(function(a, b){
+                if(a.id < b.id){
+                    return 1;
+                }
+                if(a.id > b.id){
+                    return -1;
+                }
+                return 0;
+            }))
+            res.data.lineas_pedido = ordenLineas;*/
             setPedido(res.data);
+            /* setPedido({
+                res.data,
+                lineas_pedido :ordenLineas
+            }) */
             finalizarPedido(res.data);
         })
         .catch(err => { console.log(err);})
@@ -372,45 +391,50 @@ const PedidoForm = ({pedido, setPedido}) => {
     const finalizarPedido = (pedido) =>{
         var x = 0;
         var y = 0;
-        for(y=0; y<pedido.lineas_pedido.length;y++){
-            if(pedido.lineas_pedido[y].por_recibir>0){
-                datos.finalizado=false;
-                datos.fecha_entrega=null;
-                break;
-            } 
+        if(datos.finalizado===true){
+            console.log('pedido finalizado');
         }
-        if(y>=pedido.lineas_pedido.length){
-            if(pedido.lineas_adicionales!=''){
-                for(x=0; x<pedido.lineas_adicionales.length;x++){                
+        else{
+            for(y=0; y<pedido.lineas_pedido.length;y++){
+                if(pedido.lineas_pedido[y].por_recibir>0){
+                    datos.finalizado=false;
+                    datos.fecha_entrega=null;
+                    break;
+                } 
+            }
+            if(y>=pedido.lineas_pedido.length){
+                if(pedido.lineas_adicionales!=''){
+                    for(x=0; x<pedido.lineas_adicionales.length;x++){                
 
-                    if(pedido.lineas_adicionales[x].por_recibir>0){
-                        datos.finalizado=false;
-                        datos.fecha_entrega=null;
-                        break;
-                    } 
-                    else{
-                        datos.finalizado=true;
-                        datos.fecha_entrega= (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate());
+                        if(pedido.lineas_adicionales[x].por_recibir>0){
+                            datos.finalizado=false;
+                            datos.fecha_entrega=null;
+                            break;
+                        } 
+                        else{
+                            datos.finalizado=true;
+                            datos.fecha_entrega= (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate());
+                        }
                     }
                 }
+                else{
+                        datos.finalizado=true;
+                        datos.fecha_entrega= (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate())
+                    }
             }
-            else{
-                    datos.finalizado=true;
-                    datos.fecha_entrega= (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate())
-                }
+            axios.patch(BACKEND_SERVER + `/api/repuestos/pedido/${pedido.id}/`, {
+                finalizado: datos.finalizado, 
+                fecha_entrega: datos.fecha_entrega,           
+            }, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }     
+            })
+            .then( res => {
+                updateFinalizado();
+            })
+            .catch(err => { console.log(err);})
         }
-        axios.patch(BACKEND_SERVER + `/api/repuestos/pedido/${pedido.id}/`, {
-            finalizado: datos.finalizado, 
-            fecha_entrega: datos.fecha_entrega,           
-        }, {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }     
-        })
-        .then( res => {
-            updateFinalizado();
-        })
-        .catch(err => { console.log(err);})
     }
 
     
@@ -421,6 +445,14 @@ const PedidoForm = ({pedido, setPedido}) => {
         else {
             return false
         }
+    }
+
+    const formatNumber = (numero) =>{
+        return new Intl.NumberFormat('de-DE',{ style: 'currency', currency: 'EUR' }).format(numero)
+    }
+
+    const formatPorcentaje = (numero) =>{
+        return new Intl.NumberFormat('de-DE').format(numero)
     }
 
     const handleDisabled = () => {
@@ -439,7 +471,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                     <h5 className="pb-3 pt-1 mt-2">Datos básicos:</h5>
                     <Form >
                         <Row> 
-                        <Col>
+                            <Col>
                                 <Form.Group controlId="numero">
                                     <Form.Label>Numero Pedido</Form.Label>
                                     <Form.Control type="text" 
@@ -570,15 +602,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                                 </Form.Group>
                             </Col>
                         </Row>
-                        <Row>
-                            <Col>
-                                <Form.Group className="mb-3" controlId="finalizado">
-                                    <Form.Check type="checkbox" 
-                                                label="Finalizado"
-                                                checked = {datos.finalizado}
-                                                onChange = {handleFinalizado} />
-                                </Form.Group>
-                            </Col>
+                        <Row>                            
                             <Col>
                                 <Form.Group controlId="observaciones">
                                     <Form.Label>Observaciones pedido</Form.Label>
@@ -590,7 +614,28 @@ const PedidoForm = ({pedido, setPedido}) => {
                                     </Form.Control>
                                 </Form.Group>
                             </Col>
-                        </Row>                        
+                            <Col>
+                                <Form.Group controlId="observaciones2">
+                                    <Form.Label>Observaciones final pedido</Form.Label>
+                                    <Form.Control imput type="text" 
+                                                name='observaciones2'
+                                                value = {datos.observaciones2}
+                                                onChange = {handleInputChange}
+                                                placeholder="Observaciones final del pedido">
+                                    </Form.Control>
+                                </Form.Group>
+                            </Col>
+                        </Row>   
+                        <Row>
+                            <Col>
+                                <Form.Group className="mb-3" controlId="finalizado">
+                                    <Form.Check type="checkbox" 
+                                                label="Finalizado"
+                                                checked = {datos.finalizado}
+                                                onChange = {handleFinalizado} />
+                                </Form.Group>
+                            </Col>
+                        </Row>                     
                         <Form.Row className="justify-content-center">
                             {pedido ? 
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button> :
@@ -678,12 +723,13 @@ const PedidoForm = ({pedido, setPedido}) => {
                                             {datos.lineas_pedido && datos.lineas_pedido.map( linea => {
                                                 return (
                                                     <tr key={linea.id}>
-                                                        <td>{linea.repuesto.nombre + ' - ' + linea.repuesto.fabricante + ' - ' + linea.repuesto.modelo}</td>
+                                                        <td>{linea.repuesto.nombre + (linea.repuesto.fabricante? ' - ' + linea.repuesto.fabricante:'') + (linea.repuesto.modelo? ' - ' + linea.repuesto.modelo:'')}</td>
                                                         <td>{linea.cantidad}</td>
                                                         <td>{linea.repuesto.unidad_nombre}</td>
-                                                        <td>{linea.precio + '€'}</td>
-                                                        <td>{linea.descuento + '%'}</td>
-                                                        <td>{linea.total + '€'}</td>
+                                                        <td>{formatNumber(linea.precio)}</td>
+                                                        <td>{formatPorcentaje(linea.descuento)+'%'}</td>
+                                                        {/* <td>{linea.total + '€'}</td> */}
+                                                        <td>{formatNumber(linea.total)}</td>
                                                         <td>{linea.cantidad - linea.por_recibir}</td>
                                                         <td>{linea.por_recibir}</td>
                                                         <td>
@@ -733,9 +779,9 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                     <tr key={lineaAdicional.id}>
                                                         <td>{lineaAdicional.descripcion}</td>
                                                         <td>{lineaAdicional.cantidad}</td>
-                                                        <td>{lineaAdicional.precio + '€'}</td>
+                                                        <td>{formatNumber(lineaAdicional.precio)}</td>
                                                         <td>{lineaAdicional.descuento + '%'}</td>
-                                                        <td>{lineaAdicional.total + '€'}</td>
+                                                        <td>{formatNumber(lineaAdicional.total)}</td>
                                                         <td>{lineaAdicional.cantidad - lineaAdicional.por_recibir}</td>
                                                         <td>{lineaAdicional.por_recibir}</td>
                                                         <td>

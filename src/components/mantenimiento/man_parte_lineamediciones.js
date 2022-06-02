@@ -5,23 +5,21 @@ import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import {invertirFecha} from '../utilidades/funciones_fecha';
 
-const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateParte}) => {
+const LineaMedicionNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateParte}) => {
     
     const [token] = useCookies(['tec-token']);
     const [especialidades, setEspecialidades] = useState(null);
     const [listaAsignadas, setListaAsignadas] = useState([]);
-    const [tipo_periodo, setTipoPeriodo] = useState(null);
     
     const [datos, setDatos] = useState({  
         id: null,
         nombre: '',
         especialidad: '',
         prioridad: '',
+        medicion: '',
         observaciones: '',
         fecha_plan: null,
         estado: parte.fecha_prevista_inicio?1:4,
-        tipo_periodo: parte.tipo_periodo,
-        periodo: parte.periodo,
         //estado: '',
     }); 
 
@@ -54,28 +52,6 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateP
         });
         setListaAsignadas(TareasAsignadasID);
     },[tareaAsignadas]);
-
-    useEffect(() => {
-        axios.get(BACKEND_SERVER + '/api/mantenimiento/tipo_periodo/',{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            setTipoPeriodo(res.data.sort(function(a, b){
-                if(a.nombre > b.nombre){
-                    return 1;
-                }
-                if(a.nombre < b.nombre){
-                    return -1;
-                }
-                return 0;
-            }))
-        })
-        .catch( err => {
-            console.log(err); 
-        })       
-    }, [token]);  
     
     const handleInputChange = (event) => {
         setDatos({
@@ -93,9 +69,8 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateP
             nombre: datos.nombre,
             especialidad: datos.especialidad,
             prioridad: datos.prioridad,
+            trabajo: datos.trabajo,
             observaciones: datos.observaciones,
-            tipo_periodo: datos.tipo_periodo,
-            periodo: datos.periodo,
         },
         {
             headers: {
@@ -103,12 +78,6 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateP
             }
         })
         .then( res => {
-            datos.nombre='';
-            datos.especialidad='';
-            datos.prioridad='';
-            datos.observaciones='';
-            datos.tipo_periodo='';
-            datos.periodo=0;
             const newTareaParte = [...listaAsignadas, parseInt(res.data.id)];
             axios.post(BACKEND_SERVER + `/api/mantenimiento/linea_nueva/`,{
                 parte: parte.id,
@@ -149,6 +118,7 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateP
                     datos.especialidad='';
                     datos.prioridad='';
                     datos.observaciones='';
+                    datos.trabajo='';
                     datos.fecha_plan=null;
                 })
                 .catch( err => {
@@ -171,7 +141,7 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateP
     return (        
         <Modal show={show} backdrop="static" keyboard={ false } animation={false}>            
             <Modal.Header closeButton>  
-                <h5>Nueva Tarea </h5>
+                <h5>Nueva Medición </h5>
             </Modal.Header>
             <Modal.Body>
                 <Form >
@@ -222,63 +192,20 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateP
                                 />
                             </Form.Group>
                         </Col>
-                    </Row>
-                    <Row>
-                        {parte.tipo===1?
-                            <Col>
-                                <Form.Group id="tipo_periodo">
-                                    <Form.Label>Tipo Periodo</Form.Label>
-                                    <Form.Control as="select"  
-                                                name='tipo_periodo' 
-                                                value={datos.tipo_periodo}
-                                                onChange={handleInputChange}
-                                                placeholder="Tipo Periodo"
-                                                //disabled={handleDisabled()}
-                                                >  
-                                                {/* {datos.tipo_periodo===null?  <option key={0} value={''}>Seleccionar</option>:''}   
-                                                {parte.tipo_periodo===null?  <option key={0} value={''}>Seleccionar</option>:''}     */}    
-                                                <option key={0} value={''}>Seleccionar</option>                                       
-                                                {tipo_periodo && tipo_periodo.map( periodo => {
-                                                    return (
-                                                    <option key={periodo.id} value={periodo.id}>
-                                                        {periodo.nombre}
-                                                    </option>
-                                                    )
-                                                })}
-                                    </Form.Control>
-                                </Form.Group>
-                            </Col>
-                        : null}
-                    </Row>
-                    <Row>
-                        {parte.tipo===1?  
-                            <Col>
-                                <Form.Group controlId="periodo">
-                                    <Form.Label>Cantidad de Periodos</Form.Label>
-                                    <Form.Control as="select" 
-                                                    value={datos.periodo}
-                                                    name='periodo'
-                                                    onChange={handleInputChange}
-                                                    //disabled={handleDisabled()}
-                                                    >
-                                                    {/* {datos.periodo===0?  <option key={0} value={''}>Seleccionar</option>:''} */}
-                                                    <option key={0} value={''}>Seleccionar</option>
-                                                    <option key={1} value={1}>1</option>
-                                                    <option key={2} value={2}>2</option>
-                                                    <option key={3} value={3}>3</option>
-                                                    <option key={4} value={4}>4</option>
-                                                    <option key={5} value={5}>5</option>
-                                                    <option key={6} value={6}>6</option>
-                                                    <option key={7} value={7}>7</option>
-                                                    <option key={8} value={8}>8</option>
-                                                    <option key={9} value={9}>9</option>
-                                                    <option key={10} value={10}>10</option>
-                                                    <option key={11} value={10}>11</option>                                        
-                                    </Form.Control>
-                                </Form.Group>
-                            </Col>
-                        : null}
                     </Row> 
+                    <Row>                            
+                        <Col>
+                            <Form.Group id="trabajo">
+                                <Form.Label>Trabajos a realizar</Form.Label>
+                                <Form.Control type="text" 
+                                            name='trabajo' 
+                                            value={datos.trabajo}
+                                            onChange={handleInputChange} 
+                                            placeholder="Trabajos a realizar"
+                                />
+                            </Form.Group>
+                        </Col>
+                    </Row>
                     <Row>                            
                         <Col>
                             <Form.Group id="observaciones">
@@ -317,4 +244,4 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateP
     );
 }
 
-export default LineaTareaNueva;
+export default LineaMedicionNueva;
