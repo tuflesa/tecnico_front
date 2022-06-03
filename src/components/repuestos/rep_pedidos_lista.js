@@ -13,7 +13,7 @@ const PedLista = () => {
     const [user] = useCookies(['tec-user']);
     const [pedidos, setPedidos] = useState(null);
     const [show, setShow] = useState(false);
-    const [filtro, setFiltro] = useState(`?empresa=${user['tec-user'].perfil.empresa.id}&&finalizado=${false}`);
+    const [filtro, setFiltro] = useState(`?empresa=${user['tec-user'].perfil.empresa.id}&finalizado=${false}`);
 
     const actualizaFiltro = str => {
         setFiltro(str);
