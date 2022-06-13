@@ -38,6 +38,7 @@ const RepInventario = () => {
                 r['fabricante'] = r.repuesto.fabricante;
                 r['nombre_comun']=r.repuesto.nombre_comun;
                 r['id_rep']=r.repuesto.id;
+                r['critico']=r.repuesto.es_critico;
             })}
             setListInventario(res.data.sort(function(a, b){
                 if(a.articulo > b.articulo){
@@ -67,6 +68,7 @@ const RepInventario = () => {
                         <ExcelSheet data={listInventario} name="Inventario">
                             <ExcelColumn label="Id" value="id_rep"/>
                             <ExcelColumn label="Nombre" value="articulo"/>
+                            <ExcelColumn label="Critico" value="critico"/>
                             <ExcelColumn label="Descripción Etiqueta" value="nombre_comun"/>
                             <ExcelColumn label="Fabricante" value="fabricante"/>
                             <ExcelColumn label="Almacén" value="alm"/>
@@ -78,6 +80,7 @@ const RepInventario = () => {
                         <thead>
                             <tr>
                                 <th>Nombre</th>
+                                <th>Critico</th>
                                 <th>Descripción Etiqueta</th>
                                 <th>Almacén</th>
                                 <th>Localización</th>
@@ -91,6 +94,7 @@ const RepInventario = () => {
                                 return (
                                     <tr key={inventario.id}>
                                         <td>{inventario.articulo}</td>
+                                        <td>{inventario.critico===true? 'SI':'NO'}</td>
                                         <td>{inventario.nombre_comun}</td>
                                         <td>{inventario.alm}</td>
                                         <td>{inventario.localizacion}</td>
