@@ -66,7 +66,7 @@ const ManPorEquipos = () => {
                 }
         })
         .then( res => {
-            //filtramos los trabajos que sean de nuestras destrezas
+            //filtramos los trabajos que sean de nuestras destrezas....
             var MisTrabajos;
             var destrezas = user['tec-user'].perfil.destrezas;
             MisTrabajos = res.data.filter(s => destrezas.includes(s.tarea.especialidad));
