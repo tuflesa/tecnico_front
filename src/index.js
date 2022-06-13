@@ -12,6 +12,7 @@ import {
 import Home from './components/home';
 import Estructura from './components/estructura/estructura';
 import Repuestos from './components/repuestos/repuestos';
+import Mantenimiento from './components/mantenimiento/mantenimiento';
 import Login from './components/login';
 import Cargas from './components/cargas/cargas';
 import GraficoVelocidad from './components/velocidad/vel_grafico_velocidad';
@@ -43,6 +44,10 @@ const Render = () => {
           
           <Route path='/repuestos'>
             {token['tec-token'] ? <Repuestos /> : <Redirect to="/" />}
+          </Route>
+
+          <Route path='/mantenimiento'>
+            {token['tec-token'] ? <Mantenimiento /> : <Redirect to="/" />}
           </Route>
 
           <Route path='/velocidad'>

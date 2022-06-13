@@ -89,7 +89,8 @@ const RepAlmacenForm = ({nombre, empresa, almacen_id}) => {
                                             name='empresa' 
                                             value={datos.empresa}
                                             onChange={handleInputChange}
-                                            placeholder="Empresa">
+                                            placeholder="Empresa"
+                                            enabled={false}>
                                             {empresas && empresas.map( empresa => {
                                                 return (
                                                 <option key={empresa.id} value={empresa.id}>
