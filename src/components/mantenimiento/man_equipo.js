@@ -8,7 +8,6 @@ import { Tools, StopCircle, UiChecks, FileCheck, Receipt, TruckFlatbed } from 'r
 import { Link } from 'react-router-dom';
 import ListaDePersonal from './man_equipo_trabajadores';
 
-
 const ManPorEquipos = () => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
@@ -67,7 +66,12 @@ const ManPorEquipos = () => {
                 }
         })
         .then( res => {
-            setLineas(res.data.sort(function(a, b){
+            //filtramos los trabajos que sean de nuestras destrezas
+            var MisTrabajos;
+            var destrezas = user['tec-user'].perfil.destrezas;
+            MisTrabajos = res.data.filter(s => destrezas.includes(s.tarea.especialidad));
+            //ordenamos los trabajos por prioridad
+            setLineas(MisTrabajos.sort(function(a, b){
                 if(a.tarea.prioridad < b.tarea.prioridad){
                     return 1;
                 }
@@ -75,7 +79,7 @@ const ManPorEquipos = () => {
                     return -1;
                 }
                 return 0;
-            }))            
+            }))  
         })
         .catch( err => {
             console.log(err);
@@ -348,3 +352,4 @@ const ManPorEquipos = () => {
 }
 
 export default ManPorEquipos;
+
