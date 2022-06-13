@@ -24,7 +24,7 @@ const PedidoEditar = ({ match }) => {
 
     return (
         <React.Fragment>
-            {pedido ? <PedidoForm pedido={pedido} setPedido={setPedido}/> : null}
+            {pedido ? <PedidoForm pedido={pedido} setPedido={setPedido}/> : ''}
         </React.Fragment>
     );
 }
