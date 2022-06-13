@@ -45,6 +45,10 @@ const Render = () => {
             {token['tec-token'] ? <Repuestos /> : <Redirect to="/" />}
           </Route>
 
+          <Route path='/mantenimiento'>
+            {token['tec-token'] ? <Mantenimiento /> : <Redirect to="/" />}
+          </Route>
+
           <Route path='/velocidad'>
             {token['tec-token'] ? <GraficoVelocidad /> : <Redirect to="/" />}
           </Route>
