@@ -31,7 +31,6 @@ const ManNotificacionesLista = () => {
         });
     }, [token, filtro]);
 
-<<<<<<< HEAD
     const BorrarNota =(parte) =>{ 
         console.log(parte);
     }
@@ -69,39 +68,6 @@ const ManNotificacionesLista = () => {
                                                 <PencilFill className="mr-3 pencil"/>                                                
                                             </Link>
                                             <Trash className="trash"  onClick={event =>{BorrarNota(nota)}} /> 
-=======
-    return (
-        <Container>
-            <Row className="justify-content-center">
-                <NotificacionFiltro actualizaFiltro={setFiltro} /> 
-            </Row>
-            <Row>
-                <Col>
-                    <h5 className="mb-3 mt-3">Lista de Notificaciones</h5>
-                    <Table striped bordered hover>
-                        <thead>
-                            <tr>
-                                <th>Numero</th>
-                                <th>Fecha</th>
-                                <th>Que</th>
-                                <th>Quien</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {notificaciones && notificaciones.map( nota => {
-                                return (
-                                    <tr key={nota.id}>
-                                        <td>{nota.numero}</td>
-                                        <td>{nota.fecha_creacion}</td>
-                                        <td>{nota.que}</td>
-                                        <td>{nota.quien.get_full_name}</td>
-                                        <td>
-                                            <Link to={`/mantenimiento/notificaciones/${nota.id}`}>
-                                                <PencilFill className="mr-3 pencil"/>
-                                            </Link>
-                                            <Trash className="trash"  onClick={null} />
->>>>>>> 4e7e4e5718d503e603c8408860a3728112095b7e
                                         </td>
                                     </tr>
                                 )})
@@ -114,8 +80,4 @@ const ManNotificacionesLista = () => {
     )
 }
 
-<<<<<<< HEAD
 export default ManNotificacionesLista;
-=======
-export default NotificacionesLista
->>>>>>> 4e7e4e5718d503e603c8408860a3728112095b7e

@@ -12,7 +12,6 @@ import {
 import Home from './components/home';
 import Estructura from './components/estructura/estructura';
 import Repuestos from './components/repuestos/repuestos';
-import Mantenimiento from './components/mantenimiento/mantenimiento';
 import Login from './components/login';
 import Cargas from './components/cargas/cargas';
 import GraficoVelocidad from './components/velocidad/vel_grafico_velocidad';

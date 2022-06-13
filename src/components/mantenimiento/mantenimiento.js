@@ -11,8 +11,6 @@ import ManNotificacionesNuevas from './man_notificaciones_nuevas';
 import ManNotificacionesLista from './man_notificaciones_lista';
 import ManNotificacionDetalle from './man_notificacion_editar';
 
-
-
 const Mantenimiento = () => {
     
     return (
@@ -32,5 +30,4 @@ const Mantenimiento = () => {
         </React.Fragment>
     )
 }
-
 export default Mantenimiento;
