@@ -229,7 +229,7 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
                     </View>
                     { linea !== '' ?
                         <View style={styles.page3} fixed>
-                            <View style={styles.sectionTabla}>
+                            <View style={styles.sectionTabla} fixed>
                                 <View style={styles.section6}><Text>Descripción</Text></View>
                                 <View style={styles.section7}><Text>Cant.</Text></View>
                                 <View style={styles.section7}><Text>Und.</Text></View>
