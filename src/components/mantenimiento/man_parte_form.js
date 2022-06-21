@@ -788,7 +788,7 @@ const ParteForm = ({parte, setParte}) => {
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button> :
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={crearParte}>Guardar</Button>
                             }
-                            <Link to='/mantenimiento/partes'>
+                            <Link to= {user['tec-user'].perfil.puesto.id===5?'/home':'/mantenimiento/partes'}>
                                 <Button variant="warning" >
                                     Cancelar / Cerrar
                                 </Button>

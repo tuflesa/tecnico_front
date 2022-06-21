@@ -309,6 +309,11 @@ const ManPorEquipos = () => {
                     <h5><Tools/> ---- Para iniciar un trabajo</h5>
                     <h5><FileCheck/> ---- Para finalizar un trabajo</h5>
                     <h5><Receipt/> ---- Listado del personal que está interviniendo en este trabajo</h5>
+                    <Link to= '/home'>
+                                <Button variant="warning" >
+                                    Inicio
+                                </Button>
+                    </Link>
                     <Table striped bordered hover>
                         <thead>
                             <tr>
