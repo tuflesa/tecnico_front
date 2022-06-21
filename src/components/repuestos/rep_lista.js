@@ -90,6 +90,13 @@ const RepLista = () => {
                             <ExcelColumn label="Descatalogado" value="descatalogado"/>
                         </ExcelSheet>
                     </ExcelFile> 
+                    {(user['tec-user'].perfil.nivel_acceso.nombre === 'local')?
+                        <Link to= '/home'>
+                                    <Button variant="warning" >
+                                        Inicio
+                                    </Button>
+                        </Link>
+                    :null}
                     <Table striped bordered hover>
                         <thead>
                             <tr>

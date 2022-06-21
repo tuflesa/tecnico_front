@@ -14,6 +14,7 @@ import { useBarcode } from 'react-barcodes';
 
 const RepuestoForm = ({repuesto, setRepuesto}) => {
     const [token] = useCookies(['tec-token']);
+    const [user] = useCookies(['tec-user']);
 
     const [datos, setDatos] = useState({
         id: repuesto.id ? repuesto.id : null,
@@ -163,28 +164,32 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
 
     const actualizarDatos = (event) => {
         event.preventDefault();
-        axios.put(BACKEND_SERVER + `/api/repuestos/detalle/${datos.id}/`, {
-            nombre: datos.nombre,
-            nombre_comun: datos.nombre_comun,
-            fabricante: datos.fabricante,
-            modelo: datos.modelo,
-            es_critico: datos.es_critico,
-            descatalogado: datos.descatalogado,
-            tipo_repuesto: datos.tipo_repuesto,
-            tipo_unidad: datos.tipo_unidad,
-            stocks_minimos: datos.stocks_minimos? datos.stocks_minimos:null,
-            observaciones: datos.observaciones
-        }, {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }     
-        })
-        .then( res => { 
-            setRepuesto(res.data);
-            //window.location.href = "/repuestos";
-        })
-        .catch(err => { console.log(err);})
-
+        if(user['tec-user'].perfil.nivel_acceso.nombre !== 'local'){
+            axios.put(BACKEND_SERVER + `/api/repuestos/detalle/${datos.id}/`, {
+                nombre: datos.nombre,
+                nombre_comun: datos.nombre_comun,
+                fabricante: datos.fabricante,
+                modelo: datos.modelo,
+                es_critico: datos.es_critico,
+                descatalogado: datos.descatalogado,
+                tipo_repuesto: datos.tipo_repuesto,
+                tipo_unidad: datos.tipo_unidad,
+                stocks_minimos: datos.stocks_minimos? datos.stocks_minimos:null,
+                observaciones: datos.observaciones
+            }, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }     
+            })
+            .then( res => { 
+                setRepuesto(res.data);
+                //window.location.href = "/repuestos";
+            })
+            .catch(err => { console.log(err);})
+        }
+        else{
+            alert('No tienes permisos para modificar, no se guardará ningún cambio efectuado');
+        }
     }
 
     const crearDatos = (event) => {
@@ -503,7 +508,9 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                             <h5 className="pb-3 pt-1 mt-2">Stock por empresa:</h5>
                                             </Col>
                                             <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
+                                                {(user['tec-user'].perfil.nivel_acceso.nombre !== 'local')?
                                                 <PlusCircle className="plus mr-2" size={30} onClick={abrirNuevoStock}/>
+                                                :null}
                                             </Col>
                                         </Row>
                                     </Col>
@@ -543,7 +550,9 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                 <h5 className="pb-3 pt-1 mt-2">Es repuesto de:</h5>
                                             </Col>
                                             <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
-                                                <PlusCircle className="plus mr-2" size={30} onClick={abrirAddEquipo}/>
+                                                {(user['tec-user'].perfil.nivel_acceso.nombre !== 'local')?
+                                                    <PlusCircle className="plus mr-2" size={30} onClick={abrirAddEquipo}/>
+                                                :null}
                                             </Col>
                                         </Row>
                                         <Table striped bordered hover>
@@ -577,7 +586,9 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                             <h5 className="pb-3 pt-1 mt-2">Proveedores:</h5>
                                             </Col>
                                             <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
-                                                <PlusCircle className="plus mr-2" size={30} onClick={abrirAddProveedor}/>
+                                                {(user['tec-user'].perfil.nivel_acceso.nombre !== 'local')?
+                                                    <PlusCircle className="plus mr-2" size={30} onClick={abrirAddProveedor}/>
+                                                :null}
                                             </Col>
                                         </Row>
                                         <Table striped bordered hover>
