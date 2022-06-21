@@ -329,7 +329,7 @@ const ManPorEquipos = () => {
                         <tbody>
                             {lineas && lineas.map( linea => {
                                 return (
-                                    <tr key={linea.id}>
+                                    <tr key={linea.id} class = {linea.fecha_inicio?"table-danger":" "}>
                                         <td>{linea.tarea.prioridad}</td>
                                         <td>{linea.tarea.nombre}</td>
                                         <td>{linea.tarea.observaciones}</td>

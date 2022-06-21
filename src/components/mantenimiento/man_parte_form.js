@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, Table, Modal } from 'react-bootstrap';
-import { Trash, PlusCircle, Receipt } from 'react-bootstrap-icons';
+import { Trash, PlusCircle, Receipt, PencilFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
@@ -26,6 +26,7 @@ const ParteForm = ({parte, setParte}) => {
     const [cambio_fecha, setCambioFecha] = useState(false);
     const [estados, setEstados] = useState(null);
     const [actualizar, setActualizar] = useState('');
+    const [listados, setListados] = useState(null);
 
     const [datos, setDatos] = useState({
         id: parte.id ? parte.id : null,
@@ -50,7 +51,6 @@ const ParteForm = ({parte, setParte}) => {
     });
 
     useEffect(()=>{
-        console.log(user['tec-user'].perfil.puesto.id);
         setDatos({
             id: parte.id ? parte.id : null,
             nombre: parte?parte.nombre:null,
@@ -851,6 +851,9 @@ const ParteForm = ({parte, setParte}) => {
                                                 {datos.tipo===1?<td>{linea.periodo}</td>:''}
                                                 <td>                                            
                                                     <Receipt className="mr-3 pencil" onClick={event =>{listarLineasTareas(linea)}}/>
+                                                    <Link to={`/mantenimiento/linea_tarea/${linea.id}`}>
+                                                        <PencilFill className="mr-3 pencil"/>                                                
+                                                    </Link>
                                                     <Trash className="mr-3 pencil"  onClick={event =>{BorrarLinea(linea)}} />
                                                 </td>
                                             </tr>
