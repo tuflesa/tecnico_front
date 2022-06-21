@@ -50,6 +50,7 @@ const ParteForm = ({parte, setParte}) => {
     });
 
     useEffect(()=>{
+        console.log(user['tec-user'].perfil.puesto.id);
         setDatos({
             id: parte.id ? parte.id : null,
             nombre: parte?parte.nombre:null,
@@ -577,6 +578,10 @@ const ParteForm = ({parte, setParte}) => {
         });                 
     }
 
+    const handleDisabled = () => {
+        return (user['tec-user'].perfil.puesto.id === 5)
+    }
+
     return(
         <Container>
             <Row className="justify-content-center"> 
@@ -649,7 +654,7 @@ const ParteForm = ({parte, setParte}) => {
                                                 value={datos.tipo}
                                                 onChange={handleInputChange}
                                                 placeholder="Tipo Mantenimiento"
-                                                disabled= {user['tec-user'].perfil.puesto.id===5?'true':'false'}> 
+                                                disabled={handleDisabled()}> 
                                                 {datos.id===null? <option key={0} value={''}>Seleccionar</option>: ''}                                                   
                                                 {tipoparte && tipoparte.map( tipo => {
                                                     return (
