@@ -80,15 +80,26 @@ const ParteForm = ({parte, setParte}) => {
               }
         })
         .then( res => {
-            setTipoParte(res.data.sort(function(a, b){
-                if(a.nombre > b.nombre){
-                    return 1;
-                }
-                if(a.nombre < b.nombre){
-                    return -1;
-                }
-                return 0;
-            }))
+            if(user['tec-user'].perfil.puesto.id===5){
+                const usuario_mantenimiento = res.data.filter( s => s.nombre === 'Correctivo');
+                setTipoParte(usuario_mantenimiento);
+                setDatos({
+                    ...datos,
+                    tipo: 2,
+                    fecha_prevista_inicio: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
+                });
+            }
+            else{
+                setTipoParte(res.data.sort(function(a, b){
+                    if(a.nombre > b.nombre){
+                        return 1;
+                    }
+                    if(a.nombre < b.nombre){
+                        return -1;
+                    }
+                    return 0;
+                }))
+            }
         })
         .catch( err => {
             console.log(err); 
@@ -637,8 +648,9 @@ const ParteForm = ({parte, setParte}) => {
                                                 name='tipo' 
                                                 value={datos.tipo}
                                                 onChange={handleInputChange}
-                                                placeholder="Tipo Mantenimiento"> 
-                                                {datos.id===null?  <option key={0} value={''}>Seleccionar</option>:''}                                                   
+                                                placeholder="Tipo Mantenimiento"
+                                                disabled= {user['tec-user'].perfil.puesto.id===5?'true':'false'}> 
+                                                {datos.id===null? <option key={0} value={''}>Seleccionar</option>: ''}                                                   
                                                 {tipoparte && tipoparte.map( tipo => {
                                                     return (
                                                     <option key={tipo.id} value={tipo.id}>
