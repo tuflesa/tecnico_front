@@ -601,6 +601,13 @@ const PedidoForm = ({pedido, setPedido}) => {
                                     </Form.Control>
                                 </Form.Group>
                             </Col>
+                            <Col>
+                                <Link to= '/repuestos/proveedor/1'>
+                                    <Button variant="warning" >
+                                        Datos Proveedor
+                                    </Button>
+                                </Link>
+                            </Col>
                         </Row>
                         <Row>                            
                             <Col>
