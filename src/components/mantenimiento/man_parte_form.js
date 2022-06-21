@@ -46,6 +46,7 @@ const ParteForm = ({parte, setParte}) => {
         num_parte: parte? parte.num_parte:null,
         tipo_periodo: parte.tipo===1? parte.tipo_periodo : '',
         periodo: parte.tipo===1? parte.periodo : 0,
+        finalizar: parte.estado===3?true:false,
     });
 
     useEffect(()=>{
@@ -68,6 +69,7 @@ const ParteForm = ({parte, setParte}) => {
             num_parte: parte? parte.num_parte:null,
             tipo_periodo: parte.tipo===1? parte.tipo_periodo : '',
             periodo: parte.tipo===1? parte.periodo : 0,
+            finalizar: parte.estado===3?true:false,
         });
     },[parte]);
   
@@ -100,7 +102,6 @@ const ParteForm = ({parte, setParte}) => {
               }
         })
         .then( res => {
-            //setLineasParte(res.data.tarea);
             setLineasParte(res.data.tarea.sort(function(a, b){
                 if(a.prioridad < b.prioridad){
                     return 1;
@@ -272,6 +273,68 @@ const ParteForm = ({parte, setParte}) => {
         })  
     }
 
+    const handleFinalizar = (event) => {
+        var Finalizar_Tarea = window.confirm('Vas a finalizar el parte completo ¿Desea continuar?');
+        if(Finalizar_Tarea){
+            setDatos({
+                ...datos,
+                finalizar: true,
+            }) 
+            //finalizamos la cabecera del parte
+            axios.patch(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${parte.id}/`,{
+                fecha_finalizacion : (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
+                estado: 3,
+            }, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }     
+            })
+            .then( r => {
+                updateParte();
+            })
+            .catch(err => { 
+                console.log(err);})
+
+            //finalizamos todas las tareas de este parte
+            axios.get(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_trabajo/?parte=${parte.id}`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                    }     
+            })
+            .then( res => {
+                for(var x=0; x<res.data.length; x++){
+                    if(res.data[x].estado===3){
+                        console.log('estado 3');
+                    }
+                    else{
+                        axios.patch(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_trabajo/${res.data[x].id}/`,{
+                            fecha_inicio: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
+                            fecha_fin: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
+                            estado: 3,
+                        }, {
+                            headers: {
+                                'Authorization': `token ${token['tec-token']}`
+                            }     
+                        })
+                        .then( r => {
+                            updateParte();
+                        })
+                        .catch(err => { 
+                            console.log(err);})
+                    }
+                }
+            })
+            .catch(err => { 
+                console.log(err);})
+        }
+        if(!Finalizar_Tarea){
+            setDatos({
+                ...datos,
+                finalizar: false,
+            }) 
+        }
+    }
+
     const handleInputChangeEmpresa = (event) => {
         setDatos({
             ...datos,
@@ -405,7 +468,7 @@ const ParteForm = ({parte, setParte}) => {
             zona: datos.zona,
             seccion: datos.seccion,
             equipo: datos.equipo,
-            estado: datos.fecha_prevista_inicio?1:4,
+            estado: datos.estado?datos.estado:datos.fecha_prevista_inicio?1:4,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -613,7 +676,8 @@ const ParteForm = ({parte, setParte}) => {
                                                 name='fecha_finalizacion' 
                                                 value={datos.fecha_finalizacion}
                                                 onChange={handleInputChange} 
-                                                placeholder="Fecha Finalización" />
+                                                placeholder="Fecha Finalización" 
+                                                disabled/>
                                 </Form.Group>
                             </Col>             
                         </Row>                          
@@ -705,7 +769,20 @@ const ParteForm = ({parte, setParte}) => {
                                     />
                                 </Form.Group>
                             </Col>                            
-                        </Row>                                             
+                        </Row> 
+                        <Row>
+                        {parte.tipo===2?
+                            <Col>
+                                <Form.Group className="mb-3">
+                                    <Form.Check type="checkbox" 
+                                                label="Finalizar"
+                                                checked = {datos.finalizar}
+                                                onChange = {handleFinalizar} 
+                                                disabled = {parte.estado===3?true:false}/>
+                                </Form.Group>
+                            </Col>
+                        :null}
+                        </Row>                                            
                         <Form.Row className="justify-content-center">
                             {parte.id ? 
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button> :
