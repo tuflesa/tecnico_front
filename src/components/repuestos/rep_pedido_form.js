@@ -3,7 +3,7 @@ import { Container, Row, Col, Form, Button, Table } from 'react-bootstrap';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
-import { PlusCircle, PencilFill, Trash, Truck, Receipt } from 'react-bootstrap-icons';
+import { PlusCircle, PencilFill, Trash, Truck, Receipt, Eye } from 'react-bootstrap-icons';
 import LineaForm from './rep_pedido_linea';
 import LineaAdicionalForm from './rep_pedido_linea_adicional';
 import MovimientoForm from './rep_pedido_movimiento';
@@ -49,7 +49,7 @@ const PedidoForm = ({pedido, setPedido}) => {
         creado_por: pedido ? pedido.creado_por.get_full_name : '',
         fecha_creacion: pedido ? pedido.fecha_creacion : (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
         fecha_entrega: pedido ? pedido.fecha_entrega : null,
-        fecha_prevista_entrega: pedido ? pedido.fecha_prevista_entrega : null,
+        fecha_prevista_entrega: pedido ? pedido.fecha_prevista_entrega : (hoy.getFullYear() + '-'+String(hoy.getMonth()+2).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
         finalizado: pedido ? pedido.finalizado : false,
         lineas_pedido: pedido ? pedido.lineas_pedido : null,
         lineas_adicionales: pedido ? pedido.lineas_adicionales : null,
@@ -131,7 +131,7 @@ const PedidoForm = ({pedido, setPedido}) => {
             numero: pedido ? pedido.numero : '',
             creado_por: pedido ? pedido.creado_por.get_full_name : '',
             fecha_creacion: pedido ? pedido.fecha_creacion : (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate()),
-            fecha_prevista_entrega: pedido ? pedido.fecha_prevista_entrega : '',
+            fecha_prevista_entrega: pedido ? pedido.fecha_prevista_entrega : (hoy.getFullYear() + '-'+(hoy.getMonth()+2)+'-'+hoy.getDate()),
             fecha_entrega: pedido ? pedido.fecha_entrega : '',
             finalizado: pedido ? pedido.finalizado : false,
             lineas_pedido: pedido.lineas_pedido ? pedido.lineas_pedido : null,
@@ -482,7 +482,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                             </Col> 
                             <Col>
                                 <Form.Group controlId="creado_por">
-                                    <Form.Label>Creado por</Form.Label>
+                                    <Form.Label>Creado por (*)</Form.Label>
                                     <Form.Control type="text" 
                                                 name='creado_por' 
                                                 disabled
@@ -491,7 +491,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                             </Col> 
                             <Col>
                                 <Form.Group controlId="fecha_creacion">
-                                    <Form.Label>Fecha Creación</Form.Label>
+                                    <Form.Label>Fecha Creación (*)</Form.Label>
                                     <Form.Control type="date" 
                                                 name='fecha_creacion' 
                                                 value={datos.fecha_creacion}
@@ -511,7 +511,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                             </Col>
                             <Col>
                                 <Form.Group controlId="fecha_prevista_entrega">
-                                    <Form.Label>Fecha Prevista Entrega</Form.Label>
+                                    <Form.Label>Fecha Prevista Entrega (*)</Form.Label>
                                     <Form.Control type="date" 
                                                 name='fecha_prevista_entrega' 
                                                 value={datos.fecha_prevista_entrega}
@@ -523,7 +523,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                         <Row>                                                        
                             <Col>
                                 <Form.Group controlId="empresa">
-                                    <Form.Label>Empresa</Form.Label>
+                                    <Form.Label>Empresa (*)</Form.Label>
                                     <Form.Control as="select"  
                                                 name='empresa' 
                                                 value={datos.empresa}
@@ -542,7 +542,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                             </Col>                                             
                             <Col>
                                 <Form.Group controlId="direccion_envio">
-                                    <Form.Label>Direccion de Envío</Form.Label>
+                                    <Form.Label>Direccion de Envío (*)</Form.Label>
                                     <Form.Control as="select"  
                                                 name='direccion_envio' 
                                                 value={datos.direccion_envio}
@@ -562,7 +562,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                         <Row>
                         <Col>
                                 <Form.Group controlId="proveedor">
-                                    <Form.Label>Proveedor</Form.Label>
+                                    <Form.Label>Proveedor (*)</Form.Label>
                                     <Form.Control as="select"  
                                                 name='proveedor' 
                                                 value={datos.proveedor}
@@ -602,11 +602,14 @@ const PedidoForm = ({pedido, setPedido}) => {
                                 </Form.Group>
                             </Col>
                             <Col>
-                                <Link to= '/repuestos/proveedor/1'>
-                                    <Button variant="warning" >
-                                        Datos Proveedor
-                                    </Button>
-                                </Link>
+                                <Row>
+                                    <Form.Label>Ficha Proveedor</Form.Label>
+                                </Row>
+                                <Row>
+                                    <Link to= '/repuestos/proveedor/1'>
+                                        <Button variant="info" type="submit" >Datos Proveedor</Button>
+                                    </Link>
+                                </Row>
                             </Col>
                         </Row>
                         <Row>                            
@@ -722,7 +725,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                 <th style={{width:30}}>Total</th>
                                                 <th style={{width:20}}>Recibido</th>
                                                 <th style={{width:20}}>Pendiente Recibir</th>
-                                                <th style={{width:150}}>Acciones</th>
+                                                <th style={{width:190}}>Acciones</th>
                                             </tr>
                                         </thead> 
                                                                                   
@@ -743,7 +746,8 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                             <PencilFill className="mr-3 pencil" onClick={event => {editLinea(linea)}}/>
                                                             <Truck className="mr-3 pencil" onClick={event =>{creaMoviviento(linea)}}/>
                                                             <Receipt className="mr-3 pencil" onClick={event =>{listarMovimiento(linea)}}/>
-                                                            <Trash className="trash"  onClick={event =>{BorrarLinea(linea)}} />
+                                                            <Trash className="mr-3 pencil"  onClick={event =>{BorrarLinea(linea)}} />
+                                                            <Link to={`/repuestos/${linea.repuesto.id}`}><Eye className="mr-3 pencil"/></Link>
                                                         </td>
                                                     </tr>
                                                 )})
