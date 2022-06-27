@@ -4,7 +4,7 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Table, Modal, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { Trash, PencilFill } from 'react-bootstrap-icons';
+import { Trash, PencilFill, Truck } from 'react-bootstrap-icons';
 import CargasFiltro from './cargas_carga_filtro';
 import useInterval from '../utilidades/use_interval';
 
@@ -117,7 +117,10 @@ const CargasLista = () => {
                                     <td>{carga.fecha_salida}</td>
                                     <td>
                                         <Link to={`/cargas/${carga.id}`}>
-                                            <PencilFill className="mr-3 pencil"/>
+                                            <Truck className="mr-2 pencil"/>
+                                        </Link>
+                                        <Link to={`/cargas/editar/${carga.id}`}>
+                                            <PencilFill className="mr-2 pencil"/>
                                         </Link>
                                         <Trash className="trash" onClick={event => {handleTrashClick(carga)}} />
                                     </td>

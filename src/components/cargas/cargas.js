@@ -9,6 +9,7 @@ import CargasAgenciaDetalle from './cargas_agencia_detalle';
 import CargasLista from './cargas_carga_lista';
 import CargaNueva from './cargas_carga_nueva';
 import CargaDetalle from './cargas_carga_detalle';
+import CargaEditar from './cargas_carga_editar';
 
 const Cargas = () => {
     return (
@@ -23,6 +24,7 @@ const Cargas = () => {
                     <CargasLista />
                 </Route>
                 <Route path='/cargas/nueva' exact component={CargaNueva} />
+                <Route path='/cargas/editar/:id' component={CargaEditar} />
                 <Route path='/cargas/:id' component={CargaDetalle} />
             </Switch>
         </React.Fragment>

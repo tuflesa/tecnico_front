@@ -4,7 +4,7 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Table, Modal, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { Trash, PencilFill } from 'react-bootstrap-icons';
+import { Trash, PencilFill} from 'react-bootstrap-icons';
 import AgenciaFiltro from './cargas_agencia_filtro';
 
 const AgenciaLista = () => {
