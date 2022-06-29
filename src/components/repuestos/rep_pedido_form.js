@@ -157,7 +157,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                 return 0;
             })
         }
-    }, [proveedores]);
+    }, [proveedores, token]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -601,16 +601,18 @@ const PedidoForm = ({pedido, setPedido}) => {
                                     </Form.Control>
                                 </Form.Group>
                             </Col>
+                            {pedido?
                             <Col>
                                 <Row>
                                     <Form.Label>Ficha Proveedor</Form.Label>
                                 </Row>
                                 <Row>
-                                    <Link to= '/repuestos/proveedor/1'>
+                                    <Link to= {`/repuestos/proveedor/${pedido.proveedor}`}>
                                         <Button variant="info" type="submit" >Datos Proveedor</Button>
                                     </Link>
                                 </Row>
                             </Col>
+                            :null}
                         </Row>
                         <Row>                            
                             <Col>
@@ -652,11 +654,6 @@ const PedidoForm = ({pedido, setPedido}) => {
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={crearPedido}>Guardar</Button>                                
                             }
                             <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
-                            {/* <Link to='/repuestos/pedidos'>
-                                <Button variant="warning" >
-                                    Cancelar / Cerrar
-                                </Button>
-                            </Link> */}
                         </Form.Row> 
                         <Form className="justify-content-center">
                             {!verPdf && !verIngPdf && datos.numero ?  

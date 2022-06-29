@@ -6,7 +6,7 @@ import { useCookies } from 'react-cookie';
 
 const RepListaFilto = ({actualizaFiltro}) => {
     const [token] = useCookies(['tec-token']);
-    const [user] = useCookies(['tec-user']);  
+    //const [user] = useCookies(['tec-user']);  
 
     const [datos, setDatos] = useState({
         id:'',

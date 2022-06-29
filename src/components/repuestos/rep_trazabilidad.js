@@ -10,7 +10,6 @@ import moment from 'moment';
 
 const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, almacen}) => {
     const [token] = useCookies(['tec-token']);
-    const [user] = useCookies(['tec-user']);
 
     const [listado, setListado] = useState(null);
     const [listainventario, setListaInventario] = useState(null);
