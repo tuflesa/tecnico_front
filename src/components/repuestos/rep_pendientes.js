@@ -28,7 +28,7 @@ const RepPendientes = () => {
     const [filtro, setFiltro] = useState(`?empresa=${datos.empresa}&finalizado=${false}&fecha_prevista_entrega__lte=${datos.hoy}`);
     
     useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/repuestos/articulos_fuera_stock/?almacen__empresa__id=${datos.empresa}`,{
+        axios.get(BACKEND_SERVER + `/api/repuestos/articulos_fuera_stock/?almacen__empresa__id=${datos.empresa}&repuesto__descatalogado=${false}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -85,7 +85,7 @@ const RepPendientes = () => {
             }
         })
         .then( rs => {
-            setLineasPendientes(rs.data);
+            console.log(rs.data);
         })
         .catch( err => {
             console.log(err);
@@ -100,18 +100,6 @@ const RepPendientes = () => {
     const handlerListCancelar = ()=>{
         setShow(false);
     }
-    
-    /* const OrdenarPorNombre = (lista)=>{
-        setPedFueradeFecha(lista.sort(function(a, b){
-            if(a.creado_por.get_full_name > b.creado_por.get_full_name){
-                return 1;
-            }
-            if(a.creado_por.get_full_name < b.creado_por.get_full_name){
-                return -1;
-            }
-            return 0;
-        }))
-    } */
 
     return (
         <Container>
@@ -126,7 +114,7 @@ const RepPendientes = () => {
                                 <th>Stock Actual</th>
                                 <th>Stock Mínimo</th>
                                 <th>Cant. por recibir</th>
-                                <th style={{width:90}}>Pedidos</th>
+                                <th style={{width:90}}>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
