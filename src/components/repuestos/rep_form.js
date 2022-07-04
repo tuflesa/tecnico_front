@@ -356,7 +356,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                         <Row>
                             <Col>
                                 <Form.Group id="nombre">
-                                    <Form.Label>Descripción Proveedor</Form.Label>
+                                    <Form.Label>Descripción Proveedor (*)</Form.Label>
                                     <Form.Control type="text" 
                                                 name='nombre' 
                                                 value={datos.nombre}
@@ -379,7 +379,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                             </Col>
                             <Col>
                                 <Form.Group id="tipo">
-                                    <Form.Label>Tipo</Form.Label>
+                                    <Form.Label>Tipo  (*)</Form.Label>
                                     <Form.Control as="select"  
                                                 name='tipo_repuesto' 
                                                 value={datos.tipo_repuesto}
@@ -421,7 +421,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                             </Col>
                             <Col>
                                 <Form.Group id="tipound">
-                                    <Form.Label>Unidades</Form.Label>
+                                    <Form.Label>Unidades (*)</Form.Label>
                                     <Form.Control as="select"  
                                                 name='tipo_unidad' 
                                                 value={datos.tipo_unidad}

@@ -32,10 +32,10 @@ const ManPendientes = () => {
         .then( res => {
             //ordenamos los trabajos por prioridad
             setTareas(res.data.sort(function(a, b){
-                if(a.fecha_plan > b.fecha_plan){
+                if(a.tarea.prioridad < b.tarea.prioridad){
                     return 1;
                 }
-                if(a.fecha_plan < b.fecha_plan){
+                if(a.tarea.prioridad > b.tarea.prioridad){
                     return -1;
                 }
                 return 0;
@@ -46,12 +46,13 @@ const ManPendientes = () => {
     }, [token]); 
 
     useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/mantenimiento/partes_filtrados/`,{
+        axios.get(BACKEND_SERVER + `/api/mantenimiento/partes_filtrados/?empresa__id=${datos.empresa}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
         .then( res => {
+            console.log(res.data);
             setPartes(res.data);     
         })
         .catch( err => {

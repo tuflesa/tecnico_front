@@ -191,32 +191,19 @@ const ManPorEquipos = () => {
                             }
                         })
                         .then( re => {
+                            console.log("datos que tenemos al calcular nueva fecha");
+                            console.log(re.data);
                             if(re.data.parte.tipo===1){
                                 var fechaString= null;
                                 var semanaEnMilisegundos = 1000 * 60 * 60 * 24 * 7;
+                                var diaEnMilisegundos = 1000 * 60 * 60 * 24;
                                 var fecha=Date.parse(re.data.fecha_fin);
                                 var fechaPorSemanas=null;
                                 var suma=null;
-                                if(re.data.tarea.tipo_periodo.id===1){ //si es opción mensual
-                                    suma = fecha + (semanaEnMilisegundos/7*30*re.data.tarea.periodo);
-                                    fechaPorSemanas = new Date(suma);
-                                    fechaString = fechaPorSemanas.getFullYear() + '-' + ('0' + (fechaPorSemanas.getMonth()+1)).slice(-2) + '-' + ('0' + fechaPorSemanas.getDate()).slice(-2);
-                                }
-                                if(re.data.tarea.tipo_periodo.id===2){ //si la opcion es anual
-                                    suma = fecha + (semanaEnMilisegundos/7*365*re.data.tarea.periodo);
-                                    fechaPorSemanas = new Date(suma);
-                                    fechaString = fechaPorSemanas.getFullYear() + '-' + ('0' + (fechaPorSemanas.getMonth()+1)).slice(-2) + '-' + ('0' + fechaPorSemanas.getDate()).slice(-2);
-                                }
-                                if(re.data.tarea.tipo_periodo.id===3){ //si la opción es semanal
-                                    suma = fecha + (semanaEnMilisegundos*re.data.tarea.periodo);
-                                    fechaPorSemanas = new Date(suma);
-                                    fechaString = fechaPorSemanas.getFullYear() + '-' + ('0' + (fechaPorSemanas.getMonth()+1)).slice(-2) + '-' + ('0' + fechaPorSemanas.getDate()).slice(-2);
-                                }
-                                if(re.data.tarea.tipo_periodo.id===4){ //si la opción es quincenal
-                                    suma = fecha + (semanaEnMilisegundos*2*re.data.tarea.periodo);
-                                    fechaPorSemanas = new Date(suma);
-                                    fechaString = fechaPorSemanas.getFullYear() + '-' + ('0' + (fechaPorSemanas.getMonth()+1)).slice(-2) + '-' + ('0' + fechaPorSemanas.getDate()).slice(-2);
-                                }
+                                suma = fecha + (diaEnMilisegundos * re.data.tarea.periodo * re.data.tarea.tipo_periodo.cantidad_dias);
+                                fechaPorSemanas = new Date(suma);
+                                fechaString = fechaPorSemanas.getFullYear() + '-' + ('0' + (fechaPorSemanas.getMonth()+1)).slice(-2) + '-' + ('0' + fechaPorSemanas.getDate()).slice(-2);
+                               
                                 fechaString && axios.post(BACKEND_SERVER + `/api/mantenimiento/linea_nueva/`,{
                                     parte: re.data.parte.id,
                                     tarea: re.data.tarea.id,
@@ -313,6 +300,7 @@ const ManPorEquipos = () => {
                         <thead>
                             <tr>
                                 <th>Pr</th>
+                                <th>Fecha Prev. Inicio</th>
                                 <th>Nombre Tarea</th>
                                 <th>Observaciones</th>
                                 <th>Equipo</th>
@@ -326,6 +314,7 @@ const ManPorEquipos = () => {
                                 return (
                                     <tr key={linea.id} class = {linea.fecha_inicio?"table-danger":" "}>
                                         <td>{linea.tarea.prioridad}</td>
+                                        <td>{invertirFecha(linea.fecha_plan)}</td>
                                         <td>{linea.tarea.nombre}</td>
                                         <td>{linea.tarea.observaciones}</td>
                                         <td>{linea.parte.seccion?linea.parte.seccion.siglas_zona +' - '+linea.parte.seccion.nombre + (linea.parte.equipo?' - ' + linea.parte.equipo.nombre:''):null}</td>

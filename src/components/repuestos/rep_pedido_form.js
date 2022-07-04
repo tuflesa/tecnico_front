@@ -607,7 +607,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                                     <Form.Label>Ficha Proveedor</Form.Label>
                                 </Row>
                                 <Row>
-                                    <Link to= {`/repuestos/proveedor/${pedido.proveedor}`}>
+                                    <Link to= {`/repuestos/proveedor/${pedido.proveedor.id}`}>
                                         <Button variant="info" type="submit" >Datos Proveedor</Button>
                                     </Link>
                                 </Row>
