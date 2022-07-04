@@ -183,7 +183,8 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             })
             .then( res => { 
                 setRepuesto(res.data);
-                //window.location.href = "/repuestos";
+                window.location.href = "/repuestos/listado";
+                //window.location.href="javascript: history.go(-1)"
             })
             .catch(err => { console.log(err);})
         }
