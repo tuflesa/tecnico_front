@@ -10,7 +10,7 @@ import ReactExport from 'react-data-export';
 
 const RepLista = () => {
     const [token] = useCookies(['tec-token']);
-    const [user] = useCookies(['tec-user']);
+    //const [user] = useCookies(['tec-user']);
     const [repuestos, setRepuestos] = useState(null);
     const [show, setShow] = useState(false);
     const [repuestoBorrar, setRepuestoBorrar] = useState(null);
@@ -90,13 +90,6 @@ const RepLista = () => {
                             <ExcelColumn label="Descatalogado" value="descatalogado"/>
                         </ExcelSheet>
                     </ExcelFile> 
-                    {(user['tec-user'].perfil.nivel_acceso.nombre === 'local')?
-                        <Link to= '/home'>
-                                    <Button variant="warning" >
-                                        Inicio
-                                    </Button>
-                        </Link>
-                    :null}
                     <Table striped bordered hover>
                         <thead>
                             <tr>

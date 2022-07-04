@@ -4,8 +4,6 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 
-
-
 const NotificacionFiltro = ({ actualizaFiltro }) => {
     const [user] = useCookies(['tec-user']);
     const [token] = useCookies(['tec-token']);
@@ -25,7 +23,6 @@ const NotificacionFiltro = ({ actualizaFiltro }) => {
               }
         })
         .then( res => {
-            //console.log(res.data);
             setEmpresas(res.data);
         })
         .catch( err => {
@@ -40,8 +37,6 @@ const NotificacionFiltro = ({ actualizaFiltro }) => {
     },[datos, actualizaFiltro]);
 
     const handleInputChange = (event) => {
-        // console.log(event.target.name)
-        // console.log(event.target.value)
         setDatos({
             ...datos,
             [event.target.name] : event.target.value
@@ -49,7 +44,7 @@ const NotificacionFiltro = ({ actualizaFiltro }) => {
     }
 
     const handleDisabled = () => {
-        return user['tec-user'].perfil.nivel_acceso.nombre === 'local'
+        return user['tec-user'].perfil.puesto.nombre!=='Técnico'
     }
 
     return (

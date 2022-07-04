@@ -164,7 +164,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
 
     const actualizarDatos = (event) => {
         event.preventDefault();
-        if(user['tec-user'].perfil.nivel_acceso.nombre !== 'local'){
+        if(user['tec-user'].perfil.puesto.nombre!=='Operador'){
             axios.put(BACKEND_SERVER + `/api/repuestos/detalle/${datos.id}/`, {
                 nombre: datos.nombre,
                 nombre_comun: datos.nombre_comun,
@@ -183,7 +183,8 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             })
             .then( res => { 
                 setRepuesto(res.data);
-                //window.location.href = "/repuestos";
+                window.location.href = "/repuestos/listado";
+                //window.location.href="javascript: history.go(-1)"
             })
             .catch(err => { console.log(err);})
         }
@@ -355,7 +356,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                         <Row>
                             <Col>
                                 <Form.Group id="nombre">
-                                    <Form.Label>Descripción Proveedor</Form.Label>
+                                    <Form.Label>Descripción Proveedor (*)</Form.Label>
                                     <Form.Control type="text" 
                                                 name='nombre' 
                                                 value={datos.nombre}
@@ -378,7 +379,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                             </Col>
                             <Col>
                                 <Form.Group id="tipo">
-                                    <Form.Label>Tipo</Form.Label>
+                                    <Form.Label>Tipo  (*)</Form.Label>
                                     <Form.Control as="select"  
                                                 name='tipo_repuesto' 
                                                 value={datos.tipo_repuesto}
@@ -420,7 +421,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                             </Col>
                             <Col>
                                 <Form.Group id="tipound">
-                                    <Form.Label>Unidades</Form.Label>
+                                    <Form.Label>Unidades (*)</Form.Label>
                                     <Form.Control as="select"  
                                                 name='tipo_unidad' 
                                                 value={datos.tipo_unidad}
@@ -508,7 +509,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                             <h5 className="pb-3 pt-1 mt-2">Stock por empresa:</h5>
                                             </Col>
                                             <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
-                                                {(user['tec-user'].perfil.nivel_acceso.nombre !== 'local')?
+                                                {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
                                                 <PlusCircle className="plus mr-2" size={30} onClick={abrirNuevoStock}/>
                                                 :null}
                                             </Col>
@@ -550,7 +551,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                 <h5 className="pb-3 pt-1 mt-2">Es repuesto de:</h5>
                                             </Col>
                                             <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
-                                                {(user['tec-user'].perfil.nivel_acceso.nombre !== 'local')?
+                                                {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
                                                     <PlusCircle className="plus mr-2" size={30} onClick={abrirAddEquipo}/>
                                                 :null}
                                             </Col>
@@ -561,7 +562,9 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                     <th>Zona</th>
                                                     <th>Seccion</th>
                                                     <th>Equipo</th>
-                                                    <th>Acciones</th>
+                                                    {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
+                                                        <th>Acciones</th>
+                                                    :null}
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -571,9 +574,11 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                             <td>{equipo.siglas_zona}</td>
                                                             <td>{equipo.seccion_nombre}</td>
                                                             <td>{equipo.nombre}</td>
-                                                            <td>
-                                                                <Trash className="trash"  onClick={event => {handlerBorrarEquipo(equipo.id)}} />
-                                                            </td>
+                                                            {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
+                                                                <td>
+                                                                    <Trash className="trash"  onClick={event => {handlerBorrarEquipo(equipo.id)}} />
+                                                                </td>
+                                                            :null}
                                                         </tr>
                                                     )})
                                                 }
@@ -586,7 +591,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                             <h5 className="pb-3 pt-1 mt-2">Proveedores:</h5>
                                             </Col>
                                             <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
-                                                {(user['tec-user'].perfil.nivel_acceso.nombre !== 'local')?
+                                                {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
                                                     <PlusCircle className="plus mr-2" size={30} onClick={abrirAddProveedor}/>
                                                 :null}
                                             </Col>
@@ -595,7 +600,10 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                             <thead>
                                                 <tr>
                                                     <th>Nombre</th>
-                                                    <th>Acciones</th>
+                                                    {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
+                                                        <th>Acciones</th>
+                                                    :null}
+                                                    
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -603,9 +611,11 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                     return (
                                                         <tr key={p.id}>
                                                             <td>{p.nombre}</td>
-                                                            <td>
-                                                                <Trash className="trash"  onClick={event => {handlerBorrarProveedor(p.id)}} />
-                                                            </td>
+                                                            {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
+                                                                <td>
+                                                                    <Trash className="trash"  onClick={event => {handlerBorrarProveedor(p.id)}} />
+                                                                </td>
+                                                            :null}
                                                         </tr>
                                                     )})
                                                 }

@@ -31,7 +31,7 @@ const Home = () => {
 
     return ( 
         <React.Fragment>
-            <Navbar bg="light">
+            <Navbar bg="light" fixed= 'top'>
                 <Navbar.Brand>Departamento Técnico</Navbar.Brand>
                 <Navbar.Toggle />
                 <Navbar.Collapse className="justify-content-end">
@@ -40,7 +40,7 @@ const Home = () => {
                     </Form>
                 </Navbar.Collapse>
             </Navbar>
-            <Container className="mt-4" >
+            <Container className="mt-5" >
                 <Row className="justify-content-md-center">
                     {apps && apps.map( app => {
                         return (

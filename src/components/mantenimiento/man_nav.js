@@ -8,34 +8,38 @@ const ManNavBar = () => {
     const [user] = useCookies(['tec-user']);
     const [mantenimiento, setMantenimiento] = useState(false);
     useEffect(() => {
-        console.log(user['tec-user'].perfil.puesto.id);
-        if(user['tec-user'].perfil.puesto.id===5){
+        if(user['tec-user'].perfil.puesto.nombre==='Mantenimiento'){
+            setMantenimiento(true);
+        }
+        if(user['tec-user'].perfil.puesto.nombre==='Operador'){
             setMantenimiento(true);
         }
     }, [token]);
+
     return (
         
             <React.Fragment>
-                {!mantenimiento?
-                    <Navbar bg="light">
+                    <Navbar bg="light" fixed= 'top'>
                         <Navbar.Brand href="/home">Dep.Técnico</Navbar.Brand>
                         <Navbar.Toggle aria-controls="basic-navbar-nav"/>
                         <Navbar.Collapse id="basic-navbar-nav">
-                            <Nav className="mr-auto">
-                                <NavDropdown title="Mantenimiento" id="basic-nav-dropdown">
-                                    <NavDropdown.Item href="/mantenimiento">Página de Inicio</NavDropdown.Item>
-                                    <NavDropdown.Divider />
-                                    <NavDropdown.Item href="/mantenimiento/listado_tareas">Listado de Trabajos</NavDropdown.Item>
-                                    <NavDropdown.Item href="/mantenimiento/listado_tarea">Listado de Trabajos por Equipos</NavDropdown.Item>
-                                    <NavDropdown.Divider />
-                                    <NavDropdown.Item href="/mantenimiento/partes">Lista de partes de trabajo</NavDropdown.Item>
-                                    <NavDropdown.Item href="/mantenimiento/parte/nuevo">Nuevo parte de trabajo</NavDropdown.Item> 
-                                    <NavDropdown.Divider />
-                                    <NavDropdown.Item href="/mantenimiento/notificaciones">Lista de notificaciones</NavDropdown.Item>
-                                    <NavDropdown.Item href="/mantenimiento/notificacion/nueva">Nueva Notificacion</NavDropdown.Item>
+                            {!mantenimiento?
+                                <Nav className="mr-auto">
+                                    <NavDropdown title="Mantenimiento" id="basic-nav-dropdown">
+                                        <NavDropdown.Item href="/mantenimiento">Página de Inicio</NavDropdown.Item>
+                                        <NavDropdown.Divider />
+                                        <NavDropdown.Item href="/mantenimiento/listado_tareas">Lista de Tareas</NavDropdown.Item>
+                                        <NavDropdown.Item href="/mantenimiento/listado_tarea">Mis Tareas</NavDropdown.Item>
+                                        <NavDropdown.Divider />
+                                        <NavDropdown.Item href="/mantenimiento/partes">Lista de Partes</NavDropdown.Item>
+                                        <NavDropdown.Item href="/mantenimiento/parte/nuevo">Nuevo Parte</NavDropdown.Item> 
+                                        <NavDropdown.Divider />
+                                        <NavDropdown.Item href="/mantenimiento/notificaciones">Lista de notificaciones</NavDropdown.Item>
+                                        <NavDropdown.Item href="/mantenimiento/notificacion/nueva">Nueva Notificacion</NavDropdown.Item>
 
-                                </NavDropdown>
-                            </Nav>    
+                                    </NavDropdown>
+                                </Nav> 
+                            :null}   
                             <Navbar.Text className="mr-4" >
                                 Usuario: {user['tec-user'].get_full_name}
                             </Navbar.Text>
@@ -46,7 +50,6 @@ const ManNavBar = () => {
                             </Form>
                         </Navbar.Collapse>
                     </Navbar>
-                :null}
             </React.Fragment>
         
     )

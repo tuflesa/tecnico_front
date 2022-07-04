@@ -26,7 +26,6 @@ const ParteForm = ({parte, setParte}) => {
     const [cambio_fecha, setCambioFecha] = useState(false);
     const [estados, setEstados] = useState(null);
     const [actualizar, setActualizar] = useState('');
-    const [listados, setListados] = useState(null);
 
     const [datos, setDatos] = useState({
         id: parte.id ? parte.id : null,
@@ -81,7 +80,7 @@ const ParteForm = ({parte, setParte}) => {
               }
         })
         .then( res => {
-            if(user['tec-user'].perfil.puesto.id===5){
+            if(user['tec-user'].perfil.puesto.nombre==='Mantenimiento'){
                 const usuario_mantenimiento = res.data.filter( s => s.nombre === 'Correctivo');
                 setTipoParte(usuario_mantenimiento);
                 setDatos({
@@ -274,7 +273,7 @@ const ParteForm = ({parte, setParte}) => {
     }
     
     const handleDisabled2 = () => {
-        return user['tec-user'].perfil.nivel_acceso.nombre === 'local'
+        return user['tec-user'].perfil.puesto.nombre==='Mantenimiento'
     }
 
     
@@ -292,10 +291,20 @@ const ParteForm = ({parte, setParte}) => {
                 ...datos,
                 finalizar: true,
             }) 
-            //finalizamos la cabecera del parte
+            //finalizamos la cabecera del parte si es técnico, pondrá fecha_finalización, si es de mantanimiento no se pondrá la fecha.
+            var estado2=datos.estado;
+            var fecha_f=datos.fecha_finalizacion;
+            if(user['tec-user'].perfil.puesto.nombre==='Mantenimiento'){
+                estado2=3;
+                fecha_f=null;
+            }
+            else{
+                estado2=3;
+                fecha_f= (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0'));
+            }
             axios.patch(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${parte.id}/`,{
-                fecha_finalizacion : (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
-                estado: 3,
+                fecha_finalizacion : fecha_f,
+                estado: estado2,
             }, {
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
@@ -579,7 +588,11 @@ const ParteForm = ({parte, setParte}) => {
     }
 
     const handleDisabled = () => {
-        return (user['tec-user'].perfil.puesto.id === 5)
+        return (user['tec-user'].perfil.puesto.nombre==='Mantenimiento')
+    }
+
+    const handleDisabledMantenimiento = () => {
+        return (user['tec-user'].perfil.puesto.nombre==='Mantenimiento')
     }
 
     return(
@@ -694,7 +707,7 @@ const ParteForm = ({parte, setParte}) => {
                                                 value={datos.fecha_finalizacion}
                                                 onChange={handleInputChange} 
                                                 placeholder="Fecha Finalización" 
-                                                disabled/>
+                                                disabled = {handleDisabledMantenimiento()}/>
                                 </Form.Group>
                             </Col>             
                         </Row>                          
@@ -805,11 +818,7 @@ const ParteForm = ({parte, setParte}) => {
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button> :
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={crearParte}>Guardar</Button>
                             }
-                            <Link to= {user['tec-user'].perfil.puesto.id===5?'/home':'/mantenimiento/partes'}>
-                                <Button variant="warning" >
-                                    Cancelar / Cerrar
-                                </Button>
-                            </Link>
+                            <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
                         </Form.Row>
                     </Form>
                 </Col>
@@ -851,9 +860,6 @@ const ParteForm = ({parte, setParte}) => {
                                                 {datos.tipo===1?<td>{linea.periodo}</td>:''}
                                                 <td>                                            
                                                     <Receipt className="mr-3 pencil" onClick={event =>{listarLineasTareas(linea)}}/>
-                                                    <Link to={`/mantenimiento/linea_tarea/${linea.id}`}>
-                                                        <PencilFill className="mr-3 pencil"/>                                                
-                                                    </Link>
                                                     <Trash className="mr-3 pencil"  onClick={event =>{BorrarLinea(linea)}} />
                                                 </td>
                                             </tr>
