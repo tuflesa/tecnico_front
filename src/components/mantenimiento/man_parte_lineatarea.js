@@ -63,10 +63,10 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateP
         })
         .then( res => {
             setTipoPeriodo(res.data.sort(function(a, b){
-                if(a.nombre > b.nombre){
+                if(a.id > b.id){
                     return 1;
                 }
-                if(a.nombre < b.nombre){
+                if(a.id < b.id){
                     return -1;
                 }
                 return 0;

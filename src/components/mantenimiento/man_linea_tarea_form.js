@@ -47,7 +47,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
         })       
     }, [token]);
 
-    useEffect(() => {
+    /* useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/mantenimiento/tipo_periodo/',{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -55,10 +55,10 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
         })
         .then( res => {
             setTipoPeriodo(res.data.sort(function(a, b){
-                if(a.nombre > b.nombre){
+                if(a.id > b.id){
                     return 1;
                 }
-                if(a.nombre < b.nombre){
+                if(a.id < b.id){
                     return -1;
                 }
                 return 0;
@@ -67,7 +67,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
         .catch( err => {
             console.log(err); 
         })       
-    }, [token]); 
+    }, [token]);  */
 
     const updateTarea = () => {
         linea_tarea.id && axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/${linea_tarea.id}`,{
