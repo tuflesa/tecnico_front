@@ -287,7 +287,7 @@ const ManPorEquipos = () => {
     }
 
     return(
-        <Container class extends>
+        <Container class extends className="mb-5 mt-5">
             <Row class extends>                
                 <Col>
                     <h5 className="mb-3 mt-3" style={ { color: 'red' } }>Listado de Trabajos {user['tec-user'].get_full_name}</h5>   

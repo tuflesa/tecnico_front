@@ -102,7 +102,7 @@ const RepProveedorForm = ({proveedor}) => {
     } 
 
     return (
-        <Container>
+        <Container className="mt-5">
             <Row className="justify-content-center"> 
             {proveedor.id?
                 <h5 className="pb-3 pt-1 mt-2">proveedor Detalle</h5>:

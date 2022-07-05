@@ -20,7 +20,7 @@ const ProveedorFiltro = ({ actualizaFiltro }) => {
     }
 
     return (
-        <Container>
+        <Container className="mt-5">
             <h5 className="mb-3 mt-3">Filtro</h5>
             <Form>
                 <Row>

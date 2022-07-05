@@ -49,7 +49,7 @@ const RepAlmacenesLista = () => {
     }
 
     return (
-        <Container>
+        <Container className='mt-5'>
             <Row className="justify-content-center">
                 <AlmacenFiltro actualizaFiltro={actualizaFiltro} />
             </Row>

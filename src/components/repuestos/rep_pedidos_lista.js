@@ -91,7 +91,7 @@ const PedLista = () => {
     },[show, filtro]); 
    
     return (
-        <Container>
+        <Container className="mt-5">
             <Row>
                 <Col>
                     <PedidosFiltro actualizaFiltro={actualizaFiltro}/>

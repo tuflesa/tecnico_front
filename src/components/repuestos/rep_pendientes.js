@@ -102,7 +102,7 @@ const RepPendientes = () => {
     }
 
     return (
-        <Container>
+        <Container className="mt-5">
             <Row>
                 <Col>
                     <h5 className="mb-3 mt-3">Repuestos por debajo del stock mínimo</h5>                    

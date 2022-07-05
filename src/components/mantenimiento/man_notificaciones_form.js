@@ -147,7 +147,7 @@ const NotificacionForm = ({nota, setNota}) => {
     } 
 
     return(
-        <Container>
+        <Container className="mb-5 mt-5">
             <Row className="justify-content-center"> 
                 {nota.id?
                     <h5 className="pb-3 pt-1 mt-2">Detalle de la Notificación</h5>:

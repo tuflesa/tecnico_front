@@ -460,7 +460,7 @@ const PedidoForm = ({pedido, setPedido}) => {
     }
 
     return (
-        <Container>
+        <Container className='mt-5'>
             <Row className="justify-content-center"> 
             {pedido ?
                 <h5 className="pb-3 pt-1 mt-2">Pedido Detalle</h5>:
