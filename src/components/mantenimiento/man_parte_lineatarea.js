@@ -283,7 +283,7 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateP
                         <Col>
                             <Form.Group id="observaciones">
                                 <Form.Label>Observaciones</Form.Label>
-                                <Form.Control type="text" 
+                                <Form.Control as="textarea" rows={3} 
                                             name='observaciones' 
                                             value={datos.observaciones}
                                             onChange={handleInputChange} 
