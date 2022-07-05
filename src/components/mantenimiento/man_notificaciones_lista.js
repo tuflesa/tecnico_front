@@ -36,7 +36,7 @@ const ManNotificacionesLista = () => {
     }
 
     return (
-        <Container>            
+        <Container className='mt-5'>            
             <Row>
                 <Col>
                     <ManNotificacionesFiltro actualizaFiltro={actualizaFiltro}/>

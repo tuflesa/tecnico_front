@@ -74,7 +74,7 @@ const ManNotificacionesFiltro = ({actualizaFiltro}) => {
     }
 
     return (
-        <Container>
+        <Container className="mb-5 mt-5">
             <h5 className="mb-3 mt-3">Filtro</h5>
             <Form>
                 <Row>  

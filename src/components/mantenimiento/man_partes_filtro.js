@@ -234,8 +234,8 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
     }
 
     return (
-        <Container>
-            <h5 className="mb-3 mt-3">Filtro</h5>
+        <Container className="mt-5">
+            <h5 className="mt-5">Filtro</h5>
             <Form>
                 <Row>                    
                     <Col>

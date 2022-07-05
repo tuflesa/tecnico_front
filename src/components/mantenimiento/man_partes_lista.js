@@ -9,9 +9,10 @@ import ManPartesFiltro from './man_partes_filtro';
 
 const ManListaPartes = () => {
     const [token] = useCookies(['tec-token']);
+    const [user] = useCookies(['tec-user']);
     
     const [partes, setPartes]  = useState(null);
-    const [filtro, setFiltro] = useState(`?estado=${''}`);
+    const [filtro, setFiltro] = useState(`?estado=${''}&empresa__id=${user['tec-user'].perfil.empresa.id}`);
     const [activos, setActivos] = useState('');
     const [actualizar, setActualizar] = useState('');
 
@@ -130,7 +131,7 @@ const ManListaPartes = () => {
     }
 
     return (
-        <Container>            
+        <Container className='mt-5'>            
             <Row>
                 <Col>
                     <ManPartesFiltro actualizaFiltro={actualizaFiltro}/>

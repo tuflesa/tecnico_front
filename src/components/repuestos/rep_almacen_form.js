@@ -72,7 +72,7 @@ const RepAlmacenForm = ({nombre, empresa, almacen_id}) => {
 
 
     return (
-        <Container>
+        <Container className='mt-5'>
             <Row className="justify-content-center"> 
             {almacen_id ?
                 <h5 className="pb-3 pt-1 mt-2">Almacen Detalle</h5>:

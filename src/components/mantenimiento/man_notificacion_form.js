@@ -55,7 +55,7 @@ const NotificacionForm = ({notificacion, user}) => {
     }
 
     return (
-        <Container>
+        <Container className="mb-5 mt-5">
             <Row className="justify-content-center"> 
                 {notificacion ? <h5>Editar Notificacion</h5> : <h5>Nueva Notificacion</h5>}
             </Row>

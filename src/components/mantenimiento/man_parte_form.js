@@ -596,7 +596,7 @@ const ParteForm = ({parte, setParte}) => {
     }
 
     return(
-        <Container>
+        <Container className='mt-5'>
             <Row className="justify-content-center"> 
                 {parte.id ?
                     <h5 className="pb-3 pt-1 mt-2">Detalle del parte de trabajo</h5>:

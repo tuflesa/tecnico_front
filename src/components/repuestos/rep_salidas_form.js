@@ -215,12 +215,14 @@ const RepSalidas = ({alm}) => {
         cerrarListRepuestos();      
     }
 
+
+
     return (
-        <Container>
+        <Container className="mt-5">
             <Row>                
                 <Col>
                     <Form.Group>
-                        <Form.Label>Almacén</Form.Label>
+                        <Form.Label className="mt-2">Almacén</Form.Label>
                         <Form.Control as="select"
                                     tabIndex={1}  
                                     name='almacen' 
