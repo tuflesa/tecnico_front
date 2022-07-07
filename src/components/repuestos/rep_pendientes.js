@@ -85,7 +85,7 @@ const RepPendientes = () => {
             }
         })
         .then( rs => {
-            console.log(rs.data);
+            setLineasPendientes(rs.data);
         })
         .catch( err => {
             console.log(err);
