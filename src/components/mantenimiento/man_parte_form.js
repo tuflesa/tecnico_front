@@ -446,12 +446,17 @@ const ParteForm = ({parte, setParte}) => {
             estado=0;
         }
         if(estado!==0){
+            //ponemos la fecha de planificación y el estado en el parte
             axios.get(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_mov/?parte=${parte.id}`,{
+          /*       fecha_plan: fecha,
+                estado: estado,
+            }, { */
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
             })
             .then( res => {
+                //ponemos la nueva fecha planificacion y el estado en todas las lineas del parte
                 for(var x=0;x<res.data.length;x++){
                     axios.patch(BACKEND_SERVER + `/api/mantenimiento/linea_nueva/${res.data[x].id}/`, {
                         fecha_plan: fecha,
@@ -461,7 +466,19 @@ const ParteForm = ({parte, setParte}) => {
                             'Authorization': `token ${token['tec-token']}`
                         }     
                     })
-                    .then( res => {
+                    .then( r => {
+                        axios.patch(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${parte.id}/`, {
+                            fecha_plan: fecha,
+                            estado: estado,
+                        }, {
+                            headers: {
+                                'Authorization': `token ${token['tec-token']}`
+                            }     
+                        })
+                        .then( rs => {
+                            updateParte();
+                        })
+                        .catch(err => { console.log(err);})
                         updateParte();
                     })
                     .catch(err => { console.log(err);})
@@ -496,7 +513,8 @@ const ParteForm = ({parte, setParte}) => {
               }     
         })
         .then( res => { 
-            if(cambio_fecha){
+            //if(cambio_fecha){
+            if(parte.fecha_prevista_inicio!==datos.fecha_prevista_inicio){
                 actualizarLinea();
             }
             setParte(res.data); 
