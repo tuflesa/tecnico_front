@@ -108,7 +108,7 @@ const RepSalidas = ({alm}) => {
     }, [token, cambioCodigo]);
 
     useEffect(()=>{
-        salida && lineasSalida.length>0 && lineasSalida.forEach(l => {
+        lineasSalida.length>0 && lineasSalida.forEach(l => {
             axios.post(BACKEND_SERVER + `/api/repuestos/lineasalida/`, {
                 salida: salida.id,
                 repuesto: l.repuesto,
@@ -123,11 +123,11 @@ const RepSalidas = ({alm}) => {
                 setMovimientos([...movimientos, res.data]);
             })
             .catch(err => { console.log(err)});
-            });
+        });
     },[salida]);
 
     useEffect(()=>{
-        (movimientos.length === lineasSalida.length) && movimientos.forEach(m => {
+        movimientos.forEach(m => {
             axios.post(BACKEND_SERVER + `/api/repuestos/movimiento/`,{
             cantidad : -m.cantidad,
             almacen : m.almacen,
@@ -145,7 +145,7 @@ const RepSalidas = ({alm}) => {
             // window.location.reload();
         })
         .catch( err => {console.log(err)});
-    });
+        });
     },[movimientos]);
     
     const handleInputChange = (event) => { 
@@ -195,6 +195,8 @@ const RepSalidas = ({alm}) => {
             })
             .then( res => { 
                 setSalida(res.data);
+                console.log('salida hecha');
+                console.log(res.data);
             })
             .catch(err => { console.log(err);})
         }

@@ -40,7 +40,7 @@ const Home = () => {
                     </Form>
                 </Navbar.Collapse>
             </Navbar>
-            <Container className="mt-5" >
+            <Container className="pt-1 mt-5" >
                 <Row className="justify-content-md-center">
                     {apps && apps.map( app => {
                         return (

@@ -56,12 +56,14 @@ const NotificacionForm = ({nota, setNota}) => {
     },[nota]);
 
     useEffect(() => {
+        console.log(user['tec-user'].perfil.puesto.nombre);
         axios.get(BACKEND_SERVER + `/api/administracion/usuarios/?perfil__empresa__id=${datos.empresa}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
         .then( res => {
+            console.log(user);
             setUsuarios(res.data.sort(function(a, b){
                 if(a.get_full_name > b.get_full_name){
                     return 1;
@@ -352,11 +354,7 @@ const NotificacionForm = ({nota, setNota}) => {
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarNota}>Actualizar</Button> :
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={crearNota}>Guardar</Button>
                             }
-                            <Link to='/mantenimiento/notificaciones'>
-                                <Button variant="warning" >
-                                    Cancelar / Cerrar
-                                </Button>
-                            </Link>
+                            <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar</Button>
                         </Form.Row>
                     </Form>
                 </Col>

@@ -4,7 +4,7 @@ import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table, Modal, Button  } from 'react-bootstrap';
 import {invertirFecha} from '../utilidades/funciones_fecha';
-import { Tools, StopCircle, UiChecks, FileCheck, Receipt, TruckFlatbed } from 'react-bootstrap-icons';
+import { Tools, StopCircle, UiChecks, FileCheck, Receipt, TruckFlatbed, PencilFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import ListaDePersonal from './man_equipo_trabajadores';
 
@@ -19,7 +19,7 @@ const ManPorEquipos = () => {
     var dentrodeunmes=null;
     var fechaenunmesString=null;
     var fecha_hoy=Date.parse(hoy);
-    var mesEnMilisegundos = 1000 * 60 * 60 * 24 * 6;  //cambiado a 7 días en vez del mes
+    var mesEnMilisegundos = 1000 * 60 * 60 * 24 * 7;  //cambiado a una semana, en vez del mes
     var enunmes=fecha_hoy+mesEnMilisegundos;
     dentrodeunmes = new Date(enunmes);
     fechaenunmesString = dentrodeunmes.getFullYear() + '-' + ('0' + (dentrodeunmes.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunmes.getDate()).slice(-2);
@@ -195,7 +195,6 @@ const ManPorEquipos = () => {
                             console.log(re.data);
                             if(re.data.parte.tipo===1){
                                 var fechaString= null;
-                                var semanaEnMilisegundos = 1000 * 60 * 60 * 24 * 7;
                                 var diaEnMilisegundos = 1000 * 60 * 60 * 24;
                                 var fecha=Date.parse(re.data.fecha_fin);
                                 var fechaPorSemanas=null;
@@ -300,7 +299,7 @@ const ManPorEquipos = () => {
                         <thead>
                             <tr>
                                 <th>Pr</th>
-                                <th>Fecha Prev. Inicio</th>
+                                <th style={{width:110}}>Fecha Prev. Inicio</th>
                                 <th>Nombre Tarea</th>
                                 <th>Observaciones</th>
                                 <th>Equipo</th>
@@ -324,6 +323,7 @@ const ManPorEquipos = () => {
                                         <Tools className="mr-3 pencil"  onClick={event =>{InicioTarea(linea)}}/>
                                         <FileCheck className="mr-3 pencil"  onClick={event =>{FinalizarTarea(linea)}} />
                                         <Receipt className="mr-3 pencil" onClick={event =>{listarTrabajadores(linea.id)}}/>
+                                        <Link to={`/mantenimiento/parte/${linea.parte.id}`}><PencilFill className="mr-3 pencil"/></Link>
                                         </td>
                                     </tr>
                                 )})

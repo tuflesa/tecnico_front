@@ -7,6 +7,7 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import LineaTareaNueva from './man_parte_lineatarea';
 import LineasPartesMov from './man_parte_lineas_mov';
+import { style } from 'd3';
 
 const ParteForm = ({parte, setParte}) => {
     const [token] = useCookies(['tec-token']);
@@ -26,6 +27,7 @@ const ParteForm = ({parte, setParte}) => {
     const [cambio_fecha, setCambioFecha] = useState(false);
     const [estados, setEstados] = useState(null);
     const [actualizar, setActualizar] = useState('');
+    const [lineas, setLineas] = useState(null);
 
     const [datos, setDatos] = useState({
         id: parte.id ? parte.id : null,
@@ -258,6 +260,30 @@ const ParteForm = ({parte, setParte}) => {
             console.log(err); 
         })       
     }, [token]);
+
+    useEffect(()=>{        
+        axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_activas/?parte=${parte.id}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+                }
+        })
+        .then( res => {
+            console.log('listado lineas activas');
+            console.log(res.data);
+            setLineas(res.data.sort(function(a, b){
+                if(a.tarea.prioridad < b.tarea.prioridad){
+                    return 1;
+                }
+                if(a.tarea.prioridad > b.tarea.prioridad){
+                    return -1;
+                }
+                return 0;
+            }))  
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]); 
     
     const updateParte = () => {
         parte.id && axios.get(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo_detalle/${parte.id}/`,{
@@ -278,6 +304,14 @@ const ParteForm = ({parte, setParte}) => {
 
     
     const handleInputChange = (event) => {
+        setDatos({
+            ...datos,
+            [event.target.name] : event.target.value
+        })  
+    }
+
+    const handleInputChangeFecha_fin = (event) => {
+        datos.estado='';
         setDatos({
             ...datos,
             [event.target.name] : event.target.value
@@ -506,7 +540,7 @@ const ParteForm = ({parte, setParte}) => {
             zona: datos.zona,
             seccion: datos.seccion,
             equipo: datos.equipo,
-            estado: datos.estado?datos.estado:datos.fecha_prevista_inicio?1:4,
+            estado: datos.estado?datos.estado:datos.fecha_finalizacion?3:datos.fecha_prevista_inicio?1:4,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -723,7 +757,7 @@ const ParteForm = ({parte, setParte}) => {
                                     <Form.Control type="date" 
                                                 name='fecha_finalizacion' 
                                                 value={datos.fecha_finalizacion}
-                                                onChange={handleInputChange} 
+                                                onChange={handleInputChangeFecha_fin} 
                                                 placeholder="Fecha Finalización" 
                                                 disabled = {handleDisabledMantenimiento()}/>
                                 </Form.Group>
@@ -866,19 +900,19 @@ const ParteForm = ({parte, setParte}) => {
                                     </tr>
                                 </thead>                                                                             
                                 <tbody>
-                                    {lineasparte && lineasparte.map( linea => {
+                                    {lineas && lineas.map( linea => {
                                         return (
-                                            <tr key={linea.id}>
-                                                <td>{linea.prioridad}</td>
-                                                <td>{linea.nombre}</td>
-                                                <td>{linea.especialidad_nombre}</td>
-                                                <td>{linea.observaciones}</td>
-                                                {datos.tipo===1 && linea.tipo_periodo? 
-                                                    <td>{linea.tipo_periodo.nombre}</td>:''}
-                                                {datos.tipo===1?<td>{linea.periodo}</td>:''}
+                                            <tr key={linea.tarea.id} class={ linea.fecha_fin?"table-danger":linea.fecha_inicio?"table-danger":"" }/* class = {linea.fecha_inicio?"table-danger":" " } */>
+                                                <td>{linea.tarea.prioridad}</td>
+                                                <td>{linea.tarea.nombre}</td>
+                                                <td>{linea.tarea.especialidad_nombre}</td>
+                                                <td>{linea.tarea.observaciones}</td>
+                                                {datos.tipo===1 && linea.tarea.tipo_periodo? 
+                                                    <td>{linea.tarea.tipo_periodo.nombre}</td>:''}
+                                                {datos.tipo===1?<td>{linea.tarea.periodo}</td>:''}
                                                 <td>                                            
-                                                    <Receipt className="mr-3 pencil" onClick={event =>{listarLineasTareas(linea)}}/>
-                                                    <Trash className="mr-3 pencil"  onClick={event =>{BorrarLinea(linea)}} />
+                                                    <Receipt className="mr-3 pencil" onClick={event =>{listarLineasTareas(linea.tarea)}}/>
+                                                    <Trash className="mr-3 pencil"  onClick={event =>{BorrarLinea(linea.tarea)}} />
                                                 </td>
                                             </tr>
                                         )})
