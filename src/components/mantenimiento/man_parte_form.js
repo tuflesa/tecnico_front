@@ -52,6 +52,7 @@ const ParteForm = ({parte, setParte}) => {
     });
 
     useEffect(()=>{
+        console.log(user['tec-user'].perfil.puesto.nombre);
         setDatos({
             id: parte.id ? parte.id : null,
             nombre: parte?parte.nombre:null,
@@ -864,14 +865,16 @@ const ParteForm = ({parte, setParte}) => {
                                 </Form.Group>
                             </Col>
                         :null}
-                        </Row>                                            
+                        </Row>  
+                        {(user['tec-user'].perfil.puesto.nombre ==='Técnico')?                                          
                         <Form.Row className="justify-content-center">
-                            {parte.id ? 
+                            {parte.id? 
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button> :
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={crearParte}>Guardar</Button>
                             }
                             <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
                         </Form.Row>
+                        :<Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>}
                     </Form>
                 </Col>
             </Row>
@@ -883,9 +886,11 @@ const ParteForm = ({parte, setParte}) => {
                                 <Col>
                                 <h5 className="pb-3 pt-1 mt-2">Tareas del Parte:</h5>
                                 </Col>
-                                <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
-                                        <PlusCircle className="plus mr-2" size={30} onClick={abrirAddLinea}/>
-                                </Col>
+                                {(user['tec-user'].perfil.puesto.nombre ==='Técnico')?   
+                                    <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
+                                            <PlusCircle className="plus mr-2" size={30} onClick={abrirAddLinea}/>
+                                    </Col>
+                                :null}
                             </Row>
                             <Table striped bordered hover>
                                 <thead>
@@ -896,7 +901,9 @@ const ParteForm = ({parte, setParte}) => {
                                         <th>Observaciones</th>
                                         {datos.tipo===1? <th>Tipo Periodo</th>:null}
                                         {datos.tipo===1?<th>Cantidad Periodos</th>:null}
+                                        {(user['tec-user'].perfil.puesto.nombre ==='Técnico')? 
                                         <th>Acciones</th>
+                                        :null}
                                     </tr>
                                 </thead>                                                                             
                                 <tbody>
@@ -910,10 +917,12 @@ const ParteForm = ({parte, setParte}) => {
                                                 {datos.tipo===1 && linea.tarea.tipo_periodo? 
                                                     <td>{linea.tarea.tipo_periodo.nombre}</td>:''}
                                                 {datos.tipo===1?<td>{linea.tarea.periodo}</td>:''}
-                                                <td>                                            
-                                                    <Receipt className="mr-3 pencil" onClick={event =>{listarLineasTareas(linea.tarea)}}/>
-                                                    <Trash className="mr-3 pencil"  onClick={event =>{BorrarLinea(linea.tarea)}} />
-                                                </td>
+                                                {(user['tec-user'].perfil.puesto.nombre ==='Técnico')? 
+                                                    <td>                                            
+                                                        <Receipt className="mr-3 pencil" onClick={event =>{listarLineasTareas(linea.tarea)}}/>
+                                                        <Trash className="mr-3 pencil"  onClick={event =>{BorrarLinea(linea.tarea)}} />
+                                                    </td>
+                                                :null}
                                             </tr>
                                         )})
                                     }

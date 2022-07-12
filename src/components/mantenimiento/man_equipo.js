@@ -4,7 +4,7 @@ import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table, Modal, Button  } from 'react-bootstrap';
 import {invertirFecha} from '../utilidades/funciones_fecha';
-import { Tools, StopCircle, UiChecks, FileCheck, Receipt, TruckFlatbed, PencilFill } from 'react-bootstrap-icons';
+import { Tools, StopCircle, UiChecks, FileCheck, Receipt, Eye} from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import ListaDePersonal from './man_equipo_trabajadores';
 
@@ -289,12 +289,12 @@ const ManPorEquipos = () => {
         <Container class extends className="mb-5 mt-5">
             <Row class extends>                
                 <Col>
-                    <h5 className="mb-3 mt-3" style={ { color: 'red' } }>Listado de Trabajos {user['tec-user'].get_full_name}</h5>   
-                    <h5>Listado de trabajos por prioridades.</h5>                 
+                    <h5 className="mb-3 mt-3" style={ { color: 'red' } }>Listado de Trabajos {user['tec-user'].get_full_name}, por prioridades:</h5>              
                     <h5>Acciones:</h5>
                     <h5><Tools/> ---- Para iniciar un trabajo</h5>
                     <h5><FileCheck/> ---- Para finalizar un trabajo</h5>
                     <h5><Receipt/> ---- Listado del personal que está interviniendo en este trabajo</h5>
+                    <h5><Eye/> ---- Ver el parte al que pertenece la tarea</h5>
                     <Table striped bordered hover>
                         <thead>
                             <tr>
@@ -305,7 +305,7 @@ const ManPorEquipos = () => {
                                 <th>Equipo</th>
                                 <th style={{width:110}}>Fecha Inicio</th>
                                 <th style={{width:110}}>Fecha Fin</th>
-                                <th style={{width:130}}>Acciones</th>
+                                <th style={{width:115}}>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -323,7 +323,7 @@ const ManPorEquipos = () => {
                                         <Tools className="mr-3 pencil"  onClick={event =>{InicioTarea(linea)}}/>
                                         <FileCheck className="mr-3 pencil"  onClick={event =>{FinalizarTarea(linea)}} />
                                         <Receipt className="mr-3 pencil" onClick={event =>{listarTrabajadores(linea.id)}}/>
-                                        <Link to={`/mantenimiento/parte/${linea.parte.id}`}><PencilFill className="mr-3 pencil"/></Link>
+                                        <Link to={`/mantenimiento/parte/${linea.parte.id}`}><Eye className="mr-3 pencil"/></Link>
                                         </td>
                                     </tr>
                                 )})
