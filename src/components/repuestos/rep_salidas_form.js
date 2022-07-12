@@ -108,7 +108,9 @@ const RepSalidas = ({alm}) => {
     }, [token, cambioCodigo]);
 
     useEffect(()=>{
+        let contador =0;
         lineasSalida.length>0 && lineasSalida.forEach(l => {
+            
             axios.post(BACKEND_SERVER + `/api/repuestos/lineasalida/`, {
                 salida: salida.id,
                 repuesto: l.repuesto,
@@ -120,34 +122,30 @@ const RepSalidas = ({alm}) => {
                     }     
             })
             .then( res => { 
-                setMovimientos([...movimientos, res.data]);
+                axios.post(BACKEND_SERVER + `/api/repuestos/movimiento/`,{
+                    cantidad : -res.data.cantidad,
+                    almacen : res.data.almacen,
+                    usuario : salida.responsable,
+                    linea_salida: res.data.id
+                    }, {
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                            }     
+                })
+                .then( res => { 
+                    contador+=1;
+                    if(lineasSalida.length===contador){
+                        alert("Salida realizada con exito!!!!");
+                        window.location.href = "javascript: history.go(-1)";
+                    }
+                })
+                .catch( err => {console.log(err)});
             })
             .catch(err => { console.log(err)});
         });
+        
     },[salida]);
 
-    useEffect(()=>{
-        movimientos.forEach(m => {
-            axios.post(BACKEND_SERVER + `/api/repuestos/movimiento/`,{
-            cantidad : -m.cantidad,
-            almacen : m.almacen,
-            usuario : salida.responsable,
-            linea_salida: m.id
-            }, {
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                    }     
-        })
-        .then( res => { 
-            alert("Salida realizada con exito!!!!");
-            window.location.href = "javascript: history.go(-1)";
-            //window.location.href = '/home';
-            // window.location.reload();
-        })
-        .catch( err => {console.log(err)});
-        });
-    },[movimientos]);
-    
     const handleInputChange = (event) => { 
         setNumeroBar ({
             ...numeroBar,
