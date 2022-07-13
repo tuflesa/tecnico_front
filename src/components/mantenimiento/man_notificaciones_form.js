@@ -56,14 +56,12 @@ const NotificacionForm = ({nota, setNota}) => {
     },[nota]);
 
     useEffect(() => {
-        console.log(user['tec-user'].perfil.puesto.nombre);
         axios.get(BACKEND_SERVER + `/api/administracion/usuarios/?perfil__empresa__id=${datos.empresa}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
         .then( res => {
-            console.log(user);
             setUsuarios(res.data.sort(function(a, b){
                 if(a.get_full_name > b.get_full_name){
                     return 1;

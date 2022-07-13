@@ -191,8 +191,6 @@ const ManPorEquipos = () => {
                             }
                         })
                         .then( re => {
-                            console.log("datos que tenemos al calcular nueva fecha");
-                            console.log(re.data);
                             if(re.data.parte.tipo===1){
                                 var fechaString= null;
                                 var diaEnMilisegundos = 1000 * 60 * 60 * 24;

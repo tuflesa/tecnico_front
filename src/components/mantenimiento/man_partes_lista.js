@@ -161,9 +161,7 @@ const ManListaPartes = () => {
                                         <td>{parte.creado_por.get_full_name}</td>
                                         <td>{parte.estado_nombre}</td>
                                         <td>
-                                            <Link to={`/mantenimiento/parte/${parte.id}`}>
-                                                <PencilFill className="mr-3 pencil"/>                                                
-                                            </Link>
+                                            <Link to={`/mantenimiento/parte/${parte.id}`}><PencilFill className="mr-3 pencil"/></Link>
                                             <Trash className="trash"  onClick={event =>{BorrarParte(parte)}} /> 
                                         </td>
                                     </tr>

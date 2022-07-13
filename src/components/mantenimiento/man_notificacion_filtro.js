@@ -32,7 +32,6 @@ const NotificacionFiltro = ({ actualizaFiltro }) => {
 
     useEffect(()=>{
         const filtro = `?que__icontains=${datos.que}&empresa=${datos.empresa}&revisado=${datos.revisado}&descartado=${datos.descartado}&finalizado=${datos.finalizado}`;
-        console.log('filtro = ', filtro);
         actualizaFiltro(filtro);
     },[datos, actualizaFiltro]);
 

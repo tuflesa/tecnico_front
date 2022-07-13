@@ -14,7 +14,6 @@ const ParteForm = ({parte, setParte}) => {
     const [user] = useCookies(['tec-user']);
 
     const [tipoparte, setTipoParte] = useState(null);
-    const [lineasparte, setLineasParte] = useState(null);
     const [empresas, setEmpresas] = useState(null);
     const [secciones, setSecciones] = useState(null);
     const [zonas, setZonas] = useState(null);
@@ -52,7 +51,6 @@ const ParteForm = ({parte, setParte}) => {
     });
 
     useEffect(()=>{
-        console.log(user['tec-user'].perfil.puesto.nombre);
         setDatos({
             id: parte.id ? parte.id : null,
             nombre: parte?parte.nombre:null,
@@ -108,28 +106,6 @@ const ParteForm = ({parte, setParte}) => {
             console.log(err); 
         })       
     }, [token]);
-
-    useEffect(() => {
-        parte.id && axios.get(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo_detalle/${parte.id}/`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            setLineasParte(res.data.tarea.sort(function(a, b){
-                if(a.prioridad < b.prioridad){
-                    return 1;
-                }
-                if(a.prioridad > b.prioridad){
-                    return -1;
-                }
-                return 0;
-            }))            
-        })
-        .catch( err => {
-            console.log(err); 
-        })       
-    }, [token, parte, actualizar]);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
@@ -263,23 +239,35 @@ const ParteForm = ({parte, setParte}) => {
     }, [token]);
 
     useEffect(()=>{        
-        axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_activas/?parte=${parte.id}`,{
+        axios.get(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_trabajo/?parte=${parte.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
                 }
         })
         .then( res => {
-            console.log('listado lineas activas');
-            console.log(res.data);
-            setLineas(res.data.sort(function(a, b){
-                if(a.tarea.prioridad < b.tarea.prioridad){
-                    return 1;
-                }
-                if(a.tarea.prioridad > b.tarea.prioridad){
-                    return -1;
-                }
-                return 0;
-            }))  
+            if(parte.tipo_nombre==="Preventivo"){
+                const prueba = res.data.filter((r=> r.fecha_fin===null));
+                setLineas(prueba.sort(function(a, b){
+                    if(a.tarea.prioridad < b.tarea.prioridad){
+                        return 1;
+                    }
+                    if(a.tarea.prioridad > b.tarea.prioridad){
+                        return -1;
+                    }
+                    return 0;
+                }))
+            }
+            else{
+                setLineas(res.data.sort(function(a, b){
+                    if(a.tarea.prioridad < b.tarea.prioridad){
+                        return 1;
+                    }
+                    if(a.tarea.prioridad > b.tarea.prioridad){
+                        return -1;
+                    }
+                    return 0;
+                }))  
+            }
         })
         .catch( err => {
             console.log(err);
@@ -294,6 +282,39 @@ const ParteForm = ({parte, setParte}) => {
         })
         .then( res => {
             setParte(res.data);
+            axios.get(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_trabajo/?parte=${parte.id}`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                    }
+            })
+            .then( res => {
+                if(parte.tipo_nombre==="Preventivo"){
+                    const prueba = res.data.filter((r=> r.fecha_fin===null));
+                    setLineas(prueba.sort(function(a, b){
+                        if(a.tarea.prioridad < b.tarea.prioridad){
+                            return 1;
+                        }
+                        if(a.tarea.prioridad > b.tarea.prioridad){
+                            return -1;
+                        }
+                        return 0;
+                    }))
+                }
+                else{
+                    setLineas(res.data.sort(function(a, b){
+                        if(a.tarea.prioridad < b.tarea.prioridad){
+                            return 1;
+                        }
+                        if(a.tarea.prioridad > b.tarea.prioridad){
+                            return -1;
+                        }
+                        return 0;
+                    }))  
+                }  
+            })
+            .catch( err => {
+                console.log(err);
+            });
         })
         .catch(err => { 
             console.log(err);})
@@ -892,7 +913,7 @@ const ParteForm = ({parte, setParte}) => {
                                     </Col>
                                 :null}
                             </Row>
-                            <Table striped bordered hover>
+                            <Table bordered hover>
                                 <thead>
                                     <tr>
                                         <th>Prioridad</th>
@@ -909,7 +930,7 @@ const ParteForm = ({parte, setParte}) => {
                                 <tbody>
                                     {lineas && lineas.map( linea => {
                                         return (
-                                            <tr key={linea.tarea.id} class={ linea.fecha_fin?"table-danger":linea.fecha_inicio?"table-danger":"" }/* class = {linea.fecha_inicio?"table-danger":" " } */>
+                                            <tr key={linea.tarea.id} class={ linea.fecha_fin?"table-success":linea.fecha_inicio?"table-info":"" }/* class = {linea.fecha_inicio?"table-danger":" " } */>
                                                 <td>{linea.tarea.prioridad}</td>
                                                 <td>{linea.tarea.nombre}</td>
                                                 <td>{linea.tarea.especialidad_nombre}</td>

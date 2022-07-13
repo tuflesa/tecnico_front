@@ -31,9 +31,9 @@ const ManNotificacionesLista = () => {
         });
     }, [token, filtro]);
 
-    const BorrarNota =(parte) =>{ 
-        console.log(parte);
-    }
+    // const BorrarNota =(parte) =>{ 
+    //     console.log(parte);
+    // }
 
     return (
         <Container className='mt-5'>            
@@ -67,7 +67,7 @@ const ManNotificacionesLista = () => {
                                             <Link to={`/mantenimiento/notificacion/${nota.id}`}>
                                                 <PencilFill className="mr-3 pencil"/>                                                
                                             </Link>
-                                            <Trash className="trash"  onClick={event =>{BorrarNota(nota)}} /> 
+                                            {/* <Trash className="trash"  onClick={event =>{BorrarNota(nota)}} />  */}
                                         </td>
                                     </tr>
                                 )})

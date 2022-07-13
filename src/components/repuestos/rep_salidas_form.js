@@ -193,8 +193,6 @@ const RepSalidas = ({alm}) => {
             })
             .then( res => { 
                 setSalida(res.data);
-                console.log('salida hecha');
-                console.log(res.data);
             })
             .catch(err => { console.log(err);})
         }
