@@ -941,6 +941,7 @@ const ParteForm = ({parte, setParte}) => {
                                                 {(user['tec-user'].perfil.puesto.nombre ==='Técnico')? 
                                                     <td>                                            
                                                         <Receipt className="mr-3 pencil" onClick={event =>{listarLineasTareas(linea.tarea)}}/>
+                                                        <Link to={`/mantenimiento/linea_tarea/${linea.id}`}><PencilFill className="mr-3 pencil"/></Link> 
                                                         <Trash className="mr-3 pencil"  onClick={event =>{BorrarLinea(linea.tarea)}} />
                                                     </td>
                                                 :null}
