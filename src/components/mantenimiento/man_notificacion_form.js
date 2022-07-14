@@ -29,7 +29,6 @@ const NotificacionForm = ({notificacion, user}) => {
     const [empresas, setEmpresas] = useState(null);
 
     useEffect(() => {
-        console.log('usuario ... ', user);
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
             headers: {
                 'Authorization': `token ${token['tec-token']}`

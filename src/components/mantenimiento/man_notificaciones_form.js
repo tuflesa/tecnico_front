@@ -352,11 +352,7 @@ const NotificacionForm = ({nota, setNota}) => {
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarNota}>Actualizar</Button> :
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={crearNota}>Guardar</Button>
                             }
-                            <Link to='/mantenimiento/notificaciones'>
-                                <Button variant="warning" >
-                                    Cancelar / Cerrar
-                                </Button>
-                            </Link>
+                            <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar</Button>
                         </Form.Row>
                     </Form>
                 </Col>

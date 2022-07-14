@@ -3,7 +3,7 @@ import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table, Modal, Button } from 'react-bootstrap';
-import { Trash, PencilFill, Receipt } from 'react-bootstrap-icons';
+import { Trash, PencilFill, Receipt, Eye } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import ManLineasFiltro from './man_lineas_filtro';
 import { filter } from 'd3';
@@ -170,13 +170,13 @@ const ManLineasListado = () => {
                                 <th style={{width:110}}>Fecha Plan</th>
                                 <th style={{width:110}}>Fecha Inicio</th>
                                 <th style={{width:110}}>Fecha Fin</th>
-                                <th style={{width:130}}>Acciones</th>
+                                <th style={{width:155}}>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             {lineas && lineas.map( linea => {
                                 return (
-                                    <tr key={linea.id}>
+                                    <tr key={linea.id} class={ linea.fecha_fin?"table-success":linea.fecha_inicio?"table-info":"" }>
                                         <td>{linea.tarea.prioridad}</td>
                                         <td>{linea.parte.nombre}</td>
                                         <td>{linea.tarea.nombre}</td>
@@ -192,6 +192,7 @@ const ManLineasListado = () => {
                                             </Link>  
                                             <Trash className="mr-3 pencil"  onClick={event =>{BorrarLinea(linea)}} />                                       
                                             <Receipt className="mr-3 pencil" onClick={event =>{listarTrabajadores(linea.id)}}/>
+                                            <Link to={`/mantenimiento/parte/${linea.parte.id}`}><Eye className="mr-3 pencil"/></Link>
                                         </td>
                                     </tr>
                                 )})

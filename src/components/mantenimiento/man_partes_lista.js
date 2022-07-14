@@ -40,10 +40,10 @@ const ManListaPartes = () => {
                 const activas = planificadas.concat(ejecucion);
                 //las ordenamos pasandolas a la variable que muestra los datos 'lineas'
                 setPartes(activas.sort(function(a, b){
-                    if(a.tarea.prioridad < b.tarea.prioridad){
+                    if(a.id < b.id){
                         return 1;
                     }
-                    if(a.tarea.prioridad > b.tarea.prioridad){
+                    if(a.id > b.id){
                         return -1;
                     }
                     return 0;
@@ -52,10 +52,10 @@ const ManListaPartes = () => {
             else{
                 //si no hay opción 5 (Activos) filtramos de forma normal y aquí ordenamos
                 setPartes(res.data.sort(function(a, b){
-                    if(a.tarea.prioridad < b.tarea.prioridad){
+                    if(a.id < b.id){
                         return 1;
                     }
-                    if(a.tarea.prioridad > b.tarea.prioridad){
+                    if(a.id > b.id){
                         return -1;
                     }
                     return 0;
@@ -161,9 +161,7 @@ const ManListaPartes = () => {
                                         <td>{parte.creado_por.get_full_name}</td>
                                         <td>{parte.estado_nombre}</td>
                                         <td>
-                                            <Link to={`/mantenimiento/parte/${parte.id}`}>
-                                                <PencilFill className="mr-3 pencil"/>                                                
-                                            </Link>
+                                            <Link to={`/mantenimiento/parte/${parte.id}`}><PencilFill className="mr-3 pencil"/></Link>
                                             <Trash className="trash"  onClick={event =>{BorrarParte(parte)}} /> 
                                         </td>
                                     </tr>

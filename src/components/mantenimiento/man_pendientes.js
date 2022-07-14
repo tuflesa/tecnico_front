@@ -52,7 +52,6 @@ const ManPendientes = () => {
               }
         })
         .then( res => {
-            console.log(res.data);
             setPartes(res.data);     
         })
         .catch( err => {
