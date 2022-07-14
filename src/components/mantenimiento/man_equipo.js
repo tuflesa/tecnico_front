@@ -49,9 +49,6 @@ const ManPorEquipos = () => {
                 }
         })
         .then( res => {
-            console.log('en el filtro de man_equipo');
-            console.log(res.data);
-            console.log(filtro);
             //filtramos los trabajos que sean de nuestras destrezas
             var MisTrabajos;
             var destrezas = user['tec-user'].perfil.destrezas;
@@ -73,8 +70,6 @@ const ManPorEquipos = () => {
     }, [token, filtro]); 
 
     const updateTarea = () => {
-        console.log('que vale el filtro en el update');
-        console.log(filtro);
         axios.get(BACKEND_SERVER + '/api/mantenimiento/listado_lineas_activas/'+ filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`

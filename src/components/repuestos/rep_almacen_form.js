@@ -63,7 +63,6 @@ const RepAlmacenForm = ({nombre, empresa, almacen_id}) => {
               }     
         })
         .then( res => { 
-            console.log(res);
             window.location.href = "/repuestos/almacenes/";
         })
         .catch(err => { console.log(err);})
