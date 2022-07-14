@@ -15,7 +15,7 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
     const [tipotarea, setTipoTarea] = useState(null);
 
     var fecha_hoy=Date.parse(new Date);
-    var mesEnMilisegundos = 1000 * 60 * 60 * 24 * 7;
+    var mesEnMilisegundos = 1000 * 60 * 60 * 24 * 7;  //cambiado a una semana, en vez del mes
     var enunmes=fecha_hoy+mesEnMilisegundos;
     var dentrodeunmes = new Date(enunmes);
     var fechaenunmesString = dentrodeunmes.getFullYear() + '-' + ('0' + (dentrodeunmes.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunmes.getDate()).slice(-2);  
@@ -224,7 +224,8 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
                                         name='empresa' 
                                         value={datos.empresa}
                                         onChange={handleInputChange}
-                                        placeholder="Empresa">
+                                        placeholder="Empresa"
+                                        disabled={user['tec-user'].perfil.empresa.id?true:false}>
                                         <option key={0} value={''}>Todas</option>    
                                         {empresas && empresas.map( empresa => {
                                             return (
@@ -242,7 +243,8 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
                             <Form.Control as="select" 
                                             value={datos.zona}
                                             name='zona'
-                                            onChange={handleInputChange}>
+                                            onChange={handleInputChange}
+                                            disabled={user['tec-user'].perfil.zona?true:false}>
                                 <option key={0} value={''}>Todas</option>
                                 {zonas && zonas.map( zona => {
                                     return (
@@ -260,7 +262,8 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
                             <Form.Control as="select" 
                                             value={datos.seccion}
                                             name='seccion'
-                                            onChange={handleInputChange}>
+                                            onChange={handleInputChange}
+                                            disabled={user['tec-user'].perfil.seccion?true:false}>
                                 <option key={0} value={''}>Todas</option>
                                 {secciones && secciones.map( seccion => {
                                     return (

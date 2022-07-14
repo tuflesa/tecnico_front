@@ -18,19 +18,21 @@ const ManPorEquipos = () => {
     const [hoy] = useState(new Date);
     const [show, setShow] = useState(false);
     const [linea_id, setLinea_id] = useState(null);
-    const [filtro, setFiltro] = useState(`?parte__empresa=${user['tec-user'].perfil.empresa.id}`);
-    const actualizaFiltro = str => {
-        setFiltro(str);
-    }
+    
 
-    /* var dentrodeunmes=null;
+    var dentrodeunmes=null;
     var fechaenunmesString=null;
     var fecha_hoy=Date.parse(hoy);
     var mesEnMilisegundos = 1000 * 60 * 60 * 24 * 7;  //cambiado a una semana, en vez del mes
     var enunmes=fecha_hoy+mesEnMilisegundos;
     dentrodeunmes = new Date(enunmes);
     fechaenunmesString = dentrodeunmes.getFullYear() + '-' + ('0' + (dentrodeunmes.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunmes.getDate()).slice(-2);
-    const [filtro, setFiltro] = useState(`?parte__empresa=${user['tec-user'].perfil.empresa.id}&fecha_plan__lte=${fechaenunmesString}&parte__zona=${user['tec-user'].perfil.zona?user['tec-user'].perfil.zona.id:''}&parte__seccion=${user['tec-user'].perfil.seccion?user['tec-user'].perfil.seccion.id:''}`); */
+    //const [filtro, setFiltro] = useState(`?parte__empresa=${user['tec-user'].perfil.empresa.id}&fecha_plan__lte=${fechaenunmesString}&parte__zona=${user['tec-user'].perfil.zona?user['tec-user'].perfil.zona.id:''}&parte__seccion=${user['tec-user'].perfil.seccion?user['tec-user'].perfil.seccion.id:''}`);
+
+    const [filtro, setFiltro] = useState(`?parte__empresa=${user['tec-user'].perfil.empresa.id}&fecha_plan__lte=${fechaenunmesString}`);
+    const actualizaFiltro = str => {
+        setFiltro(str);
+    }
     
 
     const [datos, setDatos] = useState({
