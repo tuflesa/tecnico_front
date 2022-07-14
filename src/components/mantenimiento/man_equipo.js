@@ -7,23 +7,31 @@ import {invertirFecha} from '../utilidades/funciones_fecha';
 import { Tools, StopCircle, UiChecks, FileCheck, Receipt, Eye} from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import ListaDePersonal from './man_equipo_trabajadores';
+import ManEquipoFiltro from './man_equipo_filtro';
 
 const ManPorEquipos = () => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
+
     const [lineas, setLineas] = useState(null);
-    const [trabajadores_lineas, setTrabajadoresLineas] = useState(null);    
+    //const [trabajadores_lineas, setTrabajadoresLineas] = useState(null);    
     const [hoy] = useState(new Date);
     const [show, setShow] = useState(false);
     const [linea_id, setLinea_id] = useState(null);
-    var dentrodeunmes=null;
+    const [filtro, setFiltro] = useState(`?parte__empresa=${user['tec-user'].perfil.empresa.id}`);
+    const actualizaFiltro = str => {
+        setFiltro(str);
+    }
+
+    /* var dentrodeunmes=null;
     var fechaenunmesString=null;
     var fecha_hoy=Date.parse(hoy);
     var mesEnMilisegundos = 1000 * 60 * 60 * 24 * 7;  //cambiado a una semana, en vez del mes
     var enunmes=fecha_hoy+mesEnMilisegundos;
     dentrodeunmes = new Date(enunmes);
     fechaenunmesString = dentrodeunmes.getFullYear() + '-' + ('0' + (dentrodeunmes.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunmes.getDate()).slice(-2);
-    const [filtro, setFiltro] = useState(`?parte__empresa=${user['tec-user'].perfil.empresa.id}&fecha_plan__lte=${fechaenunmesString}&parte__zona=${user['tec-user'].perfil.zona?user['tec-user'].perfil.zona.id:''}&parte__seccion=${user['tec-user'].perfil.seccion?user['tec-user'].perfil.seccion.id:''}`);
+    const [filtro, setFiltro] = useState(`?parte__empresa=${user['tec-user'].perfil.empresa.id}&fecha_plan__lte=${fechaenunmesString}&parte__zona=${user['tec-user'].perfil.zona?user['tec-user'].perfil.zona.id:''}&parte__seccion=${user['tec-user'].perfil.seccion?user['tec-user'].perfil.seccion.id:''}`); */
+    
 
     const [datos, setDatos] = useState({
         fecha_inicio: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
@@ -39,6 +47,9 @@ const ManPorEquipos = () => {
                 }
         })
         .then( res => {
+            console.log('en el filtro de man_equipo');
+            console.log(res.data);
+            console.log(filtro);
             //filtramos los trabajos que sean de nuestras destrezas
             var MisTrabajos;
             var destrezas = user['tec-user'].perfil.destrezas;
@@ -60,6 +71,8 @@ const ManPorEquipos = () => {
     }, [token, filtro]); 
 
     const updateTarea = () => {
+        console.log('que vale el filtro en el update');
+        console.log(filtro);
         axios.get(BACKEND_SERVER + '/api/mantenimiento/listado_lineas_activas/'+ filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -284,7 +297,7 @@ const ManPorEquipos = () => {
     }
 
     return(
-        <Container class extends className="mb-5 mt-5">
+        <Container class extends className="pt-1 mt-5">
             <Row class extends>                
                 <Col>
                     <h5 className="mb-3 mt-3" style={ { color: 'red' } }>Listado de Trabajos {user['tec-user'].get_full_name}, por prioridades:</h5>              
@@ -293,6 +306,15 @@ const ManPorEquipos = () => {
                     <h5><FileCheck/> ---- Para finalizar un trabajo</h5>
                     <h5><Receipt/> ---- Listado del personal que está interviniendo en este trabajo</h5>
                     <h5><Eye/> ---- Ver el parte al que pertenece la tarea</h5>
+                </Col>
+            </Row>
+            <Row>
+                <Col>
+                    <ManEquipoFiltro actualizaFiltro={actualizaFiltro}/>
+                </Col>
+            </ Row>
+            <Row>
+                <Col>
                     <Table striped bordered hover>
                         <thead>
                             <tr>
