@@ -282,12 +282,12 @@ const NotificacionForm = ({nota, setNota}) => {
                             </Col> */}                           
                         </Row>     
                         <Row> 
-                            {user['tec-user'].perfil.puesto.nombre==='Técnico'?
+                            {user['tec-user'].perfil.puesto.nombre==='Director Técnico'?
                                 <h5 className="pb-3 pt-1 mt-2">Estado de la notificación</h5>:null}
                         </Row>
                         <Row>
                             <Col>
-                            {user['tec-user'].perfil.puesto.nombre==='Técnico'?
+                            {user['tec-user'].perfil.puesto.nombre==='Director Técnico'?
                                 <Form.Group controlId="revisado">
                                 <Form.Label>Revisado</Form.Label>
                                 <Form.Control as="select" 
@@ -302,7 +302,7 @@ const NotificacionForm = ({nota, setNota}) => {
                             : null}
                             </Col>
                             <Col>
-                            {user['tec-user'].perfil.puesto.nombre==='Técnico'?
+                            {user['tec-user'].perfil.puesto.nombre==='Director Técnico'?
                                 <Form.Group controlId="descartado">
                                 <Form.Label>Descartado</Form.Label>
                                 <Form.Control as="select" 
@@ -317,7 +317,7 @@ const NotificacionForm = ({nota, setNota}) => {
                             : null}
                             </Col>
                             <Col>
-                            {user['tec-user'].perfil.puesto.nombre==='Técnico'?
+                            {user['tec-user'].perfil.puesto.nombre==='Director Técnico'?
                                 <Form.Group controlId="finalizado">
                                     <Form.Label>Finalizado</Form.Label>
                                     <Form.Control as="select" 
@@ -334,7 +334,7 @@ const NotificacionForm = ({nota, setNota}) => {
                         </Row>   
                         <Row>                        
                             <Col>
-                            {user['tec-user'].perfil.puesto.nombre==='Técnico'?
+                            {user['tec-user'].perfil.puesto.nombre==='Director Técnico'?
                                 <Form.Group id="conclusion">
                                     <Form.Label>Concusiones</Form.Label>
                                     <Form.Control type="text" 
