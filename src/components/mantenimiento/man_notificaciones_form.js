@@ -14,6 +14,8 @@ const NotificacionForm = ({nota, setNota}) => {
     const [show_error, setShowError] = useState(false);
     const handleCloseError = () => setShowError(false);
     const [usuarios, setUsuarios] = useState(null);
+    const [destrezas, setDestrezas] = useState(null);
+    const soyTecnico = user['tec-user'].perfil.destrezas.filter(s => s === 6);
 
     const [datos, setDatos] = useState({
         id: nota.id? nota.id : null,
@@ -35,6 +37,7 @@ const NotificacionForm = ({nota, setNota}) => {
     });
 
     useEffect(()=>{
+        
         setDatos({
             id: nota.id? nota.id : null,
             que: nota.id?nota.que:null,
@@ -76,6 +79,20 @@ const NotificacionForm = ({nota, setNota}) => {
             console.log(err);
         });
     }, [token, datos.empresa]);
+
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + `/api/mantenimiento/especialidades/`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setDestrezas(res.data.filter(d=>d.nombre==='Técnico'));
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -282,12 +299,12 @@ const NotificacionForm = ({nota, setNota}) => {
                             </Col> */}                           
                         </Row>     
                         <Row> 
-                            {user['tec-user'].perfil.puesto.nombre==='Director Técnico'?
+                            {soyTecnico.length!==0?
                                 <h5 className="pb-3 pt-1 mt-2">Estado de la notificación</h5>:null}
                         </Row>
                         <Row>
                             <Col>
-                            {user['tec-user'].perfil.puesto.nombre==='Director Técnico'?
+                            {soyTecnico.length!==0?
                                 <Form.Group controlId="revisado">
                                 <Form.Label>Revisado</Form.Label>
                                 <Form.Control as="select" 
@@ -302,7 +319,7 @@ const NotificacionForm = ({nota, setNota}) => {
                             : null}
                             </Col>
                             <Col>
-                            {user['tec-user'].perfil.puesto.nombre==='Director Técnico'?
+                            {soyTecnico.length!==0?
                                 <Form.Group controlId="descartado">
                                 <Form.Label>Descartado</Form.Label>
                                 <Form.Control as="select" 
@@ -317,7 +334,7 @@ const NotificacionForm = ({nota, setNota}) => {
                             : null}
                             </Col>
                             <Col>
-                            {user['tec-user'].perfil.puesto.nombre==='Director Técnico'?
+                            {soyTecnico.length!==0?
                                 <Form.Group controlId="finalizado">
                                     <Form.Label>Finalizado</Form.Label>
                                     <Form.Control as="select" 
@@ -334,7 +351,7 @@ const NotificacionForm = ({nota, setNota}) => {
                         </Row>   
                         <Row>                        
                             <Col>
-                            {user['tec-user'].perfil.puesto.nombre==='Director Técnico'?
+                            {soyTecnico.length!==0?
                                 <Form.Group id="conclusion">
                                     <Form.Label>Concusiones</Form.Label>
                                     <Form.Control type="text" 
