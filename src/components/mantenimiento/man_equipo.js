@@ -328,7 +328,7 @@ const ManPorEquipos = () => {
                         <tbody>
                             {lineas && lineas.map( linea => {
                                 return (
-                                    <tr key={linea.id} class = {linea.fecha_inicio?"table-danger":" "}>
+                                    <tr key={linea.id} className = {linea.fecha_inicio?"table-danger":" "}>
                                         <td>{linea.tarea.prioridad}</td>
                                         <td>{invertirFecha(linea.fecha_plan)}</td>
                                         <td>{linea.tarea.nombre}</td>
