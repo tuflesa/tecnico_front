@@ -239,7 +239,7 @@ const ParteForm = ({parte, setParte}) => {
     }, [token]);
 
     useEffect(()=>{        
-        axios.get(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_trabajo/?parte=${parte.id}`,{
+        parte.id && axios.get(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_trabajo/?parte=${parte.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
                 }

@@ -9,9 +9,10 @@ import ManNotificacionesFiltro from './man_notificaciones_filtro';
 
 const ManNotificacionesLista = () => {
     const [token] = useCookies(['tec-token']);
+    const [user] = useCookies(['tec-user']);
     
     const [notas, setNotas]  = useState(null);
-    const [filtro, setFiltro] = useState(`?finalizado=${false}&revisao=${false}&descartado=${false}`);
+    const [filtro, setFiltro] = useState(`?empresa__id=${user['tec-user'].perfil.empresa.id}&finalizado=${false}&revisao=${false}&descartado=${false}`);
 
     const actualizaFiltro = (str) => {
         setFiltro(str);

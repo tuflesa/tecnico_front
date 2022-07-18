@@ -176,7 +176,7 @@ const ManLineasListado = () => {
                         <tbody>
                             {lineas && lineas.map( linea => {
                                 return (
-                                    <tr key={linea.id} class={ linea.fecha_fin?"table-success":linea.fecha_inicio?"table-info":"" }>
+                                    <tr key={linea.id} className={ linea.fecha_fin?"table-success":linea.fecha_inicio?"table-info":"" }>
                                         <td>{linea.tarea.prioridad}</td>
                                         <td>{linea.parte.nombre}</td>
                                         <td>{linea.tarea.nombre}</td>
