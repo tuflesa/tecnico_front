@@ -175,7 +175,8 @@ const ManNotificacionesFiltro = ({actualizaFiltro}) => {
                                         name='empresa' 
                                         value={datos.empresa}
                                         onChange={handleInputChange}
-                                        placeholder="Empresa">
+                                        placeholder="Empresa"
+                                        disabled>
                                         <option key={0} value={''}>Todas</option>    
                                         {empresas && empresas.map( empresa => {
                                             return (
