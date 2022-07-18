@@ -187,6 +187,7 @@ const ManLineasListado = () => {
                         <thead>
                             <tr>
                                 <th>Pr.</th>
+                                <th>+/-</th>
                                 <th>Parte</th>
                                 <th>Tarea</th>
                                 <th>Tipo</th>
