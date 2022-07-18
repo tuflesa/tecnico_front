@@ -3,7 +3,7 @@ import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table, Modal, Button } from 'react-bootstrap';
-import { Trash, PencilFill, Receipt, Eye } from 'react-bootstrap-icons';
+import { Trash, PencilFill, Receipt, Eye, PlusSquare, DashSquare, HandThumbsUpFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import ManLineasFiltro from './man_lineas_filtro';
 import { filter } from 'd3';
@@ -147,6 +147,31 @@ const ManLineasListado = () => {
     const handlerClose = () => {
         setShow(false);
     }
+
+    const updateCantidad = (cantidad, linea) => {
+        const newLineas = [...lineas];
+        newLineas.forEach( l => {
+            if (l.tarea.id === linea.tarea.id){
+                l.tarea.prioridad += cantidad;
+                if (l.tarea.prioridad < 1) l.tarea.prioridad = 1;
+            } 
+        });
+        setLineas(newLineas);
+    }
+
+    const ActualizarPrioridad = (linea) => {
+        axios.patch(BACKEND_SERVER + `/api/mantenimiento/tareas/${linea.tarea.id}/`, {
+            prioridad : linea.tarea.prioridad,
+        },{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => { 
+            setActualizar(linea);
+        })
+        .catch(err => { console.log(err);})
+    }
     
     return (
         <Container className='mt-5'>            
@@ -178,6 +203,11 @@ const ManLineasListado = () => {
                                 return (
                                     <tr key={linea.id} className={ linea.fecha_fin?"table-success":linea.fecha_inicio?"table-info":"" }>
                                         <td>{linea.tarea.prioridad}</td>
+                                        <td>
+                                            <PlusSquare className="mr-3 pencil"  onClick={event => {updateCantidad(1, linea)}} />
+                                            <DashSquare className="mr-3 pencil"  onClick={event => {updateCantidad(-1, linea)}} />
+                                            <HandThumbsUpFill className="mr-3 pencil" onClick= {async => {ActualizarPrioridad(linea)}}/>
+                                        </td>
                                         <td>{linea.parte.nombre}</td>
                                         <td>{linea.tarea.nombre}</td>
                                         <td>{linea.parte.tipo_nombre}</td>
