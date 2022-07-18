@@ -196,7 +196,7 @@ const ManLineasListado = () => {
                                 <th style={{width:110}}>Fecha Plan</th>
                                 <th style={{width:110}}>Fecha Inicio</th>
                                 <th style={{width:110}}>Fecha Fin</th>
-                                <th style={{width:155}}>Acciones</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
