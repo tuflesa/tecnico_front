@@ -6,7 +6,7 @@ import { Container, Row, Col, Table, Modal, Button } from 'react-bootstrap';
 import { Trash, PencilFill, Receipt, Eye, PlusSquare, DashSquare, HandThumbsUpFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import ManLineasFiltro from './man_lineas_filtro';
-import { filter } from 'd3';
+import { color, filter } from 'd3';
 import {invertirFecha} from '../utilidades/funciones_fecha';
 import ListaDePersonal from './man_equipo_trabajadores';
 
