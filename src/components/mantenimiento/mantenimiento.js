@@ -11,6 +11,7 @@ import ManNotificacionesNuevas from './man_notificaciones_nuevas';
 import ManNotificacionesLista from './man_notificaciones_lista';
 import ManNotificacionDetalle from './man_notificacion_editar';
 import ManPendientes from './man_pendientes';
+import ManParteDetalleOp from './man_parte_editar_op';
 
 const Mantenimiento = () => {
     
@@ -18,7 +19,8 @@ const Mantenimiento = () => {
         <React.Fragment>
             <ManNavBar />
             <Switch>
-                <Route path='/mantenimiento/linea_tarea/:id' component={ManLineaDetalle} />              
+                <Route path='/mantenimiento/parte_op/:id' component={ManParteDetalleOp} />
+                <Route path='/mantenimiento/linea_tarea/:id' component={ManLineaDetalle} /> 
                 <Route path='/mantenimiento/parte/nuevo' component={ManParteNuevo} /> 
                 <Route path='/mantenimiento/notificaciones' component={ManNotificacionesLista} />                  
                 <Route path='/mantenimiento/notificacion/nueva' component={ManNotificacionesNuevas} />   

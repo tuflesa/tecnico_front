@@ -11,8 +11,9 @@ const ManListaPartes = () => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
     
+    const soyTecnico = user['tec-user'].perfil.destrezas.filter(s => s === 6);
     const [partes, setPartes]  = useState(null);
-    const [filtro, setFiltro] = useState(`?estado=${''}&empresa__id=${user['tec-user'].perfil.empresa.id}`);
+    const [filtro, setFiltro] = useState(`?estado=${''}&empresa__id=${user['tec-user'].perfil.empresa.id}&creado_por=${soyTecnico.length===0?user['tec-user'].perfil.usuario:''}`);
     const [activos, setActivos] = useState('');
     const [actualizar, setActualizar] = useState('');
 
@@ -106,7 +107,7 @@ const ManListaPartes = () => {
                                 } 
                             })
                             .then(res =>{
-                                console.log(res.data)                           ;
+                                console.log(res.data);
                             })
                             .catch (err=>{console.log((err));});
                         } 
