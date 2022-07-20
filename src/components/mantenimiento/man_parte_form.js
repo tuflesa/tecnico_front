@@ -27,6 +27,7 @@ const ParteForm = ({parte, setParte}) => {
     const [estados, setEstados] = useState(null);
     const [actualizar, setActualizar] = useState('');
     const [lineas, setLineas] = useState(null);
+    const soyTecnico = user['tec-user'].perfil.destrezas.filter(s => s === 6);
 
     const [datos, setDatos] = useState({
         id: parte.id ? parte.id : null,
@@ -245,6 +246,11 @@ const ParteForm = ({parte, setParte}) => {
                 }
         })
         .then( res => {
+            console.log('que cogemos en res data');
+            console.log(res.data);
+            const unique = (value, index, self) => {
+                return self.indexOf(value.tarea) === index.tarea
+              }
             if(parte.tipo_nombre==="Preventivo"){
                 const prueba = res.data.filter((r=> r.fecha_fin===null));
                 setLineas(prueba.sort(function(a, b){
@@ -256,6 +262,11 @@ const ParteForm = ({parte, setParte}) => {
                     }
                     return 0;
                 }))
+                if(prueba && prueba.length===0){
+                    console.log('prueba es longitud 0');
+                    const uniqueTarea = res.data.filter(unique)
+                    setLineas(uniqueTarea);
+                }
             }
             else{
                 setLineas(res.data.sort(function(a, b){
@@ -887,7 +898,7 @@ const ParteForm = ({parte, setParte}) => {
                             </Col>
                         :null}
                         </Row>  
-                        {(user['tec-user'].perfil.puesto.nombre ==='Técnico')?                                          
+                        {soyTecnico.length!==0?                                          
                         <Form.Row className="justify-content-center">
                             {parte.id? 
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button> :
@@ -907,7 +918,7 @@ const ParteForm = ({parte, setParte}) => {
                                 <Col>
                                 <h5 className="pb-3 pt-1 mt-2">Tareas del Parte:</h5>
                                 </Col>
-                                {(user['tec-user'].perfil.puesto.nombre ==='Técnico')?   
+                                {soyTecnico.length!==0?  
                                     <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
                                             <PlusCircle className="plus mr-2" size={30} onClick={abrirAddLinea}/>
                                     </Col>
