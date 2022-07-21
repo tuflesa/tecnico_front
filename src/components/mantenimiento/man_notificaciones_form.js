@@ -125,6 +125,9 @@ const NotificacionForm = ({nota, setNota}) => {
         })
         .then( res => { 
             setNota(res.data);
+            window.confirm('La notificación se ha creado correctamente');
+            window.location.href="javascript: history.go(-1)"
+            
         })
         .catch(err => { 
             setShowError(true);
@@ -299,12 +302,12 @@ const NotificacionForm = ({nota, setNota}) => {
                             </Col> */}                           
                         </Row>     
                         <Row> 
-                            {soyTecnico.length!==0?
+                        {nota.id?
                                 <h5 className="pb-3 pt-1 mt-2">Estado de la notificación</h5>:null}
                         </Row>
                         <Row>
                             <Col>
-                            {soyTecnico.length!==0?
+                            {nota.id?
                                 <Form.Group controlId="revisado">
                                 <Form.Label>Revisado</Form.Label>
                                 <Form.Control as="select" 
@@ -319,7 +322,7 @@ const NotificacionForm = ({nota, setNota}) => {
                             : null}
                             </Col>
                             <Col>
-                            {soyTecnico.length!==0?
+                            {nota.id?
                                 <Form.Group controlId="descartado">
                                 <Form.Label>Descartado</Form.Label>
                                 <Form.Control as="select" 
@@ -334,7 +337,7 @@ const NotificacionForm = ({nota, setNota}) => {
                             : null}
                             </Col>
                             <Col>
-                            {soyTecnico.length!==0?
+                            {nota.id?
                                 <Form.Group controlId="finalizado">
                                     <Form.Label>Finalizado</Form.Label>
                                     <Form.Control as="select" 
@@ -351,7 +354,7 @@ const NotificacionForm = ({nota, setNota}) => {
                         </Row>   
                         <Row>                        
                             <Col>
-                            {soyTecnico.length!==0?
+                            {nota.id?
                                 <Form.Group id="conclusion">
                                     <Form.Label>Concusiones</Form.Label>
                                     <Form.Control type="text" 
