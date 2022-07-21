@@ -9,7 +9,7 @@ import LineaTareaNueva from './man_parte_lineatarea';
 import LineasPartesMov from './man_parte_lineas_mov';
 import { style } from 'd3';
 
-const ParteForm = ({parte, setParte}) => {
+const ParteForm = ({parte, setParte, op}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
 
@@ -82,9 +82,17 @@ const ParteForm = ({parte, setParte}) => {
               }
         })
         .then( res => {
-            if(user['tec-user'].perfil.puesto.nombre==='Mantenimiento'){
-                const usuario_mantenimiento = res.data.filter( s => s.nombre === 'Correctivo');
-                setTipoParte(usuario_mantenimiento);
+            if(soyTecnico.length===0){
+                const no_tecnico = res.data.filter( s => s.nombre !== 'Preventivo');
+                setTipoParte(no_tecnico.sort(function(a, b){
+                    if(a.nombre > b.nombre){
+                        return 1;
+                    }
+                    if(a.nombre < b.nombre){
+                        return -1;
+                    }
+                    return 0;
+                }))
                 setDatos({
                     ...datos,
                     tipo: 2,
@@ -246,8 +254,6 @@ const ParteForm = ({parte, setParte}) => {
                 }
         })
         .then( res => {
-            console.log('que cogemos en res data');
-            console.log(res.data);
             const unique = (value, index, self) => {
                 return self.indexOf(value.tarea) === index.tarea
               }
@@ -263,7 +269,6 @@ const ParteForm = ({parte, setParte}) => {
                     return 0;
                 }))
                 if(prueba && prueba.length===0){
-                    console.log('prueba es longitud 0');
                     const uniqueTarea = res.data.filter(unique)
                     setLineas(uniqueTarea);
                 }
@@ -672,9 +677,9 @@ const ParteForm = ({parte, setParte}) => {
         });                 
     }
 
-    const handleDisabled = () => {
+    /* const handleDisabled = () => {
         return (user['tec-user'].perfil.puesto.nombre==='Mantenimiento')
-    }
+    } */
 
     const handleDisabledMantenimiento = () => {
         return (user['tec-user'].perfil.puesto.nombre==='Mantenimiento')
@@ -752,7 +757,7 @@ const ParteForm = ({parte, setParte}) => {
                                                 value={datos.tipo}
                                                 onChange={handleInputChange}
                                                 placeholder="Tipo Mantenimiento"
-                                                disabled={handleDisabled()}> 
+                                                /* disabled={handleDisabled()} */> 
                                                 {datos.id===null? <option key={0} value={''}>Seleccionar</option>: ''}                                                   
                                                 {tipoparte && tipoparte.map( tipo => {
                                                     return (
@@ -898,7 +903,8 @@ const ParteForm = ({parte, setParte}) => {
                             </Col>
                         :null}
                         </Row>  
-                        {soyTecnico.length!==0?                                          
+                        {/* {soyTecnico.length!==0?*/}
+                        {op?
                         <Form.Row className="justify-content-center">
                             {parte.id? 
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button> :
@@ -918,7 +924,8 @@ const ParteForm = ({parte, setParte}) => {
                                 <Col>
                                 <h5 className="pb-3 pt-1 mt-2">Tareas del Parte:</h5>
                                 </Col>
-                                {soyTecnico.length!==0?  
+                                {/* {soyTecnico.length!==0?   */}
+                                {op?
                                     <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
                                             <PlusCircle className="plus mr-2" size={30} onClick={abrirAddLinea}/>
                                     </Col>

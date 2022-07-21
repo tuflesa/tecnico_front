@@ -4,11 +4,11 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import ParteForm from './man_parte_form';
 
-const ManParteDetalle = ({ match }) => {
+const ManParteDetalleOp = ({ match }) => {
     const [token] = useCookies(['tec-token']);
     const [parte, setParte] = useState(null)
-    var op = true;
-
+    var op = false;
+    
     useEffect(() => {
         axios.get(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo_editar/${match.params.id}`,{
             headers: {
@@ -25,9 +25,9 @@ const ManParteDetalle = ({ match }) => {
 
     return ( 
         <React.Fragment>
-            {parte ? <ParteForm parte={parte} setParte={setParte} op={op}/> : null}
+            {parte ? <ParteForm parte={parte} setParte={setParte} op={op} /> : null}
         </React.Fragment>
      )
 }
  
-export default ManParteDetalle;
+export default ManParteDetalleOp;

@@ -15,12 +15,13 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
     const [zonas, setZonas] = useState(null);
     const [equipos, setEquipos] = useState(null);
     const [estados, setEstados] = useState(null);
+    const soyTecnico = user['tec-user'].perfil.destrezas.filter(s => s === 6);
 
     const [datos, setDatos] = useState({
         id: '',
         nombre: '',
         tipotarea: '',
-        creado_por: '',
+        creado_por: soyTecnico.length===0?user['tec-user'].perfil.usuario:'',
         observaciones: '',
         finalizado: false,
         empresa: user['tec-user'].perfil.empresa.id,
@@ -40,15 +41,29 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
               }
         })
         .then( res => {
-            setTipoTarea(res.data.sort(function(a, b){
-                if(a.nombre > b.nombre){
-                    return 1;
-                }
-                if(a.nombre < b.nombre){
-                    return -1;
-                }
-                return 0;
-            }))
+            if(soyTecnico.length===0){
+                const no_tecnico = res.data.filter( s => s.nombre !== 'Preventivo');
+                setTipoTarea(no_tecnico.sort(function(a, b){
+                    if(a.nombre > b.nombre){
+                        return 1;
+                    }
+                    if(a.nombre < b.nombre){
+                        return -1;
+                    }
+                    return 0;
+                }))
+            }
+            else{
+                setTipoTarea(res.data.sort(function(a, b){
+                    if(a.nombre > b.nombre){
+                        return 1;
+                    }
+                    if(a.nombre < b.nombre){
+                        return -1;
+                    }
+                    return 0;
+                }))
+            }
         })
         .catch( err => {
             console.log(err); 
@@ -275,7 +290,8 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
                                         name='creado_por' 
                                         value={datos.creado_por}
                                         onChange={handleInputChange}
-                                        placeholder="Creado por">
+                                        placeholder="Creado por"
+                                        disabled={soyTecnico.length===0?true:false}>
                                         <option key={0} value={''}>Todas</option>    
                                         {usuarios && usuarios.map( usuario => {
                                             return (
@@ -316,7 +332,8 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
                                         name='empresa' 
                                         value={datos.empresa}
                                         onChange={handleInputChange}
-                                        placeholder="Empresa">
+                                        placeholder="Empresa"
+                                        disabled={soyTecnico.length===0?true:false}>
                                         <option key={0} value={''}>Todas</option>    
                                         {empresas && empresas.map( empresa => {
                                             return (
