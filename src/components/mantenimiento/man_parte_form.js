@@ -82,9 +82,17 @@ const ParteForm = ({parte, setParte, op}) => {
               }
         })
         .then( res => {
-            if(user['tec-user'].perfil.puesto.nombre==='Mantenimiento'){
-                const usuario_mantenimiento = res.data.filter( s => s.nombre !== 'Preventivo');
-                setTipoParte(usuario_mantenimiento);
+            if(soyTecnico.length===0){
+                const no_tecnico = res.data.filter( s => s.nombre !== 'Preventivo');
+                setTipoParte(no_tecnico.sort(function(a, b){
+                    if(a.nombre > b.nombre){
+                        return 1;
+                    }
+                    if(a.nombre < b.nombre){
+                        return -1;
+                    }
+                    return 0;
+                }))
                 setDatos({
                     ...datos,
                     tipo: 2,

@@ -41,15 +41,29 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
               }
         })
         .then( res => {
-            setTipoTarea(res.data.sort(function(a, b){
-                if(a.nombre > b.nombre){
-                    return 1;
-                }
-                if(a.nombre < b.nombre){
-                    return -1;
-                }
-                return 0;
-            }))
+            if(soyTecnico.length===0){
+                const no_tecnico = res.data.filter( s => s.nombre !== 'Preventivo');
+                setTipoTarea(no_tecnico.sort(function(a, b){
+                    if(a.nombre > b.nombre){
+                        return 1;
+                    }
+                    if(a.nombre < b.nombre){
+                        return -1;
+                    }
+                    return 0;
+                }))
+            }
+            else{
+                setTipoTarea(res.data.sort(function(a, b){
+                    if(a.nombre > b.nombre){
+                        return 1;
+                    }
+                    if(a.nombre < b.nombre){
+                        return -1;
+                    }
+                    return 0;
+                }))
+            }
         })
         .catch( err => {
             console.log(err); 
@@ -318,7 +332,8 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
                                         name='empresa' 
                                         value={datos.empresa}
                                         onChange={handleInputChange}
-                                        placeholder="Empresa">
+                                        placeholder="Empresa"
+                                        disabled={soyTecnico.length===0?true:false}>
                                         <option key={0} value={''}>Todas</option>    
                                         {empresas && empresas.map( empresa => {
                                             return (
