@@ -9,6 +9,7 @@ const PedidosFiltro = ({ actualizaFiltro }) => {
     const [usuarios, setUsuarios] = useState(null);
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
+    const soyTecnico = user['tec-user'].perfil.destrezas.filter(s => s === 6);
 
     const [datos, setDatos] = useState({
         nombre: '',
@@ -17,7 +18,7 @@ const PedidosFiltro = ({ actualizaFiltro }) => {
         fecha_creacion_gte:'',
         finalizado: false,
         numero:'',
-        creado_por: '',
+        creado_por: user['tec-user'].perfil.usuario,
 
     });
 
@@ -114,7 +115,8 @@ const PedidosFiltro = ({ actualizaFiltro }) => {
                                         name='creado_por' 
                                         value={datos.creado_por}
                                         onChange={handleInputChange}
-                                        placeholder="Creado por">
+                                        placeholder="Creado por"
+                                        disabled={soyTecnico.length===0?true:false}>
                                         <option key={0} value={''}>Todas</option>    
                                         {usuarios && usuarios.map( usuario => {
                                             return (
