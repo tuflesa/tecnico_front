@@ -18,7 +18,15 @@ const Home = () => {
               }
         })
         .then(res => {
-            //console.log(res.data);
+            console.log(res.data.sort(function(a, b){
+                if(a.url > b.url){
+                    return 1;
+                }
+                if(a.url < b.url){
+                    return -1;
+                }
+                return 0;
+            }))
             setApps(res.data);
         })
     },[token]);

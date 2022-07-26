@@ -259,18 +259,27 @@ const ParteForm = ({parte, setParte, op}) => {
               }
             if(parte.tipo_nombre==="Preventivo"){
                 const prueba = res.data.filter((r=> r.fecha_fin===null));
-                setLineas(prueba.sort(function(a, b){
-                    if(a.tarea.prioridad < b.tarea.prioridad){
-                        return 1;
+                if(prueba.length===0){
+                    let hash = {};
+                    var array = [''];
+                    array = res.data.filter(o => hash[o.tarea.id] ? false : hash[o.tarea.id] = true);
+                    setLineas(array);
+                    console.log(res.data);
+                }
+                else{
+                    setLineas(prueba.sort(function(a, b){
+                        if(a.tarea.prioridad < b.tarea.prioridad){
+                            return 1;
+                        }
+                        if(a.tarea.prioridad > b.tarea.prioridad){
+                            return -1;
+                        }
+                        return 0;
+                    }))
+                    if(prueba && prueba.length===0){
+                        const uniqueTarea = res.data.filter(unique)
+                        setLineas(uniqueTarea);
                     }
-                    if(a.tarea.prioridad > b.tarea.prioridad){
-                        return -1;
-                    }
-                    return 0;
-                }))
-                if(prueba && prueba.length===0){
-                    const uniqueTarea = res.data.filter(unique)
-                    setLineas(uniqueTarea);
                 }
             }
             else{
