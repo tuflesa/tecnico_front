@@ -60,7 +60,14 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
               }
         })
         .then( res => {
-            setEmpresas(res.data);
+            if(user['tec-user'].perfil.empresa.id===1){
+                console.log('filtramos');
+                const empresas_2 = res.data.filter( s => s.id !== 2);
+                setEmpresas(empresas_2);
+            }
+            else{
+                setEmpresas(res.data);
+            }
         })
         .catch( err => {
             console.log(err);
@@ -193,6 +200,15 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
         })
     }
 
+    const BorAndCom = () => {
+        if(user['tec-user'].perfil.empresa.id===1){    
+            return false;
+        }
+        else{
+            return true;
+        }
+    }
+
     return (
         <Container className="mt-5">
             <h5 className="mt-5">Filtro</h5>
@@ -225,7 +241,7 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
                                         value={datos.empresa}
                                         onChange={handleInputChange}
                                         placeholder="Empresa"
-                                        disabled={user['tec-user'].perfil.empresa.id?true:false}>
+                                        disabled={BorAndCom()}>
                                         <option key={0} value={''}>Todas</option>    
                                         {empresas && empresas.map( empresa => {
                                             return (
