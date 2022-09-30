@@ -14,17 +14,28 @@ const RepLista = () => {
     const [repuestos, setRepuestos] = useState(null);
     const [show, setShow] = useState(false);
     const [repuestoBorrar, setRepuestoBorrar] = useState(null);
-    const [filtro, setFiltro] = useState(`?descatalogado=${false}`);
+    const [filtro, setFiltro] = useState(null);
+    const [filtroII,setFiltroII] = useState( `?descatalogado=${false}`);
+    const [buscando,setBuscando] = useState(false);
+
     const ExcelFile = ReactExport.ExcelFile;
     const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
     const ExcelColumn = ReactExport.ExcelFile.ExcelColumn;
 
     const actualizaFiltro = str => {
-        setFiltro(str);
+        setFiltroII(str);
     }
 
     useEffect(()=>{
-        if (!show){
+        if (!buscando){
+            setFiltro(filtroII);
+            console.log('filtro actualizado');
+        }
+    },[buscando, filtroII]);
+
+    useEffect(()=>{
+        if (!show && filtro){
+            setBuscando(true);
             axios.get(BACKEND_SERVER + '/api/repuestos/lista/' + filtro,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
@@ -40,6 +51,7 @@ const RepLista = () => {
                     }
                     return 0;
                 }));
+                setBuscando(false);
             })
             .catch( err => {
                 console.log(err);
