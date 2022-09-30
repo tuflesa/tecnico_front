@@ -61,7 +61,7 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
         })
         .then( res => {
             //Si es Bornay, enseñamos Bornay y Comalsid
-            if(user['tec-user'].perfil.empresa.id===1&&user['tec-user'].perfil.puesto.nombre==='Mantenimiento'){
+            if(user['tec-user'].perfil.empresa.id===1&&user['tec-user'].perfil.puesto.nombre!=='Operario'){
                 var empresas_2 = res.data.filter( s => s.id !== 2);
                 setEmpresas(empresas_2);
             }
@@ -194,7 +194,7 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
     }
 
     const Desactivar = () => {
-        if(user['tec-user'].perfil.empresa.id===1&&user['tec-user'].perfil.puesto.nombre==='Mantenimiento'){    
+        if(user['tec-user'].perfil.empresa.id===1&&user['tec-user'].perfil.puesto.nombre!=='Operario'){    
             return false;
         }
         else{

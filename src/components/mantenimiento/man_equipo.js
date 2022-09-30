@@ -81,7 +81,7 @@ const ManPorEquipos = () => {
         })
         .then( res => {
             setlineasTrabajadores(res.data);
-            ColorLinea();
+            //ColorLinea();
         })
         .catch( err => {
             console.log(err);
@@ -312,21 +312,21 @@ const ManPorEquipos = () => {
         setShow(false);
     }
 
-    const ColorLinea = (l) =>{
+    /* const ColorLinea = (l) =>{
         //si la linea la he cogido yo pintamos de verde
-        /* for(var x=0; x<=lineasTrabajadores.length; x++){
+        for(var x=0; x<=lineasTrabajadores.length; x++){
             if(lineasTrabajadores[x].linea===l){
                 if(lineasTrabajadores[x].trabajador===user['tec-user'].perfil.usuario){
                     console.log('coincide linea y trabajador');
                 }
             }
-        } */
+        }
         console.log('lineas de trabajadores');
         console.log(lineasTrabajadores[0].linea);
         console.log(l);
         console.log(user['tec-user'].perfil.usuario);
         //si la linea la ha cogido un compañero, se pinta de rojo
-    }
+    } */
 
     return(
         <Container class extends className="pt-1 mt-5">
@@ -363,7 +363,7 @@ const ManPorEquipos = () => {
                         <tbody>
                             {lineas && lineas.map( linea => {
                                 return (
-                                    <tr key={linea.id} className = {linea.fecha_inicio?(ColorLinea(linea.id)) /* "table-danger" */ :" "}>
+                                    <tr key={linea.id} className = {linea.fecha_inicio?/* (ColorLinea(linea.id)) */ "table-danger" :" "}>
                                         <td>{linea.tarea.prioridad}</td>
                                         <td>{invertirFecha(linea.fecha_plan)}</td>
                                         <td>{linea.tarea.nombre}</td>

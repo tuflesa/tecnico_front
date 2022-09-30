@@ -123,7 +123,14 @@ const ParteForm = ({parte, setParte, op}) => {
             }
         })
         .then( res => {
-            setEmpresas(res.data);
+            //Si es Bornay, enseñamos Bornay y Comalsid
+            if(user['tec-user'].perfil.empresa.id===1&&user['tec-user'].perfil.puesto.nombre==='Mantenimiento'){
+                var empresas_2 = res.data.filter( s => s.id !== 2);
+                setEmpresas(empresas_2);
+            }
+            else{
+                setEmpresas(res.data);
+            }
         })
         .catch( err => {
             console.log(err);
@@ -345,7 +352,7 @@ const ParteForm = ({parte, setParte, op}) => {
     }
     
     const handleDisabled2 = () => {
-        return user['tec-user'].perfil.puesto.nombre==='Mantenimiento'
+        return false; //user['tec-user'].perfil.puesto.nombre==='Mantenimiento'
     }
 
     
