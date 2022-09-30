@@ -264,7 +264,6 @@ const ParteForm = ({parte, setParte, op}) => {
                     var array = [''];
                     array = res.data.filter(o => hash[o.tarea.id] ? false : hash[o.tarea.id] = true);
                     setLineas(array);
-                    console.log(res.data);
                 }
                 else{
                     setLineas(prueba.sort(function(a, b){
@@ -806,7 +805,8 @@ const ParteForm = ({parte, setParte, op}) => {
                                                 value={datos.fecha_finalizacion}
                                                 onChange={handleInputChangeFecha_fin} 
                                                 placeholder="Fecha Finalización" 
-                                                disabled = {handleDisabledMantenimiento()}/>
+                                                /* disabled = {handleDisabledMantenimiento()} */
+                                                disabled={true}/>
                                 </Form.Group>
                             </Col>             
                         </Row>                          

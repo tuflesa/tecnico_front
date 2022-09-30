@@ -49,7 +49,7 @@ const PedidoForm = ({pedido, setPedido}) => {
         creado_por: pedido ? pedido.creado_por.get_full_name : '',
         fecha_creacion: pedido ? pedido.fecha_creacion : (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
         fecha_entrega: pedido ? pedido.fecha_entrega : null,
-        fecha_prevista_entrega: pedido ? pedido.fecha_prevista_entrega : (hoy.getFullYear() + '-'+String(hoy.getMonth()+2).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
+        fecha_prevista_entrega: pedido ? pedido.fecha_prevista_entrega : (hoy.getFullYear() + '-'+String(hoy.getMonth()+2).padStart(2,'0') + '-' + String(hoy.getDate()===31?(hoy.getDate()-1):(hoy.getDate())).padStart(2,'0')),
         finalizado: pedido ? pedido.finalizado : false,
         lineas_pedido: pedido ? pedido.lineas_pedido : null,
         lineas_adicionales: pedido ? pedido.lineas_adicionales : null,
@@ -60,6 +60,7 @@ const PedidoForm = ({pedido, setPedido}) => {
     });
 
     useEffect(()=>{
+        console.log(datos.fecha_prevista_entrega);
         axios.get(BACKEND_SERVER + `/api/repuestos/proveedor/`, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
