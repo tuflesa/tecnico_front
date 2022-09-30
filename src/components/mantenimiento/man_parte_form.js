@@ -956,7 +956,7 @@ const ParteForm = ({parte, setParte, op}) => {
                                         <th>Observaciones</th>
                                         {datos.tipo===1? <th>Tipo Periodo</th>:null}
                                         {datos.tipo===1?<th>Cantidad Periodos</th>:null}
-                                        {(user['tec-user'].perfil.puesto.nombre ==='Técnico')? 
+                                        {(user['tec-user'].perfil.puesto.nombre !=='Operario')? 
                                         <th>Acciones</th>
                                         :null}
                                     </tr>
@@ -972,7 +972,7 @@ const ParteForm = ({parte, setParte, op}) => {
                                                 {datos.tipo===1 && linea.tarea.tipo_periodo? 
                                                     <td>{linea.tarea.tipo_periodo.nombre}</td>:''}
                                                 {datos.tipo===1?<td>{linea.tarea.periodo}</td>:''}
-                                                {(user['tec-user'].perfil.puesto.nombre ==='Técnico')? 
+                                                {(user['tec-user'].perfil.puesto.nombre !=='Operario')? 
                                                     <td>                                            
                                                         <Receipt className="mr-3 pencil" onClick={event =>{listarLineasTareas(linea.tarea)}}/>
                                                         <Link to={`/mantenimiento/linea_tarea/${linea.id}`}><PencilFill className="mr-3 pencil"/></Link> 
