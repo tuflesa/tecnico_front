@@ -805,7 +805,8 @@ const ParteForm = ({parte, setParte, op}) => {
                                                 value={datos.fecha_finalizacion}
                                                 onChange={handleInputChangeFecha_fin} 
                                                 placeholder="Fecha Finalización" 
-                                                disabled = {handleDisabledMantenimiento()}/>
+                                                /* disabled = {handleDisabledMantenimiento()} */
+                                                disabled={true}/>
                                 </Form.Group>
                             </Col>             
                         </Row>                          

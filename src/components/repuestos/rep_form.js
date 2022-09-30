@@ -314,11 +314,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             format: "ean13",
             flat: true,
             height: 60,
-            // width: 1.2,
             fontSize: 16,
-            //text: datos.id + ' - ' + datos.nombre
-            //text: datos.id + ' - ' + descripcion
-            //text: Barcode.data
           }            
         }); 
         return <svg id="barcode-canvas" ref={inputRef}/>;
@@ -331,12 +327,10 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         }
         else {descripcion = datos.nombre;}
         var container = document.getElementById('barcode');
-        // var mySVG = document.getElementById("barcode-canvas");
-        var width = "90%";
-        var height = "90%";
-        var printWindow = window.open('', 'PrintMap',
-        'width=' + width + ',height=' + height);
-        printWindow.document.writeln('<center>'+container.innerHTML + '</br>' + datos.id + '-' + descripcion + '</center>');
+        var width = "100%";
+        var height = "100%";
+        var printWindow = window.open('', 'PrintMap','width=' + width + ',height=' + height);
+        printWindow.document.writeln(/* '<img src="%PUBLIC_URL%/GB.jpg" alt="Grupo Bornay"/>' */'<center>'+'Grupo Bornay'+'</br>'+container.innerHTML + '</br>' + datos.id + '-' + descripcion + '</center>');
         printWindow.document.close();
         printWindow.print();
         printWindow.close();

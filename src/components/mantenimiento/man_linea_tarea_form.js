@@ -279,7 +279,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                                                 value={datos.fecha_fin}
                                                 onChange={handleInputChange} 
                                                 placeholder="Fecha Fin"
-                                                disabled='true'/>
+                                                /* disabled='true' *//>
                                 </Form.Group>
                             </Col> 
                         </Row>                                    

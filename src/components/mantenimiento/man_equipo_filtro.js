@@ -13,12 +13,12 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
     const [zonas, setZonas] = useState(null);
     const [equipos, setEquipos] = useState(null);
     const [tipotarea, setTipoTarea] = useState(null);
-
+    
     var fecha_hoy=Date.parse(new Date);
     var mesEnMilisegundos = 1000 * 60 * 60 * 24 * 7;  //cambiado a una semana, en vez del mes
     var enunmes=fecha_hoy+mesEnMilisegundos;
     var dentrodeunmes = new Date(enunmes);
-    var fechaenunmesString = dentrodeunmes.getFullYear() + '-' + ('0' + (dentrodeunmes.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunmes.getDate()).slice(-2);  
+    var fechaenunmesString = dentrodeunmes.getFullYear() + '-' + ('0' + (dentrodeunmes.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunmes.getDate()).slice(-2); 
 
     const [datos, setDatos] = useState({
         id: '',
@@ -60,9 +60,9 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
               }
         })
         .then( res => {
-            if(user['tec-user'].perfil.empresa.id===1){
-                console.log('filtramos');
-                const empresas_2 = res.data.filter( s => s.id !== 2);
+            //Si es Bornay, enseñamos Bornay y Comalsid
+            if(user['tec-user'].perfil.empresa.id===1&&user['tec-user'].perfil.puesto.nombre==='Mantenimiento'){
+                var empresas_2 = res.data.filter( s => s.id !== 2);
                 setEmpresas(empresas_2);
             }
             else{
@@ -193,15 +193,8 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
         })
     }
 
-    const handleInputChangeE = (event) => {
-        setDatos({
-            ...datos,
-            [event.target.name] : event.target.value
-        })
-    }
-
-    const BorAndCom = () => {
-        if(user['tec-user'].perfil.empresa.id===1){    
+    const Desactivar = () => {
+        if(user['tec-user'].perfil.empresa.id===1&&user['tec-user'].perfil.puesto.nombre==='Mantenimiento'){    
             return false;
         }
         else{
@@ -241,8 +234,8 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
                                         value={datos.empresa}
                                         onChange={handleInputChange}
                                         placeholder="Empresa"
-                                        disabled={BorAndCom()}>
-                                        <option key={0} value={''}>Todas</option>    
+                                        disabled={Desactivar()}>
+                                        {/* <option key={0} value={''}>Todas</option>  */}   
                                         {empresas && empresas.map( empresa => {
                                             return (
                                             <option key={empresa.id} value={empresa.id}>

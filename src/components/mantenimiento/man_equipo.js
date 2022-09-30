@@ -18,6 +18,7 @@ const ManPorEquipos = () => {
     const [hoy] = useState(new Date);
     const [show, setShow] = useState(false);
     const [linea_id, setLinea_id] = useState(null);
+    const [lineasTrabajadores, setlineasTrabajadores] = useState(null);
     
 
     var dentrodeunmes=null;
@@ -42,13 +43,16 @@ const ManPorEquipos = () => {
         trabajador: user['tec-user'].perfil.usuario,
     });
     
-    useEffect(()=>{        
+    useEffect(()=>{ 
         axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_activas/`+ filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
                 }
         })
         .then( res => {
+            if(user['tec-user'].perfil.empresa.id===1){
+                console.log('es todas');
+            }
             //filtramos los trabajos que sean de nuestras destrezas
             var MisTrabajos;
             var destrezas = user['tec-user'].perfil.destrezas;
@@ -68,6 +72,21 @@ const ManPorEquipos = () => {
             console.log(err);
         });
     }, [token, filtro]); 
+
+    useEffect(()=>{
+        axios.get(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea_filtro/`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+                }
+        })
+        .then( res => {
+            setlineasTrabajadores(res.data);
+            ColorLinea();
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
 
     const updateTarea = () => {
         axios.get(BACKEND_SERVER + '/api/mantenimiento/listado_lineas_activas/'+ filtro,{
@@ -124,7 +143,7 @@ const ManPorEquipos = () => {
                           }     
                     })
                     .then( ress => {
-                        updateTarea(); 
+                        updateTarea();
                     })
                     .catch(err => { console.log(err);})
                     updateTarea();
@@ -293,6 +312,22 @@ const ManPorEquipos = () => {
         setShow(false);
     }
 
+    const ColorLinea = (l) =>{
+        //si la linea la he cogido yo pintamos de verde
+        /* for(var x=0; x<=lineasTrabajadores.length; x++){
+            if(lineasTrabajadores[x].linea===l){
+                if(lineasTrabajadores[x].trabajador===user['tec-user'].perfil.usuario){
+                    console.log('coincide linea y trabajador');
+                }
+            }
+        } */
+        console.log('lineas de trabajadores');
+        console.log(lineasTrabajadores[0].linea);
+        console.log(l);
+        console.log(user['tec-user'].perfil.usuario);
+        //si la linea la ha cogido un compañero, se pinta de rojo
+    }
+
     return(
         <Container class extends className="pt-1 mt-5">
             <Row class extends>                
@@ -328,7 +363,7 @@ const ManPorEquipos = () => {
                         <tbody>
                             {lineas && lineas.map( linea => {
                                 return (
-                                    <tr key={linea.id} className = {linea.fecha_inicio?"table-danger":" "}>
+                                    <tr key={linea.id} className = {linea.fecha_inicio?(ColorLinea(linea.id)) /* "table-danger" */ :" "}>
                                         <td>{linea.tarea.prioridad}</td>
                                         <td>{invertirFecha(linea.fecha_plan)}</td>
                                         <td>{linea.tarea.nombre}</td>
