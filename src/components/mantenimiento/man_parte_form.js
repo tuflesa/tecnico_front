@@ -363,13 +363,31 @@ const ParteForm = ({parte, setParte, op}) => {
         })  
     }
 
-    const handleInputChangeFecha_fin = (event) => {
+    /* lo hemos sustituido por handleFinalizar que ya estaba hecho
+        const handleInputChangeFecha_fin = (event) => {
         datos.estado='';
+        console.log(lineas);
+        //revisamos las lineas para avisar que vamos a cerrar lineas no inicializadas o no finalizadas.
+        for(var x=0;x<lineas.length;x++){
+            if(null===lineas[x].fecha_inicio){
+                console.log('la fecha de inicio y fin es nula');
+                break;
+            }
+            if(null===lineas[x].fecha_finalizacion){
+                var Finalizar_Tarea = window.confirm('Vas a finalizar el parte completo ¿Desea continuar?');
+                break;
+            }
+            else{
+                if(null===lineas[x].fecha_finalizacion){
+                    console.log('a entrado en el else, todo estaba finalizado?????');
+                }
+            }
+        }
         setDatos({
             ...datos,
             [event.target.name] : event.target.value
         })  
-    }
+    } */
 
     const handleFinalizar = (event) => {
         var Finalizar_Tarea = window.confirm('Vas a finalizar el parte completo ¿Desea continuar?');
@@ -412,7 +430,6 @@ const ParteForm = ({parte, setParte, op}) => {
             .then( res => {
                 for(var x=0; x<res.data.length; x++){
                     if(res.data[x].estado===3){
-                        console.log('estado 3');
                     }
                     else{
                         axios.patch(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_trabajo/${res.data[x].id}/`,{
@@ -433,7 +450,8 @@ const ParteForm = ({parte, setParte, op}) => {
                 }
             })
             .catch(err => { 
-                console.log(err);})
+                console.log(err);
+            })
         }
         if(!Finalizar_Tarea){
             setDatos({
@@ -692,9 +710,9 @@ const ParteForm = ({parte, setParte, op}) => {
         });                 
     }
 
-    /* const handleDisabled = () => {
+    const handleDisabled = () => {
         return (user['tec-user'].perfil.puesto.nombre==='Mantenimiento')
-    } */
+    }
 
     const handleDisabledMantenimiento = () => {
         return (user['tec-user'].perfil.puesto.nombre==='Mantenimiento')
@@ -810,10 +828,10 @@ const ParteForm = ({parte, setParte, op}) => {
                                     <Form.Control type="date" 
                                                 name='fecha_finalizacion' 
                                                 value={datos.fecha_finalizacion}
-                                                onChange={handleInputChangeFecha_fin} 
+                                                onChange={handleFinalizar} 
                                                 placeholder="Fecha Finalización" 
-                                                /* disabled = {handleDisabledMantenimiento()} */
-                                                disabled={true}/>
+                                                disabled = {handleDisabledMantenimiento()}
+                                                /* disabled={true} *//>
                                 </Form.Group>
                             </Col>             
                         </Row>                          
