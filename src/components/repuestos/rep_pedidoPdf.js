@@ -119,7 +119,7 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
         section6: {
             margin: 5,
             padding: 5,
-            flex: 6,
+            flex: 8,
             flexDirection: "column",
             fontSize: 10,
         },
