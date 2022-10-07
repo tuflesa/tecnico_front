@@ -9,12 +9,16 @@ import ManLineasFiltro from './man_lineas_filtro';
 import { color, filter } from 'd3';
 import {invertirFecha} from '../utilidades/funciones_fecha';
 import ListaDePersonal from './man_equipo_trabajadores';
+import ReactExport from 'react-data-export';
 
 
 const ManLineasListado = () => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
     const [lineas, setLineas] = useState(null);
+    const ExcelFile = ReactExport.ExcelFile;
+    const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
+    const ExcelColumn = ReactExport.ExcelFile.ExcelColumn;
     //const [lineas_finalizadas, setLineasFinalizadas] = useState(null);
     //const [hoy] = useState(new Date);
     var fecha_hoy=Date.parse(new Date);
@@ -40,6 +44,15 @@ const ManLineasListado = () => {
                 }
         })
         .then( res => {
+            res.data.map( r => {
+            //solo para poder utilizar los campos en el excel
+                r['nom_parte']=r.parte.nombre;
+                r['nom_tarea']=r.tarea.nombre;
+                r['parte_tip']=r.parte.tipo_nombre;
+                r['especial']=r.tarea.especialidad_nombre;
+                r['fecha_ini']=r.fecha_inicio?invertirFecha(String(r.fecha_inicio)):'';
+                r['fecha_plani']=r.fecha_plan?invertirFecha(String(r.fecha_plan)):'';
+            })
             //variable para filtrar en Activos las 2 opciones
             if(activos===''){
                 //listaFil recoge toda las lineas para luego filtrarlas.
@@ -73,7 +86,7 @@ const ManLineasListado = () => {
                     return 0;
                 }))
             }
-        })
+        })        
         .catch( err => {
             console.log(err);
         });
@@ -180,6 +193,19 @@ const ManLineasListado = () => {
                     <ManLineasFiltro actualizaFiltro={actualizaFiltro}/>
                 </Col>
             </ Row>
+            <Row> 
+                    <Col><h5>{lineas?lineas.prioridad:''}</h5></Col>
+                    <ExcelFile filename={"ExcelExportExample"} element={<button>Exportar a Excel</button>}>
+                        <ExcelSheet data={lineas} name="lineas">
+                            <ExcelColumn label="Id" value="id"/>
+                            <ExcelColumn label="Tarea" value="nom_tarea"/>
+                            <ExcelColumn label="Tipo" value="parte_tip"/>
+                            <ExcelColumn label="Especialidad" value="especial"/>
+                            <ExcelColumn label="fecha planificación" value="fecha_plani"/>
+                            <ExcelColumn label="fecha inicio" value="fecha_ini"/>                     
+                        </ExcelSheet>
+                    </ExcelFile> 
+                </Row>
             <Row>                
                 <Col>
                     <h5 className="mb-3 mt-3">Listado de Trabajos</h5>                    
