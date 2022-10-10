@@ -52,6 +52,7 @@ const ManLineasListado = () => {
                 r['especial']=r.tarea.especialidad_nombre;
                 r['fecha_ini']=r.fecha_inicio?invertirFecha(String(r.fecha_inicio)):'';
                 r['fecha_plani']=r.fecha_plan?invertirFecha(String(r.fecha_plan)):'';
+                r['equipoT']=r.parte.seccion?r.parte.seccion.siglas_zona +' - '+r.parte.seccion.nombre + (r.parte.equipo?' - ' + r.parte.equipo.nombre:''):null
             })
             //variable para filtrar en Activos las 2 opciones
             if(activos===''){
@@ -201,8 +202,9 @@ const ManLineasListado = () => {
                             <ExcelColumn label="Tarea" value="nom_tarea"/>
                             <ExcelColumn label="Tipo" value="parte_tip"/>
                             <ExcelColumn label="Especialidad" value="especial"/>
+                            <ExcelColumn label="Equipo" value="equipoT"/>  
                             <ExcelColumn label="fecha planificación" value="fecha_plani"/>
-                            <ExcelColumn label="fecha inicio" value="fecha_ini"/>                     
+                            <ExcelColumn label="fecha inicio" value="fecha_ini"/>        
                         </ExcelSheet>
                     </ExcelFile> 
                 </Row>
