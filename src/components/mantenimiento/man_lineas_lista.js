@@ -47,9 +47,12 @@ const ManLineasListado = () => {
             res.data.map( r => {
             //solo para poder utilizar los campos en el excel
                 r['nom_parte']=r.parte.nombre;
+                r['obparte']=r.parte.observaciones;
                 r['nom_tarea']=r.tarea.nombre;
+                r['obtarea']=r.tarea.observaciones;
                 r['parte_tip']=r.parte.tipo_nombre;
                 r['especial']=r.tarea.especialidad_nombre;
+                r['priori']=r.tarea.prioridad;
                 r['fecha_ini']=r.fecha_inicio?invertirFecha(String(r.fecha_inicio)):'';
                 r['fecha_plani']=r.fecha_plan?invertirFecha(String(r.fecha_plan)):'';
                 r['equipoT']=r.parte.seccion?r.parte.seccion.siglas_zona +' - '+r.parte.seccion.nombre + (r.parte.equipo?' - ' + r.parte.equipo.nombre:''):null
@@ -198,13 +201,16 @@ const ManLineasListado = () => {
                     <Col><h5>{lineas?lineas.prioridad:''}</h5></Col>
                     <ExcelFile filename={"ExcelExportExample"} element={<button>Exportar a Excel</button>}>
                         <ExcelSheet data={lineas} name="lineas">
-                            <ExcelColumn label="Id" value="id"/>
+                            <ExcelColumn label="Prioridad" value="priori"/>
+                            <ExcelColumn label="Parte" value="nom_parte"/>
+                            <ExcelColumn label="Observaciones Parte" value="obparte"/>
                             <ExcelColumn label="Tarea" value="nom_tarea"/>
+                            <ExcelColumn label="Observaciones Tarea" value="obtarea"/>
                             <ExcelColumn label="Tipo" value="parte_tip"/>
                             <ExcelColumn label="Especialidad" value="especial"/>
                             <ExcelColumn label="Equipo" value="equipoT"/>  
-                            <ExcelColumn label="fecha planificación" value="fecha_plani"/>
-                            <ExcelColumn label="fecha inicio" value="fecha_ini"/>        
+                            <ExcelColumn label="Fecha Planificación" value="fecha_plani"/>
+                            <ExcelColumn label="Fecha Inicio" value="fecha_ini"/>        
                         </ExcelSheet>
                     </ExcelFile> 
                 </Row>
