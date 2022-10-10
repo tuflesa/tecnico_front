@@ -363,32 +363,6 @@ const ParteForm = ({parte, setParte, op}) => {
         })  
     }
 
-    /* lo hemos sustituido por handleFinalizar que ya estaba hecho
-        const handleInputChangeFecha_fin = (event) => {
-        datos.estado='';
-        console.log(lineas);
-        //revisamos las lineas para avisar que vamos a cerrar lineas no inicializadas o no finalizadas.
-        for(var x=0;x<lineas.length;x++){
-            if(null===lineas[x].fecha_inicio){
-                console.log('la fecha de inicio y fin es nula');
-                break;
-            }
-            if(null===lineas[x].fecha_finalizacion){
-                var Finalizar_Tarea = window.confirm('Vas a finalizar el parte completo ¿Desea continuar?');
-                break;
-            }
-            else{
-                if(null===lineas[x].fecha_finalizacion){
-                    console.log('a entrado en el else, todo estaba finalizado?????');
-                }
-            }
-        }
-        setDatos({
-            ...datos,
-            [event.target.name] : event.target.value
-        })  
-    } */
-
     const handleFinalizar = (event) => {
         var Finalizar_Tarea = window.confirm('Vas a finalizar el parte completo ¿Desea continuar?');
         if(Finalizar_Tarea){
@@ -405,7 +379,7 @@ const ParteForm = ({parte, setParte, op}) => {
             }
             else{
                 estado2=3;
-                fecha_f= (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0'));
+                fecha_f= datos.fecha_finalizacion;
             }
             axios.patch(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${parte.id}/`,{
                 fecha_finalizacion : fecha_f,
@@ -622,6 +596,10 @@ const ParteForm = ({parte, setParte, op}) => {
             if(parte.fecha_prevista_inicio!==datos.fecha_prevista_inicio){
                 actualizarLinea();
             }
+            //si he puesto fecha de finalización, finalizamos todo el parte completo
+            if(parte.fecha_finalizacion!==datos.fecha_finalizacion){
+                handleFinalizar();
+            }
             setParte(res.data); 
             updateParte();   
         })
@@ -828,7 +806,7 @@ const ParteForm = ({parte, setParte, op}) => {
                                     <Form.Control type="date" 
                                                 name='fecha_finalizacion' 
                                                 value={datos.fecha_finalizacion}
-                                                onChange={handleFinalizar} 
+                                                onChange={handleInputChange} 
                                                 placeholder="Fecha Finalización" 
                                                 disabled = {handleDisabledMantenimiento()}
                                                 /* disabled={true} *//>
