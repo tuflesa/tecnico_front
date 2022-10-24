@@ -10,6 +10,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
     const [token] = useCookies(['tec-token']);
     const [estados, setEstados] = useState(null);
     const [tipo_periodo, setTipoPeriodo] = useState(null);
+    const [user] = useCookies(['tec-user']);
 
     const [datos, setDatos] = useState({
         id: linea_tarea.id,
@@ -17,6 +18,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
         especialidad: linea_tarea.tarea.especialidad_nombre,
         prioridad: linea_tarea.tarea.prioridad,
         observaciones: linea_tarea.tarea.observaciones,
+        observaciones_trab: linea_tarea.tarea.observaciones_trab,
         fecha_plan: linea_tarea.fecha_plan,
         fecha_inicio: linea_tarea.fecha_inicio,
         fecha_fin: linea_tarea.fecha_fin,
@@ -97,10 +99,12 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
         else if(datos.fecha_plan!==null){datos.estado=1;}
         else if(datos.fecha_plan===null){datos.estado=4;}
         event.preventDefault(); 
+        console.log(datos);
         axios.patch(BACKEND_SERVER + `/api/mantenimiento/tarea_nueva/${linea_tarea.tarea.id}/`, {
             nombre: datos.nombre,
             prioridad: datos.prioridad,
             observaciones: datos.observaciones,
+            observaciones_trab: datos.observaciones_trab,
             tipo_periodo: datos.tipo_periodo,
             periodo: datos.periodo,
             fecha_plan: datos.fecha_plan,
@@ -126,6 +130,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                 datos.especialidad='';
                 datos.prioridad='';
                 datos.observaciones='';
+                datos.observaciones_trab='';
                 datos.fecha_plan=null;
                 datos.fecha_inicio=null;
                 datos.fecha_fin=null;
@@ -134,6 +139,10 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
             .catch(err => { console.log(err);})
         })
         .catch(err => { console.log(err);})
+    }
+
+    const handleDisabledObservaciones = () => {
+        return (user['tec-user'].perfil.puesto.nombre!=='Director Técnico')
     }
 
     return (
@@ -286,16 +295,30 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                         <Row>                            
                             <Col>
                                 <Form.Group id="observaciones">
-                                    <Form.Label>Observaciones</Form.Label>
+                                    <Form.Label>Observaciones Técnico</Form.Label>
                                     <Form.Control as="textarea" rows={3}
                                                 name='observaciones' 
                                                 value={datos.observaciones}
                                                 onChange={handleInputChange} 
                                                 placeholder="Observaciones"
+                                                disabled={handleDisabledObservaciones()}
                                     />
                                 </Form.Group>
                             </Col>
-                        </Row>                     
+                        </Row> 
+                        <Row>                            
+                            <Col>
+                                <Form.Group id="observaciones_trab">
+                                    <Form.Label>Observaciones Personal Mantenmiento</Form.Label>
+                                    <Form.Control as="textarea" rows={3}
+                                                name='observaciones_trab' 
+                                                value={datos.observaciones_trab}
+                                                onChange={handleInputChange} 
+                                                placeholder="Observaciones_trab"
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>                    
                         <Form.Row className="justify-content-center">
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button>
                                 <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar</Button>
