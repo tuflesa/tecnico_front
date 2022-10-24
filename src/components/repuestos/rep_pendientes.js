@@ -34,17 +34,7 @@ const RepPendientes = () => {
               }
         })
         .then( res => { 
-            setPendientes(res.data);
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    }, [token]);  
-    
-    useEffect(() =>{
-        //Ordena el listado de los repuestos por debajo del stock mínimo
-        if (pendientes){
-            pendientes.sort(function(a, b){
+            setPendientes(res.data.sort(function(a, b){
                 if(a.repuesto.nombre > b.repuesto.nombre){
                     return 1;
                 }
@@ -52,10 +42,13 @@ const RepPendientes = () => {
                     return -1;
                 }
                 return 0;
-            })
-        }
-    }, [pendientes]);
-    
+            }));
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);  
+     
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/repuestos/lista_pedidos/` + filtro,{
             headers: {
