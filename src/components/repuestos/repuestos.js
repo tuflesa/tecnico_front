@@ -17,6 +17,7 @@ import RepSalidasGenerico from './rep_salidas_generico';
 import RepSalidasID from './rep_salidas_id';
 import RepPendientes from './rep_pendientes';
 import RepInventario from './rep_inventario';
+import RepTraspasoAlmacen from './rep_traspaso_almacen';
 
 const Repuestos = () => {
     
@@ -25,6 +26,7 @@ const Repuestos = () => {
             <RepNavBar />
             <Switch>
                 <Route path='/repuestos' exact component={RepPendientes} />
+                <Route path='/repuestos/traspasos' component={RepTraspasoAlmacen} /> 
                 <Route path='/repuestos/inventario' component={RepInventario} /> 
                 <Route path='/repuestos/listado' component={RepLista} />
                 <Route path='/repuestos/pedidos' component={PedLista} /> 

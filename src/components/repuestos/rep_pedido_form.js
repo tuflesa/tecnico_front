@@ -60,7 +60,6 @@ const PedidoForm = ({pedido, setPedido}) => {
     });
 
     useEffect(()=>{
-        console.log(datos.fecha_prevista_entrega);
         axios.get(BACKEND_SERVER + `/api/repuestos/proveedor/`, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`

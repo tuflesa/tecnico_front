@@ -29,7 +29,6 @@ const RepLista = () => {
     useEffect(()=>{
         if (!buscando){
             setFiltro(filtroII);
-            console.log('filtro actualizado');
         }
     },[buscando, filtroII]);
 
