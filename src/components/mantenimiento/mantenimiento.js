@@ -12,6 +12,7 @@ import ManNotificacionesLista from './man_notificaciones_lista';
 import ManNotificacionDetalle from './man_notificacion_editar';
 import ManPendientes from './man_pendientes';
 import ManParteDetalleOp from './man_parte_editar_op';
+import TareasTrabajador from './man_tareas_trabajador';
 
 const Mantenimiento = () => {
     
@@ -20,6 +21,7 @@ const Mantenimiento = () => {
             <ManNavBar />
             <Switch>
                 <Route path='/mantenimiento/parte_op/:id' component={ManParteDetalleOp} />
+                <Route path='/mantenimiento/tareas_trabajador' component={TareasTrabajador} />
                 <Route path='/mantenimiento/linea_tarea/:id' component={ManLineaDetalle} /> 
                 <Route path='/mantenimiento/parte/nuevo' component={ManParteNuevo} /> 
                 <Route path='/mantenimiento/notificaciones' component={ManNotificacionesLista} />                  

@@ -30,6 +30,7 @@ const ManNavBar = () => {
                                         <NavDropdown.Divider />
                                         <NavDropdown.Item href="/mantenimiento/listado_tareas">Lista de Tareas</NavDropdown.Item>
                                         <NavDropdown.Item href="/mantenimiento/listado_tarea">Mis Tareas</NavDropdown.Item>
+                                        <NavDropdown.Item href="/mantenimiento/tareas_trabajador">Filtro por Trabajador</NavDropdown.Item>
                                         <NavDropdown.Divider />
                                         <NavDropdown.Item href="/mantenimiento/partes">Lista de Partes</NavDropdown.Item>
                                         <NavDropdown.Item href="/mantenimiento/parte/nuevo">Nuevo Parte</NavDropdown.Item> 
