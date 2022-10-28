@@ -158,7 +158,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                 return 0;
             })
         }
-    }, [proveedores, token]);
+    }, [token]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -177,6 +177,7 @@ const PedidoForm = ({pedido, setPedido}) => {
     const abrirAddLinea =() =>{
         setLineaEtitar(null);
         setShowLinea(true);
+        updatePedido2();
     }
 
     const abrirAddLineaAdi =() =>{
@@ -357,23 +358,21 @@ const PedidoForm = ({pedido, setPedido}) => {
               }     
         })
         .then( res => {
-            /* var ordenLineas=(res.data.lineas_pedido.sort(function(a, b){
-                if(a.id < b.id){
-                    return 1;
-                }
-                if(a.id > b.id){
-                    return -1;
-                }
-                return 0;
-            }))
-            res.data.lineas_pedido = ordenLineas;*/
             setPedido(res.data);
-            /* setPedido({
-                res.data,
-                lineas_pedido :ordenLineas
-            }) */
-
             finalizarPedido(res.data);
+        })
+        .catch(err => { console.log(err);})
+    }
+
+    //Solo necesario para actualizar el id del proveedor para la ficha de proveedor y para buscar articulos por proveedor
+    const updatePedido2 = () => {
+        axios.get(BACKEND_SERVER + `/api/repuestos/pedido_detalle/${pedido.id}/`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => {
+            setPedido(res.data);
         })
         .catch(err => { console.log(err);})
     }
@@ -609,6 +608,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                                     <Form.Label>Ficha Proveedor</Form.Label>
                                 </Row>
                                 <Row>
+                                    {updatePedido2()}
                                     <Link to= {`/repuestos/proveedor/${pedido.proveedor.id}`}>
                                         <Button variant="info" type="submit" >Datos Proveedor</Button>
                                     </Link>
