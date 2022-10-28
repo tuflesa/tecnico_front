@@ -4,11 +4,13 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { locales } from 'moment';
+import BuscarRepuestosPedido from './rep_pedido_linea_buscar';
 
 const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedido, linea}) => {    
     const [token] = useCookies(['tec-token']);
 
     const [repuestos, setRepuestos]= useState(null);
+    const [show_listrepuestos, setShowListRepuestos] = useState(null);
     
     const [datos, setDatos] = useState({  
         repuesto: linea ? linea.repuesto : '',
@@ -41,7 +43,7 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
     },[datos.cantidad, datos.precio, datos.descuento]);
 
     useEffect(()=>{
-        proveedor_id && axios.get(BACKEND_SERVER + `/api/repuestos/lista/?proveedores__id=${proveedor_id}&descatalogado=${false}`, {
+        datos.id && proveedor_id && axios.get(BACKEND_SERVER + `/api/repuestos/lista/?proveedores__id=${proveedor_id}&descatalogado=${false}&id=${datos.id}`, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }     
@@ -58,7 +60,7 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
             }));
         })
         .catch(err => { console.log(err);})
-    },[token, proveedor_id]);
+    },[token, proveedor_id, datos.repuesto]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -132,9 +134,24 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
         else return false
     }
 
+    const abrirListRepuestos = () => {
+        setShowListRepuestos(true);
+    }
+
+    const cerrarListRepuestos = () => {
+        setShowListRepuestos(false);
+    }
+
+    const elegirRepuesto = (r) => { 
+        datos.repuesto=r.id;
+        datos.nombre=r.nombre;
+        datos.modelo=r.modelo;
+        cerrarListRepuestos();      
+    }
+
     return (
         <Modal show={show} backdrop="static" keyboard={ false } animation={false}>
-                <Modal.Header closeButton>  
+                <Modal.Header>  
                 { linea ?               
                     <Modal.Title>Rectificar Linea</Modal.Title> :
                     <Modal.Title>Nueva Linea</Modal.Title>
@@ -144,7 +161,29 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
                     <Form >
                         <Row>
                             <Col>
-                            <Form.Group controlId="repuesto">
+                            
+                            <Button variant="info" tabIndex={1} className={'btn-lg'} autoFocus onClick={event => {abrirListRepuestos()}}>Buscar Repuesto</Button>                 
+                            <Form.Group controlId="nombre">
+                                <Form.Label>Repuesto</Form.Label>
+                                <Form.Control imput type="text"  
+                                            name='nombre' 
+                                            value={datos.nombre}
+                                            onChange={handleInputChange}
+                                            placeholder="Nombre Repuesto"
+                                            disabled>  
+                                </Form.Control>
+                            </Form.Group>
+                            <Form.Group controlId="modelo">
+                                <Form.Label>Modelo Repuesto</Form.Label>
+                                <Form.Control imput type="text"  
+                                            name='modelo' 
+                                            value={datos.modelo}
+                                            onChange={handleInputChange}
+                                            placeholder="Modelo Repuesto"
+                                            disabled>  
+                                </Form.Control>
+                            </Form.Group>
+                            {/* <Form.Group controlId="repuesto">
                                     <Form.Label>Repuesto</Form.Label>
                                     <Form.Control as="select"  
                                                 name='repuesto' 
@@ -163,8 +202,8 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
                                                     )
                                                 })}
                                     </Form.Control>
-                                </Form.Group>
-                                <Form.Group controlId="repuesto">
+                                </Form.Group> */}
+                                {/* <Form.Group controlId="repuesto">
                                     <Form.Label>Modelo</Form.Label>
                                     <Form.Control as="select"  
                                                 name='repuesto' 
@@ -183,14 +222,16 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
                                                     )
                                                 })}
                                     </Form.Control>
-                                </Form.Group>
+                                </Form.Group> */}
                                 <Form.Group controlId="cantidad">
                                     <Form.Label>Cantidad</Form.Label>
                                     <Form.Control imput type="text"  
                                                 name='cantidad' 
                                                 value={datos.cantidad}
                                                 onChange={handleInputChange}
-                                                placeholder="Cantidad">  
+                                                placeholder="Cantidad"
+                                                tabIndex={2}
+                                                >  
                                     </Form.Control>
                                 </Form.Group>
                                 <Form.Group controlId="precio">
@@ -199,7 +240,8 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
                                                 name='precio' 
                                                 value={datos.precio}
                                                 onChange={handleInputChange}
-                                                placeholder="Precio">  
+                                                placeholder="Precio"
+                                                tabIndex={3}>  
                                     </Form.Control>
                                 </Form.Group>
                                 <Form.Group controlId="descuento">
@@ -208,7 +250,9 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
                                                 name='descuento' 
                                                 value={datos.descuento}
                                                 onChange={handleInputChange}
-                                                placeholder="Descuento">  
+                                                placeholder="Descuento"
+                                                tabIndex={4}
+                                                >  
                                     </Form.Control>
                                 </Form.Group>
                             </Col>
@@ -218,12 +262,16 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
                 <Modal.Footer>
                     { linea ?                     
                         <Button variant="info" onClick={handlerEditar}> Editar </Button> :
-                        <Button variant="info" onClick={handlerGuardar}> Guardar </Button>
+                        <Button variant="info" tabIndex={5} onClick={handlerGuardar}> Guardar </Button>
                     }        
-                    <Button variant="waring" onClick={handlerCancelar}>
+                    <Button variant="waring" tabIndex={6} onClick={handlerCancelar}>
                         Cancelar
                     </Button>
                 </Modal.Footer>
+                <BuscarRepuestosPedido      show={show_listrepuestos}
+                                            cerrarListRepuestos={cerrarListRepuestos}
+                                            proveedor_id={proveedor_id}
+                                            elegirRepuesto={elegirRepuesto}/> 
          </Modal>
     );
 }

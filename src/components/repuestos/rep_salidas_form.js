@@ -213,8 +213,6 @@ const RepSalidas = ({alm}) => {
         cerrarListRepuestos();      
     }
 
-
-
     return (
         <Container className="mt-5">
             <Row>                
