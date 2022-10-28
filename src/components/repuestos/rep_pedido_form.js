@@ -40,6 +40,7 @@ const PedidoForm = ({pedido, setPedido}) => {
     const [verIngPdf, setVerIngPdf] = useState(false);
     const [direcciones, setDirecciones]= useState(null);
     const [contactos, setContactos]= useState(null);
+    var total_pedido= 0;
     
     const [datos, setDatos] = useState({
         id: pedido ? pedido.id : null,
@@ -371,6 +372,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                 res.data,
                 lineas_pedido :ordenLineas
             }) */
+
             finalizarPedido(res.data);
         })
         .catch(err => { console.log(err);})
@@ -728,6 +730,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                                                   
                                         <tbody>
                                             {datos.lineas_pedido && datos.lineas_pedido.map( linea => {
+                                                {total_pedido+=Number(linea.total)}
                                                 return (
                                                     <tr key={linea.id}>
                                                         <td>{linea.repuesto.nombre + (linea.repuesto.fabricante? ' - ' + linea.repuesto.fabricante:'') + (linea.repuesto.modelo? ' - ' + linea.repuesto.modelo:'')}</td>
@@ -783,6 +786,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                                                   
                                         <tbody>                                            
                                             {datos.lineas_adicionales && datos.lineas_adicionales.map( lineaAdicional => {
+                                                {total_pedido+=Number(lineaAdicional.total)}
                                                 return (
                                                     <tr key={lineaAdicional.id}>
                                                         <td>{lineaAdicional.descripcion}</td>
@@ -806,7 +810,10 @@ const PedidoForm = ({pedido, setPedido}) => {
                                 </Col>
                             </Form.Row>                                                
                         </React.Fragment> 
-                        : null}                                            
+                        : null}   
+                        <Row>
+                            <h5 className="pb-3 pt-1 mt-2"><strong>Total Pedido: {total_pedido}€</strong></h5>
+                        </Row>                                         
                     </Form>
                 </Col>
             </Row>    
