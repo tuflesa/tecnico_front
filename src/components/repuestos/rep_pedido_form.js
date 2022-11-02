@@ -394,6 +394,11 @@ const PedidoForm = ({pedido, setPedido}) => {
                     datos.fecha_entrega=null;
                     break;
                 } 
+                if(pedido.lineas_adicionales[x].por_recibir>0){
+                    datos.finalizado=false;
+                    datos.fecha_entrega=null;
+                    break;
+                } 
             }
         }
         else{
