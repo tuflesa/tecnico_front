@@ -177,7 +177,6 @@ const PedidoForm = ({pedido, setPedido}) => {
     const abrirAddLinea =() =>{
         setLineaEtitar(null);
         setShowLinea(true);
-        updatePedido2();
     }
 
     const abrirAddLineaAdi =() =>{
@@ -320,6 +319,15 @@ const PedidoForm = ({pedido, setPedido}) => {
         })
         .then( res => { 
             setPedido(res.data);
+            axios.get(BACKEND_SERVER + `/api/repuestos/pedido_detalle/${res.data.id}/`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                  }     
+            })
+            .then( res => {
+                setPedido(res.data);
+            })
+            .catch(err => { console.log(err);})
         })
         .catch(err => { console.log(err);})
     }
@@ -364,19 +372,6 @@ const PedidoForm = ({pedido, setPedido}) => {
         .catch(err => { console.log(err);})
     }
 
-    //Solo necesario para actualizar el id del proveedor para la ficha de proveedor y para buscar articulos por proveedor
-    const updatePedido2 = () => {
-        axios.get(BACKEND_SERVER + `/api/repuestos/pedido_detalle/${pedido.id}/`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }     
-        })
-        .then( res => {
-            setPedido(res.data);
-        })
-        .catch(err => { console.log(err);})
-    }
-
     const updateFinalizado = () => {
         axios.get(BACKEND_SERVER + `/api/repuestos/pedido_detalle/${pedido.id}/`,{
             headers: {
@@ -393,7 +388,13 @@ const PedidoForm = ({pedido, setPedido}) => {
         var x = 0;
         var y = 0;
         if(datos.finalizado===true){
-            console.log('pedido finalizado');
+            for(y=0; y<pedido.lineas_pedido.length;y++){
+                if(pedido.lineas_pedido[y].por_recibir>0){
+                    datos.finalizado=false;
+                    datos.fecha_entrega=null;
+                    break;
+                } 
+            }
         }
         else{
             for(y=0; y<pedido.lineas_pedido.length;y++){
@@ -423,19 +424,20 @@ const PedidoForm = ({pedido, setPedido}) => {
                         datos.fecha_entrega= (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate())
                     }
             }
-            axios.patch(BACKEND_SERVER + `/api/repuestos/pedido/${pedido.id}/`, {
-                finalizado: datos.finalizado, 
-                fecha_entrega: datos.fecha_entrega,           
-            }, {
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                }     
-            })
-            .then( res => {
-                updateFinalizado();
-            })
-            .catch(err => { console.log(err);})
+            
         }
+        axios.patch(BACKEND_SERVER + `/api/repuestos/pedido/${pedido.id}/`, {
+            finalizado: datos.finalizado, 
+            fecha_entrega: datos.fecha_entrega,           
+        }, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }     
+        })
+        .then( res => {
+            updateFinalizado();
+        })
+        .catch(err => { console.log(err);})
     }
 
     
@@ -608,9 +610,8 @@ const PedidoForm = ({pedido, setPedido}) => {
                                     <Form.Label>Ficha Proveedor</Form.Label>
                                 </Row>
                                 <Row>
-                                    {updatePedido2()}
                                     <Link to= {`/repuestos/proveedor/${pedido.proveedor.id}`}>
-                                        <Button variant="info" type="submit" >Datos Proveedor</Button>
+                                        <Button variant="info" type="submit">Datos Proveedor</Button>
                                     </Link>
                                 </Row>
                             </Col>
