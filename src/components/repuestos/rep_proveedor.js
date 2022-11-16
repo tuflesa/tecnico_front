@@ -76,9 +76,28 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
         .then( res => { 
                 updateRepuesto();
                 handlerCancelar();
+                console.log('pintando nuevo proveedor');
+                console.log(newProveedores);
             }
         )
         .catch(err => { console.log(err);});
+        //crear tabla de precios para el articulo del proveedor
+        for(var x=0; x<=newProveedores.length; x++){
+            axios.post(BACKEND_SERVER + `/api/repuestos/precio/`, {
+                proveedor: newProveedores[x],
+                repuesto: repuesto_id,
+                precio: 0,
+            }, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                  }     
+            })
+            .then( res => { 
+                    console.log(res.data);
+                }
+            )
+            .catch(err => { console.log(err);});
+        }
     }
 
     return (

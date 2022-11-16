@@ -285,9 +285,13 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         datos.proveedores && datos.proveedores.forEach( p => {
             if (p.id !== id) {
                 newProveedores.push(p.id);
+                console.log('borrando proveedor');
+                console.log(newProveedores);
             }
         });
-        
+        if(newProveedores.length===0){
+            newProveedores = [];
+        }
         axios.patch(BACKEND_SERVER + `/api/repuestos/lista/${repuesto.id}/`, {
             proveedores: newProveedores
         }, {
