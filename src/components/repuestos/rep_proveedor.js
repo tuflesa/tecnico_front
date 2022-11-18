@@ -76,8 +76,6 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
         .then( res => { 
                 updateRepuesto();
                 handlerCancelar();
-                console.log('pintando nuevo proveedor');
-                console.log(newProveedores);
             }
         )
         .catch(err => { console.log(err);});

@@ -36,9 +36,9 @@ const LineaAdicionalForm = ({show, pedido_id, handleCloseLineaAdicional, updateP
 
     useEffect(()=>{ 
         datos.cantidad=Number.parseFloat(datos.cantidad).toFixed(2);
-        datos.precio=Number.parseFloat(datos.precio).toFixed(2);
+        datos.precio=Number.parseFloat(datos.precio).toFixed(4);
         datos.descuento=Number.parseFloat(datos.descuento).toFixed(2);
-        datos.total = Number.parseFloat((datos.precio*datos.cantidad)-(datos.precio*datos.cantidad*datos.descuento/100)).toFixed(2);
+        datos.total = Number.parseFloat((datos.precio*datos.cantidad)-(datos.precio*datos.cantidad*datos.descuento/100)).toFixed(4);
         //datos.total=Number.parseFloat(datos.total).toFixed(2);
         datos.por_recibir = linea_adicional ? (linea_adicional.por_recibir+(datos.cantidad-linea_adicional.cantidad)) : datos.cantidad;
     },[datos.cantidad, datos.precio, datos.descuento]);

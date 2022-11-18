@@ -57,10 +57,10 @@ const RepPrecio = ()=>{
                 }
             }
             setPrecios(prueba.sort(function(a, b){
-                if(a.proveedor > b.proveedor){
+                if(a.nombre > b.nombre){
                     return 1;
                 }
-                if(a.proveedor < b.proveedor){
+                if(a.nombre < b.nombre){
                     return -1;
                 }
                 return 0;

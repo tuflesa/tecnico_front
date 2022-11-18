@@ -16,17 +16,17 @@ const BuscarRepuestosPedido = ({cerrarListRepuestos, show, proveedor_id, elegirR
     });
 
     useEffect(()=>{
-        filtro && proveedor_id && axios.get(BACKEND_SERVER + `/api/repuestos/lista/?proveedores__id=${proveedor_id}&descatalogado=${false}`+ filtro,{
+        filtro && proveedor_id && axios.get(BACKEND_SERVER + `/api/repuestos/repuesto_precio/?proveedor=${proveedor_id}&repuesto__descatalogado=${false}`+ filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }     
         })
         .then( res => { 
             setRepuestos(res.data.sort(function(a, b){
-                if(a.nombre > b.nombre){
+                if(a.repuesto.nombre > b.repuesto.nombre){
                     return 1;
                 }
-                if(a.nombre < b.nombre){
+                if(a.repuesto.nombre < b.repuesto.nombre){
                     return -1;
                 }
                 return 0;
@@ -47,7 +47,7 @@ const BuscarRepuestosPedido = ({cerrarListRepuestos, show, proveedor_id, elegirR
     }  
     
     useEffect(()=>{
-        const filtro = `?proveedores__id=${proveedor_id}&descatalogado=${false}&nombre__icontains=${datos.nombre}&id=${datos.id}`;
+        const filtro = `?proveedores__id=${proveedor_id}&descatalogado=${false}&repuesto__nombre__icontains=${datos.nombre}&repuesto__id=${datos.id}`;
         actualizaFiltro(filtro);
     },[datos.nombre, datos.id, proveedor_id]);
 
@@ -92,8 +92,8 @@ const BuscarRepuestosPedido = ({cerrarListRepuestos, show, proveedor_id, elegirR
                             <tbody>
                                 {repuestos && repuestos.map( rep => {                                    
                                     return (                                                
-                                        <tr key={rep.id}>
-                                            <td>{rep.nombre}</td> 
+                                        <tr key={rep.repuesto.id}>
+                                            <td>{rep.repuesto.nombre}</td> 
                                             <td>
                                             <ArrowDownCircle className="mr-3 pencil" onClick={event => {elegirRepuesto(rep)}}/>
                                             </td>                                                

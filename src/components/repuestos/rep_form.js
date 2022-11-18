@@ -285,8 +285,6 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         datos.proveedores && datos.proveedores.forEach( p => {
             if (p.id !== id) {
                 newProveedores.push(p.id);
-                console.log('borrando proveedor');
-                console.log(newProveedores);
             }
         });
         if(newProveedores.length===0){
@@ -301,12 +299,37 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         })
         .then( res => { 
                 updateRepuesto();
+                handlerBorrarPrecioProveedor(id);
             }
         )
         .catch(err => { console.log(err);});
     }
 
-    
+    const handlerBorrarPrecioProveedor = (id_prov) => {
+        axios.get(BACKEND_SERVER + `/api/repuestos/repuesto_precio/?repuesto__id=${datos.id}&proveedor=${id_prov}`, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }   
+        })
+        .then( res => { 
+                console.log(res.data);
+                for(var x=0;x<res.data.length;x++){
+                    axios.delete(BACKEND_SERVER + `/api/repuestos/repuesto_precio/${res.data[x].id}`, {
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                        }   
+                    })
+                    .then( res => { 
+                            console.log(res.data);
+                        }
+                    )
+                    .catch(err => { console.log(err);});
+                }
+            }
+        )
+        .catch(err => { console.log(err);});
+    }
+
     function Barcode({datos}) {
         /* var descripcion;
         if(datos.nombre_comun){

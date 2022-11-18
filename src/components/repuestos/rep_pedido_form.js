@@ -818,7 +818,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                         </React.Fragment> 
                         : null}   
                         <Row>
-                            <h5 className="pb-3 pt-1 mt-2"><strong>Total Pedido: {total_pedido}€</strong></h5>
+                            <h5 className="pb-3 pt-1 mt-2"><strong>Total Pedido: {Number.parseFloat(total_pedido).toFixed(2)}€</strong></h5>
                         </Row>                                         
                     </Form>
                 </Col>

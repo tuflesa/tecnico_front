@@ -38,7 +38,7 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
         datos.cantidad=Number.parseFloat(datos.cantidad).toFixed(2);
         datos.precio=Number.parseFloat(datos.precio).toFixed(4);
         datos.descuento=Number.parseFloat(datos.descuento).toFixed(2);
-        datos.total = Number.parseFloat((datos.precio*datos.cantidad)-(datos.precio*datos.cantidad*datos.descuento/100)).toFixed(2);
+        datos.total = Number.parseFloat((datos.precio*datos.cantidad)-(datos.precio*datos.cantidad*datos.descuento/100)).toFixed(4);
         datos.por_recibir = linea ? (linea.por_recibir+(datos.cantidad-linea.cantidad)) : datos.cantidad;     
     },[datos.cantidad, datos.precio, datos.descuento]);
 
@@ -143,9 +143,10 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
     }
 
     const elegirRepuesto = (r) => { 
-        datos.repuesto=r.id;
-        datos.nombre=r.nombre;
-        datos.modelo=r.modelo;
+        datos.repuesto=r.repuesto.id;
+        datos.nombre=r.repuesto.nombre;
+        datos.modelo=r.repuesto.modelo;
+        datos.precio=r.precio;
         cerrarListRepuestos();      
     }
 
@@ -161,68 +162,27 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
                     <Form >
                         <Row>
                             <Col>
-                            
-                            <Button variant="info" tabIndex={1} className={'btn-lg'} autoFocus onClick={event => {abrirListRepuestos()}}>Buscar Repuesto</Button>                 
-                            <Form.Group controlId="nombre">
-                                <Form.Label>Repuesto</Form.Label>
-                                <Form.Control imput type="text"  
-                                            name='nombre' 
-                                            value={datos.nombre}
-                                            onChange={handleInputChange}
-                                            placeholder="Nombre Repuesto"
-                                            disabled>  
-                                </Form.Control>
-                            </Form.Group>
-                            <Form.Group controlId="modelo">
-                                <Form.Label>Modelo Repuesto</Form.Label>
-                                <Form.Control imput type="text"  
-                                            name='modelo' 
-                                            value={datos.modelo}
-                                            onChange={handleInputChange}
-                                            placeholder="Modelo Repuesto"
-                                            disabled>  
-                                </Form.Control>
-                            </Form.Group>
-                            {/* <Form.Group controlId="repuesto">
+                                <Button variant="info" tabIndex={1} className={'btn-lg'} autoFocus onClick={event => {abrirListRepuestos()}}>Buscar Repuesto</Button>                 
+                                <Form.Group controlId="nombre">
                                     <Form.Label>Repuesto</Form.Label>
-                                    <Form.Control as="select"  
-                                                name='repuesto' 
-                                                value={datos.repuesto}
+                                    <Form.Control imput type="text"  
+                                                name='nombre' 
+                                                value={datos.nombre}
                                                 onChange={handleInputChange}
-                                                disabled={handleRepuestoEnabled()}
-                                                placeholder="Repuesto">
-                                                    <option key={0} value={''}>
-                                                        ----
-                                                    </option>
-                                                {repuestos && repuestos.map( repuesto => {
-                                                    return (
-                                                    <option key={repuesto.id} value={repuesto.id}>
-                                                        {repuesto.nombre + ' - ' + repuesto.modelo}
-                                                    </option>
-                                                    )
-                                                })}
+                                                placeholder="Nombre Repuesto"
+                                                disabled>  
                                     </Form.Control>
-                                </Form.Group> */}
-                                {/* <Form.Group controlId="repuesto">
-                                    <Form.Label>Modelo</Form.Label>
-                                    <Form.Control as="select"  
-                                                name='repuesto' 
-                                                value={datos.repuesto}
+                                </Form.Group>
+                                <Form.Group controlId="modelo">
+                                    <Form.Label>Modelo Repuesto</Form.Label>
+                                    <Form.Control imput type="text"  
+                                                name='modelo' 
+                                                value={datos.modelo}
                                                 onChange={handleInputChange}
-                                                disabled={handleRepuestoEnabled()}
-                                                placeholder="Repuesto">
-                                                    <option key={0} value={''}>
-                                                        ----
-                                                    </option>
-                                                {repuestos && repuestos.map( repuesto => {
-                                                    return (
-                                                    <option key={repuesto.id} value={repuesto.id}>
-                                                        {repuesto.modelo}
-                                                    </option>
-                                                    )
-                                                })}
+                                                placeholder="Modelo Repuesto"
+                                                disabled>  
                                     </Form.Control>
-                                </Form.Group> */}
+                                </Form.Group>
                                 <Form.Group controlId="cantidad">
                                     <Form.Label>Cantidad</Form.Label>
                                     <Form.Control imput type="text"  

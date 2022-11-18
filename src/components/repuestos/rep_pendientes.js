@@ -71,7 +71,7 @@ const RepPendientes = () => {
         });
     },[token]); 
 
-    useEffect(() => {
+    /* useEffect(() => {
         axios.get(BACKEND_SERVER + `/api/repuestos/linea_pedido_pend/?pedido__finalizado=${'False'}&pedido__empresa=${datos.empresa}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -83,7 +83,7 @@ const RepPendientes = () => {
         .catch( err => {
             console.log(err);
         });
-    }, [token]);
+    }, [token]); */
 
     const listarPedidos = (repuesto)=>{
         setRepuesto_id(repuesto);
