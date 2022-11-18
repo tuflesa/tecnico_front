@@ -20,6 +20,8 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
         total: linea ? linea.total : 0,
         pedido: pedido_id,
         por_recibir: linea ? linea.por_recibir : '',
+        precio_recibido: linea ? linea.precio : 0,
+        id_linea_precio: 0,
     });   
 
     useEffect(()=>{
@@ -31,16 +33,10 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
             total: linea ? linea.total : 0,
             pedido: pedido_id,
             por_recibir: linea ? linea.por_recibir : 0,
+            precio_recibido: linea ? linea.precio : 0,
+            id_linea_precio: 0,
         });
     },[linea, pedido_id]);
-
-    useEffect(()=>{ 
-        datos.cantidad=Number.parseFloat(datos.cantidad).toFixed(2);
-        datos.precio=Number.parseFloat(datos.precio).toFixed(4);
-        datos.descuento=Number.parseFloat(datos.descuento).toFixed(2);
-        datos.total = Number.parseFloat((datos.precio*datos.cantidad)-(datos.precio*datos.cantidad*datos.descuento/100)).toFixed(4);
-        datos.por_recibir = linea ? (linea.por_recibir+(datos.cantidad-linea.cantidad)) : datos.cantidad;     
-    },[datos.cantidad, datos.precio, datos.descuento]);
 
     useEffect(()=>{
         datos.id && proveedor_id && axios.get(BACKEND_SERVER + `/api/repuestos/lista/?proveedores__id=${proveedor_id}&descatalogado=${false}&id=${datos.id}`, {
@@ -69,6 +65,20 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
         })
     }
 
+    const cambiarPrecio = () => {
+        axios.patch(BACKEND_SERVER + `/api/repuestos/repuesto_precio/${datos.id_linea_precio}/`,{
+            precio: datos.precio,
+        }, { 
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }    
+        })
+        .then( res => {
+            console.log(res.data);
+        })
+        .catch(err => { console.log(err);})
+    }
+
     const handlerCancelar = () => {      
         handleCloseLinea();
     } 
@@ -91,6 +101,9 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
         .then( res => {
             updatePedido();
             handlerCancelar();
+            if(datos.precio!==datos.precio_recibido){
+                cambiarPrecio();
+            }
         })
         .catch( err => {
             console.log(err);            
@@ -127,13 +140,6 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
         }
     }
 
-    const handleRepuestoEnabled = () => {
-        if (linea) {
-            return true
-        }
-        else return false
-    }
-
     const abrirListRepuestos = () => {
         setShowListRepuestos(true);
     }
@@ -147,6 +153,8 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
         datos.nombre=r.repuesto.nombre;
         datos.modelo=r.repuesto.modelo;
         datos.precio=r.precio;
+        datos.precio_recibido=r.precio;
+        datos.id_linea_precio=r.id;
         cerrarListRepuestos();      
     }
 
