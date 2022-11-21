@@ -21,22 +21,33 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
         pedido: pedido_id,
         por_recibir: linea ? linea.por_recibir : '',
         precio_recibido: linea ? linea.precio : 0,
+        descuento_recibido: linea ? linea.descuento : 0,
         id_linea_precio: 0,
     });   
 
     useEffect(()=>{
         setDatos({  
-            repuesto: linea ? linea.repuesto.id : 0,
+            repuesto: linea ? linea.repuesto : '',
             cantidad: linea ? linea.cantidad : 0,
-            precio: linea ? linea.precio : 0,
+            precio:linea ? linea.precio : 0,
             descuento: linea ? linea.descuento : 0,
             total: linea ? linea.total : 0,
             pedido: pedido_id,
-            por_recibir: linea ? linea.por_recibir : 0,
+            por_recibir: linea ? linea.por_recibir : '',
             precio_recibido: linea ? linea.precio : 0,
+            descuento_recibido: linea ? linea.descuento : 0,
             id_linea_precio: 0,
         });
     },[linea, pedido_id]);
+
+    useEffect(()=>{ 
+        datos.cantidad=Number.parseFloat(datos.cantidad).toFixed(2);
+        datos.precio=Number.parseFloat(datos.precio).toFixed(4);
+        datos.descuento=Number.parseFloat(datos.descuento).toFixed(2);
+        datos.total = Number.parseFloat((datos.precio*datos.cantidad)-(datos.precio*datos.cantidad*datos.descuento/100)).toFixed(4);
+        //datos.total=Number.parseFloat(datos.total).toFixed(2);
+        datos.por_recibir = linea ? (linea.por_recibir+(datos.cantidad-linea.cantidad)) : datos.cantidad;
+    },[datos.cantidad, datos.precio, datos.descuento]);
 
     useEffect(()=>{
         datos.id && proveedor_id && axios.get(BACKEND_SERVER + `/api/repuestos/lista/?proveedores__id=${proveedor_id}&descatalogado=${false}&id=${datos.id}`, {
@@ -68,6 +79,7 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
     const cambiarPrecio = () => {
         axios.patch(BACKEND_SERVER + `/api/repuestos/repuesto_precio/${datos.id_linea_precio}/`,{
             precio: datos.precio,
+            descuento: datos.descuento,
         }, { 
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -75,6 +87,19 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
         })
         .then( res => {
             console.log(res.data);
+        })
+        .catch(err => { console.log(err);})
+    }
+
+    const buscarLinea = () => { //busca la linea en la tabla de precios para poder modificarla después en cambiarPrecio
+        axios.get(BACKEND_SERVER + `/api/repuestos/repuesto_precio/?repuesto__id=${linea.repuesto.id}&proveedor=${proveedor_id}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }    
+        })
+        .then( res => {
+            datos.id_linea_precio=res.data[0].id;
+            cambiarPrecio();
         })
         .catch(err => { console.log(err);})
     }
@@ -102,6 +127,9 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
             updatePedido();
             handlerCancelar();
             if(datos.precio!==datos.precio_recibido){
+                cambiarPrecio();
+            }
+            if(datos.descuento!==datos.descuento_recibido){
                 cambiarPrecio();
             }
         })
@@ -133,6 +161,12 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
             .then( res => {
                 updatePedido();
                 handlerCancelar();
+                if(datos.precio!==datos.precio_recibido){
+                    buscarLinea();
+                }
+                if(datos.descuento!==datos.descuento_recibido){
+                    buscarLinea();
+                }
             })
             .catch( err => {           
                 handlerCancelar();
@@ -154,6 +188,8 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
         datos.modelo=r.repuesto.modelo;
         datos.precio=r.precio;
         datos.precio_recibido=r.precio;
+        datos.descuento=r.descuento;
+        datos.descuento_recibido=r.descuento;
         datos.id_linea_precio=r.id;
         cerrarListRepuestos();      
     }
@@ -229,10 +265,10 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
                 </Modal.Body>
                 <Modal.Footer>
                     { linea ?                     
-                        <Button variant="info" onClick={handlerEditar}> Editar </Button> :
+                        <Button variant="info" tabIndex={6} onClick={handlerEditar}> Editar </Button> :
                         <Button variant="info" tabIndex={5} onClick={handlerGuardar}> Guardar </Button>
                     }        
-                    <Button variant="waring" tabIndex={6} onClick={handlerCancelar}>
+                    <Button variant="waring" tabIndex={7} onClick={handlerCancelar}>
                         Cancelar
                     </Button>
                 </Modal.Footer>

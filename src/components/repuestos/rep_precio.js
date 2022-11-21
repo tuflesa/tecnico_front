@@ -9,7 +9,6 @@ const RepPrecio = ()=>{
     const [proveedores, setProveedores] = useState(null);
     const [precios, setPrecios] = useState(null);
     const prueba = [{}];
-    var foco =0;
 
     const [datos, setDatos] = useState({
         id:'',
@@ -77,12 +76,9 @@ const RepPrecio = ()=>{
         if(precios){
             for(var x=0; x<precios.length;x++){
                 if(precios[x].id===datos.id){
-                    console.log('estoy dentro del if de perferfoco');
-                    console.log(datos.precio_n);
                     precios[x].precio_n=datos.precio_n;
                     //precios[x].descuento_n=datos.descuento_n;
                 }
-                console.log(precios);
             }
     }
     }, [datos.precio_n]);
@@ -90,11 +86,7 @@ const RepPrecio = ()=>{
     useEffect(() => {
         if(precios){
             for(var x=0; x<precios.length;x++){
-                console.log('estoy en perderfocoDto en el for');
-                console.log(precios[x].id);
-                console.log(datos.id);
                 if(precios[x].id===datos.id){
-                    console.log('estoy en perderfocoDto en el if');
                     precios[x].descuento_n=datos.descuento_n;
                 }
             }
@@ -109,50 +101,34 @@ const RepPrecio = ()=>{
     }  
 
     const handleInputChange2 = (event) => {
-        console.log('estoy en el handleinputchange2');
         setDatos({
             ...datos,
             [event.target.name] : event.target.value,
             [event.target.id] : parseInt(event.target.className),
         })
-        foco=1;
-        console.log(datos);
     } 
 
     const handleInputChange3 = (event) => {
-        console.log('estoy en el handleinputchange3');
         setDatos({
             ...datos,
             [event.target.name] : event.target.value,
             [event.target.id] : parseInt(event.target.className),
         })
-        console.log(datos);
     } 
 
     /* const PerderFoco = () => {
-        console.log('estoy en perderfoco');
-        console.log(Object.prototype.toString.call(datos.precio_n));
         for(var x=0; x<precios.length;x++){
             if(precios[x].id===datos.id){
-                console.log('estoy dentro del if de perferfoco');
-                console.log(datos.precio_n);
                 precios[x].precio_n=datos.precio_n;
                 //precios[x].descuento_n=datos.descuento_n;
             }
-            console.log(precios);
         }
         datos.precio_n=0;        
     } */
 
     /* const PerderFocoDto = () => {
-        console.log('estoy en perderfocoDto');
-        console.log(datos);
         for(var x=0; x<precios.length;x++){
-            console.log('estoy en perderfocoDto en el for');
-            console.log(precios[x].id);
-            console.log(datos.id);
             if(precios[x].id===datos.id){
-                console.log('estoy en perderfocoDto en el if');
                 precios[x].descuento_n=datos.descuento_n;
                 datos.descuento_n=0;
             }
@@ -161,14 +137,11 @@ const RepPrecio = ()=>{
     }  */
 
     const handlerGuardar =()=>{
-        console.log('esto vale precios en guardar');
-        console.log(precios);
         for(var x=0; x<precios.length; x++){
             var precios_nuevos = precios[x].precio_n;
             var descuento_nuevo = precios[x].descuento_n;
             var ids=precios[x].ids; //es el id de la línea no del repuesto
             if(precios_nuevos!==0){
-                console.log('dentro del if de precios');
                 axios.patch(BACKEND_SERVER + `/api/repuestos/repuesto_precio/${ids}/`,{
                     precio: precios_nuevos,
                 }, { 
@@ -182,8 +155,6 @@ const RepPrecio = ()=>{
                 .catch(err => { console.log(err);})
             }
             if(descuento_nuevo!==0){
-                console.log('dentro del if de descuentos');
-                console.log(precios[x].descuento_n);
                 axios.patch(BACKEND_SERVER + `/api/repuestos/repuesto_precio/${ids}/`,{
                     descuento: descuento_nuevo,
                 }, { 

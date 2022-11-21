@@ -312,7 +312,6 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
               }   
         })
         .then( res => { 
-                console.log(res.data);
                 for(var x=0;x<res.data.length;x++){
                     axios.delete(BACKEND_SERVER + `/api/repuestos/repuesto_precio/${res.data[x].id}`, {
                         headers: {
