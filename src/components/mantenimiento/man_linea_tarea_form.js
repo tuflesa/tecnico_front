@@ -11,6 +11,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
     const [estados, setEstados] = useState(null);
     const [tipo_periodo, setTipoPeriodo] = useState(null);
     const [user] = useCookies(['tec-user']);
+    const [hoy] = useState(new Date);
 
     const [datos, setDatos] = useState({
         id: linea_tarea.id,
@@ -48,58 +49,8 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
             console.log(err); 
         })       
     }, [token]);
-
-    /* useEffect(() => {
-        axios.get(BACKEND_SERVER + '/api/mantenimiento/tipo_periodo/',{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            setTipoPeriodo(res.data.sort(function(a, b){
-                if(a.id > b.id){
-                    return 1;
-                }
-                if(a.id < b.id){
-                    return -1;
-                }
-                return 0;
-            }))
-        })
-        .catch( err => {
-            console.log(err); 
-        })       
-    }, [token]);  */
-
-    const updateTarea = () => {
-        linea_tarea.id && axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/${linea_tarea.id}`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            setLineaTarea(res.data); 
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    }
     
-    const handleInputChange = (event) => {
-        setDatos({
-            ...datos,
-            [event.target.name] : event.target.value
-        })
-    } 
-        
-    const actualizarDatos = (event) => {
-        if(datos.fecha_plan===''){datos.fecha_plan=null;}
-        if(datos.fecha_fin!==null){datos.estado=3;}
-        else if(datos.fecha_inicio!==null){datos.estado=2;}
-        else if(datos.fecha_plan!==null){datos.estado=1;}
-        else if(datos.fecha_plan===null){datos.estado=4;}
-        event.preventDefault(); 
-        console.log(datos);
+    const actualizaTarea = () => { //actualiza datos en la tarea que cuelga del parte
         axios.patch(BACKEND_SERVER + `/api/mantenimiento/tarea_nueva/${linea_tarea.tarea.id}/`, {
             nombre: datos.nombre,
             prioridad: datos.prioridad,
@@ -111,37 +62,98 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
-              }     
+            }     
         })
         .then( res => {  
-            axios.patch(BACKEND_SERVER + `/api/mantenimiento/linea_nueva/${linea_tarea.id}/`, {
-                fecha_inicio:datos.fecha_inicio,
-                fecha_fin:datos.fecha_fin,
-                fecha_plan:datos.fecha_plan,
-                estado: datos.estado,
-            }, {
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                  }     
-            })
-            .then( res => {
-                //updateTarea();
-                datos.nombre= '';
-                datos.especialidad='';
-                datos.prioridad='';
-                datos.observaciones='';
-                datos.observaciones_trab='';
-                datos.fecha_plan=null;
-                datos.fecha_inicio=null;
-                datos.fecha_fin=null;
-                datos.estado='';
-            })
-            .catch(err => { console.log(err);})
+            console.log('Tarea cerrada');
         })
         .catch(err => { console.log(err);})
     }
 
-    const handleDisabledObservaciones = () => {
+    const actualizarLinea = () => { //actualiza la linea generada de la tarea
+        axios.patch(BACKEND_SERVER + `/api/mantenimiento/linea_nueva/${linea_tarea.id}/`, {
+            fecha_inicio:datos.fecha_inicio,
+            fecha_fin:datos.fecha_fin,
+            fecha_plan:datos.fecha_plan,
+            estado: datos.estado,
+        }, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }     
+        })
+        .then( res => { 
+            datos.nombre= '';
+            datos.especialidad='';
+            datos.prioridad='';
+            datos.observaciones='';
+            datos.observaciones_trab='';
+            datos.fecha_plan=null;
+            datos.fecha_inicio=null;
+            datos.fecha_fin=null;
+            datos.estado='';
+        })
+        .catch(err => { console.log(err);})
+    }
+
+    const crearLineaNueva = () => { //si es un preventivo y le ponemos fecha de cierre, crea una nueva linea de la tarea
+        var fechaString= null;
+        var diaEnMilisegundos = 1000 * 60 * 60 * 24;
+        var fecha=Date.parse(hoy);
+        var fechaPorSemanas=null;
+        var suma=null;
+        suma = fecha + (diaEnMilisegundos * linea_tarea.tarea.periodo * linea_tarea.tarea.tipo_periodo.cantidad_dias);
+        fechaPorSemanas = new Date(suma);
+        fechaString = fechaPorSemanas.getFullYear() + '-' + ('0' + (fechaPorSemanas.getMonth()+1)).slice(-2) + '-' + ('0' + fechaPorSemanas.getDate()).slice(-2);
+        
+        fechaString && axios.post(BACKEND_SERVER + `/api/mantenimiento/linea_nueva/`,{
+            parte: linea_tarea.parte.id,
+            tarea: linea_tarea.tarea.id,
+            fecha_inicio:null,
+            fecha_fin:null,
+            fecha_plan: fechaString,
+            estado: 1,
+        },
+        {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( r => {
+            console.log('linea hecha');
+
+        })
+        .catch( err => {
+            console.log(err);  
+        });
+    }
+
+    const actualizarDatos = (event) => { //movimientos al pulsar el botón actualizar
+        event.preventDefault();
+        if(datos.fecha_plan===''){datos.fecha_plan=null;}
+        if(datos.fecha_fin!==null){
+            datos.estado=3;
+            if(linea_tarea.parte.tipo_nombre==='Preventivo'){
+                if(datos.fecha_inicio===null){
+                    datos.fecha_inicio=(hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0'));
+                }
+                crearLineaNueva();
+                actualizarLinea();
+                return;
+            }
+            else{
+                actualizarLinea();
+                actualizaTarea();
+                return;
+            }
+        }
+        else if(datos.fecha_inicio!==null){datos.estado=2;}
+        else if(datos.fecha_plan!==null){datos.estado=1;}
+        else if(datos.fecha_plan===null){datos.estado=4;}
+        actualizarLinea();
+        actualizaTarea();
+    }
+
+    const handleDisabledObservaciones = () => { //inhabilitar observaciones si no eres técnico
         return (user['tec-user'].perfil.puesto.nombre!=='Director Técnico')
     }
 
@@ -211,7 +223,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                         </Row>
                         <Row>
                             <Col>
-                                {linea_tarea.parte.tipo===1?
+                                {linea_tarea.parte.tipo===1? //si es un preventivo
                                     <Form.Group id="tipo_periodo">
                                         <Form.Label>Tipo Periodo</Form.Label>
                                         <Form.Control as="select"  
@@ -233,7 +245,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                                 : null}
                             </Col>
                             <Col>
-                                {linea_tarea.parte.tipo===1?
+                                {linea_tarea.parte.tipo===1? //si es un preventivo
                                     <Form.Group controlId="periodo">
                                         <Form.Label>Cantidad de Periodos</Form.Label>
                                         <Form.Control as="select" 
@@ -287,8 +299,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                                                 name='fecha_fin' 
                                                 value={datos.fecha_fin}
                                                 onChange={handleInputChange} 
-                                                placeholder="Fecha Fin"
-                                                /* disabled='true' *//>
+                                                placeholder="Fecha Fin"/>
                                 </Form.Group>
                             </Col> 
                         </Row>                                    

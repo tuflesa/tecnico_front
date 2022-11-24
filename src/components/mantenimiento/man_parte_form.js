@@ -265,14 +265,16 @@ const ParteForm = ({parte, setParte, op}) => {
                 return self.indexOf(value.tarea) === index.tarea
               }
             if(parte.tipo_nombre==="Preventivo"){
+                let hash = {};
+                var array = [''];
                 const prueba = res.data.filter((r=> r.fecha_fin===null));
-                if(prueba.length===0){
-                    let hash = {};
-                    var array = [''];
-                    array = res.data.filter(o => hash[o.tarea.id] ? false : hash[o.tarea.id] = true);
+                array = res.data.filter(o => hash[o.tarea.id] ? false : hash[o.tarea.id] = true);
+                if(array.length>prueba.length){
+                    //cuando eliminamos el proceso preventivo de una tarea, deja de aparecer en las tareas pero si aparece en el parte
                     setLineas(array);
                 }
                 else{
+                    //todas las tareas estas activas, por lo que solo muestra las lineas en juego.
                     setLineas(prueba.sort(function(a, b){
                         if(a.tarea.prioridad < b.tarea.prioridad){
                             return 1;

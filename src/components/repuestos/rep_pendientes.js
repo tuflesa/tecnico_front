@@ -27,7 +27,7 @@ const RepPendientes = () => {
 
     const [filtro, setFiltro] = useState(`?empresa=${datos.empresa}&finalizado=${false}&fecha_prevista_entrega__lte=${datos.hoy}`);
     
-    useEffect(() => {
+    useEffect(() => { //buscamos articulos con stock por debajo del stock mínimo
         axios.get(BACKEND_SERVER + `/api/repuestos/articulos_fuera_stock/?almacen__empresa__id=${datos.empresa}&repuesto__descatalogado=${false}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -49,7 +49,7 @@ const RepPendientes = () => {
         });
     }, [token]);  
      
-    useEffect(()=>{
+    useEffect(()=>{ //buscamos pedidos pasados de fecha de entrega
         axios.get(BACKEND_SERVER + `/api/repuestos/lista_pedidos/` + filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -71,7 +71,7 @@ const RepPendientes = () => {
         });
     },[token]); 
 
-    /* useEffect(() => {
+    useEffect(() => { //buscamos las lineas de los pedidos pendientes para mostrar en las lineas de los articulos fuera de stock
         axios.get(BACKEND_SERVER + `/api/repuestos/linea_pedido_pend/?pedido__finalizado=${'False'}&pedido__empresa=${datos.empresa}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -83,7 +83,7 @@ const RepPendientes = () => {
         .catch( err => {
             console.log(err);
         });
-    }, [token]); */
+    }, [token]);
 
     const listarPedidos = (repuesto)=>{
         setRepuesto_id(repuesto);
