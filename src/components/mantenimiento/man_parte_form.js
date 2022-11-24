@@ -155,12 +155,6 @@ const ParteForm = ({parte, setParte, op}) => {
             })
             .then( res => {
                 setZonas(res.data);
-                // setDatos({
-                //     ...datos,
-                //     zona: '',
-                //     seccion: '',
-                //     equipo: ''
-                // });
             })
             .catch( err => {
                 console.log(err);
@@ -185,11 +179,6 @@ const ParteForm = ({parte, setParte, op}) => {
             })
             .then( res => {
                 setSecciones(res.data);
-                // setDatos({
-                //     ...datos,
-                //     seccion: '',
-                //     equipo: ''
-                // });
             })
             .catch( err => {
                 console.log(err);
@@ -221,10 +210,6 @@ const ParteForm = ({parte, setParte, op}) => {
                     }
                     return 0;
                 }))
-                // setDatos({
-                //     ...datos,
-                //     equipo: ''
-                // });
             })
             .catch( err => {
                 console.log(err);
@@ -261,9 +246,18 @@ const ParteForm = ({parte, setParte, op}) => {
                 }
         })
         .then( res => {
+            res.data.sort(function(a, b){ //ordenamos el listado para que en el unique, coja los ultimos registros
+                if(a.id < b.id){
+                    return 1;
+                }
+                if(a.id > b.id){
+                    return -1;
+                }
+                return 0;
+            })
             const unique = (value, index, self) => {
                 return self.indexOf(value.tarea) === index.tarea
-              }
+            }
             if(parte.tipo_nombre==="Preventivo"){
                 let hash = {};
                 var array = [''];
@@ -936,9 +930,10 @@ const ParteForm = ({parte, setParte, op}) => {
                         <Col>
                             <Row>
                                 <Col>
-                                <h5 className="pb-3 pt-1 mt-2">Tareas del Parte:</h5>
+                                <h5 className="pb-3 pt-1 mt-2">Tareas del Parte: </h5>
+                                <h5>- Rojo = Tarea Finalizada</h5>
+                                <h5>- Verde = Tarea Iniciada</h5>
                                 </Col>
-                                {/* {soyTecnico.length!==0?   */}
                                 {op?
                                     <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
                                             <PlusCircle className="plus mr-2" size={30} onClick={abrirAddLinea}/>
@@ -962,7 +957,7 @@ const ParteForm = ({parte, setParte, op}) => {
                                 <tbody>
                                     {lineas && lineas.map( linea => {
                                         return (
-                                            <tr key={linea.tarea.id} class={ linea.fecha_fin?"table-success":linea.fecha_inicio?"table-info":"" }/* class = {linea.fecha_inicio?"table-danger":" " } */>
+                                            <tr key={linea.tarea.id} class={ linea.fecha_fin?"table-danger":linea.fecha_inicio?"table-success":"" }/* class = {linea.fecha_inicio?"table-danger":" " } */>
                                                 <td>{linea.tarea.prioridad}</td>
                                                 <td>{linea.tarea.nombre}</td>
                                                 <td>{linea.tarea.especialidad_nombre}</td>

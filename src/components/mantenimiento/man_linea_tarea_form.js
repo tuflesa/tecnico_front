@@ -49,6 +49,13 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
             console.log(err); 
         })       
     }, [token]);
+
+    const handleInputChange = (event) => {
+        setDatos({
+            ...datos,
+            [event.target.name] : event.target.value
+        })  
+    }
     
     const actualizaTarea = () => { //actualiza datos en la tarea que cuelga del parte
         axios.patch(BACKEND_SERVER + `/api/mantenimiento/tarea_nueva/${linea_tarea.tarea.id}/`, {

@@ -216,7 +216,9 @@ const ManLineasListado = () => {
                 </Row>
             <Row>                
                 <Col>
-                    <h5 className="mb-3 mt-3">Listado de Trabajos</h5>                    
+                    <h5 className="mb-3 mt-3">Listado de Trabajos</h5>
+                    <h5>--- Rojo = Trabajo terminado</h5>    
+                    <h5>--- Verde = Trabajo iniciado</h5>                 
                     <Table striped bordered hover>
                         <thead>
                             <tr>
@@ -236,7 +238,7 @@ const ManLineasListado = () => {
                         <tbody>
                             {lineas && lineas.map( linea => {
                                 return (
-                                    <tr key={linea.id} className={ linea.fecha_fin?"table-success":linea.fecha_inicio?"table-info":"" }>
+                                    <tr key={linea.id} className={ linea.fecha_fin?"table-danger":linea.fecha_inicio?"table-success":"" }>
                                         <td>{linea.tarea.prioridad}</td>
                                         <td>
                                             <PlusSquare className="mr-3 pencil"  onClick={event => {updateCantidad(1, linea)}} />

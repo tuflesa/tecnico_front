@@ -4,7 +4,7 @@ import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table, Modal, Button  } from 'react-bootstrap';
 import {invertirFecha} from '../utilidades/funciones_fecha';
-import { Tools, StopCircle, UiChecks, FileCheck, Receipt, Eye} from 'react-bootstrap-icons';
+import { Tools, FileCheck, Receipt, Eye} from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import ListaDePersonal from './man_equipo_trabajadores';
 import ManEquipoFiltro from './man_equipo_filtro';
@@ -13,8 +13,7 @@ const ManPorEquipos = () => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
 
-    const [lineas, setLineas] = useState(null);
-    //const [trabajadores_lineas, setTrabajadoresLineas] = useState(null);    
+    const [lineas, setLineas] = useState(null);  
     const [hoy] = useState(new Date);
     const [show, setShow] = useState(false);
     const [linea_id, setLinea_id] = useState(null);
@@ -28,13 +27,11 @@ const ManPorEquipos = () => {
     var enunmes=fecha_hoy+mesEnMilisegundos;
     dentrodeunmes = new Date(enunmes);
     fechaenunmesString = dentrodeunmes.getFullYear() + '-' + ('0' + (dentrodeunmes.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunmes.getDate()).slice(-2);
-    //const [filtro, setFiltro] = useState(`?parte__empresa=${user['tec-user'].perfil.empresa.id}&fecha_plan__lte=${fechaenunmesString}&parte__zona=${user['tec-user'].perfil.zona?user['tec-user'].perfil.zona.id:''}&parte__seccion=${user['tec-user'].perfil.seccion?user['tec-user'].perfil.seccion.id:''}`);
 
     const [filtro, setFiltro] = useState(`?parte__empresa=${user['tec-user'].perfil.empresa.id}&fecha_plan__lte=${fechaenunmesString}`);
     const actualizaFiltro = str => {
         setFiltro(str);
     }
-    
 
     const [datos, setDatos] = useState({
         fecha_inicio: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
@@ -50,9 +47,6 @@ const ManPorEquipos = () => {
                 }
         })
         .then( res => {
-            if(user['tec-user'].perfil.empresa.id===1){
-                console.log('es todas');
-            }
             //filtramos los trabajos que sean de nuestras destrezas
             var MisTrabajos;
             var destrezas = user['tec-user'].perfil.destrezas;
@@ -72,21 +66,28 @@ const ManPorEquipos = () => {
             console.log(err);
         });
     }, [token, filtro]); 
-
+ 
     useEffect(()=>{
-        axios.get(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea_filtro/`,{
+        axios.get(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea_filtro/?trabajador=${user['tec-user'].perfil.usuario}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
                 }
         })
         .then( res => {
             setlineasTrabajadores(res.data);
-            //ColorLinea();
         })
         .catch( err => {
             console.log(err);
         });
     }, [token]);
+
+    const comparar = (x) => {
+        for(var y=0;y<lineasTrabajadores.length;y++){
+            if(lineasTrabajadores[y].linea===x){
+                return(true);
+            }
+        }
+    }
 
     const updateTarea = () => {
         axios.get(BACKEND_SERVER + '/api/mantenimiento/listado_lineas_activas/'+ filtro,{
@@ -265,7 +266,6 @@ const ManPorEquipos = () => {
                                             contador=contador+1;
                                             if(contador===res.data.length){
                                                 axios.patch(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${res.data[0].parte}/`,{
-                                                    //fecha_finalizacion: hoy,
                                                     estado: 3,
                                                 },
                                                 {
@@ -312,32 +312,24 @@ const ManPorEquipos = () => {
         setShow(false);
     }
 
-    /* const ColorLinea = (l) =>{
-        //si la linea la he cogido yo pintamos de verde
-        for(var x=0; x<=lineasTrabajadores.length; x++){
-            if(lineasTrabajadores[x].linea===l){
-                if(lineasTrabajadores[x].trabajador===user['tec-user'].perfil.usuario){
-                    console.log('coincide linea y trabajador');
-                }
-            }
-        }
-        console.log('lineas de trabajadores');
-        console.log(lineasTrabajadores[0].linea);
-        console.log(l);
-        console.log(user['tec-user'].perfil.usuario);
-        //si la linea la ha cogido un compañero, se pinta de rojo
-    } */
-
     return(
         <Container class extends className="pt-1 mt-5">
             <Row class extends>                
                 <Col>
                     <h5 className="mb-3 mt-3" style={ { color: 'red' } }>Listado de Trabajos {user['tec-user'].get_full_name}, por prioridades:</h5>              
                     <h5>Acciones:</h5>
-                    <h5><Tools/> ---- Para iniciar un trabajo</h5>
+                    <h5><Tools/> ---- Para iniciar un trabajo "Iniciados en color verde"</h5>
                     <h5><FileCheck/> ---- Para finalizar un trabajo</h5>
                     <h5><Receipt/> ---- Listado del personal que está interviniendo en este trabajo</h5>
                     <h5><Eye/> ---- Ver el parte al que pertenece la tarea</h5>
+                </Col>
+                <Col>
+                    <br></br>
+                    <br></br>
+                    <br></br>
+                    <br></br>
+                    <h5 style={{ color: 'green' }}>Verde ---- Trabajo cogido por un compañero</h5>
+                    <h5 style={{ color: 'blue' }}>Azul ---- Trabajo cogido por nosotros</h5>
                 </Col>
             </Row>
             <Row>
@@ -363,7 +355,7 @@ const ManPorEquipos = () => {
                         <tbody>
                             {lineas && lineas.map( linea => {
                                 return (
-                                    <tr key={linea.id} className = {linea.fecha_inicio?/* (ColorLinea(linea.id)) */ "table-danger" :" "}>
+                                    <tr key={linea.id} className = {comparar(linea.id)? "table-primary" : linea.fecha_inicio? "table-success" : " "}>
                                         <td>{linea.tarea.prioridad}</td>
                                         <td>{invertirFecha(linea.fecha_plan)}</td>
                                         <td>{linea.tarea.nombre}</td>
