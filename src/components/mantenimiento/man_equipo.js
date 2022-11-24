@@ -83,9 +83,16 @@ const ManPorEquipos = () => {
 
     const comparar = (x) => {
         for(var y=0;y<lineasTrabajadores.length;y++){
-            if(lineasTrabajadores[y].linea===x){
-                return(true);
+            if(lineasTrabajadores[y].linea===x.id){
+                return( "table-primary");
             }
+            /* else if(x.fecha_inicio){
+                console.log('verdeeeeee  ' + x.id);
+                return( "table-success");
+            }
+            else if(x.fecha_inicio===null){
+                return("");
+            } */
         }
     }
 
@@ -355,7 +362,7 @@ const ManPorEquipos = () => {
                         <tbody>
                             {lineas && lineas.map( linea => {
                                 return (
-                                    <tr key={linea.id} className = {comparar(linea.id)? "table-primary" : linea.fecha_inicio? "table-success" : " "}>
+                                    <tr key={linea.id} className = {comparar(linea)? "table-primary" : linea.fecha_inicio!==null? "table-success" : " "}>
                                         <td>{linea.tarea.prioridad}</td>
                                         <td>{invertirFecha(linea.fecha_plan)}</td>
                                         <td>{linea.tarea.nombre}</td>

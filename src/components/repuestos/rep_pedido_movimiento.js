@@ -44,6 +44,7 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
         })
         .then( res => { 
             setAlmacenes(res.data);
+            console.log(res.data);
         })
         .catch(err => { console.log(err);})
     },[token, linea]);
@@ -202,7 +203,7 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
                                                 {almacenes && almacenes.map( stock => {
                                                     return (
                                                     <option key={stock.id} value={stock.almacen.id}>
-                                                        {stock.almacen.nombre + ' => En: ' + stock.localizacion}                                                       
+                                                        {stock.almacen.nombre + ' / Cant: ' + stock.stock_act + ' / En: ' + stock.localizacion }                                                       
                                                     </option>                                                    
                                                     )                                                    
                                                 })}   
