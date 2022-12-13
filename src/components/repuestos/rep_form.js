@@ -527,7 +527,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                     <Col>
                                         <Row>
                                             <Col>
-                                            <h5 className="pb-3 pt-1 mt-2">Stock por empresa:</h5>
+                                            <h5 className="pb-3 pt-1 mt-2">Stock por empresaaaaaa:</h5>
                                             </Col>
                                             <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
                                                 {(user['tec-user'].perfil.puesto.nombre!=='Operador')?

@@ -7,7 +7,7 @@ import ReactExport from 'react-data-export';
 import {invertirFecha} from '../utilidades/funciones_fecha';
 import { PencilFill, Receipt } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
-import { format } from 'd3';
+import { count, format } from 'd3';
 import ListaPedidos from './rep_pendientes_pedidos';
 
 const RepPendientes = () => {
@@ -19,6 +19,7 @@ const RepPendientes = () => {
     const [show, setShow] = useState(false);
     const [repuesto_id, setRepuesto_id] = useState(null);
     var fecha = new Date();
+    const stock_por_empresa = [];
     
     const [datos, setDatos] = useState({
         empresa: user['tec-user'].perfil.empresa.id,
@@ -34,7 +35,39 @@ const RepPendientes = () => {
               }
         })
         .then( res => { 
-            setPendientes(res.data.sort(function(a, b){
+            for(var x=0;x<res.data.length; x++){
+                let repuesto_nombre = res.data[x].repuesto.nombre_comun?res.data[x].repuesto.nombre_comun:res.data[x].repuesto.nombre;
+                let repuesto_critico = res.data[x].repuesto.es_critico;
+                let id = res.data[x].repuesto.id;
+                axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimos/?repuesto=${res.data[x].repuesto.id}`, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }     
+                })
+                .then( r => {
+                        const stock_empresa = r.data.reduce((a, b) => a + b.stock_act, 0);
+                        const stock_minimo_empresa = r.data.reduce((a, b) => a + b.cantidad, 0);
+                        if(res.data.length>0){
+                            stock_por_empresa.push({id: id, articulo: repuesto_nombre, critico: repuesto_critico, stock: stock_empresa, stock_minimo: stock_minimo_empresa});            
+                        }
+                        if(stock_por_empresa){
+                            let hash = {};
+                            let sinduplicados = stock_por_empresa;
+                            sinduplicados = sinduplicados.filter(o => hash[o.id] ? false : hash[o.id] = true);
+                            setPendientes(sinduplicados.sort(function(a, b){
+                                if(a.articulo > b.articulo){
+                                    return 1;
+                                }
+                                if(a.articulo < b.articulo){
+                                    return -1;
+                                }
+                                return 0;
+                            }));;
+                        }
+                })
+                .catch(err => { console.log(err);})
+            }
+            /* setPendientes(res.data.sort(function(a, b){
                 if(a.repuesto.nombre > b.repuesto.nombre){
                     return 1;
                 }
@@ -42,7 +75,7 @@ const RepPendientes = () => {
                     return -1;
                 }
                 return 0;
-            }));
+            })); */
         })
         .catch( err => {
             console.log(err);
@@ -114,21 +147,21 @@ const RepPendientes = () => {
                             {pendientes && pendientes.map( pendiente => {
                                 return (
                                     <tr key={pendiente.id}>
-                                        <td>{pendiente.repuesto.nombre_comun?pendiente.repuesto.nombre_comun:pendiente.repuesto.nombre}</td>
-                                        <td>{pendiente.repuesto.es_critico?'Si':'No'}</td>
-                                        <td>{pendiente.stock_act}</td>
-                                        <td>{pendiente.cantidad}</td> 
+                                        <td>{pendiente.articulo}</td>
+                                        <td>{pendiente.critico?'Si':'No'}</td>
+                                        <td>{pendiente.stock}</td>
+                                        <td>{pendiente.stock_minimo}</td> 
                                         <td>{lineasPendientes && lineasPendientes.map( linea => {
                                             let suma = 0;
-                                            if(linea.repuesto === pendiente.repuesto.id){                                        
+                                            if(linea.repuesto === pendiente.id){                                        
                                                 suma = suma + parseInt(linea.por_recibir);
                                             }
                                             return suma;
                                         }).reduce((partialSum, a) => partialSum + a, 0)}                                            
                                         </td>
                                         <td>
-                                        <Receipt className="mr-3 pencil" onClick={event =>{listarPedidos(pendiente.repuesto.id)}}/>
-                                        <Link to={`/repuestos/${pendiente.repuesto.id}`}>
+                                        <Receipt className="mr-3 pencil" onClick={event =>{listarPedidos(pendiente.id)}}/>
+                                        <Link to={`/repuestos/${pendiente.id}`}>
                                                 <PencilFill className="mr-3 pencil"/>
                                         </Link>
                                         </td>
