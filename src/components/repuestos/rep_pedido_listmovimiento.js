@@ -16,6 +16,8 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
     const [stock_minimos, setStockMinimos] = useState(null);
     const [movimiento, setMovimiento]=useState(null)
     const [lineaElegida, setLineaElegida]=useState(null);
+    const [visible, setvisible]=useState(false);
+    const [almacenes, setAlmacenes]=useState(null)
 
     const [datos, setDatos] = useState({
         fecha: null,
@@ -42,12 +44,36 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
         });
     },[linea, token]);
 
+    useEffect(()=>{
+        linea && axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimo_detalle/?repuesto=${linea.repuesto.id}`, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => { 
+            setAlmacenes(res.data);
+        })
+        .catch(err => { console.log(err);})
+    },[token, linea]);
+
+    // activa y desactiva la escritura en la línea
+    const habilitar_linea = (r)=>{
+        setvisible(true);
+        setLineaElegida(r);
+        if(user['tec-user'].perfil.puesto.nombre!=='Operador'){
+            var input_min =  document.getElementsByClassName(r.id);
+            for(var i = 0; i < input_min.length; i++) {
+                input_min[i].disabled = !input_min[i].disabled;
+            }
+        }
+        else (alert('no tienes permisos'))
+    }
+
     const guardarMovimiento = () => {
-        //event.preventDefault();
-        axios.patch(BACKEND_SERVER + `/api/repuestos/movimiento/${lineaElegida.id}/`, { //de momento funciona
+        axios.patch(BACKEND_SERVER + `/api/repuestos/movimiento/${lineaElegida.id}/`, { 
             fecha: datos.fecha? datos.fecha : lineaElegida.fecha,
             cantidad: datos.cantidad !==''? datos.cantidad : lineaElegida.cantidad,
-            almacen: lineaElegida.almacen.id,
+            almacen: datos.almacen? datos.almacen : lineaElegida.almacen.id,
             usuario: user['tec-user'].id,
             linea_pedido: lineaElegida.linea_pedido,
             linea_inventario: lineaElegida.linea_inventario,
@@ -81,7 +107,7 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
                             }     
                         })
                         .then( res => {    
-                            //actualizarStock();
+                            //habilitar_linea(lineaElegida);
                         })
                         .catch(err => { console.log(err);})
                     }
@@ -115,18 +141,6 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
     const handlerListCancelar = () => {      
         handleCloseListMovimiento();
     } 
-
-    // activa y desactiva la escritura en la línea
-    const habilitar_linea = (r)=>{
-        setLineaElegida(r);
-        if(user['tec-user'].perfil.puesto.nombre!=='Operador'){
-            var input_min =  document.getElementsByClassName(r.id);
-            for(var i = 0; i < input_min.length; i++) {
-                input_min[i].disabled = !input_min[i].disabled;
-            }
-        }
-        else (alert('no tienes permisos'))
-    }
 
     // lo necesitaremos por si ponemos una cantidad menor a la inicial, que vuelva estar pendiente de recibir
     const actualizarRecibir = () =>{
@@ -162,8 +176,8 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
                                         <th>Nueva Fecha</th>
                                         <th>Cantidad Recibida</th>
                                         <th>Albarán</th>
-                                        <th>Almacén</th> 
-                                        <th>Localización</th>                                        
+                                        <th>Almacén</th>
+                                        <th>Cambio Almacén</th>                                      
                                     </tr>
                                 </thead>                                
                                 <tbody> 
@@ -171,16 +185,15 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
                                         return (                                                    
                                             <tr key={lista.id}>
                                                 <td>{invertirFecha(String(lista.fecha))}</td>
-                                                <td>
-                                                    <input  className={lista.id} 
-                                                            type = "date" 
-                                                            name='fecha'
-                                                            value= {datos.fech}
-                                                            onChange={handleInputChange}
-                                                            //placeholder={invertirFecha(String(lista.fecha))}
-                                                            placeholder={datos.fecha}
-                                                            disabled/>
-                                                </td>                                                                                                       
+                                                    <td>
+                                                        <input  className={lista.id} 
+                                                                type = "date" 
+                                                                name='fecha'
+                                                                value= {datos.fech}
+                                                                onChange={handleInputChange}
+                                                                placeholder={datos.fecha}
+                                                                disabled/>
+                                                    </td>  
                                                 <td>
                                                     <input  className={lista.id} 
                                                             type = "text" 
@@ -200,12 +213,28 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
                                                             disabled/>
                                                 </td> 
                                                 <td>{lista.almacen.nombre}</td> 
-                                                <td>{stock_minimos && stock_minimos.map( loc => {
-                                                        if(loc.almacen === lista.almacen.id){
-                                                            return (loc.localizacion)
-                                                        }
-                                                    })}
-                                                </td>                                                     
+                                                <td>
+                                                    <Form.Group id={lista.id}>
+                                                        <Form.Control as="select" 
+                                                                    className={lista.id} 
+                                                                    name='almacen' 
+                                                                    value={datos.alma}
+                                                                    onChange={handleInputChange}
+                                                                    placeholder="Almacén"
+                                                                    disabled>
+                                                                    <option key={0} value={''}>
+                                                                        ----
+                                                                    </option>
+                                                                    {almacenes && almacenes.map( al => {
+                                                                        return (
+                                                                        <option key={al.almacen.id} value={al.almacen.id}>
+                                                                            {al.almacen.nombre}
+                                                                        </option>
+                                                                        )
+                                                                    })}
+                                                        </Form.Control>
+                                                    </Form.Group>
+                                                </td>                                                    
                                                 <td>                                                            
                                                     <PencilFill className="mr-3 pencil" onClick= {event => {habilitar_linea(lista)}}/>                                               
                                                     <HandThumbsUpFill className="mr-3 pencil" onClick= {async => {guardarMovimiento()}}/>

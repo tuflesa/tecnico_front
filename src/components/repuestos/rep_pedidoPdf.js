@@ -146,12 +146,12 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
             textAlign: 'right',
             fontSize: 10,
         },
-        section10: {
+        /* section10: {
             margin: 2,
             flex: 3,
             flexDirection: "column",
             fontSize: 8
-        },
+        }, */
         sectionTabla: {
             flexDirection: 'row',
             flexGrow: 1,
