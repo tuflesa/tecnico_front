@@ -107,6 +107,7 @@ const PedLista = () => {
                                 <th>Creado por</th>
                                 <th>Empresa</th>
                                 <th>Proveedor</th>
+                                <th>Descripción</th>
                                 <th style={{width:110}}>Fecha Pedido</th>
                                 <th style={{width:110}}>Fecha Entrega</th>
                                 <th style={{width:110}}>Fecha Prevista Entrega</th>
@@ -122,6 +123,7 @@ const PedLista = () => {
                                         <td>{pedido.creado_por.get_full_name}</td>
                                         <td>{pedido.empresa.nombre}</td>
                                         <td>{pedido.proveedor.nombre}</td>
+                                        <td>{pedido.descripcion}</td>
                                         <td>{invertirFecha(String(pedido.fecha_creacion))}</td>
                                         <td>{pedido.fecha_entrega && invertirFecha(String(pedido.fecha_entrega))}</td>                                        
                                         <td>{pedido.fecha_prevista_entrega && invertirFecha(String(pedido.fecha_prevista_entrega))}</td> 

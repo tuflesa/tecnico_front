@@ -57,7 +57,8 @@ const PedidoForm = ({pedido, setPedido}) => {
         direccion_envio: pedido ? (pedido.direccion_envio ? pedido.direccion_envio.id : null) : null,
         contacto: pedido ? (pedido.contacto ? pedido.contacto.id : null) : null,
         observaciones: pedido ? pedido.observaciones : '',
-        observaciones2: pedido ? pedido.observaciones2 : ''
+        observaciones2: pedido ? pedido.observaciones2 : '',
+        descripcion: pedido ? pedido.descripcion : '',
     });
 
     useEffect(()=>{
@@ -140,7 +141,8 @@ const PedidoForm = ({pedido, setPedido}) => {
             direccion_envio: pedido ? (pedido.direccion_envio ? pedido.direccion_envio.id : null) : direcciones[0].id,
             contacto: pedido ? (pedido.contacto ? pedido.contacto.id : null) : null,
             observaciones: pedido ? pedido.observaciones : '',
-            observaciones2: pedido ? pedido.observaciones2 : ''
+            observaciones2: pedido ? pedido.observaciones2 : '',
+            descripcion: pedido ? pedido.descripcion : '',
 
         });
     },[pedido]);
@@ -312,6 +314,7 @@ const PedidoForm = ({pedido, setPedido}) => {
             contacto: datos.contacto,
             observaciones: datos.observaciones,
             observaciones2: datos.observaciones2,
+            descripcion: datos.descripcion,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -345,6 +348,7 @@ const PedidoForm = ({pedido, setPedido}) => {
             contacto: datos.contacto,
             observaciones: datos.observaciones,
             observaciones2: datos.observaciones2,
+            descripcion: datos.descripcion,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -622,7 +626,20 @@ const PedidoForm = ({pedido, setPedido}) => {
                             </Col>
                             :null}
                         </Row>
-                        <Row>                            
+                        <Row>     
+                            <Col>
+                                <Form.Group controlId="descripcion">
+                                    <Form.Label>Descripción pedido</Form.Label>
+                                    <Form.Control imput type="text" 
+                                                name='descripcion'
+                                                value = {datos.descripcion}
+                                                onChange = {handleInputChange}
+                                                placeholder="Descripción Pedido">
+                                    </Form.Control>
+                                </Form.Group>
+                            </Col>  
+                        </Row>
+                        <Row>
                             <Col>
                                 <Form.Group controlId="observaciones">
                                     <Form.Label>Observaciones pedido</Form.Label>
