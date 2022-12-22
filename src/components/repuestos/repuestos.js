@@ -19,6 +19,7 @@ import RepPendientes from './rep_pendientes';
 import RepInventario from './rep_inventario';
 import RepTraspasoAlmacen from './rep_traspaso_almacen';
 import RepPrecio from './rep_precio';
+import Programadores from './a_rep_programadores';
 
 const Repuestos = () => {
     
@@ -27,6 +28,7 @@ const Repuestos = () => {
             <RepNavBar />
             <Switch>
                 <Route path='/repuestos/precio' component={RepPrecio} />
+                <Route path='/repuestos/programadores' component={Programadores} />
                 <Route path='/repuestos' exact component={RepPendientes} />
                 <Route path='/repuestos/traspasos' component={RepTraspasoAlmacen} /> 
                 <Route path='/repuestos/inventario' component={RepInventario} /> 

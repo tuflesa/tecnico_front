@@ -7,6 +7,8 @@ const RepNavBar = () => {
     const [user] = useCookies(['tec-user']);
     const [token] = useCookies(['tec-token']);
     const [mantenimiento, setMantenimiento] = useState(false);
+    const soyProgramador = user['tec-user'].perfil.destrezas.filter(s => s === 7);
+
     useEffect(() => {
         if(user['tec-user'].perfil.puesto.nombre==='Mantenimiento'){
             setMantenimiento(true);
@@ -15,6 +17,7 @@ const RepNavBar = () => {
             setMantenimiento(true);
         }
     }, [token]);
+
     return (
         <React.Fragment>
                 <Navbar bg="light" fixed= 'top'>
@@ -42,7 +45,11 @@ const RepNavBar = () => {
                                     <NavDropdown.Divider />
                                     <NavDropdown.Item href="/repuestos/salidas">Salidas</NavDropdown.Item>  
                                     <NavDropdown.Divider />  
-                                    <NavDropdown.Item href="/repuestos/inventario">Inventario</NavDropdown.Item>                         
+                                    <NavDropdown.Item href="/repuestos/inventario">Inventario</NavDropdown.Item> 
+                                    <NavDropdown.Divider />  
+                                    {soyProgramador[0]===7?
+                                        <NavDropdown.Item href="/repuestos/programadores">Programadores</NavDropdown.Item>                     
+                                    :null}
                                 </NavDropdown>
                             </Nav> 
                         :null}   
