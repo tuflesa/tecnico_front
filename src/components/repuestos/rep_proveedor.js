@@ -80,7 +80,7 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
         )
         .catch(err => { console.log(err);});
         //crear tabla de precios para el articulo del proveedor
-        for(var x=0; x<=newProveedores.length; x++){
+        for(var x=newProveedores.length-1; x<newProveedores.length; x++){
             axios.post(BACKEND_SERVER + `/api/repuestos/precio/`, {
                 proveedor: newProveedores[x],
                 repuesto: repuesto_id,
