@@ -41,6 +41,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     const [stock_editar, setStockEditar] = useState(null);
     const [stock_minimo_editar, setStockMinimoEditar] = useState(null);
     const [empresas, setEmpresas] = useState(null);
+    const [precio, setPrecio] = useState(null);
     const [stock_empresa, setStockEmpresa] = useState(null);
     const [show_listalmacen, setShowListAlmacen] = useState(null);
     const [almacenes_empresa, setAlmacenesEmpresa] = useState(null);
@@ -78,6 +79,20 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         })
         .then( res => {
             setEmpresas(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
+
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + `/api/repuestos/precio/?repuesto=${repuesto.id}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setPrecio(res.data);
         })
         .catch( err => {
             console.log(err);
@@ -527,7 +542,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                     <Col>
                                         <Row>
                                             <Col>
-                                            <h5 className="pb-3 pt-1 mt-2">Stock por empresaaaaaa:</h5>
+                                            <h5 className="pb-3 pt-1 mt-2">Stock por empresa:</h5>
                                             </Col>
                                             <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
                                                 {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
@@ -621,6 +636,8 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                             <thead>
                                                 <tr>
                                                     <th>Nombre</th>
+                                                    <th>Precio</th>
+                                                    <th>Dto</th>
                                                     {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
                                                         <th>Acciones</th>
                                                     :null}
@@ -632,6 +649,26 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                     return (
                                                         <tr key={p.id}>
                                                             <td>{p.nombre}</td>
+                                                            <td>{precio && precio.map(pr =>{
+                                                                if(pr.proveedor===p.id){
+                                                                    return(
+                                                                        <option key={pr.proveedor}>
+                                                                            {pr.precio + '€'}
+                                                                        </option>
+                                                                    )
+                                                                    }
+                                                                })
+                                                            }</td>
+                                                            <td>{precio && precio.map(pr =>{
+                                                                    if(pr.proveedor===p.id){
+                                                                        return(
+                                                                            <option key={pr.proveedor}>
+                                                                                {pr.descuento + '%'}
+                                                                            </option>
+                                                                        )
+                                                                        }
+                                                                    })
+                                                                }</td>
                                                             {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
                                                                 <td>
                                                                     <Trash className="trash"  onClick={event => {handlerBorrarProveedor(p.id)}} />
