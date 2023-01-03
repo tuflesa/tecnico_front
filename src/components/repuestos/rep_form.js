@@ -143,6 +143,14 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         setStockEmpresa(stock_por_empresa);        
     },[repuesto, empresas]);
 
+    const formatNumber = (numero) =>{
+        return new Intl.NumberFormat('de-DE',{ style: 'currency', currency: 'EUR' }).format(numero)
+    }
+
+    const formatPorcentaje = (numero) =>{
+        return new Intl.NumberFormat('de-DE').format(numero)
+    }
+
     const updateRepuesto = () => {
         axios.get(BACKEND_SERVER + `/api/repuestos/detalle/${datos.id}/`,{
             headers: {
@@ -653,7 +661,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                                 if(pr.proveedor===p.id){
                                                                     return(
                                                                         <option key={pr.proveedor}>
-                                                                            {pr.precio + '€'}
+                                                                            {formatNumber(pr.precio)}
                                                                         </option>
                                                                     )
                                                                     }
@@ -663,7 +671,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                                     if(pr.proveedor===p.id){
                                                                         return(
                                                                             <option key={pr.proveedor}>
-                                                                                {pr.descuento + '%'}
+                                                                                {formatPorcentaje(pr.descuento) + '%'}
                                                                             </option>
                                                                         )
                                                                         }
