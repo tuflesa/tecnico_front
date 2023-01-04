@@ -20,12 +20,12 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
                     <View key={i}>
                         <View style={styles.page2}>
                             <View style={styles.section}>
-                                <View style={styles.section6} fixed><Text>{data.repuesto.nombre + (data.repuesto.fabricante? " - " + data.repuesto.fabricante:'') + (" - " + data.repuesto.modelo? data.repuesto.modelo:'')}</Text></View>
-                                <View style={styles.section7} fixed><Text>{data.cantidad}</Text></View>
-                                <View style={styles.section7} fixed><Text>{data.repuesto.unidad_siglas}</Text></View>
-                                <View style={styles.section9} fixed><Text>{formatNumber(data.precio)}</Text></View>
-                                <View style={styles.section9} fixed><Text>{formatPorcentaje(data.descuento) + '%'}</Text></View>
-                                <View style={styles.section9} fixed><Text>{formatNumber(data.total)}</Text></View>
+                                <View style={styles.section6}><Text>{data.repuesto.nombre + (data.repuesto.fabricante? " - " + data.repuesto.fabricante:'') + (" - " + data.repuesto.modelo? data.repuesto.modelo:'')}</Text></View>
+                                <View style={styles.section7}><Text>{data.cantidad}</Text></View>
+                                <View style={styles.section7}><Text>{data.repuesto.unidad_siglas}</Text></View>
+                                <View style={styles.section9}><Text>{formatNumber(data.precio)}</Text></View>
+                                <View style={styles.section9}><Text>{formatPorcentaje(data.descuento) + '%'}</Text></View>
+                                <View style={styles.section9}><Text>{formatNumber(data.total)}</Text></View>
                             </View>
                         </View>
                     </View>
@@ -41,12 +41,12 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
                     <View key={i}>
                         <View style={styles.page2}>
                             <View style={styles.section}>
-                                <View style={styles.section6} fixed><Text>{data.descripcion}</Text></View>
-                                <View style={styles.section7} fixed><Text>{data.cantidad}</Text></View>
-                                <View style={styles.section7} fixed><Text>{null}</Text></View>
-                                <View style={styles.section9} fixed><Text>{formatNumber(data.precio)}</Text></View>
-                                <View style={styles.section9} fixed><Text>{formatPorcentaje(data.descuento) + '%'}</Text></View>
-                                <View style={styles.section9} fixed><Text>{formatNumber(data.total)}</Text></View>
+                                <View style={styles.section6}><Text>{data.descripcion}</Text></View>
+                                <View style={styles.section7}><Text>{data.cantidad}</Text></View>
+                                <View style={styles.section7}><Text>{null}</Text></View>
+                                <View style={styles.section9}><Text>{formatNumber(data.precio)}</Text></View>
+                                <View style={styles.section9}><Text>{formatPorcentaje(data.descuento) + '%'}</Text></View>
+                                <View style={styles.section9}><Text>{formatNumber(data.total)}</Text></View>
                             </View>
                         </View>
                     </View>
@@ -146,12 +146,6 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
             textAlign: 'right',
             fontSize: 10,
         },
-        /* section10: {
-            margin: 2,
-            flex: 3,
-            flexDirection: "column",
-            fontSize: 8
-        }, */
         sectionTabla: {
             flexDirection: 'row',
             flexGrow: 1,
@@ -218,7 +212,7 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
                         </View>
                     </View>
                     { linea !== '' ?
-                        <View style={styles.page3}>
+                        <View style={styles.page3} fixed>
                             <View style={styles.sectionTabla}>
                                 <View style={styles.section6}><Text>Descripción</Text></View>
                                 <View style={styles.section7}><Text>Cant.</Text></View>
