@@ -18,9 +18,9 @@ const RepInventarioFiltro = ({actualizaFiltro}) => {
     });
 
     useEffect(()=>{  
-        const filtro = `?repuesto__nombre__icontains=${datos.nombre}&repuesto__nombre_comun__icontains=${datos.nombre_comun}&repuesto__fabricante__icontains=${datos.fabricante}&almacen__nombre__icontains=${datos.almacen}&almacen__empresa__id=${datos.empresa}&repuesto__descatalogado=${false}`;      
+        const filtro = `?repuesto__nombre__icontains=${datos.nombre}&repuesto__nombre_comun__icontains=${datos.nombre_comun}&repuesto__fabricante__icontains=${datos.fabricante}&almacen__nombre__icontains=${datos.almacen}&almacen__empresa__id=${datos.empresa}&repuesto__descatalogado=${false}&repuesto__id=${datos.id}`;      
         actualizaFiltro(filtro);
-    },[datos.nombre, datos.fabricante, datos.almacen, datos.nombre_comun]);
+    },[datos.nombre, datos.fabricante, datos.almacen, datos.nombre_comun, datos.id]);
 
 
     const handleInputChange = (event) => {
@@ -36,7 +36,7 @@ const RepInventarioFiltro = ({actualizaFiltro}) => {
             <Form>
                 <Row>                    
                     <Col>
-                        <Form.Group controlId="formNombre">
+                        <Form.Group controlId="nombre">
                             <Form.Label>Nombre contiene</Form.Label>
                             <Form.Control type="text" 
                                         name='nombre' 
@@ -66,7 +66,7 @@ const RepInventarioFiltro = ({actualizaFiltro}) => {
                         </Form.Group>
                     </Col>  
                     <Col>
-                        <Form.Group controlId="fabricante">
+                        <Form.Group controlId="almacen">
                             <Form.Label>Almacén contiene</Form.Label>
                             <Form.Control type="text" 
                                         name='almacen' 
@@ -74,7 +74,17 @@ const RepInventarioFiltro = ({actualizaFiltro}) => {
                                         onChange={handleInputChange} 
                                         placeholder="Almacén contiene" />
                         </Form.Group>
-                    </Col>                                       
+                    </Col> 
+                    <Col>
+                        <Form.Group controlId="id">
+                            <Form.Label>Id Repuesto</Form.Label>
+                            <Form.Control type="text" 
+                                        name='id' 
+                                        value={datos.id}
+                                        onChange={handleInputChange} 
+                                        placeholder="Id repuesto" />
+                        </Form.Group>
+                    </Col>                                      
                 </Row>                               
             </Form>
         </Container>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
@@ -6,6 +6,8 @@ import Modal from 'react-bootstrap/Modal'
 import { Button, Row, Col, Table, Container } from 'react-bootstrap';
 import { PencilFill, HandThumbsUpFill, Receipt, Trash, Printer } from 'react-bootstrap-icons';
 import ListaTrazabilidad from './rep_trazabilidad';
+import { Link } from 'react-router-dom';
+import {invertirFecha} from '../utilidades/funciones_fecha';
 
 const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show})=>{
     const [token] = useCookies(['tec-token']);
@@ -15,6 +17,7 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
     const [traza_repuesto, setTrazaRepuesto] = useState(null);
     const [almacentraza, setAlmacenTraza] = useState(null);
     const [showBorrar, setShowBorrar] = useState(false);
+    const [pedidos_pendientes, setPedidosPendientes] = useState(null);
 
     const [datos, setDatos] = useState({
         stocks_minimos: repuesto ? repuesto.stocks_minimos : null,
@@ -25,6 +28,29 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
         localizaciones: null,
         habilitar: true,   
     });  
+
+    useEffect(()=>{
+        empresa && axios.get(BACKEND_SERVER + `/api/repuestos/linea_pedido_pend/?repuesto=${repuesto.id}&pedido__empresa__id=${empresa}` ,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+                }
+        })
+        .then( res => {
+            setPedidosPendientes(res.data.sort(function(a, b){
+                if(a.id > b.id){
+                    return 1;
+                }
+                if(a.id < b.id){
+                    return -1;
+                }
+                return 0;
+            }));
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token, empresa]);
+
     const handleInputChange = (event) => {
         setDatos({
             ...datos,
@@ -227,11 +253,6 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
                         </Col>
                     </Row>
                 </Modal.Body>
-                <Modal.Footer>                                               
-                    <Button variant="info" onClick={handlerListCancelar}>
-                        Cerrar
-                    </Button>
-                </Modal.Footer>
                 <ListaTrazabilidad  showTrazabilidad={showTrazabilidad}
                                     repuesto ={traza_repuesto}
                                     handlerListCancelar={handleCloseTraza}
@@ -250,8 +271,52 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
                         <Button variant="secondary" onClick={handlerClose}>Cerrar</Button>
                     </Modal.Footer>
                 </Modal>
-            </Modal>
-            
+                <Modal.Header closeButton>                
+                    <Modal.Title>Pedidos pendientes</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Row>
+                        <Col>
+                            <Table striped bordered hover>
+                                <thead>
+                                    <tr>
+                                        <th>Numero Pedido</th>
+                                        <th>Cantidad Pendiente</th>
+                                        <th>Proveedor</th>
+                                        <th>Fecha estimada</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                {repuesto ?
+                                    <tbody>
+                                        {pedidos_pendientes && pedidos_pendientes.map( pedidos => {
+                                            return (
+                                                <tr key={pedidos.id}>
+                                                    <td>{pedidos.pedido.numero}</td>
+                                                    <td>{pedidos.por_recibir}</td>
+                                                    <td>{pedidos.pedido.proveedor.nombre}</td> 
+                                                    <td>{invertirFecha(String(pedidos.pedido.fecha_prevista_entrega))}</td>                                     
+                                                    <td>
+                                                        <Link to={`/repuestos/pedido_detalle/${pedidos.pedido.id}`}>
+                                                            <PencilFill className="mr-3 pencil"/>
+                                                        </Link>
+                                                    </td>
+                                                </tr>
+                                            )})
+                                        }
+                                    </tbody>
+                                : null
+                                }
+                            </Table>
+                        </Col>
+                    </Row>
+                </Modal.Body>
+                <Modal.Footer>                                               
+                    <Button variant="info" onClick={handlerListCancelar}>
+                        Cerrar
+                    </Button>
+                </Modal.Footer>
+            </Modal>            
         </Container>
     )
 }

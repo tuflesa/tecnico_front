@@ -79,6 +79,7 @@ const RepInventario = () => {
                     <Table striped bordered hover>
                         <thead>
                             <tr>
+                                <th>Código</th>
                                 <th>Nombre</th>
                                 <th>Critico</th>
                                 <th>Descripción Etiqueta</th>
@@ -93,6 +94,7 @@ const RepInventario = () => {
                             {listInventario && listInventario.map( inventario => {
                                 return (
                                     <tr key={inventario.id}>
+                                        <td>{inventario.id_rep}</td>
                                         <td>{inventario.articulo}</td>
                                         <td>{inventario.critico===true? 'SI':'NO'}</td>
                                         <td>{inventario.nombre_comun}</td>

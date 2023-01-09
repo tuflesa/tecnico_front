@@ -104,6 +104,7 @@ const RepLista = () => {
                     <Table striped bordered hover>
                         <thead>
                             <tr>
+                                <th>Código</th>
                                 <th>Descripción Proveedor</th>
                                 <th>Descripción Etiqueta</th>
                                 <th>Fabricante</th>
@@ -117,6 +118,7 @@ const RepLista = () => {
                             {repuestos && repuestos.map( repuesto => {
                                 return (
                                     <tr key={repuesto.id}>
+                                        <td>{repuesto.id}</td>
                                         <td>{repuesto.nombre}</td>
                                         <td>{repuesto.nombre_comun}</td>
                                         <td>{repuesto.fabricante}</td>
