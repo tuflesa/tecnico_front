@@ -294,6 +294,7 @@ const PedidoForm = ({pedido, setPedido}) => {
 
     const cerrarListMovimiento =() =>{   
         setShowListMovimiento(false);
+        updatePedido();
     }
 
     const cerrarListEntrega =() =>{   
