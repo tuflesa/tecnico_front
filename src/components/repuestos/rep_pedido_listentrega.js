@@ -31,7 +31,7 @@ const EntLista = ({linea_adicional, handleCloseListEntrega, show}) => {
 
     return (
         <Modal show={show} backdrop="static" keyboard={ false } animation={false} size="lg">
-                <Modal.Header closeButton>                
+                <Modal.Header>                
                     <Modal.Title>Listado de Entregas</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>

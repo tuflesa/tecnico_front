@@ -152,7 +152,7 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
 
     return (
         <Modal show={show} backdrop="static" keyboard={ false } animation={false} size="xl">
-                <Modal.Header closeButton>                
+                <Modal.Header>                
                     <Modal.Title>Listado de Entregas</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>

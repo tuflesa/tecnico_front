@@ -117,7 +117,7 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, alm
     
     return(
         <Modal show={showTrazabilidad} backdrop="static" keyboard={ false } animation={false} size="xl">
-            <Modal.Header closeButton>                
+            <Modal.Header>                
                 <Modal.Title>Listado Trazabilidad del Repuesto</Modal.Title>
             </Modal.Header>
             <Modal.Body>

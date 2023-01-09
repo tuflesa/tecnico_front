@@ -100,7 +100,7 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
 
     return (
         <Modal show={show} onHide={handleCloseProveedor} backdrop="static" keyboard={ false } animation={false}>
-                <Modal.Header closeButton>
+                <Modal.Header>
                     <Modal.Title>Añadir Proveedor</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>

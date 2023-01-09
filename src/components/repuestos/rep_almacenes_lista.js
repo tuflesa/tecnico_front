@@ -84,7 +84,7 @@ const RepAlmacenesLista = () => {
                 </Col>
             </Row>
             <Modal show={show} onHide={handlerClose} backdrop="static" keyboard={ false } animation={false}>
-                <Modal.Header closeButton>
+                <Modal.Header>
                     <Modal.Title>Borrar Almacen no permitido ...</Modal.Title>
                 </Modal.Header>
 

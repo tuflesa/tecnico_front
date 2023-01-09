@@ -178,7 +178,7 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
     return (
         <Container>
             <Modal index={1} show={show} backdrop="static" keyboard={ false } animation={false} size="xl" >
-                <Modal.Header closeButton>                
+                <Modal.Header>                
                     <Modal.Title>Repuestos por almacén</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
@@ -259,7 +259,7 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
                                     almacen={almacentraza}
                 />
                 <Modal color="#FF4606" index={2} show={showBorrar} backdrop="static" keyboard={ false } animation={false} >
-                    <Modal.Header closeButton >
+                    <Modal.Header>
                         <Modal.Title>Borrar Almacén, no permitido con stock ...</Modal.Title>
                     </Modal.Header>
 
@@ -271,7 +271,7 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
                         <Button variant="secondary" onClick={handlerClose}>Cerrar</Button>
                     </Modal.Footer>
                 </Modal>
-                <Modal.Header closeButton>                
+                <Modal.Header>                
                     <Modal.Title>Pedidos pendientes</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>

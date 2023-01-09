@@ -209,7 +209,7 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
 
     return (
         <Modal show={show} onHide={handleCloseStock} backdrop="static" keyboard={ false } animation={false}>
-                <Modal.Header closeButton>
+                <Modal.Header>
                     <Modal.Title>Stock Mínimo + Ajuste</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>

@@ -122,7 +122,7 @@ const LineaAdicionalForm = ({show, pedido_id, handleCloseLineaAdicional, updateP
 
     return (
         <Modal show={show} backdrop="static" keyboard={ false } animation={false}>
-                <Modal.Header closeButton>  
+                <Modal.Header>  
                 { linea_adicional ?               
                     <Modal.Title>Rectificar Linea</Modal.Title> :
                     <Modal.Title>Nueva Linea</Modal.Title>

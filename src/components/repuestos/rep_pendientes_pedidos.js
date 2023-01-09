@@ -13,7 +13,7 @@ const ListaPedidos = ({lineasPendientes, repuesto_id, show, handlerListCancelar}
 
     return(
         <Modal show={show} backdrop="static" keyboard={ false } animation={false} size="xl">
-            <Modal.Header closeButton>                
+            <Modal.Header>                
                 <Modal.Title>Listado Pedidos en Curso</Modal.Title>
             </Modal.Header>
             <Modal.Body>

@@ -113,7 +113,7 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
 
     return (
         <Modal show={show} backdrop="static" keyboard={ false } animation={false} size="xl">
-                <Modal.Header closeButton>                
+                <Modal.Header>                
                     <Modal.Title>Nuevo Movimiento</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>

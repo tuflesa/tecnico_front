@@ -139,7 +139,7 @@ const RepLista = () => {
                 </Col>
             </Row>
             <Modal show={show} onHide={handleClose} backdrop="static" keyboard={ false } animation={false}>
-                <Modal.Header closeButton>
+                <Modal.Header>
                     <Modal.Title>Descatalogar</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>Está a punto de descatalogar el repuesto: <strong>{repuestoBorrar && repuestoBorrar.nombre}</strong></Modal.Body>
