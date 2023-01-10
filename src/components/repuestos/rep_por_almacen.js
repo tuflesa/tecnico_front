@@ -30,7 +30,7 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
     });  
 
     useEffect(()=>{
-        empresa && axios.get(BACKEND_SERVER + `/api/repuestos/linea_pedido_pend/?repuesto=${repuesto.id}&pedido__empresa__id=${empresa}` ,{
+        empresa && axios.get(BACKEND_SERVER + `/api/repuestos/linea_pedido_pend/?repuesto=${repuesto.id}&pedido__empresa__id=${empresa}&pedido__finalizado=${false}` ,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
                 }

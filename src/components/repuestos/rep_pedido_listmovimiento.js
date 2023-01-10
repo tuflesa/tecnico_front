@@ -91,7 +91,7 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
             })
             .then( r => { 
                 axios.patch(BACKEND_SERVER + `/api/repuestos/stocks_minimos/${r.data[0].id}/`, {
-                    stock_act: (r.data[0].stock_act - res.data.cantidad) + (listados[0].cantidad - res.data.cantidad), 
+                    stock_act: (r.data[0].stock_act - res.data.cantidad) - (listados[0].cantidad - res.data.cantidad), 
                     }, {
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
@@ -100,7 +100,7 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
                 .then( rs => { 
                     if(lineaElegida.cantidad!==res.data.cantidad){ //de momento funciona bien
                         axios.patch(BACKEND_SERVER + `/api/repuestos/linea_pedido/${linea.id}/`, {
-                            por_recibir: linea.por_recibir + (lineaElegida.cantidad -datos.cantidad),            
+                            por_recibir: linea.por_recibir + (lineaElegida.cantidad - datos.cantidad),            
                         }, {
                             headers: {
                                 'Authorization': `token ${token['tec-token']}`
