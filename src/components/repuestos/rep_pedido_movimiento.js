@@ -65,6 +65,13 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
         });
     },[linea]);
 
+    useEffect(()=>{
+        if(datos.recibido<0){
+            var confirmacion = window.alert('No se pueden hacer entradas en negativo, modifica la cantidad. Gracias');
+            datos.recibido=0;
+        }
+    },[datos.recibido])
+
     const actualizarRecibir = () =>{
         axios.patch(BACKEND_SERVER + `/api/repuestos/linea_pedido/${linea.id}/`, {
             por_recibir: linea.por_recibir - datos.recibido,            
@@ -109,6 +116,23 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
             ...datos,
             [event.target.name] : event.target.value
         })
+    }
+
+    const handleInputChange2 = (event) => {
+        if(event.target.value<0){
+            alert('No se pueden poner numeros negativos');
+            event.target.value='';
+            setDatos({
+                ...datos,
+                [event.target.name] : event.target.value
+            })
+        }
+        else{
+            setDatos({
+                ...datos,
+                [event.target.name] : event.target.value
+            })
+        }
     }
 
     return (
@@ -173,7 +197,7 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
                                     <Form.Control imput type="text"  
                                                 name='recibido' 
                                                 value={datos.recibido}
-                                                onChange={handleInputChange}
+                                                onChange={handleInputChange2}
                                                 placeholder="Cantidad Recibida">  
                                     </Form.Control>
                                 </Form.Group>

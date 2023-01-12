@@ -12,7 +12,8 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
     const [localizaciones, setLocalizaciones] = useState(null);
     const [datos, setDatos] = useState({
         id:'',
-        nombre: '',     
+        nombre: '',  
+        nombre_comun: '',   
     });
 
     useEffect(()=>{
@@ -56,7 +57,7 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
     }  
     
     useEffect(()=>{
-        const filtro = `?stocks_minimos__almacen__id=${almacen}&nombre__icontains=${datos.nombre}&id=${datos.id}`;
+        const filtro = `?stocks_minimos__almacen__id=${almacen}&nombre__icontains=${datos.nombre}&id=${datos.id}&nombre_comun__icontains=${datos.nombre_comun}`;
         actualizaFiltro(filtro);
     },[datos, almacen]);
 
@@ -67,7 +68,7 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
                 <Row>
                     <Col>
                         <Form.Group controlId="formNombre">
-                            <Form.Label>Buscar por Nombre</Form.Label>
+                            <Form.Label>Buscar por Nombre Proveedor</Form.Label>
                             <Form.Control type="text" 
                                         name='nombre' 
                                         value={datos.nombre}
@@ -75,14 +76,27 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
                                         placeholder="Nombre contiene" 
                                         autoFocus/>
                         </Form.Group>
-                        <Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="formNombre_comun">
+                            <Form.Label>Buscar por Nombre Etiqueta</Form.Label>
+                            <Form.Control type="text" 
+                                        name='nombre_comun' 
+                                        value={datos.nombre_comun}
+                                        onChange={handleInputChange}                                        
+                                        placeholder="Nombre etiqueta contiene" 
+                                        />
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="id_repuesto">
                         <Form.Label>Id Repuesto (sin el último dígito)</Form.Label>
                         <Form.Control   type="text" 
                                         name='id' 
                                         value={datos.id}
                                         onChange={handleInputChange} 
                                         placeholder="Id repuesto" />
-                    </Form.Group>
+                        </Form.Group>
                     </Col>
                 </Row>
             </Modal.Header>
