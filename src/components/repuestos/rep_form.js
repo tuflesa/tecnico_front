@@ -500,10 +500,12 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                     {datos.id && <Barcode datos={datos}/>}
                                 </div>
                             </Col>
+                        </Row>
+                        <Row>
                             <Col>
                                 <Form.Group id="observaciones">
                                     <Form.Label>Observaciones</Form.Label>
-                                    <Form.Control type="text" 
+                                    <Form.Control as="textarea" rows={2} 
                                                 name='observaciones' 
                                                 value={datos.observaciones}
                                                 onChange={handleInputChange} 

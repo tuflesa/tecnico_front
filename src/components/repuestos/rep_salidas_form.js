@@ -63,7 +63,7 @@ const RepSalidas = ({alm}) => {
                 'Authorization': `token ${token['tec-token']}`
                 }
         })
-        .then( res => {            
+        .then( res => {
             if(res.data.length === 0){
                 alert('Este Repuesto NO existe en este almacen, revise almacen seleccionado');
                 numeroBar.id='';
@@ -110,7 +110,6 @@ const RepSalidas = ({alm}) => {
     useEffect(()=>{
         let contador =0;
         lineasSalida.length>0 && lineasSalida.forEach(l => {
-            
             axios.post(BACKEND_SERVER + `/api/repuestos/lineasalida/`, {
                 salida: salida.id,
                 repuesto: l.repuesto,
