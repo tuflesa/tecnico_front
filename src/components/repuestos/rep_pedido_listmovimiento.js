@@ -13,11 +13,9 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
     const [user] = useCookies(['tec-user']);
 
     const [listados, setListados] = useState(null);
-    const [stock_minimos, setStockMinimos] = useState(null);
-    const [movimiento, setMovimiento]=useState(null)
     const [lineaElegida, setLineaElegida]=useState(null);
-    const [visible, setvisible]=useState(false);
-    const [almacenes, setAlmacenes]=useState(null)
+    const [almacenes, setAlmacenes]=useState(null);
+    const [reset, setReset]=useState(null);
 
     const [datos, setDatos] = useState({
         fecha: null,
@@ -56,9 +54,30 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
         .catch(err => { console.log(err);})
     },[token, linea]);
 
+    useEffect(()=>{
+        if(lineaElegida){
+            for(var x=0;x<almacenes.length;x++){
+                if(lineaElegida.almacen.id===almacenes[x].almacen.id){
+                    if(lineaElegida.cantidad>almacenes[x].stock_act || datos.cantidad>almacenes[x].stock_act){
+                        alert('No tienes suficiente cantidad en el almacen para hacer el cambio');
+                        setReset(linea);
+                        handlerCancelar();
+                        habilitar_linea(lineaElegida);
+                        handleCloseListMovimiento(false);
+                        
+                    }
+                }
+                if(reset){
+                    //cancela el for para que no de más vueltas
+                    actualizarDatos();
+                    break;
+                }
+            }
+        } 
+    },[datos.almacen]);
+
     // activa y desactiva la escritura en la línea
-    const habilitar_linea = (r)=>{
-        setvisible(true);
+    const habilitar_linea = (r)=>{;
         setLineaElegida(r);
         if(user['tec-user'].perfil.puesto.nombre!=='Operador'){
             var input_min =  document.getElementsByClassName(r.id);
@@ -70,6 +89,7 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
     }
 
     const guardarMovimiento = () => {
+        habilitar_linea(lineaElegida);
         axios.patch(BACKEND_SERVER + `/api/repuestos/movimiento/${lineaElegida.id}/`, { 
             fecha: datos.fecha? datos.fecha : lineaElegida.fecha,
             cantidad: datos.cantidad !==''? datos.cantidad : lineaElegida.cantidad,
@@ -107,7 +127,7 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
                             }     
                         })
                         .then( res => {    
-                            //habilitar_linea(lineaElegida);
+                            habilitar_linea(lineaElegida);
                         })
                         .catch(err => { console.log(err);})
                     }
@@ -115,17 +135,13 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
                 .catch(err => { console.log(err);})
             })
             .catch(err => { console.log(err);})
-
-            setMovimiento(res.data); 
             actualizarRecibir();           
             handlerCancelar();
-            
         })
         .catch(err => { console.log(err);})
     }
 
-    const handlerCancelar = () => {      
-       //handleCloseMovimiento();
+    const handlerCancelar = () => {  
         datos.recibido= '';
         datos.albaran = '';
         datos.almacen = '';
@@ -136,6 +152,18 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
             ...datos,
             [event.target.name] : event.target.value
         })        
+    }
+
+    const actualizarDatos = () => {
+        setDatos({
+            ...datos,
+                fecha: null,
+                cantidad: '',
+                albaran: '',
+                almacen: null, 
+                localizaciones: null,
+                habilitar: true,  
+        })    
     }
 
     const handlerListCancelar = () => {      
