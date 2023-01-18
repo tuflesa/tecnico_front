@@ -47,22 +47,24 @@ const RepPendientes = () => {
                 .then( r => {
                     const stock_empresa = r.data.reduce((a, b) => a + b.stock_act, 0);
                     const stock_minimo_empresa = r.data.reduce((a, b) => a + b.cantidad, 0);
-                    if(res.data.length>0){
-                        stock_por_empresa.push({id: id, articulo: repuesto_nombre, critico: repuesto_critico, stock: stock_empresa, stock_minimo: stock_minimo_empresa});            
-                    }
-                    if(stock_por_empresa){
-                        let hash = {};
-                        let sinduplicados = stock_por_empresa;
-                        sinduplicados = sinduplicados.filter(o => hash[o.id] ? false : hash[o.id] = true);
-                        setPendientes(sinduplicados.sort(function(a, b){
-                            if(a.articulo > b.articulo){
-                                return 1;
-                            }
-                            if(a.articulo < b.articulo){
-                                return -1;
-                            }
-                            return 0;
-                        }));;
+                    if(stock_empresa<stock_minimo_empresa){
+                        if(res.data.length>0){
+                            stock_por_empresa.push({id: id, articulo: repuesto_nombre, critico: repuesto_critico, stock: stock_empresa, stock_minimo: stock_minimo_empresa});            
+                        }
+                        if(stock_por_empresa){
+                            let hash = {};
+                            let sinduplicados = stock_por_empresa;
+                            sinduplicados = sinduplicados.filter(o => hash[o.id] ? false : hash[o.id] = true);
+                            setPendientes(sinduplicados.sort(function(a, b){
+                                if(a.articulo > b.articulo){
+                                    return 1;
+                                }
+                                if(a.articulo < b.articulo){
+                                    return -1;
+                                }
+                                return 0;
+                            }));;
+                        }
                     }
                 })
                 .catch(err => { console.log(err);})
