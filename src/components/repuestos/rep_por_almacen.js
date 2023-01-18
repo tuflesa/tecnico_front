@@ -36,7 +36,8 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
                 }
         })
         .then( res => {
-            setPedidosPendientes(res.data.sort(function(a, b){
+            const pedidosPendientesPositivos = res.data.filter( p => p.por_recibir > 0);
+            setPedidosPendientes(pedidosPendientesPositivos.sort(function(a, b){
                 if(a.id > b.id){
                     return 1;
                 }
