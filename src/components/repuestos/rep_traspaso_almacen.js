@@ -37,6 +37,7 @@ const RepTraspasoAlmacen = ({alm}) => {
         critico: '',
         cantidad: '',
         almacen_entre: '',
+        empresa: user['tec-user'].perfil.empresa.id,
     }); 
 
     useEffect(()=>{
@@ -93,13 +94,15 @@ const RepTraspasoAlmacen = ({alm}) => {
                             stock: res.data[0].stock_act,
                             critico: r.data.es_critico ? 'Si' : 'No' }]);
                     }
-                    axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimo_detalle/?repuesto=${datos.id}`,{
+                    axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimo_detalle/?repuesto=${datos.id}&almacen__empresa=${datos.empresa}`,{
                         headers: {
                             'Authorization': `token ${token['tec-token']}`
                             }     
                     })
                     .then( res => { 
-                        setAlmacenEntrega(res.data);
+                        const almacenes_retorno = res.data.filter( al => al.almacen.id != numeroBar.almacen);
+                        setAlmacenEntrega(almacenes_retorno);
+                        
                     })
                     .catch(err => { console.log(err);})
                 })
