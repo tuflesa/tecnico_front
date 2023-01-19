@@ -20,6 +20,7 @@ import RepInventario from './rep_inventario';
 import RepTraspasoAlmacen from './rep_traspaso_almacen';
 import RepPrecio from './rep_precio';
 import Programadores from './a_rep_programadores';
+import LineaAdicional from './rep_lineas_adicionales';
 
 const Repuestos = () => {
     
@@ -33,6 +34,7 @@ const Repuestos = () => {
                 <Route path='/repuestos/traspasos' component={RepTraspasoAlmacen} /> 
                 <Route path='/repuestos/inventario' component={RepInventario} /> 
                 <Route path='/repuestos/listado' component={RepLista} />
+                <Route path='/repuestos/lineas_adicionales' component={LineaAdicional} /> 
                 <Route path='/repuestos/pedidos' component={PedLista} /> 
                 <Route path='/repuestos/salidas/:id' component={RepSalidasID} /> 
                 <Route path='/repuestos/salidas' component={RepSalidasGenerico} />                    

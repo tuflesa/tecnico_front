@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 import RepListaFilto from './rep_lista_filtro';
 import ReactExport from 'react-data-export';
 
-const RepLista = () => {
+const RepLista = (props) => {
     const [token] = useCookies(['tec-token']);
     //const [user] = useCookies(['tec-user']);
     const [repuestos, setRepuestos] = useState(null);

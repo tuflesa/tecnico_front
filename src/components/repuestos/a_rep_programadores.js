@@ -14,7 +14,8 @@ const Programadores = () => {
     const soyProgramador = user['tec-user'].perfil.destrezas.filter(s => s === 7);
     const [lista_repuestos, setListaRepuestos] = useState(null);
 
-    const CrearListado = ()=>{
+    //crea el listado en la tabla de precios de proveedor de los repuestos ya enlazados a proveedores.
+    /* const CrearListado = ()=>{
         axios.get(BACKEND_SERVER + `/api/repuestos/lista/`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -45,7 +46,7 @@ const Programadores = () => {
             console.log(err);
         });
     }
-
+ */
     return (
         <Container className='mt-5'>
             <Row>
@@ -58,7 +59,7 @@ const Programadores = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            <th><Button variant="info" onClick={event =>{CrearListado()}}>Crear lista</Button></th>
+                            {/* <th><Button variant="info" onClick={event =>{CrearListado()}}>Crear lista</Button></th> */}
                         </tbody>
                     </Table>
                 </Col>
