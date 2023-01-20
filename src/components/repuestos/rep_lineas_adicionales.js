@@ -12,32 +12,44 @@ const LineaAdicional = () => {
     const [token] = useCookies(['tec-token']);
     const [filtro, setFiltro] = useState(``);
     const [lineas_adicionales, setLineasAdicionales] = useState(null);
-
-    useEffect(()=>{
-        axios.get(BACKEND_SERVER + '/api/repuestos/linea_adicional_detalle/' + filtro,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-                }
-        })
-        .then( res => {
-            setLineasAdicionales(res.data.sort(function(a, b){
-                if(a.descripcion > b.descripcion){
-                    return 1;
-                }
-                if(a.descripcion < b.descripcion){
-                    return -1;
-                }
-                return 0;
-            }));
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    }, [token, filtro]);
+    const [filtroII,setFiltroII] = useState( ``);
+    const [buscando,setBuscando] = useState(false);
 
     const actualizaFiltro = str => {
-        setFiltro(str);
+        setFiltroII(str);
     } 
+
+    useEffect(()=>{
+        if (!buscando){
+            setFiltro(filtroII);
+        }
+    },[buscando, filtroII]);
+
+    useEffect(()=>{
+        if (filtro){
+            setBuscando(true);
+            axios.get(BACKEND_SERVER + '/api/repuestos/linea_adicional_detalle/' + filtro,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                    }
+            })
+            .then( res => {
+                setLineasAdicionales(res.data.sort(function(a, b){
+                    if(a.descripcion > b.descripcion){
+                        return 1;
+                    }
+                    if(a.descripcion < b.descripcion){
+                        return -1;
+                    }
+                    return 0;
+                }));
+                setBuscando(false);
+            })
+            .catch( err => {
+                console.log(err);
+            });
+        }
+    }, [token, filtro]);
 
     return (
         <Container className="mt-5">

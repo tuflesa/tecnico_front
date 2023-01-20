@@ -7,47 +7,59 @@ import { Button, Row, Form, Col, Table } from 'react-bootstrap';
 import { ArrowDownCircle} from 'react-bootstrap-icons';
 const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>{
     const [token] = useCookies(['tec-token']);
-    const [filtro, setFiltro] = useState(null);
+    const [filtro, setFiltro] = useState('');
     const [repuesto, setRepuesto] = useState(null);
     const [localizaciones, setLocalizaciones] = useState(null);
+    const [filtroII,setFiltroII] = useState( ``);
+    const [buscando,setBuscando] = useState(false);
     const [datos, setDatos] = useState({
         id:'',
         nombre: '',  
         nombre_comun: '',   
     });
+    
+    const actualizaFiltro = str => {
+        setFiltroII(str);
+    }
 
     useEffect(()=>{
-        filtro && almacen && axios.get(BACKEND_SERVER + `/api/repuestos/detalle/`+ filtro,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }     
-        })
-        .then( res => {  
-            setRepuesto(res.data.sort(function(a, b){
-                if(a.nombre > b.nombre){
-                    return 1;
-                }
-                if(a.nombre < b.nombre){
-                    return -1;
-                }
-                return 0;
-            }))
-            axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimos/?almacen=${almacen}`,{
+        if (!buscando){
+            setFiltro(filtroII);
+        }
+    },[buscando, filtroII]);
+
+    useEffect(()=>{
+        if (filtro){
+            setBuscando(true);
+            filtro && almacen && axios.get(BACKEND_SERVER + `/api/repuestos/detalle/`+ filtro,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
-                  }     
+                }     
             })
-            .then( r => {   
-                setLocalizaciones(r.data);           
+            .then( res => {  
+                setRepuesto(res.data.sort(function(a, b){
+                    if(a.nombre > b.nombre){
+                        return 1;
+                    }
+                    if(a.nombre < b.nombre){
+                        return -1;
+                    }
+                    return 0;
+                }))
+                axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimos/?almacen=${almacen}`,{
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }     
+                })
+                .then( r => {   
+                    setLocalizaciones(r.data);           
+                })
+                .catch(err => { console.log(err);})
+                setBuscando(false);
             })
             .catch(err => { console.log(err);})
-        })
-        .catch(err => { console.log(err);})
-    },[filtro]);    
-
-    const actualizaFiltro = str => {
-        setFiltro(str);
-    }
+        }
+    },[filtro, token, show]);    
     
     const handleInputChange = (event) => {
         setDatos({
@@ -68,7 +80,7 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
                 <Row>
                     <Col>
                         <Form.Group controlId="formNombre">
-                            <Form.Label>Buscar por Nombre Proveedor</Form.Label>
+                            <Form.Label>Buscar por Descripción Proveedor</Form.Label>
                             <Form.Control type="text" 
                                         name='nombre' 
                                         value={datos.nombre}

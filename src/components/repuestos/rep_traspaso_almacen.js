@@ -6,7 +6,6 @@ import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table, Button, Form } from 'react-bootstrap';
 import { Trash, PlusSquare, DashSquare } from 'react-bootstrap-icons';
 import BuscarRepuestos from "./rep_salida_buscar";
-import RepSalidas from "./rep_salidas_form";
 
 const RepTraspasoAlmacen = ({alm}) => {
     const [token] = useCookies(['tec-token']);

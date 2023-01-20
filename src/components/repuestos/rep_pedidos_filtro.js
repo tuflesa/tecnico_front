@@ -61,7 +61,6 @@ const PedidosFiltro = ({ actualizaFiltro }) => {
         })
         .then( res => {
             setDestrezas(res.data);
-            console.log(res.data);
         })
         .catch( err => {
             console.log(err);
