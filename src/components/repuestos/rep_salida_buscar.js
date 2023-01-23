@@ -5,38 +5,49 @@ import { BACKEND_SERVER } from '../../constantes';
 import Modal from 'react-bootstrap/Modal'
 import { Button, Row, Form, Col, Table } from 'react-bootstrap';
 import { ArrowDownCircle} from 'react-bootstrap-icons';
+import { local } from 'd3';
 const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>{
     const [token] = useCookies(['tec-token']);
-    const [filtro, setFiltro] = useState('');
+    const [filtroII, setFiltroII] = useState(`?stocks_minimos__almacen__id=${almacen}`);
     const [repuesto, setRepuesto] = useState(null);
-    const [localizaciones, setLocalizaciones] = useState(null);
-    const [filtroII,setFiltroII] = useState( ``);
-    const [buscando,setBuscando] = useState(false);
+    //const [localizaciones, setLocalizaciones] = useState(null);
+    const [filtro, setFiltro] = useState( '');
+    const [buscando, setBuscando] = useState(false);
     const [datos, setDatos] = useState({
         id:'',
         nombre: '',  
         nombre_comun: '',   
     });
-    
+
     const actualizaFiltro = str => {
         setFiltroII(str);
     }
 
     useEffect(()=>{
+        console.log('buscando');
+        console.log(buscando);
         if (!buscando){
             setFiltro(filtroII);
         }
-    },[buscando, filtroII]);
+    },[buscando, filtroII, show]);
+  
+    useEffect(()=>{
+        const filtro2 = `?stocks_minimos__almacen__id=${almacen}&nombre__icontains=${datos.nombre}&id=${datos.id}&nombre_comun__icontains=${datos.nombre_comun}`;
+        actualizaFiltro(filtro2);
+    },[datos.id, datos.nombre, datos.nombre_comun]);
 
     useEffect(()=>{
         if (filtro){
             setBuscando(true);
-            filtro && almacen && axios.get(BACKEND_SERVER + `/api/repuestos/detalle/`+ filtro,{
+            console.log('estoy dentro y tengo almacén');
+            console.log(almacen);
+            almacen && axios.get(BACKEND_SERVER + `/api/repuestos/detalle/`+ filtro,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }     
             })
             .then( res => {  
+                console.log(res.data);
                 setRepuesto(res.data.sort(function(a, b){
                     if(a.nombre > b.nombre){
                         return 1;
@@ -46,20 +57,20 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
                     }
                     return 0;
                 }))
-                axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimos/?almacen=${almacen}`,{
+                setBuscando(false);
+                /* axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimos/?almacen=${almacen}`,{
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
                     }     
                 })
                 .then( r => {   
-                    setLocalizaciones(r.data);           
+                    setLocalizaciones(r.data); 
                 })
-                .catch(err => { console.log(err);})
-                setBuscando(false);
+                .catch(err => { console.log(err);}) */
             })
             .catch(err => { console.log(err);})
-        }
-    },[filtro, token, show]);    
+        } 
+    },[filtro, almacen]);    
     
     const handleInputChange = (event) => {
         setDatos({
@@ -67,12 +78,7 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
             [event.target.name] : event.target.value
         })
     }  
-    
-    useEffect(()=>{
-        const filtro = `?stocks_minimos__almacen__id=${almacen}&nombre__icontains=${datos.nombre}&id=${datos.id}&nombre_comun__icontains=${datos.nombre_comun}`;
-        actualizaFiltro(filtro);
-    },[datos, almacen]);
-
+   
     return(
         <Modal show={show} backdrop="static" keyboard={ false } animation={false} size="xl">
             <Modal.Title>Buscar Repuesto</Modal.Title>
@@ -128,9 +134,11 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
                                     return (                                                
                                         <tr key={rep.id}>
                                             <td>{rep.nombre}</td>  
-                                            {/* <td>{repuesto.stocks_minimos.localizacion}</td> */}
-                                            <td>{localizaciones && localizaciones.map(localizacion =>{
+                                            {/* <td>{localizaciones && localizaciones.map(localizacion =>{
                                                 if(localizacion.repuesto=== rep.id){return(localizacion.localizacion)}
+                                            })} </td> */}
+                                            <td>{rep.stocks_minimos && rep.stocks_minimos.map(localizacion =>{
+                                                if(localizacion.repuesto.id=== rep.id){return(localizacion.localizacion)}
                                             })} </td>
                                             <td>
                                             <ArrowDownCircle className="mr-3 pencil" onClick={event => {elegirRepuesto(rep.id)}}/>

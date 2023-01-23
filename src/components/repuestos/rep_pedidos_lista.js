@@ -45,14 +45,13 @@ const PedLista = () => {
                     }
                     return 0;
                 }))
-                setShow(true);
                 setBuscando(false);
             })
             .catch( err => {
                 console.log(err);
             });
         }
-    },[show, filtro, token]); 
+    },[filtro, token]); 
     
     const BorrarP = (pedido)=>{
         axios.get(BACKEND_SERVER + `/api/repuestos/pedido_detalle/${pedido.id}/`,{
