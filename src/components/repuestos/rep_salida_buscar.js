@@ -34,13 +34,11 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
     useEffect(()=>{
         const filtro2 = `?stocks_minimos__almacen__id=${almacen}&nombre__icontains=${datos.nombre}&id=${datos.id}&nombre_comun__icontains=${datos.nombre_comun}`;
         actualizaFiltro(filtro2);
-    },[datos.id, datos.nombre, datos.nombre_comun]);
+    },[datos.id, datos.nombre, datos.nombre_comun, almacen]);
 
     useEffect(()=>{
         if (filtro){
             setBuscando(true);
-            console.log('estoy dentro y tengo almacén');
-            console.log(almacen);
             almacen && axios.get(BACKEND_SERVER + `/api/repuestos/detalle/`+ filtro,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
@@ -48,25 +46,8 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
             })
             .then( res => {  
                 console.log(res.data);
-                setRepuesto(res.data.sort(function(a, b){
-                    if(a.nombre > b.nombre){
-                        return 1;
-                    }
-                    if(a.nombre < b.nombre){
-                        return -1;
-                    }
-                    return 0;
-                }))
+                setRepuesto(res.data.results);
                 setBuscando(false);
-                /* axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimos/?almacen=${almacen}`,{
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`
-                    }     
-                })
-                .then( r => {   
-                    setLocalizaciones(r.data); 
-                })
-                .catch(err => { console.log(err);}) */
             })
             .catch(err => { console.log(err);})
         } 
