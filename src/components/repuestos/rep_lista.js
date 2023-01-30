@@ -17,20 +17,23 @@ const RepLista = (props) => {
     const [filtro, setFiltro] = useState(null);
     const [filtroII,setFiltroII] = useState( `?descatalogado=${false}`);
     const [buscando,setBuscando] = useState(false);
+    const [count, setCount] = useState(null);
+    let filtroPag=(null);
 
     const ExcelFile = ReactExport.ExcelFile;
     const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
     const ExcelColumn = ReactExport.ExcelFile.ExcelColumn;
 
-    const actualizaFiltro = str => {
-        setFiltroII(str);
-    }
+    const [datos, setDatos] = useState({
+        pagina: 1,
+    });
 
     useEffect(()=>{
+        filtroPag = (`&page=${datos.pagina}`);
         if (!buscando){
-            setFiltro(filtroII);
+            setFiltro(filtroII + filtroPag);
         }
-    },[buscando, filtroII]);
+    },[buscando, filtroII, datos.pagina]);
 
     useEffect(()=>{
         if (!show && filtro){
@@ -41,22 +44,40 @@ const RepLista = (props) => {
                   }
             })
             .then( res => {
-                setRepuestos(res.data.sort(function(a, b){
-                    if(a.nombre > b.nombre){
-                        return 1;
-                    }
-                    if(a.nombre < b.nombre){
-                        return -1;
-                    }
-                    return 0;
-                }));
+                console.log(res.data);
+                setRepuestos(res.data.results);
                 setBuscando(false);
+                setCount(res.data.count);
             })
             .catch( err => {
                 console.log(err);
             });
         }
     }, [token, filtro, show]);
+
+    const cambioPagina = (pag) => {
+        if(pag<=0){
+            pag=1;
+        }
+        if(pag>count/3){
+            if(count % 3 === 0){
+                pag=Math.trunc(count/3);
+            }
+            if(count % 3 !== 0){
+                pag=Math.trunc(count/3)+1;
+            }
+        }
+        if(pag>0){
+            setDatos({
+                ...datos,
+                pagina: pag,
+            })
+        }
+    } 
+
+    const actualizaFiltro = str => {
+        setFiltroII(str);
+    }
 
     const handleClose = () => setShow(false);
 
@@ -101,6 +122,12 @@ const RepLista = (props) => {
                             <ExcelColumn label="Descatalogado" value="descatalogado"/>
                         </ExcelSheet>
                     </ExcelFile> 
+                    <table>
+                        <tbody>
+                            <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
+                            <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
+                        </tbody>
+                    </table>
                     <Table striped bordered hover>
                         <thead>
                             <tr>

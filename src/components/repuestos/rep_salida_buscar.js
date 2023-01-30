@@ -16,7 +16,6 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
     const [count, setCount] = useState(null);
     const [filtro, setFiltro] = useState( '');
     const [buscando, setBuscando] = useState(false);
-    //var pagina = 1;
 
     const [datos, setDatos] = useState({
         id:'',
@@ -51,8 +50,6 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
             .then( res => { 
                 setRepuesto(res.data.results);
                 setCount(res.data.count);
-                datos.next=(res.data.next);
-                datos.previous=res.data.previous;
                 setBuscando(false);
             })
             .catch(err => { console.log(err);})
@@ -78,8 +75,6 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
                 pag=Math.trunc(count/3)+1;
             }
         }
-        console.log(Math.trunc(count/3));
-        console.log(pag);
         if(pag>0){
             setDatos({
                 ...datos,
