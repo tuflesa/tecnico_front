@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 import RepListaFilto from './rep_lista_filtro';
 import ReactExport from 'react-data-export';
 
-const RepLista = (props) => {
+const RepLista = () => {
     const [token] = useCookies(['tec-token']);
     //const [user] = useCookies(['tec-user']);
     const [repuestos, setRepuestos] = useState(null);
@@ -44,7 +44,6 @@ const RepLista = (props) => {
                   }
             })
             .then( res => {
-                console.log(res.data);
                 setRepuestos(res.data.results);
                 setBuscando(false);
                 setCount(res.data.count);
@@ -76,6 +75,7 @@ const RepLista = (props) => {
     } 
 
     const actualizaFiltro = str => {
+        datos.pagina=1;
         setFiltroII(str);
     }
 
