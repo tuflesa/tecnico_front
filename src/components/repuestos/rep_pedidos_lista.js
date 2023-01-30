@@ -36,15 +36,7 @@ const PedLista = () => {
                 }
             })
             .then( res => {
-                setPedidos(res.data.sort(function(a, b){
-                    if(a.numero > b.numero){
-                        return 1;
-                    }
-                    if(a.numero < b.numero){
-                        return -1;
-                    }
-                    return 0;
-                }))
+                setPedidos(res.data);
                 setBuscando(false);
             })
             .catch( err => {

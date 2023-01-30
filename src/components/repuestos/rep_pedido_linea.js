@@ -56,15 +56,7 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
               }     
         })
         .then( res => { 
-            setRepuestos(res.data.sort(function(a, b){
-                if(a.nombre > b.nombre){
-                    return 1;
-                }
-                if(a.nombre < b.nombre){
-                    return -1;
-                }
-                return 0;
-            }));
+            setRepuestos(res.data);
         })
         .catch(err => { console.log(err);})
     },[token, proveedor_id, datos.repuesto]);

@@ -50,15 +50,7 @@ const RepInventario = () => {
                     r['id_rep']=r.repuesto.id;
                     r['critico']=r.repuesto.es_critico;
                 })}
-                setListInventario(res.data.sort(function(a, b){
-                    if(a.articulo > b.articulo){
-                        return 1;
-                    }
-                    if(a.articulo < b.articulo){
-                        return -1;
-                    }
-                    return 0;
-                }));
+                setListInventario(res.data);
                 setBuscando(false);
             })
             .catch( err => {

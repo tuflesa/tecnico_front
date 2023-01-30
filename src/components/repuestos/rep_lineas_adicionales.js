@@ -34,15 +34,7 @@ const LineaAdicional = () => {
                     }
             })
             .then( res => {
-                setLineasAdicionales(res.data.sort(function(a, b){
-                    if(a.descripcion > b.descripcion){
-                        return 1;
-                    }
-                    if(a.descripcion < b.descripcion){
-                        return -1;
-                    }
-                    return 0;
-                }));
+                setLineasAdicionales(res.data);
                 setBuscando(false);
             })
             .catch( err => {

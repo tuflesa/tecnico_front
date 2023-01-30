@@ -82,15 +82,7 @@ const RepPendientes = () => {
             }
         })
         .then( res => {
-            setPedFueradeFecha(res.data.sort(function(a, b){
-                if(a.numero > b.numero){
-                    return 1;
-                }
-                if(a.numero < b.numero){
-                    return -1;
-                }
-                return 0;
-            }))
+            setPedFueradeFecha(res.data);
         })
         .catch( err => {
             console.log(err);
