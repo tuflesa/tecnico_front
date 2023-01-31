@@ -112,6 +112,16 @@ const RepPendientes = () => {
         setShow(false);
     }
 
+    const comparar = (x) => {
+        if(lineasPendientes){
+            for(var y=0;y<lineasPendientes.length;y++){
+                if(lineasPendientes[y].repuesto === x.id){                                      ;
+                    return( "table-success");
+                }
+            }
+        }
+    }
+
     return (
         <Container className="mt-5">
             <Row>
@@ -131,7 +141,7 @@ const RepPendientes = () => {
                         <tbody>
                             {pendientes && pendientes.map( pendiente => {
                                 return (
-                                    <tr key={pendiente.id}>
+                                    <tr key={pendiente.id} className = {comparar(pendiente)? "table-success" : " "}>
                                         <td>{pendiente.articulo}</td>
                                         <td>{pendiente.critico?'Si':'No'}</td>
                                         <td>{pendiente.stock}</td>
