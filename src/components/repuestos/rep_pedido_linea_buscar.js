@@ -12,7 +12,8 @@ const BuscarRepuestosPedido = ({cerrarListRepuestos, show, proveedor_id, elegirR
     const [repuestos, setRepuestos] = useState(null);
     const [datos, setDatos] = useState({
         id:'',
-        nombre: '',     
+        nombre: '', 
+        modelo: '',    
     });
 
     useEffect(()=>{
@@ -22,15 +23,7 @@ const BuscarRepuestosPedido = ({cerrarListRepuestos, show, proveedor_id, elegirR
               }     
         })
         .then( res => { 
-            setRepuestos(res.data.sort(function(a, b){
-                if(a.repuesto.nombre > b.repuesto.nombre){
-                    return 1;
-                }
-                if(a.repuesto.nombre < b.repuesto.nombre){
-                    return -1;
-                }
-                return 0;
-            }));
+            setRepuestos(res.data);
         })
         .catch(err => { console.log(err);})
     },[filtro]);
@@ -47,9 +40,9 @@ const BuscarRepuestosPedido = ({cerrarListRepuestos, show, proveedor_id, elegirR
     }  
     
     useEffect(()=>{
-        const filtro = `?proveedores__id=${proveedor_id}&descatalogado=${false}&repuesto__nombre__icontains=${datos.nombre}&repuesto__id=${datos.id}`;
+        const filtro = `?proveedores__id=${proveedor_id}&descatalogado=${false}&repuesto__nombre__icontains=${datos.nombre}&repuesto__id=${datos.id}&repuesto__modelo__icontains=${datos.modelo}`;
         actualizaFiltro(filtro);
-    },[datos.nombre, datos.id, proveedor_id]);
+    },[datos.nombre, datos.id, proveedor_id, datos.modelo]);
 
     return(
         <Modal show={show} backdrop="static" keyboard={ false } animation={false} size="xl">
@@ -67,15 +60,28 @@ const BuscarRepuestosPedido = ({cerrarListRepuestos, show, proveedor_id, elegirR
                                         autoFocus
                                         />
                         </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="modelo">
+                            <Form.Label>Buscar por Modelo</Form.Label>
+                            <Form.Control type="text" 
+                                        name='modelo' 
+                                        value={datos.modelo}
+                                        onChange={handleInputChange}                                        
+                                        placeholder="Modelo contiene" 
+                                        />
+                        </Form.Group>
+                    </Col>
+                    <Col>
                         <Form.Group>
-                        <Form.Label>Id Repuesto (sin el último dígito)</Form.Label>
+                        <Form.Label>Id Repuesto</Form.Label>
                         <Form.Control   type="text" 
                                         name='id' 
                                         value={datos.id}
                                         onChange={handleInputChange} 
                                         placeholder="Id repuesto" 
                                         />
-                    </Form.Group>
+                        </Form.Group>
                     </Col>
                 </Row>
             </Modal.Header>
@@ -86,6 +92,7 @@ const BuscarRepuestosPedido = ({cerrarListRepuestos, show, proveedor_id, elegirR
                             <thead>
                                 <tr>
                                     <th>Nombre</th>
+                                    <th>Modelo</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
@@ -94,6 +101,7 @@ const BuscarRepuestosPedido = ({cerrarListRepuestos, show, proveedor_id, elegirR
                                     return (                                                
                                         <tr key={rep.repuesto.id}>
                                             <td>{rep.repuesto.nombre}</td> 
+                                            <td>{rep.repuesto.modelo}</td> 
                                             <td>
                                             <ArrowDownCircle className="mr-3 pencil" onClick={event => {elegirRepuesto(rep)}}/>
                                             </td>                                                
