@@ -756,7 +756,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                                             {datos.lineas_pedido && datos.lineas_pedido.map( linea => {
                                                 {total_pedido+=Number(linea.total)}
                                                 return (
-                                                    <tr key={linea.id}>
+                                                    <tr key={linea.id} className = {((linea.por_recibir===0) && (linea.cantidad!=linea.por_recibir) || (linea.cantidad<(linea.cantidad-linea.por_recibir)))? "table-success" : (linea.cantidad - linea.por_recibir)>0? "table-primary" : " "}>
                                                         <td>{linea.repuesto.nombre + (linea.repuesto.fabricante? ' - ' + linea.repuesto.fabricante:'') + (linea.repuesto.modelo? ' - ' + linea.repuesto.modelo:'')}</td>
                                                         <td>{linea.cantidad}</td>
                                                         <td>{linea.repuesto.unidad_nombre}</td>
@@ -812,7 +812,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                                             {datos.lineas_adicionales && datos.lineas_adicionales.map( lineaAdicional => {
                                                 {total_pedido+=Number(lineaAdicional.total)}
                                                 return (
-                                                    <tr key={lineaAdicional.id}>
+                                                    <tr key={lineaAdicional.id}  className = {((lineaAdicional.por_recibir===0) && (lineaAdicional.cantidad!=lineaAdicional.por_recibir) || (lineaAdicional.cantidad<(lineaAdicional.cantidad-lineaAdicional.por_recibir)))? "table-success" : (lineaAdicional.cantidad - lineaAdicional.por_recibir)>0? "table-primary" : " "}>
                                                         <td>{lineaAdicional.descripcion}</td>
                                                         <td>{lineaAdicional.cantidad}</td>
                                                         <td>{formatNumber(lineaAdicional.precio)}</td>
