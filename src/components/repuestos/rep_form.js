@@ -421,6 +421,8 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                     />
                                 </Form.Group>
                             </Col>
+                        </Row>
+                        <Row>
                             <Col>
                                 <Form.Group id="tipo">
                                     <Form.Label>Tipo  (*)</Form.Label>
@@ -439,8 +441,6 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                     </Form.Control>
                                 </Form.Group>
                             </Col>
-                        </Row>
-                        <Row>
                             <Col>
                                 <Form.Group id="fabricante">
                                     <Form.Label>Fabricante</Form.Label>
