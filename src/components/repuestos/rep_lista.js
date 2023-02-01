@@ -58,12 +58,12 @@ const RepLista = () => {
         if(pag<=0){
             pag=1;
         }
-        if(pag>count/3){
-            if(count % 3 === 0){
-                pag=Math.trunc(count/3);
+        if(pag>count/20){
+            if(count % 20 === 0){
+                pag=Math.trunc(count/20);
             }
-            if(count % 3 !== 0){
-                pag=Math.trunc(count/3)+1;
+            if(count % 20 !== 0){
+                pag=Math.trunc(count/20)+1;
             }
         }
         if(pag>0){
