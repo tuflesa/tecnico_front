@@ -85,6 +85,7 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
                 proveedor: newProveedores[x],
                 repuesto: repuesto_id,
                 precio: 0,
+                descuento: 0,
             }, {
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
