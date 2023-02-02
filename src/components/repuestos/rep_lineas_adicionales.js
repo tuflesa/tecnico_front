@@ -12,18 +12,25 @@ const LineaAdicional = () => {
     const [token] = useCookies(['tec-token']);
     const [filtro, setFiltro] = useState(``);
     const [lineas_adicionales, setLineasAdicionales] = useState(null);
-    const [filtroII,setFiltroII] = useState( ``);
-    const [buscando,setBuscando] = useState(false);
+    const [filtroII, setFiltroII] = useState( `?page=${1}`);
+    const [buscando, setBuscando] = useState(false);
+    const [count, setCount] = useState(null);
+    let filtroPag=(null);
 
     const actualizaFiltro = str => {
         setFiltroII(str);
     } 
 
+    const [datos, setDatos] = useState({
+        pagina: 1,
+    });
+
     useEffect(()=>{
+        filtroPag = (`&page=${datos.pagina}`);
         if (!buscando){
-            setFiltro(filtroII);
+            setFiltro(filtroII + filtroPag);
         }
-    },[buscando, filtroII]);
+    },[buscando, filtroII, datos.pagina]);
 
     useEffect(()=>{
         if (filtro){
@@ -34,7 +41,8 @@ const LineaAdicional = () => {
                     }
             })
             .then( res => {
-                setLineasAdicionales(res.data);
+                setLineasAdicionales(res.data.results);
+                setCount(res.data.count);
                 setBuscando(false);
             })
             .catch( err => {
@@ -42,6 +50,26 @@ const LineaAdicional = () => {
             });
         }
     }, [token, filtro]);
+
+    const cambioPagina = (pag) => {
+        if(pag<=0){
+            pag=1;
+        }
+        else if(pag>count/20){
+            if(count % 20 === 0){
+                pag=Math.trunc(count/20);
+            }
+            if(count % 20 !== 0){
+                pag=Math.trunc(count/20)+1;
+            }
+        }
+        if(pag>0){
+            setDatos({
+                ...datos,
+                pagina: pag,
+            })
+        }
+    } 
 
     return (
         <Container className="mt-5">
@@ -53,6 +81,12 @@ const LineaAdicional = () => {
             <Row>
                 <Col>
                     <h5 className="mb-3 mt-3">Lista lineas adionales</h5>
+                    <table>
+                        <tbody>
+                            <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
+                            <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
+                        </tbody>
+                    </table>
                     <Table striped bordered hover>
                         <thead>
                             <tr>
