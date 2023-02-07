@@ -214,51 +214,53 @@ const RepSalidas = ({alm}) => {
 
     return (
         <Container className="mt-5">
-            <Row>                
-                <Col>
-                    <Form.Group>
-                        <Form.Label className="mt-2">Almacén</Form.Label>
-                        <Form.Control as="select"
-                                    tabIndex={1}  
-                                    name='almacen' 
-                                    value={numeroBar.almacen}
-                                    disabled = {lineasSalida.length>0 || almacenesBloqueado}
-                                    placeholder="Almacén"
-                                    onChange={handleInputChange}
-                                    autoFocus> 
-                                    {!alm && <option key={0} value={''}>
-                                            ----
-                                    </option>}
-                                    {almacenes && almacenes.map( almacen => {
-                                        return (
-                                        <option key={almacen.id} value={almacen.id}>
-                                            {almacen.nombre}                                            
-                                        </option>                                        
-                                        )
-                                    })}                                                                                                                                                          
-                        </Form.Control>
-                    </Form.Group>
-                </Col>                 
-                {numeroBar.almacen ?                            
-                <Col>
-                    <Form.Group >
-                        <Form.Label>Codigo Barras</Form.Label>
-                        <Form.Control
-                                    type="text"
-                                    id="prueba"
-                                    tabIndex={2}
-                                    name='id' 
-                                    value={numeroBar.id}
-                                    onChange={handleInputChange}
-                                    placeholder="Codigo de barras" 
-                                    autoFocus/>
-                    </Form.Group>
-                </Col>: null}                             
-                <Col>
-                <br></br>
-                    {numeroBar.almacen? <Button variant="info" tabIndex={3} className={'btn-lg'} onClick={event => {abrirListRepuestos()}}>Buscar Repuesto</Button> : null}                 
-                </Col>
-            </Row>             
+            <Form>
+                <Row>                
+                    <Col>
+                        <Form.Group>
+                            <Form.Label className="mt-2">Almacén</Form.Label>
+                            <Form.Control as="select"
+                                        tabIndex={1}  
+                                        name='almacen' 
+                                        value={numeroBar.almacen}
+                                        disabled = {lineasSalida.length>0 || almacenesBloqueado}
+                                        placeholder="Almacén"
+                                        onChange={handleInputChange}
+                                        autoFocus> 
+                                        {!alm && <option key={0} value={''}>
+                                                ----
+                                        </option>}
+                                        {almacenes && almacenes.map( almacen => {
+                                            return (
+                                            <option key={almacen.id} value={almacen.id}>
+                                                {almacen.nombre}                                            
+                                            </option>                                        
+                                            )
+                                        })}                                                                                                                                                          
+                            </Form.Control>
+                        </Form.Group>
+                    </Col>                 
+                    {numeroBar.almacen ?                            
+                    <Col>
+                        <Form.Group >
+                            <Form.Label className="mt-2">Codigo Barras (con lector) </Form.Label>
+                            <Form.Control
+                                        type="text"
+                                        id="prueba"
+                                        tabIndex={2}
+                                        name='id' 
+                                        value={numeroBar.id}
+                                        onChange={handleInputChange}
+                                        placeholder="Codigo de barras" 
+                                        autoFocus/>
+                        </Form.Group>
+                    </Col>: null}                    
+                    <Col >
+                    <br></br>
+                        {numeroBar.almacen? <Button variant="info" tabIndex={3} className={'btn-lg'} onClick={event => {abrirListRepuestos()}}>Buscar Repuesto</Button> : null}                 
+                    </Col>
+                </Row>   
+            </Form>         
             <Row>
                 <Col>
                     <h5 className="mb-3 mt-3">Lista de Repuestos</h5>

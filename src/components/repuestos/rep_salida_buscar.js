@@ -3,9 +3,10 @@ import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import Modal from 'react-bootstrap/Modal'
-import { Button, Row, Form, Col, Table } from 'react-bootstrap';
+import { Button, Row, Form, Col, Table, Container } from 'react-bootstrap';
 import { ArrowDownCircle} from 'react-bootstrap-icons';
 import { local } from 'd3';
+import ModalHeader from 'react-bootstrap/esm/ModalHeader';
 
 //import TablePagination from '@mui/material/TablePagination';
 
@@ -86,42 +87,59 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
     return(
         <Modal show={show} backdrop="static" keyboard={ false } animation={false} size="xl">
             <Modal.Title>Buscar Repuesto</Modal.Title>
-            <Modal.Header>                             
-                <Row>
-                    <Col>
-                        <Form.Group controlId="formNombre">
-                            <Form.Label>Buscar por Descripción Proveedor</Form.Label>
-                            <Form.Control type="text" 
-                                        name='nombre' 
-                                        value={datos.nombre}
-                                        onChange={handleInputChange}                                        
-                                        placeholder="Nombre contiene" 
-                                        autoFocus/>
-                        </Form.Group>
-                    </Col>
-                    <Col>
-                        <Form.Group controlId="formNombre_comun">
-                            <Form.Label>Buscar por Nombre Etiqueta</Form.Label>
-                            <Form.Control type="text" 
-                                        name='nombre_comun' 
-                                        value={datos.nombre_comun}
-                                        onChange={handleInputChange}                                        
-                                        placeholder="Nombre etiqueta contiene" 
-                                        />
-                        </Form.Group>
-                    </Col>
-                    <Col>
-                        <Form.Group controlId="id_repuesto">
-                        <Form.Label>Id Repuesto (sin el último dígito)</Form.Label>
-                        <Form.Control   type="text" 
-                                        name='id' 
-                                        value={datos.id}
-                                        onChange={handleInputChange} 
-                                        placeholder="Id repuesto" />
-                        </Form.Group>
-                    </Col>
-                </Row>
-                    
+            <Modal.Header> 
+                <table>
+                    <tbody>
+                        <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
+                        <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
+                        <th>Número registros: {count}</th>
+                        <th>
+                            <Button variant="info" onClick={cerrarListRepuestos}>
+                                Cerrar
+                            </Button>
+                        </th>
+                    </tbody>
+                </table>  
+            </Modal.Header>  
+            <Modal.Header>
+                <Container> 
+                    <Form>                   
+                        <Row>
+                            <Col>
+                                <Form.Group controlId="formNombre">
+                                    <Form.Label>Buscar por Descripción Proveedor</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='nombre' 
+                                                value={datos.nombre}
+                                                onChange={handleInputChange}                                        
+                                                placeholder="Nombre contiene" 
+                                                autoFocus/>
+                                </Form.Group>
+                            </Col>
+                            <Col>
+                                <Form.Group controlId="formNombre_comun">
+                                    <Form.Label>Buscar por Nombre Etiqueta</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='nombre_comun' 
+                                                value={datos.nombre_comun}
+                                                onChange={handleInputChange}                                        
+                                                placeholder="Nombre etiqueta contiene" 
+                                                />
+                                </Form.Group>
+                            </Col>
+                            <Col>
+                                <Form.Group controlId="id_repuesto">
+                                <Form.Label>Id Repuesto (sin el último dígito)</Form.Label>
+                                <Form.Control   type="text" 
+                                                name='id' 
+                                                value={datos.id}
+                                                onChange={handleInputChange} 
+                                                placeholder="Id repuesto" />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                    </Form> 
+                </Container> 
             </Modal.Header>
             <Modal.Body>
                 <Row>
@@ -157,21 +175,6 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
                 </Row>
             </Modal.Body>
             <Modal.Footer>
-                <table>
-                    <tbody>
-                        <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
-                        <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
-                        {/* <th>
-                            {repuesto && repuesto.map( rep => {                                    
-                                return (                                 
-                                    <th key={rep.id}>
-                                        <td><button type="button" class="btn btn-default">{rep.id}</button></td>                                       
-                                    </th>
-                                )})
-                            }
-                        </th> */}
-                    </tbody>
-                </table>
                 <Button variant="info" onClick={cerrarListRepuestos}>
                     Cerrar
                 </Button>
