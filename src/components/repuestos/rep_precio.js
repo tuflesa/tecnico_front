@@ -51,15 +51,7 @@ const RepPrecio = ()=>{
                     descuento_n:0,
                 }
             }
-            setPrecios(prueba.sort(function(a, b){
-                if(a.nombre > b.nombre){
-                    return 1;
-                }
-                if(a.nombre < b.nombre){
-                    return -1;
-                }
-                return 0;
-            }));
+            setPrecios(prueba);
         })
         .catch(err => { console.log(err);})
     },[datos.proveedor]);

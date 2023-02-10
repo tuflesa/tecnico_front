@@ -126,6 +126,13 @@ const LineaAdicional = () => {
                     </Table>
                 </Col>
             </Row> 
+            <table>
+                <tbody>
+                    <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
+                    <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
+                    <th>Número registros: {count}</th>
+                </tbody>
+            </table>
         </Container>
     );
 }

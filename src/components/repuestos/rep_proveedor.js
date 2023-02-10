@@ -21,15 +21,7 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
         })
         .then( res => {
             const proveedoresDisponibles = res.data.filter(p => {return !listaAsignados.includes(p.id)});
-            setProveedores(proveedoresDisponibles.sort(function(a, b){
-                if(a.nombre > b.nombre){
-                    return 1;
-                }
-                if(a.nombre < b.nombre){
-                    return -1;
-                }
-                return 0;
-            }));
+            setProveedores(proveedoresDisponibles);
             if (proveedoresDisponibles.length>0){
                 setDatos({
                     ...datos,

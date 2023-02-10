@@ -147,21 +147,6 @@ const PedidoForm = ({pedido, setPedido}) => {
         });
     },[pedido]);
 
-    useEffect(() =>{
-        // Ordena el listado de proveedores
-        if (proveedores){
-            proveedores.sort(function(a, b){
-                if(a.nombre > b.nombre){
-                    return 1;
-                }
-                if(a.nombre < b.nombre){
-                    return -1;
-                }
-                return 0;
-            })
-        }
-    }, [token]);
-
     const handleInputChange = (event) => {
         setDatos({
             ...datos,
@@ -834,10 +819,12 @@ const PedidoForm = ({pedido, setPedido}) => {
                                 </Col>
                             </Form.Row>                                                
                         </React.Fragment> 
-                        : null}   
-                        <Row>
-                            <h5 className="pb-3 pt-1 mt-2"><strong>Total Pedido: {Number.parseFloat(total_pedido).toFixed(2)}€</strong></h5>
-                        </Row>                                         
+                        : null}  
+                        {datos.numero && !verPdf && !verIngPdf ?  
+                            <Row>
+                                <h5 className="pb-3 pt-1 mt-2"><strong>Total Pedido: {Number.parseFloat(total_pedido).toFixed(2)}€</strong></h5>
+                            </Row>   
+                        :null}                                      
                     </Form>
                 </Col>
             </Row>    

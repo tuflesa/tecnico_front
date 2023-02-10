@@ -358,7 +358,7 @@ const NotificacionForm = ({nota, setNota}) => {
                             <Col>
                             {nota.id?
                                 <Form.Group id="conclusion">
-                                    <Form.Label>Concusiones</Form.Label>
+                                    <Form.Label>Conclusiones</Form.Label>
                                     <Form.Control type="text" 
                                                 name='conclusion' 
                                                 value={datos.conclusion}

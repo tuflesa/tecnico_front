@@ -271,7 +271,7 @@ const RepTraspasoAlmacen = ({alm}) => {
                 {numeroBar.almacen ?                            
                 <Col>
                     <Form.Group >
-                        <Form.Label>Codigo Barras</Form.Label>
+                        <Form.Label className="mt-2">Codigo Barras  (con lector) </Form.Label>
                         <Form.Control
                                     type="text"
                                     id="prueba"

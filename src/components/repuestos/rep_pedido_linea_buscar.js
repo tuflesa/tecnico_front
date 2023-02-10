@@ -47,7 +47,7 @@ const BuscarRepuestosPedido = ({cerrarListRepuestos, show, proveedor_id, elegirR
     return(
         <Modal show={show} backdrop="static" keyboard={ false } animation={false} size="xl">
             <Modal.Title>Buscar Repuesto</Modal.Title>
-            <Modal.Header>                             
+            <Modal.Header>                     
                 <Row>
                     <Col>
                         <Form.Group controlId="nombre">
@@ -83,6 +83,9 @@ const BuscarRepuestosPedido = ({cerrarListRepuestos, show, proveedor_id, elegirR
                                         />
                         </Form.Group>
                     </Col>
+                    <Button variant="info" onClick={cerrarListRepuestos}>
+                        Cerrar
+                    </Button> 
                 </Row>
             </Modal.Header>
             <Modal.Body>
@@ -117,7 +120,7 @@ const BuscarRepuestosPedido = ({cerrarListRepuestos, show, proveedor_id, elegirR
                     <Button variant="info" onClick={cerrarListRepuestos}>
                         Cerrar
                     </Button>
-                </Modal.Footer>
+            </Modal.Footer>
         </Modal>    
     )
 }
