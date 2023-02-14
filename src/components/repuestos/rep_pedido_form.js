@@ -59,6 +59,7 @@ const PedidoForm = ({pedido, setPedido}) => {
         observaciones: pedido ? pedido.observaciones : '',
         observaciones2: pedido ? pedido.observaciones2 : '',
         descripcion: pedido ? pedido.descripcion : '',
+        finalizado_auto: pedido ? pedido.finalizado : false,
     });
 
     useEffect(()=>{
@@ -143,6 +144,7 @@ const PedidoForm = ({pedido, setPedido}) => {
             observaciones: pedido ? pedido.observaciones : '',
             observaciones2: pedido ? pedido.observaciones2 : '',
             descripcion: pedido ? pedido.descripcion : '',
+            finalizado_auto: pedido ? pedido.finalizado : false,
 
         });
     },[pedido]);
@@ -377,49 +379,57 @@ const PedidoForm = ({pedido, setPedido}) => {
     const finalizarPedido = (pedido) =>{
         var x = 0;
         var y = 0;
-        if(datos.finalizado===true){
-            for(y=0; y<pedido.lineas_pedido.length;y++){
-                if(pedido.lineas_pedido[y].por_recibir>0){
-                    datos.finalizado=false;
-                    datos.fecha_entrega=null;
-                    break;
-                } 
-                if(pedido.lineas_adicionales[x].por_recibir>0){
-                    datos.finalizado=false;
-                    datos.fecha_entrega=null;
-                    break;
-                } 
+        if(datos.finalizado_auto===datos.finalizado){
+            if(datos.finalizado===true){
+                for(y=0; y<pedido.lineas_pedido.length;y++){
+                    if(pedido.lineas_pedido[y].por_recibir>0){
+                        datos.finalizado=false;
+                        datos.fecha_entrega=null;
+                        break;
+                    } 
+                    if(pedido.lineas_adicionales[x].por_recibir>0){
+                        datos.finalizado=false;
+                        datos.fecha_entrega=null;
+                        break;
+                    } 
+                }
+            }
+            else{
+                for(y=0; y<pedido.lineas_pedido.length;y++){
+                    if(pedido.lineas_pedido[y].por_recibir>0){
+                        datos.finalizado=false;
+                        datos.fecha_entrega=null;
+                        break;
+                    } 
+                }
+                if(y>=pedido.lineas_pedido.length){
+                    if(pedido.lineas_adicionales!=''){
+                        for(x=0; x<pedido.lineas_adicionales.length;x++){                
+
+                            if(pedido.lineas_adicionales[x].por_recibir>0){
+                                datos.finalizado=false;
+                                datos.fecha_entrega=null;
+                                break;
+                            } 
+                            else{
+                                datos.finalizado=true;
+                                datos.fecha_entrega= (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate());
+                            }
+                        }
+                    }
+                    else{
+                            datos.finalizado=true;
+                            datos.fecha_entrega= (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate())
+                        }
+                }
+                
             }
         }
         else{
-            for(y=0; y<pedido.lineas_pedido.length;y++){
-                if(pedido.lineas_pedido[y].por_recibir>0){
-                    datos.finalizado=false;
-                    datos.fecha_entrega=null;
-                    break;
-                } 
+            var continuar = window.confirm('Va a cambiar el estado del pedido de forma manual ¿Desea continuar?');
+            if(continuar===false){
+                datos.finalizado=!datos.finalizado;
             }
-            if(y>=pedido.lineas_pedido.length){
-                if(pedido.lineas_adicionales!=''){
-                    for(x=0; x<pedido.lineas_adicionales.length;x++){                
-
-                        if(pedido.lineas_adicionales[x].por_recibir>0){
-                            datos.finalizado=false;
-                            datos.fecha_entrega=null;
-                            break;
-                        } 
-                        else{
-                            datos.finalizado=true;
-                            datos.fecha_entrega= (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate());
-                        }
-                    }
-                }
-                else{
-                        datos.finalizado=true;
-                        datos.fecha_entrega= (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate())
-                    }
-            }
-            
         }
         axios.patch(BACKEND_SERVER + `/api/repuestos/pedido/${pedido.id}/`, {
             finalizado: datos.finalizado, 
