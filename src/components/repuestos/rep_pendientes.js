@@ -122,6 +122,22 @@ const RepPendientes = () => {
         }
     }
 
+    const comparar2 = (x) => {
+        if(lineasPendientes){
+            if(x.critico){
+                for(var y=0;y<lineasPendientes.length;y++){
+                    if(lineasPendientes[y].repuesto===x.id){
+                        for(var z=0;z<pedfueradefecha.length;z++){
+                            if(pedfueradefecha[z].id===lineasPendientes[y].pedido.id){
+                                return("table-success");
+                            }
+                        }
+                    }              
+                }
+            }
+        }
+    }
+
     return (
         <Container className="mt-5">
             <Row>
@@ -141,7 +157,7 @@ const RepPendientes = () => {
                         <tbody>
                             {pendientes && pendientes.map( pendiente => {
                                 return (
-                                    <tr key={pendiente.id} className = {pendiente.critico && comparar(pendiente)? "table-warning" : (comparar(pendiente))? "table-success" : pendiente.critico? "table-danger": ""}>
+                                    <tr key={pendiente.id} className = {comparar2(pendiente)? "table-warning" : (comparar(pendiente))? "table-success" : pendiente.critico? "table-danger": ""}>
                                         <td>{pendiente.articulo}</td>
                                         <td>{pendiente.critico?'Si':'No'}</td>
                                         <td>{pendiente.stock}</td>
