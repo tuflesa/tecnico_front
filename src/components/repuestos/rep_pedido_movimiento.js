@@ -22,11 +22,12 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
         precio: linea ? linea.precio : '', 
         //fecha: (('0'+hoy.getDay()) + '-'+(hoy.getMonth()+1)+'-'+ hoy.getFullYear()),
         fecha: fechaString,
-        recibido: null,
+        recibido: '',
         albaran: null,
         almacen: '',
         localizacion: '',
         usuario: user['tec-user'],
+        entregadoAnterior: linea? (linea.cantidad - linea.por_recibir) : 0,
     });
 
     const handlerCancelar = () => {      
@@ -44,7 +45,6 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
         })
         .then( res => { 
             setAlmacenes(res.data);
-            console.log(res.data);
         })
         .catch(err => { console.log(err);})
     },[token, linea]);
@@ -62,6 +62,7 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
             almacen: datos ? datos.almacen : '',
             localizacion: datos ? datos.localizacion : '',
             usuario: user['tec-user'].id,
+            entregadoAnterior: linea? (linea.cantidad - linea.por_recibir) : 0,
         });
     },[linea]);
 
@@ -73,21 +74,37 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
     },[datos.recibido])
 
     const actualizarRecibir = () =>{
+        if((datos.entregadoAnterior + datos.recibido)>linea.cantidad){
+            var igualar = window.confirm("Se ha recibido una cantidad mayor a la indicada, ¿Deseas cambiar la cantidad pedida?");
+            if(igualar){
+                datos.por_recibir = 0;
+                datos.cantidad = datos.entregadoAnterior + parseInt(datos.recibido);
+            }
+            else{
+                datos.por_recibir = linea.por_recibir - datos.recibido;
+            }
+        }
+        else{
+            datos.por_recibir = linea.por_recibir - datos.recibido;
+        }
         axios.patch(BACKEND_SERVER + `/api/repuestos/linea_pedido/${linea.id}/`, {
-            por_recibir: linea.por_recibir - datos.recibido,            
+            por_recibir: datos.por_recibir,  
+            cantidad: datos.cantidad,    
+
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }     
         })
         .then( res => {    
-            //actualizarStock();
+            //actualizarStock();            
+            //modificarCantidad();
             updatePedido();
         })
         .catch(err => { console.log(err);})
     }
  
-    const guardarMovimiento = (event) => {
+    const guardarMovimiento = (event) => {   
         event.preventDefault();
         axios.post(BACKEND_SERVER + `/api/repuestos/movimiento/`, {
             fecha: datos.fecha,
