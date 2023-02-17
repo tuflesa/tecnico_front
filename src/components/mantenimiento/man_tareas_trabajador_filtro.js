@@ -49,6 +49,8 @@ const FiltroTareasTrabajador = ({actualizaFiltro}) => {
         actualizaFiltro(filtro);
     },[ datos.nombre_persona, datos.fecha_inicio_gte, datos.fecha_inicio_lte, token]);
 
+    
+
     return(
         <Container className="mt-5">
             <h5 className="mt-5">Filtro</h5>

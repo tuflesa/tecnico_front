@@ -13,39 +13,29 @@ import ReactExport from 'react-data-export';
 const TareasTrabajador = () => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
-    const [filtro, setFiltro] = useState('');
+    const [filtro, setFiltro] = useState(`?page=${1}`);
     const [lineasusuarios, setLineasUsuarios] = useState(null);
     const [show, setShow] = useState(false);
     const [linea_id, setLinea_id] = useState(null);
     const ExcelFile = ReactExport.ExcelFile;
     const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
     const ExcelColumn = ReactExport.ExcelFile.ExcelColumn;
+    const [count, setCount] = useState(null);
 
     const [datos, setDatos] = useState({
         nombre_persona:'',
-    })
-
-    const actualizaFiltro = str => {
-        setFiltro(str);
-    }
-
-    const listarTrabajadores = (linea_id)=>{
-        setLinea_id(linea_id);
-        setShow(true);
-    }
-
-    const handlerClose = () => {
-        setShow(false);
-    }
+        pagina: 1,
+    });
 
     useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/mantenimiento/lineas_de_un_trabajador/`+ filtro,{
+        filtro && axios.get(BACKEND_SERVER + `/api/mantenimiento/lineas_de_un_trabajador/`+ filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
         .then( res => {
-            res.data.map( r => {
+            console.log(res.data);
+            res.data.results.map( r => {
                 //solo para poder utilizar los campos en el excel
                     r['nom_parte']=r.linea.parte.num_parte;
                     r['nom_tarea']=r.linea.tarea.nombre;
@@ -60,7 +50,7 @@ const TareasTrabajador = () => {
                     r['fecha_f']=r.fecha_fin?invertirFecha(String(r.fecha_fin)):'';
                     r['equipoT']=r.linea.parte.seccion?r.linea.parte.seccion.siglas_zona +' - '+r.linea.parte.seccion.nombre + (r.linea.parte.equipo?' - ' + r.linea.parte.equipo.nombre:''):null;
             })
-            setLineasUsuarios(res.data.sort(function(a, b){
+            setLineasUsuarios(res.data.results);/* .sort(function(a, b){
                 if(a.get_full_name > b.get_full_name){
                     return 1;
                 }
@@ -68,16 +58,73 @@ const TareasTrabajador = () => {
                     return -1;
                 }
                 return 0;
-            }))
+            })) */
+            setCount(res.data.count);
         })
         .catch( err => {
             console.log(err);
         });
-    }, [filtro]);
+    }, [filtro, datos.pagina]);
+
+    const actualizaFiltro = str => {
+        console.log(filtro);
+        setFiltro(str);
+    }
+
+    const listarTrabajadores = (linea_id)=>{
+        setLinea_id(linea_id);
+        setShow(true);
+    }
+
+    const handlerClose = () => {
+        setShow(false);
+    }
+
+    const actualizaPag = () => {
+        console.log('estoy en actualizaPag');
+        console.log(datos.pagina);
+        var filtro2=`&page=${datos.pagina}`;
+        const filtro3 = filtro + filtro2;
+        actualizaFiltro(filtro3);
+    }
+
+    const cambioPagina = (pag) => {
+        console.log('estoy en cambioPagina');
+        if(pag<=0){
+            pag=1;
+        }
+        if(pag>count/20){
+            if(count % 20 === 0){
+                pag=Math.trunc(count/20);
+            }
+            if(count % 20 !== 0){
+                pag=Math.trunc(count/20)+1;
+            }
+        }
+        if(pag>0){
+            setDatos({
+                ...datos,
+                pagina: pag,
+            })
+        }
+        console.log('estoy en actualizaPag');
+        console.log(datos.pagina);
+        var filtro2=`&page=${datos.pagina}`;
+        const filtro3 = filtro + filtro2;
+        actualizaFiltro(filtro3);
+        //actualizaPag();
+    }
 
     return(
         <Container className="mt-5">
             <h5 className="mt-5">Filtro</h5>
+            <table>
+                <tbody>
+                    <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
+                    <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
+                    <th>Número registros: {count}</th>
+                </tbody>
+            </table>
             <Form>
                 <Row>
                     <Col>
@@ -133,7 +180,7 @@ const TareasTrabajador = () => {
                                         <td>{lineasUs.linea.tarea.observaciones}</td>
                                         <td>{lineasUs.linea.tarea.observaciones_trab}</td>
                                         <td>{lineasUs.linea.parte.seccion?lineasUs.linea.parte.seccion.siglas_zona +' - '+lineasUs.linea.parte.seccion.nombre + (lineasUs.linea.parte.equipo?' - ' + lineasUs.linea.parte.equipo.nombre:''):null}</td>
-                                        <td>{invertirFecha(lineasUs.linea.fecha_plan)}</td>
+                                        <td>{lineasUs.linea.fecha_plan?invertirFecha(lineasUs.linea.fecha_plan):''}</td>
                                         <td>{lineasUs.fecha_inicio?invertirFecha(String(lineasUs.fecha_inicio)):''}</td>
                                         <td>{lineasUs.fecha_fin?invertirFecha(String(lineasUs.fecha_fin)):''}</td>
                                         <td>{lineasUs.linea.parte.tipo_nombre}</td>
