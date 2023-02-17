@@ -27,8 +27,10 @@ const ManPorEquipos = () => {
     var enunmes=fecha_hoy+mesEnMilisegundos;
     dentrodeunmes = new Date(enunmes);
     fechaenunmesString = dentrodeunmes.getFullYear() + '-' + ('0' + (dentrodeunmes.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunmes.getDate()).slice(-2);
+    var Mizona = user['tec-user'].perfil.zona?user['tec-user'].perfil.zona.id:'';
+    var Midestreza = user['tec-user'].perfil.destrezas.length===1?user['tec-user'].perfil.destrezas[0]:'';
 
-    const [filtro, setFiltro] = useState(`?parte__empresa=${user['tec-user'].perfil.empresa.id}&fecha_plan__lte=${fechaenunmesString}`);
+    const [filtro, setFiltro] = useState(`?parte__empresa=${user['tec-user'].perfil.empresa.id}&fecha_plan__lte=${fechaenunmesString}&parte__zona__id=${Mizona}&tarea__especialidad=${Midestreza}`);
     const actualizaFiltro = str => {
         setFiltro(str);
     }
@@ -47,20 +49,11 @@ const ManPorEquipos = () => {
                 }
         })
         .then( res => {
-            //filtramos los trabajos que sean de nuestras destrezas
+            //filtramos los trabajos que sean de nuestras destrezas, para cuando son varias destrezas 
             var MisTrabajos;
             var destrezas = user['tec-user'].perfil.destrezas;
             MisTrabajos = res.data.filter(s => destrezas.includes(s.tarea.especialidad));
-            //ordenamos los trabajos por prioridad
-            setLineas(MisTrabajos.sort(function(a, b){
-                if(a.tarea.prioridad < b.tarea.prioridad){
-                    return 1;
-                }
-                if(a.tarea.prioridad > b.tarea.prioridad){
-                    return -1;
-                }
-                return 0;
-            }))  
+            setLineas(MisTrabajos);
         })
         .catch( err => {
             console.log(err);
@@ -86,13 +79,6 @@ const ManPorEquipos = () => {
             if(lineasTrabajadores[y].linea===x.id){
                 return( "table-primary");
             }
-            /* else if(x.fecha_inicio){
-                console.log('verdeeeeee  ' + x.id);
-                return( "table-success");
-            }
-            else if(x.fecha_inicio===null){
-                return("");
-            } */
         }
     }
 
@@ -117,6 +103,7 @@ const ManPorEquipos = () => {
                 }
                 return 0;
             }))  
+            //setLineas(res.data);
         })
         .catch( err => {
             console.log(err);

@@ -19,6 +19,7 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
     var enunmes=fecha_hoy+mesEnMilisegundos;
     var dentrodeunmes = new Date(enunmes);
     var fechaenunmesString = dentrodeunmes.getFullYear() + '-' + ('0' + (dentrodeunmes.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunmes.getDate()).slice(-2); 
+    var Midestreza = user['tec-user'].perfil.destrezas.length===1?user['tec-user'].perfil.destrezas[0]:'';
 
     const [datos, setDatos] = useState({
         id: '',
@@ -170,7 +171,7 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
     }, [token, datos.seccion]);
 
     useEffect(()=>{
-        const filtro1 = `?parte__tipo=${datos.tipo}&parte__empresa=${datos.empresa}&fecha_plan__lte=${datos.fecha_plan_lte}`;
+        const filtro1 = `?parte__tipo=${datos.tipo}&parte__empresa=${datos.empresa}&fecha_plan__lte=${datos.fecha_plan_lte}&tarea__especialidad=${Midestreza}`;
         let filtro2 = `&parte__empresa__id=${datos.empresa}`;
         if (datos.empresa !== ''){
             filtro2 = filtro2 + `&parte__zona__id=${datos.zona}`;
