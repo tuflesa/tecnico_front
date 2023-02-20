@@ -61,12 +61,16 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
               }
         })
         .then( res => {
+            console.log(res.data);
             //Si es Bornay, enseñamos Bornay y Comalsid
-            if(user['tec-user'].perfil.empresa.id===1&&user['tec-user'].perfil.puesto.nombre!=='Operario'){
+            if(user['tec-user'].perfil.empresa.id===1 && user['tec-user'].perfil.puesto.nombre!=='Operador'){
+                console.log('ento en el if');
                 var empresas_2 = res.data.filter( s => s.id !== 2);
                 setEmpresas(empresas_2);
             }
             else{
+                console.log('estoy en el else');
+                console.log(res.data);
                 setEmpresas(res.data);
             }
         })
@@ -172,7 +176,7 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
 
     useEffect(()=>{
         const filtro1 = `?parte__tipo=${datos.tipo}&parte__empresa=${user['tec-user'].perfil.empresa.id}&parte__zona=${Mizona}&fecha_plan__lte=${datos.fecha_plan_lte}&tarea__especialidad=${Midestreza}`;
-        let filtro2 = ``;
+        let filtro2 = `&parte__empresa=${datos.empresa}`;
         if (datos.empresa !== ''){
             filtro2 = filtro2 + `&parte__zona=${datos.zona}`;
             if (datos.zona !== ''){
