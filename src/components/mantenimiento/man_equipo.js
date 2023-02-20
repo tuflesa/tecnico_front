@@ -27,10 +27,10 @@ const ManPorEquipos = () => {
     var enunmes=fecha_hoy+mesEnMilisegundos;
     dentrodeunmes = new Date(enunmes);
     fechaenunmesString = dentrodeunmes.getFullYear() + '-' + ('0' + (dentrodeunmes.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunmes.getDate()).slice(-2);
-    var Mizona = user['tec-user'].perfil.zona?user['tec-user'].perfil.zona.id:'';
+    var Mizona = user['tec-user'].perfil.zona?parseInt(user['tec-user'].perfil.zona.id):'';
     var Midestreza = user['tec-user'].perfil.destrezas.length===1?user['tec-user'].perfil.destrezas[0]:'';
 
-    const [filtro, setFiltro] = useState(`?parte__empresa=${user['tec-user'].perfil.empresa.id}&fecha_plan__lte=${fechaenunmesString}&parte__zona__id=${Mizona}&tarea__especialidad=${Midestreza}`);
+    const [filtro, setFiltro] = useState(`?parte__empresa=${user['tec-user'].perfil.empresa.id}&fecha_plan__lte=${fechaenunmesString}&parte__zona=${Mizona}&tarea__especialidad=${Midestreza}`);
     const actualizaFiltro = str => {
         setFiltro(str);
     }

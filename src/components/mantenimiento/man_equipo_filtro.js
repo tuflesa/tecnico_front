@@ -19,15 +19,15 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
     var enunmes=fecha_hoy+mesEnMilisegundos;
     var dentrodeunmes = new Date(enunmes);
     var fechaenunmesString = dentrodeunmes.getFullYear() + '-' + ('0' + (dentrodeunmes.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunmes.getDate()).slice(-2); 
+    var Mizona = user['tec-user'].perfil.zona?parseInt(user['tec-user'].perfil.zona.id):'';
     var Midestreza = user['tec-user'].perfil.destrezas.length===1?user['tec-user'].perfil.destrezas[0]:'';
 
     const [datos, setDatos] = useState({
-        id: '',
-        especialidad: '',
+        especialidad: user['tec-user'].perfil.destrezas.length===1?user['tec-user'].perfil.destrezas[0]:'',
         tipo: '',
-        empresa: user['tec-user'].perfil.empresa.id,
-        zona: user['tec-user'].perfil.zona?user['tec-user'].perfil.zona.id:'',
-        seccion: user['tec-user'].perfil.seccion?user['tec-user'].perfil.seccion.id:'',
+        empresa: '',
+        zona: '',
+        seccion: '',
         equipo: '',
         fecha_plan_lte: fechaenunmesString,
     });
@@ -171,10 +171,10 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
     }, [token, datos.seccion]);
 
     useEffect(()=>{
-        const filtro1 = `?parte__tipo=${datos.tipo}&parte__empresa=${datos.empresa}&fecha_plan__lte=${datos.fecha_plan_lte}&tarea__especialidad=${Midestreza}`;
-        let filtro2 = `&parte__empresa__id=${datos.empresa}`;
+        const filtro1 = `?parte__tipo=${datos.tipo}&parte__empresa=${user['tec-user'].perfil.empresa.id}&parte__zona=${Mizona}&fecha_plan__lte=${datos.fecha_plan_lte}&tarea__especialidad=${Midestreza}`;
+        let filtro2 = ``;
         if (datos.empresa !== ''){
-            filtro2 = filtro2 + `&parte__zona__id=${datos.zona}`;
+            filtro2 = filtro2 + `&parte__zona=${datos.zona}`;
             if (datos.zona !== ''){
                 filtro2 = filtro2 + `&parte__seccion__id=${datos.seccion}`;
                 if (datos.seccion !== ''){
@@ -185,7 +185,7 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
         const filtro = filtro1 + filtro2 ;
         const activos = datos.estado;
         actualizaFiltro(filtro, activos);
-    },[ datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.id, datos.tipo, datos.fecha_plan_lte, token]);
+    },[ datos, token]);
 
     const handleInputChange = (event) => {
         setDatos({
