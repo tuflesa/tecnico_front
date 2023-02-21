@@ -18,7 +18,8 @@ const ManPorEquipos = () => {
     const [show, setShow] = useState(false);
     const [linea_id, setLinea_id] = useState(null);
     const [lineasTrabajadores, setlineasTrabajadores] = useState(null);
-    
+    const [count, setCount] = useState(null);
+    const [pagTotal, setPagTotal] = useState(null);
 
     var dentrodeunmes=null;
     var fechaenunmesString=null;
@@ -27,8 +28,6 @@ const ManPorEquipos = () => {
     var enunmes=fecha_hoy+mesEnMilisegundos;
     dentrodeunmes = new Date(enunmes);
     fechaenunmesString = dentrodeunmes.getFullYear() + '-' + ('0' + (dentrodeunmes.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunmes.getDate()).slice(-2);
-    var Mizona = user['tec-user'].perfil.zona?parseInt(user['tec-user'].perfil.zona.id):'';
-    var Midestreza = user['tec-user'].perfil.destrezas.length===1?user['tec-user'].perfil.destrezas[0]:'';
 
     const [filtro, setFiltro] = useState(null);
     const actualizaFiltro = str => {
@@ -40,6 +39,7 @@ const ManPorEquipos = () => {
         fecha_fin: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
         linea: '',
         trabajador: user['tec-user'].perfil.usuario,
+        pagina:1,
     });
     
     useEffect(()=>{ 
@@ -53,8 +53,15 @@ const ManPorEquipos = () => {
             //filtramos los trabajos que sean de nuestras destrezas, para cuando son varias destrezas 
             var MisTrabajos;
             var destrezas = user['tec-user'].perfil.destrezas;
-            MisTrabajos = res.data.filter(s => destrezas.includes(s.tarea.especialidad));
+            MisTrabajos = res.data.results.filter(s => destrezas.includes(s.tarea.especialidad));
             setLineas(MisTrabajos);
+            setCount(res.data.count);
+            let pagT = res.data.count/20;
+            if (res.data.count % 20 !== 0){
+                pagT += 1;
+            }
+            setPagTotal(Math.trunc(pagT));
+
         })
         .catch( err => {
             console.log(err);
@@ -93,7 +100,7 @@ const ManPorEquipos = () => {
             //filtramos los trabajos que sean de nuestras destrezas.
             var MisTrabajos;
             var destrezas = user['tec-user'].perfil.destrezas;
-            MisTrabajos = res.data.filter(s => destrezas.includes(s.tarea.especialidad));
+            MisTrabajos = res.data.results.filter(s => destrezas.includes(s.tarea.especialidad));
             //ordenamos los trabajos por prioridad
             setLineas(MisTrabajos.sort(function(a, b){
                 if(a.tarea.prioridad < b.tarea.prioridad){
@@ -104,7 +111,7 @@ const ManPorEquipos = () => {
                 }
                 return 0;
             }))  
-            //setLineas(res.data);
+            setCount(res.data.count);
         })
         .catch( err => {
             console.log(err);
@@ -307,6 +314,30 @@ const ManPorEquipos = () => {
         setShow(false);
     }
 
+    const cambioPagina = (pag) => {
+        if(pag<=0){
+            pag=1;
+        }
+        
+        if(pag>count/20){
+            if(count % 20 === 0){
+                pag=Math.trunc(count/20);
+            }
+            else{
+                pag=Math.trunc(count/20)+1;
+            }
+        }
+        if(pag>0){
+            setDatos({
+                ...datos,
+                pagina: pag,
+            })
+        }
+        var filtro2=`&page=${datos.pagina}`;
+        const filtro3 = filtro + filtro2;
+        actualizaFiltro(filtro3);
+    }
+
     return(
         <Container class extends className="pt-1 mt-5">
             <Row class extends>                
@@ -332,6 +363,13 @@ const ManPorEquipos = () => {
                     <ManEquipoFiltro actualizaFiltro={actualizaFiltro}/>
                 </Col>
             </ Row>
+            <table>
+                <tbody>
+                    <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
+                    <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
+                    <th>Página {datos.pagina} de {pagTotal}</th>
+                </tbody>
+            </table> 
             <Row>
                 <Col>
                     <Table striped bordered hover>
