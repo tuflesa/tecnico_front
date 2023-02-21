@@ -19,19 +19,20 @@ const ManLineasListado = () => {
     const ExcelFile = ReactExport.ExcelFile;
     const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
     const ExcelColumn = ReactExport.ExcelFile.ExcelColumn;
-    //const [lineas_finalizadas, setLineasFinalizadas] = useState(null);
-    //const [hoy] = useState(new Date);
+
     var fecha_hoy=Date.parse(new Date);
     var mesEnMilisegundos = 1000 * 60 * 60 * 24 * 30;
     var enunmes=fecha_hoy+mesEnMilisegundos;
     var dentrodeunmes = new Date(enunmes);
     var fechaenunmesString = dentrodeunmes.getFullYear() + '-' + ('0' + (dentrodeunmes.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunmes.getDate()).slice(-2);
+
     const [filtro, setFiltro] = useState(`?parte__empresa__id=${user['tec-user'].perfil.empresa.id}&estado=${''}&fecha_plan__lte=${fechaenunmesString}`);
     const [activos, setActivos] = useState(true);
     const [linea_id, setLinea_id] = useState(null);
     const [show, setShow] = useState(false);
     const [actualizar, setActualizar] = useState('');
     const [count, setCount] = useState(null);
+    const [pagTotal, setPagTotal] = useState(null);
 
     const actualizaFiltro = (str, act) => {   
         setActivos(act)
@@ -65,6 +66,11 @@ const ManLineasListado = () => {
                 }) */
                 setLineas(res.data.results);
                 setCount(res.data.count);
+                let pagT = res.data.count/20;
+                if (res.data.count % 20 !== 0){
+                    pagT += 1;
+                }
+                setPagTotal(Math.trunc(pagT));
             })
             .catch( err => {
                 console.log(err);
@@ -229,7 +235,7 @@ const ManLineasListado = () => {
                 <tbody>
                     <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
                     <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
-                    <th>Número registros: {count}</th>
+                    <th>Página {datos.pagina} de {pagTotal} - Número registros totales: {count}</th>
                 </tbody>
             </table> 
             <Row> 

@@ -21,6 +21,7 @@ const TareasTrabajador = () => {
     const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
     const ExcelColumn = ReactExport.ExcelFile.ExcelColumn;
     const [count, setCount] = useState(null);
+    const [pagTotal, setPagTotal] = useState(null);
 
     const [datos, setDatos] = useState({
         nombre_persona:'',
@@ -60,6 +61,11 @@ const TareasTrabajador = () => {
                 return 0;
             })) */
             setCount(res.data.count);
+            let pagT = res.data.count/20;
+            if (res.data.count % 20 !== 0){
+                pagT += 1;
+            }
+            setPagTotal(Math.trunc(pagT));
         })
         .catch( err => {
             console.log(err);
@@ -89,7 +95,6 @@ const TareasTrabajador = () => {
     }
 
     const cambioPagina = (pag) => {
-        console.log('estoy en cambioPagina');
         if(pag<=0){
             pag=1;
         }
@@ -107,30 +112,26 @@ const TareasTrabajador = () => {
                 pagina: pag,
             })
         }
-        console.log('estoy en actualizaPag');
-        console.log(datos.pagina);
         var filtro2=`&page=${datos.pagina}`;
         const filtro3 = filtro + filtro2;
         actualizaFiltro(filtro3);
-        //actualizaPag();
     }
 
     return(
         <Container className="mt-5">
-            <h5 className="mt-5">Filtro</h5>
-            <table>
-                <tbody>
-                    <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
-                    <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
-                    <th>Número registros: {count}</th>
-                </tbody>
-            </table>
             <Form>
                 <Row>
                     <Col>
                         <FiltroTareasTrabajador actualizaFiltro={actualizaFiltro}/>
                     </Col>
                 </ Row>
+                <table>
+                    <tbody>
+                        <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
+                        <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
+                        <th>Página {datos.pagina} de {pagTotal} - Número registros totales: {count}</th>
+                    </tbody>
+                </table>
                 <Row> 
                     <Col><h5>{lineasusuarios?lineasusuarios.prioridad:''}</h5></Col>
                     <ExcelFile filename={"ExcelExportExample"} element={<button>Exportar a Excel</button>}>
