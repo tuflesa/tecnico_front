@@ -30,7 +30,7 @@ const ManPorEquipos = () => {
     var Mizona = user['tec-user'].perfil.zona?parseInt(user['tec-user'].perfil.zona.id):'';
     var Midestreza = user['tec-user'].perfil.destrezas.length===1?user['tec-user'].perfil.destrezas[0]:'';
 
-    const [filtro, setFiltro] = useState(`?parte__empresa=${user['tec-user'].perfil.empresa.id}&fecha_plan__lte=${fechaenunmesString}&parte__zona=${Mizona}&tarea__especialidad=${Midestreza}`);
+    const [filtro, setFiltro] = useState(null);
     const actualizaFiltro = str => {
         setFiltro(str);
     }
@@ -43,7 +43,8 @@ const ManPorEquipos = () => {
     });
     
     useEffect(()=>{ 
-        axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_activas/`+ filtro,{
+        
+        filtro && axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_activas/`+ filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
                 }
