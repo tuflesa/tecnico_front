@@ -27,73 +27,78 @@ const ManLineasListado = () => {
     var dentrodeunmes = new Date(enunmes);
     var fechaenunmesString = dentrodeunmes.getFullYear() + '-' + ('0' + (dentrodeunmes.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunmes.getDate()).slice(-2);
     const [filtro, setFiltro] = useState(`?parte__empresa__id=${user['tec-user'].perfil.empresa.id}&estado=${''}&fecha_plan__lte=${fechaenunmesString}`);
-    const [activos, setActivos] = useState('');
+    const [activos, setActivos] = useState(true);
     const [linea_id, setLinea_id] = useState(null);
     const [show, setShow] = useState(false);
     const [actualizar, setActualizar] = useState('');
+    const [count, setCount] = useState(null);
 
-    const actualizaFiltro = (str, act) => {        
-        setActivos(act);
+    const actualizaFiltro = (str, act) => {   
+        setActivos(act)
         setFiltro(str);
     }
 
+    const [datos, setDatos] = useState({
+        pagina: 1,
+    });
+
     useEffect(()=>{
-        axios.get(BACKEND_SERVER + '/api/mantenimiento/listado_lineas_partes/'+ filtro,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-                }
-        })
-        .then( res => {
-            res.data.map( r => {
-            //solo para poder utilizar los campos en el excel
-                r['nom_parte']=r.parte.nombre;
-                r['obparte']=r.parte.observaciones;
-                r['nom_tarea']=r.tarea.nombre;
-                r['obtarea']=r.tarea.observaciones;
-                r['parte_tip']=r.parte.tipo_nombre;
-                r['especial']=r.tarea.especialidad_nombre;
-                r['priori']=r.tarea.prioridad;
-                r['fecha_ini']=r.fecha_inicio?invertirFecha(String(r.fecha_inicio)):'';
-                r['fecha_plani']=r.fecha_plan?invertirFecha(String(r.fecha_plan)):'';
-                r['equipoT']=r.parte.seccion?r.parte.seccion.siglas_zona +' - '+r.parte.seccion.nombre + (r.parte.equipo?' - ' + r.parte.equipo.nombre:''):null
+        if(activos){
+            axios.get(BACKEND_SERVER + '/api/mantenimiento/listado_lineas_activas/'+ filtro,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                    }
             })
-            //variable para filtrar en Activos las 2 opciones
-            if(activos===''){
-                //listaFil recoge toda las lineas para luego filtrarlas.
-                const listaFil=res.data;
-                //cogemos de todas solo las que estén planificadas
-                const planificadas = listaFil.filter(s=>s.estado===1);
-                //cogemos de todas solo las que estén en ejecución
-                const ejecucion = listaFil.filter(s=>s.estado===2);
-                //anidamos planificadas y en ejecución
-                const activas = planificadas.concat(ejecucion);
-                //las ordenamos pasandolas a la variable que muestra los datos 'lineas'
-                setLineas(activas.sort(function(a, b){
-                    if(a.tarea.prioridad < b.tarea.prioridad){
-                        return 1;
+            .then( res => {
+                /* res.data.result.map( r => {
+                //solo para poder utilizar los campos en el excel
+                    r['nom_parte']=r.parte.nombre;
+                    r['obparte']=r.parte.observaciones;
+                    r['nom_tarea']=r.tarea.nombre;
+                    r['obtarea']=r.tarea.observaciones;
+                    r['parte_tip']=r.parte.tipo_nombre;
+                    r['especial']=r.tarea.especialidad_nombre;
+                    r['priori']=r.tarea.prioridad;
+                    r['fecha_ini']=r.fecha_inicio?invertirFecha(String(r.fecha_inicio)):'';
+                    r['fecha_plani']=r.fecha_plan?invertirFecha(String(r.fecha_plan)):'';
+                    r['equipoT']=r.parte.seccion?r.parte.seccion.siglas_zona +' - '+r.parte.seccion.nombre + (r.parte.equipo?' - ' + r.parte.equipo.nombre:''):null
+                }) */
+                setLineas(res.data.results);
+                setCount(res.data.count);
+            })
+            .catch( err => {
+                console.log(err);
+            });
+        }
+        else{
+            //si no hay opción 5 (Activos) filtramos de forma normal
+            axios.get(BACKEND_SERVER + '/api/mantenimiento/listado_lineas_partes/'+ filtro,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
                     }
-                    if(a.tarea.prioridad > b.tarea.prioridad){
-                        return -1;
-                    }
-                    return 0;
-                }));
-            }
-            else{
-                //si no hay opción 5 (Activos) filtramos de forma normal y aquí ordenamos
-                setLineas(res.data.sort(function(a, b){
-                    if(a.tarea.prioridad < b.tarea.prioridad){
-                        return 1;
-                    }
-                    if(a.tarea.prioridad > b.tarea.prioridad){
-                        return -1;
-                    }
-                    return 0;
-                }))
-            }
-        })        
-        .catch( err => {
-            console.log(err);
-        });
+            })
+            .then( res => {
+
+                /* res.data.map( r => {
+                //solo para poder utilizar los campos en el excel
+                    r['nom_parte']=r.parte.nombre;
+                    r['obparte']=r.parte.observaciones;
+                    r['nom_tarea']=r.tarea.nombre;
+                    r['obtarea']=r.tarea.observaciones;
+                    r['parte_tip']=r.parte.tipo_nombre;
+                    r['especial']=r.tarea.especialidad_nombre;
+                    r['priori']=r.tarea.prioridad;
+                    r['fecha_ini']=r.fecha_inicio?invertirFecha(String(r.fecha_inicio)):'';
+                    r['fecha_plani']=r.fecha_plan?invertirFecha(String(r.fecha_plan)):'';
+                    r['equipoT']=r.parte.seccion?r.parte.seccion.siglas_zona +' - '+r.parte.seccion.nombre + (r.parte.equipo?' - ' + r.parte.equipo.nombre:''):null
+                }) */
+                setLineas(res.data.results);
+                setCount(res.data.count);
+            })
+            .catch( err => {
+                console.log(err);
+            });
+        } 
     }, [token, filtro, activos, actualizar]); 
 
     const BorrarLinea =(linea) =>{ 
@@ -189,14 +194,44 @@ const ManLineasListado = () => {
         })
         .catch(err => { console.log(err);})
     }
+
+    const cambioPagina = (pag) => {
+        if(pag<=0){
+            pag=1;
+        }
+        if(pag>count/20){
+            if(count % 20 === 0){
+                pag=Math.trunc(count/20);
+            }
+            if(count % 20 !== 0){
+                pag=Math.trunc(count/20)+1;
+            }
+        }
+        if(pag>0){
+            setDatos({
+                ...datos,
+                pagina: pag,
+            })
+        }
+        var filtro2=`&page=${datos.pagina}`;
+        const filtro3 = filtro + filtro2;
+        actualizaFiltro(filtro3, activos);
+    }
     
     return (
-        <Container className='mt-5'>            
+        <Container className='mt-5'>     
             <Row>
                 <Col>
                     <ManLineasFiltro actualizaFiltro={actualizaFiltro}/>
                 </Col>
             </ Row>
+            <table>
+                <tbody>
+                    <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
+                    <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
+                    <th>Número registros: {count}</th>
+                </tbody>
+            </table> 
             <Row> 
                     <Col><h5>{lineas?lineas.prioridad:''}</h5></Col>
                     <ExcelFile filename={"ExcelExportExample"} element={<button>Exportar a Excel</button>}>
