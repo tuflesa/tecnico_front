@@ -4,7 +4,7 @@ import NotificacionForm from './man_notificaciones_form';
 
 const ManNotificacionesNuevas = () => {
     const [user] = useCookies(['tec-user']);
-    const [nota, setNota] = useState({quien: user['tec-user'], empresa:user['tec-user'].perfil.empresa.id});
+    const [nota, setNota] = useState({quien: user['tec-user'], empresa:user['tec-user'].perfil.empresa.id, zona:user['tec-user'].perfil.zona.id});
     return ( 
         <NotificacionForm   nota={nota} 
                             setNota={setNota}

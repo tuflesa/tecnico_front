@@ -16,6 +16,8 @@ const NotificacionForm = ({nota, setNota}) => {
     const [usuarios, setUsuarios] = useState(null);
     const [destrezas, setDestrezas] = useState(null);
     const soyTecnico = user['tec-user'].perfil.destrezas.filter(s => s === 6);
+    const [empresas, setEmpresas] = useState(null);
+    const [zonas, setZonas] = useState(null);
 
     const [datos, setDatos] = useState({
         id: nota.id? nota.id : null,
@@ -32,12 +34,17 @@ const NotificacionForm = ({nota, setNota}) => {
         descartado: nota.id?nota.descartado:false,
         finalizado: nota.id?nota.finalizado:false,
         conclusion: nota.id? nota.conclusion : null,
-        empresa: nota?nota.empresa:user['tec-user'].perfil.empresa.id,
+        empresa: nota?nota.empresa:user['tec-user'].perfil.empresa__nombre,
+        zona: nota?nota.zona:user['tec-user'].perfil.zona?user['tec-user'].perfil.zona.id:'',
         numero: nota.id? nota.numero:null,
     });
 
     useEffect(()=>{
-        
+        console.log('estamos viendo el perfil');
+        console.log(user['tec-user'].perfil);
+        console.log(nota);
+        console.log('que vale datos zona');
+        console.log(datos.zona);
         setDatos({
             id: nota.id? nota.id : null,
             que: nota.id?nota.que:null,
@@ -54,6 +61,7 @@ const NotificacionForm = ({nota, setNota}) => {
             finalizado: nota.id?nota.finalizado:false,
             conclusion: nota.id? nota.conclusion : null,
             empresa: nota?nota.empresa:user['tec-user'].perfil.empresa.id,
+            zona: nota?nota.zona:user['tec-user'].perfil.zona?user['tec-user'].perfil.zona.id:'',
             numero: nota.id? nota.numero:null,
         });
     },[nota]);
@@ -166,6 +174,34 @@ const NotificacionForm = ({nota, setNota}) => {
         })
     } 
 
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setEmpresas(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
+
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + `/api/estructura/zona/?empresa=${user['tec-user'].perfil.empresa.id}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( res => {
+            setZonas(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        }); 
+    }, [token, datos.empresa]);
+
     return(
         <Container className="mb-5 mt-5">
             <Row className="justify-content-center"> 
@@ -206,6 +242,45 @@ const NotificacionForm = ({nota, setNota}) => {
                                                 placeholder="Fecha creación" />
                                 </Form.Group>
                             </Col> 
+                            <Col>
+                                <Form.Group controlId="empresa">
+                                    <Form.Label>Empresa</Form.Label>
+                                    <Form.Control as="select"  
+                                                name='empresa' 
+                                                value={datos.empresa}
+                                                onChange={handleInputChange}
+                                                placeholder="Empresa"
+                                                disabled>
+                                                <option key={0} value={''}>Todas</option>    
+                                                {empresas && empresas.map( empresa => {
+                                                    return (
+                                                    <option key={empresa.id} value={empresa.id}>
+                                                        {empresa.nombre}
+                                                    </option>
+                                                    )
+                                                })}
+                                </Form.Control>
+                                </Form.Group>
+                            </Col>
+                            <Col>
+                                <Form.Group controlId="zona">
+                                    <Form.Label>Zona (*)</Form.Label>
+                                    <Form.Control   as="select" 
+                                                    value={datos.zona}
+                                                    name='zona'
+                                                    onChange={handleInputChange}
+                                                    disabled> 
+                                                    <option key={0} value={''}>Sin Zona asignada</option>                                      
+                                                    {zonas && zonas.map( zona => {
+                                                        return (
+                                                        <option key={zona.id} value={zona.id}>
+                                                            {zona.siglas}
+                                                        </option>
+                                                        )
+                                                    })}
+                                    </Form.Control>
+                                </Form.Group>
+                            </Col>
                         </Row>
                         <Row>
                             <Col>
@@ -279,30 +354,9 @@ const NotificacionForm = ({nota, setNota}) => {
                                     />
                                 </Form.Group>
                             </Col>
-                        </Row>
+                        </Row>    
                         <Row> 
-                            {/* <Col>
-                                <Form.Group controlId="para">
-                                    <Form.Label>Para quién (*)</Form.Label>
-                                    <Form.Control as="select"  
-                                                name='para' 
-                                                value={datos.para}
-                                                onChange={handleInputChange}
-                                                placeholder="para">
-                                                <option key={0} value={''}>Todas</option>    
-                                                {usuarios && usuarios.map( usuario => {
-                                                    return (
-                                                    <option key={usuario.id} value={usuario.id}>
-                                                        {usuario.get_full_name}
-                                                    </option>
-                                                    )
-                                                })}
-                                </Form.Control>
-                                </Form.Group>
-                            </Col> */}                           
-                        </Row>     
-                        <Row> 
-                        {nota.id?
+                            {nota.id?
                                 <h5 className="pb-3 pt-1 mt-2">Estado de la notificación</h5>:null}
                         </Row>
                         <Row>

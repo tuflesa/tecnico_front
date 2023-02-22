@@ -12,13 +12,14 @@ const ManNotificacionesLista = () => {
     const [user] = useCookies(['tec-user']);
     
     const [notas, setNotas]  = useState(null);
-    const [filtro, setFiltro] = useState(`?empresa__id=${user['tec-user'].perfil.empresa.id}&finalizado=${false}&revisao=${false}&descartado=${false}`);
+    const [filtro, setFiltro] = useState(`?empresa__id=${user['tec-user'].perfil.empresa.id}&quien=${user['tec-user'].perfil.usuario}&finalizado=${false}&revisao=${false}&descartado=${false}`);
 
     const actualizaFiltro = (str) => {
         setFiltro(str);
     }
   
     useEffect(()=>{
+        console.log(user['tec-user'].perfil);
         axios.get(BACKEND_SERVER + '/api/mantenimiento/notificaciones/' + filtro ,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -31,10 +32,6 @@ const ManNotificacionesLista = () => {
             console.log(err);
         });
     }, [token, filtro]);
-
-    // const BorrarNota =(parte) =>{ 
-    //     console.log(parte);
-    // }
 
     return (
         <Container className='mt-5'>            
