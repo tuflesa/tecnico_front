@@ -72,7 +72,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
             }     
         })
         .then( res => {  
-            console.log('Tarea cerrada');
+            console.log('Tarea actualizada');
         })
         .catch(err => { console.log(err);})
     }

@@ -24,22 +24,14 @@ const ManPendientes = () => {
     const filtro = `?fecha_plan__lte=${datos.fecha_plan_lte}&parte__empresa__id=${datos.empresa}`;
 
     useEffect(()=>{        
-        axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_activas/`+ filtro,{
+        axios.get(BACKEND_SERVER + `/api/mantenimiento/lineas_activas_sinPaginar/`+ filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
                 }
         })
         .then( res => {
-            //ordenamos los trabajos por prioridad
-            setTareas(res.data.sort(function(a, b){
-                if(a.tarea.prioridad < b.tarea.prioridad){
-                    return 1;
-                }
-                if(a.tarea.prioridad > b.tarea.prioridad){
-                    return -1;
-                }
-                return 0;
-            }))})
+            setTareas(res.data);
+        })
         .catch( err => {
             console.log(err);
         });
