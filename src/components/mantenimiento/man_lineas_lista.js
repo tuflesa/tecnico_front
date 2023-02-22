@@ -51,19 +51,6 @@ const ManLineasListado = () => {
                     }
             })
             .then( res => {
-                /* res.data.result.map( r => {
-                //solo para poder utilizar los campos en el excel
-                    r['nom_parte']=r.parte.nombre;
-                    r['obparte']=r.parte.observaciones;
-                    r['nom_tarea']=r.tarea.nombre;
-                    r['obtarea']=r.tarea.observaciones;
-                    r['parte_tip']=r.parte.tipo_nombre;
-                    r['especial']=r.tarea.especialidad_nombre;
-                    r['priori']=r.tarea.prioridad;
-                    r['fecha_ini']=r.fecha_inicio?invertirFecha(String(r.fecha_inicio)):'';
-                    r['fecha_plani']=r.fecha_plan?invertirFecha(String(r.fecha_plan)):'';
-                    r['equipoT']=r.parte.seccion?r.parte.seccion.siglas_zona +' - '+r.parte.seccion.nombre + (r.parte.equipo?' - ' + r.parte.equipo.nombre:''):null
-                }) */
                 setLineas(res.data.results);
                 setCount(res.data.count);
                 let pagT = res.data.count/20;
@@ -84,22 +71,13 @@ const ManLineasListado = () => {
                     }
             })
             .then( res => {
-
-                /* res.data.map( r => {
-                //solo para poder utilizar los campos en el excel
-                    r['nom_parte']=r.parte.nombre;
-                    r['obparte']=r.parte.observaciones;
-                    r['nom_tarea']=r.tarea.nombre;
-                    r['obtarea']=r.tarea.observaciones;
-                    r['parte_tip']=r.parte.tipo_nombre;
-                    r['especial']=r.tarea.especialidad_nombre;
-                    r['priori']=r.tarea.prioridad;
-                    r['fecha_ini']=r.fecha_inicio?invertirFecha(String(r.fecha_inicio)):'';
-                    r['fecha_plani']=r.fecha_plan?invertirFecha(String(r.fecha_plan)):'';
-                    r['equipoT']=r.parte.seccion?r.parte.seccion.siglas_zona +' - '+r.parte.seccion.nombre + (r.parte.equipo?' - ' + r.parte.equipo.nombre:''):null
-                }) */
                 setLineas(res.data.results);
                 setCount(res.data.count);
+                let pagT = res.data.count/20;
+                if (res.data.count % 20 !== 0){
+                    pagT += 1;
+                }
+                setPagTotal(Math.trunc(pagT));
             })
             .catch( err => {
                 console.log(err);

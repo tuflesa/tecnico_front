@@ -57,6 +57,11 @@ const ManListaPartes = () => {
             .then( res => {
                 setPartes(res.data.results);
                 setCount(res.data.count);
+                let pagT = res.data.count/20;
+                if (res.data.count % 20 !== 0){
+                    pagT += 1;
+                }
+                setPagTotal(Math.trunc(pagT));
             })
             .catch( err => {
                 console.log(err);
