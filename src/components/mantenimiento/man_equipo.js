@@ -20,6 +20,7 @@ const ManPorEquipos = () => {
     const [lineasTrabajadores, setlineasTrabajadores] = useState(null);
     const [count, setCount] = useState(null);
     const [pagTotal, setPagTotal] = useState(null);
+    const [filtro, setFiltro] = useState(null);
 
     var dentrodeunmes=null;
     var fechaenunmesString=null;
@@ -28,8 +29,7 @@ const ManPorEquipos = () => {
     var enunmes=fecha_hoy+mesEnMilisegundos;
     dentrodeunmes = new Date(enunmes);
     fechaenunmesString = dentrodeunmes.getFullYear() + '-' + ('0' + (dentrodeunmes.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunmes.getDate()).slice(-2);
-
-    const [filtro, setFiltro] = useState(null);
+    
     const actualizaFiltro = str => {
         setFiltro(str);
     }
@@ -102,15 +102,7 @@ const ManPorEquipos = () => {
             var destrezas = user['tec-user'].perfil.destrezas;
             MisTrabajos = res.data.results.filter(s => destrezas.includes(s.tarea.especialidad));
             //ordenamos los trabajos por prioridad
-            setLineas(MisTrabajos.sort(function(a, b){
-                if(a.tarea.prioridad < b.tarea.prioridad){
-                    return 1;
-                }
-                if(a.tarea.prioridad > b.tarea.prioridad){
-                    return -1;
-                }
-                return 0;
-            }))  
+            setLineas(MisTrabajos);
             setCount(res.data.count);
         })
         .catch( err => {
@@ -339,8 +331,8 @@ const ManPorEquipos = () => {
     }
 
     return(
-        <Container class extends className="pt-1 mt-5">
-            <Row class extends>                
+        <Container className extends="pt-1 mt-5">
+            <Row className extends>                
                 <Col>
                     <h5 className="mb-3 mt-3" style={ { color: 'red' } }>Listado de Trabajos {user['tec-user'].get_full_name}, por prioridades:</h5>              
                     <h5>Acciones:</h5>
@@ -365,9 +357,11 @@ const ManPorEquipos = () => {
             </ Row>
             <table>
                 <tbody>
-                    <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
-                    <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
-                    <th>Página {datos.pagina} de {pagTotal}</th>
+                    <tr>
+                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
+                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
+                        <th>Página {datos.pagina} de {pagTotal}</th>
+                    </tr>
                 </tbody>
             </table> 
             <Row>

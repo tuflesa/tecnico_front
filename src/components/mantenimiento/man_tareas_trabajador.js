@@ -13,7 +13,7 @@ import ReactExport from 'react-data-export';
 const TareasTrabajador = () => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
-    const [filtro, setFiltro] = useState(`?page=${1}`);
+    const [filtro, setFiltro] = useState(`?linea__parte__empresa=${user['tec-user'].perfil.empresa.id}`);
     const [lineasusuarios, setLineasUsuarios] = useState(null);
     const [show, setShow] = useState(false);
     const [linea_id, setLinea_id] = useState(null);
@@ -35,7 +35,6 @@ const TareasTrabajador = () => {
               }
         })
         .then( res => {
-            console.log(res.data);
             res.data.results.map( r => {
                 //solo para poder utilizar los campos en el excel
                     r['nom_parte']=r.linea.parte.num_parte;
@@ -73,7 +72,6 @@ const TareasTrabajador = () => {
     }, [filtro, datos.pagina]);
 
     const actualizaFiltro = str => {
-        console.log(filtro);
         setFiltro(str);
     }
 
@@ -84,14 +82,6 @@ const TareasTrabajador = () => {
 
     const handlerClose = () => {
         setShow(false);
-    }
-
-    const actualizaPag = () => {
-        console.log('estoy en actualizaPag');
-        console.log(datos.pagina);
-        var filtro2=`&page=${datos.pagina}`;
-        const filtro3 = filtro + filtro2;
-        actualizaFiltro(filtro3);
     }
 
     const cambioPagina = (pag) => {
@@ -119,39 +109,40 @@ const TareasTrabajador = () => {
 
     return(
         <Container className="mt-5">
-            <Form>
-                <Row>
-                    <Col>
-                        <FiltroTareasTrabajador actualizaFiltro={actualizaFiltro}/>
-                    </Col>
-                </ Row>
-                <table>
-                    <tbody>
-                        <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
-                        <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
+            <Row>
+                <Col>
+                    <FiltroTareasTrabajador actualizaFiltro={actualizaFiltro}/>
+                </Col>
+            </ Row>
+            <table>
+                <tbody>
+                    <tr>
+                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
+                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
                         <th>Página {datos.pagina} de {pagTotal} - Número registros totales: {count}</th>
-                    </tbody>
-                </table>
-                <Row> 
-                    <Col><h5>{lineasusuarios?lineasusuarios.prioridad:''}</h5></Col>
-                    <ExcelFile filename={"ExcelExportExample"} element={<button>Exportar a Excel</button>}>
-                        <ExcelSheet data={lineasusuarios} name="lineasusuarios">
-                            <ExcelColumn label="Prioridad" value="priori"/>
-                            <ExcelColumn label="Parte" value="nom_parte"/>
-                            <ExcelColumn label="Tarea" value="nom_tarea"/>
-                            <ExcelColumn label="Observaciones Tarea" value="obtarea"/>
-                            <ExcelColumn label="Observaciones Trabajador" value="obtareatrab"/>
-                            <ExcelColumn label="Equipo" value="equipoT"/>
-                            <ExcelColumn label="Fecha Planificación" value="fecha_plani"/>
-                            <ExcelColumn label="Fecha Inicio" value="fecha_ini"/> 
-                            <ExcelColumn label="Fecha Fin" value="fecha_f"/>  
-                            <ExcelColumn label="Tipo" value="parte_tip"/>
-                            <ExcelColumn label="Periodo" value="peri"/>
-                            <ExcelColumn label="Cantidad periodo" value="pericant"/>
-                        </ExcelSheet>
-                    </ExcelFile> 
-                </Row>
-                <Row>
+                    </tr>
+                </tbody>
+            </table>
+            <Row> 
+                <Col><h5>{lineasusuarios?lineasusuarios.prioridad:''}</h5></Col>
+                <ExcelFile filename={"ExcelExportExample"} element={<button>Exportar a Excel</button>}>
+                    <ExcelSheet data={lineasusuarios} name="lineasusuarios">
+                        <ExcelColumn label="Prioridad" value="priori"/>
+                        <ExcelColumn label="Parte" value="nom_parte"/>
+                        <ExcelColumn label="Tarea" value="nom_tarea"/>
+                        <ExcelColumn label="Observaciones Tarea" value="obtarea"/>
+                        <ExcelColumn label="Observaciones Trabajador" value="obtareatrab"/>
+                        <ExcelColumn label="Equipo" value="equipoT"/>
+                        <ExcelColumn label="Fecha Planificación" value="fecha_plani"/>
+                        <ExcelColumn label="Fecha Inicio" value="fecha_ini"/> 
+                        <ExcelColumn label="Fecha Fin" value="fecha_f"/>  
+                        <ExcelColumn label="Tipo" value="parte_tip"/>
+                        <ExcelColumn label="Periodo" value="peri"/>
+                        <ExcelColumn label="Cantidad periodo" value="pericant"/>
+                    </ExcelSheet>
+                </ExcelFile> 
+            </Row>
+            <Row>
                 <Col>
                     <Table striped bordered hover>
                         <thead>
@@ -198,7 +189,6 @@ const TareasTrabajador = () => {
                     </Table>
                 </Col>
             </Row> 
-            </Form>
             <ListaDePersonal    show={show}
                                 linea_id ={linea_id}
                                 handlerClose={handlerClose}
