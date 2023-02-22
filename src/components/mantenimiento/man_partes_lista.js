@@ -14,58 +14,54 @@ const ManListaPartes = () => {
     const soyTecnico = user['tec-user'].perfil.destrezas.filter(s => s === 6);
     const [partes, setPartes]  = useState(null);
     const [filtro, setFiltro] = useState(`?estado=${''}&empresa__id=${user['tec-user'].perfil.empresa.id}&creado_por=${soyTecnico.length===0?user['tec-user'].perfil.usuario:''}`);
-    const [activos, setActivos] = useState('');
+    const [activos, setActivos] = useState(true);
     const [actualizar, setActualizar] = useState('');
+    const [count, setCount] = useState(null);
+    const [pagTotal, setPagTotal] = useState(null);
 
     const actualizaFiltro = (str, act) => {
         setActivos(act);
         setFiltro(str);
     }
+
+    const [datos, setDatos] = useState({
+        pagina: 1,
+    });
     
     useEffect(()=>{
-        axios.get(BACKEND_SERVER + '/api/mantenimiento/parte_trabajo_detalle/' + filtro ,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-                }
-        })
-        .then( res => {
-            //variable para filtrar en Activos las 2 opciones
-            if(activos===''){
-                //listaFil recoge toda las lineas para luego filtrarlas.
-                const listaFil=res.data;
-                //cogemos de todas solo las que estén planificadas
-                const planificadas = listaFil.filter(s=>s.estado===1);
-                //cogemos de todas solo las que estén en ejecución
-                const ejecucion = listaFil.filter(s=>s.estado===2);
-                //anidamos planificadas y en ejecución
-                const activas = planificadas.concat(ejecucion);
-                //las ordenamos pasandolas a la variable que muestra los datos 'lineas'
-                setPartes(activas.sort(function(a, b){
-                    if(a.id < b.id){
-                        return 1;
+        //estamos filtrando y ordenando en el back
+        if(activos){
+            //opción partes activos, excluidos los finalizados y los pendientes
+            axios.get(BACKEND_SERVER + '/api/mantenimiento/parte_activos_trabajo/' + filtro ,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
                     }
-                    if(a.id > b.id){
-                        return -1;
+            })
+            .then( res => {
+                    setPartes(res.data.results);
+                    setCount(res.data.count);
+                    let pagT = res.data.count/20;
+                    if (res.data.count % 20 !== 0){
+                        pagT += 1;
                     }
-                    return 0;
-                }));
-            }
-            else{
-                //si no hay opción 5 (Activos) filtramos de forma normal y aquí ordenamos
-                setPartes(res.data.sort(function(a, b){
-                    if(a.id < b.id){
-                        return 1;
+                    setPagTotal(Math.trunc(pagT));
+            })
+        }
+        else{
+            //Cuando activamos el filtro y queremos cualquier parte, llamamos desde aquí sin filtrar estado
+            axios.get(BACKEND_SERVER + '/api/mantenimiento/parte_trabajo_detalle/' + filtro ,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
                     }
-                    if(a.id > b.id){
-                        return -1;
-                    }
-                    return 0;
-                }))
-            }
-        })
-        .catch( err => {
-            console.log(err);
-        });
+            })
+            .then( res => {
+                setPartes(res.data.results);
+                setCount(res.data.count);
+            })
+            .catch( err => {
+                console.log(err);
+            });
+        }
     }, [token, filtro, activos, actualizar]);
 
     const BorrarParte =(parte) =>{ 
@@ -131,6 +127,29 @@ const ManListaPartes = () => {
         }         
     }
 
+    const cambioPagina = (pag) => {
+        if(pag<=0){
+            pag=1;
+        }
+        if(pag>count/20){
+            if(count % 20 === 0){
+                pag=Math.trunc(count/20);
+            }
+            if(count % 20 !== 0){
+                pag=Math.trunc(count/20)+1;
+            }
+        }
+        if(pag>0){
+            setDatos({
+                ...datos,
+                pagina: pag,
+            })
+        }
+        var filtro2=`&page=${datos.pagina}`;
+        const filtro3 = filtro + filtro2;
+        actualizaFiltro(filtro3, activos);
+    }
+
     return (
         <Container className='mt-5'>            
             <Row>
@@ -138,6 +157,13 @@ const ManListaPartes = () => {
                     <ManPartesFiltro actualizaFiltro={actualizaFiltro}/>
                 </Col>
             </ Row>
+            <table>
+                <tbody>
+                    <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
+                    <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
+                    <th>Página {datos.pagina} de {pagTotal} - Número registros totales: {count}</th>
+                </tbody>
+            </table> 
             <Row>                
                 <Col>
                     <h5 className="mb-3 mt-3">Listado de Partes</h5>                    

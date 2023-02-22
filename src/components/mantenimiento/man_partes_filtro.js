@@ -237,9 +237,9 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
             }
         }
         const filtro = filtro1 + filtro2;
-        const activos = datos.estados;
+        const activos = datos.estados<3;
         actualizaFiltro(filtro, activos);
-    },[datos.id, datos.nombre, datos.tipotarea, datos.observaciones, datos.creado_por, datos.finalizado, datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.fecha_prevista_inicio_gte, datos.fecha_prevista_inicio_lte, datos.estados, datos.num_parte, token]);
+    },[datos, token]);
 
     const handleInputChange = (event) => {
         setDatos({
