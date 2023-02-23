@@ -40,7 +40,16 @@ const ManNavBar = () => {
 
                                     </NavDropdown>
                                 </Nav> 
-                            :null}   
+                            :
+                                <Nav className="mr-auto">
+                                    <NavDropdown title="Mantenimiento" id="basic-nav-dropdown">
+                                        <NavDropdown.Item href="/mantenimiento/listado_tarea">Mis Tareas</NavDropdown.Item> 
+                                        <NavDropdown.Divider />
+                                        <NavDropdown.Item href="/mantenimiento/notificaciones">Lista de notificaciones</NavDropdown.Item>
+                                        <NavDropdown.Item href="/mantenimiento/notificacion/nueva">Nueva Notificacion</NavDropdown.Item>
+                                    </NavDropdown>
+                                </Nav> 
+                            }   
                             <Navbar.Text className="mr-4" >
                                 Usuario: {user['tec-user'].get_full_name}
                             </Navbar.Text>

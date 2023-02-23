@@ -1,5 +1,6 @@
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
+import { useCookies } from 'react-cookie';
 import ManNavBar from './man_nav';
 import ManLineaDetalle from './man_linea_tarea_editar';
 import ManListaPartes from './man_partes_lista';
@@ -15,6 +16,8 @@ import ManParteDetalleOp from './man_parte_editar_op';
 import TareasTrabajador from './man_tareas_trabajador';
 
 const Mantenimiento = () => {
+    const [user] = useCookies(['tec-user']);
+    const soyOperdor = user['tec-user'].perfil.puesto.nombre==='Operador'?true:false;
     
     return (
         <React.Fragment>
@@ -31,7 +34,7 @@ const Mantenimiento = () => {
                 <Route path='/mantenimiento/parte/:id' component={ManParteDetalle} />
                 <Route path='/mantenimiento/listado_tareas' component={ManLineasListado} /> 
                 <Route path='/mantenimiento/listado_tarea' component={ManPorEquipos} /> 
-                <Route path='/mantenimiento/' component={ManPendientes} />                
+                {!soyOperdor?<Route path='/mantenimiento/' component={ManPendientes} /> : <Route path='/mantenimiento/' component={ManPorEquipos} /> }
             </Switch>
         </React.Fragment>
     )
