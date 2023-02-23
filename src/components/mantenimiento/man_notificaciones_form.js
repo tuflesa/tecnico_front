@@ -382,7 +382,8 @@ const NotificacionForm = ({nota, setNota}) => {
                                 <Form.Control as="select" 
                                                 value={datos.revisado}
                                                 name='revisado'
-                                                onChange={handleInputChange}>
+                                                onChange={handleInputChange}
+                                                disabled={desactivar()}>
                                     <option key={0} value={''}>Todos</option>
                                     <option key={1} value={true}>Si</option>
                                     <option key={2} value={false}>No</option>
@@ -398,7 +399,7 @@ const NotificacionForm = ({nota, setNota}) => {
                                                 value={datos.descartado}
                                                 name='descartado'
                                                 onChange={handleInputChange}
-                                                disabled={soyTecnico.length===0?true:false}>
+                                                disabled={desactivar()}>
                                     <option key={0} value={''}>Todos</option>
                                     <option key={1} value={true}>Si</option>
                                     <option key={2} value={false}>No</option>
@@ -414,7 +415,7 @@ const NotificacionForm = ({nota, setNota}) => {
                                                     value={datos.finalizado}
                                                     name='finalizado'
                                                     onChange={handleInputChange}
-                                                    disabled={soyTecnico.length===0?true:false}>
+                                                    disabled={desactivar()}>
                                         <option key={0} value={''}>Todos</option>
                                         <option key={1} value={true}>Si</option>
                                         <option key={2} value={false}>No</option>
@@ -433,6 +434,7 @@ const NotificacionForm = ({nota, setNota}) => {
                                                 value={datos.conclusion}
                                                 onChange={handleInputChange} 
                                                 placeholder="Conclusiones"
+                                                disabled={desactivar()}
                                     />
                                 </Form.Group>
                             : null}
