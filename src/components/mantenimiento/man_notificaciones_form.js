@@ -34,17 +34,14 @@ const NotificacionForm = ({nota, setNota}) => {
         descartado: nota.id?nota.descartado:false,
         finalizado: nota.id?nota.finalizado:false,
         conclusion: nota.id? nota.conclusion : null,
-        empresa: nota?nota.empresa:user['tec-user'].perfil.empresa__nombre,
-        zona: nota?nota.zona:user['tec-user'].perfil.zona?user['tec-user'].perfil.zona.id:'',
+        empresa: nota?nota.empresa:'',
+        zona: nota?nota.zona:'',
         numero: nota.id? nota.numero:null,
     });
 
     useEffect(()=>{
-        console.log('estamos viendo el perfil');
-        console.log(user['tec-user'].perfil);
-        console.log(nota);
-        console.log('que vale datos zona');
-        console.log(datos.zona);
+        console.log('que vale la nota');
+        console.log(nota?nota.zona:user['tec-user'].perfil.zona?user['tec-user'].perfil.zona.id:'');
         setDatos({
             id: nota.id? nota.id : null,
             que: nota.id?nota.que:null,
@@ -66,8 +63,13 @@ const NotificacionForm = ({nota, setNota}) => {
         });
     },[nota]);
 
+    useEffect(()=>{
+        console.log('que vale la datos');
+        console.log(datos);        
+    },[datos]);
+
     useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/administracion/usuarios/?perfil__empresa__id=${datos.empresa}`,{
+        axios.get(BACKEND_SERVER + `/api/administracion/usuarios/?perfil__empresa__id=${user['tec-user'].perfil.empresa.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -102,78 +104,6 @@ const NotificacionForm = ({nota, setNota}) => {
         });
     }, [token]);
 
-    const handleInputChange = (event) => {
-        setDatos({
-            ...datos,
-            [event.target.name] : event.target.value
-        })  
-    }
-
-    const crearNota = (event) => {
-        event.preventDefault();
-        axios.post(BACKEND_SERVER + `/api/mantenimiento/notificacion_nueva/`, {
-            que: datos.que,
-            cuando: datos.cuando,
-            donde: datos.donde,
-            //para: datos.para,
-            quien: user['tec-user'].perfil.usuario,
-            como: datos.como,
-            cuanto: datos.cuanto,
-            porque: datos.porque,
-            fecha_creacion: datos.fecha_creacion,            
-            revisado: datos.revisado,
-            descartado: datos.descartado,
-            finalizado: datos.finalizado,
-            conclusion: datos.conclusion,
-            empresa: datos.empresa,
-        }, {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }     
-        })
-        .then( res => { 
-            setNota(res.data);
-            window.confirm('La notificación se ha creado correctamente');
-            window.location.href="javascript: history.go(-1)"
-            
-        })
-        .catch(err => { 
-            setShowError(true);
-            console.log(err);
-        })
-    } 
-
-    const actualizarNota = (event) => {
-        event.preventDefault();
-        axios.patch(BACKEND_SERVER + `/api/mantenimiento/notificacion_nueva/${nota.id}/`, {
-            que: datos.que,
-            cuando: datos.cuando,
-            donde: datos.donde,
-            //para: datos.para,
-            //quien: datos.quien,
-            como: datos.como,
-            cuanto: datos.cuanto,
-            porque: datos.porque,
-            fecha_creacion: datos.fecha_creacion,            
-            revisado: datos.revisado,
-            descartado: datos.descartado,
-            finalizado: datos.finalizado,
-            conclusion: datos.conclusion,
-            //empresa: datos.empresa,
-        }, {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }     
-        })
-        .then( res => { 
-            setNota(res.data);
-        })
-        .catch(err => { 
-            setShowError(true);
-            console.log(err);
-        })
-    } 
-
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
             headers: {
@@ -201,6 +131,91 @@ const NotificacionForm = ({nota, setNota}) => {
             console.log(err);
         }); 
     }, [token, datos.empresa]);
+
+    const handleInputChange = (event) => {
+        setDatos({
+            ...datos,
+            [event.target.name] : event.target.value
+        })  
+    }
+
+    const crearNota = (event) => {
+        event.preventDefault();
+        if(datos.zona===null){
+            setShowError(true);
+        }
+        else{
+            axios.post(BACKEND_SERVER + `/api/mantenimiento/notificacion_nueva/`, {
+                que: datos.que,
+                cuando: datos.cuando,
+                donde: datos.donde,
+                //para: datos.para,
+                quien: user['tec-user'].perfil.usuario,
+                como: datos.como,
+                cuanto: datos.cuanto,
+                porque: datos.porque,
+                fecha_creacion: datos.fecha_creacion,            
+                revisado: datos.revisado,
+                descartado: datos.descartado,
+                finalizado: datos.finalizado,
+                conclusion: datos.conclusion,
+                empresa: datos.empresa,
+                zona: datos.zona,
+            }, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }     
+            })
+            .then( res => { 
+                setNota(res.data);
+                window.confirm('La notificación se ha creado correctamente');
+                window.location.href="javascript: history.go(-1)"
+                
+            })
+            .catch(err => { 
+                setShowError(true);
+                console.log(err);
+            });
+        }
+    } 
+
+    const actualizarNota = (event) => {
+        event.preventDefault();
+        axios.patch(BACKEND_SERVER + `/api/mantenimiento/notificacion_nueva/${nota.id}/`, {
+            que: datos.que,
+            cuando: datos.cuando,
+            donde: datos.donde,
+            //para: datos.para,
+            //quien: datos.quien,
+            como: datos.como,
+            cuanto: datos.cuanto,
+            porque: datos.porque,
+            fecha_creacion: datos.fecha_creacion,            
+            revisado: datos.revisado,
+            descartado: datos.descartado,
+            finalizado: datos.finalizado,
+            conclusion: datos.conclusion,
+            zona: datos.zona,
+            //empresa: datos.empresa,
+        }, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => { 
+            setNota(res.data);
+        })
+        .catch(err => { 
+            setShowError(true);
+            console.log(err);
+        })
+    } 
+
+    const desactivar = () => {
+        if(user['tec-user'].perfil.puesto.nombre==='Operador'){
+            return true;
+        }
+    }
 
     return(
         <Container className="mb-5 mt-5">
@@ -269,7 +284,7 @@ const NotificacionForm = ({nota, setNota}) => {
                                                     value={datos.zona}
                                                     name='zona'
                                                     onChange={handleInputChange}
-                                                    disabled> 
+                                                    disabled={desactivar()}> 
                                                     <option key={0} value={''}>Sin Zona asignada</option>                                      
                                                     {zonas && zonas.map( zona => {
                                                         return (

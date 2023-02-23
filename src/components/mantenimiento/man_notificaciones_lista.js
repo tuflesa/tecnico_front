@@ -12,7 +12,7 @@ const ManNotificacionesLista = () => {
     const [user] = useCookies(['tec-user']);
     
     const [notas, setNotas]  = useState(null);
-    const [filtro, setFiltro] = useState(`?empresa__id=${user['tec-user'].perfil.empresa.id}&quien=${user['tec-user'].perfil.usuario}&finalizado=${false}&revisao=${false}&descartado=${false}`);
+    const [filtro, setFiltro] = useState(null);
 
     const actualizaFiltro = (str) => {
         setFiltro(str);
@@ -20,12 +20,14 @@ const ManNotificacionesLista = () => {
   
     useEffect(()=>{
         console.log(user['tec-user'].perfil);
-        axios.get(BACKEND_SERVER + '/api/mantenimiento/notificaciones/' + filtro ,{
+        console.log(filtro);
+        filtro && axios.get(BACKEND_SERVER + '/api/mantenimiento/notificaciones/' + filtro ,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
                 }
         })
         .then( res => {
+            console.log(res.data);
             setNotas(res.data);
         })
         .catch( err => {

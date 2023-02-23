@@ -76,10 +76,10 @@ const ManNotificacionesFiltro = ({actualizaFiltro}) => {
     }, [token, datos.empresa]);
 
     useEffect(()=>{
-        const filtro1 = `?quien=${datos.quien}&finalizado=${datos.finalizado}&revisado=${datos.revisado}&descartado=${datos.descartado}&fecha_creacion__lte=${datos.fecha_creacion_lte}&fecha_creacion__gte=${datos.fecha_creacion_gte}&numero__icontains=${datos.numero}`;
-        let filtro2 = `&empresa__id=${datos.empresa}`;
-        const filtro = filtro1 + filtro2;
-        actualizaFiltro(filtro);
+        const filtro1 = `?quien=${datos.quien}&finalizado=${datos.finalizado}&revisado=${datos.revisado}&descartado=${datos.descartado}&fecha_creacion__lte=${datos.fecha_creacion_lte}&fecha_creacion__gte=${datos.fecha_creacion_gte}&numero__icontains=${datos.numero}&zona__id=${datos.zona}&empresa__id=${datos.empresa}`;
+        //let filtro2 = `&empresa__id=${datos.empresa}`;
+        //const filtro = filtro1 + filtro2;
+        actualizaFiltro(filtro1);
     },[datos, token]);
 
     const handleInputChange = (event) => {
