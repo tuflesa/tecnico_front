@@ -19,21 +19,30 @@ const ManNotificacionesLista = () => {
     }
   
     useEffect(()=>{
-        console.log(user['tec-user'].perfil);
-        console.log(filtro);
         filtro && axios.get(BACKEND_SERVER + '/api/mantenimiento/notificaciones/' + filtro ,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
                 }
         })
         .then( res => {
-            console.log(res.data);
             setNotas(res.data);
         })
         .catch( err => {
             console.log(err);
         });
     }, [token, filtro]);
+
+    const comparar_finalizados = (x) => {
+        if(x.descartado || x.finalizado){
+            return( "table-primary");
+        }
+    }
+
+    const comparar_revisados = (x) => {
+        if(x.revisado && !x.finalizado && !x.descartado){
+            return( "table-success");
+        }
+    }
 
     return (
         <Container className='mt-5'>            
@@ -51,18 +60,24 @@ const ManNotificacionesLista = () => {
                                 <th style={{width:150}}>Numero</th>
                                 <th>Creado Por</th>
                                 <th>Que ocurre</th>
-                                <th>Donde ocurre</th>
+                                <th>Zona</th>
+                                <th>Revisado</th>
+                                <th>Descartado</th>
+                                <th>Finalizado</th>
                                 <th style={{width:80}}>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             {notas && notas.map( nota => {
                                 return (
-                                    <tr key={nota.id}>
+                                    <tr key={nota.id}className = {comparar_finalizados(nota)? "table-success" : comparar_revisados(nota)? "table-primary":''}>
                                         <td>{nota.numero}</td>
                                         <td>{nota.quien.get_full_name}</td>
                                         <td>{nota.que}</td>
-                                        <td>{nota.donde}</td>
+                                        <td>{nota.zona?nota.zona.siglas:''}</td>
+                                        <td>{nota.revisado?'Si':'No'}</td>
+                                        <td>{nota.descartado?'Si':'No'}</td>
+                                        <td>{nota.finalizado?'Si':'No'}</td>
                                         <td>
                                             <Link to={`/mantenimiento/notificacion/${nota.id}`}>
                                                 <PencilFill className="mr-3 pencil"/>                                                

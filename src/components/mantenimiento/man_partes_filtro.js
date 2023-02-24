@@ -15,13 +15,13 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
     const [zonas, setZonas] = useState(null);
     const [equipos, setEquipos] = useState(null);
     const [estados, setEstados] = useState(null);
-    const soyTecnico = user['tec-user'].perfil.destrezas.filter(s => s === 6);
+    const soyTecnico = user['tec-user'].perfil.destrezas.filter(s => s === 6 || s===5);
 
     const [datos, setDatos] = useState({
         id: '',
         nombre: '',
         tipotarea: '',
-        creado_por: soyTecnico.length===0?user['tec-user'].perfil.usuario:'',
+        creado_por: user['tec-user'].perfil.usuario,
         observaciones: '',
         finalizado: false,
         empresa: user['tec-user'].perfil.empresa.id,
@@ -35,6 +35,7 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
     });    
 
     useEffect(() => {
+        console.log(user['tec-user'].perfil.destrezas);
         axios.get(BACKEND_SERVER + '/api/mantenimiento/tipo_tarea/',{
             headers: {
                 'Authorization': `token ${token['tec-token']}`

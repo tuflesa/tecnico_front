@@ -202,7 +202,7 @@ const RepTraspasoAlmacen = ({alm}) => {
     }
 
     const GenerarSalida = () => {
-        if (lineasSalida.length > 0) {
+        if (lineasSalida.length > 0 && datos.almacen_entre!=='') {
             axios.post(BACKEND_SERVER + `/api/repuestos/salida/`, {
                 nombre: 'Traspaso de almacen',
                 responsable: user['tec-user'].id
@@ -214,7 +214,12 @@ const RepTraspasoAlmacen = ({alm}) => {
             .then( res => { 
                 setSalida(res.data);
             })
-            .catch(err => { console.log(err);})
+            .catch(err => { 
+                console.log(err);
+            })
+        }
+        else{
+            alert('Revisa que tengas suficiente cantidad para el traspaso y seleccionado el almacén de entrega');
         }
     }    
 

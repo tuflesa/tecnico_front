@@ -40,8 +40,6 @@ const NotificacionForm = ({nota, setNota}) => {
     });
 
     useEffect(()=>{
-        console.log('que vale la nota');
-        console.log(nota?nota.zona:user['tec-user'].perfil.zona?user['tec-user'].perfil.zona.id:'');
         setDatos({
             id: nota.id? nota.id : null,
             que: nota.id?nota.que:null,
@@ -62,11 +60,6 @@ const NotificacionForm = ({nota, setNota}) => {
             numero: nota.id? nota.numero:null,
         });
     },[nota]);
-
-    useEffect(()=>{
-        console.log('que vale la datos');
-        console.log(datos);        
-    },[datos]);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + `/api/administracion/usuarios/?perfil__empresa__id=${user['tec-user'].perfil.empresa.id}`,{
@@ -141,7 +134,7 @@ const NotificacionForm = ({nota, setNota}) => {
 
     const crearNota = (event) => {
         event.preventDefault();
-        if(datos.zona===null){
+        if(datos.zona===null||datos.zona===''){
             setShowError(true);
         }
         else{

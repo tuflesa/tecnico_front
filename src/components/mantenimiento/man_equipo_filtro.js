@@ -312,6 +312,16 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
                             </Form.Control>
                         </Form.Group>
                     </Col>
+                    <Col>
+                        <Form.Group controlId="fecha_plan_lte">
+                            <Form.Label>Fecha Plan Anterior a</Form.Label>
+                            <Form.Control type="date" 
+                                        name='fecha_plan_lte' 
+                                        value={datos.fecha_plan_lte}
+                                        onChange={handleInputChange} 
+                                        placeholder="Fecha plan anterior a..." />
+                        </Form.Group>
+                    </Col>
                 </Row> 
             </Form>
         </Container>

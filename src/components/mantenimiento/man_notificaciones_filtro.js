@@ -16,7 +16,7 @@ const ManNotificacionesFiltro = ({actualizaFiltro}) => {
         id: '',
         quien: '',
         finalizado: false,
-        revisado: false,
+        revisado: '',
         descartado: false,
         empresa: user['tec-user'].perfil.empresa.id,
         zona: user['tec-user'].perfil.puesto.nombre==='Operador'?user['tec-user'].perfil.zona.id:'',
