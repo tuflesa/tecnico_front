@@ -50,15 +50,7 @@ const TareasTrabajador = () => {
                     r['fecha_f']=r.fecha_fin?invertirFecha(String(r.fecha_fin)):'';
                     r['equipoT']=r.linea.parte.seccion?r.linea.parte.seccion.siglas_zona +' - '+r.linea.parte.seccion.nombre + (r.linea.parte.equipo?' - ' + r.linea.parte.equipo.nombre:''):null;
             })
-            setLineasUsuarios(res.data.results);/* .sort(function(a, b){
-                if(a.get_full_name > b.get_full_name){
-                    return 1;
-                }
-                if(a.get_full_name < b.get_full_name){
-                    return -1;
-                }
-                return 0;
-            })) */
+            setLineasUsuarios(res.data.results);
             setCount(res.data.count);
             let pagT = res.data.count/20;
             if (res.data.count % 20 !== 0){
@@ -189,6 +181,15 @@ const TareasTrabajador = () => {
                     </Table>
                 </Col>
             </Row> 
+            <table>
+                <tbody>
+                    <tr>
+                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
+                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
+                        <th>Página {datos.pagina} de {pagTotal} - Número registros totales: {count}</th>
+                    </tr>
+                </tbody>
+            </table>
             <ListaDePersonal    show={show}
                                 linea_id ={linea_id}
                                 handlerClose={handlerClose}

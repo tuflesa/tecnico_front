@@ -422,7 +422,7 @@ const NotificacionForm = ({nota, setNota}) => {
                             {nota.id?
                                 <Form.Group id="conclusion">
                                     <Form.Label>Conclusiones</Form.Label>
-                                    <Form.Control type="text" 
+                                    <Form.Control as="textarea" rows={4}
                                                 name='conclusion' 
                                                 value={datos.conclusion}
                                                 onChange={handleInputChange} 

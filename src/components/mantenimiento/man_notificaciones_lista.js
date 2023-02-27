@@ -13,10 +13,16 @@ const ManNotificacionesLista = () => {
     
     const [notas, setNotas]  = useState(null);
     const [filtro, setFiltro] = useState(null);
+    const [count, setCount] = useState(null);
+    const [pagTotal, setPagTotal] = useState(null);
 
     const actualizaFiltro = (str) => {
         setFiltro(str);
     }
+
+    const [datos, setDatos] = useState({
+        pagina: 1,
+    });
   
     useEffect(()=>{
         filtro && axios.get(BACKEND_SERVER + '/api/mantenimiento/notificaciones/' + filtro ,{
@@ -25,7 +31,13 @@ const ManNotificacionesLista = () => {
                 }
         })
         .then( res => {
-            setNotas(res.data);
+            setNotas(res.data.results);
+            setCount(res.data.count);
+            let pagT = res.data.count/20;
+            if (res.data.count % 20 !== 0){
+                pagT += 1;
+            }
+            setPagTotal(Math.trunc(pagT));
         })
         .catch( err => {
             console.log(err);
@@ -44,6 +56,29 @@ const ManNotificacionesLista = () => {
         }
     }
 
+    const cambioPagina = (pag) => {
+        if(pag<=0){
+            pag=1;
+        }
+        if(pag>count/20){
+            if(count % 20 === 0){
+                pag=Math.trunc(count/20);
+            }
+            if(count % 20 !== 0){
+                pag=Math.trunc(count/20)+1;
+            }
+        }
+        if(pag>0){
+            setDatos({
+                ...datos,
+                pagina: pag,
+            })
+        }
+        var filtro2=`&page=${datos.pagina}`;
+        const filtro3 = filtro + filtro2;
+        actualizaFiltro(filtro3);
+    }
+
     return (
         <Container className='mt-5'>            
             <Row>
@@ -51,6 +86,15 @@ const ManNotificacionesLista = () => {
                     <ManNotificacionesFiltro actualizaFiltro={actualizaFiltro}/>
                 </Col>
             </ Row>
+            <table>
+                <tbody>
+                    <tr>
+                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
+                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
+                        <th>Página {datos.pagina} de {pagTotal} - Número registros totales: {count}</th>
+                    </tr>
+                </tbody>
+            </table>
             <Row>                
                 <Col>
                     <h5 className="mb-3 mt-3">Listado de Notificaciones</h5>                    
@@ -91,6 +135,15 @@ const ManNotificacionesLista = () => {
                     </Table>
                 </Col>
             </Row>
+            <table>
+                <tbody>
+                    <tr>
+                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
+                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
+                        <th>Página {datos.pagina} de {pagTotal} - Número registros totales: {count}</th>
+                    </tr>
+                </tbody>
+            </table>
         </Container>
     )
 }

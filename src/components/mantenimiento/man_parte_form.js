@@ -83,6 +83,7 @@ const ParteForm = ({parte, setParte, op}) => {
         })
         .then( res => {
             if(soyTecnico.length===0){
+                console.log('no soy tecnico oficial');
                 const no_tecnico = res.data.filter( s => s.nombre !== 'Preventivo');
                 setTipoParte(no_tecnico.sort(function(a, b){
                     if(a.nombre > b.nombre){
