@@ -83,7 +83,6 @@ const ParteForm = ({parte, setParte, op}) => {
         })
         .then( res => {
             if(soyTecnico.length===0){
-                console.log('no soy tecnico oficial');
                 const no_tecnico = res.data.filter( s => s.nombre !== 'Preventivo');
                 setTipoParte(no_tecnico.sort(function(a, b){
                     if(a.nombre > b.nombre){
@@ -947,7 +946,8 @@ const ParteForm = ({parte, setParte, op}) => {
                                         <th>Prioridad</th>
                                         <th>Nombre</th>
                                         <th>Especialidad</th>
-                                        <th>Observaciones</th>
+                                        <th>Observaciones Técnico</th>
+                                        <th>Observaciones Mantenimiento</th>
                                         {datos.tipo===1? <th>Tipo Periodo</th>:null}
                                         {datos.tipo===1?<th>Cantidad Periodos</th>:null}
                                         {(user['tec-user'].perfil.puesto.nombre !=='Operario')? 
@@ -963,6 +963,7 @@ const ParteForm = ({parte, setParte, op}) => {
                                                 <td>{linea.tarea.nombre}</td>
                                                 <td>{linea.tarea.especialidad_nombre}</td>
                                                 <td>{linea.tarea.observaciones}</td>
+                                                <td>{linea.tarea.observaciones_trab}</td>
                                                 {datos.tipo===1 && linea.tarea.tipo_periodo? 
                                                     <td>{linea.tarea.tipo_periodo.nombre}</td>:''}
                                                 {datos.tipo===1?<td>{linea.tarea.periodo}</td>:''}

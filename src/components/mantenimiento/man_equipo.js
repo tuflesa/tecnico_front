@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
-import { Container, Row, Col, Table, Modal, Button  } from 'react-bootstrap';
+import { Container, Row, Col, Table, Modal, Button, Form } from 'react-bootstrap';
 import {invertirFecha} from '../utilidades/funciones_fecha';
 import { Tools, FileCheck, Receipt, Eye} from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
@@ -17,10 +17,12 @@ const ManPorEquipos = () => {
     const [hoy] = useState(new Date);
     const [show, setShow] = useState(false);
     const [linea_id, setLinea_id] = useState(null);
+    const [linea_completa, setLinea_completa] = useState(null);
     const [lineasTrabajadores, setlineasTrabajadores] = useState(null);
     const [count, setCount] = useState(null);
     const [pagTotal, setPagTotal] = useState(null);
     const [filtro, setFiltro] = useState(null);
+    const [show_Observacion, setShowObservacion] = useState(false);
 
     var dentrodeunmes=null;
     var fechaenunmesString=null;
@@ -40,6 +42,7 @@ const ManPorEquipos = () => {
         linea: '',
         trabajador: user['tec-user'].perfil.usuario,
         pagina:1,
+        observaciones:'',
     });
     
     useEffect(()=>{ 
@@ -171,6 +174,17 @@ const ManPorEquipos = () => {
         .catch(err => { console.log(err);}) 
     }
 
+    const pedir_observaciones = (linea) => {
+        datos.observaciones=linea.tarea.observaciones_trab;
+        setShowObservacion(true);
+        setLinea_completa(linea);
+    }
+
+    const handleCloseObservacion = () => {
+        setShowObservacion(false);
+        FinalizarTarea(linea_completa);
+    }
+
     const FinalizarTarea = (linea) => { 
         axios.get(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea/?linea=${linea.id}`, {
             headers: {
@@ -192,6 +206,7 @@ const ManPorEquipos = () => {
                         for(var x=0;x<res.data.length;x++){
                             axios.patch(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea/${res.data[x].id}/`,{
                                 fecha_fin: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
+
                             },
                             {
                                 headers: {
@@ -205,6 +220,20 @@ const ManPorEquipos = () => {
                                 console.log(err);
                             });
                         }
+                        axios.patch(BACKEND_SERVER + `/api/mantenimiento/tareas/${linea.tarea.id}/`,{
+                            observaciones_trab: datos.observaciones,
+                        },
+                        {
+                            headers: {
+                                'Authorization': `token ${token['tec-token']}`
+                            }
+                        })
+                        .then( r => {
+                            console.log(r.data);
+                        })
+                        .catch( err => {
+                            console.log(err);
+                        });
                         axios.patch(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_activas/${linea.id}/`,{
                             fecha_fin: datos.fecha_fin,
                             estado: 3,
@@ -330,6 +359,13 @@ const ManPorEquipos = () => {
         actualizaFiltro(filtro3);
     }
 
+    const handleInputChange = (event) => {
+        setDatos({
+            ...datos,
+            [event.target.name] : event.target.value
+        })  
+    }
+
     return(
         <Container className extends="pt-1 mt-5">
             <Row className extends>                
@@ -392,7 +428,7 @@ const ManPorEquipos = () => {
                                         <td>{linea.fecha_fin?invertirFecha(String(linea.fecha_fin)):''}</td>
                                         <td>
                                         <Tools className="mr-3 pencil"  onClick={event =>{InicioTarea(linea)}}/>
-                                        <FileCheck className="mr-3 pencil"  onClick={event =>{FinalizarTarea(linea)}} />
+                                        <FileCheck className="mr-3 pencil"  onClick={event =>{pedir_observaciones(linea)}} />
                                         <Receipt className="mr-3 pencil" onClick={event =>{listarTrabajadores(linea.id)}}/>
                                         <Link to={`/mantenimiento/parte_op/${linea.parte.id}`}><Eye className="mr-3 pencil"/></Link>
                                         </td>
@@ -412,6 +448,35 @@ const ManPorEquipos = () => {
                     </tr>
                 </tbody>
             </table>
+            <Modal show={show_Observacion} onHide={handleCloseObservacion} backdrop="static" keyboard={ false } animation={false}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Observaciones de la tarea</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {/* <Row>                            
+                        <Col> */}
+                    <Container>
+                        <Row>
+                            <Col>
+                                <Form.Group id="observaciones">
+                                    <Form.Label>Observaciones Personal Mantenmiento</Form.Label>
+                                    <Form.Control as="textarea" rows={3}
+                                                name='observaciones' 
+                                                value={datos.observaciones}
+                                                onChange={handleInputChange} 
+                                                placeholder="Observaciones trabajador"
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                    </Container>
+                      {/*   </Col>
+                    </Row> */}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseObservacion}>Aceptar</Button>
+                </Modal.Footer>
+            </Modal>
         <ListaDePersonal    show={show}
                             linea_id ={linea_id}
                             handlerClose={handlerClose}
