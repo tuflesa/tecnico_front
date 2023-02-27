@@ -74,7 +74,7 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
     },[datos.recibido])
 
     const actualizarRecibir = () =>{
-        if((datos.entregadoAnterior + datos.recibido)>linea.cantidad){
+        if((datos.entregadoAnterior + parseInt(datos.recibido))>linea.cantidad){
             var igualar = window.confirm("Se ha recibido una cantidad mayor a la indicada, ¿Deseas cambiar la cantidad pedida?");
             if(igualar){
                 datos.por_recibir = 0;

@@ -134,6 +134,12 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, alm
                             <ExcelColumn label="Stock" value="stock"/>                           
                         </ExcelSheet>
                     </ExcelFile> 
+                    
+                </Row>
+                <Row>
+                    <Button variant="info" onClick={handlerListCerrar}>
+                        Cancelar
+                    </Button>
                 </Row>
                 <Row>
                     <Col>
