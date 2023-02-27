@@ -632,16 +632,16 @@ const ParteForm = ({parte, setParte, op}) => {
         })
         .then( res => {
             //si solo hay una linea y la fecha fin esta vacía, podemos eliminar linea y tarea.
-            if(res.data.length===1 && res.data[0].fecha_fin===null){
+            if(res.data.results.length===1 && res.data.results[0].fecha_fin===null){
                 var confirmacion = window.confirm('¿Deseas eliminar la línea?');
                 if(confirmacion){
-                    axios.delete(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/${res.data[0].id}/`,{            
+                    axios.delete(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/${res.data.results[0].id}/`,{            
                         headers: {
                             'Authorization': `token ${token['tec-token']}`
                         } 
                     })
                     .then(re =>{
-                        axios.delete(BACKEND_SERVER + `/api/mantenimiento/tareas/${res.data[0].tarea.id}/`,{            
+                        axios.delete(BACKEND_SERVER + `/api/mantenimiento/tareas/${res.data.results[0].tarea.id}/`,{            
                             headers: {
                                 'Authorization': `token ${token['tec-token']}`
                             } 
@@ -657,7 +657,7 @@ const ParteForm = ({parte, setParte, op}) => {
             }
             else{
                 //Si la ultima linea tiene fecha fin, no se puede eliminar
-                if(res.data[res.data.length-1].fecha_fin!==null){
+                if(res.data.results[res.data.results.length-1].fecha_fin!==null){
                     alert('No se puede elimnar, trabajo ya ejecutado y terminado');
                 }
                 //en un preventivo, queremos detener el ciclo del trabajo.
@@ -665,7 +665,7 @@ const ParteForm = ({parte, setParte, op}) => {
                     var detenerTrabajo = window.confirm('No se puede eliminar, tiene trabajos finalizados. ¿Deseas detener el proceso?');
                     if(detenerTrabajo){
                         //eliminamos la linea que es la que ejecuta de nuevo la tarea'
-                        axios.delete(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/${res.data[res.data.length-1].id}/`,{            
+                        axios.delete(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/${res.data.results[res.data.results.length-1].id}/`,{            
                             headers: {
                                 'Authorization': `token ${token['tec-token']}`
                             } 

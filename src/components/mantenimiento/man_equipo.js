@@ -234,20 +234,6 @@ const ManPorEquipos = () => {
                                 console.log(err);
                             });
                         }
-                        /* axios.patch(BACKEND_SERVER + `/api/mantenimiento/tareas/${linea.tarea.id}/`,{
-                            observaciones_trab: datos.observaciones,
-                        },
-                        {
-                            headers: {
-                                'Authorization': `token ${token['tec-token']}`
-                            }
-                        })
-                        .then( r => {
-                            console.log(r.data);
-                        })
-                        .catch( err => {
-                            console.log(err);
-                        }); */
                         axios.patch(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_activas/${linea.id}/`,{
                             fecha_fin: datos.fecha_fin,
                             estado: 3,
@@ -311,7 +297,7 @@ const ManPorEquipos = () => {
                                                     }
                                                 })
                                                 .then( re => {
-                                                    console.log('parte finalizado');
+                                                    alert('Parte finalizado');
                                                 })
                                                 .catch( err => {
                                                     console.log(err);  
