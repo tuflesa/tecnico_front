@@ -105,6 +105,7 @@ const ManNotificacionesLista = () => {
                                 <th>Creado Por</th>
                                 <th>Que ocurre</th>
                                 <th>Zona</th>
+                                <th>Conclusiones</th>
                                 <th>Revisado</th>
                                 <th>Descartado</th>
                                 <th>Finalizado</th>
@@ -119,6 +120,7 @@ const ManNotificacionesLista = () => {
                                         <td>{nota.quien.get_full_name}</td>
                                         <td>{nota.que}</td>
                                         <td>{nota.zona?nota.zona.siglas:''}</td>
+                                        <td>{nota.conclusion}</td>
                                         <td>{nota.revisado?'Si':'No'}</td>
                                         <td>{nota.descartado?'Si':'No'}</td>
                                         <td>{nota.finalizado?'Si':'No'}</td>
