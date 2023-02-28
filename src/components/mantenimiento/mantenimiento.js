@@ -17,7 +17,7 @@ import TareasTrabajador from './man_tareas_trabajador';
 
 const Mantenimiento = () => {
     const [user] = useCookies(['tec-user']);
-    const soyOperdor = user['tec-user'].perfil.puesto.nombre==='Operador'?true:false;
+    const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Técnico'&&user['tec-user'].perfil.puesto.nombre!=='Director Técnico'?true:false;
     
     return (
         <React.Fragment>
@@ -34,7 +34,7 @@ const Mantenimiento = () => {
                 <Route path='/mantenimiento/parte/:id' component={ManParteDetalle} />
                 <Route path='/mantenimiento/listado_tareas' component={ManLineasListado} /> 
                 <Route path='/mantenimiento/listado_tarea' component={ManPorEquipos} /> 
-                {!soyOperdor?<Route path='/mantenimiento/' component={ManPendientes} /> : <Route path='/mantenimiento/' component={ManPorEquipos} /> }
+                {!nosoyTecnico?<Route path='/mantenimiento/' component={ManPendientes} /> : <Route path='/mantenimiento/' component={ManPorEquipos} /> }
             </Switch>
         </React.Fragment>
     )
