@@ -10,7 +10,6 @@ const ManPendientes = () => {
     const [token] = useCookies(['tec-token']);
     const [tareas, setTareas] = useState(null);
     const [partes, setPartes] = useState(null);
-    const [notificacion, setnotificacion] = useState(null);
     const [user] = useCookies(['tec-user']); 
     var fecha_hoy=Date.parse(new Date);
     var semanaEnMilisegundos = 1000 * 60 * 60 * 24 * 7;
@@ -38,21 +37,6 @@ const ManPendientes = () => {
         });
     }, [token]); 
 
-    useEffect(()=>{        
-        datos.empresa && axios.get(BACKEND_SERVER + `/api/mantenimiento/notificaciones_sinpaginar/?revisado=${false}&finalizado=${false}&descartado=${false}&empresa__id=${datos.empresa}`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-                }
-        })
-        .then( res => {
-            console.log(res.data);
-            setnotificacion(res.data.length);
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    }, [token]); 
-
     useEffect(() => {
         axios.get(BACKEND_SERVER + `/api/mantenimiento/partes_filtrados/?empresa__id=${datos.empresa}`,{
             headers: {
@@ -68,8 +52,7 @@ const ManPendientes = () => {
     }, [token]);
 
     return (  
-        <Container className="mb-5 mt-5">  
-            <Row><Col><h5 className="mb-3 mt-3">Notificaciones sin revisar: {notificacion}</h5></Col> </Row>
+        <Container className="mb-5 mt-5"> 
             <Row>     
                 <Col>
                     <h5 className="mb-3 mt-3">Tareas Retrasadas</h5>                    
