@@ -24,7 +24,7 @@ const NotificacionForm = ({nota, setNota}) => {
         que: nota.id?nota.que:null,
         cuando: nota.id?nota.cuando:null,
         donde: nota.id?nota.donde:null,
-        quien: nota? nota.quien: user['tec-user'].perfil.usuario,
+        quien: nota? nota.quien: null,
         como: nota.id? nota.como : null,
         cuanto: nota.id? nota.cuanto : '',
         porque: nota.id? nota.porque : '',
@@ -34,8 +34,8 @@ const NotificacionForm = ({nota, setNota}) => {
         descartado: nota.id?nota.descartado:false,
         finalizado: nota.id?nota.finalizado:false,
         conclusion: nota.id? nota.conclusion : null,
-        empresa: nota?nota.empresa:'',
-        zona: nota?nota.zona:'',
+        empresa: nota?nota.empresa:null,
+        zona: nota.zona?nota.zona.id:null,
         numero: nota.id? nota.numero:null,
     });
 
@@ -45,7 +45,7 @@ const NotificacionForm = ({nota, setNota}) => {
             que: nota.id?nota.que:null,
             cuando: nota.id?nota.cuando:null,
             donde: nota.id?nota.donde:null,
-            quien: nota? nota.quien: user['tec-user'].perfil.usuario,
+            quien: nota? nota.quien: null,
             como: nota.id? nota.como : null,
             cuanto: nota.id? nota.cuanto : '',
             porque: nota.id? nota.porque : '',
@@ -55,8 +55,8 @@ const NotificacionForm = ({nota, setNota}) => {
             descartado: nota.id?nota.descartado:false,
             finalizado: nota.id?nota.finalizado:false,
             conclusion: nota.id? nota.conclusion : null,
-            empresa: nota?nota.empresa:user['tec-user'].perfil.empresa.id,
-            zona: nota?nota.zona:user['tec-user'].perfil.zona?user['tec-user'].perfil.zona.id:'',
+            empresa: nota?nota.empresa:null,
+            zona: nota.zona?nota.zona.id:null,
             numero: nota.id? nota.numero:null,
         });
     },[nota]);
