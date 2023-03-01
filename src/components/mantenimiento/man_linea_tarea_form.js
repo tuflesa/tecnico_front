@@ -168,7 +168,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
         <Container className='pt-1 mt-5'>
             <h5 className='pt-1 mt-2'>Parte: {linea_tarea.parte.nombre}</h5>
             <Row className="justify-content-center">
-                    <h5 className="pb-3 pt-1 mt-2">Detalle del Trabajo</h5>
+                    <h5 className="pb-3 pt-1 mt-2">Detalle de la tarea</h5>
             </Row>
             <Row className="justify-content-center">
                 <Col>
@@ -327,12 +327,12 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                         <Row>                            
                             <Col>
                                 <Form.Group id="observaciones_trab">
-                                    <Form.Label>Observaciones Personal Mantenmiento</Form.Label>
+                                    <Form.Label>Conclusiones Personal Mantenmiento</Form.Label>
                                     <Form.Control as="textarea" rows={3}
                                                 name='observaciones_trab' 
                                                 value={datos.observaciones_trab}
                                                 onChange={handleInputChange} 
-                                                placeholder="Observaciones_trab"
+                                                placeholder="Conclusiones"
                                     />
                                 </Form.Group>
                             </Col>

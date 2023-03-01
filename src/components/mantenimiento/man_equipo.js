@@ -8,6 +8,7 @@ import { Tools, FileCheck, Receipt, Eye} from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import ListaDePersonal from './man_equipo_trabajadores';
 import ManEquipoFiltro from './man_equipo_filtro';
+import { color } from 'd3';
 
 const ManPorEquipos = () => {
     const [token] = useCookies(['tec-token']);
@@ -88,9 +89,10 @@ const ManPorEquipos = () => {
     const comparar = (x) => {
         for(var y=0;y<lineasTrabajadores.length;y++){
             if(lineasTrabajadores[y].linea===x.id){
-                return( "table-primary");
+                return( true);
             }
         }
+        return(false);
     }
 
     const updateTarea = () => {
@@ -365,6 +367,12 @@ const ManPorEquipos = () => {
             [event.target.name] : event.target.value
         })  
     }
+    
+    const styles = ({
+        color1:{
+            color: '#FFAEC9',
+        },
+    });
 
     return(
         <Container className extends="pt-1 mt-5">
@@ -382,8 +390,8 @@ const ManPorEquipos = () => {
                     <br></br>
                     <br></br>
                     <br></br>
-                    <h5 style={{ color: 'green' }}>Verde ---- Trabajo cogido por un compañero</h5>
-                    <h5 style={{ color: 'blue' }}>Azul ---- Trabajo cogido por nosotros</h5>
+                    <h5 style={{ color: 'black' }}>Amarillo ---- Trabajo cogido por un compañero</h5>
+                    <h5 style={{ color: 'orange' }}>Naranja ---- Trabajo cogido por nosotros</h5>
                 </Col>
             </Row>
             <Row>
@@ -418,7 +426,7 @@ const ManPorEquipos = () => {
                         <tbody>
                             {lineas && lineas.map( linea => {
                                 return (
-                                    <tr key={linea.id} className = {comparar(linea)? "table-primary" : linea.fecha_inicio!==null? "table-success" : " "}>
+                                    <tr key={linea.id} style={{ backgroundColor: comparar(linea) ? 'orange' : linea.fecha_inicio!==null? 'yellow' : " " }} className="table-secundary">
                                         <td>{linea.tarea.prioridad}</td>
                                         <td>{invertirFecha(linea.fecha_plan)}</td>
                                         <td>{linea.tarea.nombre}</td>
@@ -450,7 +458,7 @@ const ManPorEquipos = () => {
             </table>
             <Modal show={show_Observacion} onHide={handleCloseObservacion} backdrop="static" keyboard={ false } animation={false}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Observaciones de la tarea</Modal.Title>
+                    <Modal.Title>Conclusiones de la tarea</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     {/* <Row>                            
@@ -459,12 +467,12 @@ const ManPorEquipos = () => {
                         <Row>
                             <Col>
                                 <Form.Group id="observaciones">
-                                    <Form.Label>Observaciones Personal Mantenmiento</Form.Label>
+                                    <Form.Label>Conclusiones Personal Mantenmiento</Form.Label>
                                     <Form.Control as="textarea" rows={3}
                                                 name='observaciones' 
                                                 value={datos.observaciones}
                                                 onChange={handleInputChange} 
-                                                placeholder="Observaciones trabajador"
+                                                placeholder="Conclusiones"
                                     />
                                 </Form.Group>
                             </Col>

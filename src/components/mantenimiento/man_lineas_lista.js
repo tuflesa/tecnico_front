@@ -25,6 +25,9 @@ const ManLineasListado = () => {
     var enunmes=fecha_hoy+mesEnMilisegundos;
     var dentrodeunmes = new Date(enunmes);
     var fechaenunmesString = dentrodeunmes.getFullYear() + '-' + ('0' + (dentrodeunmes.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunmes.getDate()).slice(-2);
+    var haceunmes = fecha_hoy-mesEnMilisegundos;
+    var unmesatras = new Date(haceunmes);
+    var fechapasadaString = unmesatras.getFullYear() + '-' + ('0' + (unmesatras.getMonth()+1)).slice(-2) + '-' + ('0' + unmesatras.getDate()).slice(-2);
 
     const [filtro, setFiltro] = useState(`?parte__empresa__id=${user['tec-user'].perfil.empresa.id}&estado=${''}&fecha_plan__lte=${fechaenunmesString}`);
     const [activos, setActivos] = useState(true);
@@ -44,6 +47,7 @@ const ManLineasListado = () => {
     });
 
     useEffect(()=>{
+        console.log(fechapasadaString);
         if(activos){
             axios.get(BACKEND_SERVER + '/api/mantenimiento/listado_lineas_activas/'+ filtro,{
                 headers: {
@@ -238,8 +242,8 @@ const ManLineasListado = () => {
             <Row>                
                 <Col>
                     <h5 className="mb-3 mt-3">Listado de Trabajos</h5>
-                    <h5>--- Rojo = Trabajo terminado</h5>    
-                    <h5>--- Verde = Trabajo iniciado</h5>                 
+                    <h5>--- Verde = Trabajo terminado   --- Rojo = Trabajo NO iniciado con fecha pasada</h5>  
+                    <h5>--- Azul = Trabajo iniciado   --- Naranja = Trabajo iniciado con fecha pasada</h5>             
                     <Table striped bordered hover>
                         <thead>
                             <tr>
@@ -259,7 +263,7 @@ const ManLineasListado = () => {
                         <tbody>
                             {lineas && lineas.map( linea => {
                                 return (
-                                    <tr key={linea.id} className={ linea.fecha_fin?"table-danger":linea.fecha_inicio?"table-success":"" }>
+                                    <tr key={linea.id} className = {linea.fecha_fin?"table-success" : linea.fecha_inicio && fechapasadaString<linea.fecha_plan?"table-primary":!linea.fecha_inicio && fechapasadaString>linea.fecha_plan?"table-danger" : "" }style={{ backgroundColor: linea.fecha_inicio && fechapasadaString>linea.fecha_plan? 'orange' : " " }}>
                                         <td>{linea.tarea.prioridad}</td>
                                         <td>
                                             <PlusSquare className="mr-3 pencil"  onClick={event => {updateCantidad(1, linea)}} />
