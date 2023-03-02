@@ -45,8 +45,38 @@ const Programadores = () => {
         .catch( err => {
             console.log(err);
         });
+    }*/
+ 
+
+    //copiar la descripción de proveedor actual de repuestos en la tabla de precio, descripcion_proveedor.
+    const copia_descripcion = ()=>{
+        axios.get(BACKEND_SERVER + `/api/repuestos/repuesto_precio/`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( res => {
+            setListaRepuestos(res.data);
+            console.log(res.data);
+            for(var y=0; y<res.data.length; y++){
+                axios.patch(BACKEND_SERVER + `/api/repuestos/precio/${res.data[y].id}/`, {
+                    descripcion_proveedor: res.data[y].repuesto.nombre,
+                }, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                      }     
+                })
+                .then( r => { 
+                    console.log('ya estaaaaaa');
+                })
+                .catch(err => { console.log(err);})
+            }
+        })
+        .catch( err => {
+            console.log(err);
+        });
     }
- */
+
     return (
         <Container className='mt-5'>
             <Row>
@@ -60,6 +90,7 @@ const Programadores = () => {
                         </thead>
                         <tbody>
                             {/* <th><Button variant="info" onClick={event =>{CrearListado()}}>Crear lista</Button></th> */}
+                            <th><Button variant="info" onClick={event =>{copia_descripcion()}}>Copiar datos</Button></th>
                         </tbody>
                     </Table>
                 </Col>

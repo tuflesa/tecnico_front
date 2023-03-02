@@ -8,6 +8,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import LineaTareaNueva from './man_parte_lineatarea';
 import LineasPartesMov from './man_parte_lineas_mov';
 import { style } from 'd3';
+import { constants } from 'buffer';
 
 const ParteForm = ({parte, setParte, op}) => {
     const [token] = useCookies(['tec-token']);
@@ -96,7 +97,7 @@ const ParteForm = ({parte, setParte, op}) => {
                 setDatos({
                     ...datos,
                     tipo: 2,
-                    fecha_prevista_inicio: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
+                    //fecha_prevista_inicio: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
                 });
             }
             else{
@@ -476,6 +477,8 @@ const ParteForm = ({parte, setParte, op}) => {
     }
 
     const crearParte = (event) => {
+        if(datos.fecha_prevista_inicio===''){datos.fecha_prevista_inicio=null}
+        if(datos.fecha_finalizacion===''){datos.fecha_finalizacion=null}
         event.preventDefault();
         axios.post(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/`, {
             nombre: datos.nombre,
@@ -509,7 +512,7 @@ const ParteForm = ({parte, setParte, op}) => {
     const actualizarLinea = () => { 
         var fecha=null;
         var estado='';
-        if(parte.fecha_prevista_inicio===null&& datos.fecha_prevista_inicio!==null){
+        if(parte.fecha_prevista_inicio===null && datos.fecha_prevista_inicio!==null){
             fecha=datos.fecha_prevista_inicio;
             estado=1;
         }
@@ -523,9 +526,6 @@ const ParteForm = ({parte, setParte, op}) => {
         if(estado!==0){
             //ponemos la fecha de planificación y el estado en el parte
             axios.get(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_mov/?parte=${parte.id}`,{
-          /*       fecha_plan: fecha,
-                estado: estado,
-            }, { */
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
@@ -542,22 +542,23 @@ const ParteForm = ({parte, setParte, op}) => {
                         }     
                     })
                     .then( r => {
-                        axios.patch(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${parte.id}/`, {
-                            fecha_plan: fecha,
-                            estado: estado,
-                        }, {
-                            headers: {
-                                'Authorization': `token ${token['tec-token']}`
-                            }     
-                        })
-                        .then( rs => {
-                            updateParte();
-                        })
-                        .catch(err => { console.log(err);})
-                        updateParte();
+                        
                     })
                     .catch(err => { console.log(err);})
-                }         
+                } 
+                axios.patch(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${parte.id}/`, {
+                    fecha_plan: fecha,
+                    estado: estado,
+                }, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }     
+                })
+                .then( rs => {
+                    updateParte();
+                })
+                .catch(err => { console.log(err);})
+                updateParte();       
             })
             .catch( err => {
                 console.log(err);
