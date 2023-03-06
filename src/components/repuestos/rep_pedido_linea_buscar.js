@@ -13,7 +13,7 @@ const BuscarRepuestosPedido = ({cerrarListRepuestos, show, proveedor_id, elegirR
     const [datos, setDatos] = useState({
         id:'',
         nombre: '', 
-        modelo: '',    
+        modelo: '',
     });
 
     useEffect(()=>{
@@ -40,9 +40,9 @@ const BuscarRepuestosPedido = ({cerrarListRepuestos, show, proveedor_id, elegirR
     }  
     
     useEffect(()=>{
-        const filtro = `?proveedores__id=${proveedor_id}&descatalogado=${false}&repuesto__nombre__icontains=${datos.nombre}&repuesto__id=${datos.id}&repuesto__modelo__icontains=${datos.modelo}`;
+        const filtro = `?proveedores__id=${proveedor_id}&repuesto__descatalogado=${false}&repuesto__nombre__icontains=${datos.nombre}&repuesto__id=${datos.id}&repuesto__modelo__icontains=${datos.modelo}`;
         actualizaFiltro(filtro);
-    },[datos.nombre, datos.id, proveedor_id, datos.modelo]);
+    },[datos]);
 
     return(
         <Modal show={show} backdrop="static" keyboard={ false } animation={false} size="xl">
