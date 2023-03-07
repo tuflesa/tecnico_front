@@ -5,6 +5,9 @@ import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { filter } from 'd3';
+import logo from '../../assets/icono_1.svg';
+import cuchilla from '../../assets/cuchilla_1.svg';
+import logo_bor from '../../assets/logo_bornay.svg';
 
 
 const Programadores = () => {
@@ -13,6 +16,8 @@ const Programadores = () => {
 
     const soyProgramador = user['tec-user'].perfil.destrezas.filter(s => s === 7);
     const [lista_repuestos, setListaRepuestos] = useState(null);
+    const [repuestos, setRepuestos] = useState(null);
+    var numero = 2;
 
     //crea el listado en la tabla de precios de proveedor de los repuestos ya enlazados a proveedores.
     /* const CrearListado = ()=>{
@@ -68,6 +73,7 @@ const Programadores = () => {
                 })
                 .then( r => { 
                     console.log('ya estaaaaaa');
+                    console.log(res.data);
                 })
                 .catch(err => { console.log(err);})
             }
@@ -77,11 +83,25 @@ const Programadores = () => {
         });
     }
 
+    useEffect(()=>{
+        axios.get(BACKEND_SERVER + `/api/repuestos/repuesto_precio/`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => { 
+            setRepuestos(res.data);
+        })
+        .catch(err => { console.log(err);})
+    });
+
     return (
         <Container className='mt-5'>
             <Row>
                 <Col>
-                    <h5 className="mb-3 mt-3">Acciones de Programadores</h5>                    
+                    
+                    <h5 className="mb-3 mt-3">Acciones de Programadores</h5>  
+                    <h5><img src = {logo}></img></h5>                 
                     <Table striped bordered hover>
                         <thead>
                             <tr>
@@ -94,7 +114,40 @@ const Programadores = () => {
                         </tbody>
                     </Table>
                 </Col>
-            </Row>            
+            </Row>  
+            <Row>
+                <Col>
+                    <h5 className="mb-3 mt-3">Lista de Almacenes</h5>
+                    <Table striped bordered hover>
+                        <thead>
+                            <tr>
+                                <th colspan ={numero}>Id Repuesto precio</th>
+                                <th>Nombre</th>
+                                <th>Imagen</th>
+                                <th>Proveedor</th>
+                            </tr>
+                            <tr>
+                                <th><img src = {logo}></img></th>
+                                <th><img src = {logo}></img></th>
+                                <th><img src = {logo}></img></th>
+                                <th><img src = {logo}></img></th>
+                                <th><img src = {logo}></img></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {repuestos && repuestos.map( repuesto => {
+                                return (
+                                    <tr key={repuesto.id}>
+                                        <td>{repuesto.nombre}</td>
+                                        <td>{repuesto.proveedor===29?<img src = {logo}></img>:repuesto.proveedor===30?<img src = {cuchilla}></img>:''}</td>
+                                        <td>{repuesto.proveedor}</td>
+                                    </tr>
+                                )})
+                            }
+                        </tbody>
+                    </Table>
+                </Col>
+            </Row>          
         </Container>        
     )
 }
