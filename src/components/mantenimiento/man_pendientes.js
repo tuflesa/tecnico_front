@@ -3,7 +3,7 @@ import { Container, Row, Col, Table, Modal, Button } from 'react-bootstrap';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
-import { NutFill, PencilFill } from 'react-bootstrap-icons';
+import { NutFill, PencilFill, Eye } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 
 const ManPendientes = () => {
@@ -74,7 +74,10 @@ const ManPendientes = () => {
                                         <td>{linea.tarea.nombre}</td>
                                         <td>{linea.parte.seccion.siglas_zona}</td>
                                         <td>{linea.tarea.especialidad_nombre}</td>
-                                        <td><Link to={`/mantenimiento/linea_tarea/${linea.id}`}><PencilFill className="mr-3 pencil"/></Link></td>
+                                        <td>
+                                            <Link to={`/mantenimiento/linea_tarea/${linea.id}`}><PencilFill className="mr-3 pencil"/></Link>
+                                            <Link to={`/mantenimiento/parte/${linea.parte.id}`}><Eye className="mr-3 pencil"/></Link>
+                                        </td>
                                     </tr>
                                 )})
                             }
