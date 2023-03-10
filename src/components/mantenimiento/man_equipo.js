@@ -143,6 +143,17 @@ const ManPorEquipos = () => {
                           }     
                     })
                     .then( ress => {
+                        axios.get(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea_filtro/?trabajador=${user['tec-user'].perfil.usuario}`,{
+                            headers: {
+                                'Authorization': `token ${token['tec-token']}`
+                                }
+                        })
+                        .then( res => {
+                            setlineasTrabajadores(res.data);
+                        })
+                        .catch( err => {
+                            console.log(err);
+                        });
                         updateTarea();
                     })
                     .catch(err => { console.log(err);})
