@@ -7,7 +7,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import { filter } from 'd3';
 import logo from '../../assets/icono_1.svg';
 import cuchilla from '../../assets/cuchilla_1.svg';
-import logo_bor from '../../assets/logo_bornay.svg';
+import logo_bor from '../../assets/bitmap.svg';
 
 
 const Programadores = () => {
