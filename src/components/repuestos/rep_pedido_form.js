@@ -63,6 +63,8 @@ const PedidoForm = ({pedido, setPedido}) => {
     });
 
     useEffect(()=>{
+        console.log('que vale pedido.lineas_pedido');
+        pedido&&console.log(pedido.lineas_pedido);
         axios.get(BACKEND_SERVER + `/api/repuestos/proveedor/`, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -752,7 +754,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                 {total_pedido+=Number(linea.total)}
                                                 return (
                                                     <tr key={linea.id} className = {((linea.por_recibir===0) && (linea.cantidad!=linea.por_recibir) || (linea.cantidad<(linea.cantidad-linea.por_recibir)))? "table-success" : (linea.cantidad - linea.por_recibir)>0? "table-primary" : " "}>
-                                                        <td>{linea.repuesto.nombre + (linea.repuesto.fabricante? ' - ' + linea.repuesto.fabricante:'') + (linea.repuesto.modelo? ' - ' + linea.repuesto.modelo:'')}</td>
+                                                        <td>{linea.descripcion_proveedor!==null?linea.descripcion_proveedor:linea.repuesto.nombre + (linea.repuesto.fabricante? ' - ' + linea.repuesto.fabricante:'') + (linea.repuesto.modelo? ' - ' + linea.repuesto.modelo:'')}</td>
                                                         <td>{linea.cantidad}</td>
                                                         <td>{linea.repuesto.unidad_nombre}</td>
                                                         <td>{formatNumber(linea.precio)}</td>

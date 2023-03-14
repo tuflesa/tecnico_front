@@ -9,13 +9,16 @@ const RepPrecio = ()=>{
     const [proveedores, setProveedores] = useState(null);
     const [precios, setPrecios] = useState(null);
     const prueba = [{}];
+    
 
     const [datos, setDatos] = useState({
         id:'',
-        proveedor: '', 
+        proveedor:'', 
+        descripcion:'',
         descatalogado: false,  
         precio_n:{},
         descuento_n:{},
+        descripcion_proveedor_n:{},
     });
 
     useEffect(() => {
@@ -33,7 +36,7 @@ const RepPrecio = ()=>{
     }, [token]);
 
     useEffect(()=>{
-        datos.proveedor && axios.get(BACKEND_SERVER + `/api/repuestos/repuesto_precio/?proveedor__id=${datos.proveedor}`,{
+        datos.proveedor && axios.get(BACKEND_SERVER + `/api/repuestos/repuesto_precio/?proveedor__id=${datos.proveedor}&descripcion_proveedor__icontains=${datos.descripcion}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }     
@@ -49,12 +52,14 @@ const RepPrecio = ()=>{
                     precio_n:0,
                     descuento: res.data[x].descuento,
                     descuento_n:0,
+                    descripcion_proveedor:res.data[x].descripcion_proveedor,
+                    descripcion_proveedor_n:'',
                 }
             }
             setPrecios(prueba);
         })
         .catch(err => { console.log(err);})
-    },[datos.proveedor]);
+    },[datos.proveedor, datos.descripcion]);
 
     useEffect(() => {
         if(precios){
@@ -76,6 +81,16 @@ const RepPrecio = ()=>{
             }
         }
     }, [datos.descuento_n]);
+
+    useEffect(() => {
+        if(precios){
+            for(var x=0; x<precios.length;x++){
+                if(precios[x].id===datos.id){
+                    precios[x].descripcion_proveedor_n=datos.descripcion_proveedor_n;
+                }
+            }
+        }
+    }, [datos.descripcion_proveedor_n]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -99,6 +114,14 @@ const RepPrecio = ()=>{
             [event.target.id] : parseInt(event.target.className),
         })
     } 
+
+    const handleInputChange4 = (event) => {
+        setDatos({
+            ...datos,
+            [event.target.name] : event.target.value,
+            [event.target.id] : parseInt(event.target.className),
+        })
+    }
 
     /* const PerderFoco = () => {
         for(var x=0; x<precios.length;x++){
@@ -124,6 +147,7 @@ const RepPrecio = ()=>{
         for(var x=0; x<precios.length; x++){
             var precios_nuevos = precios[x].precio_n;
             var descuento_nuevo = precios[x].descuento_n;
+            var descripcion_nueva = precios[x].descripcion_proveedor_n;
             var ids=precios[x].ids; //es el id de la línea no del repuesto
             if(precios_nuevos!==0){
                 axios.patch(BACKEND_SERVER + `/api/repuestos/repuesto_precio/${ids}/`,{
@@ -141,6 +165,19 @@ const RepPrecio = ()=>{
             if(descuento_nuevo!==0){
                 axios.patch(BACKEND_SERVER + `/api/repuestos/repuesto_precio/${ids}/`,{
                     descuento: descuento_nuevo,
+                }, { 
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }    
+                })
+                .then( res => {
+                    //window.location.href = "/repuestos/precio";
+                })
+                .catch(err => { console.log(err);})
+            }
+            if(descripcion_nueva!==''){
+                axios.patch(BACKEND_SERVER + `/api/repuestos/repuesto_precio/${ids}/`,{
+                    descripcion_proveedor: descripcion_nueva,
                 }, { 
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
@@ -188,6 +225,18 @@ const RepPrecio = ()=>{
                             </Form.Control>
                         </Form.Group>
                     </Col>
+                    {datos.proveedor?
+                        <Col>
+                            <Form.Group controlId="descripcion">
+                                <Form.Label>Descripción</Form.Label>
+                                <Form.Control type="text" 
+                                            name='descripcion' 
+                                            value={datos.descripcion}
+                                            onChange={handleInputChange} 
+                                            placeholder="Descripción contiene"/>
+                            </Form.Group>
+                        </Col>
+                    :null}
                     <Col>
                         <Form.Group controlId="descatalogado">
                             <Form.Label>Descatalogado</Form.Label>
@@ -217,12 +266,12 @@ const RepPrecio = ()=>{
                             <thead>
                                 <tr>
                                     <th>Codigo</th>
-                                    <th>Descripción Proveedor</th>
-                                    <th>Descripción Etiqueta</th>
+                                    <th>Descripción proveedor</th>
                                     <th>Descuento</th>
                                     <th>Precio Actual</th>
                                     <th>Nuevo Descuento</th>
                                     <th>Nuevo Precio</th>
+                                    <th>Nueva Descripción</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -230,8 +279,7 @@ const RepPrecio = ()=>{
                                     return (                                                
                                         <tr key={p.id}>
                                             <td>{p.id}</td>
-                                            <td>{p.nombre}</td>
-                                            <td>{p.nombre_comun}</td>
+                                            <td>{p.descripcion_proveedor}</td>
                                             <td>{p.descuento?p.descuento + '%':0 + '%'}</td>
                                             <td>{p.precio?p.precio + '€': 0 + '€'}</td>
                                             <td>
@@ -256,6 +304,18 @@ const RepPrecio = ()=>{
                                                 onChange={handleInputChange2}
                                                 //onBlur={PerderFoco}
                                                 placeholder={p.precio_n}
+                                            />
+                                            </td>
+                                            <td>
+                                            <input                  
+                                                className={p.id} 
+                                                type = "text" 
+                                                id = "id"
+                                                name='descripcion_proveedor_n'
+                                                value= {datos.descripcion_proveedor_n[p]}
+                                                onChange={handleInputChange4}
+                                                //onBlur={PerderFoco}
+                                                placeholder={p.descripcion_proveedor_n}
                                             />
                                             </td>
                                         </tr>

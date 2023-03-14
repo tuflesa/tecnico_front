@@ -298,9 +298,7 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
                                                     <td>{pedidos.pedido.proveedor.nombre}</td> 
                                                     <td>{invertirFecha(String(pedidos.pedido.fecha_prevista_entrega))}</td>                                     
                                                     <td>
-                                                        <Link to={`/repuestos/pedido_detalle/${pedidos.pedido.id}`}>
-                                                            <PencilFill className="mr-3 pencil"/>
-                                                        </Link>
+                                                        <Link to={`/repuestos/pedido_detalle/${pedidos.pedido.id}`}><PencilFill className="mr-3 pencil"/></Link>
                                                     </td>
                                                 </tr>
                                             )})

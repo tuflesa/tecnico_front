@@ -20,7 +20,7 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
                     <View key={i}>
                         <View style={styles.page2}>
                             <View style={styles.section}>
-                                <View style={styles.section6}><Text>{data.repuesto.nombre + (data.repuesto.fabricante? " - " + data.repuesto.fabricante:'') + (" - " + data.repuesto.modelo? data.repuesto.modelo:'')}</Text></View>
+                                <View style={styles.section6}><Text>{data.descripcion_proveedor!==null?data.descripcion_proveedor:data.repuesto.nombre + (data.repuesto.fabricante? " - " + data.repuesto.fabricante:'') + (" - " + data.repuesto.modelo? data.repuesto.modelo:'')}</Text></View>
                                 <View style={styles.section7}><Text>{data.cantidad}</Text></View>
                                 <View style={styles.section7}><Text>{data.repuesto.unidad_siglas}</Text></View>
                                 <View style={styles.section9}><Text>{formatNumber(data.precio)}</Text></View>

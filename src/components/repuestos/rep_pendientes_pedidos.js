@@ -42,9 +42,7 @@ const ListaPedidos = ({lineasPendientes, repuesto_id, show, handlerListCancelar}
                                                     <td>{invertirFecha(String(lineas.pedido.fecha_creacion))}</td>
                                                     <td>{(lineas.pedido.fecha_prevista_entrega) ? (invertirFecha(String(lineas.pedido.fecha_prevista_entrega))) : ''}</td>
                                                     <td>
-                                                        <Link to={`/repuestos/pedido_detalle/${lineas.pedido.id}`}>
-                                                            <PencilFill className="mr-3 pencil"/>
-                                                        </Link>
+                                                        <Link to={`/repuestos/pedido_detalle/${lineas.pedido.id}`}><PencilFill className="mr-3 pencil"/></Link>
                                                     </td>
                                                 </tr>
                                             )

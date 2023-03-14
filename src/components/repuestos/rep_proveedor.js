@@ -4,11 +4,14 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 
-const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repuesto_id, updateRepuesto}) => {
+const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repuesto_id, updateRepuesto, repuesto_nombre}) => {
     const [token] = useCookies(['tec-token']);
 
     const [datos, setDatos] = useState({
-        proveedor: ''
+        proveedor: '',
+        precio:0,
+        descuento:0,
+        descripcion_proveedor: '',
     });
     const [proveedores, setProveedores] = useState(null);
     const [listaAsignados, setListaAsignados] = useState([]);
@@ -76,8 +79,9 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
             axios.post(BACKEND_SERVER + `/api/repuestos/precio/`, {
                 proveedor: newProveedores[x],
                 repuesto: repuesto_id,
-                precio: 0,
-                descuento: 0,
+                precio: datos.precio,
+                descuento: datos.descuento,
+                descripcion_proveedor: datos.descripcion_proveedor?datos.descripcion_proveedor:repuesto_nombre,
             }, {
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
@@ -115,6 +119,43 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
                                                     )
                                                 })}
                                     </Form.Control>
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <Form.Group id="precio">
+                                    <Form.Label>Precio</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='precio' 
+                                                value={datos.precio}
+                                                onChange={handleInputChange} 
+                                                placeholder="Precio"
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col>
+                                <Form.Group id="descuento">
+                                    <Form.Label>Descuento</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='descuento' 
+                                                value={datos.descuento}
+                                                onChange={handleInputChange} 
+                                                placeholder="Descuento"
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <Form.Group id="descripcion_proveedor">
+                                    <Form.Label>Descirpción Proveedor</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='descripcion_proveedor' 
+                                                value={datos.descripcion_proveedor}
+                                                onChange={handleInputChange} 
+                                                placeholder="Descirpción proveedor"
+                                    />
                                 </Form.Group>
                             </Col>
                         </Row>

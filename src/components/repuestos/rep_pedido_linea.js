@@ -23,6 +23,7 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
         precio_recibido: linea ? linea.precio : 0,
         descuento_recibido: linea ? linea.descuento : 0,
         id_linea_precio: 0,
+        descripcion_proveedor: linea ? linea.descripcion_proveedor : '',
     });   
 
     useEffect(()=>{
@@ -37,6 +38,8 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
             precio_recibido: linea ? linea.precio : 0,
             descuento_recibido: linea ? linea.descuento : 0,
             id_linea_precio: 0,
+            descripcion_proveedor_recibida: linea ? linea.descripcion_proveedor : '',
+            descripcion_proveedor: linea ? linea.descripcion_proveedor : '',
         });
     },[linea, pedido_id]);
 
@@ -72,6 +75,7 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
         axios.patch(BACKEND_SERVER + `/api/repuestos/repuesto_precio/${datos.id_linea_precio}/`,{
             precio: datos.precio,
             descuento: datos.descuento,
+            descripcion_proveedor: datos.descripcion_proveedor,
         }, { 
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -100,7 +104,7 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
         handleCloseLinea();
     } 
 
-    const handlerGuardar = () => {      
+    const handlerGuardar = () => {
         axios.post(BACKEND_SERVER + `/api/repuestos/linea_pedido/`,{
             repuesto: datos.repuesto,
             cantidad: datos.cantidad,
@@ -109,6 +113,7 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
             total: datos.total,
             pedido: datos.pedido,
             por_recibir: datos.cantidad,
+            descripcion_proveedor: datos.descripcion_proveedor,
         },
         {
             headers: {
@@ -122,6 +127,9 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
                 cambiarPrecio();
             }
             if(datos.descuento!==datos.descuento_recibido){
+                cambiarPrecio();
+            }
+            if(datos.descripcion_proveedor!==datos.descripcion_proveedor_recibida){
                 cambiarPrecio();
             }
         })
@@ -144,6 +152,8 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
                 total: datos.total,
                 pedido: datos.pedido,
                 por_recibir: datos.por_recibir,
+                descripcion_proveedor: datos.descripcion_proveedor,
+                //descripcion_proveedor: datos.descripcion_proveedor,
             },
             {
                 headers: {
@@ -157,6 +167,9 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
                     buscarLinea();
                 }
                 if(datos.descuento!==datos.descuento_recibido){
+                    buscarLinea();
+                }
+                if(datos.descripcion_proveedor!==datos.descripcion_proveedor_recibida){
                     buscarLinea();
                 }
             })
@@ -183,6 +196,7 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
         datos.descuento=r.descuento;
         datos.descuento_recibido=r.descuento;
         datos.id_linea_precio=r.id;
+        datos.descripcion_proveedor=r.descripcion_proveedor;
         cerrarListRepuestos();      
     }
 
@@ -198,15 +212,16 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
                     <Form >
                         <Row>
                             <Col>
-                                <Button variant="info" tabIndex={1} className={'btn-lg'} autoFocus onClick={event => {abrirListRepuestos()}}>Buscar Repuesto</Button>                 
-                                <Form.Group controlId="nombre">
+                                {linea?'':<Button variant="info" tabIndex={1} className={'btn-lg'} autoFocus onClick={event => {abrirListRepuestos()}}>Buscar Repuesto</Button>}
+                                <Form.Group controlId="descripcion_proveedor">
                                     <Form.Label>Repuesto</Form.Label>
                                     <Form.Control imput type="text"  
-                                                name='nombre' 
-                                                value={datos.nombre}
+                                                name='descripcion_proveedor' 
+                                                value={datos.descripcion_proveedor}
                                                 onChange={handleInputChange}
-                                                placeholder="Nombre Repuesto"
-                                                disabled>  
+                                                placeholder="Descripción Proveedor"
+                                                tabIndex={1}
+                                                disabled={linea?false:true}>  
                                     </Form.Control>
                                 </Form.Group>
                                 <Form.Group controlId="modelo">

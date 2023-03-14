@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
-import { PlusCircle, Trash, GeoAltFill, Receipt} from 'react-bootstrap-icons';
+import { PlusCircle, Trash, GeoAltFill, Eye} from 'react-bootstrap-icons';
 import './repuestos.css';
 import StockMinimoForm from './rep_stock_minimo';
 import EquipoForm from './rep_equipo';
@@ -400,7 +400,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                         <Row>
                             <Col>
                                 <Form.Group id="nombre">
-                                    <Form.Label>Descripción Proveedor (*)</Form.Label>
+                                    <Form.Label>Descripción (*)</Form.Label>
                                     <Form.Control type="text" 
                                                 name='nombre' 
                                                 value={datos.nombre}
@@ -646,6 +646,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                             <thead>
                                                 <tr>
                                                     <th>Nombre</th>
+                                                    <th>Descripción</th>
                                                     <th>Precio</th>
                                                     <th>Dto</th>
                                                     {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
@@ -659,6 +660,16 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                     return (
                                                         <tr key={p.id}>
                                                             <td>{p.nombre}</td>
+                                                            <td>{precio && precio.map(pr =>{
+                                                                if(pr.proveedor===p.id){
+                                                                    return(
+                                                                        <option key={pr.proveedor}>
+                                                                            {pr.descripcion_proveedor}
+                                                                        </option>
+                                                                    )
+                                                                    }
+                                                                })
+                                                            }</td>
                                                             <td>{precio && precio.map(pr =>{
                                                                 if(pr.proveedor===p.id){
                                                                     return(
@@ -681,7 +692,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                                 }</td>
                                                             {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
                                                                 <td>
-                                                                    <Trash className="trash"  onClick={event => {handlerBorrarProveedor(p.id)}} />
+                                                                    <Trash className="mr-3 pencil"  onClick={event => {handlerBorrarProveedor(p.id)}} />
                                                                 </td>
                                                             :null}
                                                         </tr>
@@ -716,6 +727,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                            handleCloseProveedor={cerrarAddProveedor}
                            proveedoresAsignados={datos.proveedores}
                            repuesto_id={repuesto.id}
+                           repuesto_nombre={datos.nombre}
                            updateRepuesto = {updateRepuesto}/>
 
             <RepPorAlmacen  show={show_listalmacen}

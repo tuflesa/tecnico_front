@@ -93,7 +93,7 @@ const Programadores = () => {
             setRepuestos(res.data);
         })
         .catch(err => { console.log(err);})
-    });
+    },[token]);
 
     return (
         <Container className='mt-5'>
