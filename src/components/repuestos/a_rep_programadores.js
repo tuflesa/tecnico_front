@@ -72,8 +72,33 @@ const Programadores = () => {
                       }     
                 })
                 .then( r => { 
-                    console.log('ya estaaaaaa');
-                    console.log(res.data);
+                })
+                .catch(err => { console.log(err);})
+            }
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }
+
+    //copiar la descripción de proveedor en la linea del pedido.
+    const copia_descripcion_linea_pedido = ()=>{
+        axios.get(BACKEND_SERVER + `/api/repuestos/linea_pedido_detalle/`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( res => {
+            console.log(res.data);
+            for(var y=0; y<res.data.length; y++){
+                axios.patch(BACKEND_SERVER + `/api/repuestos/linea_pedido/${res.data[y].id}/`, {
+                    descripcion_proveedor: res.data[y].repuesto.nombre,
+                }, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                      }     
+                })
+                .then( r => { 
                 })
                 .catch(err => { console.log(err);})
             }
@@ -111,6 +136,7 @@ const Programadores = () => {
                         <tbody>
                             {/* <th><Button variant="info" onClick={event =>{CrearListado()}}>Crear lista</Button></th> */}
                             <th><Button variant="info" onClick={event =>{copia_descripcion()}}>Copiar datos</Button></th>
+                            <th><Button variant="info" onClick={event =>{copia_descripcion_linea_pedido()}}>Copiar datos a la linea de pedido</Button></th>
                         </tbody>
                     </Table>
                 </Col>
