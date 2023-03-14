@@ -133,7 +133,7 @@ const RepLista = () => {
                         <thead>
                             <tr>
                                 <th>Código</th>
-                                <th>Descripción Proveedor</th>
+                                <th>Descripción Repuesto</th>
                                 <th>Descripción Etiqueta</th>
                                 <th>Fabricante</th>
                                 <th>Modelo</th>

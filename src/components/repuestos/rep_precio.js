@@ -15,6 +15,7 @@ const RepPrecio = ()=>{
         id:'',
         proveedor:'', 
         descripcion:'',
+        nombre:'',
         descatalogado: false,  
         precio_n:{},
         descuento_n:{},
@@ -36,7 +37,7 @@ const RepPrecio = ()=>{
     }, [token]);
 
     useEffect(()=>{
-        datos.proveedor && axios.get(BACKEND_SERVER + `/api/repuestos/repuesto_precio/?proveedor__id=${datos.proveedor}&descripcion_proveedor__icontains=${datos.descripcion}`,{
+        datos.proveedor && axios.get(BACKEND_SERVER + `/api/repuestos/repuesto_precio/?proveedor__id=${datos.proveedor}&descripcion_proveedor__icontains=${datos.descripcion}&repuesto__nombre__icontains=${datos.nombre}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }     
@@ -59,7 +60,7 @@ const RepPrecio = ()=>{
             setPrecios(prueba);
         })
         .catch(err => { console.log(err);})
-    },[datos.proveedor, datos.descripcion]);
+    },[datos.proveedor, datos.descripcion, datos.nombre]);
 
     useEffect(() => {
         if(precios){
@@ -228,28 +229,27 @@ const RepPrecio = ()=>{
                     {datos.proveedor?
                         <Col>
                             <Form.Group controlId="descripcion">
-                                <Form.Label>Descripción</Form.Label>
+                                <Form.Label>Descripción Proveedor</Form.Label>
                                 <Form.Control type="text" 
                                             name='descripcion' 
                                             value={datos.descripcion}
                                             onChange={handleInputChange} 
-                                            placeholder="Descripción contiene"/>
+                                            placeholder="Descripción proveedor"/>
                             </Form.Group>
                         </Col>
                     :null}
-                    <Col>
-                        <Form.Group controlId="descatalogado">
-                            <Form.Label>Descatalogado</Form.Label>
-                            <Form.Control as="select" 
-                                            value={datos.descatalogado}
-                                            name='descatalogado'
-                                            onChange={handleInputChange}>
-                                <option key={0} value={''}>Todos</option>
-                                <option key={1} value={true}>Si</option>
-                                <option key={2} value={false}>No</option>
-                            </Form.Control>
-                        </Form.Group>
-                    </Col>
+                    {datos.proveedor?
+                        <Col>
+                            <Form.Group controlId="nombre">
+                                <Form.Label>Descripción Repuesto</Form.Label>
+                                <Form.Control type="text" 
+                                            name='nombre' 
+                                            value={datos.nombre}
+                                            onChange={handleInputChange} 
+                                            placeholder="Descripción repuesto"/>
+                            </Form.Group>
+                        </Col>
+                    :null}
                 </Row>
                 {datos.proveedor?
                     <React.Fragment>
@@ -267,6 +267,7 @@ const RepPrecio = ()=>{
                                 <tr>
                                     <th>Codigo</th>
                                     <th>Descripción proveedor</th>
+                                    <th>Descripción repuesto</th>
                                     <th>Descuento</th>
                                     <th>Precio Actual</th>
                                     <th>Nuevo Descuento</th>
@@ -280,6 +281,7 @@ const RepPrecio = ()=>{
                                         <tr key={p.id}>
                                             <td>{p.id}</td>
                                             <td>{p.descripcion_proveedor}</td>
+                                            <td>{p.nombre}</td>
                                             <td>{p.descuento?p.descuento + '%':0 + '%'}</td>
                                             <td>{p.precio?p.precio + '€': 0 + '€'}</td>
                                             <td>

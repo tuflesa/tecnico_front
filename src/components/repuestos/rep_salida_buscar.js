@@ -107,7 +107,7 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
                         <Row>
                             <Col>
                                 <Form.Group controlId="formNombre">
-                                    <Form.Label>Buscar por Descripción Proveedor</Form.Label>
+                                    <Form.Label>Buscar por Descripción Repuesto</Form.Label>
                                     <Form.Control type="text" 
                                                 name='nombre' 
                                                 value={datos.nombre}
