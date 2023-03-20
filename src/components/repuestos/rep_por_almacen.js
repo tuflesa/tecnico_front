@@ -18,6 +18,7 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
     const [almacentraza, setAlmacenTraza] = useState(null);
     const [showBorrar, setShowBorrar] = useState(false);
     const [pedidos_pendientes, setPedidosPendientes] = useState(null);
+    const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Técnico'&&user['tec-user'].perfil.puesto.nombre!=='Director Técnico'?true:false;
 
     const [datos, setDatos] = useState({
         stocks_minimos: repuesto ? repuesto.stocks_minimos : null,
@@ -197,7 +198,7 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
                                         <th>Ubicación</th>
                                         <th>Stock Actual</th>
                                         <th>Stock Mínimo</th>
-                                        <th>Acciones</th>
+                                        {!nosoyTecnico?<th>Acciones</th>:null}
                                     </tr>
                                 </thead>
                                 {repuesto ?
@@ -236,13 +237,15 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
                                                                     placeholder={r.cantidad}
                                                                     disabled
                                                             />
-                                                            </td>                                                      
-                                                            <td>                                                            
-                                                                <PencilFill className="mr-3 pencil" onClick= {event => {habilitar_linea(r)}}/>                                               
-                                                                <HandThumbsUpFill className="mr-3 pencil" onClick= {async => {ActualizaStock(r)}}/>
-                                                                <Receipt className="mr-3 pencil" onClick={event => {trazabilidad(r.almacen.id)}}/>
-                                                                <Trash className="pencil"  onClick={event =>{BorrarAlmacen(r)}} />
-                                                            </td>
+                                                            </td> 
+                                                            {!nosoyTecnico?                                                     
+                                                                <td>                                                            
+                                                                    <PencilFill className="mr-3 pencil" onClick= {event => {habilitar_linea(r)}}/>                                               
+                                                                    <HandThumbsUpFill className="mr-3 pencil" onClick= {async => {ActualizaStock(r)}}/>
+                                                                    <Receipt className="mr-3 pencil" onClick={event => {trazabilidad(r.almacen.id)}}/>
+                                                                    <Trash className="pencil"  onClick={event =>{BorrarAlmacen(r)}} />
+                                                                </td>
+                                                            :null}
                                                         </tr>
                                                     )}
                                                 })
@@ -285,7 +288,7 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
                                         <th>Cantidad Pendiente</th>
                                         <th>Proveedor</th>
                                         <th>Fecha estimada</th>
-                                        <th>Acciones</th>
+                                        {!nosoyTecnico?<th>Acciones</th>:null}
                                     </tr>
                                 </thead>
                                 {repuesto ?
@@ -297,11 +300,13 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
                                                     <td>{pedidos.por_recibir}</td>
                                                     <td>{pedidos.pedido.proveedor.nombre}</td> 
                                                     <td>{invertirFecha(String(pedidos.pedido.fecha_prevista_entrega))}</td>                                     
-                                                    <td>
-                                                        <Link to={`/repuestos/pedido_detalle/${pedidos.pedido.id}`}>
-                                                            <PencilFill className="mr-3 pencil"/>
-                                                        </Link>
-                                                    </td>
+                                                    {!nosoyTecnico?
+                                                        <td>
+                                                            <Link to={`/repuestos/pedido_detalle/${pedidos.pedido.id}`}>
+                                                                <PencilFill className="mr-3 pencil"/>
+                                                            </Link>
+                                                        </td>
+                                                    :null}
                                                 </tr>
                                             )})
                                         }

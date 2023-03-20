@@ -15,6 +15,7 @@ import { useBarcode } from 'react-barcodes';
 const RepuestoForm = ({repuesto, setRepuesto}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
+    const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Técnico'&&user['tec-user'].perfil.puesto.nombre!=='Director Técnico'?true:false;
 
     const [datos, setDatos] = useState({
         id: repuesto.id ? repuesto.id : null,
@@ -532,20 +533,25 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                 </Form.Group>
                             </Col>
                         </Row>
-                        <Form.Row className="justify-content-center">
-                            {repuesto.id ? 
-                                <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button> :
-                                <Button variant="info" type="submit" className={'mx-2'} onClick={crearDatos}>Guardar</Button>
-                            }
-                            <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
-                            {/* <Link to='/repuestos/listado'>
-                                <Button variant="warning" >
-                                    Cancelar / Cerrar
-                                </Button>
-                            </Link> */}
-                            {datos.id && <Button variant='info' className={'mx-2'} onClick={ImprimirBarcode}>Imprimir Etiqueta</Button>}
-                        </Form.Row>
-
+                        {!nosoyTecnico?
+                            <Form.Row className="justify-content-center">
+                                {repuesto.id? 
+                                    <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button> :
+                                    <Button variant="info" type="submit" className={'mx-2'} onClick={crearDatos}>Guardar</Button>
+                                }
+                                <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
+                                {/* <Link to='/repuestos/listado'>
+                                    <Button variant="warning" >
+                                        Cancelar / Cerrar
+                                    </Button>
+                                </Link> */}
+                                {datos.id && <Button variant='info' className={'mx-2'} onClick={ImprimirBarcode}>Imprimir Etiqueta</Button>}
+                            </Form.Row>
+                        :
+                            <Form.Row className="justify-content-center">
+                                <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
+                            </Form.Row>
+                        }
                         {repuesto.id ?
                             <React.Fragment>
                                 <Form.Row>
@@ -555,7 +561,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                             <h5 className="pb-3 pt-1 mt-2">Stock por empresa:</h5>
                                             </Col>
                                             <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
-                                                {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
+                                                {!nosoyTecnico?
                                                 <PlusCircle className="plus mr-2" size={30} onClick={abrirNuevoStock}/>
                                                 :null}
                                             </Col>
@@ -597,7 +603,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                 <h5 className="pb-3 pt-1 mt-2">Es repuesto de:</h5>
                                             </Col>
                                             <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
-                                                {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
+                                                {!nosoyTecnico?
                                                     <PlusCircle className="plus mr-2" size={30} onClick={abrirAddEquipo}/>
                                                 :null}
                                             </Col>
@@ -608,7 +614,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                     <th>Zona</th>
                                                     <th>Seccion</th>
                                                     <th>Equipo</th>
-                                                    {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
+                                                    {!nosoyTecnico?
                                                         <th>Acciones</th>
                                                     :null}
                                                 </tr>
@@ -620,7 +626,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                             <td>{equipo.siglas_zona}</td>
                                                             <td>{equipo.seccion_nombre}</td>
                                                             <td>{equipo.nombre}</td>
-                                                            {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
+                                                            {!nosoyTecnico?
                                                                 <td>
                                                                     <Trash className="trash"  onClick={event => {handlerBorrarEquipo(equipo.id)}} />
                                                                 </td>
@@ -631,65 +637,67 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                             </tbody>
                                         </Table>
                                     </Col>
-                                    <Col>
-                                        <Row>
-                                            <Col>
-                                            <h5 className="pb-3 pt-1 mt-2">Proveedores:</h5>
-                                            </Col>
-                                            <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
-                                                {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
-                                                    <PlusCircle className="plus mr-2" size={30} onClick={abrirAddProveedor}/>
-                                                :null}
-                                            </Col>
-                                        </Row>
-                                        <Table striped bordered hover>
-                                            <thead>
-                                                <tr>
-                                                    <th>Nombre</th>
-                                                    <th>Precio</th>
-                                                    <th>Dto</th>
+                                    {!nosoyTecnico?
+                                        <Col>
+                                            <Row>
+                                                <Col>
+                                                <h5 className="pb-3 pt-1 mt-2">Proveedores:</h5>
+                                                </Col>
+                                                <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
                                                     {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
-                                                        <th>Acciones</th>
+                                                        <PlusCircle className="plus mr-2" size={30} onClick={abrirAddProveedor}/>
                                                     :null}
-                                                    
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {datos.proveedores && datos.proveedores.map( p => {
-                                                    return (
-                                                        <tr key={p.id}>
-                                                            <td>{p.nombre}</td>
-                                                            <td>{precio && precio.map(pr =>{
-                                                                if(pr.proveedor===p.id){
-                                                                    return(
-                                                                        <option key={pr.proveedor}>
-                                                                            {formatNumber(pr.precio)}
-                                                                        </option>
-                                                                    )
-                                                                    }
-                                                                })
-                                                            }</td>
-                                                            <td>{precio && precio.map(pr =>{
+                                                </Col>
+                                            </Row>
+                                            <Table striped bordered hover>
+                                                <thead>
+                                                    <tr>
+                                                        <th>Nombre</th>
+                                                        <th>Precio</th>
+                                                        <th>Dto</th>
+                                                        {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
+                                                            <th>Acciones</th>
+                                                        :null}
+                                                        
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {datos.proveedores && datos.proveedores.map( p => {
+                                                        return (
+                                                            <tr key={p.id}>
+                                                                <td>{p.nombre}</td>
+                                                                <td>{precio && precio.map(pr =>{
                                                                     if(pr.proveedor===p.id){
                                                                         return(
                                                                             <option key={pr.proveedor}>
-                                                                                {formatPorcentaje(pr.descuento) + '%'}
+                                                                                {formatNumber(pr.precio)}
                                                                             </option>
                                                                         )
                                                                         }
                                                                     })
                                                                 }</td>
-                                                            {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
-                                                                <td>
-                                                                    <Trash className="trash"  onClick={event => {handlerBorrarProveedor(p.id)}} />
-                                                                </td>
-                                                            :null}
-                                                        </tr>
-                                                    )})
-                                                }
-                                            </tbody>
-                                        </Table>
-                                    </Col>
+                                                                <td>{precio && precio.map(pr =>{
+                                                                        if(pr.proveedor===p.id){
+                                                                            return(
+                                                                                <option key={pr.proveedor}>
+                                                                                    {formatPorcentaje(pr.descuento) + '%'}
+                                                                                </option>
+                                                                            )
+                                                                            }
+                                                                        })
+                                                                    }</td>
+                                                                {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
+                                                                    <td>
+                                                                        <Trash className="trash"  onClick={event => {handlerBorrarProveedor(p.id)}} />
+                                                                    </td>
+                                                                :null}
+                                                            </tr>
+                                                        )})
+                                                    }
+                                                </tbody>
+                                            </Table>
+                                        </Col>
+                                    :null}
                                 </Form.Row>
                             </React.Fragment>
                         : null}

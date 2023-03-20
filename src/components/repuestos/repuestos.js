@@ -21,8 +21,11 @@ import RepTraspasoAlmacen from './rep_traspaso_almacen';
 import RepPrecio from './rep_precio';
 import Programadores from './a_rep_programadores';
 import LineaAdicional from './rep_lineas_adicionales';
+import { useCookies } from 'react-cookie';
 
 const Repuestos = () => {
+    const [user] = useCookies(['tec-user']);
+    const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Técnico'&&user['tec-user'].perfil.puesto.nombre!=='Director Técnico'?true:false;
     
     return (
         <React.Fragment>
@@ -30,7 +33,6 @@ const Repuestos = () => {
             <Switch>
                 <Route path='/repuestos/precio' component={RepPrecio} />
                 <Route path='/repuestos/programadores' component={Programadores} />
-                <Route path='/repuestos' exact component={RepPendientes} />
                 <Route path='/repuestos/traspasos' component={RepTraspasoAlmacen} /> 
                 <Route path='/repuestos/inventario' component={RepInventario} /> 
                 <Route path='/repuestos/listado' component={RepLista} />
@@ -48,6 +50,7 @@ const Repuestos = () => {
                 <Route path='/repuestos/proveedor/nuevo' component={RepProveedorNuevo} />
                 <Route path='/repuestos/proveedor/:id' component={RepProveedorEdit} />                              
                 <Route path='/repuestos/:id' component={RepDetalle} />                
+                {!nosoyTecnico?<Route path='/repuestos/' exact component={RepPendientes} /> : <Route path='/repuestos/' exact component={RepLista} /> }
             </Switch>
         </React.Fragment>
     )
