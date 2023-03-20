@@ -20,13 +20,14 @@ const RepPendientes = () => {
     const [repuesto_id, setRepuesto_id] = useState(null);
     var fecha = new Date();
     const stock_por_empresa = [];
+    const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Director Técnico'?true:false;
     
     const [datos, setDatos] = useState({
         empresa: user['tec-user'].perfil.empresa.id,
         hoy: (fecha.getFullYear() + "-" + (fecha.getMonth()+1) + "-" + fecha.getDate()),
     });
 
-    const [filtro, setFiltro] = useState(`?empresa=${datos.empresa}&finalizado=${false}&fecha_prevista_entrega__lte=${datos.hoy}`);
+    const [filtro, setFiltro] = useState(`?empresa=${datos.empresa}&finalizado=${false}&fecha_prevista_entrega__lte=${datos.hoy}&creado_por=${nosoyTecnico?user['tec-user'].perfil.usuario:''}`);
     
     useEffect(() => { //buscamos articulos con stock por debajo del stock mínimo
         axios.get(BACKEND_SERVER + `/api/repuestos/articulos_fuera_stock/?almacen__empresa__id=${datos.empresa}&repuesto__descatalogado=${false}`,{
