@@ -210,6 +210,16 @@ const NotificacionForm = ({nota, setNota}) => {
         }
     }
 
+    const desactivar_zona = () => {
+        console.log(user['tec-user'].perfil);
+        if(user['tec-user'].perfil.zona && user['tec-user'].perfil.puesto.nombre==='Operador'){    
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
     return(
         <Container className="mb-5 mt-5">
             <Row className="justify-content-center"> 
@@ -277,7 +287,7 @@ const NotificacionForm = ({nota, setNota}) => {
                                                     value={datos.zona}
                                                     name='zona'
                                                     onChange={handleInputChange}
-                                                    disabled={desactivar()}> 
+                                                    disabled={desactivar_zona()}> 
                                                     <option key={0} value={''}>Sin Zona asignada</option>                                      
                                                     {zonas && zonas.map( zona => {
                                                         return (

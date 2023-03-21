@@ -11,6 +11,7 @@ const ManNotificacionesFiltro = ({actualizaFiltro}) => {
     const [usuarios, setUsuarios] = useState(null);
     const [empresas, setEmpresas] = useState(null);
     const [zonas, setZonas] = useState(null);
+    const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Técnico'&&user['tec-user'].perfil.puesto.nombre!=='Director Técnico'?true:false;
 
     const [datos, setDatos] = useState({
         id: '',
@@ -19,7 +20,7 @@ const ManNotificacionesFiltro = ({actualizaFiltro}) => {
         revisado: '',
         descartado: false,
         empresa: user['tec-user'].perfil.empresa.id,
-        zona: user['tec-user'].perfil.puesto.nombre==='Operador'?user['tec-user'].perfil.zona.id:'',
+        zona: user['tec-user'].perfil.zona?user['tec-user'].perfil.zona.id:'',
         fecha_creacion_lte:'',
         fecha_creacion_gte:'',
         numero: '',
@@ -90,8 +91,18 @@ const ManNotificacionesFiltro = ({actualizaFiltro}) => {
     }
 
     const desactivar = () => {
-        if(user['tec-user'].perfil.puesto.nombre==='Operador'){
+        if(nosoyTecnico){
             return true;
+        }
+    }
+
+    const desactivar_zona = () => {
+        console.log(user['tec-user'].perfil);
+        if(user['tec-user'].perfil.zona && user['tec-user'].perfil.puesto.nombre==='Operador'){    
+            return true;
+        }
+        else{
+            return false;
         }
     }
 
@@ -198,7 +209,7 @@ const ManNotificacionesFiltro = ({actualizaFiltro}) => {
                                         value={datos.empresa}
                                         onChange={handleInputChange}
                                         placeholder="Empresa"
-                                        disabled>
+                                        disabled={desactivar()}>
                                         <option key={0} value={''}>Todas</option>    
                                         {empresas && empresas.map( empresa => {
                                             return (
@@ -217,7 +228,7 @@ const ManNotificacionesFiltro = ({actualizaFiltro}) => {
                                             value={datos.zona}
                                             name='zona'
                                             onChange={handleInputChange}
-                                            disabled={desactivar()}> 
+                                            disabled={desactivar_zona()}> 
                                             <option key={0} value={''}>Seleccionar</option>                                      
                                             {zonas && zonas.map( zona => {
                                                 return (

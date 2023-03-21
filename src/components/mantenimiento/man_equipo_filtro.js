@@ -203,6 +203,16 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
         }
     }
 
+    const Desactivar_zona = () => {
+        console.log(user['tec-user'].perfil);
+        if(user['tec-user'].perfil.zona && user['tec-user'].perfil.puesto.nombre==='Operador'){    
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
     const Desactivar_seccion = () => {
         if(user['tec-user'].perfil.seccion && user['tec-user'].perfil.puesto.nombre==='Operador'){    
             return true;
@@ -263,7 +273,7 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
                                             value={datos.zona}
                                             name='zona'
                                             onChange={handleInputChange_zona}
-                                            disabled={Desactivar()}>
+                                            disabled={Desactivar_zona()}>
                                 {<option key={0} value={''}>Todas</option>}
                                 {zonas && zonas.map( zona => {
                                     return (
