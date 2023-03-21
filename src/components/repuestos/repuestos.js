@@ -25,7 +25,7 @@ import { useCookies } from 'react-cookie';
 
 const Repuestos = () => {
     const [user] = useCookies(['tec-user']);
-    const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Técnico'&&user['tec-user'].perfil.puesto.nombre!=='Director Técnico'?true:false;
+    const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Mantenimiento'&&user['tec-user'].perfil.puesto.nombre!=='Operador'?false:true;
     
     return (
         <React.Fragment>

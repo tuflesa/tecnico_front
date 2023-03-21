@@ -20,7 +20,7 @@ const RepPendientes = () => {
     const [repuesto_id, setRepuesto_id] = useState(null);
     var fecha = new Date();
     const stock_por_empresa = [];
-    const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Director Técnico'?true:false;
+    const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Técnico'?false:true;
     
     const [datos, setDatos] = useState({
         empresa: user['tec-user'].perfil.empresa.id,

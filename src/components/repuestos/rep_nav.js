@@ -8,7 +8,7 @@ const RepNavBar = () => {
     const [token] = useCookies(['tec-token']);
     //const [mantenimiento, setMantenimiento] = useState(false);
     const soyProgramador = user['tec-user'].perfil.destrezas.filter(s => s === 7);
-    const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Técnico'&&user['tec-user'].perfil.puesto.nombre!=='Director Técnico'?true:false;
+    const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Mantenimiento'&&user['tec-user'].perfil.puesto.nombre!=='Operador'?false:true;
 
     useEffect(() => {
         console.log(nosoyTecnico);
@@ -53,8 +53,6 @@ const RepNavBar = () => {
                             <Nav className="mr-auto">
                                 <NavDropdown title="Repuestos" id="basic-nav-dropdown">
                                     <NavDropdown.Item href="/repuestos/listado">Lista de repuestos</NavDropdown.Item>
-                                    <NavDropdown.Divider />
-                                    <NavDropdown.Item href="/repuestos/traspasos">Traspaso de almacen</NavDropdown.Item>
                                     <NavDropdown.Divider />
                                     <NavDropdown.Item href="/repuestos/salidas">Salidas</NavDropdown.Item>  
                                     <NavDropdown.Divider />  

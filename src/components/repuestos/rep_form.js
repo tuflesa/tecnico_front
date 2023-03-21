@@ -15,7 +15,7 @@ import { useBarcode } from 'react-barcodes';
 const RepuestoForm = ({repuesto, setRepuesto}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
-    const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Técnico'&&user['tec-user'].perfil.puesto.nombre!=='Director Técnico'?true:false;
+    const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Mantenimiento'&&user['tec-user'].perfil.puesto.nombre!=='Operador'?false:true;
 
     const [datos, setDatos] = useState({
         id: repuesto.id ? repuesto.id : null,
