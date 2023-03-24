@@ -12,6 +12,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
     const [tipo_periodo, setTipoPeriodo] = useState(null);
     const [user] = useCookies(['tec-user']);
     const [hoy] = useState(new Date);
+    const nosoyTecnico = user['tec-user'].perfil.puesto.nombre==='Operador'||user['tec-user'].perfil.puesto.nombre==='Mantenimiento'?true:false;
 
     const [datos, setDatos] = useState({
         id: linea_tarea.id,
@@ -182,6 +183,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                                                 value={datos.prioridad}
                                                 onChange={handleInputChange} 
                                                 placeholder="Prioridad"
+                                                disabled={nosoyTecnico? + true: + false}
                                                 autoFocus
                                     />
                                 </Form.Group>
@@ -214,6 +216,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                                                 value={datos.nombre}
                                                 onChange={handleInputChange} 
                                                 placeholder="Nombre"
+                                                disabled={nosoyTecnico? + true: + false}
                                     />
                                 </Form.Group>
                             </Col>
@@ -285,7 +288,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                                                 value={datos.fecha_plan}
                                                 onChange={handleInputChange} 
                                                 placeholder="Fecha Plan"
-                                                disabled={linea_tarea.parte.fecha_prevista_inicio===null?true:false} />
+                                                disabled={nosoyTecnico? + true: linea_tarea.parte.fecha_prevista_inicio===null?+ true:+ false} />
                                 </Form.Group>
                             </Col> 
                             <Col>

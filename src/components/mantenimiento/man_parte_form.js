@@ -29,6 +29,7 @@ const ParteForm = ({parte, setParte, op}) => {
     const [actualizar, setActualizar] = useState('');
     const [lineas, setLineas] = useState(null);
     const soyTecnico = user['tec-user'].perfil.destrezas.filter(s => s === 6);
+    const nosoyTecnico = user['tec-user'].perfil.puesto.nombre==='Operador'||user['tec-user'].perfil.puesto.nombre==='Mantenimiento'?true:false;
 
     const [datos, setDatos] = useState({
         id: parte.id ? parte.id : null,
@@ -722,6 +723,7 @@ const ParteForm = ({parte, setParte, op}) => {
                                                 value={datos.nombre}
                                                 onChange={handleInputChange} 
                                                 placeholder="Nombre"
+                                                disabled={nosoyTecnico? true: false}
                                                 autoFocus
                                     />
                                 </Form.Group>
@@ -765,7 +767,7 @@ const ParteForm = ({parte, setParte, op}) => {
                                                 value={datos.tipo}
                                                 onChange={handleInputChange}
                                                 placeholder="Tipo Mantenimiento"
-                                                /* disabled={handleDisabled()} */> 
+                                                disabled={nosoyTecnico? true: false}> 
                                                 {datos.id===null? <option key={0} value={''}>Seleccionar</option>: ''}                                                   
                                                 {tipoparte && tipoparte.map( tipo => {
                                                     return (
@@ -784,7 +786,8 @@ const ParteForm = ({parte, setParte, op}) => {
                                                 name='fecha_creacion' 
                                                 value={datos.fecha_creacion}
                                                 onChange={handleInputChange} 
-                                                placeholder="Fecha creación" />
+                                                placeholder="Fecha creación" 
+                                                disabled={nosoyTecnico? true: false}/>
                                 </Form.Group>
                             </Col> 
                             <Col>
@@ -794,7 +797,8 @@ const ParteForm = ({parte, setParte, op}) => {
                                                 name='fecha_prevista_inicio' 
                                                 value={datos.fecha_prevista_inicio}
                                                 onChange={handleInputChangeF} 
-                                                placeholder="Fecha prevista inicio" />
+                                                placeholder="Fecha prevista inicio" 
+                                                disabled={nosoyTecnico? true: false}/>
                                 </Form.Group>
                             </Col>                         
                             <Col>
@@ -836,7 +840,8 @@ const ParteForm = ({parte, setParte, op}) => {
                                     <Form.Control   as="select" 
                                                     value={datos.zona}
                                                     name='zona'
-                                                    onChange={handleInputChangeZona}> 
+                                                    onChange={handleInputChangeZona}
+                                                    disabled={nosoyTecnico? true: false}> 
                                                     <option key={0} value={''}>Seleccionar</option>                                      
                                                     {zonas && zonas.map( zona => {
                                                         return (
@@ -854,7 +859,8 @@ const ParteForm = ({parte, setParte, op}) => {
                                     <Form.Control   as="select" 
                                                     value={datos.seccion}
                                                     name='seccion'
-                                                    onChange={handleInputChangeSeccion}>  
+                                                    onChange={handleInputChangeSeccion}
+                                                    disabled={nosoyTecnico? true: false}>  
                                                     <option key={0} value={''}>Seleccionar</option>                                      
                                                     {secciones && secciones.map( seccion => {
                                                         return (
@@ -872,7 +878,8 @@ const ParteForm = ({parte, setParte, op}) => {
                                     <Form.Control   as="select" 
                                                     value={datos.equipo}
                                                     name='equipo'
-                                                    onChange={handleInputChange}>  
+                                                    onChange={handleInputChange}
+                                                    disabled={nosoyTecnico? true: false}>  
                                                     {/* {datos.equipo===''?  <option key={0} value={''}>Seleccionar</option>:''}                                    */}
                                                     <option key={0} value={''}>Seleccionar</option>   
                                                     {equipos && equipos.map( equipo => {
@@ -895,6 +902,7 @@ const ParteForm = ({parte, setParte, op}) => {
                                                 value={datos.observaciones}
                                                 onChange={handleInputChange} 
                                                 placeholder="Observaciones"
+                                                disabled={nosoyTecnico? true: false}
                                     />
                                 </Form.Group>
                             </Col>                            
