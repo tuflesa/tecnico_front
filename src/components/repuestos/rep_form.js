@@ -739,6 +739,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                            proveedoresAsignados={datos.proveedores}
                            repuesto_id={repuesto.id}
                            repuesto_nombre={datos.nombre}
+                           repuesto_modelo={datos.modelo}
                            updateRepuesto = {updateRepuesto}/>
 
             <RepPorAlmacen  show={show_listalmacen}

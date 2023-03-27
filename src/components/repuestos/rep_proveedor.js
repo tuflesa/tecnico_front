@@ -4,7 +4,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 
-const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repuesto_id, updateRepuesto, repuesto_nombre}) => {
+const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repuesto_id, updateRepuesto, repuesto_nombre, repuesto_modelo}) => {
     const [token] = useCookies(['tec-token']);
 
     const [datos, setDatos] = useState({
@@ -12,6 +12,7 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
         precio:0,
         descuento:0,
         descripcion_proveedor: '',
+        modelo_proveedor: '',
     });
     const [proveedores, setProveedores] = useState(null);
     const [listaAsignados, setListaAsignados] = useState([]);
@@ -82,6 +83,7 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
                 precio: datos.precio,
                 descuento: datos.descuento,
                 descripcion_proveedor: datos.descripcion_proveedor?datos.descripcion_proveedor:repuesto_nombre,
+                modelo_proveedor: datos.modelo_proveedor?datos.modelo_proveedor:repuesto_modelo,
             }, {
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
@@ -155,6 +157,17 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
                                                 value={datos.descripcion_proveedor}
                                                 onChange={handleInputChange} 
                                                 placeholder="Descirpción proveedor"
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col>
+                                <Form.Group id="modelo_proveedor">
+                                    <Form.Label>Modelo Proveedor</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='modelo_proveedor' 
+                                                value={datos.modelo_proveedor}
+                                                onChange={handleInputChange} 
+                                                placeholder="Modelo proveedor"
                                     />
                                 </Form.Group>
                             </Col>
