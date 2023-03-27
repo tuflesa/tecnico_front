@@ -647,6 +647,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                 <tr>
                                                     <th>Nombre</th>
                                                     <th>Descripción</th>
+                                                    <th>Modelo</th>
                                                     <th>Precio</th>
                                                     <th>Dto</th>
                                                     {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
@@ -665,6 +666,16 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                                     return(
                                                                         <option key={pr.proveedor}>
                                                                             {pr.descripcion_proveedor}
+                                                                        </option>
+                                                                    )
+                                                                    }
+                                                                })
+                                                            }</td>
+                                                            <td>{precio && precio.map(pr =>{
+                                                                if(pr.proveedor===p.id){
+                                                                    return(
+                                                                        <option key={pr.proveedor}>
+                                                                            {pr.modelo_proveedor}
                                                                         </option>
                                                                     )
                                                                     }

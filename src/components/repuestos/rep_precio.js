@@ -15,11 +15,13 @@ const RepPrecio = ()=>{
         id:'',
         proveedor:'', 
         descripcion:'',
+        modelo:'',
         nombre:'',
         descatalogado: false,  
         precio_n:{},
         descuento_n:{},
         descripcion_proveedor_n:{},
+        modelo_proveedor_n:{},
     });
 
     useEffect(() => {
@@ -37,7 +39,7 @@ const RepPrecio = ()=>{
     }, [token]);
 
     useEffect(()=>{
-        datos.proveedor && axios.get(BACKEND_SERVER + `/api/repuestos/repuesto_precio/?proveedor__id=${datos.proveedor}&descripcion_proveedor__icontains=${datos.descripcion}&repuesto__nombre__icontains=${datos.nombre}`,{
+        datos.proveedor && axios.get(BACKEND_SERVER + `/api/repuestos/repuesto_precio/?proveedor__id=${datos.proveedor}&descripcion_proveedor__icontains=${datos.descripcion}&modelo_proveedor__icontains=${datos.modelo}&repuesto__nombre__icontains=${datos.nombre}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }     
@@ -55,12 +57,14 @@ const RepPrecio = ()=>{
                     descuento_n:0,
                     descripcion_proveedor:res.data[x].descripcion_proveedor,
                     descripcion_proveedor_n:'',
+                    modelo_proveedor:res.data[x].modelo_proveedor,
+                    modelo_proveedor_n:'',
                 }
             }
             setPrecios(prueba);
         })
         .catch(err => { console.log(err);})
-    },[datos.proveedor, datos.descripcion, datos.nombre]);
+    },[datos.proveedor, datos.descripcion, datos.nombre, datos.modelo]);
 
     useEffect(() => {
         if(precios){
@@ -88,10 +92,11 @@ const RepPrecio = ()=>{
             for(var x=0; x<precios.length;x++){
                 if(precios[x].id===datos.id){
                     precios[x].descripcion_proveedor_n=datos.descripcion_proveedor_n;
+                    precios[x].modelo_proveedor_n=datos.modelo_proveedor_n;
                 }
             }
         }
-    }, [datos.descripcion_proveedor_n]);
+    }, [datos.descripcion_proveedor_n, datos.modelo_proveedor_n]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -149,6 +154,7 @@ const RepPrecio = ()=>{
             var precios_nuevos = precios[x].precio_n;
             var descuento_nuevo = precios[x].descuento_n;
             var descripcion_nueva = precios[x].descripcion_proveedor_n;
+            var modelo_nuevo = precios[x].modelo_proveedor_n;
             var ids=precios[x].ids; //es el id de la línea no del repuesto
             if(precios_nuevos!==0){
                 axios.patch(BACKEND_SERVER + `/api/repuestos/repuesto_precio/${ids}/`,{
@@ -179,6 +185,19 @@ const RepPrecio = ()=>{
             if(descripcion_nueva!==''){
                 axios.patch(BACKEND_SERVER + `/api/repuestos/repuesto_precio/${ids}/`,{
                     descripcion_proveedor: descripcion_nueva,
+                }, { 
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }    
+                })
+                .then( res => {
+                    //window.location.href = "/repuestos/precio";
+                })
+                .catch(err => { console.log(err);})
+            }
+            if(modelo_nuevo!==''){
+                axios.patch(BACKEND_SERVER + `/api/repuestos/repuesto_precio/${ids}/`,{
+                    modelo_proveedor: modelo_nuevo,
                 }, { 
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
@@ -250,6 +269,18 @@ const RepPrecio = ()=>{
                             </Form.Group>
                         </Col>
                     :null}
+                    {datos.proveedor?
+                        <Col>
+                            <Form.Group controlId="modelo">
+                                <Form.Label>Modelo Repuesto</Form.Label>
+                                <Form.Control type="text" 
+                                            name='modelo' 
+                                            value={datos.modelo}
+                                            onChange={handleInputChange} 
+                                            placeholder="Modelo repuesto"/>
+                            </Form.Group>
+                        </Col>
+                    :null}
                 </Row>
                 {datos.proveedor?
                     <React.Fragment>
@@ -267,12 +298,14 @@ const RepPrecio = ()=>{
                                 <tr>
                                     <th>Codigo</th>
                                     <th>Descripción proveedor</th>
+                                    <th>Modelo proveedor</th>
                                     <th>Descripción repuesto</th>
                                     <th>Descuento</th>
                                     <th>Precio Actual</th>
                                     <th>Nuevo Descuento</th>
                                     <th>Nuevo Precio</th>
                                     <th>Nueva Descripción</th>
+                                    <th>Nuevo Modelo</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -281,6 +314,7 @@ const RepPrecio = ()=>{
                                         <tr key={p.id}>
                                             <td>{p.id}</td>
                                             <td>{p.descripcion_proveedor}</td>
+                                            <td>{p.modelo_proveedor}</td>
                                             <td>{p.nombre}</td>
                                             <td>{p.descuento?p.descuento + '%':0 + '%'}</td>
                                             <td>{p.precio?p.precio + '€': 0 + '€'}</td>
@@ -318,6 +352,18 @@ const RepPrecio = ()=>{
                                                 onChange={handleInputChange4}
                                                 //onBlur={PerderFoco}
                                                 placeholder={p.descripcion_proveedor_n}
+                                            />
+                                            </td>
+                                            <td>
+                                            <input                  
+                                                className={p.id} 
+                                                type = "text" 
+                                                id = "id"
+                                                name='modelo_proveedor_n'
+                                                value= {datos.modelo_proveedor_n[p]}
+                                                onChange={handleInputChange4}
+                                                //onBlur={PerderFoco}
+                                                placeholder={p.modelo_proveedor_n}
                                             />
                                             </td>
                                         </tr>

@@ -53,7 +53,7 @@ const Programadores = () => {
     }*/
  
 
-    //copiar la descripción de proveedor actual de repuestos en la tabla de precio, descripcion_proveedor.
+    //copiar la descripción de proveedor actual y modelo actual de repuestos en la tabla de precio, descripcion_proveedor.
     const copia_descripcion = ()=>{
         axios.get(BACKEND_SERVER + `/api/repuestos/repuesto_precio/`,{
             headers: {
@@ -62,16 +62,17 @@ const Programadores = () => {
         })
         .then( res => {
             setListaRepuestos(res.data);
-            console.log(res.data);
             for(var y=0; y<res.data.length; y++){
                 axios.patch(BACKEND_SERVER + `/api/repuestos/precio/${res.data[y].id}/`, {
                     descripcion_proveedor: res.data[y].repuesto.nombre,
+                    modelo_proveedor: res.data[y].repuesto.modelo,
                 }, {
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
                       }     
                 })
                 .then( r => { 
+                    console.log('copiado descripción y modelo');
                 })
                 .catch(err => { console.log(err);})
             }
@@ -81,7 +82,7 @@ const Programadores = () => {
         });
     }
 
-    //copiar la descripción de proveedor en la linea del pedido.
+    //copiar la descripción de proveedor y el modelo en la linea del pedido.
     const copia_descripcion_linea_pedido = ()=>{
         axios.get(BACKEND_SERVER + `/api/repuestos/linea_pedido_detalle/`,{
             headers: {
@@ -89,10 +90,10 @@ const Programadores = () => {
             }
         })
         .then( res => {
-            console.log(res.data);
             for(var y=0; y<res.data.length; y++){
                 axios.patch(BACKEND_SERVER + `/api/repuestos/linea_pedido/${res.data[y].id}/`, {
                     descripcion_proveedor: res.data[y].repuesto.nombre,
+                    modelo_proveedor: res.data[y].repuesto.modelo,
                 }, {
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
@@ -135,7 +136,7 @@ const Programadores = () => {
                         </thead>
                         <tbody>
                             {/* <th><Button variant="info" onClick={event =>{CrearListado()}}>Crear lista</Button></th> */}
-                            <th><Button variant="info" onClick={event =>{copia_descripcion()}}>Copiar datos</Button></th>
+                            <th><Button variant="info" onClick={event =>{copia_descripcion()}}>Copiar datos en articulo</Button></th>
                             <th><Button variant="info" onClick={event =>{copia_descripcion_linea_pedido()}}>Copiar datos a la linea de pedido</Button></th>
                         </tbody>
                     </Table>
