@@ -13,7 +13,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
         nombre: '',
         nombre_comun: '',
         fabricante: '',
-        modelo: '',
+        modelo: [],
         modelo_proveedor: '',
         critico: '',
         tipo_repuesto: '',
@@ -24,8 +24,8 @@ const RepListaFilto = ({actualizaFiltro}) => {
         equipo: '',
         proveedor: '',
     });
-    const [numeroBar, setnumeroBar] = useState({id:''});
 
+    const [numeroBar, setnumeroBar] = useState({id:''});
     const [tiposRepuesto, setTiposRepuesto] = useState(null);
     const [empresas, setEmpresas] = useState(null);
     const [proveedores, setProveedores] = useState(null);
@@ -158,40 +158,14 @@ const RepListaFilto = ({actualizaFiltro}) => {
     }, [token, datos.seccion]);
 
     useEffect(()=>{
-        axios.get(BACKEND_SERVER + `/api/repuestos/repuesto_precio/?modelo_proveedor__icontains=${datos.modelo_proveedor}`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-            }
-        })
-        .then( res => {
-            setModelos(res.data);
-            if(res.data.length!==0){
-                setDatos({
-                    ...datos,
-                    modelo: res.data[0].repuesto.modelo
-                });
-            }
-            else{
-                setDatos({
-                    ...datos,
-                    modelo: ''
-                });
-            }
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    },[datos.modelo_proveedor]);
-
-    useEffect(()=>{
-        const filtro1 = `?nombre__icontains=${datos.nombre}&nombre_comun__icontains=${datos.nombre_comun}&fabricante__icontains=${datos.fabricante}&modelo__icontains=${datos.modelo}&id=${datos.id}&es_critico=${datos.critico}&descatalogado=${datos.descatalogado}&tipo_repuesto=${datos.tipo_repuesto}&proveedores__id=${datos.proveedor}`;
-        let filtro2 = `&equipos__seccion__zona__empresa__id=${datos.empresa}`;
+        const filtro1 = `?modelo_proveedor__icontains=${datos.modelo_proveedor}&repuesto__nombre__icontains=${datos.nombre}&repuesto__nombre_comun__icontains=${datos.nombre_comun}&repuesto__fabricante__icontains=${datos.fabricante}&repuesto__id=${datos.id}&repuesto__es_critico=${datos.critico}&repuesto__descatalogado=${datos.descatalogado}&repuesto__tipo_repuesto=${datos.tipo_repuesto}&repuesto__proveedores__id=${datos.proveedor}`;
+        let filtro2 = `&repuesto__equipos__seccion__zona__empresa__id=${datos.empresa}`;
         if (datos.empresa !== ''){
-            filtro2 = filtro2 + `&equipos__seccion__zona__id=${datos.zona}`;
+            filtro2 = filtro2 + `&repuesto__equipos__seccion__zona__id=${datos.zona}`;
             if (datos.zona !== ''){
-                filtro2 = filtro2 + `&equipos__seccion__id=${datos.seccion}`;
+                filtro2 = filtro2 + `&repuesto__equipos__seccion__id=${datos.seccion}`;
                 if (datos.seccion !== ''){
-                    filtro2 = filtro2 + `&equipos__id=${datos.equipo}`
+                    filtro2 = filtro2 + `&repuesto__equipos__id=${datos.equipo}`
                 }
             }
         }
@@ -199,7 +173,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
         const filtro = filtro1 + filtro2;
         
         actualizaFiltro(filtro);
-    },[datos.nombre, datos.nombre_comun, datos.fabricante, datos.modelo, datos.id, datos.critico, datos.descatalogado, datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.tipo_repuesto, datos.proveedor]);
+    },[datos]);
 
 
     const handleInputChange = (event) => {

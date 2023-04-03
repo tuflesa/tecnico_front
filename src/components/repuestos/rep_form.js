@@ -247,6 +247,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             setStockEditar(null);
             setStockMinimoEditar(null);
         }
+        setShowProveedor(true);
     }
 
     const abrirNuevoStock = () => {
@@ -268,7 +269,11 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     }
 
     const cerrarAddProveedor = () => {
-        setShowProveedor(false);
+        updateRepuesto();
+        if(datos.proveedores.length>0 || setShowProveedor===false){     
+            setShowProveedor(false);
+            updateRepuesto();
+        }
     }
 
     const abrirListAlmacen = (empresa) => {
@@ -631,6 +636,11 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                             </tbody>
                                         </Table>
                                     </Col>
+                                </Form.Row>
+                            </React.Fragment>:null}
+                        {repuesto.id ?
+                            <React.Fragment>
+                                <Form.Row>
                                     <Col>
                                         <Row>
                                             <Col>
@@ -740,7 +750,8 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                            repuesto_id={repuesto.id}
                            repuesto_nombre={datos.nombre}
                            repuesto_modelo={datos.modelo}
-                           updateRepuesto = {updateRepuesto}/>
+                           updateRepuesto = {updateRepuesto}
+                           setShowProveedor = {setShowProveedor}/>
 
             <RepPorAlmacen  show={show_listalmacen}
                             cerrarListAlmacen={cerrarListAlmacen}

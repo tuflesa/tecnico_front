@@ -4,7 +4,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 
-const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repuesto_id, updateRepuesto, repuesto_nombre, repuesto_modelo}) => {
+const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repuesto_id, updateRepuesto, repuesto_nombre, repuesto_modelo, setShowProveedor}) => {
     const [token] = useCookies(['tec-token']);
 
     const [datos, setDatos] = useState({
@@ -57,7 +57,7 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
         setDatos({
             proveedor: ''
         });
-        handleCloseProveedor();
+        handleCloseProveedor()
     }
 
     const handlerGuardar = () => {
@@ -71,7 +71,7 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
         })
         .then( res => { 
                 updateRepuesto();
-                handlerCancelar();
+                setShowProveedor(false);
             }
         )
         .catch(err => { console.log(err);});
@@ -90,7 +90,7 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
                   }     
             })
             .then( res => { 
-                    console.log(res.data);
+                    handlerCancelar();
                 }
             )
             .catch(err => { console.log(err);});
@@ -175,13 +175,8 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="info" 
-                        onClick={handlerGuardar}>
-                        Guardar
-                    </Button>
-                    <Button variant="waring" onClick={handlerCancelar}>
-                        Cancelar
-                    </Button>
+                    <Button variant="info" onClick={handlerGuardar}>Guardar</Button>
+                    <Button variant="waring" onClick={handlerCancelar}>Cancelar</Button>
                 </Modal.Footer>
         </Modal>
     );
