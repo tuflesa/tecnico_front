@@ -13,7 +13,8 @@ const BuscarRepuestosPedido = ({cerrarListRepuestos, show, proveedor_id, elegirR
     const [datos, setDatos] = useState({
         id:'',
         nombre: '', 
-        modelo: '',
+        modelo_proveedor: '',
+        descripcion_proveedor: '',
     });
 
     useEffect(()=>{
@@ -40,7 +41,7 @@ const BuscarRepuestosPedido = ({cerrarListRepuestos, show, proveedor_id, elegirR
     }  
     
     useEffect(()=>{
-        const filtro = `?proveedores__id=${proveedor_id}&repuesto__descatalogado=${false}&repuesto__nombre__icontains=${datos.nombre}&repuesto__id=${datos.id}&repuesto__modelo__icontains=${datos.modelo}`;
+        const filtro = `?proveedores__id=${proveedor_id}&descripcion_proveedor__icontains=${datos.descripcion_proveedor}&repuesto__descatalogado=${false}&repuesto__nombre__icontains=${datos.nombre}&repuesto__id=${datos.id}&modelo_proveedor__icontains=${datos.modelo_proveedor}`;
         actualizaFiltro(filtro);
     },[datos]);
 
@@ -51,7 +52,7 @@ const BuscarRepuestosPedido = ({cerrarListRepuestos, show, proveedor_id, elegirR
                 <Row>
                     <Col>
                         <Form.Group controlId="nombre">
-                            <Form.Label>Buscar por Nombre</Form.Label>
+                            <Form.Label>Buscar por: Nombre</Form.Label>
                             <Form.Control type="text" 
                                         name='nombre' 
                                         value={datos.nombre}
@@ -62,11 +63,22 @@ const BuscarRepuestosPedido = ({cerrarListRepuestos, show, proveedor_id, elegirR
                         </Form.Group>
                     </Col>
                     <Col>
-                        <Form.Group controlId="modelo">
-                            <Form.Label>Buscar por Modelo</Form.Label>
+                        <Form.Group controlId="descripcion_proveedor">
+                            <Form.Label>Descripción proveedor</Form.Label>
                             <Form.Control type="text" 
-                                        name='modelo' 
-                                        value={datos.modelo}
+                                        name='descripcion_proveedor' 
+                                        value={datos.descripcion_proveedor}
+                                        onChange={handleInputChange}                                        
+                                        placeholder="Descripción proveedor" 
+                                        />
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="modelo_proveedor">
+                            <Form.Label>Modelo proveedor</Form.Label>
+                            <Form.Control type="text" 
+                                        name='modelo_proveedor' 
+                                        value={datos.modelo_proveedor}
                                         onChange={handleInputChange}                                        
                                         placeholder="Modelo contiene" 
                                         />
@@ -95,6 +107,7 @@ const BuscarRepuestosPedido = ({cerrarListRepuestos, show, proveedor_id, elegirR
                             <thead>
                                 <tr>
                                     <th>Nombre</th>
+                                    <th>Descripción Proveedor</th>
                                     <th>Modelo</th>
                                     <th>Acciones</th>
                                 </tr>
@@ -104,7 +117,8 @@ const BuscarRepuestosPedido = ({cerrarListRepuestos, show, proveedor_id, elegirR
                                     return (                                                
                                         <tr key={rep.repuesto.id}>
                                             <td>{rep.repuesto.nombre}</td> 
-                                            <td>{rep.repuesto.modelo}</td> 
+                                            <td>{rep.descripcion_proveedor}</td>
+                                            <td>{rep.modelo_proveedor}</td> 
                                             <td>
                                             <ArrowDownCircle className="mr-3 pencil" onClick={event => {elegirRepuesto(rep)}}/>
                                             </td>                                                

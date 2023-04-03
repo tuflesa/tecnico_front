@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
-import { PlusCircle, Trash, GeoAltFill, Receipt} from 'react-bootstrap-icons';
+import { PlusCircle, Trash, GeoAltFill, Eye} from 'react-bootstrap-icons';
 import './repuestos.css';
 import StockMinimoForm from './rep_stock_minimo';
 import EquipoForm from './rep_equipo';
@@ -248,6 +248,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             setStockEditar(null);
             setStockMinimoEditar(null);
         }
+        setShowProveedor(true);
     }
 
     const abrirNuevoStock = () => {
@@ -269,7 +270,11 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     }
 
     const cerrarAddProveedor = () => {
-        setShowProveedor(false);
+        updateRepuesto();
+        if(datos.proveedores.length>0 || setShowProveedor===false){     
+            setShowProveedor(false);
+            updateRepuesto();
+        }
     }
 
     const abrirListAlmacen = (empresa) => {
@@ -401,7 +406,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                         <Row>
                             <Col>
                                 <Form.Group id="nombre">
-                                    <Form.Label>Descripción Proveedor (*)</Form.Label>
+                                    <Form.Label>Descripción (*)</Form.Label>
                                     <Form.Control type="text" 
                                                 name='nombre' 
                                                 value={datos.nombre}
@@ -676,24 +681,14 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                                         }
                                                                     })
                                                                 }</td>
-                                                                <td>{precio && precio.map(pr =>{
-                                                                        if(pr.proveedor===p.id){
-                                                                            return(
-                                                                                <option key={pr.proveedor}>
-                                                                                    {formatPorcentaje(pr.descuento) + '%'}
-                                                                                </option>
-                                                                            )
-                                                                            }
-                                                                        })
-                                                                    }</td>
-                                                                {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
-                                                                    <td>
-                                                                        <Trash className="trash"  onClick={event => {handlerBorrarProveedor(p.id)}} />
-                                                                    </td>
-                                                                :null}
-                                                            </tr>
-                                                        )})
-                                                    }
+                                                            {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
+                                                                <td>
+                                                                    <Trash className="mr-3 pencil"  onClick={event => {handlerBorrarProveedor(p.id)}} />
+                                                                </td>
+                                                            :null}
+                                                        </tr>
+                                                    )})
+                                                }
                                                 </tbody>
                                             </Table>
                                         </Col>
@@ -724,7 +719,10 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                            handleCloseProveedor={cerrarAddProveedor}
                            proveedoresAsignados={datos.proveedores}
                            repuesto_id={repuesto.id}
-                           updateRepuesto = {updateRepuesto}/>
+                           repuesto_nombre={datos.nombre}
+                           repuesto_modelo={datos.modelo}
+                           updateRepuesto = {updateRepuesto}
+                           setShowProveedor = {setShowProveedor}/>
 
             <RepPorAlmacen  show={show_listalmacen}
                             cerrarListAlmacen={cerrarListAlmacen}

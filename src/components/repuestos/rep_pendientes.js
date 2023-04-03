@@ -91,7 +91,8 @@ const RepPendientes = () => {
     },[token]); 
 
     useEffect(() => { //buscamos las lineas de los pedidos pendientes para mostrar en las lineas de los articulos fuera de stock
-        axios.get(BACKEND_SERVER + `/api/repuestos/linea_pedido_pend/?pedido__finalizado=${'False'}&pedido__empresa=${datos.empresa}`,{
+        console.log('entro');
+        datos.empresa && axios.get(BACKEND_SERVER + `/api/repuestos/linea_pedido_pend/?pedido__finalizado=${'false'}&pedido__empresa=${datos.empresa}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }

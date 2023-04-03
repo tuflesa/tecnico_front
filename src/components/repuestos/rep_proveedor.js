@@ -4,11 +4,15 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 
-const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repuesto_id, updateRepuesto}) => {
+const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repuesto_id, updateRepuesto, repuesto_nombre, repuesto_modelo, setShowProveedor}) => {
     const [token] = useCookies(['tec-token']);
 
     const [datos, setDatos] = useState({
-        proveedor: ''
+        proveedor: '',
+        precio:0,
+        descuento:0,
+        descripcion_proveedor: '',
+        modelo_proveedor: '',
     });
     const [proveedores, setProveedores] = useState(null);
     const [listaAsignados, setListaAsignados] = useState([]);
@@ -53,7 +57,7 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
         setDatos({
             proveedor: ''
         });
-        handleCloseProveedor();
+        handleCloseProveedor()
     }
 
     const handlerGuardar = () => {
@@ -67,7 +71,7 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
         })
         .then( res => { 
                 updateRepuesto();
-                handlerCancelar();
+                setShowProveedor(false);
             }
         )
         .catch(err => { console.log(err);});
@@ -76,15 +80,17 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
             axios.post(BACKEND_SERVER + `/api/repuestos/precio/`, {
                 proveedor: newProveedores[x],
                 repuesto: repuesto_id,
-                precio: 0,
-                descuento: 0,
+                precio: datos.precio,
+                descuento: datos.descuento,
+                descripcion_proveedor: datos.descripcion_proveedor?datos.descripcion_proveedor:repuesto_nombre,
+                modelo_proveedor: datos.modelo_proveedor?datos.modelo_proveedor:repuesto_modelo,
             }, {
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                   }     
             })
             .then( res => { 
-                    console.log(res.data);
+                    handlerCancelar();
                 }
             )
             .catch(err => { console.log(err);});
@@ -118,16 +124,59 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
                                 </Form.Group>
                             </Col>
                         </Row>
+                        <Row>
+                            <Col>
+                                <Form.Group id="precio">
+                                    <Form.Label>Precio</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='precio' 
+                                                value={datos.precio}
+                                                onChange={handleInputChange} 
+                                                placeholder="Precio"
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col>
+                                <Form.Group id="descuento">
+                                    <Form.Label>Descuento</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='descuento' 
+                                                value={datos.descuento}
+                                                onChange={handleInputChange} 
+                                                placeholder="Descuento"
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <Form.Group id="descripcion_proveedor">
+                                    <Form.Label>Descirpción Proveedor</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='descripcion_proveedor' 
+                                                value={datos.descripcion_proveedor}
+                                                onChange={handleInputChange} 
+                                                placeholder="Descirpción proveedor"
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col>
+                                <Form.Group id="modelo_proveedor">
+                                    <Form.Label>Modelo Proveedor</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='modelo_proveedor' 
+                                                value={datos.modelo_proveedor}
+                                                onChange={handleInputChange} 
+                                                placeholder="Modelo proveedor"
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="info" 
-                        onClick={handlerGuardar}>
-                        Guardar
-                    </Button>
-                    <Button variant="waring" onClick={handlerCancelar}>
-                        Cancelar
-                    </Button>
+                    <Button variant="info" onClick={handlerGuardar}>Guardar</Button>
+                    <Button variant="waring" onClick={handlerCancelar}>Cancelar</Button>
                 </Modal.Footer>
         </Modal>
     );

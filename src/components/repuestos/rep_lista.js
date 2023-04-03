@@ -7,11 +7,13 @@ import { Trash, PencilFill, Receipt } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import RepListaFilto from './rep_lista_filtro';
 import ReactExport from 'react-data-export';
+import { select } from 'd3';
 
 const RepLista = () => {
     const [token] = useCookies(['tec-token']);
     //const [user] = useCookies(['tec-user']);
     const [repuestos, setRepuestos] = useState(null);
+    const [result_repuestos, setResulRepuestos] = useState(null);
     const [show, setShow] = useState(false);
     const [repuestoBorrar, setRepuestoBorrar] = useState(null);
     const [filtro, setFiltro] = useState(null);
@@ -38,7 +40,7 @@ const RepLista = () => {
     useEffect(()=>{
         if (!show && filtro){
             setBuscando(true);
-            axios.get(BACKEND_SERVER + '/api/repuestos/lista/' + filtro,{
+            axios.get(BACKEND_SERVER + '/api/repuestos/filtro_repuesto_precio/' + filtro,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                   }
@@ -47,12 +49,22 @@ const RepLista = () => {
                 setRepuestos(res.data.results);
                 setBuscando(false);
                 setCount(res.data.count);
+                
             })
             .catch( err => {
                 console.log(err);
             });
         }
+        
     }, [token, filtro, show]);
+
+    useEffect(()=>{
+        if(repuestos){
+            const map = new Map(repuestos.map(pos => [pos.repuesto.id, pos.repuesto]));
+            const unicos = [...map.values()];
+            setResulRepuestos(unicos);
+        }
+    }, [repuestos]);
 
     const cambioPagina = (pag) => {
         if(pag<=0){
@@ -111,7 +123,7 @@ const RepLista = () => {
             <Row>
                 <Col>
                     <h5 className="mb-3 mt-3">Lista de Repuestos</h5>
-                    <ExcelFile filename={"ExcelExportExample"} element={<button>Exportar a Excel</button>}>
+                    {/* <ExcelFile filename={"ExcelExportExample"} element={<button>Exportar a Excel</button>}>
                         <ExcelSheet data={repuestos} name="Repuestos">
                             <ExcelColumn label="Id" value="id"/>
                             <ExcelColumn label="Nombre" value="nombre"/>
@@ -121,19 +133,17 @@ const RepLista = () => {
                             <ExcelColumn label="Crítico" value="es_critico"/>
                             <ExcelColumn label="Descatalogado" value="descatalogado"/>
                         </ExcelSheet>
-                    </ExcelFile> 
+                    </ExcelFile>  */}
                     <table>
-                        <tbody>
-                            <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
-                            <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
-                            <th>Número registros: {count}</th>
-                        </tbody>
+                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
+                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
+                        <th>Número registros: {count}</th>
                     </table>
                     <Table striped bordered hover>
                         <thead>
                             <tr>
                                 <th>Código</th>
-                                <th>Descripción Proveedor</th>
+                                <th>Descripción Repuesto</th>
                                 <th>Descripción Etiqueta</th>
                                 <th>Fabricante</th>
                                 <th>Modelo</th>
@@ -143,21 +153,21 @@ const RepLista = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {repuestos && repuestos.map( repuesto => {
+                            {result_repuestos && result_repuestos.map( re => {
                                 return (
-                                    <tr key={repuesto.id}>
-                                        <td>{repuesto.id}</td>
-                                        <td>{repuesto.nombre}</td>
-                                        <td>{repuesto.nombre_comun}</td>
-                                        <td>{repuesto.fabricante}</td>
-                                        <td>{repuesto.modelo}</td>
+                                    <tr key={re.id}>
+                                        <td>{re.id}</td>
+                                        <td>{re.nombre}</td>
+                                        <td>{re.nombre_comun}</td>
+                                        <td>{re.fabricante}</td>
+                                        <td>{re.modelo}</td>
                                         {/* <td>{repuesto.es_critico ? 'Si' : 'No'}</td>
                                         <td>{repuesto.descatalogado ? 'Si' : 'No'}</td> */}
                                         <td>
-                                            <Link title='Detalle/Modificar'to={`/repuestos/${repuesto.id}`}>
+                                            <Link title='Detalle/Modificar'to={`/repuestos/${re.id}`}>
                                                 <PencilFill className="mr-3 pencil"/>
                                             </Link>
-                                            <Trash className="mr-3 trash" onClick={event => {handleTrashClick(repuesto)}} />
+                                            <Trash className="mr-3 trash" onClick={event => {handleTrashClick(re)}} />
                                         </td>
                                     </tr>
                                 )})
@@ -168,11 +178,9 @@ const RepLista = () => {
             </Row>
             <Row>
                 <table>
-                    <tbody>
-                        <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
-                        <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
+                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
+                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
                         <th>Número registros: {count}</th>
-                    </tbody>
                 </table>
             </Row>
             <Modal show={show} onHide={handleClose} backdrop="static" keyboard={ false } animation={false}>

@@ -300,6 +300,7 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
                                                     <td>{pedidos.por_recibir}</td>
                                                     <td>{pedidos.pedido.proveedor.nombre}</td> 
                                                     <td>{invertirFecha(String(pedidos.pedido.fecha_prevista_entrega))}</td>                                     
+<<<<<<< HEAD
                                                     {!nosoyTecnico?
                                                         <td>
                                                             <Link to={`/repuestos/pedido_detalle/${pedidos.pedido.id}`}>
@@ -307,6 +308,11 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
                                                             </Link>
                                                         </td>
                                                     :null}
+=======
+                                                    <td>
+                                                        <Link to={`/repuestos/pedido_detalle/${pedidos.pedido.id}`}><PencilFill className="mr-3 pencil"/></Link>
+                                                    </td>
+>>>>>>> proveedores
                                                 </tr>
                                             )})
                                         }
