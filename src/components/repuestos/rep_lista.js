@@ -28,6 +28,7 @@ const RepLista = () => {
 
     const [datos, setDatos] = useState({
         pagina: 1,
+        total_pag:0,
     });
 
     useEffect(()=>{
@@ -65,6 +66,21 @@ const RepLista = () => {
             setResulRepuestos(unicos);
         }
     }, [repuestos]);
+
+    useEffect(()=>{
+        if(count % 20 === 0){
+            setDatos({
+                ...datos,
+                total_pag:Math.trunc(count/20),
+            })
+        }
+        else if(count % 20 !== 0){
+            setDatos({
+                ...datos,
+                total_pag:Math.trunc(count/20)+1,
+            })
+        }
+    }, [count, filtro]);
 
     const cambioPagina = (pag) => {
         if(pag<=0){
@@ -123,7 +139,7 @@ const RepLista = () => {
             <Row>
                 <Col>
                     <h5 className="mb-3 mt-3">Lista de Repuestos</h5>
-                    {/* <ExcelFile filename={"ExcelExportExample"} element={<button>Exportar a Excel</button>}>
+                    <ExcelFile filename={"ExcelExportExample"} element={<button>Exportar a Excel</button>}>
                         <ExcelSheet data={repuestos} name="Repuestos">
                             <ExcelColumn label="Id" value="id"/>
                             <ExcelColumn label="Nombre" value="nombre"/>
@@ -133,11 +149,11 @@ const RepLista = () => {
                             <ExcelColumn label="Crítico" value="es_critico"/>
                             <ExcelColumn label="Descatalogado" value="descatalogado"/>
                         </ExcelSheet>
-                    </ExcelFile>  */}
+                    </ExcelFile> 
                     <table>
                         <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
                         <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
-                        <th>Número registros: {count}</th>
+                        <th>Número páginas: {datos.pagina} / {datos.total_pag}</th>
                     </table>
                     <Table striped bordered hover>
                         <thead>
@@ -180,7 +196,7 @@ const RepLista = () => {
                 <table>
                         <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
                         <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
-                        <th>Número registros: {count}</th>
+                        <th>Número páginas: {datos.pagina} / {datos.total_pag}</th>
                 </table>
             </Row>
             <Modal show={show} onHide={handleClose} backdrop="static" keyboard={ false } animation={false}>
