@@ -97,8 +97,7 @@ const ManNotificacionesFiltro = ({actualizaFiltro}) => {
     }
 
     const desactivar_zona = () => {
-        console.log(user['tec-user'].perfil);
-        if(user['tec-user'].perfil.zona && user['tec-user'].perfil.puesto.nombre==='Operador'){    
+        if(user['tec-user'].perfil.zona){    
             return true;
         }
         else{

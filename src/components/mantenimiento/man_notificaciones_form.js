@@ -16,6 +16,7 @@ const NotificacionForm = ({nota, setNota}) => {
     const [usuarios, setUsuarios] = useState(null);
     const [destrezas, setDestrezas] = useState(null);
     const soyTecnico = user['tec-user'].perfil.destrezas.filter(s => s === 6);
+    const nosoyTecnico = user['tec-user'].perfil.puesto.nombre==='Operador'||user['tec-user'].perfil.puesto.nombre==='Mantenimiento'?true:false;
     const [empresas, setEmpresas] = useState(null);
     const [zonas, setZonas] = useState(null);
 
@@ -205,14 +206,13 @@ const NotificacionForm = ({nota, setNota}) => {
     } 
 
     const desactivar = () => {
-        if(user['tec-user'].perfil.puesto.nombre==='Operador'){
+        if(nosoyTecnico){
             return true;
         }
     }
 
     const desactivar_zona = () => {
-        console.log(user['tec-user'].perfil);
-        if(user['tec-user'].perfil.zona && user['tec-user'].perfil.puesto.nombre==='Operador'){    
+        if(user['tec-user'].perfil.zona){    
             return true;
         }
         else{

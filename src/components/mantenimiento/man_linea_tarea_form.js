@@ -9,7 +9,7 @@ import { strToArrBuffer } from 'react-data-export/dist/ExcelPlugin/utils/DataUti
 const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
     const [token] = useCookies(['tec-token']);
     const [estados, setEstados] = useState(null);
-    const [tipo_periodo, setTipoPeriodo] = useState(null);
+    const [tipo_periodos, setTipoPeriodo] = useState(null);
     const [user] = useCookies(['tec-user']);
     const [hoy] = useState(new Date);
     const nosoyTecnico = user['tec-user'].perfil.puesto.nombre==='Operador'||user['tec-user'].perfil.puesto.nombre==='Mantenimiento'?true:false;
@@ -28,6 +28,20 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
         periodo: linea_tarea.tarea.periodo?linea_tarea.tarea.periodo:0,
         tipo_periodo: linea_tarea.tarea.tipo_periodo?linea_tarea.tarea.tipo_periodo.id:'',
     });
+
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + '/api/mantenimiento/tipo_periodo/',{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setTipoPeriodo(res.data);
+        })
+        .catch( err => {
+            console.log(err); 
+        })       
+    }, [token]);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/mantenimiento/estados/',{
@@ -240,10 +254,11 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                                                     name='tipo_periodo' 
                                                     value={datos.tipo_periodo}
                                                     onChange={handleInputChange}
-                                                    placeholder="Tipo Periodo">  
+                                                    placeholder="Tipo Periodo"
+                                                    disabled={nosoyTecnico? + true: + false}>  
                                                     {datos.tipo_periodo===''?  <option key={0} value={''}>Seleccionar</option>:''}   
-                                                    {linea_tarea.tarea.tipo_periodo===null?  <option key={0} value={''}>Seleccionar</option>:''}                                               
-                                                    {tipo_periodo && tipo_periodo.map( periodo => {
+                                                    {/* {linea_tarea.tipo_periodo===null?  <option key={0} value={''}>Seleccionar</option>:''}                                                */}
+                                                    {tipo_periodos && tipo_periodos.map( periodo => {
                                                         return (
                                                         <option key={periodo.id} value={periodo.id}>
                                                             {periodo.nombre}
@@ -261,7 +276,8 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                                         <Form.Control as="select" 
                                                         value={datos.periodo}
                                                         name='periodo'
-                                                        onChange={handleInputChange}>
+                                                        onChange={handleInputChange}
+                                                        disabled={nosoyTecnico? + true: + false}>
                                                         {datos.periodo===0?  <option key={0} value={''}>Seleccionar</option>:''}
                                                         <option key={1} value={1}>1</option>
                                                         <option key={2} value={2}>2</option>

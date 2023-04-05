@@ -204,7 +204,6 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
     }
 
     const Desactivar_zona = () => {
-        console.log(user['tec-user'].perfil);
         if(user['tec-user'].perfil.zona && user['tec-user'].perfil.puesto.nombre==='Operador'){    
             return true;
         }

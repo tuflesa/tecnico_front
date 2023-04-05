@@ -84,34 +84,15 @@ const ParteForm = ({parte, setParte, op}) => {
               }
         })
         .then( res => {
-            if(soyTecnico.length===0){
-                const no_tecnico = res.data.filter( s => s.nombre !== 'Preventivo');
-                setTipoParte(no_tecnico.sort(function(a, b){
-                    if(a.nombre > b.nombre){
-                        return 1;
-                    }
-                    if(a.nombre < b.nombre){
-                        return -1;
-                    }
-                    return 0;
-                }))
-                setDatos({
-                    ...datos,
-                    tipo: 2,
-                    //fecha_prevista_inicio: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
-                });
-            }
-            else{
-                setTipoParte(res.data.sort(function(a, b){
-                    if(a.nombre > b.nombre){
-                        return 1;
-                    }
-                    if(a.nombre < b.nombre){
-                        return -1;
-                    }
-                    return 0;
-                }))
-            }
+            setTipoParte(res.data.sort(function(a, b){
+                if(a.nombre > b.nombre){
+                    return 1;
+                }
+                if(a.nombre < b.nombre){
+                    return -1;
+                }
+                return 0;
+            }));
         })
         .catch( err => {
             console.log(err); 
@@ -302,6 +283,11 @@ const ParteForm = ({parte, setParte, op}) => {
             console.log(err);
         });
     }, [token]); 
+
+    useEffect(()=>{ 
+        console.log('esto vale las lineas');
+        console.log(lineas);
+    }, [lineas]); 
     
     const updateParte = () => {
         parte.id && axios.get(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo_detalle/${parte.id}/`,{
@@ -478,6 +464,10 @@ const ParteForm = ({parte, setParte, op}) => {
     }
 
     const crearParte = (event) => {
+        if(datos.tipo==='1'&& soyTecnico.length===0){
+            alert('No tienes permisos para crear preventivos, contacte con el administrador');
+            return;
+        }
         if(datos.fecha_prevista_inicio===''){datos.fecha_prevista_inicio=null}
         if(datos.fecha_finalizacion===''){datos.fecha_finalizacion=null}
         event.preventDefault();
@@ -568,6 +558,10 @@ const ParteForm = ({parte, setParte, op}) => {
     }
 
     const actualizarDatos = (event) => {
+        if(datos.tipo==='1'&& soyTecnico.length===0){
+            alert('No tienes permisos para crear preventivos, contacte con el administrador');
+            return;
+        }
         //Si borramos la fecha, ponemos un null para que no falle el put
         if(datos.fecha_prevista_inicio===''){datos.fecha_prevista_inicio=null}
         if(datos.fecha_finalizacion===''){datos.fecha_finalizacion=null}
@@ -973,16 +967,13 @@ const ParteForm = ({parte, setParte, op}) => {
                                                 <td>{linea.tarea.especialidad_nombre}</td>
                                                 <td>{linea.tarea.observaciones}</td>
                                                 <td>{linea.tarea.observaciones_trab}</td>
-                                                {datos.tipo===1 && linea.tarea.tipo_periodo? 
-                                                    <td>{linea.tarea.tipo_periodo.nombre}</td>:''}
-                                                {datos.tipo===1?<td>{linea.tarea.periodo}</td>:''}
-                                                {(user['tec-user'].perfil.puesto.nombre !=='Operario')? 
-                                                    <td>                                            
-                                                        <Receipt className="mr-3 pencil" onClick={event =>{listarLineasTareas(linea.tarea)}}/>
-                                                        <Link to={`/mantenimiento/linea_tarea/${linea.id}`}><PencilFill className="mr-3 pencil"/></Link> 
-                                                        <Trash className="mr-3 pencil"  onClick={event =>{BorrarLinea(linea.tarea)}} />
-                                                    </td>
-                                                :null}
+                                                <td>{datos.tipo===1? linea.tarea.tipo_periodo?linea.tarea.tipo_periodo.nombre:'0':'0'}</td>
+                                                <td>{datos.tipo===1? linea.tarea.periodo?linea.tarea.periodo:'0':'0'}</td>
+                                                <td>                                            
+                                                    <Receipt className="mr-3 pencil" onClick={event =>{listarLineasTareas(linea.tarea)}}/>
+                                                    <Link to={`/mantenimiento/linea_tarea/${linea.id}`}><PencilFill className="mr-3 pencil"/></Link> 
+                                                    {nosoyTecnico?'':<Trash className="mr-3 pencil"  onClick={event =>{BorrarLinea(linea.tarea)}} />}
+                                                </td>
                                             </tr>
                                         )})
                                     }

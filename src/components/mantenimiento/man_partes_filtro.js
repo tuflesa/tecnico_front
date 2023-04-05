@@ -74,7 +74,6 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
     }, [token]); 
 
     useEffect(() => {
-        console.log(soyTecnico);
         axios.get(BACKEND_SERVER + `/api/administracion/usuarios/?perfil__empresa__id=${user['tec-user'].perfil.empresa.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
