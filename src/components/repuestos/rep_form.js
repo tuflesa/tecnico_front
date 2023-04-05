@@ -642,6 +642,8 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                             </tbody>
                                         </Table>
                                     </Col>
+                                </Form.Row>
+                                <Form.Row>
                                     {!nosoyTecnico?
                                         <Col>
                                             <Row>
@@ -658,6 +660,8 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                 <thead>
                                                     <tr>
                                                         <th>Nombre</th>
+                                                        <th>Descripción Prov</th>
+                                                        <th>Modelo Prov</th>
                                                         <th>Precio</th>
                                                         <th>Dto</th>
                                                         {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
@@ -675,7 +679,37 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                                     if(pr.proveedor===p.id){
                                                                         return(
                                                                             <option key={pr.proveedor}>
+                                                                                {pr.descripcion_proveedor}
+                                                                            </option>
+                                                                        )
+                                                                        }
+                                                                    })
+                                                                }</td>
+                                                                <td>{precio && precio.map(pr =>{
+                                                                    if(pr.proveedor===p.id){
+                                                                        return(
+                                                                            <option key={pr.proveedor}>
+                                                                                {pr.modelo_proveedor}
+                                                                            </option>
+                                                                        )
+                                                                        }
+                                                                    })
+                                                                }</td>
+                                                                <td>{precio && precio.map(pr =>{
+                                                                    if(pr.proveedor===p.id){
+                                                                        return(
+                                                                            <option key={pr.proveedor}>
                                                                                 {formatNumber(pr.precio)}
+                                                                            </option>
+                                                                        )
+                                                                        }
+                                                                    })
+                                                                }</td>
+                                                                <td>{precio && precio.map(pr =>{
+                                                                    if(pr.proveedor===p.id){
+                                                                        return(
+                                                                            <option key={pr.proveedor}>
+                                                                                {formatNumber(pr.descuento)}
                                                                             </option>
                                                                         )
                                                                         }
