@@ -9,10 +9,13 @@ const FiltroTareasTrabajador = ({actualizaFiltro}) => {
     const [user] = useCookies(['tec-user']);
 
     const [usuarios, setUsuarios] = useState(null);
+    const [estados, setEstados] = useState(null);
+
     const [datos, setDatos] = useState({
         nombre_persona:'',
         fecha_inicio_lte:'',
         fecha_inicio_gte:'',
+        estados:'',
     })
 
     const handleInputChange = (event) => {
@@ -44,10 +47,25 @@ const FiltroTareasTrabajador = ({actualizaFiltro}) => {
         });
     }, [token]);
 
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + `/api/mantenimiento/estados/`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            var estados_elegidos = res.data.filter( s => s.nombre === 'En Ejecución' || s.nombre === 'Finalizado');
+            setEstados(estados_elegidos);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
+
     useEffect(()=>{
-        const filtro = (`?trabajador=${datos.nombre_persona}&fecha_inicio__lte=${datos.fecha_inicio_lte}&fecha_inicio__gte=${datos.fecha_inicio_gte}`);
+        const filtro = (`?trabajador=${datos.nombre_persona}&linea__parte__empresa=${user['tec-user'].perfil.empresa.id}&fecha_inicio__lte=${datos.fecha_inicio_lte}&fecha_inicio__gte=${datos.fecha_inicio_gte}&linea__estado=${datos.estados}`);
         actualizaFiltro(filtro);
-    },[ datos.nombre_persona, datos.fecha_inicio_gte, datos.fecha_inicio_lte, token]);
+    },[ datos.nombre_persona, datos.fecha_inicio_gte, datos.fecha_inicio_lte, datos.estados, token]);
 
     
 
@@ -69,6 +87,25 @@ const FiltroTareasTrabajador = ({actualizaFiltro}) => {
                                             return (
                                             <option key={usuario.id} value={usuario.id}>
                                                 {usuario.get_full_name}
+                                            </option>
+                                            )
+                                        })}
+                        </Form.Control>
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="estados">
+                            <Form.Label>Estado del trabajo:</Form.Label>
+                            <Form.Control as="select"  
+                                        name='estados' 
+                                        value={datos.estados}
+                                        onChange={handleInputChange}
+                                        placeholder="Estados">
+                                        <option key={0} value={''}>Todas</option>    
+                                        {estados && estados.map( estado => {
+                                            return (
+                                            <option key={estado.id} value={estado.id}>
+                                                {estado.nombre}
                                             </option>
                                             )
                                         })}
