@@ -3,6 +3,7 @@ import { Button, Modal, Form, Col, Row } from 'react-bootstrap';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
+import { relativeTimeRounding } from 'moment';
 
 const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repuesto_id, updateRepuesto, repuesto_nombre, repuesto_modelo, setShowProveedor}) => {
     const [token] = useCookies(['tec-token']);
@@ -61,7 +62,11 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
     }
 
     const handlerGuardar = () => {
+        console.log('datos.proveedor');
+        console.log(datos.proveedor);
         const newProveedores = [...listaAsignados, parseInt(datos.proveedor)];
+        console.log('nueveos proveedores');
+        console.log(newProveedores);
         axios.patch(BACKEND_SERVER + `/api/repuestos/lista/${repuesto_id}/`, {
             proveedores: newProveedores
         }, {
@@ -70,15 +75,8 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
               }     
         })
         .then( res => { 
-                updateRepuesto();
-                setShowProveedor(false);
-            }
-        )
-        .catch(err => { console.log(err);});
-        //crear tabla de precios para el articulo del proveedor
-        for(var x=newProveedores.length-1; x<newProveedores.length; x++){
             axios.post(BACKEND_SERVER + `/api/repuestos/precio/`, {
-                proveedor: newProveedores[x],
+                proveedor: datos.proveedor,
                 repuesto: repuesto_id,
                 precio: datos.precio,
                 descuento: datos.descuento,
@@ -87,14 +85,21 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
             }, {
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
-                  }     
+                    }     
             })
             .then( res => { 
+                    console.log('el res.data del post de precio');
+                    console.log(res.data);
                     handlerCancelar();
                 }
             )
             .catch(err => { console.log(err);});
-        }
+            updateRepuesto();
+            setShowProveedor(false);
+        })
+        .catch(err => { console.log(err);});
+        //crear tabla de precios para el articulo del proveedor
+        
     }
 
     return (
