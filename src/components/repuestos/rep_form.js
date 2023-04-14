@@ -11,6 +11,7 @@ import EquipoForm from './rep_equipo';
 import ProveedorForm from './rep_proveedor';
 import RepPorAlmacen from './rep_por_almacen';
 import { useBarcode } from 'react-barcodes';
+import RepPrecioEdit from './rep_precio_editar';
 
 const RepuestoForm = ({repuesto, setRepuesto}) => {
     const [token] = useCookies(['tec-token']);
@@ -39,6 +40,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     const [show_stock, setShowStock] = useState(false);
     const [show_equipo, setShowEquipo] = useState(false);
     const [show_proveedor, setShowProveedor] = useState(false);
+    const [show_modificar_proveedor, setShowModificarProveedor] = useState(false);
     const [stock_editar, setStockEditar] = useState(null);
     const [stock_minimo_editar, setStockMinimoEditar] = useState(null);
     const [empresas, setEmpresas] = useState(null);
@@ -46,6 +48,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     const [stock_empresa, setStockEmpresa] = useState(null);
     const [show_listalmacen, setShowListAlmacen] = useState(null);
     const [almacenes_empresa, setAlmacenesEmpresa] = useState(null);
+    const [datos_precio, setDatosPrecio] = useState(null);
     
     
     useEffect(()=>{
@@ -279,10 +282,24 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         setShowProveedor(true);
     }
 
+    const actualizarAddProveedor = (p) => {
+        setDatosPrecio(p);
+        setShowModificarProveedor(true);
+        
+    }
+
     const cerrarAddProveedor = () => {
         updateRepuesto();
         if(datos.proveedores.length>0 || setShowProveedor===false){     
             setShowProveedor(false);
+            updateRepuesto();
+        }
+    }
+
+    const cerrarModificarProveedor = () => {
+        updateRepuesto();
+        if(datos.proveedores.length>0 || setShowProveedor===false){     
+            setShowModificarProveedor(false);
             updateRepuesto();
         }
     }
@@ -693,7 +710,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                             {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
                                                                 <td>
                                                                     <Trash className="mr-3 pencil"  onClick={event => {handlerBorrarProveedor(p.proveedor.id)}} />
-                                                                    <PencilFill className="mr-3 pencil"  onClick={event => {handlerBorrarProveedor(p.proveedor.id)}} />
+                                                                    <PencilFill className="mr-3 pencil"  onClick={event => {actualizarAddProveedor(p)}} />
                                                                 </td>
                                                             :null}
                                                         </tr>
@@ -734,8 +751,13 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                            updateRepuesto = {updateRepuesto}
                            setShowProveedor = {setShowProveedor}/>
 
-            {/* <ModificarProveedor show={show_modificar_proveedor}
-                           handleCloseModificarProveedor={cerrarAddProveedor}/> */}
+            {/* {datos_precio? */}
+                <RepPrecioEdit show_modificar={show_modificar_proveedor}
+                           handleCloseModificarProveedor = {cerrarModificarProveedor}
+                           datos_precio = {datos_precio}
+                           updateRepuesto = {updateRepuesto}
+                           setShowModificarProveedor = {setShowModificarProveedor}/>
+            {/* :null} */}
 
             <RepPorAlmacen  show={show_listalmacen}
                             cerrarListAlmacen={cerrarListAlmacen}

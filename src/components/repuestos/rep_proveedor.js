@@ -62,11 +62,7 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
     }
 
     const handlerGuardar = () => {
-        console.log('datos.proveedor');
-        console.log(datos.proveedor);
         const newProveedores = [...listaAsignados, parseInt(datos.proveedor)];
-        console.log('nueveos proveedores');
-        console.log(newProveedores);
         axios.patch(BACKEND_SERVER + `/api/repuestos/lista/${repuesto_id}/`, {
             proveedores: newProveedores
         }, {
