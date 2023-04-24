@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Form, Button, Table, Modal } from 'react-bootstrap';
-import { PlusCircle, Receipt } from 'react-bootstrap-icons';
-import { Link } from 'react-router-dom';
+import { Container, Row, Col, Form, Button, Modal, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
@@ -19,6 +17,7 @@ const NotificacionForm = ({nota, setNota}) => {
     const nosoyTecnico = user['tec-user'].perfil.puesto.nombre==='Operador'||user['tec-user'].perfil.puesto.nombre==='Mantenimiento'?true:false;
     const [empresas, setEmpresas] = useState(null);
     const [zonas, setZonas] = useState(null);
+    const [reclamaciones, setReclamaciones] = useState(null);
 
     const [datos, setDatos] = useState({
         id: nota.id? nota.id : null,
@@ -83,6 +82,20 @@ const NotificacionForm = ({nota, setNota}) => {
             console.log(err);
         });
     }, [token, datos.empresa]);
+
+    useEffect(() => {
+        nota && axios.get(BACKEND_SERVER + `/api/mantenimiento/reclamos/?notificacion=${nota.id}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setReclamaciones(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token, nota]);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + `/api/mantenimiento/especialidades/`,{
@@ -203,6 +216,31 @@ const NotificacionForm = ({nota, setNota}) => {
             setShowError(true);
             console.log(err);
         })
+    } 
+
+    const reclamar_nota = (event) => {
+        var ya_reclame = reclamaciones.filter (r=>r.trabajador===user['tec-user'].perfil.usuario&&r.fecha===hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0'));
+        event.preventDefault();
+        if(ya_reclame.length===0){
+            axios.post(BACKEND_SERVER + `/api/mantenimiento/reclamos/`, {
+                notificacion: nota.id,
+                fecha: hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0'),
+                trabajador: user['tec-user'].perfil.usuario,
+            }, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                    }     
+            })
+            .then( res => { 
+                alert('Se ha notificado el reclamo de esta notificación, gracias.');
+            })
+            .catch(err => { 
+                console.log(err);
+            })
+        }
+        else{
+            alert('Ya has reclamado esta notificación, gracias');
+        }
     } 
 
     const desactivar = () => {
@@ -449,6 +487,8 @@ const NotificacionForm = ({nota, setNota}) => {
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={crearNota}>Guardar</Button>
                             }
                             <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar</Button>
+                            <Button variant="danger" type="submit" className={'mx-2'} onClick={reclamar_nota}>Reclamar</Button>
+                            <Button variant="danger" type="submit" className="mr-3 pencil" onClick={''}>R /{reclamaciones? reclamaciones.length: 0}</Button>
                         </Form.Row>
                     </Form>
                 </Col>
@@ -459,9 +499,7 @@ const NotificacionForm = ({nota, setNota}) => {
                 </Modal.Header>
                 <Modal.Body>Error al guardar formulario. Revise que todos los campos con asterisco esten cumplimentados</Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={handleCloseError}>
-                        Cerrar
-                    </Button>
+                    <Button variant="secondary" onClick={handleCloseError}>Cerrar</Button>
                 </Modal.Footer>
             </Modal>
         </Container>

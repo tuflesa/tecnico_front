@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
-import { Container, Row, Col, Table } from 'react-bootstrap';
+import { Container, Row, Col, Table, Button} from 'react-bootstrap';
 import { Trash, PencilFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import ManNotificacionesFiltro from './man_notificaciones_filtro';
@@ -124,10 +124,8 @@ const ManNotificacionesLista = () => {
                                         <td>{nota.revisado?'Si':'No'}</td>
                                         <td>{nota.descartado?'Si':'No'}</td>
                                         <td>{nota.finalizado?'Si':'No'}</td>
-                                        <td>
-                                            <Link to={`/mantenimiento/notificacion/${nota.id}`}>
-                                                <PencilFill className="mr-3 pencil"/>                                                
-                                            </Link>
+                                        <td style={{width:115}}>
+                                            <Link to={`/mantenimiento/notificacion/${nota.id}`}><PencilFill className="mr-3 pencil"/></Link>
                                             {/* <Trash className="trash"  onClick={event =>{BorrarNota(nota)}} />  */}
                                         </td>
                                     </tr>
