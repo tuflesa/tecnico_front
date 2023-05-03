@@ -90,8 +90,7 @@ const NotificacionForm = ({nota, setNota}) => {
     }, [token, datos.empresa]);
 
     useEffect(() => {
-        console.log('estamos en reclamaciones actualizando');
-        nota && axios.get(BACKEND_SERVER + `/api/mantenimiento/reclamos/?notificacion=${nota.id}`,{
+        nota && axios.get(BACKEND_SERVER + `/api/mantenimiento/reclamos_detalle/?notificacion=${nota.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -227,7 +226,7 @@ const NotificacionForm = ({nota, setNota}) => {
     } 
 
     const reclamar_nota = (event) => {
-        var ya_reclame = reclamaciones.filter (r=>r.trabajador===user['tec-user'].perfil.usuario&&r.fecha===hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0'));
+        var ya_reclame = reclamaciones.filter (r=>r.fecha===hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0'));
         event.preventDefault();
         if(ya_reclame.length===0){
             axios.post(BACKEND_SERVER + `/api/mantenimiento/reclamos/`, {
@@ -248,7 +247,7 @@ const NotificacionForm = ({nota, setNota}) => {
             })
         }
         else{
-            alert('Ya has reclamado esta notificación, gracias');
+            alert('Con fecha de hoy, ya se ha reclamado esta notificación, gracias');
         }
     } 
 
@@ -531,17 +530,19 @@ const NotificacionForm = ({nota, setNota}) => {
                                         <th>Trabajador</th>
                                         <th>Fecha</th>
                                     </tr>
-                                </thead>                               
+                                </thead> 
+                                {reclamaciones?                              
                                 <tbody>                                    
                                     {reclamaciones && reclamaciones.map(r =>{
                                         return(
                                             <tr key={r.id}>
-                                                <td>{r.trabajador.get_full_name}</td>
-                                                <td>{invertirFecha(String(r.fecha))}</td>
+                                                <td>{r.trabajador?r.trabajador.get_full_name:null}</td>
+                                                <td>{r.fecha?invertirFecha(String(r.fecha)):null}</td>
                                             </tr>
                                         )
                                     })}                                
                                 </tbody>
+                                :null}
                             </Table>
                         </Col>
                     </Row>
