@@ -36,6 +36,7 @@ const ManLineasListado = () => {
     const [actualizar, setActualizar] = useState('');
     const [count, setCount] = useState(null);
     const [pagTotal, setPagTotal] = useState(null);
+    const [abrirFiltro, setabrirFiltro] = useState(false);
 
     const actualizaFiltro = (str, act) => {   
         setActivos(act)
@@ -233,14 +234,41 @@ const ManLineasListado = () => {
         const filtro3 = filtro + filtro2;
         actualizaFiltro(filtro3, activos);
     }
+
+    const abroFiltro = () => {
+        setabrirFiltro(!abrirFiltro);
+    }
     
     return (
-        <Container className='mt-5'>     
-            <Row>
-                <Col>
-                    <ManLineasFiltro actualizaFiltro={actualizaFiltro}/>
-                </Col>
-            </ Row>
+        <Container className='mt-3'>
+            <button type="button" className='mt-5' onClick={event => {abroFiltro()}}>Ver Filtros</button>
+            {abrirFiltro?    
+                <Row>
+                    <Col>
+                        <ManLineasFiltro actualizaFiltro={actualizaFiltro}/>
+                    </Col>
+                </ Row>
+            :null}
+            {abrirFiltro? 
+                <Row> 
+                    <Col><h5>{lineas?lineas.prioridad:''}</h5></Col>
+                    <ExcelFile filename={"ExcelExportExample"} element={<button>Exportar a Excel</button>}>
+                        <ExcelSheet data={lineas} name="lineas">
+                            <ExcelColumn label="Prioridad" value="priori"/>
+                            <ExcelColumn label="Parte" value="nom_parte"/>
+                            <ExcelColumn label="Observaciones Parte" value="obparte"/>
+                            <ExcelColumn label="Tarea" value="nom_tarea"/>
+                            <ExcelColumn label="Observaciones Tarea" value="obtarea"/>
+                            <ExcelColumn label="Observaciones Tarea Mantenimiento" value="obtareaT"/>
+                            <ExcelColumn label="Tipo" value="parte_tip"/>
+                            <ExcelColumn label="Especialidad" value="especial"/>
+                            <ExcelColumn label="Equipo" value="equipoT"/>  
+                            <ExcelColumn label="Fecha Planificación" value="fecha_plani"/>
+                            <ExcelColumn label="Fecha Inicio" value="fecha_ini"/>        
+                        </ExcelSheet>
+                    </ExcelFile> 
+                </Row>
+            :null}
             <table>
                 <tbody>
                     <tr>
@@ -250,24 +278,6 @@ const ManLineasListado = () => {
                     </tr>
                 </tbody>
             </table> 
-            <Row> 
-                <Col><h5>{lineas?lineas.prioridad:''}</h5></Col>
-                <ExcelFile filename={"ExcelExportExample"} element={<button>Exportar a Excel</button>}>
-                    <ExcelSheet data={lineas} name="lineas">
-                        <ExcelColumn label="Prioridad" value="priori"/>
-                        <ExcelColumn label="Parte" value="nom_parte"/>
-                        <ExcelColumn label="Observaciones Parte" value="obparte"/>
-                        <ExcelColumn label="Tarea" value="nom_tarea"/>
-                        <ExcelColumn label="Observaciones Tarea" value="obtarea"/>
-                        <ExcelColumn label="Observaciones Tarea Mantenimiento" value="obtareaT"/>
-                        <ExcelColumn label="Tipo" value="parte_tip"/>
-                        <ExcelColumn label="Especialidad" value="especial"/>
-                        <ExcelColumn label="Equipo" value="equipoT"/>  
-                        <ExcelColumn label="Fecha Planificación" value="fecha_plani"/>
-                        <ExcelColumn label="Fecha Inicio" value="fecha_ini"/>        
-                    </ExcelSheet>
-                </ExcelFile> 
-            </Row>
             <Row>                
                 <Col>
                     <h5 className="mb-3 mt-3">Listado de Trabajos</h5>
@@ -331,6 +341,7 @@ const ManLineasListado = () => {
                     </tr>
                 </tbody>
             </table>
+            
             <ListaDePersonal    show={show}
                                 linea_id ={linea_id}
                                 handlerClose={handlerClose}

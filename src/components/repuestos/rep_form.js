@@ -4,13 +4,14 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
-import { PlusCircle, Trash, GeoAltFill, Eye} from 'react-bootstrap-icons';
+import { PlusCircle, Trash, GeoAltFill, PencilFill} from 'react-bootstrap-icons';
 import './repuestos.css';
 import StockMinimoForm from './rep_stock_minimo';
 import EquipoForm from './rep_equipo';
 import ProveedorForm from './rep_proveedor';
 import RepPorAlmacen from './rep_por_almacen';
 import { useBarcode } from 'react-barcodes';
+import RepPrecioEdit from './rep_precio_editar';
 
 const RepuestoForm = ({repuesto, setRepuesto}) => {
     const [token] = useCookies(['tec-token']);
@@ -39,6 +40,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     const [show_stock, setShowStock] = useState(false);
     const [show_equipo, setShowEquipo] = useState(false);
     const [show_proveedor, setShowProveedor] = useState(false);
+    const [show_modificar_proveedor, setShowModificarProveedor] = useState(false);
     const [stock_editar, setStockEditar] = useState(null);
     const [stock_minimo_editar, setStockMinimoEditar] = useState(null);
     const [empresas, setEmpresas] = useState(null);
@@ -46,6 +48,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     const [stock_empresa, setStockEmpresa] = useState(null);
     const [show_listalmacen, setShowListAlmacen] = useState(null);
     const [almacenes_empresa, setAlmacenesEmpresa] = useState(null);
+    const [datos_precio, setDatosPrecio] = useState(null);
     
     
     useEffect(()=>{
@@ -87,7 +90,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     }, [token]);
 
     useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/repuestos/precio/?repuesto=${repuesto.id}`,{
+        axios.get(BACKEND_SERVER + `/api/repuestos/repuesto_precio/?repuesto=${repuesto.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -160,7 +163,17 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         })
         .then( res => { 
             setRepuesto(res.data);
-            //setShowHeGuardado(true);
+            axios.get(BACKEND_SERVER + `/api/repuestos/repuesto_precio/?repuesto__id=${repuesto.id}`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                  }
+            })
+            .then( res => {
+                setPrecio(res.data);
+            })
+            .catch( err => {
+                console.log(err);
+            });
         })
         .catch(err => { console.log(err);})
     }
@@ -269,10 +282,24 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         setShowProveedor(true);
     }
 
+    const actualizarAddProveedor = (p) => {
+        setDatosPrecio(p);
+        setShowModificarProveedor(true);
+        
+    }
+
     const cerrarAddProveedor = () => {
         updateRepuesto();
         if(datos.proveedores.length>0 || setShowProveedor===false){     
             setShowProveedor(false);
+            updateRepuesto();
+        }
+    }
+
+    const cerrarModificarProveedor = () => {
+        updateRepuesto();
+        if(datos.proveedores.length>0 || setShowProveedor===false){     
+            setShowModificarProveedor(false);
             updateRepuesto();
         }
     }
@@ -348,7 +375,8 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                         }   
                     })
                     .then( res => { 
-                            console.log(res.data);
+                            alert('Borrado proveedor');
+                            updateRepuesto();
                         }
                     )
                     .catch(err => { console.log(err);});
@@ -671,53 +699,18 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {datos.proveedores && datos.proveedores.map( p => {
+                                                    {precio && precio.map( p => {
                                                         return (
                                                             <tr key={p.id}>
-                                                                <td>{p.nombre}</td>
-                                                                <td>{precio && precio.map(pr =>{
-                                                                    if(pr.proveedor===p.id){
-                                                                        return(
-                                                                            <option key={pr.proveedor}>
-                                                                                {pr.descripcion_proveedor}
-                                                                            </option>
-                                                                        )
-                                                                        }
-                                                                    })
-                                                                }</td>
-                                                                <td>{precio && precio.map(pr =>{
-                                                                    if(pr.proveedor===p.id){
-                                                                        return(
-                                                                            <option key={pr.proveedor}>
-                                                                                {pr.modelo_proveedor}
-                                                                            </option>
-                                                                        )
-                                                                        }
-                                                                    })
-                                                                }</td>
-                                                                <td>{precio && precio.map(pr =>{
-                                                                    if(pr.proveedor===p.id){
-                                                                        return(
-                                                                            <option key={pr.proveedor}>
-                                                                                {formatNumber(pr.precio)}
-                                                                            </option>
-                                                                        )
-                                                                        }
-                                                                    })
-                                                                }</td>
-                                                                <td>{precio && precio.map(pr =>{
-                                                                    if(pr.proveedor===p.id){
-                                                                        return(
-                                                                            <option key={pr.proveedor}>
-                                                                                {formatNumber(pr.descuento)}
-                                                                            </option>
-                                                                        )
-                                                                        }
-                                                                    })
-                                                                }</td>
+                                                                <td>{p.proveedor.nombre}</td>
+                                                                <td>{p.descripcion_proveedor}</td>
+                                                                <td>{p.modelo_proveedor}</td>
+                                                                <td>{p.precio}</td>
+                                                                <td>{p.descuento}</td>
                                                             {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
                                                                 <td>
-                                                                    <Trash className="mr-3 pencil"  onClick={event => {handlerBorrarProveedor(p.id)}} />
+                                                                    <Trash className="mr-3 pencil"  onClick={event => {handlerBorrarProveedor(p.proveedor.id)}} />
+                                                                    <PencilFill className="mr-3 pencil"  onClick={event => {actualizarAddProveedor(p)}} />
                                                                 </td>
                                                             :null}
                                                         </tr>
@@ -757,6 +750,14 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                            repuesto_modelo={datos.modelo}
                            updateRepuesto = {updateRepuesto}
                            setShowProveedor = {setShowProveedor}/>
+
+            {/* {datos_precio? */}
+                <RepPrecioEdit show_modificar={show_modificar_proveedor}
+                           handleCloseModificarProveedor = {cerrarModificarProveedor}
+                           datos_precio = {datos_precio}
+                           updateRepuesto = {updateRepuesto}
+                           setShowModificarProveedor = {setShowModificarProveedor}/>
+            {/* :null} */}
 
             <RepPorAlmacen  show={show_listalmacen}
                             cerrarListAlmacen={cerrarListAlmacen}
