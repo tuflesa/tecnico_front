@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Form, Button, Table, Modal } from 'react-bootstrap';
-import { PlusCircle, Receipt } from 'react-bootstrap-icons';
-import { Link } from 'react-router-dom';
+import { Container, Row, Col, Form, Button, Modal, Table } from 'react-bootstrap';
+import { Trash } from 'react-bootstrap-icons';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
+import {invertirFecha} from '../utilidades/funciones_fecha';
 
 const NotificacionForm = ({nota, setNota}) => {
     const [token] = useCookies(['tec-token']);
@@ -12,13 +12,18 @@ const NotificacionForm = ({nota, setNota}) => {
 
     const [hoy] = useState(new Date);
     const [show_error, setShowError] = useState(false);
+    const [show, setShow] = useState(false);
     const handleCloseError = () => setShowError(false);
+    const handleClose = () => setShow(false);
     const [usuarios, setUsuarios] = useState(null);
     const [destrezas, setDestrezas] = useState(null);
     const soyTecnico = user['tec-user'].perfil.destrezas.filter(s => s === 6);
     const nosoyTecnico = user['tec-user'].perfil.puesto.nombre==='Operador'||user['tec-user'].perfil.puesto.nombre==='Mantenimiento'?true:false;
     const [empresas, setEmpresas] = useState(null);
     const [zonas, setZonas] = useState(null);
+    const [reclamaciones, setReclamaciones] = useState(null);
+    const [act_reclamaciones, setActReclamaciones] = useState(false);
+    
 
     const [datos, setDatos] = useState({
         id: nota.id? nota.id : null,
@@ -83,6 +88,21 @@ const NotificacionForm = ({nota, setNota}) => {
             console.log(err);
         });
     }, [token, datos.empresa]);
+
+    useEffect(() => {
+        nota && axios.get(BACKEND_SERVER + `/api/mantenimiento/reclamos_detalle/?notificacion=${nota.id}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setReclamaciones(res.data);
+            setActReclamaciones(false);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token, nota, act_reclamaciones]);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + `/api/mantenimiento/especialidades/`,{
@@ -205,6 +225,32 @@ const NotificacionForm = ({nota, setNota}) => {
         })
     } 
 
+    const reclamar_nota = (event) => {
+        var ya_reclame = reclamaciones.filter (r=>r.fecha===hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0'));
+        event.preventDefault();
+        if(ya_reclame.length===0){
+            axios.post(BACKEND_SERVER + `/api/mantenimiento/reclamos/`, {
+                notificacion: nota.id,
+                fecha: hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0'),
+                trabajador: user['tec-user'].perfil.usuario,
+            }, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                    }     
+            })
+            .then( res => { 
+                alert('Se ha notificado el reclamo de esta notificación, gracias.');
+                setActReclamaciones(true);
+            })
+            .catch(err => { 
+                console.log(err);
+            })
+        }
+        else{
+            alert('Con fecha de hoy, ya se ha reclamado esta notificación, gracias');
+        }
+    } 
+
     const desactivar = () => {
         if(nosoyTecnico){
             return true;
@@ -218,6 +264,10 @@ const NotificacionForm = ({nota, setNota}) => {
         else{
             return false;
         }
+    }
+
+    const listado_reclamaciones = ()=>{
+        setShow(true);
     }
 
     return(
@@ -449,18 +499,57 @@ const NotificacionForm = ({nota, setNota}) => {
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={crearNota}>Guardar</Button>
                             }
                             <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar</Button>
+                            <Button variant="danger" type="submit" className={'mx-2'} onClick={reclamar_nota}>Reclamar</Button>
+                            <Button variant="danger" className="mr-3 trash" onClick={event => {listado_reclamaciones()}}>R / {reclamaciones?reclamaciones.length:0}</Button>
+                            {/* <Trash className="mr-3 trash" onClick={event => {listado_reclamaciones()}} /> */}
                         </Form.Row>
                     </Form>
                 </Col>
             </Row>
+            
             <Modal show={show_error} onHide={handleCloseError} backdrop="static" keyboard={ false } animation={false}>
                 <Modal.Header closeButton>
                     <Modal.Title>Error</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>Error al guardar formulario. Revise que todos los campos con asterisco esten cumplimentados</Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={handleCloseError}>
-                        Cerrar
+                    <Button variant="secondary" onClick={handleCloseError}>Cerrar</Button>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal show={show} onHide={handleClose} backdrop="static" keyboard={ false } animation={false}>
+                <Modal.Header>
+                    <Modal.Title>Listado de reclamos:</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Row>
+                        <Col>
+                            <Table striped bordered hover>
+                                <thead>
+                                    <tr>
+                                        <th>Trabajador</th>
+                                        <th>Fecha</th>
+                                    </tr>
+                                </thead> 
+                                {reclamaciones?                              
+                                <tbody>                                    
+                                    {reclamaciones && reclamaciones.map(r =>{
+                                        return(
+                                            <tr key={r.id}>
+                                                <td>{r.trabajador?r.trabajador.get_full_name:null}</td>
+                                                <td>{r.fecha?invertirFecha(String(r.fecha)):null}</td>
+                                            </tr>
+                                        )
+                                    })}                                
+                                </tbody>
+                                :null}
+                            </Table>
+                        </Col>
+                    </Row>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="waring" onClick={handleClose}>
+                        Cancelar
                     </Button>
                 </Modal.Footer>
             </Modal>
