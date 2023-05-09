@@ -174,7 +174,7 @@ const Programadores = () => {
         });
     }
 
-    useEffect(()=>{
+    /* useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/repuestos/repuesto_precio/`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -184,7 +184,7 @@ const Programadores = () => {
             setRepuestos(res.data);
         })
         .catch(err => { console.log(err);})
-    },[token]);
+    },[token]); */
 
     return (
         <Container className='mt-5'>
@@ -201,9 +201,9 @@ const Programadores = () => {
                         </thead>
                         <tbody>
                             {/* <th><Button variant="info" onClick={event =>{CrearListado()}}>Crear lista</Button></th> */}
-                            <th><Button variant="info" onClick={event =>{copia_descripcion()}}>Copiar datos en articulo</Button></th>
-                            <th><Button variant="info" onClick={event =>{copia_descripcion_linea_pedido()}}>Copiar datos a la linea de pedido</Button></th>
-                            <th><Button variant="info" onClick={event =>{RepasarListado()}}>Repasar lista de precios</Button></th>
+                            <th><Button variant="info" onClick={event =>{RepasarListado()}}>1- Repasar lista de precios</Button></th>
+                            <th><Button variant="info" onClick={event =>{copia_descripcion()}}>2- Copiar DESCRIPCION Y MODELO en precio</Button></th>
+                            <th><Button variant="info" onClick={event =>{copia_descripcion_linea_pedido()}}>3- Copiar datos a la linea de pedido</Button></th>
                         </tbody>
                     </Table>
                 </Col>
