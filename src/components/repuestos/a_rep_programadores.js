@@ -18,8 +18,8 @@ const Programadores = () => {
     const [lista_repuestos, setListaRepuestos] = useState(null);
     const [lista_precios, setListaPrecios] = useState(null);
     const [repuestos, setRepuestos] = useState(null);
-    const generico_id = 32;
-    //const generico_id = 273;
+    //const generico_id = 32;
+    const generico_id = 273;
     
     var numero = 2;
     var SiEsta = '';
