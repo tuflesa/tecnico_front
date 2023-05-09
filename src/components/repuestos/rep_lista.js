@@ -13,7 +13,7 @@ const RepLista = () => {
     const [token] = useCookies(['tec-token']);
     //const [user] = useCookies(['tec-user']);
     const [repuestos, setRepuestos] = useState(null);
-    const [result_repuestos, setResulRepuestos] = useState(null);
+    //const [result_repuestos, setResulRepuestos] = useState(null);
     const [show, setShow] = useState(false);
     const [repuestoBorrar, setRepuestoBorrar] = useState(null);
     const [filtro, setFiltro] = useState(null);
@@ -30,7 +30,6 @@ const RepLista = () => {
         pagina: 1,
         total_pag:0,
     });
-
     useEffect(()=>{
         filtroPag = (`&page=${datos.pagina}`);
         if (!buscando){
@@ -41,7 +40,7 @@ const RepLista = () => {
     useEffect(()=>{
         if (!show && filtro){
             setBuscando(true);
-            axios.get(BACKEND_SERVER + '/api/repuestos/filtro_repuesto_precio/' + filtro,{
+            axios.get(BACKEND_SERVER + '/api/repuestos/lista/' + filtro,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                   }
@@ -59,13 +58,13 @@ const RepLista = () => {
         
     }, [token, filtro, show]);
 
-    useEffect(()=>{
+    /* useEffect(()=>{
         if(repuestos){
             const map = new Map(repuestos.map(pos => [pos.repuesto.id, pos.repuesto]));
             const unicos = [...map.values()];
             setResulRepuestos(unicos);
         }
-    }, [repuestos]);
+    }, [repuestos]); */
 
     useEffect(()=>{
         if(count % 20 === 0){
@@ -169,7 +168,8 @@ const RepLista = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {result_repuestos && result_repuestos.map( re => {
+                            {/* {result_repuestos && result_repuestos.map( re => { */}
+                            {repuestos && repuestos.map( re => {
                                 return (
                                     <tr key={re.id}>
                                         <td>{re.id}</td>

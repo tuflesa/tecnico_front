@@ -63,6 +63,7 @@ const Programadores = () => {
             }
         })
         .then( res => {
+            console.log(res.data);
             setListaRepuestos(res.data);
             axios.get(BACKEND_SERVER + `/api/repuestos/repuesto_precio/`,{
                 headers: {
@@ -106,6 +107,20 @@ const Programadores = () => {
                         }
                     }
                     else{
+                        /* if(!r.data[x].descripcion_proveedor){
+                            axios.patch(BACKEND_SERVER + `/api/repuestos/precio/${r.data[x].id}`, {
+                                descripcion_proveedor: res.data[x].nombre,
+                                modelo_proveedor: res.data[x].modelo,
+                            }, {
+                                headers: {
+                                    'Authorization': `token ${token['tec-token']}`
+                                }     
+                            })
+                            .then( res => { 
+                                console.log('patch realizado en id: ' + r.data[x].id);
+                            })
+                            .catch(err => { console.log(err);})
+                        } */
                         SiEsta='';
                     }
                 }
@@ -126,20 +141,24 @@ const Programadores = () => {
             }
         })
         .then( res => {
+            console.log('lo que recojo en el respuesto_precio');
+            console.log(res.data);
             setListaRepuestos(res.data);
             for(var y=0; y<res.data.length; y++){
-                axios.patch(BACKEND_SERVER + `/api/repuestos/precio/${res.data[y].id}/`, {
-                    descripcion_proveedor: res.data[y].repuesto.nombre,
-                    modelo_proveedor: res.data[y].repuesto.modelo,
-                }, {
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`
-                      }     
-                })
-                .then( r => { 
-                    console.log('copiado descripción y modelo');
-                })
-                .catch(err => { console.log(err);})
+                if(!res.data[y].descripcion_proveedor){
+                    axios.patch(BACKEND_SERVER + `/api/repuestos/precio/${res.data[y].id}/`, {
+                        descripcion_proveedor: res.data[y].repuesto.nombre,
+                        modelo_proveedor: res.data[y].repuesto.modelo,
+                    }, {
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                        }     
+                    })
+                    .then( r => { 
+                        console.log('copiado descripción y modelo');
+                    })
+                    .catch(err => { console.log(err);})
+                }
             }
         })
         .catch( err => {

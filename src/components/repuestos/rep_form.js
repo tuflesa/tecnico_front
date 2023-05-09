@@ -628,49 +628,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                             </React.Fragment> : null}
 
                         {repuesto.id ?
-                            <React.Fragment>                              
-                                <Form.Row>
-                                    <Col>
-                                        <Row>
-                                            <Col>
-                                                <h5 className="pb-3 pt-1 mt-2">Es repuesto de:</h5>
-                                            </Col>
-                                            <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
-                                                {!nosoyTecnico?
-                                                    <PlusCircle className="plus mr-2" size={30} onClick={abrirAddEquipo}/>
-                                                :null}
-                                            </Col>
-                                        </Row>
-                                        <Table striped bordered hover>
-                                            <thead>
-                                                <tr>
-                                                    <th>Zona</th>
-                                                    <th>Seccion</th>
-                                                    <th>Equipo</th>
-                                                    {!nosoyTecnico?
-                                                        <th>Acciones</th>
-                                                    :null}
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {datos.equipos && datos.equipos.map( equipo => {
-                                                    return (
-                                                        <tr key={equipo.id}>
-                                                            <td>{equipo.siglas_zona}</td>
-                                                            <td>{equipo.seccion_nombre}</td>
-                                                            <td>{equipo.nombre}</td>
-                                                            {!nosoyTecnico?
-                                                                <td>
-                                                                    <Trash className="trash"  onClick={event => {handlerBorrarEquipo(equipo.id)}} />
-                                                                </td>
-                                                            :null}
-                                                        </tr>
-                                                    )})
-                                                }
-                                            </tbody>
-                                        </Table>
-                                    </Col>
-                                </Form.Row>
+                            <React.Fragment> 
                                 <Form.Row>
                                     {!nosoyTecnico?
                                         <Col>
@@ -720,7 +678,50 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                             </Table>
                                         </Col>
                                     :null}
+                                </Form.Row>                             
+                                <Form.Row>
+                                    <Col>
+                                        <Row>
+                                            <Col>
+                                                <h5 className="pb-3 pt-1 mt-2">Es repuesto de:</h5>
+                                            </Col>
+                                            <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
+                                                {!nosoyTecnico?
+                                                    <PlusCircle className="plus mr-2" size={30} onClick={abrirAddEquipo}/>
+                                                :null}
+                                            </Col>
+                                        </Row>
+                                        <Table striped bordered hover>
+                                            <thead>
+                                                <tr>
+                                                    <th>Zona</th>
+                                                    <th>Seccion</th>
+                                                    <th>Equipo</th>
+                                                    {!nosoyTecnico?
+                                                        <th>Acciones</th>
+                                                    :null}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {datos.equipos && datos.equipos.map( equipo => {
+                                                    return (
+                                                        <tr key={equipo.id}>
+                                                            <td>{equipo.siglas_zona}</td>
+                                                            <td>{equipo.seccion_nombre}</td>
+                                                            <td>{equipo.nombre}</td>
+                                                            {!nosoyTecnico?
+                                                                <td>
+                                                                    <Trash className="trash"  onClick={event => {handlerBorrarEquipo(equipo.id)}} />
+                                                                </td>
+                                                            :null}
+                                                        </tr>
+                                                    )})
+                                                }
+                                            </tbody>
+                                        </Table>
+                                    </Col>
                                 </Form.Row>
+                                
                             </React.Fragment>
                         : null}
                     </Form>

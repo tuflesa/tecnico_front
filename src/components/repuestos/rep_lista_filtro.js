@@ -158,14 +158,14 @@ const RepListaFilto = ({actualizaFiltro}) => {
     }, [token, datos.seccion]);
 
     useEffect(()=>{
-        const filtro1 = `?modelo_proveedor__icontains=${datos.modelo_proveedor}&repuesto__nombre__icontains=${datos.nombre}&repuesto__nombre_comun__icontains=${datos.nombre_comun}&repuesto__fabricante__icontains=${datos.fabricante}&repuesto__id=${datos.id}&repuesto__es_critico=${datos.critico}&repuesto__descatalogado=${datos.descatalogado}&repuesto__tipo_repuesto=${datos.tipo_repuesto}&repuesto__proveedores__id=${datos.proveedor}`;
-        let filtro2 = `&repuesto__equipos__seccion__zona__empresa__id=${datos.empresa}`;
+        const filtro1 = `?precios__modelo_proveedor__icontains=${datos.modelo_proveedor}&nombre__icontains=${datos.nombre}&nombre_comun__icontains=${datos.nombre_comun}&fabricante__icontains=${datos.fabricante}&id=${datos.id}&es_critico=${datos.critico}&descatalogado=${datos.descatalogado}&tipo_repuesto=${datos.tipo_repuesto}&proveedores__id=${datos.proveedor}`;
+        let filtro2 = `&equipos__seccion__zona__empresa__id=${datos.empresa}`;
         if (datos.empresa !== ''){
-            filtro2 = filtro2 + `&repuesto__equipos__seccion__zona__id=${datos.zona}`;
+            filtro2 = filtro2 + `&equipos__seccion__zona__id=${datos.zona}`;
             if (datos.zona !== ''){
-                filtro2 = filtro2 + `&repuesto__equipos__seccion__id=${datos.seccion}`;
+                filtro2 = filtro2 + `&equipos__seccion__id=${datos.seccion}`;
                 if (datos.seccion !== ''){
-                    filtro2 = filtro2 + `&repuesto__equipos__id=${datos.equipo}`
+                    filtro2 = filtro2 + `&equipos__id=${datos.equipo}`
                 }
             }
         }
