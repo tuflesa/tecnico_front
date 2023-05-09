@@ -5,7 +5,7 @@ import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { relativeTimeRounding } from 'moment';
 
-const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repuesto_id, updateRepuesto, repuesto_nombre, repuesto_modelo, setShowProveedor}) => {
+const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repuesto_id, updateRepuesto, repuesto_nombre, repuesto_modelo, repuesto_fabricante, setShowProveedor}) => {
     const [token] = useCookies(['tec-token']);
 
     const [datos, setDatos] = useState({
@@ -14,6 +14,7 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
         descuento:0,
         descripcion_proveedor: '',
         modelo_proveedor: '',
+        fabricante: '',
     });
     const [proveedores, setProveedores] = useState(null);
     const [listaAsignados, setListaAsignados] = useState([]);
@@ -78,6 +79,7 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
                 descuento: datos.descuento,
                 descripcion_proveedor: datos.descripcion_proveedor?datos.descripcion_proveedor:repuesto_nombre,
                 modelo_proveedor: datos.modelo_proveedor?datos.modelo_proveedor:repuesto_modelo,
+                fabricante: datos.fabricante?datos.fabricante:repuesto_fabricante,
             }, {
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
@@ -145,6 +147,19 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
                                                 value={datos.descuento}
                                                 onChange={handleInputChange} 
                                                 placeholder="Descuento"
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <Form.Group id="fabricante">
+                                    <Form.Label>Fabricante</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='fabricante' 
+                                                value={datos.fabricante}
+                                                onChange={handleInputChange} 
+                                                placeholder="Fabricante"
                                     />
                                 </Form.Group>
                             </Col>

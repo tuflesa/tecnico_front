@@ -646,6 +646,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                 <thead>
                                                     <tr>
                                                         <th>Nombre</th>
+                                                        <th>Fabricante</th>
                                                         <th>Descripción Prov</th>
                                                         <th>Modelo Prov</th>
                                                         <th>Precio</th>
@@ -661,6 +662,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                         return (
                                                             <tr key={p.id}>
                                                                 <td>{p.proveedor.nombre}</td>
+                                                                <td>{p.fabricante}</td>
                                                                 <td>{p.descripcion_proveedor}</td>
                                                                 <td>{p.modelo_proveedor}</td>
                                                                 <td>{p.precio}</td>
@@ -749,6 +751,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                            repuesto_id={repuesto.id}
                            repuesto_nombre={datos.nombre}
                            repuesto_modelo={datos.modelo}
+                           repuesto_fabricante={datos.fabricante}
                            updateRepuesto = {updateRepuesto}
                            setShowProveedor = {setShowProveedor}/>
 

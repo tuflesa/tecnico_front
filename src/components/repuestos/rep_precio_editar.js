@@ -13,6 +13,7 @@ const RepPrecioEdit = ({show_modificar, updateRepuesto, setShowModificarProveedo
         descuento:datos_precio? datos_precio.descuento:0,
         descripcion_proveedor: datos_precio? datos_precio.descripcion_proveedor: '',
         modelo_proveedor: datos_precio? datos_precio.modelo_proveedor: '',
+        fabricante: datos_precio? datos_precio.fabricante: '',
     });
 
     useEffect(()=>{
@@ -22,6 +23,7 @@ const RepPrecioEdit = ({show_modificar, updateRepuesto, setShowModificarProveedo
             descuento:datos_precio? datos_precio.descuento:0,
             descripcion_proveedor: datos_precio? datos_precio.descripcion_proveedor: '',
             modelo_proveedor: datos_precio? datos_precio.modelo_proveedor: '',
+            fabricante: datos_precio? datos_precio.fabricante: '',
         })
     },[token, datos_precio]);
 
@@ -32,6 +34,8 @@ const RepPrecioEdit = ({show_modificar, updateRepuesto, setShowModificarProveedo
             descuento: datos.descuento,
             descripcion_proveedor: datos.descripcion_proveedor,
             modelo_proveedor: datos.modelo_proveedor,
+            fabricante: datos.fabricante,
+
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -98,6 +102,19 @@ const RepPrecioEdit = ({show_modificar, updateRepuesto, setShowModificarProveedo
                                                 value={datos.descuento}
                                                 onChange={handleInputChange} 
                                                 placeholder="Descuento"
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <Form.Group id="fabricante">
+                                    <Form.Label>Fabricante</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='fabricante' 
+                                                value={datos.fabricante}
+                                                onChange={handleInputChange} 
+                                                placeholder="Fabricante"
                                     />
                                 </Form.Group>
                             </Col>

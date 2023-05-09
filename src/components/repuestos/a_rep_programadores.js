@@ -18,43 +18,12 @@ const Programadores = () => {
     const [lista_repuestos, setListaRepuestos] = useState(null);
     const [lista_precios, setListaPrecios] = useState(null);
     const [repuestos, setRepuestos] = useState(null);
+    const generico_id = 32;
+    //const generico_id = 273;
     
     var numero = 2;
     var SiEsta = '';
 
-    //crea el listado en la tabla de precios de proveedor de los repuestos ya enlazados a proveedores.
-    /* const CrearListado = ()=>{
-        axios.get(BACKEND_SERVER + `/api/repuestos/lista/`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-            }
-        })
-        .then( res => {
-            setListaRepuestos(res.data);
-            for(var x=0; x<res.data.length; x++){
-                for(var y=0; y<res.data[x].proveedores.length; y++){
-                    axios.post(BACKEND_SERVER + `/api/repuestos/precio/`, {
-                        repuesto: res.data[x].id,
-                        proveedor: res.data[x].proveedores[y],
-                        precio: 0,
-                        descuento: 0, 
-                    }, {
-                        headers: {
-                            'Authorization': `token ${token['tec-token']}`
-                          }     
-                    })
-                    .then( res => { 
-                        console.log('ya estaaaaaa');
-                    })
-                    .catch(err => { console.log(err);})
-                }
-            }
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    }*/
- 
     //Repasa el listado en la tabla de precios de proveedor y crea aquello que se hayan quedado sin crear o se hayan borrado.
     const RepasarListado = ()=>{
         axios.get(BACKEND_SERVER + `/api/repuestos/lista_repuestos/`,{
@@ -81,8 +50,23 @@ const Programadores = () => {
                     }
                     if(SiEsta!==1){
                         if(res.data[x].proveedores.length===0){
-                            alert('este repuesto no tiene proveedor, revisar: ' + res.data[x].nombre);
-                            break;
+                            axios.post(BACKEND_SERVER + `/api/repuestos/precio/`, {
+                                repuesto: res.data[x].id,
+                                proveedor: generico_id,
+                                descripcion_proveedor: res.data[x].nombre,
+                                modelo_proveedor: res.data[x].modelo,
+                                precio: 0,
+                                descuento: 0, 
+                                fabricante: res.data[x].fabricante,
+                            }, {
+                                headers: {
+                                    'Authorization': `token ${token['tec-token']}`
+                                }     
+                            })
+                            .then( res => { 
+                                console.log('genérico');
+                            })
+                            .catch(err => { console.log(err);})
                         }
                         else if(res.data[x].proveedores.length!==0){
                             for(var z=0; z<res.data[x].proveedores.length;z++){
@@ -93,13 +77,14 @@ const Programadores = () => {
                                     modelo_proveedor: res.data[x].modelo,
                                     precio: 0,
                                     descuento: 0, 
+                                    fabricante: res.data[x].fabricante,
                                 }, {
                                     headers: {
                                         'Authorization': `token ${token['tec-token']}`
                                     }     
                                 })
                                 .then( res => { 
-                                    console.log('ya estaaaaaa');
+                                    console.log('post realizado en id: ' + res.data);
                                 })
                                 .catch(err => { console.log(err);})
                             }
@@ -107,20 +92,19 @@ const Programadores = () => {
                         }
                     }
                     else{
-                        /* if(!r.data[x].descripcion_proveedor){
-                            axios.patch(BACKEND_SERVER + `/api/repuestos/precio/${r.data[x].id}`, {
-                                descripcion_proveedor: res.data[x].nombre,
-                                modelo_proveedor: res.data[x].modelo,
-                            }, {
-                                headers: {
-                                    'Authorization': `token ${token['tec-token']}`
-                                }     
-                            })
-                            .then( res => { 
-                                console.log('patch realizado en id: ' + r.data[x].id);
-                            })
-                            .catch(err => { console.log(err);})
-                        } */
+                        axios.patch(BACKEND_SERVER + `/api/repuestos/precio/${r.data[x].id}/`, {
+                            descripcion_proveedor: res.data[x].nombre,
+                            modelo_proveedor: res.data[x].modelo,
+                            fabricante: res.data[x].fabricante,
+                        }, {
+                            headers: {
+                                'Authorization': `token ${token['tec-token']}`
+                            }     
+                        })
+                        .then( res => { 
+                            console.log('patch realizado en id: ' + r.data[x].id);
+                        })
+                        .catch(err => { console.log(err);})
                         SiEsta='';
                     }
                 }
@@ -135,7 +119,7 @@ const Programadores = () => {
 
     //copiar la descripción de proveedor actual y modelo actual de repuestos en la tabla de precio, descripcion_proveedor.
     const copia_descripcion = ()=>{
-        axios.get(BACKEND_SERVER + `/api/repuestos/repuesto_precio/`,{
+        /* axios.get(BACKEND_SERVER + `/api/repuestos/repuesto_precio/`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }
@@ -163,7 +147,7 @@ const Programadores = () => {
         })
         .catch( err => {
             console.log(err);
-        });
+        }); */
     }
 
     //copiar la descripción de proveedor y el modelo en la linea del pedido.
@@ -184,6 +168,7 @@ const Programadores = () => {
                       }     
                 })
                 .then( r => { 
+                    console.log('patch de la linea de pedido');
                 })
                 .catch(err => { console.log(err);})
             }
