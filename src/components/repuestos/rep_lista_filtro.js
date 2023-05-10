@@ -13,7 +13,8 @@ const RepListaFilto = ({actualizaFiltro}) => {
         nombre: '',
         nombre_comun: '',
         fabricante: '',
-        modelo: '',
+        modelo: [],
+        modelo_proveedor: '',
         critico: '',
         tipo_repuesto: '',
         descatalogado: false,
@@ -23,14 +24,15 @@ const RepListaFilto = ({actualizaFiltro}) => {
         equipo: '',
         proveedor: '',
     });
-    const [numeroBar, setnumeroBar] = useState({id:''});
 
+    const [numeroBar, setnumeroBar] = useState({id:''});
     const [tiposRepuesto, setTiposRepuesto] = useState(null);
     const [empresas, setEmpresas] = useState(null);
     const [proveedores, setProveedores] = useState(null);
     const [secciones, setSecciones] = useState(null);
     const [zonas, setZonas] = useState(null);
     const [equipos, setEquipos] = useState(null);
+    const [modelos, setModelos] = useState(null);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
@@ -61,15 +63,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
               }
         })
         .then( res => {
-            setProveedores(res.data.sort(function(a, b){
-                if(a.nombre > b.nombre){
-                    return 1;
-                }
-                if(a.nombre < b.nombre){
-                    return -1;
-                }
-                return 0;
-            }))
+            setProveedores(res.data);
         })
         .catch( err => {
             console.log(err);
@@ -151,15 +145,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
                 }
             })
             .then( res => {
-                setEquipos(res.data.sort(function(a, b){
-                    if(a.nombre > b.nombre){
-                        return 1;
-                    }
-                    if(a.nombre < b.nombre){
-                        return -1;
-                    }
-                    return 0;
-                }))
+                setEquipos(res.data);
                 setDatos({
                     ...datos,
                     equipo: ''
@@ -172,7 +158,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
     }, [token, datos.seccion]);
 
     useEffect(()=>{
-        const filtro1 = `?nombre__icontains=${datos.nombre}&nombre_comun__icontains=${datos.nombre_comun}&fabricante__icontains=${datos.fabricante}&modelo__icontains=${datos.modelo}&id=${datos.id}&es_critico=${datos.critico}&descatalogado=${datos.descatalogado}&tipo_repuesto=${datos.tipo_repuesto}&proveedores__id=${datos.proveedor}`;
+        const filtro1 = `?precios__modelo_proveedor__icontains=${datos.modelo_proveedor}&nombre__icontains=${datos.nombre}&nombre_comun__icontains=${datos.nombre_comun}&precios__fabricante__icontains=${datos.fabricante}&id=${datos.id}&es_critico=${datos.critico}&descatalogado=${datos.descatalogado}&tipo_repuesto=${datos.tipo_repuesto}&proveedores__id=${datos.proveedor}`;
         let filtro2 = `&equipos__seccion__zona__empresa__id=${datos.empresa}`;
         if (datos.empresa !== ''){
             filtro2 = filtro2 + `&equipos__seccion__zona__id=${datos.zona}`;
@@ -187,7 +173,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
         const filtro = filtro1 + filtro2;
         
         actualizaFiltro(filtro);
-    },[datos.nombre, datos.nombre_comun, datos.fabricante, datos.modelo, datos.id, datos.critico, datos.descatalogado, datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.tipo_repuesto, datos.proveedor]);
+    },[datos]);
 
 
     const handleInputChange = (event) => {
@@ -247,11 +233,11 @@ const RepListaFilto = ({actualizaFiltro}) => {
                         </Form.Group>
                     </Col>
                     <Col>
-                        <Form.Group controlId="modelo">
+                        <Form.Group controlId="modelo_proveedor">
                             <Form.Label>Modelo contiene</Form.Label>
                             <Form.Control type="text" 
-                                        name='modelo' 
-                                        value={datos.modelo}
+                                        name='modelo_proveedor' 
+                                        value={datos.modelo_proveedor}
                                         onChange={handleInputChange} 
                                         placeholder="Modelo contiene" />
                         </Form.Group>

@@ -89,7 +89,7 @@ const ContactoForm = ({show, proveedor_id, handleCloseContacto, updateProveedorC
 
     return (
         <Modal show={show} backdrop="static" keyboard={ false } animation={false}>
-                <Modal.Header closeButton>
+                <Modal.Header>
                     {contacto ?                    
                         <Modal.Title>Actualizar Contacto</Modal.Title> : <Modal.Title>Añadir Contacto</Modal.Title>
                     }

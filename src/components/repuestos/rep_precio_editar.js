@@ -1,52 +1,58 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Modal, Form, Col, Row } from 'react-bootstrap';
-import { BACKEND_SERVER } from '../../constantes';
-import axios from 'axios';
 import { useCookies } from 'react-cookie';
-import { relativeTimeRounding } from 'moment';
+import { BACKEND_SERVER } from '../../constantes';
+import { Row, Col, Form, Button, Modal } from 'react-bootstrap';
+import axios from 'axios';
 
-const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repuesto_id, updateRepuesto, repuesto_nombre, repuesto_modelo, repuesto_fabricante, setShowProveedor}) => {
+const RepPrecioEdit = ({show_modificar, updateRepuesto, setShowModificarProveedor, datos_precio}) => {
     const [token] = useCookies(['tec-token']);
 
     const [datos, setDatos] = useState({
-        proveedor: '',
-        precio:0,
-        descuento:0,
-        descripcion_proveedor: '',
-        modelo_proveedor: '',
-        fabricante: '',
+        proveedor: datos_precio? datos_precio.proveedor.nombre:'',
+        precio:datos_precio? datos_precio.precio:0,
+        descuento:datos_precio? datos_precio.descuento:0,
+        descripcion_proveedor: datos_precio? datos_precio.descripcion_proveedor: '',
+        modelo_proveedor: datos_precio? datos_precio.modelo_proveedor: '',
+        fabricante: datos_precio? datos_precio.fabricante: '',
     });
-    const [proveedores, setProveedores] = useState(null);
-    const [listaAsignados, setListaAsignados] = useState([]);
 
     useEffect(()=>{
-        axios.get(BACKEND_SERVER + `/api/repuestos/proveedor/`,{
+        setDatos({
+            proveedor: datos_precio? datos_precio.proveedor.nombre:'',
+            precio:datos_precio? datos_precio.precio:0,
+            descuento:datos_precio? datos_precio.descuento:0,
+            descripcion_proveedor: datos_precio? datos_precio.descripcion_proveedor: '',
+            modelo_proveedor: datos_precio? datos_precio.modelo_proveedor: '',
+            fabricante: datos_precio? datos_precio.fabricante: '',
+        })
+    },[token, datos_precio]);
+
+    const handlerActualizar = (event) => {
+        event.preventDefault();
+        axios.patch(BACKEND_SERVER + `/api/repuestos/precio/${datos_precio.id}/`, {
+            precio: datos.precio,
+            descuento: datos.descuento,
+            descripcion_proveedor: datos.descripcion_proveedor,
+            modelo_proveedor: datos.modelo_proveedor,
+            fabricante: datos.fabricante,
+
+        }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
-            }
+                }     
         })
-        .then( res => {
-            const proveedoresDisponibles = res.data.filter(p => {return !listaAsignados.includes(p.id)});
-            setProveedores(proveedoresDisponibles);
-            if (proveedoresDisponibles.length>0){
-                setDatos({
-                    ...datos,
-                    proveedor: proveedoresDisponibles[0].id
-                });
+        .then( res => { 
+                handlerCancelar();
             }
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    }, [token, listaAsignados]);
+        )
+        .catch(err => { console.log(err);});
+        updateRepuesto();
+        setShowModificarProveedor(false);
+    }
 
-    useEffect(()=>{
-        let proveedoresAsignadosID = [];
-        proveedoresAsignados && proveedoresAsignados.forEach(p => {
-            proveedoresAsignadosID.push(p.id);
-        });
-        setListaAsignados(proveedoresAsignadosID);
-    },[proveedoresAsignados]);
+    const handlerCancelar = () => {
+        setShowModificarProveedor();
+    }
 
     const handleInputChange = (event) => {
         setDatos({
@@ -55,75 +61,24 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
         })
     }
 
-    const handlerCancelar = () => {
-        setDatos({
-            proveedor: ''
-        });
-        handleCloseProveedor()
-    }
-
-    const handlerGuardar = () => {
-        const newProveedores = [...listaAsignados, parseInt(datos.proveedor)];
-        axios.patch(BACKEND_SERVER + `/api/repuestos/lista/${repuesto_id}/`, {
-            proveedores: newProveedores
-        }, {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }     
-        })
-        .then( res => { 
-            axios.post(BACKEND_SERVER + `/api/repuestos/precio/`, {
-                proveedor: datos.proveedor,
-                repuesto: repuesto_id,
-                precio: datos.precio,
-                descuento: datos.descuento,
-                descripcion_proveedor: datos.descripcion_proveedor?datos.descripcion_proveedor:repuesto_nombre,
-                modelo_proveedor: datos.modelo_proveedor?datos.modelo_proveedor:repuesto_modelo,
-                fabricante: datos.fabricante?datos.fabricante:repuesto_fabricante,
-            }, {
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                    }     
-            })
-            .then( res => { 
-                    console.log('el res.data del post de precio');
-                    console.log(res.data);
-                    handlerCancelar();
-                }
-            )
-            .catch(err => { console.log(err);});
-            updateRepuesto();
-            setShowProveedor(false);
-        })
-        .catch(err => { console.log(err);});
-        //crear tabla de precios para el articulo del proveedor
-        
-    }
-
     return (
-        <Modal show={show} onHide={handleCloseProveedor} backdrop="static" keyboard={ false } animation={false}>
+        <Modal show={show_modificar} onHide={setShowModificarProveedor} backdrop="static" keyboard={ false } animation={false}>
                 <Modal.Header>
-                    <Modal.Title>Añadir Proveedor</Modal.Title>
+                    <Modal.Title>Modificar Proveedor</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form >
                         <Row>
                             <Col>
-                                <Form.Group controlId="proveedor">
+                                <Form.Group id="proveedor">
                                     <Form.Label>Proveedor</Form.Label>
-                                    <Form.Control as="select"  
+                                    <Form.Control type="text" 
                                                 name='proveedor' 
                                                 value={datos.proveedor}
-                                                onChange={handleInputChange}
-                                                placeholder="Proveedor">  
-                                                {proveedores && proveedores.map( proveedor => {
-                                                    return (
-                                                    <option key={proveedor.id} value={proveedor.id}>
-                                                        {proveedor.nombre}
-                                                    </option>
-                                                    )
-                                                })}
-                                    </Form.Control>
+                                                onChange={handleInputChange} 
+                                                placeholder="Proveedor"
+                                                disabled="true"
+                                    />
                                 </Form.Group>
                             </Col>
                         </Row>
@@ -191,11 +146,10 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="info" onClick={handlerGuardar}>Guardar</Button>
+                    <Button variant="info" onClick={handlerActualizar}>Actualizar</Button>
                     <Button variant="waring" onClick={handlerCancelar}>Cancelar</Button>
                 </Modal.Footer>
         </Modal>
     );
 }
-
-export default ProveedorForm;
+export default RepPrecioEdit;

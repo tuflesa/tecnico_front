@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Form, Button, Table, Modal } from 'react-bootstrap';
-import { PlusCircle, Receipt } from 'react-bootstrap-icons';
-import { Link } from 'react-router-dom';
+import { Container, Row, Col, Form, Button, Modal, Table } from 'react-bootstrap';
+import { Trash } from 'react-bootstrap-icons';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
+import {invertirFecha} from '../utilidades/funciones_fecha';
 
 const NotificacionForm = ({nota, setNota}) => {
     const [token] = useCookies(['tec-token']);
@@ -12,17 +12,25 @@ const NotificacionForm = ({nota, setNota}) => {
 
     const [hoy] = useState(new Date);
     const [show_error, setShowError] = useState(false);
+    const [show, setShow] = useState(false);
     const handleCloseError = () => setShowError(false);
+    const handleClose = () => setShow(false);
     const [usuarios, setUsuarios] = useState(null);
     const [destrezas, setDestrezas] = useState(null);
     const soyTecnico = user['tec-user'].perfil.destrezas.filter(s => s === 6);
+    const nosoyTecnico = user['tec-user'].perfil.puesto.nombre==='Operador'||user['tec-user'].perfil.puesto.nombre==='Mantenimiento'?true:false;
+    const [empresas, setEmpresas] = useState(null);
+    const [zonas, setZonas] = useState(null);
+    const [reclamaciones, setReclamaciones] = useState(null);
+    const [act_reclamaciones, setActReclamaciones] = useState(false);
+    
 
     const [datos, setDatos] = useState({
         id: nota.id? nota.id : null,
         que: nota.id?nota.que:null,
         cuando: nota.id?nota.cuando:null,
         donde: nota.id?nota.donde:null,
-        quien: nota? nota.quien: user['tec-user'].perfil.usuario,
+        quien: nota? nota.quien: null,
         como: nota.id? nota.como : null,
         cuanto: nota.id? nota.cuanto : '',
         porque: nota.id? nota.porque : '',
@@ -32,18 +40,18 @@ const NotificacionForm = ({nota, setNota}) => {
         descartado: nota.id?nota.descartado:false,
         finalizado: nota.id?nota.finalizado:false,
         conclusion: nota.id? nota.conclusion : null,
-        empresa: nota?nota.empresa:user['tec-user'].perfil.empresa.id,
+        empresa: nota?nota.empresa:null,
+        zona: nota.zona?nota.zona.id:null,
         numero: nota.id? nota.numero:null,
     });
 
     useEffect(()=>{
-        
         setDatos({
             id: nota.id? nota.id : null,
             que: nota.id?nota.que:null,
             cuando: nota.id?nota.cuando:null,
             donde: nota.id?nota.donde:null,
-            quien: nota? nota.quien: user['tec-user'].perfil.usuario,
+            quien: nota? nota.quien: null,
             como: nota.id? nota.como : null,
             cuanto: nota.id? nota.cuanto : '',
             porque: nota.id? nota.porque : '',
@@ -53,13 +61,14 @@ const NotificacionForm = ({nota, setNota}) => {
             descartado: nota.id?nota.descartado:false,
             finalizado: nota.id?nota.finalizado:false,
             conclusion: nota.id? nota.conclusion : null,
-            empresa: nota?nota.empresa:user['tec-user'].perfil.empresa.id,
+            empresa: nota?nota.empresa:null,
+            zona: nota.zona?nota.zona.id:null,
             numero: nota.id? nota.numero:null,
         });
     },[nota]);
 
     useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/administracion/usuarios/?perfil__empresa__id=${datos.empresa}`,{
+        axios.get(BACKEND_SERVER + `/api/administracion/usuarios/?perfil__empresa__id=${user['tec-user'].perfil.empresa.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -81,6 +90,21 @@ const NotificacionForm = ({nota, setNota}) => {
     }, [token, datos.empresa]);
 
     useEffect(() => {
+        nota && axios.get(BACKEND_SERVER + `/api/mantenimiento/reclamos_detalle/?notificacion=${nota.id}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setReclamaciones(res.data);
+            setActReclamaciones(false);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token, nota, act_reclamaciones]);
+
+    useEffect(() => {
         axios.get(BACKEND_SERVER + `/api/mantenimiento/especialidades/`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -94,6 +118,34 @@ const NotificacionForm = ({nota, setNota}) => {
         });
     }, [token]);
 
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setEmpresas(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
+
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + `/api/estructura/zona/?empresa=${user['tec-user'].perfil.empresa.id}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( res => {
+            setZonas(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        }); 
+    }, [token, datos.empresa]);
+
     const handleInputChange = (event) => {
         setDatos({
             ...datos,
@@ -103,36 +155,42 @@ const NotificacionForm = ({nota, setNota}) => {
 
     const crearNota = (event) => {
         event.preventDefault();
-        axios.post(BACKEND_SERVER + `/api/mantenimiento/notificacion_nueva/`, {
-            que: datos.que,
-            cuando: datos.cuando,
-            donde: datos.donde,
-            //para: datos.para,
-            quien: user['tec-user'].perfil.usuario,
-            como: datos.como,
-            cuanto: datos.cuanto,
-            porque: datos.porque,
-            fecha_creacion: datos.fecha_creacion,            
-            revisado: datos.revisado,
-            descartado: datos.descartado,
-            finalizado: datos.finalizado,
-            conclusion: datos.conclusion,
-            empresa: datos.empresa,
-        }, {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }     
-        })
-        .then( res => { 
-            setNota(res.data);
-            window.confirm('La notificación se ha creado correctamente');
-            window.location.href="javascript: history.go(-1)"
-            
-        })
-        .catch(err => { 
+        if(datos.zona===null||datos.zona===''){
             setShowError(true);
-            console.log(err);
-        })
+        }
+        else{
+            axios.post(BACKEND_SERVER + `/api/mantenimiento/notificacion_nueva/`, {
+                que: datos.que,
+                cuando: datos.cuando,
+                donde: datos.donde,
+                //para: datos.para,
+                quien: user['tec-user'].perfil.usuario,
+                como: datos.como,
+                cuanto: datos.cuanto,
+                porque: datos.porque,
+                fecha_creacion: datos.fecha_creacion,            
+                revisado: datos.revisado,
+                descartado: datos.descartado,
+                finalizado: datos.finalizado,
+                conclusion: datos.conclusion,
+                empresa: datos.empresa,
+                zona: datos.zona,
+            }, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }     
+            })
+            .then( res => { 
+                setNota(res.data);
+                window.confirm('La notificación se ha creado correctamente');
+                window.location.href="javascript: history.go(-1)"
+                
+            })
+            .catch(err => { 
+                setShowError(true);
+                console.log(err);
+            });
+        }
     } 
 
     const actualizarNota = (event) => {
@@ -151,6 +209,7 @@ const NotificacionForm = ({nota, setNota}) => {
             descartado: datos.descartado,
             finalizado: datos.finalizado,
             conclusion: datos.conclusion,
+            zona: datos.zona,
             //empresa: datos.empresa,
         }, {
             headers: {
@@ -165,6 +224,51 @@ const NotificacionForm = ({nota, setNota}) => {
             console.log(err);
         })
     } 
+
+    const reclamar_nota = (event) => {
+        var ya_reclame = reclamaciones.filter (r=>r.fecha===hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0'));
+        event.preventDefault();
+        if(ya_reclame.length===0){
+            axios.post(BACKEND_SERVER + `/api/mantenimiento/reclamos/`, {
+                notificacion: nota.id,
+                fecha: hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0'),
+                trabajador: user['tec-user'].perfil.usuario,
+            }, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                    }     
+            })
+            .then( res => { 
+                alert('Se ha notificado el reclamo de esta notificación, gracias.');
+                setActReclamaciones(true);
+            })
+            .catch(err => { 
+                console.log(err);
+            })
+        }
+        else{
+            alert('Con fecha de hoy, ya se ha reclamado esta notificación, gracias');
+        }
+    } 
+
+    const desactivar = () => {
+        if(nosoyTecnico){
+            return true;
+        }
+    }
+
+    const desactivar_zona = () => {
+        if(user['tec-user'].perfil.zona){    
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+    const listado_reclamaciones = ()=>{
+        setShow(true);
+    }
 
     return(
         <Container className="mb-5 mt-5">
@@ -206,6 +310,45 @@ const NotificacionForm = ({nota, setNota}) => {
                                                 placeholder="Fecha creación" />
                                 </Form.Group>
                             </Col> 
+                            <Col>
+                                <Form.Group controlId="empresa">
+                                    <Form.Label>Empresa</Form.Label>
+                                    <Form.Control as="select"  
+                                                name='empresa' 
+                                                value={datos.empresa}
+                                                onChange={handleInputChange}
+                                                placeholder="Empresa"
+                                                disabled>
+                                                <option key={0} value={''}>Todas</option>    
+                                                {empresas && empresas.map( empresa => {
+                                                    return (
+                                                    <option key={empresa.id} value={empresa.id}>
+                                                        {empresa.nombre}
+                                                    </option>
+                                                    )
+                                                })}
+                                </Form.Control>
+                                </Form.Group>
+                            </Col>
+                            <Col>
+                                <Form.Group controlId="zona">
+                                    <Form.Label>Zona (*)</Form.Label>
+                                    <Form.Control   as="select" 
+                                                    value={datos.zona}
+                                                    name='zona'
+                                                    onChange={handleInputChange}
+                                                    disabled={desactivar_zona()}> 
+                                                    <option key={0} value={''}>Sin Zona asignada</option>                                      
+                                                    {zonas && zonas.map( zona => {
+                                                        return (
+                                                        <option key={zona.id} value={zona.id}>
+                                                            {zona.siglas}
+                                                        </option>
+                                                        )
+                                                    })}
+                                    </Form.Control>
+                                </Form.Group>
+                            </Col>
                         </Row>
                         <Row>
                             <Col>
@@ -279,30 +422,9 @@ const NotificacionForm = ({nota, setNota}) => {
                                     />
                                 </Form.Group>
                             </Col>
-                        </Row>
+                        </Row>    
                         <Row> 
-                            {/* <Col>
-                                <Form.Group controlId="para">
-                                    <Form.Label>Para quién (*)</Form.Label>
-                                    <Form.Control as="select"  
-                                                name='para' 
-                                                value={datos.para}
-                                                onChange={handleInputChange}
-                                                placeholder="para">
-                                                <option key={0} value={''}>Todas</option>    
-                                                {usuarios && usuarios.map( usuario => {
-                                                    return (
-                                                    <option key={usuario.id} value={usuario.id}>
-                                                        {usuario.get_full_name}
-                                                    </option>
-                                                    )
-                                                })}
-                                </Form.Control>
-                                </Form.Group>
-                            </Col> */}                           
-                        </Row>     
-                        <Row> 
-                        {nota.id?
+                            {nota.id?
                                 <h5 className="pb-3 pt-1 mt-2">Estado de la notificación</h5>:null}
                         </Row>
                         <Row>
@@ -313,7 +435,8 @@ const NotificacionForm = ({nota, setNota}) => {
                                 <Form.Control as="select" 
                                                 value={datos.revisado}
                                                 name='revisado'
-                                                onChange={handleInputChange}>
+                                                onChange={handleInputChange}
+                                                disabled={desactivar()}>
                                     <option key={0} value={''}>Todos</option>
                                     <option key={1} value={true}>Si</option>
                                     <option key={2} value={false}>No</option>
@@ -329,7 +452,7 @@ const NotificacionForm = ({nota, setNota}) => {
                                                 value={datos.descartado}
                                                 name='descartado'
                                                 onChange={handleInputChange}
-                                                disabled={soyTecnico.length===0?true:false}>
+                                                disabled={desactivar()}>
                                     <option key={0} value={''}>Todos</option>
                                     <option key={1} value={true}>Si</option>
                                     <option key={2} value={false}>No</option>
@@ -345,7 +468,7 @@ const NotificacionForm = ({nota, setNota}) => {
                                                     value={datos.finalizado}
                                                     name='finalizado'
                                                     onChange={handleInputChange}
-                                                    disabled={soyTecnico.length===0?true:false}>
+                                                    disabled={desactivar()}>
                                         <option key={0} value={''}>Todos</option>
                                         <option key={1} value={true}>Si</option>
                                         <option key={2} value={false}>No</option>
@@ -358,12 +481,13 @@ const NotificacionForm = ({nota, setNota}) => {
                             <Col>
                             {nota.id?
                                 <Form.Group id="conclusion">
-                                    <Form.Label>Concusiones</Form.Label>
-                                    <Form.Control type="text" 
+                                    <Form.Label>Conclusiones</Form.Label>
+                                    <Form.Control as="textarea" rows={4}
                                                 name='conclusion' 
                                                 value={datos.conclusion}
                                                 onChange={handleInputChange} 
                                                 placeholder="Conclusiones"
+                                                disabled={desactivar()}
                                     />
                                 </Form.Group>
                             : null}
@@ -375,18 +499,57 @@ const NotificacionForm = ({nota, setNota}) => {
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={crearNota}>Guardar</Button>
                             }
                             <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar</Button>
+                            <Button variant="danger" type="submit" className={'mx-2'} onClick={reclamar_nota}>Reclamar</Button>
+                            <Button variant="danger" className="mr-3 trash" onClick={event => {listado_reclamaciones()}}>R / {reclamaciones?reclamaciones.length:0}</Button>
+                            {/* <Trash className="mr-3 trash" onClick={event => {listado_reclamaciones()}} /> */}
                         </Form.Row>
                     </Form>
                 </Col>
             </Row>
+            
             <Modal show={show_error} onHide={handleCloseError} backdrop="static" keyboard={ false } animation={false}>
                 <Modal.Header closeButton>
                     <Modal.Title>Error</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>Error al guardar formulario. Revise que todos los campos con asterisco esten cumplimentados</Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={handleCloseError}>
-                        Cerrar
+                    <Button variant="secondary" onClick={handleCloseError}>Cerrar</Button>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal show={show} onHide={handleClose} backdrop="static" keyboard={ false } animation={false}>
+                <Modal.Header>
+                    <Modal.Title>Listado de reclamos:</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Row>
+                        <Col>
+                            <Table striped bordered hover>
+                                <thead>
+                                    <tr>
+                                        <th>Trabajador</th>
+                                        <th>Fecha</th>
+                                    </tr>
+                                </thead> 
+                                {reclamaciones?                              
+                                <tbody>                                    
+                                    {reclamaciones && reclamaciones.map(r =>{
+                                        return(
+                                            <tr key={r.id}>
+                                                <td>{r.trabajador?r.trabajador.get_full_name:null}</td>
+                                                <td>{r.fecha?invertirFecha(String(r.fecha)):null}</td>
+                                            </tr>
+                                        )
+                                    })}                                
+                                </tbody>
+                                :null}
+                            </Table>
+                        </Col>
+                    </Row>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="waring" onClick={handleClose}>
+                        Cancelar
                     </Button>
                 </Modal.Footer>
             </Modal>

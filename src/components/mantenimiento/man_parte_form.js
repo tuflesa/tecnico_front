@@ -8,6 +8,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import LineaTareaNueva from './man_parte_lineatarea';
 import LineasPartesMov from './man_parte_lineas_mov';
 import { style } from 'd3';
+import { constants } from 'buffer';
 
 const ParteForm = ({parte, setParte, op}) => {
     const [token] = useCookies(['tec-token']);
@@ -28,6 +29,7 @@ const ParteForm = ({parte, setParte, op}) => {
     const [actualizar, setActualizar] = useState('');
     const [lineas, setLineas] = useState(null);
     const soyTecnico = user['tec-user'].perfil.destrezas.filter(s => s === 6);
+    const nosoyTecnico = user['tec-user'].perfil.puesto.nombre==='Operador'||user['tec-user'].perfil.puesto.nombre==='Mantenimiento'?true:false;
 
     const [datos, setDatos] = useState({
         id: parte.id ? parte.id : null,
@@ -37,7 +39,7 @@ const ParteForm = ({parte, setParte, op}) => {
         finalizado: parte? parte.finalizado : false,
         observaciones: parte.observaciones? parte.observaciones : '',
         fecha_creacion: parte.id ? parte.fecha_creacion :(hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
-        fecha_prevista_inicio: parte? parte.fecha_prevista_inicio : '',
+        fecha_prevista_inicio: parte.id? parte.fecha_prevista_inicio :(hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
         fecha_finalizacion: parte? parte.fecha_finalizacion : '',
         empresa: parte?parte.empresa:null,
         zona: parte? parte.zona : '',
@@ -60,7 +62,7 @@ const ParteForm = ({parte, setParte, op}) => {
             finalizado: parte? parte.finalizado : false,
             observaciones: parte.observaciones? parte.observaciones : '',
             fecha_creacion: parte.id ? parte.fecha_creacion :(hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
-            fecha_prevista_inicio: parte? parte.fecha_prevista_inicio : '',
+            fecha_prevista_inicio: parte.id? parte.fecha_prevista_inicio : (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
             fecha_finalizacion: parte? parte.fecha_finalizacion : '',
             empresa: parte?parte.empresa:null,
             zona: parte? parte.zona : '',
@@ -82,34 +84,15 @@ const ParteForm = ({parte, setParte, op}) => {
               }
         })
         .then( res => {
-            if(soyTecnico.length===0){
-                const no_tecnico = res.data.filter( s => s.nombre !== 'Preventivo');
-                setTipoParte(no_tecnico.sort(function(a, b){
-                    if(a.nombre > b.nombre){
-                        return 1;
-                    }
-                    if(a.nombre < b.nombre){
-                        return -1;
-                    }
-                    return 0;
-                }))
-                setDatos({
-                    ...datos,
-                    tipo: 2,
-                    fecha_prevista_inicio: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
-                });
-            }
-            else{
-                setTipoParte(res.data.sort(function(a, b){
-                    if(a.nombre > b.nombre){
-                        return 1;
-                    }
-                    if(a.nombre < b.nombre){
-                        return -1;
-                    }
-                    return 0;
-                }))
-            }
+            setTipoParte(res.data.sort(function(a, b){
+                if(a.nombre > b.nombre){
+                    return 1;
+                }
+                if(a.nombre < b.nombre){
+                    return -1;
+                }
+                return 0;
+            }));
         })
         .catch( err => {
             console.log(err); 
@@ -123,7 +106,14 @@ const ParteForm = ({parte, setParte, op}) => {
             }
         })
         .then( res => {
-            setEmpresas(res.data);
+            //Si es Bornay, enseñamos Bornay y Comalsid
+            if(user['tec-user'].perfil.empresa.id===1&&user['tec-user'].perfil.puesto.nombre==='Mantenimiento'){
+                var empresas_2 = res.data.filter( s => s.id !== 2);
+                setEmpresas(empresas_2);
+            }
+            else{
+                setEmpresas(res.data);
+            }
         })
         .catch( err => {
             console.log(err);
@@ -148,12 +138,6 @@ const ParteForm = ({parte, setParte, op}) => {
             })
             .then( res => {
                 setZonas(res.data);
-                // setDatos({
-                //     ...datos,
-                //     zona: '',
-                //     seccion: '',
-                //     equipo: ''
-                // });
             })
             .catch( err => {
                 console.log(err);
@@ -178,11 +162,6 @@ const ParteForm = ({parte, setParte, op}) => {
             })
             .then( res => {
                 setSecciones(res.data);
-                // setDatos({
-                //     ...datos,
-                //     seccion: '',
-                //     equipo: ''
-                // });
             })
             .catch( err => {
                 console.log(err);
@@ -214,10 +193,6 @@ const ParteForm = ({parte, setParte, op}) => {
                     }
                     return 0;
                 }))
-                // setDatos({
-                //     ...datos,
-                //     equipo: ''
-                // });
             })
             .catch( err => {
                 console.log(err);
@@ -254,19 +229,29 @@ const ParteForm = ({parte, setParte, op}) => {
                 }
         })
         .then( res => {
+            res.data.sort(function(a, b){ //ordenamos el listado para que en el unique, coja los ultimos registros
+                if(a.id < b.id){
+                    return 1;
+                }
+                if(a.id > b.id){
+                    return -1;
+                }
+                return 0;
+            })
             const unique = (value, index, self) => {
                 return self.indexOf(value.tarea) === index.tarea
-              }
+            }
             if(parte.tipo_nombre==="Preventivo"){
+                let hash = {};
+                var array = [''];
                 const prueba = res.data.filter((r=> r.fecha_fin===null));
-                if(prueba.length===0){
-                    let hash = {};
-                    var array = [''];
-                    array = res.data.filter(o => hash[o.tarea.id] ? false : hash[o.tarea.id] = true);
+                array = res.data.filter(o => hash[o.tarea.id] ? false : hash[o.tarea.id] = true);
+                if(array.length>prueba.length){
+                    //cuando eliminamos el proceso preventivo de una tarea, deja de aparecer en las tareas pero si aparece en el parte
                     setLineas(array);
-                    console.log(res.data);
                 }
                 else{
+                    //todas las tareas estas activas, por lo que solo muestra las lineas en juego.
                     setLineas(prueba.sort(function(a, b){
                         if(a.tarea.prioridad < b.tarea.prioridad){
                             return 1;
@@ -298,6 +283,11 @@ const ParteForm = ({parte, setParte, op}) => {
             console.log(err);
         });
     }, [token]); 
+
+    useEffect(()=>{ 
+        console.log('esto vale las lineas');
+        console.log(lineas);
+    }, [lineas]); 
     
     const updateParte = () => {
         parte.id && axios.get(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo_detalle/${parte.id}/`,{
@@ -346,19 +336,11 @@ const ParteForm = ({parte, setParte, op}) => {
     }
     
     const handleDisabled2 = () => {
-        return user['tec-user'].perfil.puesto.nombre==='Mantenimiento'
+        return false; //user['tec-user'].perfil.puesto.nombre==='Mantenimiento'
     }
 
     
     const handleInputChange = (event) => {
-        setDatos({
-            ...datos,
-            [event.target.name] : event.target.value
-        })  
-    }
-
-    const handleInputChangeFecha_fin = (event) => {
-        datos.estado='';
         setDatos({
             ...datos,
             [event.target.name] : event.target.value
@@ -381,7 +363,7 @@ const ParteForm = ({parte, setParte, op}) => {
             }
             else{
                 estado2=3;
-                fecha_f= (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0'));
+                fecha_f= datos.fecha_finalizacion;
             }
             axios.patch(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${parte.id}/`,{
                 fecha_finalizacion : fecha_f,
@@ -406,7 +388,6 @@ const ParteForm = ({parte, setParte, op}) => {
             .then( res => {
                 for(var x=0; x<res.data.length; x++){
                     if(res.data[x].estado===3){
-                        console.log('estado 3');
                     }
                     else{
                         axios.patch(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_trabajo/${res.data[x].id}/`,{
@@ -427,7 +408,8 @@ const ParteForm = ({parte, setParte, op}) => {
                 }
             })
             .catch(err => { 
-                console.log(err);})
+                console.log(err);
+            })
         }
         if(!Finalizar_Tarea){
             setDatos({
@@ -482,6 +464,12 @@ const ParteForm = ({parte, setParte, op}) => {
     }
 
     const crearParte = (event) => {
+        if(datos.tipo==='1'&& soyTecnico.length===0){
+            alert('No tienes permisos para crear preventivos, contacte con el administrador');
+            return;
+        }
+        if(datos.fecha_prevista_inicio===''){datos.fecha_prevista_inicio=null}
+        if(datos.fecha_finalizacion===''){datos.fecha_finalizacion=null}
         event.preventDefault();
         axios.post(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/`, {
             nombre: datos.nombre,
@@ -515,7 +503,7 @@ const ParteForm = ({parte, setParte, op}) => {
     const actualizarLinea = () => { 
         var fecha=null;
         var estado='';
-        if(parte.fecha_prevista_inicio===null&& datos.fecha_prevista_inicio!==null){
+        if(parte.fecha_prevista_inicio===null && datos.fecha_prevista_inicio!==null){
             fecha=datos.fecha_prevista_inicio;
             estado=1;
         }
@@ -529,9 +517,6 @@ const ParteForm = ({parte, setParte, op}) => {
         if(estado!==0){
             //ponemos la fecha de planificación y el estado en el parte
             axios.get(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_mov/?parte=${parte.id}`,{
-          /*       fecha_plan: fecha,
-                estado: estado,
-            }, { */
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
@@ -548,22 +533,23 @@ const ParteForm = ({parte, setParte, op}) => {
                         }     
                     })
                     .then( r => {
-                        axios.patch(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${parte.id}/`, {
-                            fecha_plan: fecha,
-                            estado: estado,
-                        }, {
-                            headers: {
-                                'Authorization': `token ${token['tec-token']}`
-                            }     
-                        })
-                        .then( rs => {
-                            updateParte();
-                        })
-                        .catch(err => { console.log(err);})
-                        updateParte();
+                        
                     })
                     .catch(err => { console.log(err);})
-                }         
+                } 
+                axios.patch(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${parte.id}/`, {
+                    fecha_plan: fecha,
+                    estado: estado,
+                }, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }     
+                })
+                .then( rs => {
+                    updateParte();
+                })
+                .catch(err => { console.log(err);})
+                updateParte();       
             })
             .catch( err => {
                 console.log(err);
@@ -572,6 +558,10 @@ const ParteForm = ({parte, setParte, op}) => {
     }
 
     const actualizarDatos = (event) => {
+        if(datos.tipo==='1'&& soyTecnico.length===0){
+            alert('No tienes permisos para crear preventivos, contacte con el administrador');
+            return;
+        }
         //Si borramos la fecha, ponemos un null para que no falle el put
         if(datos.fecha_prevista_inicio===''){datos.fecha_prevista_inicio=null}
         if(datos.fecha_finalizacion===''){datos.fecha_finalizacion=null}
@@ -597,6 +587,10 @@ const ParteForm = ({parte, setParte, op}) => {
             //if(cambio_fecha){
             if(parte.fecha_prevista_inicio!==datos.fecha_prevista_inicio){
                 actualizarLinea();
+            }
+            //si he puesto fecha de finalización, finalizamos todo el parte completo
+            if(parte.fecha_finalizacion!==datos.fecha_finalizacion){
+                handleFinalizar();
             }
             setParte(res.data); 
             updateParte();   
@@ -634,16 +628,16 @@ const ParteForm = ({parte, setParte, op}) => {
         })
         .then( res => {
             //si solo hay una linea y la fecha fin esta vacía, podemos eliminar linea y tarea.
-            if(res.data.length===1 && res.data[0].fecha_fin===null){
+            if(res.data.results.length===1 && res.data.results[0].fecha_fin===null){
                 var confirmacion = window.confirm('¿Deseas eliminar la línea?');
                 if(confirmacion){
-                    axios.delete(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/${res.data[0].id}/`,{            
+                    axios.delete(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/${res.data.results[0].id}/`,{            
                         headers: {
                             'Authorization': `token ${token['tec-token']}`
                         } 
                     })
                     .then(re =>{
-                        axios.delete(BACKEND_SERVER + `/api/mantenimiento/tareas/${res.data[0].tarea.id}/`,{            
+                        axios.delete(BACKEND_SERVER + `/api/mantenimiento/tareas/${res.data.results[0].tarea.id}/`,{            
                             headers: {
                                 'Authorization': `token ${token['tec-token']}`
                             } 
@@ -659,7 +653,7 @@ const ParteForm = ({parte, setParte, op}) => {
             }
             else{
                 //Si la ultima linea tiene fecha fin, no se puede eliminar
-                if(res.data[res.data.length-1].fecha_fin!==null){
+                if(res.data.results[res.data.results.length-1].fecha_fin!==null){
                     alert('No se puede elimnar, trabajo ya ejecutado y terminado');
                 }
                 //en un preventivo, queremos detener el ciclo del trabajo.
@@ -667,7 +661,7 @@ const ParteForm = ({parte, setParte, op}) => {
                     var detenerTrabajo = window.confirm('No se puede eliminar, tiene trabajos finalizados. ¿Deseas detener el proceso?');
                     if(detenerTrabajo){
                         //eliminamos la linea que es la que ejecuta de nuevo la tarea'
-                        axios.delete(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/${res.data[res.data.length-1].id}/`,{            
+                        axios.delete(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/${res.data.results[res.data.results.length-1].id}/`,{            
                             headers: {
                                 'Authorization': `token ${token['tec-token']}`
                             } 
@@ -686,9 +680,9 @@ const ParteForm = ({parte, setParte, op}) => {
         });                 
     }
 
-    /* const handleDisabled = () => {
+    const handleDisabled = () => {
         return (user['tec-user'].perfil.puesto.nombre==='Mantenimiento')
-    } */
+    }
 
     const handleDisabledMantenimiento = () => {
         return (user['tec-user'].perfil.puesto.nombre==='Mantenimiento')
@@ -723,6 +717,7 @@ const ParteForm = ({parte, setParte, op}) => {
                                                 value={datos.nombre}
                                                 onChange={handleInputChange} 
                                                 placeholder="Nombre"
+                                                disabled={nosoyTecnico? true: false}
                                                 autoFocus
                                     />
                                 </Form.Group>
@@ -766,7 +761,7 @@ const ParteForm = ({parte, setParte, op}) => {
                                                 value={datos.tipo}
                                                 onChange={handleInputChange}
                                                 placeholder="Tipo Mantenimiento"
-                                                /* disabled={handleDisabled()} */> 
+                                                disabled={nosoyTecnico? true: false}> 
                                                 {datos.id===null? <option key={0} value={''}>Seleccionar</option>: ''}                                                   
                                                 {tipoparte && tipoparte.map( tipo => {
                                                     return (
@@ -785,7 +780,8 @@ const ParteForm = ({parte, setParte, op}) => {
                                                 name='fecha_creacion' 
                                                 value={datos.fecha_creacion}
                                                 onChange={handleInputChange} 
-                                                placeholder="Fecha creación" />
+                                                placeholder="Fecha creación" 
+                                                disabled={nosoyTecnico? true: false}/>
                                 </Form.Group>
                             </Col> 
                             <Col>
@@ -795,7 +791,8 @@ const ParteForm = ({parte, setParte, op}) => {
                                                 name='fecha_prevista_inicio' 
                                                 value={datos.fecha_prevista_inicio}
                                                 onChange={handleInputChangeF} 
-                                                placeholder="Fecha prevista inicio" />
+                                                placeholder="Fecha prevista inicio" 
+                                                disabled={nosoyTecnico? true: false}/>
                                 </Form.Group>
                             </Col>                         
                             <Col>
@@ -804,9 +801,10 @@ const ParteForm = ({parte, setParte, op}) => {
                                     <Form.Control type="date" 
                                                 name='fecha_finalizacion' 
                                                 value={datos.fecha_finalizacion}
-                                                onChange={handleInputChangeFecha_fin} 
+                                                onChange={handleInputChange} 
                                                 placeholder="Fecha Finalización" 
-                                                disabled = {handleDisabledMantenimiento()}/>
+                                                disabled = {handleDisabledMantenimiento()}
+                                                /* disabled={true} *//>
                                 </Form.Group>
                             </Col>             
                         </Row>                          
@@ -836,7 +834,8 @@ const ParteForm = ({parte, setParte, op}) => {
                                     <Form.Control   as="select" 
                                                     value={datos.zona}
                                                     name='zona'
-                                                    onChange={handleInputChangeZona}> 
+                                                    onChange={handleInputChangeZona}
+                                                    disabled={nosoyTecnico? true: false}> 
                                                     <option key={0} value={''}>Seleccionar</option>                                      
                                                     {zonas && zonas.map( zona => {
                                                         return (
@@ -854,7 +853,8 @@ const ParteForm = ({parte, setParte, op}) => {
                                     <Form.Control   as="select" 
                                                     value={datos.seccion}
                                                     name='seccion'
-                                                    onChange={handleInputChangeSeccion}>  
+                                                    onChange={handleInputChangeSeccion}
+                                                    disabled={nosoyTecnico? true: false}>  
                                                     <option key={0} value={''}>Seleccionar</option>                                      
                                                     {secciones && secciones.map( seccion => {
                                                         return (
@@ -872,7 +872,8 @@ const ParteForm = ({parte, setParte, op}) => {
                                     <Form.Control   as="select" 
                                                     value={datos.equipo}
                                                     name='equipo'
-                                                    onChange={handleInputChange}>  
+                                                    onChange={handleInputChange}
+                                                    disabled={nosoyTecnico? true: false}>  
                                                     {/* {datos.equipo===''?  <option key={0} value={''}>Seleccionar</option>:''}                                    */}
                                                     <option key={0} value={''}>Seleccionar</option>   
                                                     {equipos && equipos.map( equipo => {
@@ -895,6 +896,7 @@ const ParteForm = ({parte, setParte, op}) => {
                                                 value={datos.observaciones}
                                                 onChange={handleInputChange} 
                                                 placeholder="Observaciones"
+                                                disabled={nosoyTecnico? true: false}
                                     />
                                 </Form.Group>
                             </Col>                            
@@ -931,9 +933,10 @@ const ParteForm = ({parte, setParte, op}) => {
                         <Col>
                             <Row>
                                 <Col>
-                                <h5 className="pb-3 pt-1 mt-2">Tareas del Parte:</h5>
+                                <h5 className="pb-3 pt-1 mt-2">Tareas del Parte: </h5>
+                                <h5>- Rojo = Tarea Finalizada</h5>
+                                <h5>- Verde = Tarea Iniciada</h5>
                                 </Col>
-                                {/* {soyTecnico.length!==0?   */}
                                 {op?
                                     <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
                                             <PlusCircle className="plus mr-2" size={30} onClick={abrirAddLinea}/>
@@ -946,10 +949,11 @@ const ParteForm = ({parte, setParte, op}) => {
                                         <th>Prioridad</th>
                                         <th>Nombre</th>
                                         <th>Especialidad</th>
-                                        <th>Observaciones</th>
+                                        <th>Observaciones Técnico</th>
+                                        <th>Observaciones Mantenimiento</th>
                                         {datos.tipo===1? <th>Tipo Periodo</th>:null}
                                         {datos.tipo===1?<th>Cantidad Periodos</th>:null}
-                                        {(user['tec-user'].perfil.puesto.nombre ==='Técnico')? 
+                                        {(user['tec-user'].perfil.puesto.nombre !=='Operario')? 
                                         <th>Acciones</th>
                                         :null}
                                     </tr>
@@ -957,21 +961,19 @@ const ParteForm = ({parte, setParte, op}) => {
                                 <tbody>
                                     {lineas && lineas.map( linea => {
                                         return (
-                                            <tr key={linea.tarea.id} class={ linea.fecha_fin?"table-success":linea.fecha_inicio?"table-info":"" }/* class = {linea.fecha_inicio?"table-danger":" " } */>
+                                            <tr key={linea.tarea.id} class={ linea.fecha_fin?"table-danger":linea.fecha_inicio?"table-success":"" }/* class = {linea.fecha_inicio?"table-danger":" " } */>
                                                 <td>{linea.tarea.prioridad}</td>
                                                 <td>{linea.tarea.nombre}</td>
                                                 <td>{linea.tarea.especialidad_nombre}</td>
                                                 <td>{linea.tarea.observaciones}</td>
-                                                {datos.tipo===1 && linea.tarea.tipo_periodo? 
-                                                    <td>{linea.tarea.tipo_periodo.nombre}</td>:''}
-                                                {datos.tipo===1?<td>{linea.tarea.periodo}</td>:''}
-                                                {(user['tec-user'].perfil.puesto.nombre ==='Técnico')? 
-                                                    <td>                                            
-                                                        <Receipt className="mr-3 pencil" onClick={event =>{listarLineasTareas(linea.tarea)}}/>
-                                                        <Link to={`/mantenimiento/linea_tarea/${linea.id}`}><PencilFill className="mr-3 pencil"/></Link> 
-                                                        <Trash className="mr-3 pencil"  onClick={event =>{BorrarLinea(linea.tarea)}} />
-                                                    </td>
-                                                :null}
+                                                <td>{linea.tarea.observaciones_trab}</td>
+                                                <td>{datos.tipo===1? linea.tarea.tipo_periodo?linea.tarea.tipo_periodo.nombre:'0':'0'}</td>
+                                                <td>{datos.tipo===1? linea.tarea.periodo?linea.tarea.periodo:'0':'0'}</td>
+                                                <td>                                            
+                                                    <Receipt className="mr-3 pencil" onClick={event =>{listarLineasTareas(linea.tarea)}}/>
+                                                    <Link to={`/mantenimiento/linea_tarea/${linea.id}`}><PencilFill className="mr-3 pencil"/></Link> 
+                                                    {nosoyTecnico?'':<Trash className="mr-3 pencil"  onClick={event =>{BorrarLinea(linea.tarea)}} />}
+                                                </td>
                                             </tr>
                                         )})
                                     }

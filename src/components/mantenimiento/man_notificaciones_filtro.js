@@ -10,14 +10,17 @@ const ManNotificacionesFiltro = ({actualizaFiltro}) => {
 
     const [usuarios, setUsuarios] = useState(null);
     const [empresas, setEmpresas] = useState(null);
+    const [zonas, setZonas] = useState(null);
+    const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Técnico'&&user['tec-user'].perfil.puesto.nombre!=='Director Técnico'?true:false;
 
     const [datos, setDatos] = useState({
         id: '',
         quien: '',
         finalizado: false,
-        revisado: false,
+        revisado: '',
         descartado: false,
         empresa: user['tec-user'].perfil.empresa.id,
+        zona: user['tec-user'].perfil.zona?user['tec-user'].perfil.zona.id:'',
         fecha_creacion_lte:'',
         fecha_creacion_gte:'',
         numero: '',
@@ -59,18 +62,47 @@ const ManNotificacionesFiltro = ({actualizaFiltro}) => {
         });
     }, [token]);
 
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + `/api/estructura/zona/?empresa=${user['tec-user'].perfil.empresa.id}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( res => {
+            setZonas(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        }); 
+    }, [token, datos.empresa]);
+
     useEffect(()=>{
-        const filtro1 = `?quien=${datos.quien}&finalizado=${datos.finalizado}&revisado=${datos.revisado}&descartado=${datos.descartado}&fecha_creacion__lte=${datos.fecha_creacion_lte}&fecha_creacion__gte=${datos.fecha_creacion_gte}&numero__icontains=${datos.numero}`;
-        let filtro2 = `&empresa__id=${datos.empresa}`;
-        const filtro = filtro1 + filtro2;
-        actualizaFiltro(filtro);
-    },[datos.quien, datos.finalizado, datos.revisado, datos.descartado, datos.empresa, datos.fecha_creacion_gte, datos.fecha_creacion_lte, datos.numero, token]);
+        const filtro1 = `?quien=${datos.quien}&finalizado=${datos.finalizado}&revisado=${datos.revisado}&descartado=${datos.descartado}&fecha_creacion__lte=${datos.fecha_creacion_lte}&fecha_creacion__gte=${datos.fecha_creacion_gte}&numero__icontains=${datos.numero}&zona__id=${datos.zona}&empresa__id=${datos.empresa}`;
+        //let filtro2 = `&empresa__id=${datos.empresa}`;
+        //const filtro = filtro1 + filtro2;
+        actualizaFiltro(filtro1);
+    },[datos, token]);
 
     const handleInputChange = (event) => {
         setDatos({
             ...datos,
             [event.target.name] : event.target.value
         })
+    }
+
+    const desactivar = () => {
+        if(nosoyTecnico){
+            return true;
+        }
+    }
+
+    const desactivar_zona = () => {
+        if(user['tec-user'].perfil.zona){    
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 
     return (
@@ -176,7 +208,7 @@ const ManNotificacionesFiltro = ({actualizaFiltro}) => {
                                         value={datos.empresa}
                                         onChange={handleInputChange}
                                         placeholder="Empresa"
-                                        disabled>
+                                        disabled={desactivar()}>
                                         <option key={0} value={''}>Todas</option>    
                                         {empresas && empresas.map( empresa => {
                                             return (
@@ -186,6 +218,25 @@ const ManNotificacionesFiltro = ({actualizaFiltro}) => {
                                             )
                                         })}
                         </Form.Control>
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="zona">
+                            <Form.Label>Zona</Form.Label>
+                            <Form.Control   as="select" 
+                                            value={datos.zona}
+                                            name='zona'
+                                            onChange={handleInputChange}
+                                            disabled={desactivar_zona()}> 
+                                            <option key={0} value={''}>Seleccionar</option>                                      
+                                            {zonas && zonas.map( zona => {
+                                                return (
+                                                <option key={zona.id} value={zona.id}>
+                                                    {zona.siglas}
+                                                </option>
+                                                )
+                                            })}
+                            </Form.Control>
                         </Form.Group>
                     </Col>
                 </Row>

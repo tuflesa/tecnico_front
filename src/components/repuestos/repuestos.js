@@ -17,16 +17,26 @@ import RepSalidasGenerico from './rep_salidas_generico';
 import RepSalidasID from './rep_salidas_id';
 import RepPendientes from './rep_pendientes';
 import RepInventario from './rep_inventario';
+import RepTraspasoAlmacen from './rep_traspaso_almacen';
+import RepPrecio from './rep_precio';
+import Programadores from './a_rep_programadores';
+import LineaAdicional from './rep_lineas_adicionales';
+import { useCookies } from 'react-cookie';
 
 const Repuestos = () => {
+    const [user] = useCookies(['tec-user']);
+    const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Mantenimiento'&&user['tec-user'].perfil.puesto.nombre!=='Operador'?false:true;
     
     return (
         <React.Fragment>
             <RepNavBar />
             <Switch>
-                <Route path='/repuestos' exact component={RepPendientes} />
+                <Route path='/repuestos/precio' component={RepPrecio} />
+                <Route path='/repuestos/programadores' component={Programadores} />
+                <Route path='/repuestos/traspasos' component={RepTraspasoAlmacen} /> 
                 <Route path='/repuestos/inventario' component={RepInventario} /> 
                 <Route path='/repuestos/listado' component={RepLista} />
+                <Route path='/repuestos/lineas_adicionales' component={LineaAdicional} /> 
                 <Route path='/repuestos/pedidos' component={PedLista} /> 
                 <Route path='/repuestos/salidas/:id' component={RepSalidasID} /> 
                 <Route path='/repuestos/salidas' component={RepSalidasGenerico} />                    
@@ -40,6 +50,7 @@ const Repuestos = () => {
                 <Route path='/repuestos/proveedor/nuevo' component={RepProveedorNuevo} />
                 <Route path='/repuestos/proveedor/:id' component={RepProveedorEdit} />                              
                 <Route path='/repuestos/:id' component={RepDetalle} />                
+                {!nosoyTecnico?<Route path='/repuestos/' exact component={RepPendientes} /> : <Route path='/repuestos/' exact component={RepLista} /> }
             </Switch>
         </React.Fragment>
     )

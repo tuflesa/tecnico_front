@@ -15,13 +15,15 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
     const [zonas, setZonas] = useState(null);
     const [equipos, setEquipos] = useState(null);
     const [estados, setEstados] = useState(null);
-    const soyTecnico = user['tec-user'].perfil.destrezas.filter(s => s === 6);
+    //const soyTecnico = user['tec-user'].perfil.destrezas.filter(s => s === 6);
+    const soyTecnico_mantenimiento = user['tec-user'].perfil.puesto.nombre==='Técnico'||user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:false;
+    const soyTecnico = user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:false;
 
     const [datos, setDatos] = useState({
         id: '',
         nombre: '',
         tipotarea: '',
-        creado_por: soyTecnico.length===0?user['tec-user'].perfil.usuario:'',
+        creado_por: user['tec-user'].perfil.usuario,
         observaciones: '',
         finalizado: false,
         empresa: user['tec-user'].perfil.empresa.id,
@@ -35,13 +37,14 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
     });    
 
     useEffect(() => {
+        console.log(user['tec-user'].perfil.puesto.nombre);
         axios.get(BACKEND_SERVER + '/api/mantenimiento/tipo_tarea/',{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
         .then( res => {
-            if(soyTecnico.length===0){
+            if(!soyTecnico){
                 const no_tecnico = res.data.filter( s => s.nombre !== 'Preventivo');
                 setTipoTarea(no_tecnico.sort(function(a, b){
                     if(a.nombre > b.nombre){
@@ -237,9 +240,9 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
             }
         }
         const filtro = filtro1 + filtro2;
-        const activos = datos.estados;
+        const activos = datos.estados<3;
         actualizaFiltro(filtro, activos);
-    },[datos.id, datos.nombre, datos.tipotarea, datos.observaciones, datos.creado_por, datos.finalizado, datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.fecha_prevista_inicio_gte, datos.fecha_prevista_inicio_lte, datos.estados, datos.num_parte, token]);
+    },[datos, token]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -291,7 +294,7 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
                                         value={datos.creado_por}
                                         onChange={handleInputChange}
                                         placeholder="Creado por"
-                                        disabled={soyTecnico.length===0?true:false}>
+                                        disabled={soyTecnico_mantenimiento?false:true}>
                                         <option key={0} value={''}>Todas</option>    
                                         {usuarios && usuarios.map( usuario => {
                                             return (
@@ -333,7 +336,7 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
                                         value={datos.empresa}
                                         onChange={handleInputChange}
                                         placeholder="Empresa"
-                                        disabled={soyTecnico.length===0?true:false}>
+                                        disabled={soyTecnico?false:true}>
                                         <option key={0} value={''}>Todas</option>    
                                         {empresas && empresas.map( empresa => {
                                             return (

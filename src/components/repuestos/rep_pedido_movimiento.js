@@ -22,11 +22,12 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
         precio: linea ? linea.precio : '', 
         //fecha: (('0'+hoy.getDay()) + '-'+(hoy.getMonth()+1)+'-'+ hoy.getFullYear()),
         fecha: fechaString,
-        recibido: null,
+        recibido: '',
         albaran: null,
         almacen: '',
         localizacion: '',
         usuario: user['tec-user'],
+        entregadoAnterior: linea? (linea.cantidad - linea.por_recibir) : 0,
     });
 
     const handlerCancelar = () => {      
@@ -61,25 +62,49 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
             almacen: datos ? datos.almacen : '',
             localizacion: datos ? datos.localizacion : '',
             usuario: user['tec-user'].id,
+            entregadoAnterior: linea? (linea.cantidad - linea.por_recibir) : 0,
         });
     },[linea]);
 
+    useEffect(()=>{
+        if(datos.recibido<0){
+            var confirmacion = window.alert('No se pueden hacer entradas en negativo, modifica la cantidad. Gracias');
+            datos.recibido=0;
+        }
+    },[datos.recibido])
+
     const actualizarRecibir = () =>{
+        if((datos.entregadoAnterior + parseInt(datos.recibido))>linea.cantidad){
+            var igualar = window.confirm("Se ha recibido una cantidad mayor a la indicada, ¿Deseas cambiar la cantidad pedida?");
+            if(igualar){
+                datos.por_recibir = 0;
+                datos.cantidad = datos.entregadoAnterior + parseInt(datos.recibido);
+            }
+            else{
+                datos.por_recibir = linea.por_recibir - datos.recibido;
+            }
+        }
+        else{
+            datos.por_recibir = linea.por_recibir - datos.recibido;
+        }
         axios.patch(BACKEND_SERVER + `/api/repuestos/linea_pedido/${linea.id}/`, {
-            por_recibir: linea.por_recibir - datos.recibido,            
+            por_recibir: datos.por_recibir,  
+            cantidad: datos.cantidad,    
+
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }     
         })
         .then( res => {    
-            //actualizarStock();
+            //actualizarStock();            
+            //modificarCantidad();
             updatePedido();
         })
         .catch(err => { console.log(err);})
     }
  
-    const guardarMovimiento = (event) => {
+    const guardarMovimiento = (event) => {   
         event.preventDefault();
         axios.post(BACKEND_SERVER + `/api/repuestos/movimiento/`, {
             fecha: datos.fecha,
@@ -110,9 +135,26 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
         })
     }
 
+    const handleInputChange2 = (event) => {
+        if(event.target.value<0){
+            alert('No se pueden poner numeros negativos');
+            event.target.value='';
+            setDatos({
+                ...datos,
+                [event.target.name] : event.target.value
+            })
+        }
+        else{
+            setDatos({
+                ...datos,
+                [event.target.name] : event.target.value
+            })
+        }
+    }
+
     return (
         <Modal show={show} backdrop="static" keyboard={ false } animation={false} size="xl">
-                <Modal.Header closeButton>                
+                <Modal.Header>                
                     <Modal.Title>Nuevo Movimiento</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
@@ -172,7 +214,7 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
                                     <Form.Control imput type="text"  
                                                 name='recibido' 
                                                 value={datos.recibido}
-                                                onChange={handleInputChange}
+                                                onChange={handleInputChange2}
                                                 placeholder="Cantidad Recibida">  
                                     </Form.Control>
                                 </Form.Group>
@@ -202,7 +244,7 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
                                                 {almacenes && almacenes.map( stock => {
                                                     return (
                                                     <option key={stock.id} value={stock.almacen.id}>
-                                                        {stock.almacen.nombre + ' => En: ' + stock.localizacion}                                                       
+                                                        {stock.almacen.nombre + ' / Cant: ' + stock.stock_act + ' / En: ' + stock.localizacion }                                                       
                                                     </option>                                                    
                                                     )                                                    
                                                 })}   

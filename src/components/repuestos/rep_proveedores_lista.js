@@ -21,15 +21,7 @@ const RepProveedoresLista = () => {
               }
         })
         .then( res => {
-            setProveedores(res.data.sort(function(a, b){
-                if(a.nombre > b.nombre){
-                    return 1;
-                }
-                if(a.nombre < b.nombre){
-                    return -1;
-                }
-                return 0;
-            }));
+            setProveedores(res.data);
         })
         .catch( err => {
             console.log(err);
@@ -86,7 +78,7 @@ const RepProveedoresLista = () => {
                 </Col>
             </Row>
             <Modal show={show} onHide={handlerClose} backdrop="static" keyboard={ false } animation={false}>
-                <Modal.Header closeButton>
+                <Modal.Header>
                     <Modal.Title>Borrar Proveedor no permitido ...</Modal.Title>
                 </Modal.Header>
 

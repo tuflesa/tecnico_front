@@ -175,7 +175,7 @@ const EquipoForm = ({show, repuesto_id, handleCloseEquipo, equiposAsignados, upd
 
     return (
         <Modal show={show} onHide={handleCloseEquipo} backdrop="static" keyboard={ false } animation={false}>
-                <Modal.Header closeButton>
+                <Modal.Header>
                     <Modal.Title>Añadir equipo</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>

@@ -2,23 +2,28 @@ import React, { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
-import { Container, Row, Col, Table, Modal, Button  } from 'react-bootstrap';
+import { Container, Row, Col, Table, Modal, Button, Form } from 'react-bootstrap';
 import {invertirFecha} from '../utilidades/funciones_fecha';
-import { Tools, StopCircle, UiChecks, FileCheck, Receipt, Eye} from 'react-bootstrap-icons';
+import { Tools, FileCheck, Receipt, Eye} from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import ListaDePersonal from './man_equipo_trabajadores';
 import ManEquipoFiltro from './man_equipo_filtro';
+import { color } from 'd3';
 
 const ManPorEquipos = () => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
 
-    const [lineas, setLineas] = useState(null);
-    //const [trabajadores_lineas, setTrabajadoresLineas] = useState(null);    
+    const [lineas, setLineas] = useState(null);  
     const [hoy] = useState(new Date);
     const [show, setShow] = useState(false);
     const [linea_id, setLinea_id] = useState(null);
-    
+    const [linea_completa, setLinea_completa] = useState(null);
+    const [lineasTrabajadores, setlineasTrabajadores] = useState(null);
+    const [count, setCount] = useState(null);
+    const [pagTotal, setPagTotal] = useState(null);
+    const [filtro, setFiltro] = useState(null);
+    const [show_Observacion, setShowObservacion] = useState(false);
 
     var dentrodeunmes=null;
     var fechaenunmesString=null;
@@ -27,47 +32,68 @@ const ManPorEquipos = () => {
     var enunmes=fecha_hoy+mesEnMilisegundos;
     dentrodeunmes = new Date(enunmes);
     fechaenunmesString = dentrodeunmes.getFullYear() + '-' + ('0' + (dentrodeunmes.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunmes.getDate()).slice(-2);
-    //const [filtro, setFiltro] = useState(`?parte__empresa=${user['tec-user'].perfil.empresa.id}&fecha_plan__lte=${fechaenunmesString}&parte__zona=${user['tec-user'].perfil.zona?user['tec-user'].perfil.zona.id:''}&parte__seccion=${user['tec-user'].perfil.seccion?user['tec-user'].perfil.seccion.id:''}`);
-
-    const [filtro, setFiltro] = useState(`?parte__empresa=${user['tec-user'].perfil.empresa.id}&fecha_plan__lte=${fechaenunmesString}`);
+    
     const actualizaFiltro = str => {
         setFiltro(str);
     }
-    
 
     const [datos, setDatos] = useState({
         fecha_inicio: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
         fecha_fin: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
         linea: '',
         trabajador: user['tec-user'].perfil.usuario,
+        pagina:1,
+        observaciones:'',
     });
     
-    useEffect(()=>{        
-        axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_activas/`+ filtro,{
+    useEffect(()=>{ 
+        
+        filtro && axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_activas/`+ filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
                 }
         })
         .then( res => {
-            //filtramos los trabajos que sean de nuestras destrezas
+            //filtramos los trabajos que sean de nuestras destrezas, para cuando son varias destrezas 
             var MisTrabajos;
             var destrezas = user['tec-user'].perfil.destrezas;
-            MisTrabajos = res.data.filter(s => destrezas.includes(s.tarea.especialidad));
-            //ordenamos los trabajos por prioridad
-            setLineas(MisTrabajos.sort(function(a, b){
-                if(a.tarea.prioridad < b.tarea.prioridad){
-                    return 1;
-                }
-                if(a.tarea.prioridad > b.tarea.prioridad){
-                    return -1;
-                }
-                return 0;
-            }))  
+            MisTrabajos = res.data.results.filter(s => destrezas.includes(s.tarea.especialidad));
+            setLineas(MisTrabajos);
+            setCount(res.data.count);
+            let pagT = res.data.count/20;
+            if (res.data.count % 20 !== 0){
+                pagT += 1;
+            }
+            setPagTotal(Math.trunc(pagT));
+
         })
         .catch( err => {
             console.log(err);
         });
     }, [token, filtro]); 
+ 
+    useEffect(()=>{
+        axios.get(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea_filtro/?trabajador=${user['tec-user'].perfil.usuario}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+                }
+        })
+        .then( res => {
+            setlineasTrabajadores(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
+
+    const comparar = (x) => {
+        for(var y=0;y<lineasTrabajadores.length;y++){
+            if(lineasTrabajadores[y].linea===x.id){
+                return( true);
+            }
+        }
+        return(false);
+    }
 
     const updateTarea = () => {
         axios.get(BACKEND_SERVER + '/api/mantenimiento/listado_lineas_activas/'+ filtro,{
@@ -79,17 +105,10 @@ const ManPorEquipos = () => {
             //filtramos los trabajos que sean de nuestras destrezas.
             var MisTrabajos;
             var destrezas = user['tec-user'].perfil.destrezas;
-            MisTrabajos = res.data.filter(s => destrezas.includes(s.tarea.especialidad));
+            MisTrabajos = res.data.results.filter(s => destrezas.includes(s.tarea.especialidad));
             //ordenamos los trabajos por prioridad
-            setLineas(MisTrabajos.sort(function(a, b){
-                if(a.tarea.prioridad < b.tarea.prioridad){
-                    return 1;
-                }
-                if(a.tarea.prioridad > b.tarea.prioridad){
-                    return -1;
-                }
-                return 0;
-            }))  
+            setLineas(MisTrabajos);
+            setCount(res.data.count);
         })
         .catch( err => {
             console.log(err);
@@ -124,7 +143,18 @@ const ManPorEquipos = () => {
                           }     
                     })
                     .then( ress => {
-                        updateTarea(); 
+                        axios.get(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea_filtro/?trabajador=${user['tec-user'].perfil.usuario}`,{
+                            headers: {
+                                'Authorization': `token ${token['tec-token']}`
+                                }
+                        })
+                        .then( res => {
+                            setlineasTrabajadores(res.data);
+                        })
+                        .catch( err => {
+                            console.log(err);
+                        });
+                        updateTarea();
                     })
                     .catch(err => { console.log(err);})
                     updateTarea();
@@ -157,6 +187,31 @@ const ManPorEquipos = () => {
         .catch(err => { console.log(err);}) 
     }
 
+    const pedir_observaciones = (linea) => {
+        datos.observaciones=linea.tarea.observaciones_trab;
+        setShowObservacion(true);
+        setLinea_completa(linea);
+    }
+
+    const handleCloseObservacion = () => {
+        setShowObservacion(false);
+        axios.patch(BACKEND_SERVER + `/api/mantenimiento/tareas/${linea_completa.tarea.id}/`,{
+            observaciones_trab: datos.observaciones,
+        },
+        {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( r => {
+            console.log(r.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+        FinalizarTarea(linea_completa);
+    }
+
     const FinalizarTarea = (linea) => { 
         axios.get(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea/?linea=${linea.id}`, {
             headers: {
@@ -178,6 +233,7 @@ const ManPorEquipos = () => {
                         for(var x=0;x<res.data.length;x++){
                             axios.patch(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea/${res.data[x].id}/`,{
                                 fecha_fin: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
+
                             },
                             {
                                 headers: {
@@ -246,7 +302,6 @@ const ManPorEquipos = () => {
                                             contador=contador+1;
                                             if(contador===res.data.length){
                                                 axios.patch(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${res.data[0].parte}/`,{
-                                                    //fecha_finalizacion: hoy,
                                                     estado: 3,
                                                 },
                                                 {
@@ -255,7 +310,7 @@ const ManPorEquipos = () => {
                                                     }
                                                 })
                                                 .then( re => {
-                                                    console.log('parte finalizado');
+                                                    alert('Parte finalizado');
                                                 })
                                                 .catch( err => {
                                                     console.log(err);  
@@ -293,16 +348,61 @@ const ManPorEquipos = () => {
         setShow(false);
     }
 
+    const cambioPagina = (pag) => {
+        if(pag<=0){
+            pag=1;
+        }
+        
+        if(pag>count/20){
+            if(count % 20 === 0){
+                pag=Math.trunc(count/20);
+            }
+            else{
+                pag=Math.trunc(count/20)+1;
+            }
+        }
+        if(pag>0){
+            setDatos({
+                ...datos,
+                pagina: pag,
+            })
+        }
+        var filtro2=`&page=${datos.pagina}`;
+        const filtro3 = filtro + filtro2;
+        actualizaFiltro(filtro3);
+    }
+
+    const handleInputChange = (event) => {
+        setDatos({
+            ...datos,
+            [event.target.name] : event.target.value
+        })  
+    }
+    
+    const styles = ({
+        color1:{
+            color: '#FFAEC9',
+        },
+    });
+
     return(
-        <Container class extends className="pt-1 mt-5">
-            <Row class extends>                
+        <Container className extends="pt-1 mt-5">
+            <Row className extends>                
                 <Col>
                     <h5 className="mb-3 mt-3" style={ { color: 'red' } }>Listado de Trabajos {user['tec-user'].get_full_name}, por prioridades:</h5>              
                     <h5>Acciones:</h5>
-                    <h5><Tools/> ---- Para iniciar un trabajo</h5>
+                    <h5><Tools/> ---- Para iniciar un trabajo "Iniciados en color verde"</h5>
                     <h5><FileCheck/> ---- Para finalizar un trabajo</h5>
                     <h5><Receipt/> ---- Listado del personal que está interviniendo en este trabajo</h5>
                     <h5><Eye/> ---- Ver el parte al que pertenece la tarea</h5>
+                </Col>
+                <Col>
+                    <br></br>
+                    <br></br>
+                    <br></br>
+                    <br></br>
+                    <h5 style={{ color: 'black' }}>Amarillo ---- Trabajo cogido por un compañero</h5>
+                    <h5 style={{ color: 'orange' }}>Naranja ---- Trabajo cogido por nosotros</h5>
                 </Col>
             </Row>
             <Row>
@@ -310,6 +410,15 @@ const ManPorEquipos = () => {
                     <ManEquipoFiltro actualizaFiltro={actualizaFiltro}/>
                 </Col>
             </ Row>
+            <table>
+                <tbody>
+                    <tr>
+                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
+                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
+                        <th>Página {datos.pagina} de {pagTotal}</th>
+                    </tr>
+                </tbody>
+            </table> 
             <Row>
                 <Col>
                     <Table striped bordered hover>
@@ -328,7 +437,7 @@ const ManPorEquipos = () => {
                         <tbody>
                             {lineas && lineas.map( linea => {
                                 return (
-                                    <tr key={linea.id} className = {linea.fecha_inicio?"table-danger":" "}>
+                                    <tr key={linea.id} style={{ backgroundColor: comparar(linea) ? 'orange' : linea.fecha_inicio!==null? 'yellow' : " " }} className="table-secundary">
                                         <td>{linea.tarea.prioridad}</td>
                                         <td>{invertirFecha(linea.fecha_plan)}</td>
                                         <td>{linea.tarea.nombre}</td>
@@ -338,7 +447,7 @@ const ManPorEquipos = () => {
                                         <td>{linea.fecha_fin?invertirFecha(String(linea.fecha_fin)):''}</td>
                                         <td>
                                         <Tools className="mr-3 pencil"  onClick={event =>{InicioTarea(linea)}}/>
-                                        <FileCheck className="mr-3 pencil"  onClick={event =>{FinalizarTarea(linea)}} />
+                                        <FileCheck className="mr-3 pencil"  onClick={event =>{pedir_observaciones(linea)}} />
                                         <Receipt className="mr-3 pencil" onClick={event =>{listarTrabajadores(linea.id)}}/>
                                         <Link to={`/mantenimiento/parte_op/${linea.parte.id}`}><Eye className="mr-3 pencil"/></Link>
                                         </td>
@@ -349,6 +458,44 @@ const ManPorEquipos = () => {
                     </Table>
                 </Col>
             </Row> 
+            <table>
+                <tbody>
+                    <tr>
+                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
+                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
+                        <th>Página {datos.pagina} de {pagTotal}</th>
+                    </tr>
+                </tbody>
+            </table>
+            <Modal show={show_Observacion} onHide={handleCloseObservacion} backdrop="static" keyboard={ false } animation={false}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Conclusiones de la tarea</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {/* <Row>                            
+                        <Col> */}
+                    <Container>
+                        <Row>
+                            <Col>
+                                <Form.Group id="observaciones">
+                                    <Form.Label>Conclusiones Personal Mantenmiento</Form.Label>
+                                    <Form.Control as="textarea" rows={3}
+                                                name='observaciones' 
+                                                value={datos.observaciones}
+                                                onChange={handleInputChange} 
+                                                placeholder="Conclusiones"
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                    </Container>
+                      {/*   </Col>
+                    </Row> */}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseObservacion}>Aceptar</Button>
+                </Modal.Footer>
+            </Modal>
         <ListaDePersonal    show={show}
                             linea_id ={linea_id}
                             handlerClose={handlerClose}

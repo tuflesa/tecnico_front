@@ -7,11 +7,15 @@ import { useCookies } from 'react-cookie';
 const ManLineasFiltro = ({actualizaFiltro}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']); 
+
     const [empresas, setEmpresas] = useState(null);
     const [secciones, setSecciones] = useState(null);
     const [zonas, setZonas] = useState(null);
     const [equipos, setEquipos] = useState(null);
     const [estados, setEstados] = useState(null);
+    const [especialidades, setEspecialidades] = useState(null);
+    const [tipotarea, setTipoTarea] = useState(null);
+
     var fecha_hoy=Date.parse(new Date);
     var mesEnMilisegundos = 1000 * 60 * 60 * 24 * 30;
     var enunmes=fecha_hoy+mesEnMilisegundos;
@@ -37,9 +41,6 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
         fecha_plan_gte:'',
         estado:'',
     });
-
-    const [especialidades, setEspecialidades] = useState(null);
-    const [tipotarea, setTipoTarea] = useState(null);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/mantenimiento/especialidades/',{
@@ -230,9 +231,9 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
             }
         }
         const filtro = filtro1 + filtro2 ;
-        const activos = datos.estado;
+        const activos = datos.estado<3;
         actualizaFiltro(filtro, activos);
-    },[ datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.id, datos.nombre_tarea, datos.tipo, datos.especialidad,datos.prioridad_mayor, datos.prioridad_menor, datos.finalizada, datos.nombre_parte, datos.fecha_inicio_gte, datos.fecha_inicio_lte, datos.fecha_plan_gte, datos.fecha_plan_lte, datos.estado, token]);
+    },[datos, token]);
 
     const handleInputChange = (event) => {
         setDatos({

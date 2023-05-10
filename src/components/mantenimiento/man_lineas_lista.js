@@ -2,81 +2,120 @@ import React, { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
-import { Container, Row, Col, Table, Modal, Button } from 'react-bootstrap';
+import { Container, Row, Col, Table} from 'react-bootstrap';
 import { Trash, PencilFill, Receipt, Eye, PlusSquare, DashSquare, HandThumbsUpFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import ManLineasFiltro from './man_lineas_filtro';
 import { color, filter } from 'd3';
 import {invertirFecha} from '../utilidades/funciones_fecha';
 import ListaDePersonal from './man_equipo_trabajadores';
+import ReactExport from 'react-data-export';
 
 
 const ManLineasListado = () => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
     const [lineas, setLineas] = useState(null);
-    //const [lineas_finalizadas, setLineasFinalizadas] = useState(null);
-    //const [hoy] = useState(new Date);
+    const ExcelFile = ReactExport.ExcelFile;
+    const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
+    const ExcelColumn = ReactExport.ExcelFile.ExcelColumn;
+
     var fecha_hoy=Date.parse(new Date);
     var mesEnMilisegundos = 1000 * 60 * 60 * 24 * 30;
     var enunmes=fecha_hoy+mesEnMilisegundos;
     var dentrodeunmes = new Date(enunmes);
     var fechaenunmesString = dentrodeunmes.getFullYear() + '-' + ('0' + (dentrodeunmes.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunmes.getDate()).slice(-2);
+    var haceunmes = fecha_hoy-mesEnMilisegundos;
+    var unmesatras = new Date(haceunmes);
+    var fechapasadaString = unmesatras.getFullYear() + '-' + ('0' + (unmesatras.getMonth()+1)).slice(-2) + '-' + ('0' + unmesatras.getDate()).slice(-2);
+
     const [filtro, setFiltro] = useState(`?parte__empresa__id=${user['tec-user'].perfil.empresa.id}&estado=${''}&fecha_plan__lte=${fechaenunmesString}`);
-    const [activos, setActivos] = useState('');
+    const [activos, setActivos] = useState(true);
     const [linea_id, setLinea_id] = useState(null);
     const [show, setShow] = useState(false);
     const [actualizar, setActualizar] = useState('');
+    const [count, setCount] = useState(null);
+    const [pagTotal, setPagTotal] = useState(null);
+    const [abrirFiltro, setabrirFiltro] = useState(false);
 
-    const actualizaFiltro = (str, act) => {        
-        setActivos(act);
+    const actualizaFiltro = (str, act) => {   
+        setActivos(act)
         setFiltro(str);
     }
 
+    const [datos, setDatos] = useState({
+        pagina: 1,
+    });
+
     useEffect(()=>{
-        axios.get(BACKEND_SERVER + '/api/mantenimiento/listado_lineas_partes/'+ filtro,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
+        console.log(fechapasadaString);
+        if(activos){
+            axios.get(BACKEND_SERVER + '/api/mantenimiento/listado_lineas_activas/'+ filtro,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                    }
+            })
+            .then( res => {
+                console.log(res.data.results);
+                res.data.results.map( r => {
+                    //solo para poder utilizar los campos en el excel
+                    r['priori']=r.tarea.prioridad;
+                    r['nom_parte']=r.parte.nombre;
+                    r['obparte']=r.parte.observaciones;
+                    r['nom_tarea']=r.tarea.nombre;
+                    r['obtarea']=r.tarea.observaciones;
+                    r['obtareaT']=r.tarea.observaciones_trab;
+                    r['parte_tip']=r.parte.tipo_nombre;
+                    r['especial']=r.tarea.especialidad_nombre;
+                    r['equipoT']=r.parte.seccion?r.parte.seccion.siglas_zona +' - '+r.parte.seccion.nombre + (r.parte.equipo?' - ' + r.parte.equipo.nombre:''):null;
+                    r['fecha_plani']=r.fecha_inicio?invertirFecha(String(r.fecha_plan)):'';
+                    r['fecha_ini']=r.fecha_inicio?invertirFecha(String(r.fecha_inicio)):'';
+                })
+                setLineas(res.data.results);
+                setCount(res.data.count);
+                let pagT = res.data.count/20;
+                if (res.data.count % 20 !== 0){
+                    pagT += 1;
                 }
-        })
-        .then( res => {
-            //variable para filtrar en Activos las 2 opciones
-            if(activos===''){
-                //listaFil recoge toda las lineas para luego filtrarlas.
-                const listaFil=res.data;
-                //cogemos de todas solo las que estén planificadas
-                const planificadas = listaFil.filter(s=>s.estado===1);
-                //cogemos de todas solo las que estén en ejecución
-                const ejecucion = listaFil.filter(s=>s.estado===2);
-                //anidamos planificadas y en ejecución
-                const activas = planificadas.concat(ejecucion);
-                //las ordenamos pasandolas a la variable que muestra los datos 'lineas'
-                setLineas(activas.sort(function(a, b){
-                    if(a.tarea.prioridad < b.tarea.prioridad){
-                        return 1;
+                setPagTotal(Math.trunc(pagT));
+            })
+            .catch( err => {
+                console.log(err);
+            });
+        }
+        else{
+            //si no hay opción 5 (Activos) filtramos de forma normal
+            axios.get(BACKEND_SERVER + '/api/mantenimiento/listado_lineas_partes/'+ filtro,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
                     }
-                    if(a.tarea.prioridad > b.tarea.prioridad){
-                        return -1;
-                    }
-                    return 0;
-                }));
-            }
-            else{
-                //si no hay opción 5 (Activos) filtramos de forma normal y aquí ordenamos
-                setLineas(res.data.sort(function(a, b){
-                    if(a.tarea.prioridad < b.tarea.prioridad){
-                        return 1;
-                    }
-                    if(a.tarea.prioridad > b.tarea.prioridad){
-                        return -1;
-                    }
-                    return 0;
-                }))
-            }
-        })
-        .catch( err => {
-            console.log(err);
-        });
+            })
+            .then( res => {
+                /* res.data.results.map( r => {
+                    //solo para poder utilizar los campos en el excel
+                    r['priori']=r.tarea.prioridad;
+                    r['nom_parte']=r.parte.nombre;
+                    r['obparte']=r.parte.observaciones;
+                    r['obtarea']=r.tarea.observaciones;
+                    r['obtareaT']=r.tarea.observaciones_trab;
+                    r['parte_tip']=r.parte.tipo_nombre;
+                    r['especial']=r.tarea.especialidad_nombre;
+                    r['equipoT']=r.parte.equipo.nombre;
+                    r['fecha_plani']=r.fecha_inicio?invertirFecha(String(r.fecha_plan)):'';
+                    r['fecha_ini']=r.fecha_inicio?invertirFecha(String(r.fecha_inicio)):'';
+                }) */
+                setLineas(res.data.results);
+                setCount(res.data.count);
+                let pagT = res.data.count/20;
+                if (res.data.count % 20 !== 0){
+                    pagT += 1;
+                }
+                setPagTotal(Math.trunc(pagT));
+            })
+            .catch( err => {
+                console.log(err);
+            });
+        } 
     }, [token, filtro, activos, actualizar]); 
 
     const BorrarLinea =(linea) =>{ 
@@ -172,17 +211,78 @@ const ManLineasListado = () => {
         })
         .catch(err => { console.log(err);})
     }
+
+    const cambioPagina = (pag) => {
+        if(pag<=0){
+            pag=1;
+        }
+        if(pag>count/20){
+            if(count % 20 === 0){
+                pag=Math.trunc(count/20);
+            }
+            if(count % 20 !== 0){
+                pag=Math.trunc(count/20)+1;
+            }
+        }
+        if(pag>0){
+            setDatos({
+                ...datos,
+                pagina: pag,
+            })
+        }
+        var filtro2=`&page=${datos.pagina}`;
+        const filtro3 = filtro + filtro2;
+        actualizaFiltro(filtro3, activos);
+    }
+
+    const abroFiltro = () => {
+        setabrirFiltro(!abrirFiltro);
+    }
     
     return (
-        <Container className='mt-5'>            
-            <Row>
-                <Col>
-                    <ManLineasFiltro actualizaFiltro={actualizaFiltro}/>
-                </Col>
-            </ Row>
+        <Container className='mt-3'>
+            <button type="button" className='mt-5' onClick={event => {abroFiltro()}}>Ver Filtros</button>
+            {abrirFiltro?    
+                <Row>
+                    <Col>
+                        <ManLineasFiltro actualizaFiltro={actualizaFiltro}/>
+                    </Col>
+                </ Row>
+            :null}
+            {abrirFiltro? 
+                <Row> 
+                    <Col><h5>{lineas?lineas.prioridad:''}</h5></Col>
+                    <ExcelFile filename={"ExcelExportExample"} element={<button>Exportar a Excel</button>}>
+                        <ExcelSheet data={lineas} name="lineas">
+                            <ExcelColumn label="Prioridad" value="priori"/>
+                            <ExcelColumn label="Parte" value="nom_parte"/>
+                            <ExcelColumn label="Observaciones Parte" value="obparte"/>
+                            <ExcelColumn label="Tarea" value="nom_tarea"/>
+                            <ExcelColumn label="Observaciones Tarea" value="obtarea"/>
+                            <ExcelColumn label="Observaciones Tarea Mantenimiento" value="obtareaT"/>
+                            <ExcelColumn label="Tipo" value="parte_tip"/>
+                            <ExcelColumn label="Especialidad" value="especial"/>
+                            <ExcelColumn label="Equipo" value="equipoT"/>  
+                            <ExcelColumn label="Fecha Planificación" value="fecha_plani"/>
+                            <ExcelColumn label="Fecha Inicio" value="fecha_ini"/>        
+                        </ExcelSheet>
+                    </ExcelFile> 
+                </Row>
+            :null}
+            <table>
+                <tbody>
+                    <tr>
+                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
+                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
+                        <th>Página {datos.pagina} de {pagTotal} - Número registros totales: {count}</th>
+                    </tr>
+                </tbody>
+            </table> 
             <Row>                
                 <Col>
-                    <h5 className="mb-3 mt-3">Listado de Trabajos</h5>                    
+                    <h5 className="mb-3 mt-3">Listado de Trabajos</h5>
+                    <h5>--- Verde = Trabajo terminado   --- Rojo = Trabajo NO iniciado con fecha pasada</h5>  
+                    <h5>--- Azul = Trabajo iniciado   --- Naranja = Trabajo iniciado con fecha pasada</h5>             
                     <Table striped bordered hover>
                         <thead>
                             <tr>
@@ -202,7 +302,7 @@ const ManLineasListado = () => {
                         <tbody>
                             {lineas && lineas.map( linea => {
                                 return (
-                                    <tr key={linea.id} className={ linea.fecha_fin?"table-success":linea.fecha_inicio?"table-info":"" }>
+                                    <tr key={linea.id} className = {linea.fecha_fin?"table-success" : linea.fecha_inicio && fechapasadaString<linea.fecha_plan?"table-primary":!linea.fecha_inicio && fechapasadaString>linea.fecha_plan?"table-danger" : "" }style={{ backgroundColor: linea.fecha_inicio && fechapasadaString>linea.fecha_plan? 'orange' : " " }}>
                                         <td>{linea.tarea.prioridad}</td>
                                         <td>
                                             <PlusSquare className="mr-3 pencil"  onClick={event => {updateCantidad(1, linea)}} />
@@ -232,6 +332,16 @@ const ManLineasListado = () => {
                     </Table>
                 </Col>
             </Row>
+            <table>
+                <tbody>
+                    <tr>
+                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
+                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
+                        <th>Página {datos.pagina} de {pagTotal} - Número registros totales: {count}</th>
+                    </tr>
+                </tbody>
+            </table>
+            
             <ListaDePersonal    show={show}
                                 linea_id ={linea_id}
                                 handlerClose={handlerClose}

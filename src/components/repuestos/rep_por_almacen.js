@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import Modal from 'react-bootstrap/Modal'
-import { Button, Row, Col, Table } from 'react-bootstrap';
-import { PencilFill, HandThumbsUpFill, Receipt } from 'react-bootstrap-icons';
+import { Button, Row, Col, Table, Container } from 'react-bootstrap';
+import { PencilFill, HandThumbsUpFill, Receipt, Trash, Printer } from 'react-bootstrap-icons';
 import ListaTrazabilidad from './rep_trazabilidad';
+import { Link } from 'react-router-dom';
+import {invertirFecha} from '../utilidades/funciones_fecha';
 
 const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show})=>{
     const [token] = useCookies(['tec-token']);
@@ -14,6 +16,10 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
     const [showTrazabilidad, setShowTrazabilidad] = useState(false);
     const [traza_repuesto, setTrazaRepuesto] = useState(null);
     const [almacentraza, setAlmacenTraza] = useState(null);
+    const [showBorrar, setShowBorrar] = useState(false);
+    const [pedidos_pendientes, setPedidosPendientes] = useState(null);
+    const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Mantenimiento'&&user['tec-user'].perfil.puesto.nombre!=='Operador'?false:true;
+
     const [datos, setDatos] = useState({
         stocks_minimos: repuesto ? repuesto.stocks_minimos : null,
         cantidad: repuesto.stocks_minimos ? repuesto.stocks_minimos.cantidad : null,
@@ -23,6 +29,30 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
         localizaciones: null,
         habilitar: true,   
     });  
+
+    useEffect(()=>{
+        empresa && axios.get(BACKEND_SERVER + `/api/repuestos/linea_pedido_pend/?repuesto=${repuesto.id}&pedido__empresa__id=${empresa}&pedido__finalizado=${false}` ,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+                }
+        })
+        .then( res => {
+            const pedidosPendientesPositivos = res.data.filter( p => p.por_recibir > 0);
+            setPedidosPendientes(pedidosPendientesPositivos.sort(function(a, b){
+                if(a.id > b.id){
+                    return 1;
+                }
+                if(a.id < b.id){
+                    return -1;
+                }
+                return 0;
+            }));
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token, empresa]);
+
     const handleInputChange = (event) => {
         setDatos({
             ...datos,
@@ -113,6 +143,28 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
         else (alert('no tienes permisos'))
     }
 
+    const BorrarAlmacen = (r)=>{
+        console.log(r);
+        if(r.stock_act>0){
+            console.log('estoy borrando almacen');
+            setShowBorrar(true);
+        }
+        else{
+            var confirmacion = window.confirm('Se va a eliminar el almacén ¿desea continuar?');
+                if(confirmacion){
+                    fetch (BACKEND_SERVER + `/api/repuestos/stocks_minimos/${r.id}`,{
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                        }
+                    })
+                    .then( res => { 
+                        //updatePedido();
+                    })
+                }
+        }
+    }
+
     const handleCloseTraza = () => setShowTrazabilidad(false);
 
     const trazabilidad = (almacen_id) => {
@@ -121,94 +173,157 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
         setShowTrazabilidad(true);
     }
 
+    const handlerClose = () => {
+        setShowBorrar(false);
+    } 
+
     return (
-        <Modal show={show} backdrop="static" keyboard={ false } animation={false} size="xl">
-            <Modal.Header closeButton>                
-                <Modal.Title>Repuestos por almacén</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <Row>
-                    <Col>
-                        <Row>
-                            <Col>
-                            <h5 className="pb-3 pt-1 mt-2">Stock por almacén:</h5>
-                            </Col>                                            
-                        </Row>
-                        <Table striped bordered hover>
-                            <thead>
-                                <tr>
-                                    <th>Almacén</th>
-                                    <th>Ubicación</th>
-                                    <th>Stock Actual</th>
-                                    <th>Stock Mínimo</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            {repuesto ?
-                                <tbody>
-                                    {repuesto.stocks_minimos && repuesto.stocks_minimos.map( r => {                                                                      
-                                            if(r.almacen.empresa === empresa){                                                
-                                                return (                                                    
-                                                    <tr key={r.id}>
-                                                        <td>{r.almacen.nombre}</td> 
+        <Container>
+            <Modal index={1} show={show} backdrop="static" keyboard={ false } animation={false} size="xl" >
+                <Modal.Header>                
+                    <Modal.Title>Repuestos por almacén</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Row>
+                        <Col>
+                            <Row>
+                                <Col>
+                                <h5 className="pb-3 pt-1 mt-2">Stock por almacén:</h5>
+                                </Col>                                            
+                            </Row>
+                            <Table striped bordered hover>
+                                <thead>
+                                    <tr>
+                                        <th>Almacén</th>
+                                        <th>Ubicación</th>
+                                        <th>Stock Actual</th>
+                                        <th>Stock Mínimo</th>
+                                        {!nosoyTecnico?<th>Acciones</th>:null}
+                                    </tr>
+                                </thead>
+                                {repuesto ?
+                                    <tbody>
+                                        {repuesto.stocks_minimos && repuesto.stocks_minimos.map( r => {                                                                      
+                                                if(r.almacen.empresa === empresa){                                                
+                                                    return (                                                    
+                                                        <tr key={r.id}>
+                                                            <td>{r.almacen.nombre}</td> 
+                                                            <td>
+                                                            <input          className={r.almacen.nombre} 
+                                                                            type = "text" 
+                                                                            name='localizaciones'
+                                                                            value= {datos.localizacion}
+                                                                            onChange={handleInputChange}
+                                                                            placeholder={r.localizacion}
+                                                                            disabled
+                                                            />
+                                                            </td>                                                                                                       
+                                                            <td>
+                                                            <input          className={r.almacen.nombre} 
+                                                                            type = "text" 
+                                                                            name='stock_actual'
+                                                                            value= {datos.stock_act}
+                                                                            onChange={handleInputChange}
+                                                                            placeholder={r.stock_act}
+                                                                            disabled
+                                                            />
+                                                            </td>
+                                                            <td>
+                                                            <input  className={r.almacen.nombre}
+                                                                    type = "text"                                                                      
+                                                                    name='stock_minimo'                                                             
+                                                                    value= {datos.stock_min}
+                                                                    onChange={handleInputChange}
+                                                                    placeholder={r.cantidad}
+                                                                    disabled
+                                                            />
+                                                            </td> 
+                                                            {!nosoyTecnico?                                                     
+                                                                <td>                                                            
+                                                                    <PencilFill className="mr-3 pencil" onClick= {event => {habilitar_linea(r)}}/>                                               
+                                                                    <HandThumbsUpFill className="mr-3 pencil" onClick= {async => {ActualizaStock(r)}}/>
+                                                                    <Receipt className="mr-3 pencil" onClick={event => {trazabilidad(r.almacen.id)}}/>
+                                                                    <Trash className="pencil"  onClick={event =>{BorrarAlmacen(r)}} />
+                                                                </td>
+                                                            :null}
+                                                        </tr>
+                                                    )}
+                                                })
+                                        }
+                                    </tbody>
+                                : null
+                                }
+                            </Table>
+                        </Col>
+                    </Row>
+                </Modal.Body>
+                <ListaTrazabilidad  showTrazabilidad={showTrazabilidad}
+                                    repuesto ={traza_repuesto}
+                                    handlerListCancelar={handleCloseTraza}
+                                    almacen={almacentraza}
+                />
+                <Modal color="#FF4606" index={2} show={showBorrar} backdrop="static" keyboard={ false } animation={false} >
+                    <Modal.Header>
+                        <Modal.Title>Borrar Almacén, no permitido con stock ...</Modal.Title>
+                    </Modal.Header>
+
+                    <Modal.Body>
+                        <p>Por favor mueva el stock a otro almacén.</p>
+                    </Modal.Body>
+
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={handlerClose}>Cerrar</Button>
+                    </Modal.Footer>
+                </Modal>
+                <Modal.Header>                
+                    <Modal.Title>Pedidos pendientes</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Row>
+                        <Col>
+                            <Table striped bordered hover>
+                                <thead>
+                                    <tr>
+                                        <th>Numero Pedido</th>
+                                        <th>Cantidad Pendiente</th>
+                                        <th>Proveedor</th>
+                                        <th>Fecha estimada</th>
+                                        {!nosoyTecnico?<th>Acciones</th>:null}
+                                    </tr>
+                                </thead>
+                                {repuesto ?
+                                    <tbody>
+                                        {pedidos_pendientes && pedidos_pendientes.map( pedidos => {
+                                            return (
+                                                <tr key={pedidos.id}>
+                                                    <td>{pedidos.pedido.numero}</td>
+                                                    <td>{pedidos.por_recibir}</td>
+                                                    <td>{pedidos.pedido.proveedor.nombre}</td> 
+                                                    <td>{invertirFecha(String(pedidos.pedido.fecha_prevista_entrega))}</td>                                     
+                                                    {!nosoyTecnico?
                                                         <td>
-                                                        <input          className={r.almacen.nombre} 
-                                                                        type = "text" 
-                                                                        name='localizaciones'
-                                                                        value= {datos.localizacion}
-                                                                        onChange={handleInputChange}
-                                                                        placeholder={r.localizacion}
-                                                                        disabled
-                                                        />
-                                                        </td>                                                                                                       
-                                                        <td>
-                                                        <input          className={r.almacen.nombre} 
-                                                                        type = "text" 
-                                                                        name='stock_actual'
-                                                                        value= {datos.stock_act}
-                                                                        onChange={handleInputChange}
-                                                                        placeholder={r.stock_act}
-                                                                        disabled
-                                                        />
+                                                            <Link to={`/repuestos/pedido_detalle/${pedidos.pedido.id}`}>
+                                                                <PencilFill className="mr-3 pencil"/>
+                                                            </Link>
                                                         </td>
-                                                        <td>
-                                                        <input  className={r.almacen.nombre}
-                                                                type = "text"                                                                      
-                                                                name='stock_minimo'                                                             
-                                                                value= {datos.stock_min}
-                                                                onChange={handleInputChange}
-                                                                placeholder={r.cantidad}
-                                                                disabled
-                                                        />
-                                                        </td>                                                      
-                                                        <td>                                                            
-                                                            <PencilFill className="mr-3 pencil" onClick= {event => {habilitar_linea(r)}}/>                                               
-                                                            <HandThumbsUpFill className="mr-3 pencil" onClick= {async => {ActualizaStock(r)}}/>
-                                                            <Receipt className="pencil" onClick={event => {trazabilidad(r.almacen.id)}}/>
-                                                        </td>
-                                                    </tr>
-                                                )}
-                                            })
-                                    }
-                                </tbody>
-                            : null
-                            }
-                        </Table>
-                    </Col>
-                </Row>
-            </Modal.Body>
-            <Modal.Footer>                                               
-                <Button variant="info" onClick={handlerListCancelar}>
-                    Cerrar
-                </Button>
-            </Modal.Footer>
-            <ListaTrazabilidad  showTrazabilidad={showTrazabilidad}
-                                repuesto ={traza_repuesto}
-                                handlerListCancelar={handleCloseTraza}
-                                almacen={almacentraza}
-                    />
-        </Modal>
-        
+                                                    :null}
+                                                </tr>
+                                            )})
+                                        }
+                                    </tbody>
+                                : null
+                                }
+                            </Table>
+                        </Col>
+                    </Row>
+                </Modal.Body>
+                <Modal.Footer>                                               
+                    <Button variant="info" onClick={handlerListCancelar}>
+                        Cerrar
+                    </Button>
+                </Modal.Footer>
+            </Modal>            
+        </Container>
     )
 }
 export default RepPorAlmacen;

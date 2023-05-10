@@ -4,9 +4,12 @@ import { Button } from 'react-bootstrap';
 
 const Logout = () => {
     const [ ,  , deleteToken] = useCookies(['tec-token']);
+    const [ ,  , deleteUser] = useCookies(['tec-user']);
 
     const logout = () => {
         deleteToken('tec-token', {path: '/'});
+        deleteUser('tec-user', {path: '/'});
+        window.location.reload()
     }
 
     return (

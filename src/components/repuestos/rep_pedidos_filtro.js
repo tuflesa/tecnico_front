@@ -7,6 +7,7 @@ import axios from 'axios';
 const PedidosFiltro = ({ actualizaFiltro }) => {
     const [empresas, setEmpresas] = useState(null);
     const [usuarios, setUsuarios] = useState(null);
+    const [destrezas, setDestrezas] = useState(null);
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
     const soyTecnico = user['tec-user'].perfil.destrezas.filter(s => s === 6);
@@ -19,11 +20,12 @@ const PedidosFiltro = ({ actualizaFiltro }) => {
         finalizado: false,
         numero:'',
         creado_por: user['tec-user'].perfil.usuario,
+        descripcion: '',
 
     });
 
     useEffect(()=>{
-        const filtro = `?proveedor__nombre__icontains=${datos.nombre}&fecha_creacion__lte=${datos.fecha_creacion_lte}&fecha_creacion__gte=${datos.fecha_creacion_gte}&finalizado=${datos.finalizado}&numero__icontains=${datos.numero}&empresa=${datos.empresa}&creado_por=${datos.creado_por}`;
+        const filtro = `?proveedor__nombre__icontains=${datos.nombre}&fecha_creacion__lte=${datos.fecha_creacion_lte}&fecha_creacion__gte=${datos.fecha_creacion_gte}&finalizado=${datos.finalizado}&numero__icontains=${datos.numero}&empresa=${datos.empresa}&creado_por=${datos.creado_por}&descripcion__icontains=${datos.descripcion}`;
         actualizaFiltro(filtro);
     },[datos, actualizaFiltro]);
 
@@ -36,6 +38,7 @@ const PedidosFiltro = ({ actualizaFiltro }) => {
     const handleDisabled = () => {
         return user['tec-user'].perfil.nivel_acceso.nombre === 'local'
     }
+
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
             headers: {
@@ -44,6 +47,20 @@ const PedidosFiltro = ({ actualizaFiltro }) => {
         })
         .then( res => {
             setEmpresas(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
+
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + '/api/mantenimiento/especialidades/',{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setDestrezas(res.data);
         })
         .catch( err => {
             console.log(err);
@@ -89,6 +106,16 @@ const PedidosFiltro = ({ actualizaFiltro }) => {
                         </Form.Group>
                     </Col>
                     <Col>
+                        <Form.Group controlId="descripcion">
+                            <Form.Label>Descripción</Form.Label>
+                            <Form.Control type="text" 
+                                        name='descripcion' 
+                                        value={datos.descripcion}
+                                        onChange={handleInputChange} 
+                                        placeholder="Descripción contiene"/>
+                        </Form.Group>
+                    </Col>
+                    <Col>
                         <Form.Group controlId="empresa">
                             <Form.Label>Empresa</Form.Label>
                             <Form.Control as="select"  
@@ -128,6 +155,26 @@ const PedidosFiltro = ({ actualizaFiltro }) => {
                         </Form.Control>
                         </Form.Group>
                     </Col>
+                    {/* <Col>
+                        <Form.Group controlId="destrezas">
+                            <Form.Label>Destreza</Form.Label>
+                            <Form.Control as="select"  
+                                        name='destrezas' 
+                                        value={datos.destrezas}
+                                        onChange={handleInputChange}
+                                        placeholder="Destrezas"
+                                        disabled={soyTecnico.length===0?true:false}>
+                                        <option key={0} value={''}>Todas</option>    
+                                        {destrezas && destrezas.map( destreza => {
+                                            return (
+                                            <option key={destreza.id} value={destreza.id}>
+                                                {destreza.nombre}
+                                            </option>
+                                            )
+                                        })}
+                        </Form.Control>
+                        </Form.Group>
+                    </Col> */}
                     <Col>
                         <Form.Group controlId="numero">
                             <Form.Label>Numero Pedido</Form.Label>

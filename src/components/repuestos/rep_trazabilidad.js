@@ -31,7 +31,7 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, alm
             res.data.map( r => {
                 r.albaran=r.linea_inventario.inventario.nombre;
                 r['alm'] = r.almacen.nombre;
-                r['stock']='';
+                r['stock']=0;
                 r['usuario']=r.usuario.get_full_name;
             })
             setListaInventario(res.data);
@@ -52,7 +52,7 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, alm
             res.data.map( r => {
                 r.albaran=r.linea_pedido.pedido.numero;
                 r['alm'] = r.almacen.nombre;
-                r['stock']='';
+                r['stock']=0;
                 r['usuario']=r.usuario.get_full_name;
             })
             setListaPedidos(res.data);
@@ -73,7 +73,7 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, alm
             res.data.map( r => {
                 r.albaran=r.linea_salida.salida.nombre;
                 r['alm'] = r.almacen.nombre;
-                r['stock']='';
+                r['stock']=0;
                 r['usuario']=r.usuario.get_full_name;
             })
             setListaSalidas(res.data);
@@ -99,13 +99,18 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, alm
             //calcular stock
             for(let x=(listado_completo.length-1);x>=0;x--){ 
                 let y=x+1;  
-                if(x===listado_completo.length-1) y=listado_completo.length-1;             
-                if(listado_completo[x].albaran==='Ajuste de stock')
+                if(x===listado_completo.length-1){ 
+                    y=listado_completo.length-1;
+                }
+                if(listado_completo[x].albaran==='Ajuste de stock'){
                     listado_completo[x].stock=listado_completo[x].cantidad;
-                    else if (listado_completo[x].albaran==='Ajuste Inicial')
-                        listado_completo[x].stock=listado_completo[x].cantidad;
-                        else 
-                        listado_completo[x].stock= listado_completo[y].stock + listado_completo[x].cantidad;
+                }
+                else if (listado_completo[x].albaran==='Ajuste Inicial'){
+                    listado_completo[x].stock=listado_completo[x].cantidad;
+                }
+                else {
+                    listado_completo[x].stock= listado_completo[y].stock + listado_completo[x].cantidad;
+                }
             }
             setListado(listado_completo);
         }
@@ -117,7 +122,7 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, alm
     
     return(
         <Modal show={showTrazabilidad} backdrop="static" keyboard={ false } animation={false} size="xl">
-            <Modal.Header closeButton>                
+            <Modal.Header>                
                 <Modal.Title>Listado Trazabilidad del Repuesto</Modal.Title>
             </Modal.Header>
             <Modal.Body>
@@ -134,6 +139,12 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, alm
                             <ExcelColumn label="Stock" value="stock"/>                           
                         </ExcelSheet>
                     </ExcelFile> 
+                    
+                </Row>
+                <Row>
+                    <Button variant="info" onClick={handlerListCerrar}>
+                        Cancelar
+                    </Button>
                 </Row>
                 <Row>
                     <Col>

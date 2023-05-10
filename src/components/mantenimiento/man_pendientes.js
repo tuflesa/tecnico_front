@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Table, Modal, Button } from 'react-bootstrap';
+import { Container, Row, Col, Table } from 'react-bootstrap';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
-import { NutFill, PencilFill } from 'react-bootstrap-icons';
+import { NutFill, PencilFill, Eye } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 
 const ManPendientes = () => {
@@ -24,22 +24,14 @@ const ManPendientes = () => {
     const filtro = `?fecha_plan__lte=${datos.fecha_plan_lte}&parte__empresa__id=${datos.empresa}`;
 
     useEffect(()=>{        
-        axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_activas/`+ filtro,{
+        axios.get(BACKEND_SERVER + `/api/mantenimiento/lineas_activas_sinPaginar/`+ filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
                 }
         })
         .then( res => {
-            //ordenamos los trabajos por prioridad
-            setTareas(res.data.sort(function(a, b){
-                if(a.tarea.prioridad < b.tarea.prioridad){
-                    return 1;
-                }
-                if(a.tarea.prioridad > b.tarea.prioridad){
-                    return -1;
-                }
-                return 0;
-            }))})
+            setTareas(res.data);
+        })
         .catch( err => {
             console.log(err);
         });
@@ -60,8 +52,8 @@ const ManPendientes = () => {
     }, [token]);
 
     return (  
-        <Container className="mb-5 mt-5">  
-            <Row>            
+        <Container className="mb-5 mt-5"> 
+            <Row>     
                 <Col>
                     <h5 className="mb-3 mt-3">Tareas Retrasadas</h5>                    
                     <Table striped bordered hover>
@@ -82,7 +74,10 @@ const ManPendientes = () => {
                                         <td>{linea.tarea.nombre}</td>
                                         <td>{linea.parte.seccion.siglas_zona}</td>
                                         <td>{linea.tarea.especialidad_nombre}</td>
-                                        <td><Link to={`/mantenimiento/linea_tarea/${linea.id}`}><PencilFill className="mr-3 pencil"/></Link></td>
+                                        <td>
+                                            <Link to={`/mantenimiento/linea_tarea/${linea.id}`}><PencilFill className="mr-3 pencil"/></Link>
+                                            <Link to={`/mantenimiento/parte/${linea.parte.id}`}><Eye className="mr-3 pencil"/></Link>
+                                        </td>
                                     </tr>
                                 )})
                             }

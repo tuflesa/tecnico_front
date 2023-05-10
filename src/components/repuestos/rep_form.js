@@ -4,17 +4,19 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
-import { PlusCircle, Trash, GeoAltFill, Receipt} from 'react-bootstrap-icons';
+import { PlusCircle, Trash, GeoAltFill, PencilFill} from 'react-bootstrap-icons';
 import './repuestos.css';
 import StockMinimoForm from './rep_stock_minimo';
 import EquipoForm from './rep_equipo';
 import ProveedorForm from './rep_proveedor';
 import RepPorAlmacen from './rep_por_almacen';
 import { useBarcode } from 'react-barcodes';
+import RepPrecioEdit from './rep_precio_editar';
 
 const RepuestoForm = ({repuesto, setRepuesto}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
+    const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Mantenimiento'&&user['tec-user'].perfil.puesto.nombre!=='Operador'?false:true;
 
     const [datos, setDatos] = useState({
         id: repuesto.id ? repuesto.id : null,
@@ -38,12 +40,15 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     const [show_stock, setShowStock] = useState(false);
     const [show_equipo, setShowEquipo] = useState(false);
     const [show_proveedor, setShowProveedor] = useState(false);
+    const [show_modificar_proveedor, setShowModificarProveedor] = useState(false);
     const [stock_editar, setStockEditar] = useState(null);
     const [stock_minimo_editar, setStockMinimoEditar] = useState(null);
     const [empresas, setEmpresas] = useState(null);
+    const [precio, setPrecio] = useState(null);
     const [stock_empresa, setStockEmpresa] = useState(null);
     const [show_listalmacen, setShowListAlmacen] = useState(null);
     const [almacenes_empresa, setAlmacenesEmpresa] = useState(null);
+    const [datos_precio, setDatosPrecio] = useState(null);
     
     
     useEffect(()=>{
@@ -78,6 +83,20 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         })
         .then( res => {
             setEmpresas(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
+
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + `/api/repuestos/repuesto_precio/?repuesto=${repuesto.id}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setPrecio(res.data);
         })
         .catch( err => {
             console.log(err);
@@ -128,6 +147,14 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         setStockEmpresa(stock_por_empresa);        
     },[repuesto, empresas]);
 
+    const formatNumber = (numero) =>{
+        return new Intl.NumberFormat('de-DE',{ style: 'currency', currency: 'EUR' }).format(numero)
+    }
+
+    const formatPorcentaje = (numero) =>{
+        return new Intl.NumberFormat('de-DE').format(numero)
+    }
+
     const updateRepuesto = () => {
         axios.get(BACKEND_SERVER + `/api/repuestos/detalle/${datos.id}/`,{
             headers: {
@@ -136,7 +163,17 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         })
         .then( res => { 
             setRepuesto(res.data);
-            //setShowHeGuardado(true);
+            axios.get(BACKEND_SERVER + `/api/repuestos/repuesto_precio/?repuesto__id=${repuesto.id}`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                  }
+            })
+            .then( res => {
+                setPrecio(res.data);
+            })
+            .catch( err => {
+                console.log(err);
+            });
         })
         .catch(err => { console.log(err);})
     }
@@ -183,7 +220,8 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             })
             .then( res => { 
                 setRepuesto(res.data);
-                window.location.href = "/repuestos/listado";
+                alert('Repuesto actualizado');
+                //window.location.href = "/repuestos/listado";
                 //window.location.href="javascript: history.go(-1)"
             })
             .catch(err => { console.log(err);})
@@ -223,6 +261,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             setStockEditar(null);
             setStockMinimoEditar(null);
         }
+        setShowProveedor(true);
     }
 
     const abrirNuevoStock = () => {
@@ -243,8 +282,26 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         setShowProveedor(true);
     }
 
+    const actualizarAddProveedor = (p) => {
+        setDatosPrecio(p);
+        setShowModificarProveedor(true);
+        
+    }
+
     const cerrarAddProveedor = () => {
-        setShowProveedor(false);
+        updateRepuesto();
+        if(datos.proveedores.length>0 || setShowProveedor===false){     
+            setShowProveedor(false);
+            updateRepuesto();
+        }
+    }
+
+    const cerrarModificarProveedor = () => {
+        updateRepuesto();
+        if(datos.proveedores.length>0 || setShowProveedor===false){     
+            setShowModificarProveedor(false);
+            updateRepuesto();
+        }
     }
 
     const abrirListAlmacen = (empresa) => {
@@ -286,7 +343,9 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                 newProveedores.push(p.id);
             }
         });
-        
+        if(newProveedores.length===0){
+            newProveedores = [];
+        }
         axios.patch(BACKEND_SERVER + `/api/repuestos/lista/${repuesto.id}/`, {
             proveedores: newProveedores
         }, {
@@ -296,12 +355,37 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         })
         .then( res => { 
                 updateRepuesto();
+                handlerBorrarPrecioProveedor(id);
             }
         )
         .catch(err => { console.log(err);});
     }
 
-    
+    const handlerBorrarPrecioProveedor = (id_prov) => {
+        axios.get(BACKEND_SERVER + `/api/repuestos/repuesto_precio/?repuesto__id=${datos.id}&proveedor=${id_prov}`, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }   
+        })
+        .then( res => { 
+                for(var x=0;x<res.data.length;x++){
+                    axios.delete(BACKEND_SERVER + `/api/repuestos/repuesto_precio/${res.data[x].id}`, {
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                        }   
+                    })
+                    .then( res => { 
+                            alert('Borrado proveedor');
+                            updateRepuesto();
+                        }
+                    )
+                    .catch(err => { console.log(err);});
+                }
+            }
+        )
+        .catch(err => { console.log(err);});
+    }
+
     function Barcode({datos}) {
         /* var descripcion;
         if(datos.nombre_comun){
@@ -314,11 +398,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             format: "ean13",
             flat: true,
             height: 60,
-            // width: 1.2,
             fontSize: 16,
-            //text: datos.id + ' - ' + datos.nombre
-            //text: datos.id + ' - ' + descripcion
-            //text: Barcode.data
           }            
         }); 
         return <svg id="barcode-canvas" ref={inputRef}/>;
@@ -331,12 +411,10 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         }
         else {descripcion = datos.nombre;}
         var container = document.getElementById('barcode');
-        // var mySVG = document.getElementById("barcode-canvas");
-        var width = "90%";
-        var height = "90%";
-        var printWindow = window.open('', 'PrintMap',
-        'width=' + width + ',height=' + height);
-        printWindow.document.writeln('<center>'+container.innerHTML + '</br>' + datos.id + '-' + descripcion + '</center>');
+        var width = "100%";
+        var height = "100%";
+        var printWindow = window.open('', 'PrintMap','width=' + width + ',height=' + height);
+        printWindow.document.writeln(/* '<img src="%PUBLIC_URL%/GB.jpg" alt="Grupo Bornay"/>' */'<center>'+'Grupo Bornay'+'</br>'+container.innerHTML + '</br>' + datos.id + '-' + descripcion + '</center>');
         printWindow.document.close();
         printWindow.print();
         printWindow.close();
@@ -356,7 +434,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                         <Row>
                             <Col>
                                 <Form.Group id="nombre">
-                                    <Form.Label>Descripción Proveedor (*)</Form.Label>
+                                    <Form.Label>Descripción (*)</Form.Label>
                                     <Form.Control type="text" 
                                                 name='nombre' 
                                                 value={datos.nombre}
@@ -377,6 +455,8 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                     />
                                 </Form.Group>
                             </Col>
+                        </Row>
+                        <Row>
                             <Col>
                                 <Form.Group id="tipo">
                                     <Form.Label>Tipo  (*)</Form.Label>
@@ -395,8 +475,6 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                     </Form.Control>
                                 </Form.Group>
                             </Col>
-                        </Row>
-                        <Row>
                             <Col>
                                 <Form.Group id="fabricante">
                                     <Form.Label>Fabricante</Form.Label>
@@ -456,10 +534,12 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                     {datos.id && <Barcode datos={datos}/>}
                                 </div>
                             </Col>
+                        </Row>
+                        <Row>
                             <Col>
                                 <Form.Group id="observaciones">
                                     <Form.Label>Observaciones</Form.Label>
-                                    <Form.Control type="text" 
+                                    <Form.Control as="textarea" rows={2} 
                                                 name='observaciones' 
                                                 value={datos.observaciones}
                                                 onChange={handleInputChange} 
@@ -486,20 +566,25 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                 </Form.Group>
                             </Col>
                         </Row>
-                        <Form.Row className="justify-content-center">
-                            {repuesto.id ? 
-                                <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button> :
-                                <Button variant="info" type="submit" className={'mx-2'} onClick={crearDatos}>Guardar</Button>
-                            }
-                            <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
-                            {/* <Link to='/repuestos/listado'>
-                                <Button variant="warning" >
-                                    Cancelar / Cerrar
-                                </Button>
-                            </Link> */}
-                            {datos.id && <Button variant='info' className={'mx-2'} onClick={ImprimirBarcode}>Imprimir Etiqueta</Button>}
-                        </Form.Row>
-
+                        {!nosoyTecnico?
+                            <Form.Row className="justify-content-center">
+                                {repuesto.id? 
+                                    <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button> :
+                                    <Button variant="info" type="submit" className={'mx-2'} onClick={crearDatos}>Guardar</Button>
+                                }
+                                <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
+                                {/* <Link to='/repuestos/listado'>
+                                    <Button variant="warning" >
+                                        Cancelar / Cerrar
+                                    </Button>
+                                </Link> */}
+                                {datos.id && <Button variant='info' className={'mx-2'} onClick={ImprimirBarcode}>Imprimir Etiqueta</Button>}
+                            </Form.Row>
+                        :
+                            <Form.Row className="justify-content-center">
+                                <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
+                            </Form.Row>
+                        }
                         {repuesto.id ?
                             <React.Fragment>
                                 <Form.Row>
@@ -509,7 +594,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                             <h5 className="pb-3 pt-1 mt-2">Stock por empresa:</h5>
                                             </Col>
                                             <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
-                                                {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
+                                                {!nosoyTecnico?
                                                 <PlusCircle className="plus mr-2" size={30} onClick={abrirNuevoStock}/>
                                                 :null}
                                             </Col>
@@ -543,7 +628,59 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                             </React.Fragment> : null}
 
                         {repuesto.id ?
-                            <React.Fragment>                              
+                            <React.Fragment> 
+                                <Form.Row>
+                                    {!nosoyTecnico?
+                                        <Col>
+                                            <Row>
+                                                <Col>
+                                                <h5 className="pb-3 pt-1 mt-2">Proveedores:</h5>
+                                                </Col>
+                                                <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
+                                                    {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
+                                                        <PlusCircle className="plus mr-2" size={30} onClick={abrirAddProveedor}/>
+                                                    :null}
+                                                </Col>
+                                            </Row>
+                                            <Table striped bordered hover>
+                                                <thead>
+                                                    <tr>
+                                                        <th>Nombre</th>
+                                                        <th>Fabricante</th>
+                                                        <th>Descripción Prov</th>
+                                                        <th>Modelo Prov</th>
+                                                        <th>Precio</th>
+                                                        <th>Dto</th>
+                                                        {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
+                                                            <th>Acciones</th>
+                                                        :null}
+                                                        
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {precio && precio.map( p => {
+                                                        return (
+                                                            <tr key={p.id}>
+                                                                <td>{p.proveedor.nombre}</td>
+                                                                <td>{p.fabricante}</td>
+                                                                <td>{p.descripcion_proveedor}</td>
+                                                                <td>{p.modelo_proveedor}</td>
+                                                                <td>{p.precio}</td>
+                                                                <td>{p.descuento}</td>
+                                                            {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
+                                                                <td>
+                                                                    <Trash className="mr-3 pencil"  onClick={event => {handlerBorrarProveedor(p.proveedor.id)}} />
+                                                                    <PencilFill className="mr-3 pencil"  onClick={event => {actualizarAddProveedor(p)}} />
+                                                                </td>
+                                                            :null}
+                                                        </tr>
+                                                    )})
+                                                }
+                                                </tbody>
+                                            </Table>
+                                        </Col>
+                                    :null}
+                                </Form.Row>                             
                                 <Form.Row>
                                     <Col>
                                         <Row>
@@ -551,7 +688,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                 <h5 className="pb-3 pt-1 mt-2">Es repuesto de:</h5>
                                             </Col>
                                             <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
-                                                {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
+                                                {!nosoyTecnico?
                                                     <PlusCircle className="plus mr-2" size={30} onClick={abrirAddEquipo}/>
                                                 :null}
                                             </Col>
@@ -562,7 +699,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                     <th>Zona</th>
                                                     <th>Seccion</th>
                                                     <th>Equipo</th>
-                                                    {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
+                                                    {!nosoyTecnico?
                                                         <th>Acciones</th>
                                                     :null}
                                                 </tr>
@@ -574,7 +711,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                             <td>{equipo.siglas_zona}</td>
                                                             <td>{equipo.seccion_nombre}</td>
                                                             <td>{equipo.nombre}</td>
-                                                            {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
+                                                            {!nosoyTecnico?
                                                                 <td>
                                                                     <Trash className="trash"  onClick={event => {handlerBorrarEquipo(equipo.id)}} />
                                                                 </td>
@@ -585,44 +722,8 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                             </tbody>
                                         </Table>
                                     </Col>
-                                    <Col>
-                                        <Row>
-                                            <Col>
-                                            <h5 className="pb-3 pt-1 mt-2">Proveedores:</h5>
-                                            </Col>
-                                            <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
-                                                {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
-                                                    <PlusCircle className="plus mr-2" size={30} onClick={abrirAddProveedor}/>
-                                                :null}
-                                            </Col>
-                                        </Row>
-                                        <Table striped bordered hover>
-                                            <thead>
-                                                <tr>
-                                                    <th>Nombre</th>
-                                                    {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
-                                                        <th>Acciones</th>
-                                                    :null}
-                                                    
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {datos.proveedores && datos.proveedores.map( p => {
-                                                    return (
-                                                        <tr key={p.id}>
-                                                            <td>{p.nombre}</td>
-                                                            {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
-                                                                <td>
-                                                                    <Trash className="trash"  onClick={event => {handlerBorrarProveedor(p.id)}} />
-                                                                </td>
-                                                            :null}
-                                                        </tr>
-                                                    )})
-                                                }
-                                            </tbody>
-                                        </Table>
-                                    </Col>
                                 </Form.Row>
+                                
                             </React.Fragment>
                         : null}
                     </Form>
@@ -648,7 +749,19 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                            handleCloseProveedor={cerrarAddProveedor}
                            proveedoresAsignados={datos.proveedores}
                            repuesto_id={repuesto.id}
-                           updateRepuesto = {updateRepuesto}/>
+                           repuesto_nombre={datos.nombre}
+                           repuesto_modelo={datos.modelo}
+                           repuesto_fabricante={datos.fabricante}
+                           updateRepuesto = {updateRepuesto}
+                           setShowProveedor = {setShowProveedor}/>
+
+            {/* {datos_precio? */}
+                <RepPrecioEdit show_modificar={show_modificar_proveedor}
+                           handleCloseModificarProveedor = {cerrarModificarProveedor}
+                           datos_precio = {datos_precio}
+                           updateRepuesto = {updateRepuesto}
+                           setShowModificarProveedor = {setShowModificarProveedor}/>
+            {/* :null} */}
 
             <RepPorAlmacen  show={show_listalmacen}
                             cerrarListAlmacen={cerrarListAlmacen}

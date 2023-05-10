@@ -13,32 +13,36 @@ const RepAlmacenesLista = () => {
     const [filtro, setFiltro] = useState('');
     const [almacenes, setAlmacenes] = useState(null);
     const [show, setShow] = useState(false);
-
-    useEffect(()=>{
-        axios.get(BACKEND_SERVER + '/api/repuestos/almacen/' + filtro,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            setAlmacenes(res.data.sort(function(a, b){
-                if(a.nombre > b.nombre){
-                    return 1;
-                }
-                if(a.nombre < b.nombre){
-                    return -1;
-                }
-                return 0;
-            }));
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    }, [token, filtro]);
+    const [buscando,setBuscando] = useState(false);
+    const [filtroII,setFiltroII] = useState( `?descatalogado=${false}`);
 
     const actualizaFiltro = str => {
-        setFiltro(str);
+        setFiltroII(str);
     }
+
+    useEffect(()=>{
+        if (!buscando){
+            setFiltro(filtroII);
+        }
+    },[buscando, filtroII]);
+
+    useEffect(()=>{
+        if (!show && filtro){
+            setBuscando(true);
+            axios.get(BACKEND_SERVER + '/api/repuestos/almacen/' + filtro,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }
+            })
+            .then( res => {
+                setAlmacenes(res.data);
+                setBuscando(false);
+            })
+            .catch( err => {
+                console.log(err);
+            });
+        }
+    }, [token, filtro, show]);
 
     const handlerBorrar = () => {
         setShow(true);
@@ -84,7 +88,7 @@ const RepAlmacenesLista = () => {
                 </Col>
             </Row>
             <Modal show={show} onHide={handlerClose} backdrop="static" keyboard={ false } animation={false}>
-                <Modal.Header closeButton>
+                <Modal.Header>
                     <Modal.Title>Borrar Almacen no permitido ...</Modal.Title>
                 </Modal.Header>
 

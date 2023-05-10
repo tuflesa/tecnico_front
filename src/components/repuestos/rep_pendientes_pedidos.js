@@ -13,7 +13,7 @@ const ListaPedidos = ({lineasPendientes, repuesto_id, show, handlerListCancelar}
 
     return(
         <Modal show={show} backdrop="static" keyboard={ false } animation={false} size="xl">
-            <Modal.Header closeButton>                
+            <Modal.Header>                
                 <Modal.Title>Listado Pedidos en Curso</Modal.Title>
             </Modal.Header>
             <Modal.Body>
@@ -42,9 +42,7 @@ const ListaPedidos = ({lineasPendientes, repuesto_id, show, handlerListCancelar}
                                                     <td>{invertirFecha(String(lineas.pedido.fecha_creacion))}</td>
                                                     <td>{(lineas.pedido.fecha_prevista_entrega) ? (invertirFecha(String(lineas.pedido.fecha_prevista_entrega))) : ''}</td>
                                                     <td>
-                                                        <Link to={`/repuestos/pedido_detalle/${lineas.pedido.id}`}>
-                                                            <PencilFill className="mr-3 pencil"/>
-                                                        </Link>
+                                                        <Link to={`/repuestos/pedido_detalle/${lineas.pedido.id}`}><PencilFill className="mr-3 pencil"/></Link>
                                                     </td>
                                                 </tr>
                                             )

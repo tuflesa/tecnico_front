@@ -6,29 +6,30 @@ import { useCookies } from 'react-cookie';
 const RepNavBar = () => {
     const [user] = useCookies(['tec-user']);
     const [token] = useCookies(['tec-token']);
-    const [mantenimiento, setMantenimiento] = useState(false);
+    //const [mantenimiento, setMantenimiento] = useState(false);
+    const soyProgramador = user['tec-user'].perfil.destrezas.filter(s => s === 7);
+    const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Mantenimiento'&&user['tec-user'].perfil.puesto.nombre!=='Operador'?false:true;
+
     useEffect(() => {
-        if(user['tec-user'].perfil.puesto.nombre==='Mantenimiento'){
-            setMantenimiento(true);
-        }
-        if(user['tec-user'].perfil.puesto.nombre==='Operador'){
-            setMantenimiento(true);
-        }
+        console.log(nosoyTecnico);
     }, [token]);
+
     return (
         <React.Fragment>
                 <Navbar bg="light" fixed= 'top'>
                     <Navbar.Brand href="/home">Dep.Técnico</Navbar.Brand>
                     <Navbar.Toggle aria-controls="basic-navbar-nav"/>
                     <Navbar.Collapse id="basic-navbar-nav">
-                        {!mantenimiento?
+                        {!nosoyTecnico?
                             <Nav className="mr-auto">
                                 <NavDropdown title="Repuestos" id="basic-nav-dropdown">
                                     <NavDropdown.Item href="/repuestos">Página de Inicio</NavDropdown.Item>
                                     <NavDropdown.Divider />
                                     <NavDropdown.Item href="/repuestos/listado">Lista de repuestos</NavDropdown.Item>
                                     <NavDropdown.Item href="/repuestos/nuevo">Nuevo repuesto</NavDropdown.Item>
+                                    <NavDropdown.Item href="/repuestos/precio">Precio repuestos</NavDropdown.Item>
                                     <NavDropdown.Divider />
+                                    <NavDropdown.Item href="/repuestos/traspasos">Traspaso de almacen</NavDropdown.Item>
                                     <NavDropdown.Item href="/repuestos/almacenes">Lista de almacenes</NavDropdown.Item>
                                     <NavDropdown.Item href="/repuestos/almacen/nuevo">Nuevo almacén</NavDropdown.Item>
                                     <NavDropdown.Divider />
@@ -37,13 +38,28 @@ const RepNavBar = () => {
                                     <NavDropdown.Divider />
                                     <NavDropdown.Item href="/repuestos/pedidos">Lista de pedidos</NavDropdown.Item>
                                     <NavDropdown.Item href="/repuestos/pedido/nuevo">Nuevo pedido</NavDropdown.Item>
+                                    <NavDropdown.Item href="/repuestos/lineas_adicionales">Lineas Adicionales</NavDropdown.Item>
                                     <NavDropdown.Divider />
                                     <NavDropdown.Item href="/repuestos/salidas">Salidas</NavDropdown.Item>  
                                     <NavDropdown.Divider />  
-                                    <NavDropdown.Item href="/repuestos/inventario">Inventario</NavDropdown.Item>                         
+                                    <NavDropdown.Item href="/repuestos/inventario">Inventario</NavDropdown.Item> 
+                                    <NavDropdown.Divider />  
+                                    {soyProgramador[0]===7?
+                                        <NavDropdown.Item href="/repuestos/programadores">Programadores</NavDropdown.Item>                     
+                                    :null}
                                 </NavDropdown>
                             </Nav> 
-                        :null}   
+                        :
+                            <Nav className="mr-auto">
+                                <NavDropdown title="Repuestos" id="basic-nav-dropdown">
+                                    <NavDropdown.Item href="/repuestos/listado">Lista de repuestos</NavDropdown.Item>
+                                    <NavDropdown.Divider />
+                                    <NavDropdown.Item href="/repuestos/salidas">Salidas</NavDropdown.Item>  
+                                    <NavDropdown.Divider />  
+                                    <NavDropdown.Item href="/repuestos/inventario">Inventario</NavDropdown.Item> 
+                                </NavDropdown>
+                            </Nav> 
+                        }   
                         <Navbar.Text className="mr-4" >
                             Usuario: {user['tec-user'].get_full_name}
                         </Navbar.Text>

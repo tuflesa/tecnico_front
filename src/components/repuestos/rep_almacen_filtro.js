@@ -4,8 +4,6 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 
-
-
 const AlmacenFiltro = ({ actualizaFiltro }) => {
     const [user] = useCookies(['tec-user']);
     const [token] = useCookies(['tec-token']);

@@ -7,45 +7,104 @@ import { Trash, PencilFill, Receipt } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import RepListaFilto from './rep_lista_filtro';
 import ReactExport from 'react-data-export';
+import { select } from 'd3';
 
 const RepLista = () => {
     const [token] = useCookies(['tec-token']);
     //const [user] = useCookies(['tec-user']);
     const [repuestos, setRepuestos] = useState(null);
+    //const [result_repuestos, setResulRepuestos] = useState(null);
     const [show, setShow] = useState(false);
     const [repuestoBorrar, setRepuestoBorrar] = useState(null);
-    const [filtro, setFiltro] = useState(`?descatalogado=${false}`);
+    const [filtro, setFiltro] = useState(null);
+    const [filtroII,setFiltroII] = useState( `?descatalogado=${false}`);
+    const [buscando,setBuscando] = useState(false);
+    const [count, setCount] = useState(null);
+    let filtroPag=(null);
+
     const ExcelFile = ReactExport.ExcelFile;
     const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
     const ExcelColumn = ReactExport.ExcelFile.ExcelColumn;
 
-    const actualizaFiltro = str => {
-        setFiltro(str);
-    }
+    const [datos, setDatos] = useState({
+        pagina: 1,
+        total_pag:0,
+    });
+    useEffect(()=>{
+        filtroPag = (`&page=${datos.pagina}`);
+        if (!buscando){
+            setFiltro(filtroII + filtroPag);
+        }
+    },[buscando, filtroII, datos.pagina]);
 
     useEffect(()=>{
-        if (!show){
+        if (!show && filtro){
+            setBuscando(true);
             axios.get(BACKEND_SERVER + '/api/repuestos/lista/' + filtro,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                   }
             })
             .then( res => {
-                setRepuestos(res.data.sort(function(a, b){
-                    if(a.nombre > b.nombre){
-                        return 1;
-                    }
-                    if(a.nombre < b.nombre){
-                        return -1;
-                    }
-                    return 0;
-                }));
+                setRepuestos(res.data.results);
+                setBuscando(false);
+                setCount(res.data.count);
+                
             })
             .catch( err => {
                 console.log(err);
             });
         }
+        
     }, [token, filtro, show]);
+
+    /* useEffect(()=>{
+        if(repuestos){
+            const map = new Map(repuestos.map(pos => [pos.repuesto.id, pos.repuesto]));
+            const unicos = [...map.values()];
+            setResulRepuestos(unicos);
+        }
+    }, [repuestos]); */
+
+    useEffect(()=>{
+        if(count % 20 === 0){
+            setDatos({
+                ...datos,
+                total_pag:Math.trunc(count/20),
+            })
+        }
+        else if(count % 20 !== 0){
+            setDatos({
+                ...datos,
+                total_pag:Math.trunc(count/20)+1,
+            })
+        }
+    }, [count, filtro]);
+
+    const cambioPagina = (pag) => {
+        if(pag<=0){
+            pag=1;
+        }
+        if(pag>count/20){
+            if(count % 20 === 0){
+                pag=Math.trunc(count/20);
+            }
+            if(count % 20 !== 0){
+                pag=Math.trunc(count/20)+1;
+            }
+        }
+        if(pag>0){
+            setDatos({
+                ...datos,
+                pagina: pag,
+            })
+        }
+    } 
+
+    const actualizaFiltro = str => {
+        datos.pagina=1;
+        setFiltroII(str);
+    }
 
     const handleClose = () => setShow(false);
 
@@ -90,10 +149,16 @@ const RepLista = () => {
                             <ExcelColumn label="Descatalogado" value="descatalogado"/>
                         </ExcelSheet>
                     </ExcelFile> 
+                    <table>
+                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
+                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
+                        <th>Número páginas: {datos.pagina} / {datos.total_pag} - Registros: {count}</th>
+                    </table>
                     <Table striped bordered hover>
                         <thead>
                             <tr>
-                                <th>Descripción Proveedor</th>
+                                <th>Código</th>
+                                <th>Descripción Repuesto</th>
                                 <th>Descripción Etiqueta</th>
                                 <th>Fabricante</th>
                                 <th>Modelo</th>
@@ -103,20 +168,22 @@ const RepLista = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {repuestos && repuestos.map( repuesto => {
+                            {/* {result_repuestos && result_repuestos.map( re => { */}
+                            {repuestos && repuestos.map( re => {
                                 return (
-                                    <tr key={repuesto.id}>
-                                        <td>{repuesto.nombre}</td>
-                                        <td>{repuesto.nombre_comun}</td>
-                                        <td>{repuesto.fabricante}</td>
-                                        <td>{repuesto.modelo}</td>
+                                    <tr key={re.id}>
+                                        <td>{re.id}</td>
+                                        <td>{re.nombre}</td>
+                                        <td>{re.nombre_comun}</td>
+                                        <td>{re.fabricante}</td>
+                                        <td>{re.modelo}</td>
                                         {/* <td>{repuesto.es_critico ? 'Si' : 'No'}</td>
                                         <td>{repuesto.descatalogado ? 'Si' : 'No'}</td> */}
                                         <td>
-                                            <Link title='Detalle/Modificar'to={`/repuestos/${repuesto.id}`}>
+                                            <Link title='Detalle/Modificar'to={`/repuestos/${re.id}`}>
                                                 <PencilFill className="mr-3 pencil"/>
                                             </Link>
-                                            <Trash className="mr-3 trash" onClick={event => {handleTrashClick(repuesto)}} />
+                                            <Trash className="mr-3 trash" onClick={event => {handleTrashClick(re)}} />
                                         </td>
                                     </tr>
                                 )})
@@ -125,8 +192,15 @@ const RepLista = () => {
                     </Table>
                 </Col>
             </Row>
+            <Row>
+                <table>
+                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
+                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
+                        <th>Número páginas: {datos.pagina} / {datos.total_pag}</th>
+                </table>
+            </Row>
             <Modal show={show} onHide={handleClose} backdrop="static" keyboard={ false } animation={false}>
-                <Modal.Header closeButton>
+                <Modal.Header>
                     <Modal.Title>Descatalogar</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>Está a punto de descatalogar el repuesto: <strong>{repuestoBorrar && repuestoBorrar.nombre}</strong></Modal.Body>

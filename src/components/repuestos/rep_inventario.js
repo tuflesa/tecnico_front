@@ -19,40 +19,44 @@ const RepInventario = () => {
     const ExcelFile = ReactExport.ExcelFile;
     const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
     const ExcelColumn = ReactExport.ExcelFile.ExcelColumn;
-    const [filtro, setFiltro] = useState(`?almacen__empresa__id=${datos.empresa}&repuesto__descatalogado=${false}`);
+    const [filtroII, setFiltroII] = useState(`?almacen__empresa__id=${datos.empresa}&repuesto__descatalogado=${false}`);
+    const [filtro, setFiltro] = useState( ``);
+    const [buscando, setBuscando] = useState(false);
 
     const actualizaFiltro = str => {
-        setFiltro(str);
+        setFiltroII(str);
     }
 
     useEffect(()=>{
-        axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimo_detalle/` + filtro,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-                }
-        })
-        .then( res => {
-            {res.data && res.data.map( r => {
-                r['alm'] = r.almacen.nombre;
-                r['articulo'] = r.repuesto.nombre;
-                r['fabricante'] = r.repuesto.fabricante;
-                r['nombre_comun']=r.repuesto.nombre_comun;
-                r['id_rep']=r.repuesto.id;
-                r['critico']=r.repuesto.es_critico;
-            })}
-            setListInventario(res.data.sort(function(a, b){
-                if(a.articulo > b.articulo){
-                    return 1;
-                }
-                if(a.articulo < b.articulo){
-                    return -1;
-                }
-                return 0;
-            }));
-        })
-        .catch( err => {
-            console.log(err);
-        });
+        if (!buscando){
+            setFiltro(filtroII);
+        }
+    },[buscando, filtroII]);
+
+    useEffect(()=>{
+        if (filtro){
+            setBuscando(true);
+            axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimo_detalle/` + filtro,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                    }
+            })
+            .then( res => {
+                {res.data && res.data.map( r => {
+                    r['alm'] = r.almacen.nombre;
+                    r['articulo'] = r.repuesto.nombre;
+                    r['fabricante'] = r.repuesto.fabricante;
+                    r['nombre_comun']=r.repuesto.nombre_comun;
+                    r['id_rep']=r.repuesto.id;
+                    r['critico']=r.repuesto.es_critico;
+                })}
+                setListInventario(res.data);
+                setBuscando(false);
+            })
+            .catch( err => {
+                console.log(err);
+            });
+        }
     }, [token, filtro]);
     return (
         <Container className="mt-5">
@@ -79,7 +83,8 @@ const RepInventario = () => {
                     <Table striped bordered hover>
                         <thead>
                             <tr>
-                                <th>Nombre</th>
+                                <th>Código</th>
+                                <th>Descripción Repuesto</th>
                                 <th>Critico</th>
                                 <th>Descripción Etiqueta</th>
                                 <th>Almacén</th>
@@ -93,6 +98,7 @@ const RepInventario = () => {
                             {listInventario && listInventario.map( inventario => {
                                 return (
                                     <tr key={inventario.id}>
+                                        <td>{inventario.id_rep}</td>
                                         <td>{inventario.articulo}</td>
                                         <td>{inventario.critico===true? 'SI':'NO'}</td>
                                         <td>{inventario.nombre_comun}</td>

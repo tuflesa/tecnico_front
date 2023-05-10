@@ -7,7 +7,7 @@ import ReactExport from 'react-data-export';
 import {invertirFecha} from '../utilidades/funciones_fecha';
 import { PencilFill, Receipt } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
-import { format } from 'd3';
+import { count, format } from 'd3';
 import ListaPedidos from './rep_pendientes_pedidos';
 
 const RepPendientes = () => {
@@ -19,67 +19,80 @@ const RepPendientes = () => {
     const [show, setShow] = useState(false);
     const [repuesto_id, setRepuesto_id] = useState(null);
     var fecha = new Date();
+    const stock_por_empresa = [];
+    const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Técnico'?false:true;
     
     const [datos, setDatos] = useState({
         empresa: user['tec-user'].perfil.empresa.id,
         hoy: (fecha.getFullYear() + "-" + (fecha.getMonth()+1) + "-" + fecha.getDate()),
     });
 
-    const [filtro, setFiltro] = useState(`?empresa=${datos.empresa}&finalizado=${false}&fecha_prevista_entrega__lte=${datos.hoy}`);
+    const [filtro, setFiltro] = useState(`?empresa=${datos.empresa}&finalizado=${false}&fecha_prevista_entrega__lte=${datos.hoy}&creado_por=${nosoyTecnico?user['tec-user'].perfil.usuario:''}`);
     
-    useEffect(() => {
+    useEffect(() => { //buscamos articulos con stock por debajo del stock mínimo
         axios.get(BACKEND_SERVER + `/api/repuestos/articulos_fuera_stock/?almacen__empresa__id=${datos.empresa}&repuesto__descatalogado=${false}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
         .then( res => { 
-            setPendientes(res.data);
+            for(var x=0;x<res.data.length; x++){
+                let repuesto_nombre = res.data[x].repuesto.nombre_comun?res.data[x].repuesto.nombre_comun:res.data[x].repuesto.nombre;
+                let repuesto_critico = res.data[x].repuesto.es_critico;
+                let id = res.data[x].repuesto.id;
+                axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimo_detalle/?repuesto=${res.data[x].repuesto.id}&almacen__empresa__id=${datos.empresa}`, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }     
+                })
+                .then( r => {
+                    const stock_empresa = r.data.reduce((a, b) => a + b.stock_act, 0);
+                    const stock_minimo_empresa = r.data.reduce((a, b) => a + b.cantidad, 0);
+                    if(stock_empresa<stock_minimo_empresa){
+                        if(res.data.length>0){
+                            stock_por_empresa.push({id: id, articulo: repuesto_nombre, critico: repuesto_critico, stock: stock_empresa, stock_minimo: stock_minimo_empresa});            
+                        }
+                        if(stock_por_empresa){
+                            let hash = {};
+                            let sinduplicados = stock_por_empresa;
+                            sinduplicados = sinduplicados.filter(o => hash[o.id] ? false : hash[o.id] = true);
+                            setPendientes(sinduplicados.sort(function(a, b){
+                                if(a.articulo > b.articulo){
+                                    return 1;
+                                }
+                                if(a.articulo < b.articulo){
+                                    return -1;
+                                }
+                                return 0;
+                            }));;
+                        }
+                    }
+                })
+                .catch(err => { console.log(err);})
+            }
         })
         .catch( err => {
             console.log(err);
         });
     }, [token]);  
-    
-    useEffect(() =>{
-        //Ordena el listado de los repuestos por debajo del stock mínimo
-        if (pendientes){
-            pendientes.sort(function(a, b){
-                if(a.repuesto.nombre > b.repuesto.nombre){
-                    return 1;
-                }
-                if(a.repuesto.nombre < b.repuesto.nombre){
-                    return -1;
-                }
-                return 0;
-            })
-        }
-    }, [pendientes]);
-    
-    useEffect(()=>{
+     
+    useEffect(()=>{ //buscamos pedidos pasados de fecha de entrega
         axios.get(BACKEND_SERVER + `/api/repuestos/lista_pedidos/` + filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }
         })
         .then( res => {
-            setPedFueradeFecha(res.data.sort(function(a, b){
-                if(a.numero > b.numero){
-                    return 1;
-                }
-                if(a.numero < b.numero){
-                    return -1;
-                }
-                return 0;
-            }))
+            setPedFueradeFecha(res.data);
         })
         .catch( err => {
             console.log(err);
         });
     },[token]); 
 
-    useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/repuestos/linea_pedido_pend/?pedido__finalizado=${'False'}&pedido__empresa=${datos.empresa}`,{
+    useEffect(() => { //buscamos las lineas de los pedidos pendientes para mostrar en las lineas de los articulos fuera de stock
+        console.log('entro');
+        datos.empresa && axios.get(BACKEND_SERVER + `/api/repuestos/linea_pedido_pend/?pedido__finalizado=${'false'}&pedido__empresa=${datos.empresa}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }
@@ -101,6 +114,32 @@ const RepPendientes = () => {
         setShow(false);
     }
 
+    const comparar = (x) => {
+        if(lineasPendientes){
+            for(var y=0;y<lineasPendientes.length;y++){
+                if(lineasPendientes[y].repuesto === x.id){                                      ;
+                    return( "table-success");
+                }
+            }
+        }
+    }
+
+    const comparar2 = (x) => {
+        if(lineasPendientes){
+            if(x.critico){
+                for(var y=0;y<lineasPendientes.length;y++){
+                    if(lineasPendientes[y].repuesto===x.id){
+                        for(var z=0;z<pedfueradefecha.length;z++){
+                            if(pedfueradefecha[z].id===lineasPendientes[y].pedido.id){
+                                return("table-success");
+                            }
+                        }
+                    }              
+                }
+            }
+        }
+    }
+
     return (
         <Container className="mt-5">
             <Row>
@@ -120,22 +159,22 @@ const RepPendientes = () => {
                         <tbody>
                             {pendientes && pendientes.map( pendiente => {
                                 return (
-                                    <tr key={pendiente.id}>
-                                        <td>{pendiente.repuesto.nombre_comun?pendiente.repuesto.nombre_comun:pendiente.repuesto.nombre}</td>
-                                        <td>{pendiente.repuesto.es_critico?'Si':'No'}</td>
-                                        <td>{pendiente.stock_act}</td>
-                                        <td>{pendiente.cantidad}</td> 
+                                    <tr key={pendiente.id} className = {comparar2(pendiente)? "table-warning" : (comparar(pendiente))? "table-success" : pendiente.critico? "table-danger": ""}>
+                                        <td>{pendiente.articulo}</td>
+                                        <td>{pendiente.critico?'Si':'No'}</td>
+                                        <td>{pendiente.stock}</td>
+                                        <td>{pendiente.stock_minimo}</td> 
                                         <td>{lineasPendientes && lineasPendientes.map( linea => {
                                             let suma = 0;
-                                            if(linea.repuesto === pendiente.repuesto.id){                                        
+                                            if(linea.repuesto === pendiente.id){                                        
                                                 suma = suma + parseInt(linea.por_recibir);
                                             }
                                             return suma;
                                         }).reduce((partialSum, a) => partialSum + a, 0)}                                            
                                         </td>
                                         <td>
-                                        <Receipt className="mr-3 pencil" onClick={event =>{listarPedidos(pendiente.repuesto.id)}}/>
-                                        <Link to={`/repuestos/${pendiente.repuesto.id}`}>
+                                        <Receipt className="mr-3 pencil" onClick={event =>{listarPedidos(pendiente.id)}}/>
+                                        <Link to={`/repuestos/${pendiente.id}`}>
                                                 <PencilFill className="mr-3 pencil"/>
                                         </Link>
                                         </td>
@@ -156,6 +195,7 @@ const RepPendientes = () => {
                                 <th style={{width:130}}>Num-Pedido</th>
                                 <th>Empresa</th>
                                 <th>Proveedor</th>
+                                <th>Descripción</th>
                                 <th style={{width:110}}>Fecha Pedido</th>
                                 <th style={{width:110}}>Fecha Entrega</th>
                                 <th style={{width:150}}>Fecha Prevista Entrega</th>
@@ -171,6 +211,7 @@ const RepPendientes = () => {
                                         <td>{pedido.numero}</td>
                                         <td>{pedido.empresa.nombre}</td>
                                         <td>{pedido.proveedor.nombre}</td>
+                                        <td>{pedido.descripcion}</td>
                                         <td>{invertirFecha(String(pedido.fecha_creacion))}</td>
                                         <td>{pedido.fecha_entrega && invertirFecha(String(pedido.fecha_entrega))}</td>                                        
                                         <td>{pedido.fecha_prevista_entrega && invertirFecha(String(pedido.fecha_prevista_entrega))}</td> 

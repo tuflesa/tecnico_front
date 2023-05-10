@@ -13,11 +13,37 @@ const PedLista = () => {
     const [user] = useCookies(['tec-user']);
     const [pedidos, setPedidos] = useState(null);
     const [show, setShow] = useState(false);
-    const [filtro, setFiltro] = useState(`?empresa=${user['tec-user'].perfil.empresa.id}&finalizado=${false}&creado_por=${user['tec-user'].perfil.usuario}`);
+    const [filtroII, setFiltroII] = useState(`?empresa=${user['tec-user'].perfil.empresa.id}&finalizado=${false}&creado_por=${user['tec-user'].perfil.usuario}`);
+    const [filtro, setFiltro] = useState('');
+    const [buscando, setBuscando] = useState(false);
 
     const actualizaFiltro = str => {
-        setFiltro(str);
+        setFiltroII(str);
     } 
+
+    useEffect(()=>{
+        if (!buscando){
+            setFiltro(filtroII);
+        }
+    },[buscando, filtroII]);
+
+    useEffect(()=>{
+        if (filtro){
+            setBuscando(true);
+            axios.get(BACKEND_SERVER + `/api/repuestos/lista_pedidos/` + filtro,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }
+            })
+            .then( res => {
+                setPedidos(res.data);
+                setBuscando(false);
+            })
+            .catch( err => {
+                console.log(err);
+            });
+        }
+    },[filtro, token]); 
     
     const BorrarP = (pedido)=>{
         axios.get(BACKEND_SERVER + `/api/repuestos/pedido_detalle/${pedido.id}/`,{
@@ -66,29 +92,6 @@ const PedLista = () => {
         }
 
     }
-
-    useEffect(()=>{
-        axios.get(BACKEND_SERVER + `/api/repuestos/lista_pedidos/` + filtro,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-            }
-        })
-        .then( res => {
-            setPedidos(res.data.sort(function(a, b){
-                if(a.numero > b.numero){
-                    return 1;
-                }
-                if(a.numero < b.numero){
-                    return -1;
-                }
-                return 0;
-            }))
-            setShow(true);
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    },[show, filtro]); 
    
     return (
         <Container className="mt-5">
@@ -107,6 +110,7 @@ const PedLista = () => {
                                 <th>Creado por</th>
                                 <th>Empresa</th>
                                 <th>Proveedor</th>
+                                <th>Descripción</th>
                                 <th style={{width:110}}>Fecha Pedido</th>
                                 <th style={{width:110}}>Fecha Entrega</th>
                                 <th style={{width:110}}>Fecha Prevista Entrega</th>
@@ -122,6 +126,7 @@ const PedLista = () => {
                                         <td>{pedido.creado_por.get_full_name}</td>
                                         <td>{pedido.empresa.nombre}</td>
                                         <td>{pedido.proveedor.nombre}</td>
+                                        <td>{pedido.descripcion}</td>
                                         <td>{invertirFecha(String(pedido.fecha_creacion))}</td>
                                         <td>{pedido.fecha_entrega && invertirFecha(String(pedido.fecha_entrega))}</td>                                        
                                         <td>{pedido.fecha_prevista_entrega && invertirFecha(String(pedido.fecha_prevista_entrega))}</td> 

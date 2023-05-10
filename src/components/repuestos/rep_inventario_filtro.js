@@ -8,6 +8,8 @@ const RepInventarioFiltro = ({actualizaFiltro}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
 
+    const [almacenes, setAlmacenes] = useState(null);
+
     const [datos, setDatos] = useState({
         id:'',
         empresa: user['tec-user'].perfil.empresa.id, 
@@ -18,10 +20,23 @@ const RepInventarioFiltro = ({actualizaFiltro}) => {
     });
 
     useEffect(()=>{  
-        const filtro = `?repuesto__nombre__icontains=${datos.nombre}&repuesto__nombre_comun__icontains=${datos.nombre_comun}&repuesto__fabricante__icontains=${datos.fabricante}&almacen__nombre__icontains=${datos.almacen}&almacen__empresa__id=${datos.empresa}&repuesto__descatalogado=${false}`;      
+        const filtro = `?repuesto__nombre__icontains=${datos.nombre}&repuesto__nombre_comun__icontains=${datos.nombre_comun}&repuesto__fabricante__icontains=${datos.fabricante}&almacen__id=${datos.almacen}&almacen__empresa__id=${datos.empresa}&repuesto__descatalogado=${false}`;      
         actualizaFiltro(filtro);
-    },[datos.nombre, datos.fabricante, datos.almacen, datos.nombre_comun]);
+    },[datos.nombre, datos.fabricante, datos.almacen, datos.nombre_comun, datos.id]);
 
+    useEffect(()=>{
+        axios.get(BACKEND_SERVER + `/api/repuestos/almacen/?empresa=${datos.empresa}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( res => {
+            setAlmacenes(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -36,7 +51,26 @@ const RepInventarioFiltro = ({actualizaFiltro}) => {
             <Form>
                 <Row>                    
                     <Col>
-                        <Form.Group controlId="formNombre">
+                        <Form.Group controlId="almacen">
+                            <Form.Label>Almacén</Form.Label>
+                            <Form.Control as="select" 
+                                        name='almacen' 
+                                        value={datos.almacen}
+                                        onChange={handleInputChange} 
+                                        autoFocus >
+                                <option key={0} value={''}>-------</option>
+                                {almacenes && almacenes.map( almacen => {
+                                    return (
+                                    <option key={almacen.id} value={almacen.id}>
+                                        {almacen.nombre}
+                                    </option>
+                                    )
+                                })}   
+                            </Form.Control>         
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="nombre">
                             <Form.Label>Nombre contiene</Form.Label>
                             <Form.Control type="text" 
                                         name='nombre' 
@@ -65,8 +99,8 @@ const RepInventarioFiltro = ({actualizaFiltro}) => {
                                         placeholder="Fabricante contiene" />
                         </Form.Group>
                     </Col>  
-                    <Col>
-                        <Form.Group controlId="fabricante">
+                    {/* <Col>
+                        <Form.Group controlId="almacen">
                             <Form.Label>Almacén contiene</Form.Label>
                             <Form.Control type="text" 
                                         name='almacen' 
@@ -74,7 +108,17 @@ const RepInventarioFiltro = ({actualizaFiltro}) => {
                                         onChange={handleInputChange} 
                                         placeholder="Almacén contiene" />
                         </Form.Group>
-                    </Col>                                       
+                    </Col>  */}
+                    {/* <Col>
+                        <Form.Group controlId="id">
+                            <Form.Label>Id Repuesto</Form.Label>
+                            <Form.Control type="text" 
+                                        name='id' 
+                                        value={datos.id}
+                                        onChange={handleInputChange} 
+                                        placeholder="Id repuesto" />
+                        </Form.Group>
+                    </Col>  */}                                     
                 </Row>                               
             </Form>
         </Container>

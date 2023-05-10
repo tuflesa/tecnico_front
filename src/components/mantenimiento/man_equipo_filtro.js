@@ -13,16 +13,16 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
     const [zonas, setZonas] = useState(null);
     const [equipos, setEquipos] = useState(null);
     const [tipotarea, setTipoTarea] = useState(null);
-
+    const [primera_vez, setPrimeraVez] = useState(true);
+    
     var fecha_hoy=Date.parse(new Date);
     var mesEnMilisegundos = 1000 * 60 * 60 * 24 * 7;  //cambiado a una semana, en vez del mes
     var enunmes=fecha_hoy+mesEnMilisegundos;
     var dentrodeunmes = new Date(enunmes);
-    var fechaenunmesString = dentrodeunmes.getFullYear() + '-' + ('0' + (dentrodeunmes.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunmes.getDate()).slice(-2);  
+    var fechaenunmesString = dentrodeunmes.getFullYear() + '-' + ('0' + (dentrodeunmes.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunmes.getDate()).slice(-2); 
 
     const [datos, setDatos] = useState({
-        id: '',
-        especialidad: '',
+        especialidad: user['tec-user'].perfil.destrezas.length===1?user['tec-user'].perfil.destrezas[0]:'',
         tipo: '',
         empresa: user['tec-user'].perfil.empresa.id,
         zona: user['tec-user'].perfil.zona?user['tec-user'].perfil.zona.id:'',
@@ -60,7 +60,14 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
               }
         })
         .then( res => {
-            setEmpresas(res.data);
+            //Si es Bornay, enseñamos Bornay y Comalsid
+            if(user['tec-user'].perfil.empresa.id===1 && user['tec-user'].perfil.puesto.nombre!=='Operador'){
+                var empresas_2 = res.data.filter( s => s.id !== 2);
+                setEmpresas(empresas_2);
+            }
+            else{
+                setEmpresas(res.data);
+            }
         })
         .catch( err => {
             console.log(err);
@@ -68,40 +75,29 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
     }, [token]);
 
     useEffect(() => {
-        if (datos.empresa === '') {
-            setZonas([]);
-            setDatos({
+        axios.get(BACKEND_SERVER + `/api/estructura/zona/?empresa=${datos.empresa}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( res => {
+            setZonas(res.data);
+            !primera_vez && setDatos({
                 ...datos,
                 zona: '',
                 seccion: '',
                 equipo: ''
             });
-        }
-        else {
-            axios.get(BACKEND_SERVER + `/api/estructura/zona/?empresa=${datos.empresa}`,{
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                }
-            })
-            .then( res => {
-                setZonas(res.data);
-                setDatos({
-                    ...datos,
-                    zona: '',
-                    seccion: '',
-                    equipo: ''
-                });
-            })
-            .catch( err => {
-                console.log(err);
-            });
-        }
-    }, [token, datos.empresa]);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [datos.empresa]);
 
     useEffect(() => {
         if (datos.zona === '') {
             setSecciones([]);
-            setDatos({
+            !primera_vez && setDatos({
                 ...datos,
                 seccion: '',
                 equipo: ''
@@ -115,7 +111,7 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
             })
             .then( res => {
                 setSecciones(res.data);
-                setDatos({
+                !primera_vez && setDatos({
                     ...datos,
                     seccion: '',
                     equipo: ''
@@ -125,12 +121,12 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
                 console.log(err);
             });
         }
-    }, [token, datos.zona]);
+    }, [datos.zona]);
 
     useEffect(() => {
         if (datos.seccion === ''){
             setEquipos([]);
-            setDatos({
+            !primera_vez && setDatos({
                 ...datos,
                 equipo: ''
             });
@@ -151,33 +147,18 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
                     }
                     return 0;
                 }))
-                setDatos({
-                    ...datos,
-                    equipo: ''
-                });
+                setPrimeraVez(false);
             })
             .catch( err => {
                 console.log(err);
             });
         }
-    }, [token, datos.seccion]);
+    }, [datos.seccion]);
 
     useEffect(()=>{
-        const filtro1 = `?parte__tipo=${datos.tipo}&parte__empresa=${datos.empresa}&fecha_plan__lte=${datos.fecha_plan_lte}`;
-        let filtro2 = `&parte__empresa__id=${datos.empresa}`;
-        if (datos.empresa !== ''){
-            filtro2 = filtro2 + `&parte__zona__id=${datos.zona}`;
-            if (datos.zona !== ''){
-                filtro2 = filtro2 + `&parte__seccion__id=${datos.seccion}`;
-                if (datos.seccion !== ''){
-                    filtro2 = filtro2 + `&parte__equipo__id=${datos.equipo}`;
-                }
-            }
-        }
-        const filtro = filtro1 + filtro2 ;
-        const activos = datos.estado;
-        actualizaFiltro(filtro, activos);
-    },[ datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.id, datos.tipo, datos.fecha_plan_lte, token]);
+        const filtro = `?parte__tipo=${datos.tipo}&parte__empresa=${datos.empresa}&parte__zona=${datos.zona}&parte__seccion__id=${datos.seccion}&parte__equipo__id=${datos.equipo}&fecha_plan__lte=${datos.fecha_plan_lte}&tarea__especialidad=${datos.especialidad}`;
+        actualizaFiltro(filtro);
+    },[datos]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -186,11 +167,58 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
         })
     }
 
-    const handleInputChangeE = (event) => {
+    const handleInputChange_empresa = (event) => {
         setDatos({
             ...datos,
-            [event.target.name] : event.target.value
-        })
+            empresa: event.target.value,
+            zona: '',
+            seccion: '',
+            equipo: ''
+        });
+    }
+
+    const handleInputChange_zona = (event) => {
+        setDatos({
+            ...datos,
+            zona: event.target.value,
+            seccion: '',
+            equipo: ''
+        });
+    }
+
+    const handleInputChange_seccion = (event) => {
+        setDatos({
+            ...datos,
+            seccion: event.target.value,
+            equipo: ''
+        });
+    }
+
+    const Desactivar = () => {
+        if(user['tec-user'].perfil.puesto.nombre!=='Operador'){    
+            return false;
+        }
+        else{
+            return true;
+        }
+    }
+
+    const Desactivar_zona = () => {
+        if(user['tec-user'].perfil.zona && user['tec-user'].perfil.puesto.nombre==='Operador'){    
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+    const Desactivar_seccion = () => {
+        if(user['tec-user'].perfil.seccion && user['tec-user'].perfil.puesto.nombre==='Operador'){    
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 
     return (
@@ -223,10 +251,10 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
                             <Form.Control as="select"  
                                         name='empresa' 
                                         value={datos.empresa}
-                                        onChange={handleInputChange}
+                                        onChange={handleInputChange_empresa}
                                         placeholder="Empresa"
-                                        disabled={user['tec-user'].perfil.empresa.id?true:false}>
-                                        <option key={0} value={''}>Todas</option>    
+                                        disabled={Desactivar()}>
+                                        {<option key={0} value={''}>Todas</option>}   
                                         {empresas && empresas.map( empresa => {
                                             return (
                                             <option key={empresa.id} value={empresa.id}>
@@ -243,9 +271,9 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
                             <Form.Control as="select" 
                                             value={datos.zona}
                                             name='zona'
-                                            onChange={handleInputChange}
-                                            disabled={user['tec-user'].perfil.zona?true:false}>
-                                <option key={0} value={''}>Todas</option>
+                                            onChange={handleInputChange_zona}
+                                            disabled={Desactivar_zona()}>
+                                {<option key={0} value={''}>Todas</option>}
                                 {zonas && zonas.map( zona => {
                                     return (
                                     <option key={zona.id} value={zona.id}>
@@ -262,8 +290,8 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
                             <Form.Control as="select" 
                                             value={datos.seccion}
                                             name='seccion'
-                                            onChange={handleInputChange}
-                                            disabled={user['tec-user'].perfil.seccion?true:false}>
+                                            onChange={handleInputChange_seccion}
+                                            disabled={Desactivar_seccion()}>
                                 <option key={0} value={''}>Todas</option>
                                 {secciones && secciones.map( seccion => {
                                     return (
@@ -291,6 +319,16 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
                                     )
                                 })}
                             </Form.Control>
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="fecha_plan_lte">
+                            <Form.Label>Fecha Plan Anterior a</Form.Label>
+                            <Form.Control type="date" 
+                                        name='fecha_plan_lte' 
+                                        value={datos.fecha_plan_lte}
+                                        onChange={handleInputChange} 
+                                        placeholder="Fecha plan anterior a..." />
                         </Form.Group>
                     </Col>
                 </Row> 

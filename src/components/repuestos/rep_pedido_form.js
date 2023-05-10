@@ -40,6 +40,7 @@ const PedidoForm = ({pedido, setPedido}) => {
     const [verIngPdf, setVerIngPdf] = useState(false);
     const [direcciones, setDirecciones]= useState(null);
     const [contactos, setContactos]= useState(null);
+    var total_pedido= 0;
     
     const [datos, setDatos] = useState({
         id: pedido ? pedido.id : null,
@@ -49,14 +50,16 @@ const PedidoForm = ({pedido, setPedido}) => {
         creado_por: pedido ? pedido.creado_por.get_full_name : '',
         fecha_creacion: pedido ? pedido.fecha_creacion : (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
         fecha_entrega: pedido ? pedido.fecha_entrega : null,
-        fecha_prevista_entrega: pedido ? pedido.fecha_prevista_entrega : (hoy.getFullYear() + '-'+String(hoy.getMonth()+2).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
+        fecha_prevista_entrega: pedido ? pedido.fecha_prevista_entrega : (hoy.getFullYear() + '-'+String(hoy.getMonth()+2).padStart(2,'0') + '-' + String(hoy.getDate()===31?(hoy.getDate()-1):(hoy.getDate())).padStart(2,'0')),
         finalizado: pedido ? pedido.finalizado : false,
         lineas_pedido: pedido ? pedido.lineas_pedido : null,
         lineas_adicionales: pedido ? pedido.lineas_adicionales : null,
         direccion_envio: pedido ? (pedido.direccion_envio ? pedido.direccion_envio.id : null) : null,
         contacto: pedido ? (pedido.contacto ? pedido.contacto.id : null) : null,
         observaciones: pedido ? pedido.observaciones : '',
-        observaciones2: pedido ? pedido.observaciones2 : ''
+        observaciones2: pedido ? pedido.observaciones2 : '',
+        descripcion: pedido ? pedido.descripcion : '',
+        finalizado_auto: pedido ? pedido.finalizado : false,
     });
 
     useEffect(()=>{
@@ -139,25 +142,12 @@ const PedidoForm = ({pedido, setPedido}) => {
             direccion_envio: pedido ? (pedido.direccion_envio ? pedido.direccion_envio.id : null) : direcciones[0].id,
             contacto: pedido ? (pedido.contacto ? pedido.contacto.id : null) : null,
             observaciones: pedido ? pedido.observaciones : '',
-            observaciones2: pedido ? pedido.observaciones2 : ''
+            observaciones2: pedido ? pedido.observaciones2 : '',
+            descripcion: pedido ? pedido.descripcion : '',
+            finalizado_auto: pedido ? pedido.finalizado : false,
 
         });
     },[pedido]);
-
-    useEffect(() =>{
-        // Ordena el listado de proveedores
-        if (proveedores){
-            proveedores.sort(function(a, b){
-                if(a.nombre > b.nombre){
-                    return 1;
-                }
-                if(a.nombre < b.nombre){
-                    return -1;
-                }
-                return 0;
-            })
-        }
-    }, [proveedores, token]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -291,6 +281,7 @@ const PedidoForm = ({pedido, setPedido}) => {
 
     const cerrarListMovimiento =() =>{   
         setShowListMovimiento(false);
+        updatePedido();
     }
 
     const cerrarListEntrega =() =>{   
@@ -311,6 +302,7 @@ const PedidoForm = ({pedido, setPedido}) => {
             contacto: datos.contacto,
             observaciones: datos.observaciones,
             observaciones2: datos.observaciones2,
+            descripcion: datos.descripcion,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -318,6 +310,15 @@ const PedidoForm = ({pedido, setPedido}) => {
         })
         .then( res => { 
             setPedido(res.data);
+            axios.get(BACKEND_SERVER + `/api/repuestos/pedido_detalle/${res.data.id}/`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                  }     
+            })
+            .then( res => {
+                setPedido(res.data);
+            })
+            .catch(err => { console.log(err);})
         })
         .catch(err => { console.log(err);})
     }
@@ -335,6 +336,7 @@ const PedidoForm = ({pedido, setPedido}) => {
             contacto: datos.contacto,
             observaciones: datos.observaciones,
             observaciones2: datos.observaciones2,
+            descripcion: datos.descripcion,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -356,21 +358,7 @@ const PedidoForm = ({pedido, setPedido}) => {
               }     
         })
         .then( res => {
-            /* var ordenLineas=(res.data.lineas_pedido.sort(function(a, b){
-                if(a.id < b.id){
-                    return 1;
-                }
-                if(a.id > b.id){
-                    return -1;
-                }
-                return 0;
-            }))
-            res.data.lineas_pedido = ordenLineas;*/
             setPedido(res.data);
-            /* setPedido({
-                res.data,
-                lineas_pedido :ordenLineas
-            }) */
             finalizarPedido(res.data);
         })
         .catch(err => { console.log(err);})
@@ -391,50 +379,70 @@ const PedidoForm = ({pedido, setPedido}) => {
     const finalizarPedido = (pedido) =>{
         var x = 0;
         var y = 0;
-        if(datos.finalizado===true){
-            console.log('pedido finalizado');
-        }
-        else{
-            for(y=0; y<pedido.lineas_pedido.length;y++){
-                if(pedido.lineas_pedido[y].por_recibir>0){
-                    datos.finalizado=false;
-                    datos.fecha_entrega=null;
-                    break;
-                } 
+        if(datos.finalizado_auto===datos.finalizado){
+            if(datos.finalizado===true){
+                for(y=0; y<pedido.lineas_pedido.length;y++){
+                    if(pedido.lineas_pedido[y].por_recibir>0){
+                        datos.finalizado=false;
+                        datos.fecha_entrega=null;
+                        break;
+                    } 
+                    if(pedido.lineas_adicionales[x].por_recibir>0){
+                        datos.finalizado=false;
+                        datos.fecha_entrega=null;
+                        break;
+                    } 
+                }
             }
-            if(y>=pedido.lineas_pedido.length){
-                if(pedido.lineas_adicionales!=''){
-                    for(x=0; x<pedido.lineas_adicionales.length;x++){                
+            else{
+                for(y=0; y<pedido.lineas_pedido.length;y++){
+                    if(pedido.lineas_pedido[y].por_recibir>0){
+                        datos.finalizado=false;
+                        datos.fecha_entrega=null;
+                        break;
+                    } 
+                }
+                if(y>=pedido.lineas_pedido.length){
+                    if(pedido.lineas_adicionales!=''){
+                        for(x=0; x<pedido.lineas_adicionales.length;x++){                
 
-                        if(pedido.lineas_adicionales[x].por_recibir>0){
-                            datos.finalizado=false;
-                            datos.fecha_entrega=null;
-                            break;
-                        } 
-                        else{
-                            datos.finalizado=true;
-                            datos.fecha_entrega= (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate());
+                            if(pedido.lineas_adicionales[x].por_recibir>0){
+                                datos.finalizado=false;
+                                datos.fecha_entrega=null;
+                                break;
+                            } 
+                            else{
+                                datos.finalizado=true;
+                                datos.fecha_entrega= (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate());
+                            }
                         }
                     }
+                    else{
+                            datos.finalizado=true;
+                            datos.fecha_entrega= (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate())
+                        }
                 }
-                else{
-                        datos.finalizado=true;
-                        datos.fecha_entrega= (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate())
-                    }
+                
             }
-            axios.patch(BACKEND_SERVER + `/api/repuestos/pedido/${pedido.id}/`, {
-                finalizado: datos.finalizado, 
-                fecha_entrega: datos.fecha_entrega,           
-            }, {
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                }     
-            })
-            .then( res => {
-                updateFinalizado();
-            })
-            .catch(err => { console.log(err);})
         }
+        else{
+            var continuar = window.confirm('Va a cambiar el estado del pedido de forma manual ¿Desea continuar?');
+            if(continuar===false){
+                datos.finalizado=!datos.finalizado;
+            }
+        }
+        axios.patch(BACKEND_SERVER + `/api/repuestos/pedido/${pedido.id}/`, {
+            finalizado: datos.finalizado, 
+            fecha_entrega: datos.fecha_entrega,           
+        }, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }     
+        })
+        .then( res => {
+            updateFinalizado();
+        })
+        .catch(err => { console.log(err);})
     }
 
     
@@ -608,13 +616,26 @@ const PedidoForm = ({pedido, setPedido}) => {
                                 </Row>
                                 <Row>
                                     <Link to= {`/repuestos/proveedor/${pedido.proveedor.id}`}>
-                                        <Button variant="info" type="submit" >Datos Proveedor</Button>
+                                        <Button variant="info" type="submit">Datos Proveedor</Button>
                                     </Link>
                                 </Row>
                             </Col>
                             :null}
                         </Row>
-                        <Row>                            
+                        <Row>     
+                            <Col>
+                                <Form.Group controlId="descripcion">
+                                    <Form.Label>Descripción pedido</Form.Label>
+                                    <Form.Control imput type="text" 
+                                                name='descripcion'
+                                                value = {datos.descripcion}
+                                                onChange = {handleInputChange}
+                                                placeholder="Descripción Pedido">
+                                    </Form.Control>
+                                </Form.Group>
+                            </Col>  
+                        </Row>
+                        <Row>
                             <Col>
                                 <Form.Group controlId="observaciones">
                                     <Form.Label>Observaciones pedido</Form.Label>
@@ -728,9 +749,10 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                                                   
                                         <tbody>
                                             {datos.lineas_pedido && datos.lineas_pedido.map( linea => {
+                                                {total_pedido+=Number(linea.total)}
                                                 return (
-                                                    <tr key={linea.id}>
-                                                        <td>{linea.repuesto.nombre + (linea.repuesto.fabricante? ' - ' + linea.repuesto.fabricante:'') + (linea.repuesto.modelo? ' - ' + linea.repuesto.modelo:'')}</td>
+                                                    <tr key={linea.id} className = {((linea.por_recibir===0) && (linea.cantidad!=linea.por_recibir) || (linea.cantidad<(linea.cantidad-linea.por_recibir)))? "table-success" : (linea.cantidad - linea.por_recibir)>0? "table-primary" : " "}>
+                                                        <td>{linea.descripcion_proveedor!==null?linea.descripcion_proveedor:linea.repuesto.nombre + (linea.repuesto.fabricante? ' - ' + linea.repuesto.fabricante:'') + (linea.modelo_proveedor? ' - ' + linea.modelo_proveedor:'')}</td>
                                                         <td>{linea.cantidad}</td>
                                                         <td>{linea.repuesto.unidad_nombre}</td>
                                                         <td>{formatNumber(linea.precio)}</td>
@@ -783,8 +805,9 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                                                   
                                         <tbody>                                            
                                             {datos.lineas_adicionales && datos.lineas_adicionales.map( lineaAdicional => {
+                                                {total_pedido+=Number(lineaAdicional.total)}
                                                 return (
-                                                    <tr key={lineaAdicional.id}>
+                                                    <tr key={lineaAdicional.id}  className = {((lineaAdicional.por_recibir===0) && (lineaAdicional.cantidad!=lineaAdicional.por_recibir) || (lineaAdicional.cantidad<(lineaAdicional.cantidad-lineaAdicional.por_recibir)))? "table-success" : (lineaAdicional.cantidad - lineaAdicional.por_recibir)>0? "table-primary" : " "}>
                                                         <td>{lineaAdicional.descripcion}</td>
                                                         <td>{lineaAdicional.cantidad}</td>
                                                         <td>{formatNumber(lineaAdicional.precio)}</td>
@@ -806,7 +829,12 @@ const PedidoForm = ({pedido, setPedido}) => {
                                 </Col>
                             </Form.Row>                                                
                         </React.Fragment> 
-                        : null}                                            
+                        : null}  
+                        {datos.numero && !verPdf && !verIngPdf ?  
+                            <Row>
+                                <h5 className="pb-3 pt-1 mt-2"><strong>Total Pedido: {Number.parseFloat(total_pedido).toFixed(2)}€</strong></h5>
+                            </Row>   
+                        :null}                                      
                     </Form>
                 </Col>
             </Row>    

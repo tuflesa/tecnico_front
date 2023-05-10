@@ -1,13 +1,13 @@
 import React , { useState, useEffect } from "react";
 import { useCookies } from 'react-cookie';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+//import { Link } from 'react-router-dom';
 import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table, Button, Form } from 'react-bootstrap';
 import { Trash, PlusSquare, DashSquare } from 'react-bootstrap-icons';
 import BuscarRepuestos from "./rep_salida_buscar";
 
-const RepSalidas = ({alm}) => {
+const RepTraspasoAlmacen = ({alm}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
 
@@ -18,6 +18,7 @@ const RepSalidas = ({alm}) => {
     const [almacenesBloqueado, setAlmacenesBloqueado] = useState(false);
     const [salida, setSalida] = useState(null);
     //const [movimientos, setMovimientos] = useState([]);
+    const [almacenentrega, setAlmacenEntrega]=useState(null);
 
     const [numeroBar, setNumeroBar] = useState({
         id: '',
@@ -25,6 +26,7 @@ const RepSalidas = ({alm}) => {
         almacen:'',
         idCod: '',
     });
+
     const [datos, setDatos] = useState({
         usuario: user['tec-user'],
         almacen: '',
@@ -33,6 +35,8 @@ const RepSalidas = ({alm}) => {
         stock: '',
         critico: '',
         cantidad: '',
+        almacen_entre: '',
+        empresa: user['tec-user'].perfil.empresa.id,
     }); 
 
     useEffect(()=>{
@@ -56,7 +60,7 @@ const RepSalidas = ({alm}) => {
         })
         .catch(err => { console.log(err);})
     },[token, alm]);
-    
+
     useEffect(()=>{
         datos.id && datos.almacen && axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimos/?repuesto=${datos.id}&almacen=${datos.almacen}`,{
             headers: {
@@ -89,13 +93,17 @@ const RepSalidas = ({alm}) => {
                             stock: res.data[0].stock_act,
                             critico: r.data.es_critico ? 'Si' : 'No' }]);
                     }
-                    else {
-                        const newLineas = [...lineasSalida];
-                        newLineas.forEach( l => {
-                            if (l.repuesto === res.data[0].repuesto) l.cantidad = l.cantidad + 1;
-                        });
-                        setLineasSalida(newLineas);
-                    }
+                    axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimo_detalle/?repuesto=${datos.id}&almacen__empresa=${datos.empresa}`,{
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                            }     
+                    })
+                    .then( res => { 
+                        const almacenes_retorno = res.data.filter( al => al.almacen.id != numeroBar.almacen);
+                        setAlmacenEntrega(almacenes_retorno);
+                        
+                    })
+                    .catch(err => { console.log(err);})
                 })
                 .catch( err => {
                     console.log(err);
@@ -132,16 +140,30 @@ const RepSalidas = ({alm}) => {
                             }     
                 })
                 .then( res => { 
+                    /* contador+=1; */
+                    
+                })
+                .catch( err => {console.log(err)});
+                axios.post(BACKEND_SERVER + `/api/repuestos/movimiento/`,{
+                    cantidad : res.data.cantidad,
+                    almacen : datos.almacen_entre,
+                    usuario : salida.responsable,
+                    linea_salida: res.data.id
+                    }, {
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                            }     
+                })
+                .then( res => { 
                     contador+=1;
                     if(lineasSalida.length===contador){
-                        alert("Salida realizada con exito!!!!");
+                        alert("Traspaso realizado con exito!!!!");
                         window.location.href = "javascript: history.go(-1)";
                     }
                 })
                 .catch( err => {console.log(err)});
-            })
-            .catch(err => { console.log(err)});
-        });        
+            })  
+        });
     },[salida]);
 
     const handleInputChange = (event) => { 
@@ -180,9 +202,9 @@ const RepSalidas = ({alm}) => {
     }
 
     const GenerarSalida = () => {
-        if (lineasSalida.length > 0) {
+        if (lineasSalida.length > 0 && datos.almacen_entre!=='') {
             axios.post(BACKEND_SERVER + `/api/repuestos/salida/`, {
-                nombre: 'Salida de almacen',
+                nombre: 'Traspaso de almacen',
                 responsable: user['tec-user'].id
             }, {
                 headers: {
@@ -192,7 +214,12 @@ const RepSalidas = ({alm}) => {
             .then( res => { 
                 setSalida(res.data);
             })
-            .catch(err => { console.log(err);})
+            .catch(err => { 
+                console.log(err);
+            })
+        }
+        else{
+            alert('Revisa que tengas suficiente cantidad para el traspaso y seleccionado el almacén de entrega');
         }
     }    
 
@@ -211,12 +238,20 @@ const RepSalidas = ({alm}) => {
         cerrarListRepuestos();      
     }
 
+    const handleInputChange2 = (event) => {
+        setDatos({
+            ...datos,
+            [event.target.name] : event.target.value
+        })  
+    }
+
+
     return (
         <Container className="mt-5">
             <Row>                
                 <Col>
                     <Form.Group>
-                        <Form.Label className="mt-2">Almacén</Form.Label>
+                        <Form.Label className="mt-2">Almacén de salida</Form.Label>
                         <Form.Control as="select"
                                     tabIndex={1}  
                                     name='almacen' 
@@ -240,8 +275,8 @@ const RepSalidas = ({alm}) => {
                 </Col>                 
                 {numeroBar.almacen ?                            
                 <Col>
-                    <Form.Group>
-                        <Form.Label className="mt-2">Codigo Barras (con lector) </Form.Label>
+                    <Form.Group >
+                        <Form.Label className="mt-2">Codigo Barras  (con lector) </Form.Label>
                         <Form.Control
                                     type="text"
                                     id="prueba"
@@ -250,14 +285,15 @@ const RepSalidas = ({alm}) => {
                                     value={numeroBar.id}
                                     onChange={handleInputChange}
                                     placeholder="Codigo de barras" 
+                                    disabled = {lineasSalida.length>0}
                                     autoFocus/>
                     </Form.Group>
-                </Col>: null}                    
-                <Col >
+                </Col>: null}                       
+                <Col>
                 <br></br>
-                    {numeroBar.almacen? <Button variant="info" tabIndex={3} className={'btn-lg'} onClick={event => {abrirListRepuestos()}}>Buscar Repuesto</Button> : null}                 
+                    {numeroBar.almacen? <Button variant="info" tabIndex={3} className={'btn-lg'} disabled = {lineasSalida.length>0} onClick={event => {abrirListRepuestos()}}>Buscar Repuesto</Button> : null}                 
                 </Col>
-            </Row>         
+            </Row>             
             <Row>
                 <Col>
                     <h5 className="mb-3 mt-3">Lista de Repuestos</h5>
@@ -290,18 +326,35 @@ const RepSalidas = ({alm}) => {
                     </Table>
                 </Col>                
             </Row>
+            {lineasSalida.length>0?
+                <Form.Row className="justify-content-center">
+                    <Col>
+                        <Form.Group controlId="almacen_entre">
+                            <Form.Label>Almacén de Entrega</Form.Label>
+                            <Form.Control as="select"  
+                                        name='almacen_entre' 
+                                        value={datos.almacen_entre}
+                                        onChange={handleInputChange2}
+                                        placeholder="almacen2">
+                                            <option key={0} value={''}>Todos</option>
+                                            {almacenentrega && almacenentrega.map( alment => {
+                                            return (
+                                            <option key={alment.almacen.id} value={alment.almacen.id}>
+                                                {alment.almacen.nombre}
+                                            </option>
+                                            )
+                                        })}                                                
+                            </Form.Control>
+                        </Form.Group>
+                    </Col> 
+                </Form.Row>:null
+            }
             <Form.Row className="justify-content-center">
                 {lineasSalida.length>0 ? 
-                    <Button variant="info" type="submit" className={'mx-2'} onClick={GenerarSalida}>Hacer Salida</Button> :
+                    <Button variant="info" type="submit" className={'mx-2'} onClick={GenerarSalida}>Hacer Traspaso</Button> :
                     null
                 }
-                
-                <Link to = '/home'>
-                    <Button variant="warning" >
-                        Cancelar
-                    </Button>
-                </Link>
-                                          
+                <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>                   
             </Form.Row>
             <BuscarRepuestos    show={show_listrepuestos}
                                 cerrarListRepuestos={cerrarListRepuestos}
@@ -311,4 +364,4 @@ const RepSalidas = ({alm}) => {
     )
 }
 
-export default RepSalidas;
+export default RepTraspasoAlmacen;
