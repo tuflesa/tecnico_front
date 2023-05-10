@@ -15,143 +15,145 @@ const Programadores = () => {
     const [token] = useCookies(['tec-token']);
 
     const soyProgramador = user['tec-user'].perfil.destrezas.filter(s => s === 7);
-    const [lista_repuestos, setListaRepuestos] = useState(null);
+    const [precios, setPrecios] = useState(null);
     const [lista_precios, setListaPrecios] = useState(null);
     const [repuestos, setRepuestos] = useState(null);
     //const generico_id = 32;
     const generico_id = 273;
+    const right =[];
+    const Nright = [];
+    const SinProveedor = [];
+    const ConProveedor = [];
     
     var numero = 2;
     var SiEsta = '';
 
     //Repasa el listado en la tabla de precios de proveedor y crea aquello que se hayan quedado sin crear o se hayan borrado.
-    const RepasarListado = ()=>{
-        axios.get(BACKEND_SERVER + `/api/repuestos/lista_repuestos/`,{
+    /* const RepasarListado = ()=>{
+        axios.get(BACKEND_SERVER + `/api/repuestos/repuesto_precio/`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }
         })
-        .then( res => {
-            console.log(res.data);
-            setListaRepuestos(res.data);
-            axios.get(BACKEND_SERVER + `/api/repuestos/repuesto_precio/`,{
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                }
-            })
-            .then( r => {
-                //console.log(r.data);
-                setListaPrecios(r.data);
-                for(var x=0; x<res.data.length; x++){
-                    for(var y=0; y<r.data.length; y++){
-                        if(res.data[x].id===r.data[y].repuesto.id){
-                            SiEsta=1;
-                        }
-                    }
-                    if(SiEsta!==1){
-                        if(res.data[x].proveedores.length===0){
-                            axios.post(BACKEND_SERVER + `/api/repuestos/precio/`, {
-                                repuesto: res.data[x].id,
-                                proveedor: generico_id,
-                                descripcion_proveedor: res.data[x].nombre,
-                                modelo_proveedor: res.data[x].modelo,
-                                precio: 0,
-                                descuento: 0, 
-                                fabricante: res.data[x].fabricante,
-                            }, {
-                                headers: {
-                                    'Authorization': `token ${token['tec-token']}`
-                                }     
-                            })
-                            .then( res => { 
-                                console.log('genérico');
-                            })
-                            .catch(err => { console.log(err);})
-                        }
-                        else if(res.data[x].proveedores.length!==0){
-                            for(var z=0; z<res.data[x].proveedores.length;z++){
-                                axios.post(BACKEND_SERVER + `/api/repuestos/precio/`, {
-                                    repuesto: res.data[x].id,
-                                    proveedor: res.data[x].proveedores[z],
-                                    descripcion_proveedor: res.data[x].nombre,
-                                    modelo_proveedor: res.data[x].modelo,
-                                    precio: 0,
-                                    descuento: 0, 
-                                    fabricante: res.data[x].fabricante,
-                                }, {
-                                    headers: {
-                                        'Authorization': `token ${token['tec-token']}`
-                                    }     
-                                })
-                                .then( res => { 
-                                    console.log('post realizado en id: ' + res.data);
-                                })
-                                .catch(err => { console.log(err);})
-                            }
-                            SiEsta='';
-                        }
-                    }
-                    else{
-                        axios.patch(BACKEND_SERVER + `/api/repuestos/precio/${r.data[x].id}/`, {
-                            descripcion_proveedor: res.data[x].nombre,
-                            modelo_proveedor: res.data[x].modelo,
-                            fabricante: res.data[x].fabricante,
-                        }, {
-                            headers: {
-                                'Authorization': `token ${token['tec-token']}`
-                            }     
-                        })
-                        .then( res => { 
-                            console.log('patch realizado en id: ' + r.data[x].id);
-                        })
-                        .catch(err => { console.log(err);})
-                        SiEsta='';
-                    }
-                }
-            })
-            .catch( err => {console.log(err); });
+        .then( r => {
+            console.log('esto es la lista de repuestos_precios');
+            console.log(r.data);
+            setListaPrecios(r.data);
         })
-        .catch( err => {
-            console.log(err);
-        });
         console.log('se terminóoooooo');
     }
 
+    useEffect(()=>{
+        console.log(lista_precios);
+        for(var x=2300; x<2342; x++){
+            lista_precios && axios.patch(BACKEND_SERVER + `/api/repuestos/precio/${lista_precios[x].id}/`, {
+                descripcion_proveedor: lista_precios[x].repuesto.nombre,
+                modelo_proveedor: lista_precios[x].repuesto.modelo,
+                fabricante: lista_precios[x].repuesto.fabricante,
+            }, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }     
+            })
+            .then( s => { 
+                console.log('en el then del patch');
+            })
+            .catch(err => { console.log(err);})
+        }
+    }, [lista_precios]); */
+
     //copiar la descripción de proveedor actual y modelo actual de repuestos en la tabla de precio, descripcion_proveedor.
     const copia_descripcion = ()=>{
-        /* axios.get(BACKEND_SERVER + `/api/repuestos/repuesto_precio/`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-            }
-        })
-        .then( res => {
-            console.log('lo que recojo en el respuesto_precio');
-            console.log(res.data);
-            setListaRepuestos(res.data);
-            for(var y=0; y<res.data.length; y++){
-                if(!res.data[y].descripcion_proveedor){
-                    axios.patch(BACKEND_SERVER + `/api/repuestos/precio/${res.data[y].id}/`, {
-                        descripcion_proveedor: res.data[y].repuesto.nombre,
-                        modelo_proveedor: res.data[y].repuesto.modelo,
-                    }, {
-                        headers: {
-                            'Authorization': `token ${token['tec-token']}`
+        /* for(var y=0; y<SinProveedor.length; y++){
+            const newProveedores = [parseInt(generico_id)];
+            axios.patch(BACKEND_SERVER + `/api/repuestos/lista/${SinProveedor[y].id}/`, {
+                proveedores:newProveedores,
+            }, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                    }     
+            })
+            .then( r => { 
+                console.log('patch de la linea de pedido');
+            })
+            .catch(err => { console.log(err);})
+        } */
+        /* for(var y=0; y<ConProveedor.length; y++){
+            console.log('estamos dentro _____ 30!!!');
+            for(var x=0; x<ConProveedor[y].proveedores.length; x++){
+                axios.post(BACKEND_SERVER + `/api/repuestos/precio/`, {
+                    proveedor: ConProveedor[y].proveedores[x],
+                    repuesto: ConProveedor[y].id,
+                    precio: '',
+                    descuento: '',
+                    descripcion_proveedor: ConProveedor[y].nombre,
+                    modelo_proveedor: ConProveedor[y].modelo,
+                    fabricante: ConProveedor[y].fabricante,
+                }, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
                         }     
-                    })
-                    .then( r => { 
-                        console.log('copiado descripción y modelo');
-                    })
-                    .catch(err => { console.log(err);})
-                }
+                })
+                .then( res => { 
+                    }
+                )
+                .catch(err => { console.log(err);});
             }
-        })
-        .catch( err => {
-            console.log(err);
-        }); */
+        }
+        console.log('termino el post en precio'); */
     }
 
+    const RepasarListado = () => {
+       /*  axios.get(BACKEND_SERVER + `/api/repuestos/precio/`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => { 
+            setPrecios(res.data);
+            axios.get(BACKEND_SERVER + `/api/repuestos/lista_repuestos/`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                  }     
+            })
+            .then( r => { 
+                setRepuestos(r.data);                
+            })
+            .catch(err => { console.log(err);})
+        })
+        .catch(err => { console.log(err);}) */
+        
+        
+    }
+
+    const los_diferentes = () => {
+        /* var cont = 0;
+        repuestos.filter((d) => {
+            precios.filter((s) => {
+                if (d.id === s.repuesto) {
+                    cont=1;
+                    Nright.push(d);
+                    
+                }
+            })
+            if(cont===0){
+                if(d.proveedores.length===1){
+                    SinProveedor.push(d);
+                }
+                else{
+                    ConProveedor.push(d);
+                }
+                right.push(d);
+            }
+            else{
+                cont=0;
+            }
+        }) */
+    }
+
+
     //copiar la descripción de proveedor y el modelo en la linea del pedido.
-    const copia_descripcion_linea_pedido = ()=>{
+    /* const copia_descripcion_linea_pedido = ()=>{
         axios.get(BACKEND_SERVER + `/api/repuestos/linea_pedido_detalle/`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -176,7 +178,7 @@ const Programadores = () => {
         .catch( err => {
             console.log(err);
         });
-    }
+    } */
 
     /* useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/repuestos/repuesto_precio/`,{
@@ -207,12 +209,12 @@ const Programadores = () => {
                             {/* <th><Button variant="info" onClick={event =>{CrearListado()}}>Crear lista</Button></th> */}
                             <th><Button variant="info" onClick={event =>{RepasarListado()}}>1- Repasar lista de precios</Button></th>
                             <th><Button variant="info" onClick={event =>{copia_descripcion()}}>2- Copiar DESCRIPCION Y MODELO en precio</Button></th>
-                            <th><Button variant="info" onClick={event =>{copia_descripcion_linea_pedido()}}>3- Copiar datos a la linea de pedido</Button></th>
+                            <th><Button variant="info" onClick={event =>{los_diferentes()}}>3- Recoger los diferentes</Button></th>
                         </tbody>
                     </Table>
                 </Col>
             </Row>  
-            <Row>
+            {/* <Row>
                 <Col>
                     <h5 className="mb-3 mt-3">Lista de Almacenes</h5>
                     <Table striped bordered hover>
@@ -244,7 +246,7 @@ const Programadores = () => {
                         </tbody>
                     </Table>
                 </Col>
-            </Row>          
+            </Row> */}          
         </Container>        
     )
 }
