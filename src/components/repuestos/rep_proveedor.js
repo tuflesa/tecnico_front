@@ -26,7 +26,8 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
             }
         })
         .then( res => {
-            const proveedoresDisponibles = res.data.filter(p => {return !listaAsignados.includes(p.id)});
+            //const proveedoresDisponibles = res.data.filter(p => {return !listaAsignados.includes(p.id)});
+            const proveedoresDisponibles = res.data;
             setProveedores(proveedoresDisponibles);
             if (proveedoresDisponibles.length>0){
                 setDatos({
@@ -63,7 +64,15 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
     }
 
     const handlerGuardar = () => {
-        const newProveedores = [...listaAsignados, parseInt(datos.proveedor)];
+        var newProveedores=[];
+        //const Proveedor_repetido = listaAsignados.filter(p => {return datos.proveedor.includes(p.id)});
+        const Proveedor_repetido = listaAsignados.filter( pr => pr === datos.proveedor);
+        if(Proveedor_repetido.length!==0){;
+            newProveedores = [...listaAsignados]
+        }
+        else{
+            newProveedores = [...listaAsignados, parseInt(datos.proveedor)]
+        }
         axios.patch(BACKEND_SERVER + `/api/repuestos/lista/${repuesto_id}/`, {
             proveedores: newProveedores
         }, {
@@ -86,8 +95,6 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
                     }     
             })
             .then( res => { 
-                    console.log('el res.data del post de precio');
-                    console.log(res.data);
                     handlerCancelar();
                 }
             )

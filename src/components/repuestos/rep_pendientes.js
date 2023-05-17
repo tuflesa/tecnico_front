@@ -191,7 +191,7 @@ const RepPendientes = () => {
                     <h5 className="mb-3 mt-3">Pedidos con fecha prevista vencida</h5>                    
                     <Table striped bordered hover>
                         <thead>
-                        <tr>
+                            <tr>
                                 <th style={{width:130}}>Num-Pedido</th>
                                 <th>Empresa</th>
                                 <th>Proveedor</th>

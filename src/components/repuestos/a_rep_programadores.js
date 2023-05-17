@@ -18,6 +18,7 @@ const Programadores = () => {
     const [precios, setPrecios] = useState(null);
     const [lista_precios, setListaPrecios] = useState(null);
     const [repuestos, setRepuestos] = useState(null);
+    const [linea_pedidos, setLineaPedidos] = useState(null);
     //const generico_id = 32;
     const generico_id = 273;
     const right =[];
@@ -153,32 +154,37 @@ const Programadores = () => {
 
 
     //copiar la descripción de proveedor y el modelo en la linea del pedido.
-    /* const copia_descripcion_linea_pedido = ()=>{
-        axios.get(BACKEND_SERVER + `/api/repuestos/linea_pedido_detalle/`,{
+    const copiar_datos = ()=>{
+        /* for(var y=1300; y<1368; y++){
+            axios.patch(BACKEND_SERVER + `/api/repuestos/linea_pedido/${linea_pedidos[y].id}/`, {
+                descripcion_proveedor: linea_pedidos[y].repuesto.nombre,
+                modelo_proveedor: linea_pedidos[y].repuesto.modelo,
+            }, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                  }     
+            })
+            .then( r => { 
+                console.log('patch de la linea de pedido');
+            })
+            .catch(err => { console.log(err);})
+        } */
+    }
+    const copia_descripcion_linea_pedido = ()=>{
+        /* axios.get(BACKEND_SERVER + `/api/repuestos/linea_pedido_detalle/`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }
         })
         .then( res => {
-            for(var y=0; y<res.data.length; y++){
-                axios.patch(BACKEND_SERVER + `/api/repuestos/linea_pedido/${res.data[y].id}/`, {
-                    descripcion_proveedor: res.data[y].repuesto.nombre,
-                    modelo_proveedor: res.data[y].repuesto.modelo,
-                }, {
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`
-                      }     
-                })
-                .then( r => { 
-                    console.log('patch de la linea de pedido');
-                })
-                .catch(err => { console.log(err);})
-            }
+            setLineaPedidos(res.data);
+            console.log('listado de lineas de pedido');
+            console.log(res.data);
         })
         .catch( err => {
             console.log(err);
-        });
-    } */
+        }); */
+    }
 
     /* useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/repuestos/repuesto_precio/`,{
@@ -210,6 +216,8 @@ const Programadores = () => {
                             <th><Button variant="info" onClick={event =>{RepasarListado()}}>1- Repasar lista de precios</Button></th>
                             <th><Button variant="info" onClick={event =>{copia_descripcion()}}>2- Copiar DESCRIPCION Y MODELO en precio</Button></th>
                             <th><Button variant="info" onClick={event =>{los_diferentes()}}>3- Recoger los diferentes</Button></th>
+                            <th><Button variant="info" onClick={event =>{copia_descripcion_linea_pedido()}}>4- Copiar datos linea pedidos</Button></th>
+                            <th><Button variant="info" onClick={event =>{copiar_datos()}}>5- Copiar datos en linea</Button></th>
                         </tbody>
                     </Table>
                 </Col>
