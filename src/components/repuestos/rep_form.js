@@ -573,16 +573,12 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                     <Button variant="info" type="submit" className={'mx-2'} onClick={crearDatos}>Guardar</Button>
                                 }
                                 <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
-                                {/* <Link to='/repuestos/listado'>
-                                    <Button variant="warning" >
-                                        Cancelar / Cerrar
-                                    </Button>
-                                </Link> */}
                                 {datos.id && <Button variant='info' className={'mx-2'} onClick={ImprimirBarcode}>Imprimir Etiqueta</Button>}
                             </Form.Row>
                         :
                             <Form.Row className="justify-content-center">
                                 <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
+                                {datos.id && <Button variant='info' className={'mx-2'} onClick={ImprimirBarcode}>Imprimir Etiqueta</Button>}
                             </Form.Row>
                         }
                         {repuesto.id ?
