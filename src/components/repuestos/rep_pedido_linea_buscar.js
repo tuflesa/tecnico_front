@@ -25,8 +25,6 @@ const BuscarRepuestosPedido = ({cerrarListRepuestos, show, proveedor_id, elegirR
         })
         .then( res => { 
             setRepuestos(res.data);
-            console.log('recogemos listado de lineas del proveedor');
-            console.log(res.data);
         })
         .catch(err => { console.log(err);})
     },[filtro]);

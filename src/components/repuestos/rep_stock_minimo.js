@@ -115,7 +115,6 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
                 .catch(err => { console.log(err);})
             }
             else { // Crear stock mínimo
-                // console.log('Crear stock mínimo: repuesto:' + repuesto_id + ' almacen:  ' + datos.almacen + ' cantidad: ' + datos.stock_minimo_cantidad);
                 axios.post(BACKEND_SERVER + `/api/repuestos/stocks_minimos/`, {
                     repuesto: repuesto_id,
                     almacen: datos.almacen,

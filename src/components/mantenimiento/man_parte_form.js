@@ -284,11 +284,6 @@ const ParteForm = ({parte, setParte, op}) => {
         });
     }, [token]); 
 
-    useEffect(()=>{ 
-        console.log('esto vale las lineas');
-        console.log(lineas);
-    }, [lineas]); 
-    
     const updateParte = () => {
         parte.id && axios.get(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo_detalle/${parte.id}/`,{
             headers: {

@@ -144,9 +144,7 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
     }
 
     const BorrarAlmacen = (r)=>{
-        console.log(r);
         if(r.stock_act>0){
-            console.log('estoy borrando almacen');
             setShowBorrar(true);
         }
         else{

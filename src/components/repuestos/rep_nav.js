@@ -10,10 +10,6 @@ const RepNavBar = () => {
     const soyProgramador = user['tec-user'].perfil.destrezas.filter(s => s === 7);
     const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Mantenimiento'&&user['tec-user'].perfil.puesto.nombre!=='Operador'?false:true;
 
-    useEffect(() => {
-        console.log(nosoyTecnico);
-    }, [token]);
-
     return (
         <React.Fragment>
                 <Navbar bg="light" fixed= 'top'>

@@ -47,8 +47,6 @@ const NotificacionForm = ({nota, setNota}) => {
     });
 
     useEffect(()=>{
-        console.log('que entra en nota');
-        console.log(nota);
         setDatos({
             id: nota.id? nota.id : null,
             que: nota.id?nota.que:null,
@@ -70,12 +68,6 @@ const NotificacionForm = ({nota, setNota}) => {
             peligrosidad: nota.id? nota.peligrosidad:false,
         });
     },[nota]);
-
-    useEffect(()=>{
-        console.log('que entra en nota');
-        console.log(nota);
-        console.log(datos);
-    },[nota, datos.id]);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + `/api/administracion/usuarios/?perfil__empresa__id=${user['tec-user'].perfil.empresa.id}`,{
@@ -434,25 +426,14 @@ const NotificacionForm = ({nota, setNota}) => {
                                     />
                                 </Form.Group>
                             </Col>
-                            {/* <Col>
+                        </Row>
+                        <Row>
+                            <Col style={ { color: 'red' } }>
                                 <Form.Group className="mb-3" controlId="peligrosidad">
                                     <Form.Check type="checkbox" 
                                                 label="Peligrosidad"
                                                 checked = {datos.peligrosidad}
                                                 onChange = {handleInputChange} />
-                                </Form.Group>
-                            </Col> */}
-                            <Col style={ { color: 'red' } }>
-                                <Form.Group controlId="peligrosidad" >
-                                    <Form.Label>Peligrosidad</Form.Label>
-                                    <Form.Control as="select" 
-                                                    value={datos.peligrosidad}
-                                                    name='peligrosidad'
-                                                    onChange={handleInputChange}>
-                                        <option key={0} value={''}>Todos</option>
-                                        <option key={1} value={true}>Si</option>
-                                        <option key={2} value={false}>No</option>
-                                    </Form.Control>
                                 </Form.Group>
                             </Col>
                         </Row>    

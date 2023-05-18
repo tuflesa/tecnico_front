@@ -36,8 +36,7 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
         num_parte: '',
     });    
 
-    useEffect(() => {
-        console.log(user['tec-user'].perfil.puesto.nombre);
+    useEffect(() => {;
         axios.get(BACKEND_SERVER + '/api/mantenimiento/tipo_tarea/',{
             headers: {
                 'Authorization': `token ${token['tec-token']}`

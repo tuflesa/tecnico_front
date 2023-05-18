@@ -48,7 +48,6 @@ const ManLineasListado = () => {
     });
 
     useEffect(()=>{
-        console.log(fechapasadaString);
         if(activos){
             axios.get(BACKEND_SERVER + '/api/mantenimiento/listado_lineas_activas/'+ filtro,{
                 headers: {
@@ -56,7 +55,6 @@ const ManLineasListado = () => {
                     }
             })
             .then( res => {
-                console.log(res.data.results);
                 res.data.results.map( r => {
                     //solo para poder utilizar los campos en el excel
                     r['priori']=r.tarea.prioridad;
