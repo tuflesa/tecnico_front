@@ -90,14 +90,16 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
             <Modal.Header> 
                 <table>
                     <tbody>
-                        <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
-                        <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
-                        <th>Número registros: {count}</th>
-                        <th>
-                            <Button variant="info" onClick={cerrarListRepuestos}>
-                                Cerrar
-                            </Button>
-                        </th>
+                        <tr>
+                            <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
+                            <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
+                            <th>Número registros: {count}</th>
+                            <th>
+                                <Button variant="info" onClick={cerrarListRepuestos}>
+                                    Cerrar
+                                </Button>
+                            </th>
+                        </tr>
                     </tbody>
                 </table>  
             </Modal.Header>  
@@ -156,16 +158,16 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
                                 {repuesto && repuesto.map( rep => {                                    
                                     return (                                                
                                         <tr key={rep.id}>
-                                            <td>{rep.nombre}</td>  
+                                            <th>{rep.nombre}</th>  
                                             {/* <td>{localizaciones && localizaciones.map(localizacion =>{
                                                 if(localizacion.repuesto=== rep.id){return(localizacion.localizacion)}
                                             })} </td> */}
-                                            <td>{rep.stocks_minimos && rep.stocks_minimos.map(localizacion =>{
+                                            <th>{rep.stocks_minimos && rep.stocks_minimos.map(localizacion =>{
                                                 if(localizacion.repuesto.id=== rep.id){return(localizacion.localizacion)}
-                                            })} </td>
-                                            <td>
+                                            })} </th>
+                                            <th>
                                             <ArrowDownCircle className="mr-3 pencil" onClick={event => {elegirRepuesto(rep.id)}}/>
-                                            </td>                                                
+                                            </th>                                                
                                         </tr>
                                     )})
                                 }
@@ -177,14 +179,16 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
             <Modal.Footer>
                 <table>
                     <tbody>
-                        <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
-                        <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
-                        <th>Número registros: {count}</th>
-                        <th>
-                            <Button variant="info" onClick={cerrarListRepuestos}>
-                                Cerrar
-                            </Button>
-                        </th>
+                        <tr>
+                            <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
+                            <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
+                            <th>Número registros: {count}</th>
+                            <th>
+                                <Button variant="info" onClick={cerrarListRepuestos}>
+                                    Cerrar
+                                </Button>
+                            </th>
+                        </tr>
                     </tbody>
                 </table>
             </Modal.Footer>

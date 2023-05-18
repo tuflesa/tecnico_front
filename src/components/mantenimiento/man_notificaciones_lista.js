@@ -115,7 +115,7 @@ const ManNotificacionesLista = () => {
                         <tbody>
                             {notas && notas.map( nota => {
                                 return (
-                                    <tr key={nota.id}className = {comparar_finalizados(nota)? "table-success" : comparar_revisados(nota)? "table-primary":''}>
+                                    <tr key={nota.id}className = {comparar_finalizados(nota)? "table-success" : comparar_revisados(nota)? "table-primary": nota.peligrosidad===true? "table-danger":''}>
                                         <td>{nota.numero}</td>
                                         <td>{nota.quien.get_full_name}</td>
                                         <td>{nota.que}</td>
