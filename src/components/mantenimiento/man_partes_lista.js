@@ -13,7 +13,7 @@ const ManListaPartes = () => {
     
     const soyTecnico = user['tec-user'].perfil.destrezas.filter(s => s === 6);
     const [partes, setPartes]  = useState(null);
-    const [filtro, setFiltro] = useState(`?estado=${''}&empresa__id=${user['tec-user'].perfil.empresa.id}&creado_por=${soyTecnico.length===0?user['tec-user'].perfil.usuario:''}`);
+    const [filtro, setFiltro] = useState(`?estado=${''}&empresa__id=${user['tec-user'].perfil.empresa.id}&creado_por=${user['tec-user'].perfil.usuario}`);
     const [activos, setActivos] = useState(true);
     const [actualizar, setActualizar] = useState('');
     const [count, setCount] = useState(null);
