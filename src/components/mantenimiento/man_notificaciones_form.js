@@ -47,6 +47,8 @@ const NotificacionForm = ({nota, setNota}) => {
     });
 
     useEffect(()=>{
+        console.log('que entra en nota');
+        console.log(nota);
         setDatos({
             id: nota.id? nota.id : null,
             que: nota.id?nota.que:null,
@@ -92,7 +94,7 @@ const NotificacionForm = ({nota, setNota}) => {
     }, [token, datos.empresa]);
 
     useEffect(() => {
-        nota && axios.get(BACKEND_SERVER + `/api/mantenimiento/reclamos_detalle/?notificacion=${nota.id}`,{
+        nota.id && axios.get(BACKEND_SERVER + `/api/mantenimiento/reclamos_detalle/?notificacion=${nota.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -153,6 +155,13 @@ const NotificacionForm = ({nota, setNota}) => {
             ...datos,
             [event.target.name] : event.target.value
         })  
+    }
+
+    const handlePeligro = (event) => {
+        setDatos({
+            ...datos,
+            peligrosidad : !datos.peligrosidad
+        })
     }
 
     const crearNota = (event) => {
@@ -429,11 +438,11 @@ const NotificacionForm = ({nota, setNota}) => {
                         </Row>
                         <Row>
                             <Col style={ { color: 'red' } }>
-                                <Form.Group className="mb-3" controlId="peligrosidad">
+                                <Form.Group className="mb-3" controlId="peligro">
                                     <Form.Check type="checkbox" 
                                                 label="Peligrosidad"
                                                 checked = {datos.peligrosidad}
-                                                onChange = {handleInputChange} />
+                                                onChange = {handlePeligro} />
                                 </Form.Group>
                             </Col>
                         </Row>    
