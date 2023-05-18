@@ -173,7 +173,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
         const filtro = filtro1 + filtro2;
         
         actualizaFiltro(filtro);
-    },[datos]);
+    },[datos, numeroBar]);
 
 
     const handleInputChange = (event) => {
