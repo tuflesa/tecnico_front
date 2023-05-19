@@ -11,7 +11,7 @@ import { select } from 'd3';
 
 const RepLista = () => {
     const [token] = useCookies(['tec-token']);
-    //const [user] = useCookies(['tec-user']);
+    const [user] = useCookies(['tec-user']);
     const [repuestos, setRepuestos] = useState(null);
     //const [result_repuestos, setResulRepuestos] = useState(null);
     const [show, setShow] = useState(false);
@@ -20,6 +20,7 @@ const RepLista = () => {
     const [filtroII,setFiltroII] = useState( `?descatalogado=${false}`);
     const [buscando,setBuscando] = useState(false);
     const [count, setCount] = useState(null);
+    const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Mantenimiento'&&user['tec-user'].perfil.puesto.nombre!=='Operador'?false:true;
     let filtroPag=(null);
 
     const ExcelFile = ReactExport.ExcelFile;
@@ -180,10 +181,8 @@ const RepLista = () => {
                                         {/* <td>{repuesto.es_critico ? 'Si' : 'No'}</td>
                                         <td>{repuesto.descatalogado ? 'Si' : 'No'}</td> */}
                                         <td>
-                                            <Link title='Detalle/Modificar'to={`/repuestos/${re.id}`}>
-                                                <PencilFill className="mr-3 pencil"/>
-                                            </Link>
-                                            <Trash className="mr-3 trash" onClick={event => {handleTrashClick(re)}} />
+                                            <Link title='Detalle/Modificar'to={`/repuestos/${re.id}`}><PencilFill className="mr-3 pencil"/></Link>
+                                            {!nosoyTecnico?<Trash className="mr-3 trash" onClick={event => {handleTrashClick(re)}} />:''}
                                         </td>
                                     </tr>
                                 )})
