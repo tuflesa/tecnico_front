@@ -10,6 +10,7 @@ import LineasAdicionalesFiltro from './rep_lineas_adicionales_filtro';
 const LineaAdicional = () => {
     
     const [token] = useCookies(['tec-token']);
+    const [user] = useCookies(['tec-user']);
     const [filtro, setFiltro] = useState(``);
     const [lineas_adicionales, setLineasAdicionales] = useState(null);
     const [filtroII, setFiltroII] = useState( `?page=${1}`);
@@ -40,7 +41,7 @@ const LineaAdicional = () => {
                     'Authorization': `token ${token['tec-token']}`
                     }
             })
-            .then( res => {
+            .then( res => {;
                 setLineasAdicionales(res.data.results);
                 setCount(res.data.count);
                 setBuscando(false);
