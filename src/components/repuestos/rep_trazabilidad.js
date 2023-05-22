@@ -70,11 +70,12 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, alm
             }
         })
         .then( res => {
+            console.log(res.data);
             res.data.map( r => {
                 r.albaran=r.linea_salida.salida.nombre;
                 r['alm'] = r.almacen.nombre;
                 r['stock']=0;
-                r['usuario']=r.usuario.get_full_name;
+                r['usuario']=r.usuario?r.usuario.get_full_name:'';
             })
             setListaSalidas(res.data);
         })
@@ -126,7 +127,7 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, alm
                 <Modal.Title>Listado Trazabilidad del Repuesto</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Row> 
+                {/* <Row> 
                     <Col><h5>{repuesto?repuesto.nombre:''}</h5></Col>
                     <ExcelFile filename={"ExcelExportExample"} element={<button>Exportar a Excel</button>}>
                         <ExcelSheet data={listado} name="Listados">
@@ -140,7 +141,7 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, alm
                         </ExcelSheet>
                     </ExcelFile> 
                     
-                </Row>
+                </Row> */}
                 <Row>
                     <Button variant="info" onClick={handlerListCerrar}>
                         Cancelar
