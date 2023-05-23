@@ -70,7 +70,7 @@ const ManPorEquipos = () => {
         .catch( err => {
             console.log(err);
         });
-    }, [token, filtro]); 
+    }, [token, filtro, datos.observaciones]); 
  
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea_filtro/?trabajador=${user['tec-user'].perfil.usuario}`,{
@@ -188,31 +188,6 @@ const ManPorEquipos = () => {
     }
 
     const pedir_observaciones = (linea) => {
-        datos.observaciones=linea.tarea.observaciones_trab;
-        setShowObservacion(true);
-        setLinea_completa(linea);
-    }
-
-    const handleCloseObservacion = () => {
-        setShowObservacion(false);
-        axios.patch(BACKEND_SERVER + `/api/mantenimiento/tareas/${linea_completa.tarea.id}/`,{
-            observaciones_trab: datos.observaciones,
-        },
-        {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-            }
-        })
-        .then( r => {
-            console.log(r.data);
-        })
-        .catch( err => {
-            console.log(err);
-        });
-        FinalizarTarea(linea_completa);
-    }
-
-    const FinalizarTarea = (linea) => { 
         axios.get(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea/?linea=${linea.id}`, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -225,118 +200,143 @@ const ManPorEquipos = () => {
             else{
                 const trabajador_activo = res.data.filter(s => s.trabajador === user['tec-user'].perfil.usuario);
                 if(trabajador_activo.length===0){
-                    alert('No tienes esta tarea iniciada, no la puedes finalizar');
+                    alert('No tienes esta tarea iniciada, no la puedes comentar ni finalizar');
                 }
                 else if(trabajador_activo.length!==0){
-                    var Finalizar_Tarea = window.confirm('Vas a finalizar la tarea ¿Desea continuar?');
-                    if (Finalizar_Tarea){
-                        for(var x=0;x<res.data.length;x++){
-                            axios.patch(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea/${res.data[x].id}/`,{
-                                fecha_fin: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
-
-                            },
-                            {
-                                headers: {
-                                    'Authorization': `token ${token['tec-token']}`
-                                }
-                            })
-                            .then( r => {
-                                updateTarea();
-                            })
-                            .catch( err => {
-                                console.log(err);
-                            });
-                        }
-                        axios.patch(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_activas/${linea.id}/`,{
-                            fecha_fin: datos.fecha_fin,
-                            estado: 3,
-                        },
-                        {
-                            headers: {
-                                'Authorization': `token ${token['tec-token']}`
-                            }
-                        })
-                        .then( re => {
-                            if(re.data.parte.tipo===1){
-                                var fechaString= null;
-                                var diaEnMilisegundos = 1000 * 60 * 60 * 24;
-                                var fecha=Date.parse(re.data.fecha_fin);
-                                var fechaPorSemanas=null;
-                                var suma=null;
-                                suma = fecha + (diaEnMilisegundos * re.data.tarea.periodo * re.data.tarea.tipo_periodo.cantidad_dias);
-                                fechaPorSemanas = new Date(suma);
-                                fechaString = fechaPorSemanas.getFullYear() + '-' + ('0' + (fechaPorSemanas.getMonth()+1)).slice(-2) + '-' + ('0' + fechaPorSemanas.getDate()).slice(-2);
-                               
-                                fechaString && axios.post(BACKEND_SERVER + `/api/mantenimiento/linea_nueva/`,{
-                                    parte: re.data.parte.id,
-                                    tarea: re.data.tarea.id,
-                                    fecha_inicio:null,
-                                    fecha_fin:null,
-                                    fecha_plan: fechaString,
-                                    estado: 1,
-                                },
-                                {
-                                    headers: {
-                                        'Authorization': `token ${token['tec-token']}`
-                                    }
-                                })
-                                .then( r => {
-                                    console.log('linea hecha');
-
-                                })
-                                .catch( err => {
-                                    console.log(err);  
-                                });
-                                updateTarea();
-                            }                            
-                            else{
-                                axios.get(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_trabajo/?parte=${re.data.parte.id}`, {
-                                    headers: {
-                                        'Authorization': `token ${token['tec-token']}`
-                                      }     
-                                })
-                                .then( res => {
-                                    var contador = 0;
-                                    for(var x=0;x<res.data.length;x++){
-                                        if(res.data[x].estado===3){
-                                            contador=contador+1;
-                                            if(contador===res.data.length){
-                                                axios.patch(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${res.data[0].parte}/`,{
-                                                    estado: 3,
-                                                },
-                                                {
-                                                    headers: {
-                                                        'Authorization': `token ${token['tec-token']}`
-                                                    }
-                                                })
-                                                .then( re => {
-                                                    alert('Parte finalizado');
-                                                })
-                                                .catch( err => {
-                                                    console.log(err);  
-                                                });
-                                            }
-                                        }
-                                        else{
-                                            console.log('hay lineas sin finalizar');
-                                        }
-                                    }
-
-                                })
-                                .catch( err => {
-                                    console.log(err);  
-                                });
-                            }
-                        })
-                        .catch( err => {
-                            console.log(err);
-                        });
-                    }
+                    datos.observaciones=linea.observaciones_trab;
+                    setShowObservacion(true);
+                    setLinea_completa(linea);
                 }
             }
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }
+
+    const handleCloseObservacion = () => {
+        setShowObservacion(false);
+        axios.patch(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_mov/${linea_completa.id}/`,{
+            observaciones_trab: datos.observaciones,
+        },
+        {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( r => {
             updateTarea();
         })
-        .catch(err => { console.log(err);}) 
+        .catch( err => {
+            console.log(err);
+        });
+        FinalizarTarea(linea_completa);
+    }
+
+    const FinalizarTarea = (linea) => { 
+        var Finalizar_Tarea = window.confirm('Vas a finalizar la tarea ¿Desea continuar?');
+        if (Finalizar_Tarea){
+            for(var x=0;x<linea.length;x++){
+                axios.patch(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea/${linea[x].id}/`,{
+                    fecha_fin: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
+
+                },
+                {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }
+                })
+                .then( r => {
+                    updateTarea();
+                })
+                .catch( err => {
+                    console.log(err);
+                });
+            }
+            axios.patch(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_activas/${linea.id}/`,{
+                fecha_fin: datos.fecha_fin,
+                estado: 3,
+            },
+            {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }
+            })
+            .then( re => {
+                if(re.data.parte.tipo===1){
+                    var fechaString= null;
+                    var diaEnMilisegundos = 1000 * 60 * 60 * 24;
+                    var fecha=Date.parse(re.data.fecha_fin);
+                    var fechaPorSemanas=null;
+                    var suma=null;
+                    suma = fecha + (diaEnMilisegundos * re.data.tarea.periodo * re.data.tarea.tipo_periodo.cantidad_dias);
+                    fechaPorSemanas = new Date(suma);
+                    fechaString = fechaPorSemanas.getFullYear() + '-' + ('0' + (fechaPorSemanas.getMonth()+1)).slice(-2) + '-' + ('0' + fechaPorSemanas.getDate()).slice(-2);
+                    
+                    fechaString && axios.post(BACKEND_SERVER + `/api/mantenimiento/linea_nueva/`,{
+                        parte: re.data.parte.id,
+                        tarea: re.data.tarea.id,
+                        fecha_inicio:null,
+                        fecha_fin:null,
+                        fecha_plan: fechaString,
+                        estado: 1,
+                    },
+                    {
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                        }
+                    })
+                    .then( r => {
+                        console.log('linea hecha');
+
+                    })
+                    .catch( err => {
+                        console.log(err);  
+                    });
+                    updateTarea();
+                }                            
+                else{
+                    axios.get(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_trabajo/?parte=${re.data.parte.id}`, {
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                            }     
+                    })
+                    .then( res => {
+                        var contador = 0;
+                        for(var x=0;x<res.data.length;x++){
+                            if(res.data[x].estado===3){
+                                contador=contador+1;
+                                if(contador===res.data.length){
+                                    axios.patch(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${res.data[0].parte}/`,{
+                                        estado: 3,
+                                    },
+                                    {
+                                        headers: {
+                                            'Authorization': `token ${token['tec-token']}`
+                                        }
+                                    })
+                                    .then( re => {
+                                        alert('Parte finalizado');
+                                    })
+                                    .catch( err => {
+                                        console.log(err);  
+                                    });
+                                }
+                            }
+                            else{
+                                console.log('hay lineas sin finalizar');
+                            }
+                        }
+
+                    })
+                    .catch( err => {
+                        console.log(err);  
+                    });
+                }
+                updateTarea();
+            })
+            .catch(err => { console.log(err);}) 
+        }
     }
 
     const listarTrabajadores = (linea_id)=>{
@@ -505,4 +505,3 @@ const ManPorEquipos = () => {
 }
 
 export default ManPorEquipos;
-

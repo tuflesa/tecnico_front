@@ -946,29 +946,32 @@ const ParteForm = ({parte, setParte, op}) => {
                                         <th>Especialidad</th>
                                         <th>Observaciones Técnico</th>
                                         <th>Observaciones Mantenimiento</th>
+                                        {(user['tec-user'].perfil.puesto.nombre !=='Operario')? 
+                                        <th style={{width:125}}>Acciones</th>
+                                        :null}
                                         {datos.tipo===1? <th>Tipo Periodo</th>:null}
                                         {datos.tipo===1?<th>Cantidad Periodos</th>:null}
-                                        {(user['tec-user'].perfil.puesto.nombre !=='Operario')? 
-                                        <th>Acciones</th>
-                                        :null}
                                     </tr>
                                 </thead>                                                                             
                                 <tbody>
                                     {lineas && lineas.map( linea => {
                                         return (
-                                            <tr key={linea.tarea.id} class={ linea.fecha_fin?"table-danger":linea.fecha_inicio?"table-success":"" }/* class = {linea.fecha_inicio?"table-danger":" " } */>
+                                            <tr key={linea.tarea.id} className={ linea.fecha_fin?"table-danger":linea.fecha_inicio?"table-success":"" }/* class = {linea.fecha_inicio?"table-danger":" " } */>
                                                 <td>{linea.tarea.prioridad}</td>
                                                 <td>{linea.tarea.nombre}</td>
                                                 <td>{linea.tarea.especialidad_nombre}</td>
                                                 <td>{linea.tarea.observaciones}</td>
-                                                <td>{linea.tarea.observaciones_trab}</td>
-                                                <td>{datos.tipo===1? linea.tarea.tipo_periodo?linea.tarea.tipo_periodo.nombre:'0':'0'}</td>
-                                                <td>{datos.tipo===1? linea.tarea.periodo?linea.tarea.periodo:'0':'0'}</td>
+                                                <td>{linea.observaciones_trab}</td>
                                                 <td>                                            
                                                     <Receipt className="mr-3 pencil" onClick={event =>{listarLineasTareas(linea.tarea)}}/>
                                                     <Link to={`/mantenimiento/linea_tarea/${linea.id}`}><PencilFill className="mr-3 pencil"/></Link> 
                                                     {nosoyTecnico?'':<Trash className="mr-3 pencil"  onClick={event =>{BorrarLinea(linea.tarea)}} />}
                                                 </td>
+                                                {datos.tipo===1? 
+                                                    <td>{linea.tarea.tipo_periodo?linea.tarea.tipo_periodo.nombre:'0'}</td> : ''}
+                                                {datos.tipo===1? 
+                                                    <td>{linea.tarea.periodo?linea.tarea.periodo:'0'}</td>
+                                                :''}
                                             </tr>
                                         )})
                                     }

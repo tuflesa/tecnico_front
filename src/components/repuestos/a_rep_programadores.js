@@ -29,6 +29,37 @@ const Programadores = () => {
     var numero = 2;
     var SiEsta = '';
 
+    //vamos a copiar las observaciones de los trabajadores de las tareas a las lineas de parte
+    /* axios.get(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_trabajo/`,{
+        headers: {
+            'Authorization': `token ${token['tec-token']}`
+        }
+    })
+    .then( r => {
+        console.log('que listado obtenemos');
+        console.log(r.data);
+        for(var x=1500;x<1512; x++){
+            console.log('dentro del for');
+            axios.patch(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_mov/${r.data[x].id}/`,{
+                observaciones_trab: r.data[x].tarea.observaciones_trab,
+            },
+            {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }
+            })
+            .then( res => {
+                console.log('dentro del patch');
+            })
+            .catch( err => {
+                console.log(err);
+            });
+        }
+    })
+    .catch( err => {
+        console.log(err);
+    }); */
+
     //Repasa el listado en la tabla de precios de proveedor y crea aquello que se hayan quedado sin crear o se hayan borrado.
     /* const RepasarListado = ()=>{
         axios.get(BACKEND_SERVER + `/api/repuestos/repuesto_precio/`,{

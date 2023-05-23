@@ -20,7 +20,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
         especialidad: linea_tarea.tarea.especialidad_nombre,
         prioridad: linea_tarea.tarea.prioridad,
         observaciones: linea_tarea.tarea.observaciones,
-        observaciones_trab: linea_tarea.tarea.observaciones_trab,
+        observaciones_trab: linea_tarea.observaciones_trab,
         fecha_plan: linea_tarea.fecha_plan,
         fecha_inicio: linea_tarea.fecha_inicio,
         fecha_fin: linea_tarea.fecha_fin,
