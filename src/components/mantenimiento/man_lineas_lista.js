@@ -49,6 +49,7 @@ const ManLineasListado = () => {
     });
 
     useEffect(()=>{
+        console.log(actualizar_seg);
         if(activos){
             axios.get(BACKEND_SERVER + '/api/mantenimiento/listado_lineas_activas/'+ filtro,{
                 headers: {
@@ -240,8 +241,10 @@ const ManLineasListado = () => {
 
     useEffect(() => {
         const interval = setInterval(() => {
+            console.log('actualizar_seg');
             setActualizarSeg(!actualizar_seg);
         }, 30000);
+        //console.log('viendo que vale actualizar_seg: ' + actualizar_seg);
       }, []);
     
     return (

@@ -49,7 +49,7 @@ const ManPorEquipos = () => {
     });
     
     useEffect(()=>{ 
-        
+        console.log(actualizar_seg);
         filtro && axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_activas/`+ filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -394,6 +394,7 @@ const ManPorEquipos = () => {
 
     useEffect(() => {
         const interval = setInterval(() => {
+            console.log('actualizar_seg');
             setActualizarSeg(!actualizar_seg);
         }, 30000);
       }, []);
