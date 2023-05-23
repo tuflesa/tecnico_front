@@ -25,6 +25,7 @@ const ManPorEquipos = () => {
     const [filtro, setFiltro] = useState(null);
     const [show_Observacion, setShowObservacion] = useState(false);
     const [abrirFiltro, setabrirFiltro] = useState(false);
+    const [actualizar_seg, setActualizarSeg] = useState(false);
 
     var dentrodeunmes=null;
     var fechaenunmesString=null;
@@ -71,7 +72,7 @@ const ManPorEquipos = () => {
         .catch( err => {
             console.log(err);
         });
-    }, [token, filtro, datos.observaciones]); 
+    }, [token, filtro, datos.observaciones, actualizar_seg]); 
  
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea_filtro/?trabajador=${user['tec-user'].perfil.usuario}`,{
@@ -389,6 +390,13 @@ const ManPorEquipos = () => {
     const abroFiltro = () => {
         setabrirFiltro(!abrirFiltro);
     }
+
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setActualizarSeg(!actualizar_seg);
+        }, 30000);
+      }, []);
 
     return(
         <Container className extends="pt-1 mt-5">

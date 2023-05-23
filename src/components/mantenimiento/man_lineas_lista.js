@@ -37,6 +37,7 @@ const ManLineasListado = () => {
     const [count, setCount] = useState(null);
     const [pagTotal, setPagTotal] = useState(null);
     const [abrirFiltro, setabrirFiltro] = useState(false);
+    const [actualizar_seg, setActualizarSeg] = useState(false);
 
     const actualizaFiltro = (str, act) => {   
         setActivos(act)
@@ -114,7 +115,7 @@ const ManLineasListado = () => {
                 console.log(err);
             });
         } 
-    }, [token, filtro, activos, actualizar]); 
+    }, [token, filtro, activos, actualizar, actualizar_seg]); 
 
     const BorrarLinea =(linea) =>{ 
         axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/?tarea=${linea.tarea.id}`,{
@@ -236,6 +237,12 @@ const ManLineasListado = () => {
     const abroFiltro = () => {
         setabrirFiltro(!abrirFiltro);
     }
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setActualizarSeg(!actualizar_seg);
+        }, 30000);
+      }, []);
     
     return (
         <Container className='mt-3'>
