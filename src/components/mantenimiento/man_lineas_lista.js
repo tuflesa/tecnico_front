@@ -49,7 +49,7 @@ const ManLineasListado = () => {
     });
 
     useEffect(()=>{
-        console.log(actualizar_seg);
+        console.log('useEffect actualizando');
         if(activos){
             axios.get(BACKEND_SERVER + '/api/mantenimiento/listado_lineas_activas/'+ filtro,{
                 headers: {
@@ -116,6 +116,7 @@ const ManLineasListado = () => {
                 console.log(err);
             });
         } 
+        setActualizarSeg(false);
     }, [token, filtro, activos, actualizar, actualizar_seg]); 
 
     const BorrarLinea =(linea) =>{ 
@@ -242,9 +243,10 @@ const ManLineasListado = () => {
     useEffect(() => {
         const interval = setInterval(() => {
             console.log('actualizar_seg');
-            setActualizarSeg(!actualizar_seg);
-        }, 30000);
-        //console.log('viendo que vale actualizar_seg: ' + actualizar_seg);
+            console.log('estoy viendo actualiza_seg');
+            console.log(actualizar_seg)
+            setActualizarSeg(true);
+        }, 60000);
       }, []);
     
     return (
