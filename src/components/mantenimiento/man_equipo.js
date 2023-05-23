@@ -24,6 +24,7 @@ const ManPorEquipos = () => {
     const [pagTotal, setPagTotal] = useState(null);
     const [filtro, setFiltro] = useState(null);
     const [show_Observacion, setShowObservacion] = useState(false);
+    const [abrirFiltro, setabrirFiltro] = useState(false);
 
     var dentrodeunmes=null;
     var fechaenunmesString=null;
@@ -385,8 +386,15 @@ const ManPorEquipos = () => {
         },
     });
 
+    const abroFiltro = () => {
+        setabrirFiltro(!abrirFiltro);
+    }
+
     return(
         <Container className extends="pt-1 mt-5">
+            <br></br>
+            <button type="button" className='mt-5' onClick={event => {abroFiltro()}}>Ver Anotaciones</button>
+            {abrirFiltro?   
             <Row className extends>                
                 <Col>
                     <h5 className="mb-3 mt-3" style={ { color: 'red' } }>Listado de Trabajos {user['tec-user'].get_full_name}, por prioridades:</h5>              
@@ -405,6 +413,7 @@ const ManPorEquipos = () => {
                     <h5 style={{ color: 'orange' }}>Naranja ---- Trabajo cogido por nosotros</h5>
                 </Col>
             </Row>
+            :null} 
             <Row>
                 <Col>
                     <ManEquipoFiltro actualizaFiltro={actualizaFiltro}/>

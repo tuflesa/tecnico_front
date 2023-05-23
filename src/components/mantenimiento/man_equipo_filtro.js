@@ -14,6 +14,7 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
     const [equipos, setEquipos] = useState(null);
     const [tipotarea, setTipoTarea] = useState(null);
     const [primera_vez, setPrimeraVez] = useState(true);
+    const [abrirFiltro, setabrirFiltro] = useState(false);
     
     var fecha_hoy=Date.parse(new Date);
     var mesEnMilisegundos = 1000 * 60 * 60 * 24 * 7;  //cambiado a una semana, en vez del mes
@@ -221,10 +222,15 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
         }
     }
 
+    const abroFiltro = () => {
+        setabrirFiltro(!abrirFiltro);
+    }
+
     return (
-        <Container className="mt-5">
-            <h5 className="mt-5">Filtro</h5>
+        <Container >
+            <button type="button" onClick={event => {abroFiltro()}}>Ver Filtros</button>
             <Form>
+            {abrirFiltro?
                 <Row>
                     <Col>
                         <Form.Group controlId="tipo">
@@ -332,6 +338,7 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
                         </Form.Group>
                     </Col>
                 </Row> 
+            :null}
             </Form>
         </Container>
     );
