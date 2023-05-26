@@ -78,6 +78,7 @@ const RepInventario = () => {
                             <ExcelColumn label="Almacén" value="alm"/>
                             <ExcelColumn label="Localización" value="localizacion"/>
                             <ExcelColumn label="Cantidad" value="stock_act"/>
+                            <ExcelColumn label="Minimo" value="cantidad"/>
                         </ExcelSheet>
                     </ExcelFile> 
                     <Table striped bordered hover>
