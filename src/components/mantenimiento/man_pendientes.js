@@ -91,6 +91,7 @@ const ManPendientes = () => {
                             <tr>
                                 <th>Parte</th>
                                 <th>Personal</th>
+                                <th>Equipo</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -100,6 +101,7 @@ const ManPendientes = () => {
                                     <tr key={parte.id}>
                                         <td>{parte.nombre}</td>
                                         <td>{parte.creado_por.get_full_name}</td>
+                                        <td>{parte.seccion.siglas_zona + '-' + parte.seccion.nombre}</td>
                                         <td><Link to={`/mantenimiento/parte/${parte.id}`}><PencilFill className="mr-3 pencil"/></Link></td>
                                         
                                     </tr>
