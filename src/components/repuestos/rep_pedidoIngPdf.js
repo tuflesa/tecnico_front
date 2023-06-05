@@ -5,6 +5,7 @@ import cuchilla from '../../assets/cuchilla_1.svg';
 
 const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, empresa, lineas_adicionales, proveedor, contacto, direccion_envio}) =>{
     const [token] = useCookies(['tec-token']);
+    var total_pedido= 0;
     /* const [im, setIm] = useState({
         uri: empresa.logo,
         method:'GET',
@@ -61,6 +62,15 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, empresa, lineas_
                 )
             })
         }
+    }
+
+    function Total(){
+        if(linea){
+            linea.map( l => {{total_pedido+=Number(l.total)}})
+        }
+    }
+    function Total_adic(){
+        lineas_adicionales.map( linea => {{total_pedido+=Number(linea.total)}})
     }
 
     /* const ExampleSvg = () => (
@@ -300,6 +310,9 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, empresa, lineas_
                     
                     {parse2Data()}
                 </View>
+                {Total()}
+                {Total_adic()}
+                <View style={styles.page2}><Text>Order total: {Number.parseFloat(total_pedido).toFixed(2)}€</Text></View>
                 <View style={styles.page2}>
                     <View style={styles.section}>
                         <View style={styles.section3}>

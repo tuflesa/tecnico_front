@@ -4,6 +4,7 @@ import { useCookies } from 'react-cookie';
 
 const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicionales, proveedor, contacto, direccion_envio}) =>{
     const [token] = useCookies(['tec-token']);
+    var total_pedido= 0;
 
     const formatNumber = (numero) =>{
         return new Intl.NumberFormat('de-DE',{ style: 'currency', currency: 'EUR' }).format(numero)
@@ -53,6 +54,15 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
                 )
             })
         }
+    }
+
+    function Total(){
+        if(linea){
+            linea.map( l => {{total_pedido+=Number(l.total)}})
+        }
+    }
+    function Total_adic(){
+        lineas_adicionales.map( linea => {{total_pedido+=Number(linea.total)}})
     }
     const styles = StyleSheet.create({
         page:{
@@ -227,6 +237,9 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
                     
                     {parse2Data()}
                 </View>
+                {Total()}
+                {Total_adic()}
+                <View style={styles.page2}><Text>Total Pedido: {Number.parseFloat(total_pedido).toFixed(2)}€</Text></View>
                 <View style={styles.page2}>
                     <View style={styles.section}>
                         <View style={styles.section3}>
