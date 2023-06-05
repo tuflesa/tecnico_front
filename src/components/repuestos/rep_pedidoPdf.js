@@ -169,7 +169,16 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
             right: 0,
             textAlign: 'center',
             color: 'grey',
-          },
+        },
+        totalNumber: {
+            marginRight: 70,
+            fontSize: 14,
+            bottom: 30,
+            left: 0,
+            right: 0,
+            textAlign: 'right',
+            color: 'grey',
+        },
     });
     return(     
         <Document>
@@ -239,7 +248,7 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
                 </View>
                 {Total()}
                 {Total_adic()}
-                <View style={styles.page2}><Text>Total Pedido: {Number.parseFloat(total_pedido).toFixed(2)}€</Text></View>
+                <View style={styles.totalNumber}><Text>Total Pedido: {Number.parseFloat(total_pedido).toFixed(2)}€</Text></View>
                 <View style={styles.page2}>
                     <View style={styles.section}>
                         <View style={styles.section3}>
