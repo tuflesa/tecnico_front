@@ -67,6 +67,7 @@ const ManLineasListado = () => {
                     r['obtareaT']=r.tarea.observaciones_trab;
                     r['parte_tip']=r.parte.tipo_nombre;
                     r['especial']=r.tarea.especialidad_nombre;
+                    r['periodo']=r.tarea.tipo_periodo?r.tarea.tipo_periodo.nombre:'';
                     r['equipoT']=r.parte.seccion?r.parte.seccion.siglas_zona +' - '+r.parte.seccion.nombre + (r.parte.equipo?' - ' + r.parte.equipo.nombre:''):null;
                     r['fecha_plani']=r.fecha_inicio?invertirFecha(String(r.fecha_plan)):'';
                     r['fecha_ini']=r.fecha_inicio?invertirFecha(String(r.fecha_inicio)):'';
@@ -91,19 +92,22 @@ const ManLineasListado = () => {
                     }
             })
             .then( res => {
-                /* res.data.results.map( r => {
+                console.log(res.data.results);
+                res.data.results.map( r => {
                     //solo para poder utilizar los campos en el excel
                     r['priori']=r.tarea.prioridad;
                     r['nom_parte']=r.parte.nombre;
                     r['obparte']=r.parte.observaciones;
+                    r['nom_tarea']=r.tarea.nombre;
                     r['obtarea']=r.tarea.observaciones;
                     r['obtareaT']=r.tarea.observaciones_trab;
                     r['parte_tip']=r.parte.tipo_nombre;
                     r['especial']=r.tarea.especialidad_nombre;
-                    r['equipoT']=r.parte.equipo.nombre;
+                    r['periodo']=r.tarea.tipo_periodo?r.tarea.tipo_periodo.nombre:'';
+                    r['equipoT']=r.parte.seccion?r.parte.seccion.siglas_zona +' - '+r.parte.seccion.nombre + (r.parte.equipo?' - ' + r.parte.equipo.nombre:''):null;
                     r['fecha_plani']=r.fecha_inicio?invertirFecha(String(r.fecha_plan)):'';
                     r['fecha_ini']=r.fecha_inicio?invertirFecha(String(r.fecha_inicio)):'';
-                }) */
+                })
                 setLineas(res.data.results);
                 setCount(res.data.count);
                 let pagT = res.data.count/20;
@@ -272,6 +276,7 @@ const ManLineasListado = () => {
                             <ExcelColumn label="Observaciones Tarea Mantenimiento" value="obtareaT"/>
                             <ExcelColumn label="Tipo" value="parte_tip"/>
                             <ExcelColumn label="Especialidad" value="especial"/>
+                            <ExcelColumn label="Periodo" value="periodo"/>
                             <ExcelColumn label="Equipo" value="equipoT"/>  
                             <ExcelColumn label="Fecha Planificación" value="fecha_plani"/>
                             <ExcelColumn label="Fecha Inicio" value="fecha_ini"/>        
