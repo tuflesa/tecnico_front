@@ -16,6 +16,7 @@ import Login from './components/login';
 import Cargas from './components/cargas/cargas';
 import GraficoVelocidad from './components/velocidad/vel_grafico_velocidad';
 import Mantenimiento from './components/mantenimiento/mantenimiento';
+import Rodillos from './components/rodillos/rodillos';
 import { CookiesProvider, useCookies } from 'react-cookie';
 
 const Render = () => {
@@ -55,6 +56,10 @@ const Render = () => {
 
           <Route path='/mantenimiento'>
             {token['tec-token'] ? <Mantenimiento /> : <Redirect to="/" />}
+          </Route>
+
+          <Route path='/rodillos'>
+            {token['tec-token'] ? <Rodillos /> : <Redirect to="/" />}
           </Route>
         </Switch>
       </BrowserRouter>
