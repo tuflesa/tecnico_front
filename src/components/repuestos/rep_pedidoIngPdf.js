@@ -1,18 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Document, Page, Image, View, Text, StyleSheet, Svg, Polygon, Rect, Path, Defs, Circle, G} from "@react-pdf/renderer";
+import React from 'react';
+import { Document, Page, Image, View, Text, StyleSheet } from "@react-pdf/renderer";
 import { useCookies } from 'react-cookie';
-import cuchilla from '../../assets/cuchilla_1.svg';
 
 const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, empresa, lineas_adicionales, proveedor, contacto, direccion_envio}) =>{
-    const [token] = useCookies(['tec-token']);
     var total_pedido= 0;
-    /* const [im, setIm] = useState({
-        uri: empresa.logo,
-        method:'GET',
-        headers:{
-            'Authorization': `token ${token['tec-token']}`
-            }
-    }); */
 
     const formatNumber = (numero) =>{
         return new Intl.NumberFormat('de-DE',{ style: 'currency', currency: 'EUR' }).format(numero)

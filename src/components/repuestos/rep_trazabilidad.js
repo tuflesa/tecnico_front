@@ -6,7 +6,6 @@ import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import {invertirFecha} from '../utilidades/funciones_fecha';
 import ReactExport from 'react-data-export';
-import moment from 'moment';
 
 const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, almacen}) => {
     const [token] = useCookies(['tec-token']);

@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Document, Page, Image, View, Text, StyleSheet } from "@react-pdf/renderer";
 import { useCookies } from 'react-cookie';
 
 const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicionales, proveedor, contacto, direccion_envio}) =>{
-    const [token] = useCookies(['tec-token']);
     var total_pedido= 0;
 
     const formatNumber = (numero) =>{

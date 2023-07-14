@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
-import { strToArrBuffer } from 'react-data-export/dist/ExcelPlugin/utils/DataUtil';
 
 const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
     const [token] = useCookies(['tec-token']);

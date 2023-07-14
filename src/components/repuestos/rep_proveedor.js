@@ -3,7 +3,6 @@ import { Button, Modal, Form, Col, Row } from 'react-bootstrap';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
-import { relativeTimeRounding } from 'moment';
 
 const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repuesto_id, updateRepuesto, repuesto_nombre, repuesto_modelo, repuesto_fabricante, setShowProveedor}) => {
     const [token] = useCookies(['tec-token']);

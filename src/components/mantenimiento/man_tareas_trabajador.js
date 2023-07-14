@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
-import { Container, Row, Form, Col, Table } from 'react-bootstrap';
+import { Container, Row, Col, Table } from 'react-bootstrap';
 import FiltroTareasTrabajador from './man_tareas_trabajador_filtro';
 import {invertirFecha} from '../utilidades/funciones_fecha';
 import ListaDePersonal from './man_equipo_trabajadores';

@@ -32,7 +32,6 @@ const RepListaFilto = ({actualizaFiltro}) => {
     const [secciones, setSecciones] = useState(null);
     const [zonas, setZonas] = useState(null);
     const [equipos, setEquipos] = useState(null);
-    const [modelos, setModelos] = useState(null);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{

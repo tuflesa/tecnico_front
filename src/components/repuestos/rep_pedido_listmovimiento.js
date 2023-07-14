@@ -4,9 +4,7 @@ import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { Button, Row, Form, Modal, Col, Table } from 'react-bootstrap';
 import {invertirFecha} from '../utilidades/funciones_fecha';
-import { PencilFill, HandThumbsUpFill, Receipt } from 'react-bootstrap-icons';
-import { curveLinearClosed } from 'd3';
-import { constants } from 'buffer';
+import { PencilFill, HandThumbsUpFill } from 'react-bootstrap-icons';
 
 const MovLista = ({linea, handleCloseListMovimiento, show}) => {
     const [token] = useCookies(['tec-token']);

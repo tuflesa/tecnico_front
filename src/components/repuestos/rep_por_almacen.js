@@ -4,7 +4,7 @@ import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import Modal from 'react-bootstrap/Modal'
 import { Button, Row, Col, Table, Container } from 'react-bootstrap';
-import { PencilFill, HandThumbsUpFill, Receipt, Trash, Printer } from 'react-bootstrap-icons';
+import { PencilFill, HandThumbsUpFill, Receipt, Trash } from 'react-bootstrap-icons';
 import ListaTrazabilidad from './rep_trazabilidad';
 import { Link } from 'react-router-dom';
 import {invertirFecha} from '../utilidades/funciones_fecha';

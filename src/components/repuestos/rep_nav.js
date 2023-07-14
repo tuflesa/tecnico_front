@@ -1,12 +1,10 @@
-import React,{ useState, useEffect } from 'react';
+import React from 'react';
 import { Navbar, NavDropdown, Nav, Form, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useCookies } from 'react-cookie';
 
 const RepNavBar = () => {
     const [user] = useCookies(['tec-user']);
-    const [token] = useCookies(['tec-token']);
-    //const [mantenimiento, setMantenimiento] = useState(false);
     const soyProgramador = user['tec-user'].perfil.destrezas.filter(s => s === 7);
     const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Mantenimiento'&&user['tec-user'].perfil.puesto.nombre!=='Operador'?false:true;
 

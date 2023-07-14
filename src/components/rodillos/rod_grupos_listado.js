@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
-import { Container, Row, Col, Table, Modal, Button } from 'react-bootstrap';
+import { Container, Row, Col, Table } from 'react-bootstrap';
 
 const RodGruposListado = () => {
     const [token] = useCookies(['tec-token']);

@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Container, Row, Col, Form, Button, Table } from 'react-bootstrap';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
-import { Link } from 'react-router-dom';
 import { PlusCircle, Trash, PencilFill } from 'react-bootstrap-icons';
 import ContactoForm from './rep_contacto';
 

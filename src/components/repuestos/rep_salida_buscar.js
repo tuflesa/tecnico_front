@@ -5,8 +5,6 @@ import { BACKEND_SERVER } from '../../constantes';
 import Modal from 'react-bootstrap/Modal'
 import { Button, Row, Form, Col, Table, Container } from 'react-bootstrap';
 import { ArrowDownCircle} from 'react-bootstrap-icons';
-import { local } from 'd3';
-import ModalHeader from 'react-bootstrap/esm/ModalHeader';
 
 //import TablePagination from '@mui/material/TablePagination';
 

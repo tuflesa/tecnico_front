@@ -4,11 +4,9 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
-import useInterval from '../utilidades/use_interval';
 
 const CargaEditar = ({ match }) => {
     const [token] = useCookies(['tec-token']);
-    const [user] = useCookies(['tec-user']);
 
     const [empresas, setEmpresas] = useState([]);
     const [agencias, setAgencias] = useState([]);

@@ -3,7 +3,6 @@ import { Button, Modal, Form, Col, Row } from 'react-bootstrap';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
-import { locales } from 'moment';
 import BuscarRepuestosPedido from './rep_pedido_linea_buscar';
 
 const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedido, linea}) => {    

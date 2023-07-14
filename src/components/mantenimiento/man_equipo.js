@@ -8,7 +8,6 @@ import { Tools, FileCheck, Receipt, Eye} from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import ListaDePersonal from './man_equipo_trabajadores';
 import ManEquipoFiltro from './man_equipo_filtro';
-import { color } from 'd3';
 
 const ManPorEquipos = () => {
     const [token] = useCookies(['tec-token']);
@@ -382,25 +381,9 @@ const ManPorEquipos = () => {
         })  
     }
     
-    const styles = ({
-        color1:{
-            color: '#FFAEC9',
-        },
-    });
-
     const abroFiltro = () => {
         setabrirFiltro(!abrirFiltro);
     }
-
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            console.log('actualizar_seg');
-            console.log('estoy viendo actualiza_seg');
-            console.log(actualizar_seg)
-            setActualizarSeg(true);
-        }, 60000);
-      }, []);
 
     return(
         <Container className extends="pt-1 mt-5">

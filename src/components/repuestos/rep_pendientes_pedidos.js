@@ -1,5 +1,5 @@
 //Modal que abre las lineas pendientes de recibir de este repuesto
-import React, { useEffect } from 'react';
+import React, { } from 'react';
 import { Button, Row, Modal, Col, Table } from 'react-bootstrap';
 import {invertirFecha} from '../utilidades/funciones_fecha';
 import { PencilFill } from 'react-bootstrap-icons';

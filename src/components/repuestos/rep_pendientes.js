@@ -2,12 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
-import { Container, Row, Col, Table, Modal, Button } from 'react-bootstrap';
-import ReactExport from 'react-data-export';
+import { Container, Row, Col, Table } from 'react-bootstrap';
 import {invertirFecha} from '../utilidades/funciones_fecha';
 import { PencilFill, Receipt } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
-import { count, format } from 'd3';
 import ListaPedidos from './rep_pendientes_pedidos';
 
 const RepPendientes = () => {

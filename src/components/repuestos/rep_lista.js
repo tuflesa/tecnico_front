@@ -3,11 +3,10 @@ import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table, Modal, Button } from 'react-bootstrap';
-import { Trash, PencilFill, Receipt } from 'react-bootstrap-icons';
+import { Trash, PencilFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import RepListaFilto from './rep_lista_filtro';
 import ReactExport from 'react-data-export';
-import { select } from 'd3';
 
 const RepLista = () => {
     const [token] = useCookies(['tec-token']);
