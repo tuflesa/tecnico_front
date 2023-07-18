@@ -15,9 +15,11 @@ const RodNavBar = () => {
                             <Nav className="mr-auto">
                                 <NavDropdown title="Rodillos" id="basic-nav-dropdown">
                                     <NavDropdown.Item href="/rodillos/grupos">Listado de grupos</NavDropdown.Item> 
-                                    <NavDropdown.Divider />
-                                    <NavDropdown.Item href="/rodillos/planos">Nuevo Plano</NavDropdown.Item> 
                                     <NavDropdown.Item href="/rodillos/grupo/nuevo">Nuevo grupo</NavDropdown.Item> 
+                                    <NavDropdown.Divider />
+                                    <NavDropdown.Item href="/rodillos/rodillo/nuevo">Nuevo rodillo</NavDropdown.Item> 
+                                    <NavDropdown.Item href="/rodillos/planos">Nuevo Plano</NavDropdown.Item> 
+                                    
                                 </NavDropdown>
                             </Nav> 
                             <Navbar.Text className="mr-4" >
