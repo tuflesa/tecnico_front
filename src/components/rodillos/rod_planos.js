@@ -74,18 +74,22 @@ const RodPlanos = () => {
                                 autoFocus
                     />
                 </Form.Group>
-                <h5 className="mb-3 mt-3">Elige los Rodillos del plano</h5>
-                {rodillos.map(rodillo => (
-                    <Form.Check
-                        key={rodillo.id}
-                        type="checkbox"
-                        id={`checkbox-${rodillo.id}`}
-                        label={rodillo.nombre}
-                        value={String(rodillo.id)} // Convertir a cadena de texto
-                        checked={opcionesSeleccionadas.includes(String(rodillo.id))} // Convertir a cadena de texto
-                        onChange={handleCheckboxChange}
-                    />
-            ))}
+                <Form.Group>
+                    <Form.Label>Plano/Planos</Form.Label>
+                    <div style={{ height: '75px', overflow: 'auto'}}>
+                        {rodillos.map(rodillo => (
+                            <Form.Check
+                                key={rodillo.id}
+                                type="checkbox"
+                                id={`checkbox-${rodillo.id}`}
+                                label={rodillo.nombre}
+                                value={String(rodillo.id)} // Convertir a cadena de texto
+                                checked={opcionesSeleccionadas.includes(String(rodillo.id))} // Convertir a cadena de texto
+                                onChange={handleCheckboxChange}
+                            />
+                        ))}
+                    </div>
+                </Form.Group>
             </Form>
             <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
             <Button variant="outline-primary" onClick={GuardarPlano}>Guardar</Button>
