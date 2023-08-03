@@ -75,7 +75,7 @@ const RodPlanos = () => {
                     />
                 </Form.Group>
                 <Form.Group>
-                    <Form.Label>Plano/Planos</Form.Label>
+                    <Form.Label>Rodillo/Rodillos</Form.Label>
                     <div style={{ height: '75px', overflow: 'auto'}}>
                         {rodillos.map(rodillo => (
                             <Form.Check
