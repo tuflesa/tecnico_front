@@ -1,6 +1,5 @@
 import React from 'react';
 import { Document, Page, Image, View, Text, StyleSheet, Svg, Path, G, Rect, Polygon} from "@react-pdf/renderer";
-import { useCookies } from 'react-cookie';
 
 const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, empresa, lineas_adicionales, proveedor, contacto, direccion_envio}) =>{
     var total_pedido= 0;
@@ -219,8 +218,7 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, empresa, lineas_
                 <View style={styles.page} >
                     <View fixed>
                         <View style={styles.imagen}>
-                            {/* <Image src= { empresa.logo } width="500" height="500"/> */}
-                            {<VerLogo />}
+                            {empresa.id===1?<VerLogo/>:<Image src= { empresa.logo } width="500" height="500"/>}
                         </View>
                     </View>
                     <View style={styles.page2}>               
