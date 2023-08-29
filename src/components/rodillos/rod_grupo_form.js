@@ -103,7 +103,7 @@ const RodGrupo = ({grupo, setGrupo}) => {
             console.log(err);
             alert('Falta datos, por favor rellena todos los campos obligatorios.');
         });
-    };
+    };  
 
     const ActualizarGrupo = (event) => {
         event.preventDefault();

@@ -19,26 +19,42 @@ const RepPendientes = () => {
     var fecha = new Date();
     const stock_por_empresa = [];
     const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Técnico'?false:true;
+    const [count, setCount] = useState(null);
+    const [count2, setCount2] = useState(null);
     
     const [datos, setDatos] = useState({
         empresa: user['tec-user'].perfil.empresa.id,
         hoy: (fecha.getFullYear() + "-" + (fecha.getMonth()+1) + "-" + fecha.getDate()),
+        pagina: 1,
+        pagina2: 1,
+        total_pag:0,
+        total_pag2:0,
     });
 
-    const [filtro, setFiltro] = useState(`?empresa=${datos.empresa}&finalizado=${false}&fecha_prevista_entrega__lte=${datos.hoy}&creado_por=${nosoyTecnico?user['tec-user'].perfil.usuario:''}`);
+    const [filtro, setFiltro] = useState(`?empresa=${datos.empresa}&page=${datos.pagina}&finalizado=${false}&fecha_prevista_entrega__lte=${datos.hoy}&creado_por=${nosoyTecnico?user['tec-user'].perfil.usuario:''}`);
+    const [filtro2, setFiltro2] = useState(`?almacen__empresa__id=${datos.empresa}&repuesto__descatalogado=${false}&page=${datos.pagina}`);
+
+    useEffect(() => {
+        setFiltro2(`?almacen__empresa__id=${datos.empresa}&repuesto__descatalogado=${false}&page=${datos.pagina2}`);
+    },[datos.pagina2, token]);
+
+    useEffect(() => {
+        setFiltro(`?empresa=${datos.empresa}&page=${datos.pagina}&finalizado=${false}&fecha_prevista_entrega__lte=${datos.hoy}&creado_por=${nosoyTecnico?user['tec-user'].perfil.usuario:''}`);
+    },[datos.pagina, datos.empresa, datos.hoy, token]);
     
     useEffect(() => { //buscamos articulos con stock por debajo del stock mínimo
-        axios.get(BACKEND_SERVER + `/api/repuestos/articulos_fuera_stock/?almacen__empresa__id=${datos.empresa}&repuesto__descatalogado=${false}`,{
+        axios.get(BACKEND_SERVER + `/api/repuestos/articulos_fuera_stock/` + filtro2,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
         .then( res => { 
-            for(var x=0;x<res.data.length; x++){
-                let repuesto_nombre = res.data[x].repuesto.nombre_comun?res.data[x].repuesto.nombre_comun:res.data[x].repuesto.nombre;
-                let repuesto_critico = res.data[x].repuesto.es_critico;
-                let id = res.data[x].repuesto.id;
-                axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimo_detalle/?repuesto=${res.data[x].repuesto.id}&almacen__empresa__id=${datos.empresa}`, {
+            setCount2(res.data.count);
+            for(var x=0;x<res.data.results.length; x++){
+                let repuesto_nombre = res.data.results[x].repuesto.nombre_comun?res.data.results[x].repuesto.nombre_comun:res.data.results[x].repuesto.nombre;
+                let repuesto_critico = res.data.results[x].repuesto.es_critico;
+                let id = res.data.results[x].repuesto.id;
+                axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimo_detalle/?repuesto=${res.data.results[x].repuesto.id}&almacen__empresa__id=${datos.empresa}`, {
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
                     }     
@@ -47,7 +63,7 @@ const RepPendientes = () => {
                     const stock_empresa = r.data.reduce((a, b) => a + b.stock_act, 0);
                     const stock_minimo_empresa = r.data.reduce((a, b) => a + b.cantidad, 0);
                     if(stock_empresa<stock_minimo_empresa){
-                        if(res.data.length>0){
+                        if(res.data.results.length>0){
                             stock_por_empresa.push({id: id, articulo: repuesto_nombre, critico: repuesto_critico, stock: stock_empresa, stock_minimo: stock_minimo_empresa});            
                         }
                         if(stock_por_empresa){
@@ -72,21 +88,52 @@ const RepPendientes = () => {
         .catch( err => {
             console.log(err);
         });
-    }, [token]);  
+    }, [token, filtro2]);  
+
+    useEffect(()=>{
+        if(count % 20 === 0){
+            setDatos({
+                ...datos,
+                total_pag:Math.trunc(count/20),
+            })
+        }
+        else if(count % 20 !== 0){
+            setDatos({
+                ...datos,
+                total_pag:Math.trunc(count/20)+1,
+            })
+        }
+    }, [count, filtro]);
+
+    useEffect(()=>{
+        if(count2 % 20 === 0){
+            setDatos({
+                ...datos,
+                total_pag2:Math.trunc(count2/20),
+            })
+        }
+        else if(count2 % 20 !== 0){
+            setDatos({
+                ...datos,
+                total_pag2:Math.trunc(count2/20)+1,
+            })
+        }
+    }, [count2, filtro2]);
      
     useEffect(()=>{ //buscamos pedidos pasados de fecha de entrega
-        axios.get(BACKEND_SERVER + `/api/repuestos/lista_pedidos/` + filtro,{
+        axios.get(BACKEND_SERVER + `/api/repuestos/lista_pedidos_fuera_fecha/` + filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }
         })
         .then( res => {
-            setPedFueradeFecha(res.data);
+            setPedFueradeFecha(res.data.results);
+            setCount(res.data.count);
         })
         .catch( err => {
             console.log(err);
         });
-    },[token]); 
+    },[token, filtro]); 
 
     useEffect(() => { //buscamos las lineas de los pedidos pendientes para mostrar en las lineas de los articulos fuera de stock
         datos.empresa && axios.get(BACKEND_SERVER + `/api/repuestos/linea_pedido_pend/?pedido__finalizado=${'false'}&pedido__empresa=${datos.empresa}`,{
@@ -126,9 +173,11 @@ const RepPendientes = () => {
             if(x.critico){
                 for(var y=0;y<lineasPendientes.length;y++){
                     if(lineasPendientes[y].repuesto===x.id){
-                        for(var z=0;z<pedfueradefecha.length;z++){
-                            if(pedfueradefecha[z].id===lineasPendientes[y].pedido.id){
-                                return("table-success");
+                        if(pedfueradefecha){
+                            for(var z=0;z<pedfueradefecha.length;z++){
+                                if(pedfueradefecha[z].id===lineasPendientes[y].pedido.id){
+                                    return("table-success");
+                                }
                             }
                         }
                     }              
@@ -137,11 +186,56 @@ const RepPendientes = () => {
         }
     }
 
+    const cambioPagina = (pag) => {
+        if(pag<=0){
+            pag=1;
+        }
+        if(pag>count/20){
+            if(count % 20 === 0){
+                pag=Math.trunc(count/20);
+            }
+            if(count % 20 !== 0){
+                pag=Math.trunc(count/20)+1;
+            }
+        }
+        if(pag>0){
+            setDatos({
+                ...datos,
+                pagina: pag,
+            })
+        }
+    } 
+
+    const cambioPagina2 = (pag) => {
+        if(pag<=0){
+            pag=1;
+        }
+        if(pag>count2/20){
+            if(count2 % 20 === 0){
+                pag=Math.trunc(count2/20);
+            }
+            if(count2 % 20 !== 0){
+                pag=Math.trunc(count2/20)+1;
+            }
+        }
+        if(pag>0){
+            setDatos({
+                ...datos,
+                pagina2: pag,
+            })
+        }
+    } 
+
     return (
         <Container className="mt-5">
             <Row>
                 <Col>
-                    <h5 className="mb-3 mt-3">Repuestos por debajo del stock mínimo</h5>                    
+                    <h5 className="mb-3 mt-3">Repuestos por debajo del stock mínimo</h5>     
+                    <table>
+                        <th><button type="button" className="btn btn-default" value={datos.pagina2} name='pagina_anterior' onClick={event => {cambioPagina2(datos.pagina2=datos.pagina2-1)}}>Pág Anterior</button></th> 
+                        <th><button type="button" className="btn btn-default" value={datos.pagina2} name='pagina_posterior' onClick={event => {cambioPagina2(datos.pagina2=datos.pagina2+1)}}>Pág Siguiente</button></th> 
+                        <th>Número páginas: {datos.pagina2} / {datos.total_pag2} - Registros: {count2}</th>
+                    </table>               
                     <Table striped bordered hover>
                         <thead>
                             <tr>
@@ -185,7 +279,12 @@ const RepPendientes = () => {
             </Row>
             <Row>
                 <Col>
-                    <h5 className="mb-3 mt-3">Pedidos con fecha prevista vencida</h5>                    
+                    <h5 className="mb-3 mt-3">Pedidos con fecha prevista vencida</h5> 
+                    <table>
+                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
+                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
+                        <th>Número páginas: {datos.pagina} / {datos.total_pag} - Registros: {count}</th>
+                    </table>                    
                     <Table striped bordered hover>
                         <thead>
                             <tr>
