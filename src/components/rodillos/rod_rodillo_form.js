@@ -101,12 +101,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             });
         }
         else {
-            if(rodillo.id){
-                setFiltro(`?empresa=${datos.empresa}`);
-                console.log('lo que vale empresa');
-                console.log(datos.empresa);
-            }
-            axios.get(BACKEND_SERVER + `/api/estructura/zona/`+filtro,{
+            axios.get(BACKEND_SERVER + `/api/estructura/zona/?empresa=${datos.empresa}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
