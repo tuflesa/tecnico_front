@@ -9,15 +9,13 @@ const RodEditar = ({ match }) => {
     const [rodillo, setRodillo] = useState(null)
 
     useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/rodillos/rodillo_editar/${match.params.id}`,{
+        axios.get(BACKEND_SERVER + `/api/rodillos/lista_rodillos/${match.params.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
         .then( res => {
             setRodillo(res.data);
-            console.log('estoy en editar y esto sacamos');
-            console.log(res.data);
         })
         .catch( err => {
             console.log(err);

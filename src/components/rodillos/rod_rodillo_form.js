@@ -4,6 +4,7 @@ import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
 import { Button, Form, Col, Row } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 
 const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [token] = useCookies(['tec-token']);
@@ -17,7 +18,6 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [materiales, setMateriales] = useState([]);
     const [grupos, setGrupos] = useState([]);
     const [tipo_plano, setTipoPlano] = useState([]);
-    const [filtro, setFiltro] = useState(``);
 
     const [datos, setDatos] = useState({
         empresa: rodillo.id?rodillo.operacion.seccion.maquina.empresa_id:'',
@@ -32,9 +32,6 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     });
 
     useEffect(() => {
-        console.log('esto es lo que entra');
-        console.log(rodillo);
-        console.log(datos);
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -199,8 +196,6 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 }
             })
             .then( res => {
-                console.log('esto son los grupos recogidos');
-                console.log(res.data);
                 setGrupos(res.data);
                 if(res.data.length === 0){
                     alert('No tenemos ningún grupo dado de alta para esta máquina');
@@ -234,7 +229,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 }     
         })
         .then( res => { 
-            setRodillo(res.data);
+            window.location.href = `/rodillos/editar/${res.data.id}`;
         })
         .catch(err => { 
             console.log(err);
@@ -244,7 +239,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
 
     const ActualizarRodillo = (event) => {
         event.preventDefault();
-        axios.put(BACKEND_SERVER + `/api/rodillos/rodillo_detalle/${rodillo.id}/`, {
+        axios.put(BACKEND_SERVER + `/api/rodillos/rodillo_editar/${rodillo.id}/`, {
             nombre: datos.nombre,
             operacion: datos.operacion,
             grupo: datos.grupo,
@@ -256,7 +251,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 }     
         })
         .then( res => { 
-            setRodillo(res.data);
+            window.location.href = `/rodillos/editar/${res.data.id}`;
         })
         .catch(err => { 
             console.log(err);

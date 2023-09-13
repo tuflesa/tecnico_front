@@ -12,14 +12,20 @@ const RodLista = () => {
     const [show, setShow] = useState(false);
     const [count, setCount] = useState(null);
     const [lista_rodillos, setListaRodillos] = useState(null);
+    const [filtro, setFiltro] = useState(`?page=${1}`);
+    //let filtroPag=(null);
 
     const [datos, setDatos] = useState({
         pagina: 1,
         total_pag:0,
     });
 
+    useEffect(()=>{
+        setFiltro(`?page=${datos.pagina}`);
+    },[datos.pagina]);
+
     useEffect(() => {
-        axios.get(BACKEND_SERVER + '/api/rodillos/lista_rodillos/',{
+        axios.get(BACKEND_SERVER + '/api/rodillos/lista_rodillos/'+ filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -31,7 +37,7 @@ const RodLista = () => {
         .catch( err => {
             console.log(err);
         });
-    }, [token]);
+    }, [token, filtro]);
 
     useEffect(()=>{
         if(count % 20 === 0){
