@@ -5,6 +5,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table, Modal, Button } from 'react-bootstrap';
 import { Trash, PencilFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
+import RodListaFiltro from './rod_lista_filtro';
 
 const RodLista = () => {
     const [token] = useCookies(['tec-token']);
@@ -12,7 +13,9 @@ const RodLista = () => {
     const [show, setShow] = useState(false);
     const [count, setCount] = useState(null);
     const [lista_rodillos, setListaRodillos] = useState(null);
-    const [filtro, setFiltro] = useState(`?page=${1}`);
+    const [filtro, setFiltro] = useState(``);
+    const [filtroPag, setFiltroPag] = useState(`?page=${1}`);
+    const [filtroII, setFiltroII] = useState(``);
     //let filtroPag=(null);
 
     const [datos, setDatos] = useState({
@@ -21,8 +24,12 @@ const RodLista = () => {
     });
 
     useEffect(()=>{
-        setFiltro(`?page=${datos.pagina}`);
+        setFiltroPag(`&page=${datos.pagina}`);
     },[datos.pagina]);
+
+    useEffect(()=>{
+        setFiltro(filtro + filtroPag);
+    },[filtroPag]);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/rodillos/lista_rodillos/'+ filtro,{
@@ -74,10 +81,20 @@ const RodLista = () => {
         }
     } 
 
+    const actualizaFiltro = str => {
+        datos.pagina=1;
+        setFiltro(str);
+    }
+
     const handleClose = () => setShow(false);
 
     return (
         <Container className='mt-5'>
+            <Row>
+                <Col>
+                    <RodListaFiltro actualizaFiltro={actualizaFiltro}/>
+                </Col>
+            </ Row>
             <Row>
                 <Col>
                     <h5 className="mb-3 mt-3">Lista de Rodillos</h5>

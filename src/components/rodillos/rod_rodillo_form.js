@@ -121,17 +121,22 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     }, [token, datos.empresa]);
 
     useEffect(() => {
+        if(rodillo.id){
+            if(datos.zona!=rodillo.operacion.seccion.maquina.id){
+                setOperaciones([]);
+            }
+        }
         if (datos.zona === '') {
             setSecciones([]);
+            setOperaciones([]);
             setDatos({
                 ...datos,
                 seccion: '',
-                equipo: ''
+                operacion:'',
             });
         }
         else {
-            
-            axios.get(BACKEND_SERVER + `/api/rodillos/seccion/?maquina=${datos.zona}`,{
+            axios.get(BACKEND_SERVER + `/api/rodillos/seccion/?maquina__id=${datos.zona}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
@@ -139,9 +144,11 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             .then( res => {
                 setSecciones(res.data);
                 if(!rodillo.id){
+                    setOperaciones([]);
                     setDatos({
                         ...datos,
                         seccion: '',
+                        operacion: '',
                     });
                 }
             })
