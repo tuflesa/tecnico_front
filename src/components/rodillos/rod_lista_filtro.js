@@ -20,6 +20,7 @@ const RodListaFiltro = ({actualizaFiltro}) => {
 
     const [empresas, setEmpresas] = useState(null);
     const [secciones, setSecciones] = useState(null);
+    const [operaciones, setOperaciones] = useState(null);
     const [zonas, setZonas] = useState(null);
     const [equipos, setEquipos] = useState(null);
     const [tipo_rodillo, setTipoRodillo] = useState(null);
@@ -100,6 +101,7 @@ const RodListaFiltro = ({actualizaFiltro}) => {
                 setDatos({
                     ...datos,
                     seccion: '',
+                    operacion: '',
                 });
             })
             .catch( err => {
@@ -107,9 +109,28 @@ const RodListaFiltro = ({actualizaFiltro}) => {
             });
         }
     }, [token, datos.maquina]);
+
+    useEffect(() => {
+        if (datos.seccion === '') {
+            setOperaciones([]);
+        }
+        else {
+            axios.get(BACKEND_SERVER + `/api/rodillos/operacion/?seccion__id=${datos.seccion}`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }
+            })
+            .then( res => {
+                setOperaciones(res.data);
+            })
+            .catch( err => {
+                console.log(err);
+            });
+        }
+    }, [token, datos.seccion]);
     
     useEffect(()=>{
-        const filtro = `?nombre__icontains=${datos.nombre}&id=${datos.id}&tipo=${datos.tipo_rodillo}&operacion__seccion__maquina__empresa__id=${datos.empresa}&operacion__seccion__maquina=${datos.maquina}&operacion__seccion=${datos.seccion}`
+        const filtro = `?nombre__icontains=${datos.nombre}&id=${datos.id}&tipo=${datos.tipo_rodillo}&operacion__seccion__maquina__empresa__id=${datos.empresa}&operacion__seccion__maquina=${datos.maquina}&operacion__seccion=${datos.seccion}&operacion__id=${datos.operacion}`
         actualizaFiltro(filtro);
     },[datos]);
 
@@ -214,17 +235,17 @@ const RodListaFiltro = ({actualizaFiltro}) => {
                         </Form.Group>
                     </Col>
                     <Col>
-                        <Form.Group controlId="equipo">
+                        <Form.Group controlId="operacion">
                             <Form.Label>Operación</Form.Label>
                             <Form.Control as="select" 
-                                            value={datos.equipo}
-                                            name='equipo'
+                                            value={datos.operacion}
+                                            name='operacion'
                                             onChange={handleInputChange}>
                                 <option key={0} value={''}>Todos</option>
-                                {equipos && equipos.map( equipo => {
+                                {operaciones && operaciones.map( operacion => {
                                     return (
-                                    <option key={equipo.id} value={equipo.id}>
-                                        {equipo.nombre}
+                                    <option key={operacion.id} value={operacion.id}>
+                                        {operacion.nombre}
                                     </option>
                                     )
                                 })}
