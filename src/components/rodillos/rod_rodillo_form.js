@@ -3,8 +3,10 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
-import { Button, Form, Col, Row } from 'react-bootstrap';
+import { Button, Form, Col, Row, Table } from 'react-bootstrap';
+import { PlusCircle} from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
+import ParametrosForm from './rod_parametros';
 
 const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [token] = useCookies(['tec-token']);
@@ -17,7 +19,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [tipo_rodillo, setTipoRodillo] = useState([]);
     const [materiales, setMateriales] = useState([]);
     const [grupos, setGrupos] = useState([]);
-    const [tipo_plano, setTipoPlano] = useState([]);
+    
+    const [show_parametros, setShowParametros] = useState(false);
 
     const [datos, setDatos] = useState({
         empresa: rodillo.id?rodillo.operacion.seccion.maquina.empresa_id:'',
@@ -45,19 +48,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         });
     }, [token]);
 
-    useEffect(() => {
-        axios.get(BACKEND_SERVER + '/api/rodillos/tipo_plano/',{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            setTipoPlano(res.data);
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    }, [token]);
+    
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/rodillos/materiales/',{
@@ -272,6 +263,14 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         }
     }
 
+    const añadirParametros = () => {
+        setShowParametros(true);
+    }
+
+    const cerrarParametros = () => {
+        setShowParametros(false);
+    }
+
     return (
         <Container className='mt-5'>
             {rodillo.length===0?
@@ -421,28 +420,37 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                             </Form.Control>
                         </Form.Group>
                     </Col>
-                    <Col>
-                        <Form.Group controlId="tipo_plano">
-                            <Form.Label>Tipo de plano</Form.Label>
-                            <Form.Control as="select" 
-                                            value={datos.tipo_plano}
-                                            name='tipo_plano'
-                                            onChange={handleInputChange}>
-                                <option key={0} value={''}>Todos</option>
-                                {tipo_plano && tipo_plano.map( tipo => {
-                                    return (
-                                    <option key={tipo.id} value={tipo.id}>
-                                        {tipo.nombre}
-                                    </option>
-                                    )
-                                })}
-                            </Form.Control>
-                        </Form.Group>
-                    </Col>
+                    
                 </Row>
             </Form>
             <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
             {rodillo.length===0?<Button variant="outline-primary" onClick={GuardarRodillo}>Guardar</Button>:<Button variant="outline-primary" onClick={ActualizarRodillo}>Actualizar</Button>}
+            {rodillo.length!==0?
+                <React.Fragment> 
+                    <Form.Row>
+                    <Col>
+                        <Row>
+                            <Col>
+                            <h5 className="pb-3 pt-1 mt-2">Añadir Parametros:</h5>
+                            </Col>
+                            <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
+                                    <PlusCircle className="plus mr-2" size={30} onClick={añadirParametros}/>
+                            </Col>
+                        </Row>
+                        
+                    </Col>
+                    </Form.Row>
+                </React.Fragment>
+            :null}
+            <ParametrosForm show={show_parametros}
+                           handleCloseParametros={cerrarParametros}
+                           /* proveedoresAsignados={datos.proveedores}
+                           repuesto_id={repuesto.id}
+                           repuesto_nombre={datos.nombre}
+                           repuesto_modelo={datos.modelo}
+                           repuesto_fabricante={datos.fabricante}
+                           updateRepuesto = {updateRepuesto}
+                           setShowProveedor = {setShowProveedor} *//>
         </Container>
     );
 }
