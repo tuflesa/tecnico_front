@@ -12,7 +12,7 @@ const RodGruposListado = () => {
     const [filaSeleccionada, setFilaSeleccionada] = useState(null);
 
     useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/rodillos/grupos/`,{
+        axios.get(BACKEND_SERVER + `/api/rodillos/grupo/`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
