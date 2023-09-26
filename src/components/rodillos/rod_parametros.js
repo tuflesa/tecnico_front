@@ -5,7 +5,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import { Modal, Button, Form, Col, Row, } from 'react-bootstrap';
 
 
-const ParametrosForm = ({show, handleCloseParametros}) => {
+const ParametrosForm = ({show, handleCloseParametros, tipo_seccion}) => {
     const [token] = useCookies(['tec-token']);
     const [tipo_plano, setTipoPlano] = useState([]);
     const [parametros, setParametros] = useState([]);
@@ -21,7 +21,7 @@ const ParametrosForm = ({show, handleCloseParametros}) => {
     });
 
     useEffect(() => {
-        axios.get(BACKEND_SERVER + '/api/rodillos/tipo_plano/',{
+        axios.get(BACKEND_SERVER + `/api/rodillos/tipo_plano/?tipo_seccion=${tipo_seccion}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }

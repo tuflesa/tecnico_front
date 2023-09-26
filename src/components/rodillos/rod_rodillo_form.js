@@ -444,13 +444,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             :null}
             <ParametrosForm show={show_parametros}
                            handleCloseParametros={cerrarParametros}
-                           /* proveedoresAsignados={datos.proveedores}
-                           repuesto_id={repuesto.id}
-                           repuesto_nombre={datos.nombre}
-                           repuesto_modelo={datos.modelo}
-                           repuesto_fabricante={datos.fabricante}
-                           updateRepuesto = {updateRepuesto}
-                           setShowProveedor = {setShowProveedor} *//>
+                           tipo_seccion={datos.seccion}/>
         </Container>
     );
 }
