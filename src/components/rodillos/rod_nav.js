@@ -16,6 +16,7 @@ const RodNavBar = () => {
                                 <NavDropdown title="Rodillos" id="basic-nav-dropdown">
                                     <NavDropdown.Item href="/rodillos/tooling">Tooling Chart</NavDropdown.Item>
                                     <NavDropdown.Item href="/rodillos/grupos">Listado de grupos</NavDropdown.Item> 
+                                    <NavDropdown.Item href="/rodillos/lista">Listado de rodillos</NavDropdown.Item>
                                     <NavDropdown.Divider />
                                     <NavDropdown.Item href="/rodillos/nuevo">Nuevo rodillo</NavDropdown.Item> 
                                     <NavDropdown.Item href="/rodillos/grupo/nuevo">Nuevo grupo</NavDropdown.Item> 

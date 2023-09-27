@@ -3,7 +3,10 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
-import { Button, Form, Col, Row } from 'react-bootstrap';
+import { Button, Form, Col, Row, Table } from 'react-bootstrap';
+import { PlusCircle} from 'react-bootstrap-icons';
+import { Link } from 'react-router-dom';
+import ParametrosForm from './rod_parametros';
 
 const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [token] = useCookies(['tec-token']);
@@ -16,17 +19,18 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [tipo_rodillo, setTipoRodillo] = useState([]);
     const [materiales, setMateriales] = useState([]);
     const [grupos, setGrupos] = useState([]);
-    const [tipo_plano, setTipoPlano] = useState([]);
+    
+    const [show_parametros, setShowParametros] = useState(false);
 
     const [datos, setDatos] = useState({
-        empresa: user['tec-user'].perfil.empresa.id,
-        zona: '',
-        seccion: '',
-        operacion: '',
-        grupo: '',
-        tipo_rodillo: '',
-        material: '',
-        nombre: '',
+        empresa: rodillo.id?rodillo.operacion.seccion.maquina.empresa_id:'',
+        zona: rodillo.id?rodillo.operacion.seccion.maquina.id:'',
+        seccion: rodillo.id?rodillo.operacion.seccion.id: '',
+        operacion: rodillo.id?rodillo.operacion.id:'',
+        grupo: rodillo.grupo?rodillo.grupo.id:'',
+        tipo_rodillo: rodillo.id?rodillo.tipo.id:'',
+        material: rodillo.id?rodillo.material.id:'',
+        nombre: rodillo.id?rodillo.nombre:'',
         tipo_plano: '',
     });
 
@@ -44,35 +48,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         });
     }, [token]);
 
-    useEffect(() => {
-        axios.get(BACKEND_SERVER + '/api/rodillos/tipo_plano/',{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            setTipoPlano(res.data);
-            console.log(res.data);
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    }, [token]);
-
-    /* useEffect(() => {
-        rodillo && axios.get(BACKEND_SERVER + `/api/rodillos/rodillo_nuevo/?operacion__seccion__maquina${2}`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            console.log('que aparece en operacion__seccion__maquina === 2');
-            console.log(res.data);
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    }, [rodillo]); */
+    
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/rodillos/materiales/',{
@@ -120,12 +96,14 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             })
             .then( res => {
                 setZonas(res.data);
-                setDatos({
-                    ...datos,
-                    zona: '',
-                    seccion: '',
-                    equipo: ''
-                });
+                if(!rodillo.id){
+                    setDatos({
+                        ...datos,
+                        zona: '',
+                        seccion: '',
+                        equipo: ''
+                    });
+                }
             })
             .catch( err => {
                 console.log(err);
@@ -134,26 +112,36 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     }, [token, datos.empresa]);
 
     useEffect(() => {
+        if(rodillo.id){
+            if(datos.zona!=rodillo.operacion.seccion.maquina.id){
+                setOperaciones([]);
+            }
+        }
         if (datos.zona === '') {
             setSecciones([]);
+            setOperaciones([]);
             setDatos({
                 ...datos,
                 seccion: '',
-                equipo: ''
+                operacion:'',
             });
         }
         else {
-            axios.get(BACKEND_SERVER + `/api/rodillos/seccion/?maquina=${datos.zona}`,{
+            axios.get(BACKEND_SERVER + `/api/rodillos/seccion/?maquina__id=${datos.zona}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
             })
             .then( res => {
                 setSecciones(res.data);
-                setDatos({
-                    ...datos,
-                    seccion: '',
-                });
+                if(!rodillo.id){
+                    setOperaciones([]);
+                    setDatos({
+                        ...datos,
+                        seccion: '',
+                        operacion: '',
+                    });
+                }
             })
             .catch( err => {
                 console.log(err);
@@ -177,10 +165,12 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             })
             .then( res => {
                 setOperaciones(res.data);
-                setDatos({
-                    ...datos,
-                    operacion: ''
-                });
+                if(!rodillo.id){
+                    setDatos({
+                        ...datos,
+                        operacion: ''
+                    });
+                }
             })
             .catch( err => {
                 console.log(err);
@@ -237,7 +227,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 }     
         })
         .then( res => { 
-            setRodillo(res.data);
+            window.location.href = `/rodillos/editar/${res.data.id}`;
         })
         .catch(err => { 
             console.log(err);
@@ -247,7 +237,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
 
     const ActualizarRodillo = (event) => {
         event.preventDefault();
-        axios.put(BACKEND_SERVER + `/api/rodillos/rodillo_nuevo/${rodillo.id}/`, {
+        axios.put(BACKEND_SERVER + `/api/rodillos/rodillo_editar/${rodillo.id}/`, {
             nombre: datos.nombre,
             operacion: datos.operacion,
             grupo: datos.grupo,
@@ -259,7 +249,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 }     
         })
         .then( res => { 
-            setRodillo(res.data);
+            window.location.href = `/rodillos/editar/${res.data.id}`;
         })
         .catch(err => { 
             console.log(err);
@@ -268,12 +258,24 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     };
 
     const handleDisabled = () => {
-        return user['tec-user'].perfil.nivel_acceso.nombre === 'local'
+        if(rodillo.id){
+            return true
+        }
+    }
+
+    const añadirParametros = () => {
+        setShowParametros(true);
+    }
+
+    const cerrarParametros = () => {
+        setShowParametros(false);
     }
 
     return (
         <Container className='mt-5'>
-            <h5 className='mt-5'>Creando un rodillo nuevo</h5>
+            {rodillo.length===0?
+                <h5 className='mt-5'>Creando un rodillo nuevo</h5>:
+                <h5 className='mt-5'>Revisando un rodillo</h5>}
             <Form >
                 <Row>
                 <Form.Group controlId="nombre">
@@ -418,28 +420,31 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                             </Form.Control>
                         </Form.Group>
                     </Col>
-                    <Col>
-                        <Form.Group controlId="tipo_plano">
-                            <Form.Label>Tipo de plano</Form.Label>
-                            <Form.Control as="select" 
-                                            value={datos.tipo_plano}
-                                            name='tipo_plano'
-                                            onChange={handleInputChange}>
-                                <option key={0} value={''}>Todos</option>
-                                {tipo_plano && tipo_plano.map( tipo => {
-                                    return (
-                                    <option key={tipo.id} value={tipo.id}>
-                                        {tipo.nombre}
-                                    </option>
-                                    )
-                                })}
-                            </Form.Control>
-                        </Form.Group>
-                    </Col>
+                    
                 </Row>
             </Form>
             <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
             {rodillo.length===0?<Button variant="outline-primary" onClick={GuardarRodillo}>Guardar</Button>:<Button variant="outline-primary" onClick={ActualizarRodillo}>Actualizar</Button>}
+            {rodillo.length!==0?
+                <React.Fragment> 
+                    <Form.Row>
+                    <Col>
+                        <Row>
+                            <Col>
+                            <h5 className="pb-3 pt-1 mt-2">Añadir Parametros:</h5>
+                            </Col>
+                            <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
+                                    <PlusCircle className="plus mr-2" size={30} onClick={añadirParametros}/>
+                            </Col>
+                        </Row>
+                        
+                    </Col>
+                    </Form.Row>
+                </React.Fragment>
+            :null}
+            <ParametrosForm show={show_parametros}
+                           handleCloseParametros={cerrarParametros}
+                           tipo_seccion={datos.seccion}/>
         </Container>
     );
 }
