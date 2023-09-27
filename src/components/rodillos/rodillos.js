@@ -6,8 +6,8 @@ import RodPlanos from './rod_planos';
 import RodNuevo from './rod_rodillo_nuevo';
 import RodTooling from './rod_tooling';
 import RodGrupoNuevo from './rod_grupo_nuevo';
-import RodLista from './rod_rodillos_lista';
-import RodEditar from './rod_editar';
+import RodLista from './rod_rodillo_lista';
+import RodEditar from './rod_rodillo_editar';
 
 const Rodillos = () => {
     

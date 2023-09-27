@@ -6,7 +6,7 @@ import { useCookies } from 'react-cookie';
 import { Button, Form, Col, Row, Table } from 'react-bootstrap';
 import { PlusCircle} from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
-import ParametrosForm from './rod_parametros';
+import PlanoForm from './rod_plano_nuevo';
 
 const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [token] = useCookies(['tec-token']);
@@ -272,10 +272,10 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     }
 
     return (
-        <Container className='mt-5'>
+        <Container className='mt-5 pt-1'>
             {rodillo.length===0?
-                <h5 className='mt-5'>Creando un rodillo nuevo</h5>:
-                <h5 className='mt-5'>Revisando un rodillo</h5>}
+                <h5 className='mt-5'>Nuevo Rodillo</h5>:
+                <h5 className='mt-5'>Editar Rodillo</h5>}
             <Form >
                 <Row>
                 <Form.Group controlId="nombre">
@@ -431,7 +431,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                     <Col>
                         <Row>
                             <Col>
-                            <h5 className="pb-3 pt-1 mt-2">Añadir Parametros:</h5>
+                            <h5 className="pb-3 pt-1 mt-2">Añadir Plano:</h5>
                             </Col>
                             <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
                                     <PlusCircle className="plus mr-2" size={30} onClick={añadirParametros}/>
@@ -442,7 +442,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                     </Form.Row>
                 </React.Fragment>
             :null}
-            <ParametrosForm show={show_parametros}
+            <PlanoForm show={show_parametros}
                            handleCloseParametros={cerrarParametros}
                            tipo_seccion={datos.seccion}/>
         </Container>

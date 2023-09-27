@@ -124,7 +124,7 @@ const RodLista = () => {
                                     <tr key={lista.id}>
                                         <td>{lista.id}</td>
                                         <td>{lista.nombre}</td>
-                                        <td>{lista.operacion.seccion.maquina.empresa}</td>
+                                        <td>{lista.operacion.seccion.maquina.empresa.nombre}</td>
                                         <td>{lista.operacion.seccion.maquina.siglas}</td>
                                         <td>{lista.operacion.seccion.nombre}</td>
                                         <td>{lista.operacion.nombre}</td>
