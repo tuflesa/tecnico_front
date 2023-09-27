@@ -1,0 +1,17 @@
+.grid line {
+    stroke: lightgrey;
+    stroke-opacity: 0.8;
+    shape-rendering: crispEdges
+} 
+
+.grid path {
+    stroke-width: 0;
+}
+
+.standChart {
+    overflow: visible;
+    display: block;
+    width: 100%;
+    height: 0;
+    padding-bottom: 100%;
+  }
