@@ -25,7 +25,7 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
 
         const svg =svgRef.current;
 
-        const limite = 300;
+        const limite = 250;
                 
         const xScale = scaleLinear()
             .domain([-limite, limite])
@@ -121,6 +121,160 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
             return r.toString()
         }
 
+        function draw_BD_W(m, i) {
+            // Definición del rodillo
+            const roll = m.rodillos[0]; // Solo usamos el rodillo interior
+            const R1 = roll.parametros.R1;
+            let alfa1 = roll.parametros.alfa1 * Math.PI / 180;
+            const R2 = roll.parametros.R2;
+            let alfa2 = roll.parametros.alfa2 * Math.PI / 180;
+            const Dext = roll.parametros.Dext;
+            const Df = roll.parametros.Df;
+            const Dc = roll.parametros.Dc;
+            const Ancho = roll.parametros.Ancho;
+            const AxisPos0 = -ejes.filter(e => e.op == m.operacion)[0].pos[0]; // Posición del eje referido al centro de la máquina
+
+            // Calculos
+            const xc1 = - roll.parametros.xc1;
+            const yc1 = AxisPos0 + Df/2 + R1;
+            const pos = R1 - yc1; // Posición del fondo del rodillo respecto al centro de máquina
+            const xc2 = 0;
+            const yc2 = (Dc-Df)/2 - R2 - pos;
+            const x0 = xc1 + R1 * Math.sin(alfa2);
+            const y0 = yc1 - R1 * Math.cos(alfa2);
+            const x1 = xc2 - R2 * Math.sin(alfa2);
+            const y1 = yc2 + R2 * Math.cos(alfa2);
+
+            // longitud de fleje fuera del radio (tramo recto)
+            const d1 = 2* Math.sqrt(Math.pow((x0-x1),2)+Math.pow((y0-y1),2)); // Tramo recto entre radios
+            const d2 = R2 * 2 * alfa2; // Longitud tramo central
+            const d3 = 2 * R1 * alfa2; 
+            const d4 = 2 * R1 * alfa1;
+            const d5 = d1 + d2 + d3 + d4;
+
+            let L; 
+            if (d5 > fleje.ancho) {
+                alfa1 = (d5 - fleje.ancho)/(2*R1);
+                L = 0;
+                
+            }
+            else {
+                L = fleje.ancho - d5;
+            }
+
+            const x2 = -xc1 + R1 * Math.sin(alfa1);
+            const y2 = yc1 - R1 * Math.cos(alfa1);
+            const x3 = x2 - fleje.espesor * Math.sin(alfa1);
+            const y3 = y2 + fleje.espesor * Math.cos(alfa1);
+            const x4 = -x1 - fleje.espesor * Math.sin(alfa2);
+            const y4 = y1 + fleje.espesor * Math.cos(alfa2);
+            const x5 = x0 - fleje.espesor * Math.sin(alfa2);
+            const y5 = y0 + fleje.espesor * Math.cos(alfa2);
+
+            // // Centro de masas
+            // const M1 = alfa * (Math.pow(R,2) - Math.pow((R-fleje.espesor),2)) / 2; // Area de la sección circular
+            // const ycm1 = yc - ((2/(3*M1))*(Math.pow(R,3) - Math.pow((R-fleje.espesor),3)) * Math.sin(alfa/2)); // Centro de masas;
+
+            // const M2 = fleje.espesor * L;
+            // const yi = R * (1 - Math.cos(alfa/2)) - pos;
+            // const ycm2 = yi + (L/4) + Math.sin(alfa/2) + (fleje.espesor/2) * Math.cos(alfa/2);
+
+            // const ycm = (ycm1*M1 + ycm2*M2) /(M1+M2);
+            // console.log('ycm: ', ycm);
+            
+        
+            // // Dibujo
+            const r = path();
+            r.arc(xScale(xc1), yScale(yc1), rScale(R1), Math.PI/2 + alfa1, Math.PI/2 - alfa2, true);
+            r.lineTo(xScale(x1), yScale(y1));
+            r.arc(xScale(xc2), yScale(yc2), rScale(R2), 3*Math.PI/2 - alfa2, 3*Math.PI/2 + alfa2);
+            r.lineTo(xScale(-x0), yScale(y0));
+            r.arc(xScale(-xc1), yScale(yc1), rScale(R1), Math.PI/2 + alfa2, Math.PI/2 - alfa1, true);
+            r.lineTo(xScale(x3), yScale(y3));
+            r.arc(xScale(-xc1), yScale(yc1), rScale(R1 - fleje.espesor), Math.PI/2 - alfa1, Math.PI/2 + alfa2);
+            r.lineTo(xScale(x4), yScale(y4));
+            r.arc(xScale(xc2), yScale(yc2), rScale(R2 + fleje.espesor), 3*Math.PI/2 + alfa2, 3*Math.PI/2 - alfa2, true);
+            r.lineTo(xScale(x5), yScale(y5));
+            r.arc(xScale(xc1), yScale(yc1), rScale(R1-fleje.espesor), Math.PI/2 - alfa2, Math.PI/2 + alfa1);
+            r.closePath();
+
+            return r.toString()
+        }
+
+        function draw_BD_2R(m, i) {
+            // Definición del rodillo
+            const roll = m.rodillos[0]; // Solo usamos el rodillo interior
+            const R1 = roll.parametros.R1;
+            let alfa1 = roll.parametros.alfa1 * Math.PI / 180;
+            const R2 = roll.parametros.R2;
+            let alfa2 = roll.parametros.alfa2 * Math.PI / 180;
+            const R3 = roll.parametros.R3;
+            const Dext = roll.parametros.Dext;
+            const Df = roll.parametros.Df;
+            const AxisPos0 = -ejes.filter(e => e.op == m.operacion)[0].pos[0]; // Posición del eje referido al centro de la máquina
+
+            // Calculos
+            const xc1 = 0;
+            const yc1 = AxisPos0 + Df/2 + R1;
+            const pos = R1 - yc1; // Posición del fondo del rodillo respecto al centro de máquina
+            const xc2 = (R1-R2) * Math.sin(alfa1/2);
+            const yc2 = yc1 - (R1-R2) * Math.cos(alfa1/2);
+            const xc3 = xc2 - (R3-R2) * Math.sin(alfa2);
+            const yc3 = yc2 + (R3-R2) * Math.cos(alfa2);
+
+            // longitud de fleje fuera del radio (tramo recto)
+            const d1 = R1 * alfa1; // Longitud tramo central
+            const d2 = 2 * R2 * alfa2;
+            const d3 = d1 + d2;
+
+            let alfa3 = 0;
+            if (d3 > fleje.ancho) {
+                alfa2 = (d3 - fleje.ancho)/(2*R2);
+            }
+            else {
+                alfa3 = (fleje.ancho - d3)/(2*R3);
+            }
+            
+            const x0 = xc3 + R3 * Math.sin(alfa2+alfa3);
+            const y0 = yc3 - R3 * Math.cos(alfa2+alfa3);
+            const x1 = x0 - fleje.espesor * Math.sin(alfa2+alfa3);
+            const y1 = y0 + fleje.espesor * Math.cos(alfa2+alfa3);
+            // const x4 = -x1 - fleje.espesor * Math.sin(alfa2);
+            // const y4 = y1 + fleje.espesor * Math.cos(alfa2);
+            // const x5 = x0 - fleje.espesor * Math.sin(alfa2);
+            // const y5 = y0 + fleje.espesor * Math.cos(alfa2);
+
+            // // Centro de masas
+            // const M1 = alfa * (Math.pow(R,2) - Math.pow((R-fleje.espesor),2)) / 2; // Area de la sección circular
+            // const ycm1 = yc - ((2/(3*M1))*(Math.pow(R,3) - Math.pow((R-fleje.espesor),3)) * Math.sin(alfa/2)); // Centro de masas;
+
+            // const M2 = fleje.espesor * L;
+            // const yi = R * (1 - Math.cos(alfa/2)) - pos;
+            // const ycm2 = yi + (L/4) + Math.sin(alfa/2) + (fleje.espesor/2) * Math.cos(alfa/2);
+
+            // const ycm = (ycm1*M1 + ycm2*M2) /(M1+M2);
+            // console.log('ycm: ', ycm);
+            
+        
+            // // Dibujo
+            const r = path();
+            r.arc(xScale(xc1), yScale(yc1), rScale(R1), (Math.PI + alfa1)/2, (Math.PI - alfa1)/2, true);
+            r.arc(xScale(xc2), yScale(yc2), rScale(R2), (Math.PI - alfa1)/2, Math.PI/2 - alfa2, true);
+            r.arc(xScale(xc3), yScale(yc3), rScale(R3), Math.PI/2 - alfa2,  Math.PI/2 - alfa2 - alfa3, true);
+            r.lineTo(xScale(x1), yScale(y1));
+            r.arc(xScale(xc3), yScale(yc3), rScale(R3-fleje.espesor), Math.PI/2 - alfa2 - alfa3, Math.PI/2 - alfa2);
+            r.arc(xScale(xc2), yScale(yc2), rScale(R2-fleje.espesor), Math.PI/2 - alfa2, (Math.PI - alfa1)/2);
+            r.arc(xScale(xc1), yScale(yc1), rScale(R1-fleje.espesor), (Math.PI - alfa1)/2, (Math.PI + alfa1)/2);
+            r.arc(xScale(-xc2), yScale(yc2), rScale(R2-fleje.espesor), (Math.PI + alfa1)/2, Math.PI/2 + alfa2);
+            r.arc(xScale(-xc3), yScale(yc3), rScale(R3-fleje.espesor),  Math.PI/2 + alfa2, Math.PI/2 + alfa2 + alfa3);
+            r.lineTo(xScale(-x0), yScale(y0));
+            r.arc(xScale(-xc3), yScale(yc3), rScale(R3), Math.PI/2 + alfa2 + alfa3, Math.PI/2 + alfa2, true);
+            r.arc(xScale(-xc2), yScale(yc2), rScale(R2), Math.PI/2 + alfa2, (Math.PI + alfa1)/2, true);
+            r.closePath();
+
+            return r.toString()
+        }
+
         function draw_FP(m, i) {
             // Rodillos y ejes
             const roll_i = m.rodillos[0];
@@ -176,7 +330,11 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
             alfa2_s = roll_s.parametros.alfa2 * Math.PI / 180;
             alfa3_s = roll_s.parametros.alfa3 * Math.PI / 180;
             C = roll_s.parametros.Cuchilla;
-            const alfa_c = Math.asin(C/(2*R1_s));
+
+            let alfa_c = 0;
+             if (R1_s != 0) {
+                alfa_c = Math.asin(C/(2*R1_s));
+             }
             
             pos_s = AxisPos0_s - Df_s / 2;
             x1 = -C/2;
@@ -197,11 +355,13 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
                 x2 = x1 + fleje.espesor*Math.sin(alfa_c);
                 y2 = y1 - fleje.espesor*Math.cos(alfa_c);
             }
-            console.log('alfa_c: ', alfa_c*180/Math.PI);
+            // console.log('alfa_c: ', alfa_c*180/Math.PI);
 
             // Desarrollo
-            const Desarrollo = R1*alfa1 + 2*R2*((Math.PI-alfa1)/2 - alfa3) + 2*R4*(2*alfa3) + 2*R2_s*(alfa2_s-alfa3_s) + 2*R1_s*(alfa1_s-alfa_c);
-            console.log('desarrollo: ', Desarrollo); 
+            // console.log('R4: ', R4);
+            // console.log('alfa3:', alfa3*180/Math.PI);
+            const Desarrollo = R1*alfa1 + 2*R2*((Math.PI-alfa1)/2 - alfa3) + 2*R4*(2*alfa3) + 2*R2_s*(alfa2_s-alfa3_s) + 2*R1_s*(alfa1_s/2-alfa_c);
+            console.log(m.nombre + ' desarrollo: ', Desarrollo); 
 
             // Centro de masas
             
@@ -239,34 +399,6 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
             r.arc(xScale(-xcr), yScale(ycr), rScale(R4), -alfa3 ,  alfa3);
             r.arc(xScale(-xc2), yScale(yc2), rScale(R2), alfa3, (Math.PI-alfa1)/2);
  
-             return r.toString()
-        }
-
-        function draw_W(m,i) {
-            // Rodillos y ejes
-            const roll_lat_operador = m.rodillos[0];
-            const roll_lat_motor = m.rodillos[1];
-            const roll_inf = m.rodillos[2];
-            const AxisPos0_lat_op = ejes.filter(e => e.op == m.operacion)[0].pos[0];
-            const AxisPos0_lat_mot = ejes.filter(e => e.op == m.operacion)[0].pos[1];
-            const AxisPos0_lat_inf = ejes.filter(e => e.op == m.operacion)[0].pos[2];
-
-            // Parametros
-            const Df = roll_lat_operador.parametros.Df;
-
-            // Variables
-            let pos;
-
-            // Calculos
-            pos = AxisPos0_lat_mot - Df/2; 
-
-            // Dibujo
-            const r = path();
-
-            r.arc(xScale(0), yScale(0), rScale(pos), -Math.PI/4, 7*Math.PI/4);
-            r.lineTo(xScale((pos-fleje.espesor)*Math.cos(Math.PI/4)),yScale((pos-fleje.espesor)*Math.sin(Math.PI/4)));
-            r.arc(xScale(0), yScale(0), rScale(pos-fleje.espesor), 7*Math.PI/4, -Math.PI/4, true);
-            r.closePath();
             return r.toString()
         }
         
@@ -277,12 +409,15 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
                 case 'BD':
                     p = draw_BD(m,i);
                     break;
+                case 'BD_W':
+                    p = draw_BD_W(m,i);
+                    break;
+                case 'BD_2R':
+                    p = draw_BD_2R(m,i);
+                    break;
                 case 'FP':
                     p = draw_FP(m, i);
                 break;
-                case 'W':
-                    p = draw_W(m,i);
-                    break;
             }
         }
           return p;
@@ -324,6 +459,7 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
             .data(montaje)
             .join('path')
             .attr('fill', m => m.color)
+            //.attr('fill', 'none')
             .attr('opacity', 0.5)
             .attr('stroke', m => m.color)
             .style("stroke-width", 1)
