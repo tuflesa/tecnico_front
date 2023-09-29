@@ -32,7 +32,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         material: rodillo.id?rodillo.material.id:'',
         nombre: rodillo.id?rodillo.nombre:'',
         tipo_seccion: rodillo.id?rodillo.operacion.seccion.tipo:'',
-        tipo_plano: '',
+        tipo_plano: rodillo.id?rodillo.tipo_plano:'',
     });
 
     useEffect(() => {

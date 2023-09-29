@@ -16,7 +16,7 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
     const [archivo, setArchivo] = useState(null);
 
     const [datos, setDatos] = useState({
-        tipo_plano: '',
+        tipo_plano: rodillo_tipo_plano,
         nombre: '',
         fecha: fechaString,
         archivo:'',
@@ -102,9 +102,7 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
               });
             })
         
-        console.log(datos.tipo_plano);
-        console.log(rodillo_tipo_plano);
-        if(tipo_plano!==''){
+        if(datos.tipo_plano!==''){
             axios.patch(BACKEND_SERVER + `/api/rodillos/rodillo_nuevo/${rodillo_id}/`, {
                 tipo_plano: datos.tipo_plano,
             }, {
@@ -196,7 +194,8 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
                                     <Form.Control as="select" 
                                                     value={datos.tipo_plano}
                                                     name='tipo_plano'
-                                                    onChange={handleInputChange}>
+                                                    onChange={handleInputChange}
+                                                    disabled={rodillo_tipo_plano!==''}>
                                         <option key={0} value={0}>Todos</option>
                                         {tipo_plano && tipo_plano.map( tipo => {
                                             return (
