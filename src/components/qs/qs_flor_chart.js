@@ -25,7 +25,7 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
 
         const svg =svgRef.current;
 
-        const limite = 250;
+        const limite = 150;
                 
         const xScale = scaleLinear()
             .domain([-limite, limite])

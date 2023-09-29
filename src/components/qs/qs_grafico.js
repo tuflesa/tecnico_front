@@ -5,7 +5,7 @@ import FlowerChart from "./qs_flor_chart";
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
-import {montaje, fleje} from './Grupo_133';
+import {montaje, fleje} from './Grupo_90';
 
 // const ejes = [{op:1, pos: [174, 343.57]},
 //               {op:2, pos: [177.91, 340.49]},
@@ -14,23 +14,19 @@ import {montaje, fleje} from './Grupo_133';
 //               {op:6, pos: [201.79, 187.88]},
 //               {op:7, pos: [255.65, 255.65, 263.15]}
 //             ]; 
-// const fleje = {
-//     espesor: 7,
-//     ancho: 410,
-//     calidad: 'S350',
-//     color: 'aqua'
-// }
 
 const QS_Grafico = () => {
     const [token] = useCookies(['tec-token']);
 
     const [OP, setOP] = useState(1);
     const [ejes, setEjes] = useState(null);
-    const [posiciones, setPosiciones] = useState({});
+    const [simulador, setSimulador] = useState(false);
 
     const handleInputChange = (event) => {
+        event.preventDefault();
         setOP(event.target.value);
     }
+
 
     const leerEjes = (event) => {
         event.preventDefault();
@@ -76,7 +72,16 @@ return (
                                 })}
                             </Form.Control>
                         </Form.Group>
-                        <Button variant="info" type="submit" className={'mx-2'} onClick={leerEjes}>Leer</Button>
+                        <Form.Check // prettier-ignore
+                                type="switch"
+                                id="custom-switch"
+                                label="Simulador"
+                                onClick={(event) => {
+                                    // event.preventDefault();
+                                    setSimulador(event.target.checked);
+                                }}
+                            />
+                        {simulador ? <Button variant="info" type="submit" className={'mx-2'} onClick={null}>Simular</Button> : <Button variant="info" type="submit" className={'mx-2'} onClick={leerEjes}>Leer</Button>}
                     </Form>
                 </Row>
                 <Row>

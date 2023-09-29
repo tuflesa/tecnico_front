@@ -2,123 +2,70 @@ const montaje = [
     {
         operacion: 1,
         color: 'blue',
-        tipo: 'BD',
+        tipo: 'BD_W',
         nombre: 'BD-I',
         rodillos: [
             {
-                tipo_plano: 'BD_INF',
+                tipo_plano: 'BD_W_INF',
                 parametros: {
                     Ancho: 660,
-                    Dext: 740,
+                    Dext: 550,
                     Df: 300,
-                    R: 300,
-                    alfa: 120
+                    Dc: 338.5,
+                    R1: 126,
+                    alfa1: 63,
+                    xc1: 155.3,
+                    R2: 489,
+                    alfa2: 12,
+                    R3:15
                 }
             },
             {
-                tipo_plano: 'BD_SUP',
+                tipo_plano: 'BD_W_SUP',
                 parametros: {
-                    Ancho: 520,
+                    Ancho: 246,
                     Dext: 740,
-                    R: 281
+                    R: 123,
+                    H: 310.5
                 }
             }
         ]
     },
-    
     {
         operacion: 2,
         color: 'magenta',
-        tipo: 'BD',
+        tipo: 'BD_2R',
         nombre: 'BD-II',
         rodillos: [
             {
-                tipo_plano: 'BD_INF',
+                tipo_plano: 'BD_2R_INF',
                 parametros: {
-                    Ancho: 470,
+                    Ancho: 606,
                     Dext: 660,
                     Df: 300,
-                    R: 190,
-                    alfa: 130
+                    R1: 422,
+                    alfa1: 20,
+                    R2: 126,
+                    alfa2: 35,
+                    R3: 377,
+                    alfa3: 21.24,
+                    R4: 40
                 }
             },
             {
-                tipo_plano: 'BD_SUP',
+                tipo_plano: 'BD_2R_SUP',
                 parametros: {
-                    Ancho: 340,
+                    Ancho: 277,
                     Dext: 740,
-                    R: 170
+                    R1: 419,
+                    alfa1: 10,
+                    R2: 123,
+                    alfa2: 24.57,
+                    R3: 40
                 }
             }
         ]   
     },
-    // {
-    //     operacion: 1,
-    //     color: 'blue',
-    //     tipo: 'BD_W',
-    //     nombre: 'BD-I',
-    //     rodillos: [
-    //         {
-    //             tipo_plano: 'BD_W_INF',
-    //             parametros: {
-    //                 Ancho: 660,
-    //                 Dext: 550,
-    //                 Df: 300,
-    //                 Dc: 338.5,
-    //                 R1: 126,
-    //                 alfa1: 63,
-    //                 xc1: 155.3,
-    //                 R2: 489,
-    //                 alfa2: 12,
-    //                 R3:15
-    //             }
-    //         },
-    //         {
-    //             tipo_plano: 'BD_W_SUP',
-    //             parametros: {
-    //                 Ancho: 246,
-    //                 Dext: 740,
-    //                 R: 123,
-    //                 H: 310.5
-    //             }
-    //         }
-    //     ]
-    // },
-    // {
-    //     operacion: 2,
-    //     color: 'magenta',
-    //     tipo: 'BD_2R',
-    //     nombre: 'BD-II',
-    //     rodillos: [
-    //         {
-    //             tipo_plano: 'BD_2R_INF',
-    //             parametros: {
-    //                 Ancho: 606,
-    //                 Dext: 660,
-    //                 Df: 300,
-    //                 R1: 422,
-    //                 alfa1: 20,
-    //                 R2: 126,
-    //                 alfa2: 35,
-    //                 R3: 377,
-    //                 alfa3: 26.95,
-    //                 R4: 40
-    //             }
-    //         },
-    //         {
-    //             tipo_plano: 'BD_2R_SUP',
-    //             parametros: {
-    //                 Ancho: 277,
-    //                 Dext: 740,
-    //                 R1: 419,
-    //                 alfa1: 10,
-    //                 R2: 123,
-    //                 alfa2: 24.57,
-    //                 R3: 40
-    //             }
-    //         }
-    //     ]   
-    // },
     {
         operacion: 4,
         color: 'red',
@@ -287,13 +234,6 @@ const montaje = [
     }
 ]
 
-// const ejes = [{op:1, pos: [174, 343.57]},
-//               {op:2, pos: [177.91, 340.49]},
-//               {op:4, pos: [207.01, 201.08]},
-//               {op:5, pos: [206.43, 197.73]},
-//               {op:6, pos: [201.79, 187.88]},
-//               {op:7, pos: [255.65, 255.65, 263.15]}
-//             ]; 
 const fleje = {
     espesor: 4,
     ancho: 547,

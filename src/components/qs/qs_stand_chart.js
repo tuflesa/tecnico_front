@@ -25,6 +25,8 @@ const StandChart = ({montaje, ejes, fleje}) => {
 
         const svg =svgRef.current;
 
+        console.log(ejes);
+
         let ancho_max = 0;
         for (let i = 0; i < montaje[0].rodillos.length; i++) {
             if (ancho_max < montaje[0].rodillos[i].parametros.Ancho) {ancho_max = montaje[0].rodillos[i].parametros.Ancho}
