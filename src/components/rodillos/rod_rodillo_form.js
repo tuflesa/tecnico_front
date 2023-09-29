@@ -31,6 +31,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         tipo_rodillo: rodillo.id?rodillo.tipo.id:'',
         material: rodillo.id?rodillo.material.id:'',
         nombre: rodillo.id?rodillo.nombre:'',
+        tipo_seccion: rodillo.id?rodillo.operacion.seccion.tipo:'',
         tipo_plano: '',
     });
 
@@ -85,7 +86,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 ...datos,
                 zona: '',
                 seccion: '',
-                equipo: ''
+                operacion: '',
+                grupo: '',
             });
         }
         else {
@@ -101,7 +103,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                         ...datos,
                         zona: '',
                         seccion: '',
-                        equipo: ''
+                        operacion: '',
+                        grupo: '',
                     });
                 }
             })
@@ -120,10 +123,12 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         if (datos.zona === '') {
             setSecciones([]);
             setOperaciones([]);
+            setGrupos([]);
             setDatos({
                 ...datos,
                 seccion: '',
                 operacion:'',
+                grupo: '',
             });
         }
         else {
@@ -136,10 +141,12 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 setSecciones(res.data);
                 if(!rodillo.id){
                     setOperaciones([]);
+                    setGrupos([]);
                     setDatos({
                         ...datos,
                         seccion: '',
                         operacion: '',
+                        grupo: '',
                     });
                 }
             })
@@ -152,9 +159,11 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     useEffect(() => {
         if (datos.seccion === ''){
             setOperaciones([]);
+            setGrupos([]);
             setDatos({
                 ...datos,
-                operacion: ''
+                operacion: '',
+                grupo:'',
             });
         }
         else{
@@ -166,9 +175,11 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             .then( res => {
                 setOperaciones(res.data);
                 if(!rodillo.id){
+                    setGrupos([]);
                     setDatos({
                         ...datos,
-                        operacion: ''
+                        operacion: '',
+                        grupo:'',
                     });
                 }
             })
@@ -180,11 +191,10 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
 
     useEffect(() => {
         if (datos.zona === '') {
-            setSecciones([]);
+            setGrupos([]);
             setDatos({
                 ...datos,
-                seccion: '',
-                equipo: ''
+                grupo:'',
             });
         }
         else {
@@ -444,7 +454,10 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             :null}
             <PlanoForm show={show_parametros}
                            handleCloseParametros={cerrarParametros}
-                           tipo_seccion={datos.seccion}/>
+                           tipo_seccion={datos.tipo_seccion}
+                           tipo_rodillo={datos.tipo_rodillo}
+                           rodillo_id={rodillo.id}
+                           rodillo_tipo_plano={datos.tipo_plano}/>
         </Container>
     );
 }
