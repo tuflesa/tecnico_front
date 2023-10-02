@@ -7,6 +7,7 @@ import { Button, Form, Col, Row, Table } from 'react-bootstrap';
 import { PlusCircle} from 'react-bootstrap-icons';
 import PlanoForm from './rod_plano_nuevo';
 import { Link } from 'react-router-dom';
+import {invertirFecha} from '../utilidades/funciones_fecha';
 
 
 const RodRodilloForm = ({rodillo, setRodillo}) => {
@@ -338,7 +339,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                             {conjunto.archivo}
                                             </a>
                                         </td>
-                                        <td>{conjunto.fecha}</td>
+                                        
+                                        <td>{invertirFecha(String(conjunto.fecha))}</td>
                                     </tr>
                                 )})
                             }
