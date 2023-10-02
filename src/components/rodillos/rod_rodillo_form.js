@@ -301,19 +301,6 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         setShowParametros(false);
     }
 
-    /* const abrirConjuntos = (plano) => {
-        if(show){
-            setValorConjuntos('');
-            setFilaSeleccionada('');
-            setRevisiones(null);
-            setShow(false);
-        }
-        else{
-            setShow(true);
-        }
-        abrirConjuntos2(plano);
-    } */
-
     const abrirConjuntos = (plano) => {        
         axios.get(BACKEND_SERVER + `/api/rodillos/revision_conjuntos/?plano=${plano}`,{
             headers: {
@@ -326,6 +313,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                           
             if(show){
                 const tabla = (
+                    <div>
+                    <h2 style={{textAlign: 'center'}}>Revisiones del plano</h2>
                     <Table striped bordered hover>
                         <thead>
                             <tr>
@@ -342,12 +331,10 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                         <td>{conjunto.motivo}</td>
                                         <td>{conjunto.plano}</td>
                                         <td>
-                                            <a
-                                            href={conjunto.archivo}
+                                            <a href={conjunto.archivo}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            title="Haz clic para abrir el PDF"
-                                            >
+                                            title="Haz clic para abrir el PDF">
                                             {conjunto.archivo}
                                             </a>
                                         </td>
@@ -357,6 +344,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                             }
                         </tbody>
                     </Table>
+                    </div>
                 );
                 setValorConjuntos(tabla);
                 setFilaSeleccionada(plano);
