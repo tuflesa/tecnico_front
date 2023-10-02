@@ -5,8 +5,9 @@ import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
 import { Button, Form, Col, Row, Table } from 'react-bootstrap';
 import { PlusCircle} from 'react-bootstrap-icons';
-import { Link } from 'react-router-dom';
 import PlanoForm from './rod_plano_nuevo';
+import { Link } from 'react-router-dom';
+
 
 const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [token] = useCookies(['tec-token']);
@@ -19,6 +20,11 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [tipo_rodillo, setTipoRodillo] = useState([]);
     const [materiales, setMateriales] = useState([]);
     const [grupos, setGrupos] = useState([]);
+    const [planos, setPlanos] = useState(null);
+    const [valor_conjuntos, setValorConjuntos] = useState('');
+    const [show, setShow] = useState(false);
+    const [filaSeleccionada, setFilaSeleccionada] = useState(null);
+    const [revisiones, setRevisiones] = useState(null);
     
     const [show_parametros, setShowParametros] = useState(false);
 
@@ -49,7 +55,21 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         });
     }, [token]);
 
-    
+    useEffect(() => {
+        if(rodillo.id){
+            axios.get(BACKEND_SERVER + `/api/rodillos/plano/?rodillos=${rodillo.id}`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                  }
+            })
+            .then( res => {
+                setPlanos(res.data);
+            })
+            .catch( err => {
+                console.log(err);
+            });
+        }
+    }, [token]);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/rodillos/materiales/',{
@@ -273,13 +293,86 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         }
     }
 
-    const añadirParametros = () => {
+    const añadirPlano = () => {
         setShowParametros(true);
     }
 
     const cerrarParametros = () => {
         setShowParametros(false);
     }
+
+    /* const abrirConjuntos = (plano) => {
+        if(show){
+            setValorConjuntos('');
+            setFilaSeleccionada('');
+            setRevisiones(null);
+            setShow(false);
+        }
+        else{
+            setShow(true);
+        }
+        abrirConjuntos2(plano);
+    } */
+
+    const abrirConjuntos = (plano) => {        
+        axios.get(BACKEND_SERVER + `/api/rodillos/revision_conjuntos/?plano=${plano}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+                }
+        })
+        .then( res => {
+            setRevisiones(res.data);
+            setShow(!show);
+                          
+            if(show){
+                const tabla = (
+                    <Table striped bordered hover>
+                        <thead>
+                            <tr>
+                                <th>Motivo</th>
+                                <th>Nombre</th>
+                                <th>Archivo</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {res.data && res.data.map( conjunto => {
+                                return (
+                                    <tr key={conjunto.id}>
+                                        <td>{conjunto.motivo}</td>
+                                        <td>{conjunto.plano}</td>
+                                        <td>
+                                            <a
+                                            href={conjunto.archivo}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            title="Haz clic para abrir el PDF"
+                                            >
+                                            {conjunto.archivo}
+                                            </a>
+                                        </td>
+                                        <td>{conjunto.fecha}</td>
+                                    </tr>
+                                )})
+                            }
+                        </tbody>
+                    </Table>
+                );
+                setValorConjuntos(tabla);
+                setFilaSeleccionada(plano);
+            }
+            else{
+                setValorConjuntos('');
+                setFilaSeleccionada('');
+                setRevisiones(null);
+            }
+        })
+        .catch( err => {
+            console.log(err);
+        });
+        
+        
+    };
 
     return (
         <Container className='mt-5 pt-1'>
@@ -288,16 +381,16 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 <h5 className='mt-5'>Editar Rodillo</h5>}
             <Form >
                 <Row>
-                <Form.Group controlId="nombre">
-                    <Form.Label>Nombre del rodillo *</Form.Label>
-                    <Form.Control type="text" 
-                                name='nombre' 
-                                value={datos.nombre}
-                                onChange={handleInputChange} 
-                                placeholder="Rodillo"
-                                autoFocus
-                    />
-                </Form.Group>
+                    <Form.Group controlId="nombre">
+                        <Form.Label>Nombre del rodillo *</Form.Label>
+                        <Form.Control type="text" 
+                                    name='nombre' 
+                                    value={datos.nombre}
+                                    onChange={handleInputChange} 
+                                    placeholder="Rodillo"
+                                    autoFocus
+                        />
+                    </Form.Group>
                 </Row>
                 <Row>
                     <Col>
@@ -430,28 +523,60 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                             </Form.Control>
                         </Form.Group>
                     </Col>
-                    
                 </Row>
+                <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
+                {rodillo.length===0?<Button variant="outline-primary" onClick={GuardarRodillo}>Guardar</Button>:<Button variant="outline-primary" onClick={ActualizarRodillo}>Actualizar</Button>}
+                {rodillo.length!==0?
+                    <React.Fragment> 
+                        <Form.Row>
+                        <Col>
+                            <Row>
+                                <Col>
+                                <h5 className="pb-3 pt-1 mt-2">Añadir Plano:</h5>
+                                </Col>
+                                <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
+                                        <PlusCircle className="plus mr-2" size={30} onClick={añadirPlano}/>
+                                </Col>
+                            </Row>
+                            
+                        </Col>
+                        </Form.Row>
+                    </React.Fragment>
+                :null}
             </Form>
-            <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
-            {rodillo.length===0?<Button variant="outline-primary" onClick={GuardarRodillo}>Guardar</Button>:<Button variant="outline-primary" onClick={ActualizarRodillo}>Actualizar</Button>}
-            {rodillo.length!==0?
-                <React.Fragment> 
-                    <Form.Row>
-                    <Col>
-                        <Row>
-                            <Col>
-                            <h5 className="pb-3 pt-1 mt-2">Añadir Plano:</h5>
-                            </Col>
-                            <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
-                                    <PlusCircle className="plus mr-2" size={30} onClick={añadirParametros}/>
-                            </Col>
-                        </Row>
-                        
-                    </Col>
-                    </Form.Row>
-                </React.Fragment>
-            :null}
+            {planos?planos.length!==0?
+                <Table striped bordered hover>
+                    <thead>
+                        <tr>
+                            <th>Desplegable</th>
+                            <th>Código</th>
+                            <th>Nombre</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        { planos && planos.map( plano => {
+                            return (
+                                <React.Fragment key={plano.id}>
+                                    <tr key={plano.id}>
+                                        <td>
+                                            <button type="button" className="btn btn-default" value={plano.id} name='prueba' onClick={event => {abrirConjuntos(plano.id)}}>--</button>
+                                        </td>
+                                        <td>{plano.id}</td>
+                                        <td>{plano.nombre}</td>
+                                        <td>{'acciones'}</td>
+                                    </tr>
+                                    {filaSeleccionada === plano.id && (
+                                        <tr>
+                                            <td colSpan="4">{valor_conjuntos}</td>
+                                        </tr>
+                                        )}
+                                </React.Fragment>
+                            )})
+                        }
+                    </tbody>
+                </Table>
+            :"No hay plano relacionados con este rodillo":null}
             <PlanoForm show={show_parametros}
                            handleCloseParametros={cerrarParametros}
                            tipo_seccion={datos.tipo_seccion}

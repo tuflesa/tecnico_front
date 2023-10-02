@@ -52,7 +52,7 @@ const RodGruposListado = () => {
         else{
             setValorConjuntos('');
         }
-      };
+    };
 
     return(
         <Container className='mt-5'>  
