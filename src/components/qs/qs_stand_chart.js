@@ -10,7 +10,7 @@ import './qs.css';
 import useResizeObserver from '../utilidades/use_resizeObserver';
 
 
-const StandChart = ({montaje, ejes, fleje}) => {
+const StandChart = ({montaje, ejes, posiciones, simulador, fleje}) => {
     const svgRef = useRef();
     const wrapperRef = useRef();
     const dimensions = useResizeObserver(wrapperRef);
@@ -24,8 +24,6 @@ const StandChart = ({montaje, ejes, fleje}) => {
         const innerHeight = height - margin.top - margin.bottom;
 
         const svg =svgRef.current;
-
-        console.log(ejes);
 
         let ancho_max = 0;
         for (let i = 0; i < montaje[0].rodillos.length; i++) {
@@ -62,7 +60,7 @@ const StandChart = ({montaje, ejes, fleje}) => {
         function make_x_gridlines() {
             return axisBottom(xScale)
                 .ticks(10)
-          }
+          } 
 
         function make_y_gridlines() {
             return axisLeft(yScale)
@@ -78,8 +76,8 @@ const StandChart = ({montaje, ejes, fleje}) => {
 
             // Rodillo inferior
             // Definición del rodillo
-            const AxisPos0_i = -ejes[2*i]; // Posición del eje inferior referido al centro de la máquina
-            const AxisPos0_s = ejes[2*i+1]; // Posición del eje superior referido al centro de la máquina
+            const AxisPos0_i = -ejes['INF']; // Posición del eje inferior referido al centro de la máquina
+            const AxisPos0_s = ejes['SUP']; // Posición del eje superior referido al centro de la máquina
 
             // Variables
             let R;
@@ -122,7 +120,7 @@ const StandChart = ({montaje, ejes, fleje}) => {
 
             // Rodillo superior
             R = roll_s.parametros.R;
-            Dext = roll_s.parametros.Dext;
+            Dext = roll_s.parametros.Df;
             Ancho = roll_s.parametros.Ancho;
 
             // Calculos
@@ -164,8 +162,8 @@ const StandChart = ({montaje, ejes, fleje}) => {
 
             // Rodillo inferior
             // Definición del rodillo
-            const AxisPos0_i = -ejes[2*i]; // Posición del eje inferior referido al centro de la máquina
-            const AxisPos0_s = ejes[2*i+1]; // Posición del eje superior referido al centro de la máquina
+            const AxisPos0_i = -ejes['INF']; // Posición del eje inferior referido al centro de la máquina
+            const AxisPos0_s = ejes['SUP']; // Posición del eje superior referido al centro de la máquina
 
             // Variables
             let R1, R2, R3;
@@ -269,8 +267,8 @@ const StandChart = ({montaje, ejes, fleje}) => {
 
             // Rodillo inferior
             // Definición del rodillo
-            const AxisPos0_i = -ejes[2*i]; // Posición del eje inferior referido al centro de la máquina
-            const AxisPos0_s = ejes[2*i+1]; // Posición del eje superior referido al centro de la máquina
+            const AxisPos0_i = -ejes['INF']; // Posición del eje inferior referido al centro de la máquina
+            const AxisPos0_s = ejes['SUP']; // Posición del eje superior referido al centro de la máquina
 
             // Variables
             let R1, R2, R3, R4;
@@ -386,8 +384,8 @@ const StandChart = ({montaje, ejes, fleje}) => {
             // Rodillos y ejes
             const roll_i = stand.rodillos[0];
             const roll_s = stand.rodillos[1];
-            const AxisPos0_i = ejes[2*i];
-            const AxisPos0_s = ejes[2*i+1];
+            const AxisPos0_i = ejes['INF'];
+            const AxisPos0_s = ejes['SUP'];
 
             // Dibujo rodillo inferior
             // Variables
@@ -527,9 +525,9 @@ const StandChart = ({montaje, ejes, fleje}) => {
             const roll_Lat_Operador= stand.rodillos[0];
             const roll_Lat_Motor = stand.rodillos[1];
             const roll_Inf = stand.rodillos[2];
-            const AxisPos0_Lat_Operador = ejes[2*i];
-            const AxisPos0_Lat_Motor = ejes[2*i+1];
-            const AxisPos0_Inf = ejes[2*i+2];
+            const AxisPos0_Lat_Operador = ejes['LAT_OP'];
+            const AxisPos0_Lat_Motor = ejes['LAT_MO'];
+            const AxisPos0_Inf = ejes['INF'];
 
             // Variables
             let xc, yc;
@@ -704,6 +702,36 @@ const StandChart = ({montaje, ejes, fleje}) => {
             .attr('stroke', m => m.color)
             .style("stroke-width", 2)
             .attr('d', (m, i) => draw_stand(m, i));
+
+        posiciones&&select(svg).select('.grafico')
+            .selectAll('text')
+            .data(posiciones)
+            .join('text')
+            .attr('x', p => {
+                switch(p.eje) {
+                    case 'INF':
+                        return 300;
+                    case 'SUP':
+                        return 300;
+                    case 'LAT_OP':
+                        return 20;
+                    case 'LAT_MO':
+                        return 300;
+                }
+            })
+            .attr('y', p => {
+                switch(p.eje) {
+                    case 'INF':
+                        return 400;
+                    case 'SUP':
+                        return 20;
+                    case 'LAT_OP':
+                        return 100;
+                    case 'LAT_MO':
+                        return 100;
+                }
+            })
+            .text(p => simulador ? p.pos_sim.toFixed(2) : p.pos.toFixed(2));
                
     },[dimensions, montaje, ejes, fleje]);
 

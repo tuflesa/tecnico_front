@@ -81,7 +81,7 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
             // const Dext = roll.parametros.Dext;
             const Df = roll.parametros.Df;
             // const Ancho = roll.parametros.Ancho;
-            const AxisPos0 = -ejes.filter(e => e.op == m.operacion)[0].pos[0]; // Posición del eje referido al centro de la máquina
+            const AxisPos0 = -ejes.filter(e => e.op == m.operacion)[0].pos['INF']; // Posición del eje referido al centro de la máquina
         
             // Calculos
             const xc = 0;
@@ -132,7 +132,7 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
             const Df = roll.parametros.Df;
             const Dc = roll.parametros.Dc;
             const Ancho = roll.parametros.Ancho;
-            const AxisPos0 = -ejes.filter(e => e.op == m.operacion)[0].pos[0]; // Posición del eje referido al centro de la máquina
+            const AxisPos0 = -ejes.filter(e => e.op == m.operacion)[0].pos['INF']; // Posición del eje referido al centro de la máquina
 
             // Calculos
             const xc1 = - roll.parametros.xc1;
@@ -211,7 +211,7 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
             const R3 = roll.parametros.R3;
             const Dext = roll.parametros.Dext;
             const Df = roll.parametros.Df;
-            const AxisPos0 = -ejes.filter(e => e.op == m.operacion)[0].pos[0]; // Posición del eje referido al centro de la máquina
+            const AxisPos0 = -ejes.filter(e => e.op == m.operacion)[0].pos['INF']; // Posición del eje referido al centro de la máquina
 
             // Calculos
             const xc1 = 0;
@@ -279,8 +279,8 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
             // Rodillos y ejes
             const roll_i = m.rodillos[0];
             const roll_s = m.rodillos[1];
-            const AxisPos0_i = ejes.filter(e => e.op == m.operacion)[0].pos[0];
-            const AxisPos0_s = ejes.filter(e => e.op == m.operacion)[0].pos[1];
+            const AxisPos0_i = ejes.filter(e => e.op == m.operacion)[0].pos['INF'];
+            const AxisPos0_s = ejes.filter(e => e.op == m.operacion)[0].pos['SUP'];
 
             // Dibujo rodillo inferior
             // Variables

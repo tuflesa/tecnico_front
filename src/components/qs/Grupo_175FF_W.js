@@ -7,6 +7,7 @@ const montaje = [
         rodillos: [
             {
                 tipo_plano: 'BD_W_INF',
+                eje: 'INF',
                 parametros: {
                     Ancho: 660,
                     Dext: 550,
@@ -22,9 +23,10 @@ const montaje = [
             },
             {
                 tipo_plano: 'BD_W_SUP',
+                eje: 'SUP',
                 parametros: {
                     Ancho: 246,
-                    Dext: 740,
+                    Df: 740,
                     R: 123,
                     H: 310.5
                 }
@@ -39,6 +41,7 @@ const montaje = [
         rodillos: [
             {
                 tipo_plano: 'BD_2R_INF',
+                eje: 'INF',
                 parametros: {
                     Ancho: 606,
                     Dext: 660,
@@ -54,6 +57,7 @@ const montaje = [
             },
             {
                 tipo_plano: 'BD_2R_SUP',
+                eje: 'SUP',
                 parametros: {
                     Ancho: 277,
                     Dext: 740,
@@ -74,6 +78,7 @@ const montaje = [
         rodillos: [
             {
                 tipo_plano: 'FP_INF',
+                eje: 'INF',
                 parametros: {
                     Ancho: 290,
                     Dext: 505.847,
@@ -89,6 +94,7 @@ const montaje = [
             },
             {
                 tipo_plano: 'FP_SUP',
+                eje: 'SUP',
                 parametros: {
                     Ancho: 290,
                     Dext: 498.05,
@@ -115,6 +121,7 @@ const montaje = [
         rodillos: [
             {
                 tipo_plano: 'FP_INF',
+                eje: 'INF',
                 parametros: {
                     Ancho: 290,
                     Dext: 491.765,
@@ -130,6 +137,7 @@ const montaje = [
             },
             {
                 tipo_plano: 'FP_SUP',
+                eje: 'SUP',
                 parametros: {
                     Ancho: 290,
                     Dext: 483.98,
@@ -156,6 +164,7 @@ const montaje = [
         rodillos: [
             {
                 tipo_plano: 'FP_INF',
+                eje: 'INF',
                 parametros: {
                     Ancho: 290,
                     Dext: 474.47,
@@ -171,6 +180,7 @@ const montaje = [
             },
             {
                 tipo_plano: 'FP_SUP',
+                eje: 'SUP',
                 parametros: {
                     Ancho: 290,
                     Dext: 472.65,
@@ -196,6 +206,7 @@ const montaje = [
         rodillos: [
             {
                 tipo_plano: 'W_Lat',
+                eje: 'LAT_OP',
                 parametros: {
                     Ancho: 210,
                     Df: 335,
@@ -208,6 +219,7 @@ const montaje = [
             },
             {
                 tipo_plano: 'W_Lat',
+                eje: 'LAT_MO',
                 parametros: {
                     Ancho: 210,
                     Df: 335,
@@ -220,6 +232,7 @@ const montaje = [
             },
             {
                 tipo_plano: 'W_Inf',
+                eje: 'INF',
                 parametros: {
                     Ancho: 140,
                     Df: 350,
