@@ -95,7 +95,25 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
                 }
               })
               .then(res => { 
-                alert('Plano guardado correctamente');
+                if(valorParametro){
+                    for(var x=0;x<=valorParametro.length;x++){
+                        axios.post(BACKEND_SERVER + `/api/rodillos/parametros/`, {
+                            nombre: valorParametro[x].nombre,
+                            revision: res.data.id,
+                            valor: valorParametro[x].valor,
+                        }, {
+                            headers: {
+                                'Authorization': `token ${token['tec-token']}`
+                                }     
+                        })
+                        .then( res => { 
+                            alert('Plano guardado correctamente');
+                        })
+                        .catch(err => { 
+                            console.error(err);
+                        });
+                    }
+                }
               })
               .catch(err => { 
                 console.error(err);

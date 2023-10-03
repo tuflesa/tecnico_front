@@ -24,10 +24,14 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [planos, setPlanos] = useState(null);
     const [valor_conjuntos, setValorConjuntos] = useState('');
     const [show, setShow] = useState(false);
+    //const [showParam, setShowParam] = useState(false);
     const [filaSeleccionada, setFilaSeleccionada] = useState(null);
     const [revisiones, setRevisiones] = useState(null);
+    const [valor_parametros, setValorParametros] = useState('');
+    const [parametros, setParametros] = useState('');
+    const [filaSeleccionadaParametros, setFilaSeleccionadaParametros] = useState(null);
     
-    const [show_parametros, setShowParametros] = useState(false);
+    const [show_plano, setShowPlano] = useState(false);
 
     const [datos, setDatos] = useState({
         empresa: rodillo.id?rodillo.operacion.seccion.maquina.empresa_id:'',
@@ -281,11 +285,11 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     }
 
     const añadirPlano = () => {
-        setShowParametros(true);
+        setShowPlano(true);
     }
 
     const cerrarParametros = () => {
-        setShowParametros(false);
+        setShowPlano(false);
     }
 
     const abrirConjuntos = (plano) => {        
@@ -297,6 +301,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         .then( res => {
             setRevisiones(res.data);
             setShow(!show);
+            console.log(valor_parametros);
                           
             if(show){
                 const tabla = (
@@ -305,6 +310,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                     <Table striped bordered hover>
                         <thead>
                             <tr>
+                                <th>Parametros</th>
                                 <th>Motivo</th>
                                 <th>Nombre</th>
                                 <th>Archivo</th>
@@ -314,20 +320,30 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                         <tbody>
                             {res.data && res.data.map( conjunto => {
                                 return (
-                                    <tr key={conjunto.id}>
-                                        <td>{conjunto.motivo}</td>
-                                        <td>{conjunto.plano}</td>
-                                        <td>
-                                            <a href={conjunto.archivo}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            title="Haz clic para abrir el PDF">
-                                            {conjunto.archivo}
-                                            </a>
-                                        </td>
-                                        
-                                        <td>{invertirFecha(String(conjunto.fecha))}</td>
-                                    </tr>
+                                    <React.Fragment key={conjunto.id}>
+                                        <tr key={conjunto.id}>
+                                            <td>
+                                                <button type="button" className="btn btn-default" value={conjunto.id} name='prueba2' onClick={event => {abrirParametros(conjunto.id)}}>--</button>
+                                            </td>
+                                            <td>{conjunto.motivo}</td>
+                                            <td>{conjunto.plano}</td>
+                                            <td>
+                                                <a href={conjunto.archivo}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                title="Haz clic para abrir el PDF">
+                                                {conjunto.archivo}
+                                                </a>
+                                            </td>
+                                            
+                                            <td>{invertirFecha(String(conjunto.fecha))}</td>
+                                        </tr>
+                                        {filaSeleccionadaParametros === conjunto.id && (
+                                            <tr>
+                                                <td colSpan="3">{valor_parametros}</td>
+                                            </tr>
+                                            )}
+                                    </React.Fragment>
                                 )})
                             }
                         </tbody>
@@ -341,6 +357,60 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 setValorConjuntos('');
                 setFilaSeleccionada('');
                 setRevisiones(null);
+            }
+        })
+        .catch( err => {
+            console.log(err);
+        });
+        
+        
+    };
+
+    const abrirParametros = (revision) => {        
+        axios.get(BACKEND_SERVER + `/api/rodillos/parametros/?revision=${revision}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+                }
+        })
+        .then( r => {
+            setParametros(r.data);
+            //setShowParam(true);
+            const showParam = true;
+            console.log(showParam);
+            console.log(r.data);
+                          
+            if(showParam){
+                console.log('dentro del if de showParam');
+                const tablaParam = (
+                    <div>
+                    <h2 style={{textAlign: 'center'}}>Parametros</h2>
+                    <Table striped bordered hover>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {r.data && r.data.map( p => {
+                                return (
+                                    <tr key={p.id}>
+                                        <td>{p.nombre}</td>
+                                        <td>{p.valor}</td>
+                                    </tr>
+                                )})
+                            }
+                        </tbody>
+                    </Table>
+                    </div>
+                );
+                setValorParametros(tablaParam);
+                setFilaSeleccionadaParametros(revision);
+            }
+            else{
+                setValorParametros('');
+                setFilaSeleccionadaParametros('');
+                setParametros(null);
             }
         })
         .catch( err => {
@@ -524,7 +594,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 <Table striped bordered hover>
                     <thead>
                         <tr>
-                            <th>Desplegable</th>
+                            <th>Planos</th>
                             <th>Código</th>
                             <th>Nombre</th>
                             <th>Acciones</th>
@@ -552,8 +622,9 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                         }
                     </tbody>
                 </Table>
-            :"No hay plano relacionados con este rodillo":null}
-            <PlanoForm show={show_parametros}
+            :"No hay planos relacionados con este rodillo":null}
+            
+            <PlanoForm show={show_plano}
                            handleCloseParametros={cerrarParametros}
                            tipo_seccion={datos.tipo_seccion}
                            tipo_rodillo={datos.tipo_rodillo}
