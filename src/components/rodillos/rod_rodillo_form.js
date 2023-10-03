@@ -70,7 +70,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 console.log(err);
             });
         }
-    }, [token]);
+    }, [token, rodillo]);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/rodillos/materiales/',{
@@ -139,6 +139,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         if(rodillo.id){
             if(datos.zona!=rodillo.operacion.seccion.maquina.id){
                 setOperaciones([]);
+                setSecciones([]);
+                setGrupos([]);
             }
         }
         if (datos.zona === '') {
@@ -162,7 +164,6 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 setSecciones(res.data);
                 if(!rodillo.id){
                     setOperaciones([]);
-                    setGrupos([]);
                     setDatos({
                         ...datos,
                         seccion: '',
@@ -174,51 +175,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             .catch( err => {
                 console.log(err);
             });
-        }
-    }, [token, datos.zona]);
 
-    useEffect(() => {
-        if (datos.seccion === ''){
-            setOperaciones([]);
-            setGrupos([]);
-            setDatos({
-                ...datos,
-                operacion: '',
-                grupo:'',
-            });
-        }
-        else{
-            axios.get(BACKEND_SERVER + `/api/rodillos/operacion/?seccion=${datos.seccion}`,{
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                }
-            })
-            .then( res => {
-                setOperaciones(res.data);
-                if(!rodillo.id){
-                    setGrupos([]);
-                    setDatos({
-                        ...datos,
-                        operacion: '',
-                        grupo:'',
-                    });
-                }
-            })
-            .catch( err => {
-                console.log(err);
-            });
-        }
-    }, [token, datos.seccion]);
-
-    useEffect(() => {
-        if (datos.zona === '') {
-            setGrupos([]);
-            setDatos({
-                ...datos,
-                grupo:'',
-            });
-        }
-        else {
             axios.get(BACKEND_SERVER + `/api/rodillos/grupo/?maquina=${datos.zona}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
@@ -235,6 +192,35 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             });
         }
     }, [token, datos.zona]);
+
+    useEffect(() => {
+        if (datos.seccion === ''){
+            setOperaciones([]);
+            setDatos({
+                ...datos,
+                operacion: '',
+            });
+        }
+        else{
+            axios.get(BACKEND_SERVER + `/api/rodillos/operacion/?seccion=${datos.seccion}`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }
+            })
+            .then( res => {
+                setOperaciones(res.data);
+                if(!rodillo.id){
+                    setDatos({
+                        ...datos,
+                        operacion: '',
+                    });
+                }
+            })
+            .catch( err => {
+                console.log(err);
+            });
+        }
+    }, [token, datos.seccion]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -503,7 +489,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                             name='grupo'
                                             onChange={handleInputChange}>
                                 <option key={0} value={''}>Todos</option>
-                                {grupos && grupos.map( grupo => {
+                                {grupos && grupos.map(grupo => {
                                     return (
                                     <option key={grupo.id} value={grupo.id}>
                                         {grupo.nombre}

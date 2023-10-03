@@ -195,7 +195,7 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
                                                     value={datos.tipo_plano}
                                                     name='tipo_plano'
                                                     onChange={handleInputChange}
-                                                    disabled={rodillo_tipo_plano!==''}>
+                                                    disabled={rodillo_tipo_plano!==null}>
                                         <option key={0} value={0}>Todos</option>
                                         {tipo_plano && tipo_plano.map( tipo => {
                                             return (
