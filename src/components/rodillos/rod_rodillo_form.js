@@ -25,6 +25,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [valor_conjuntos, setValorConjuntos] = useState('');
     const [show, setShow] = useState(false);
     const [showParam, setShowParam] = useState(false);
+    const [showParamNot, setShowParamNot] = useState(false);
     const [filaSeleccionada, setFilaSeleccionada] = useState(null);
     const [revisiones, setRevisiones] = useState(null);
     const [valor_parametros, setValorParametros] = useState('');
@@ -372,7 +373,11 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         })
         .then( r => {
             setParametros(r.data);
-            setShowParam(true);            
+            if(r.data.length!==0) 
+                {setShowParam(true);}            
+            else{
+                {setShowParamNot(true);}  
+            }
         })
         .catch( err => {
             console.log(err);
@@ -383,6 +388,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
 
     const handlerClose = () => {
         setShowParam(false);
+        setShowParamNot(false);
     }
 
     return (
@@ -613,6 +619,20 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                 }
                             </tbody>
                         </Table>
+                </Modal.Body>
+
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handlerClose}>Cerrar</Button>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal show={showParamNot} onHide={handlerClose} backdrop="static" keyboard={ false } animation={false} centered>
+                <Modal.Header>
+                    <Modal.Title>Parametros</Modal.Title>
+                </Modal.Header>
+
+                <Modal.Body>
+                    <p>No tenemos parametros para esta revisión.</p>
                 </Modal.Body>
 
                 <Modal.Footer>
