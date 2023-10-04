@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
-import { Button, Form, Col, Row, Table } from 'react-bootstrap';
+import { Button, Form, Col, Row, Table, Modal } from 'react-bootstrap';
 import { PlusCircle} from 'react-bootstrap-icons';
 import PlanoForm from './rod_plano_nuevo';
 import { Link } from 'react-router-dom';
@@ -24,7 +24,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [planos, setPlanos] = useState(null);
     const [valor_conjuntos, setValorConjuntos] = useState('');
     const [show, setShow] = useState(false);
-    //const [showParam, setShowParam] = useState(false);
+    const [showParam, setShowParam] = useState(false);
     const [filaSeleccionada, setFilaSeleccionada] = useState(null);
     const [revisiones, setRevisiones] = useState(null);
     const [valor_parametros, setValorParametros] = useState('');
@@ -300,9 +300,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         })
         .then( res => {
             setRevisiones(res.data);
-            setShow(!show);
-            console.log(valor_parametros);
-                          
+            setShow(!show);                          
             if(show){
                 const tabla = (
                     <div>
@@ -342,7 +340,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                             <tr>
                                                 <td colSpan="3">{valor_parametros}</td>
                                             </tr>
-                                            )}
+                                        )}
                                     </React.Fragment>
                                 )})
                             }
@@ -374,44 +372,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         })
         .then( r => {
             setParametros(r.data);
-            //setShowParam(true);
-            const showParam = true;
-            console.log(showParam);
-            console.log(r.data);
-                          
-            if(showParam){
-                console.log('dentro del if de showParam');
-                const tablaParam = (
-                    <div>
-                    <h2 style={{textAlign: 'center'}}>Parametros</h2>
-                    <Table striped bordered hover>
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Valor</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {r.data && r.data.map( p => {
-                                return (
-                                    <tr key={p.id}>
-                                        <td>{p.nombre}</td>
-                                        <td>{p.valor}</td>
-                                    </tr>
-                                )})
-                            }
-                        </tbody>
-                    </Table>
-                    </div>
-                );
-                setValorParametros(tablaParam);
-                setFilaSeleccionadaParametros(revision);
-            }
-            else{
-                setValorParametros('');
-                setFilaSeleccionadaParametros('');
-                setParametros(null);
-            }
+            setShowParam(true);            
         })
         .catch( err => {
             console.log(err);
@@ -419,6 +380,10 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         
         
     };
+
+    const handlerClose = () => {
+        setShowParam(false);
+    }
 
     return (
         <Container className='mt-5 pt-1'>
@@ -623,6 +588,37 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                     </tbody>
                 </Table>
             :"No hay planos relacionados con este rodillo":null}
+
+            <Modal show={showParam} onHide={handlerClose} backdrop="static" keyboard={ false } animation={false}>
+                <Modal.Header>
+                    <Modal.Title>Parametros</Modal.Title>
+                </Modal.Header>
+
+                <Modal.Body>
+                        <Table striped bordered hover>
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Valor</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {parametros && parametros.map( p => {
+                                    return (
+                                        <tr key={p.id}>
+                                            <td>{p.nombre}</td>
+                                            <td>{p.valor}</td>
+                                        </tr>
+                                    )})
+                                }
+                            </tbody>
+                        </Table>
+                </Modal.Body>
+
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handlerClose}>Cerrar</Button>
+                </Modal.Footer>
+            </Modal>
             
             <PlanoForm show={show_plano}
                            handleCloseParametros={cerrarParametros}
