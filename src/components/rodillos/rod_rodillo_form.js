@@ -565,7 +565,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 <Table striped bordered hover>
                     <thead>
                         <tr>
-                            <th>Planos</th>
+                            <th>Revisiones</th>
                             <th>Código</th>
                             <th>Nombre</th>
                             <th>Acciones</th>

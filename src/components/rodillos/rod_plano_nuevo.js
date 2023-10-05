@@ -95,6 +95,7 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
                 }
               })
               .then(res => { 
+                alert('Plano guardado correctamente');
                 if(valorParametro){
                     for(var x=0;x<=valorParametro.length;x++){
                         axios.post(BACKEND_SERVER + `/api/rodillos/parametros/`, {
@@ -107,7 +108,7 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
                                 }     
                         })
                         .then( res => { 
-                            alert('Plano guardado correctamente');
+                            console.log('parametros guardados');
                         })
                         .catch(err => { 
                             console.error(err);
@@ -139,7 +140,6 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
         })
         }
         handlerCancelar();
-
     }
 
     const handleValorChange = (parametroId, nuevoValor)=> {

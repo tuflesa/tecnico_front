@@ -6,11 +6,12 @@ import { useCookies } from 'react-cookie';
 
 const RodListaFiltro = ({actualizaFiltro}) => {
     const [token] = useCookies(['tec-token']);
+    const [user] = useCookies(['tec-user']);
 
     const [datos, setDatos] = useState({
         id:'',
         nombre: '',
-        empresa: '',
+        empresa: user['tec-user'].perfil.empresa.id,
         maquina: '',
         seccion: '',
         operacion: '',
@@ -130,7 +131,7 @@ const RodListaFiltro = ({actualizaFiltro}) => {
     }, [token, datos.seccion]);
     
     useEffect(()=>{
-        const filtro = `?nombre__icontains=${datos.nombre}&id=${datos.id}&tipo=${datos.tipo_rodillo}&operacion__seccion__maquina__empresa__id=${datos.empresa}&operacion__seccion__maquina=${datos.maquina}&operacion__seccion=${datos.seccion}&operacion__id=${datos.operacion}`
+        const filtro = `?operacion__seccion__maquina__empresa__id=${datos.empresa}&nombre__icontains=${datos.nombre}&id=${datos.id}&tipo=${datos.tipo_rodillo}&operacion__seccion__maquina=${datos.maquina}&operacion__seccion=${datos.seccion}&operacion__id=${datos.operacion}`
         actualizaFiltro(filtro);
     },[datos]);
 
