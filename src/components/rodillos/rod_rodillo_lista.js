@@ -14,7 +14,7 @@ const RodLista = () => {
     const [count, setCount] = useState(null);
     const [lista_rodillos, setListaRodillos] = useState(null);
     const [filtro, setFiltro] = useState(`?operacion__seccion__maquina__empresa__id=${user['tec-user'].perfil.empresa.id}`);
-    const [filtroPag, setFiltroPag] = useState(`?page=${1}`);
+    const [filtroPag, setFiltroPag] = useState(`&page=${1}`);
     const [filtroII, setFiltroII] = useState(``);
     //let filtroPag=(null);
 

@@ -97,7 +97,7 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
               .then(res => { 
                 alert('Plano guardado correctamente');
                 if(valorParametro){
-                    for(var x=0;x<=valorParametro.length;x++){
+                    for(var x=0;x<valorParametro.length;x++){
                         axios.post(BACKEND_SERVER + `/api/rodillos/parametros/`, {
                             nombre: valorParametro[x].nombre,
                             revision: res.data.id,
@@ -240,7 +240,7 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
                             <Col>
                                 <form encType='multipart/form-data'>
                                     <Form.Group controlId="archivo">
-                                        <Form.Label>Archivo</Form.Label>
+                                        <Form.Label>Archivo *</Form.Label>
                                         <Form.Control type="file"  
                                                     name='archivo' 
                                                     onChange={handleInputChange_archivo}>  

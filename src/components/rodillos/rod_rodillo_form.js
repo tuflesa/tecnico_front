@@ -4,10 +4,11 @@ import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
 import { Button, Form, Col, Row, Table, Modal } from 'react-bootstrap';
-import { PlusCircle} from 'react-bootstrap-icons';
+import { PlusCircle, Clipboard} from 'react-bootstrap-icons';
 import PlanoForm from './rod_plano_nuevo';
 import { Link } from 'react-router-dom';
 import {invertirFecha} from '../utilidades/funciones_fecha';
+import RodRevisionForm from './rod_revision_form';
 
 
 const RodRodilloForm = ({rodillo, setRodillo}) => {
@@ -31,6 +32,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [valor_parametros, setValorParametros] = useState('');
     const [parametros, setParametros] = useState('');
     const [filaSeleccionadaParametros, setFilaSeleccionadaParametros] = useState(null);
+    const [plano_id, setPlano_id] = useState(null);
+    const [showRevision, setShowRevision] = useState(false);
     
     const [show_plano, setShowPlano] = useState(false);
 
@@ -391,6 +394,11 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         setShowParamNot(false);
     }
 
+    const NuevaRevision = (plano) => {
+        setPlano_id(plano);
+        setShowRevision(true);
+    }
+
     return (
         <Container className='mt-5 pt-1'>
             {rodillo.length===0?
@@ -581,7 +589,9 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                         </td>
                                         <td>{plano.id}</td>
                                         <td>{plano.nombre}</td>
-                                        <td>{'acciones'}</td>
+                                        <td>
+                                            <Clipboard className="mr-3 pencil" onClick={event => {NuevaRevision(plano.id)}}/>                                                        
+                                        </td>
                                     </tr>
                                     {filaSeleccionada === plano.id && (
                                         <tr>
@@ -646,6 +656,15 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                            tipo_rodillo={datos.tipo_rodillo}
                            rodillo_id={rodillo.id}
                            rodillo_tipo_plano={datos.tipo_plano}/>
+            
+            <RodRevisionForm showRev={showRevision}
+                           plano_id={plano_id}
+                           setShowRevision={setShowRevision}
+                           show_revision={showRevision}
+                           tipo_plano_id={datos.tipo_plano}
+                           setParametros={setParametros}
+                           parametros={parametros}/>
+
         </Container>
     );
 }
