@@ -355,50 +355,54 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
                 x2 = x1 + fleje.espesor*Math.sin(alfa_c);
                 y2 = y1 - fleje.espesor*Math.cos(alfa_c);
             }
-            // console.log('alfa_c: ', alfa_c*180/Math.PI);
 
-            // Desarrollo
-            // console.log('R4: ', R4);
-            // console.log('alfa3:', alfa3*180/Math.PI);
             const Desarrollo = R1*alfa1 + 2*R2*((Math.PI-alfa1)/2 - alfa3) + 2*R4*(2*alfa3) + 2*R2_s*(alfa2_s-alfa3_s) + 2*R1_s*(alfa1_s/2-alfa_c);
             console.log(m.nombre + ' desarrollo: ', Desarrollo); 
 
-            // Centro de masas
-            
+            let gap = -1; // Solo dibujamos si los rodillos no se tocan
+            console.log(ejes);
+            console.log(m);
+            if (ejes&&m) {
+                const eje_inf = ejes.filter(e => e.op == m.operacion)[0].pos['INF'];
+                const eje_sup = ejes.filter(e => e.op == m.operacion)[0].pos['SUP'];
+                const Di = m.rodillos.filter(r => r.eje == 'INF')[0].parametros['Dext'];
+                const Ds = m.rodillos.filter(r => r.eje == 'SUP')[0].parametros['Dext'];
+                gap = eje_sup + eje_inf - (Ds + Di)/2;
+            }
 
-            // Dibujo
             const r = path();
-            r.arc(xScale(xc), yScale(yc), rScale(R1), (Math.PI - alfa1)/2, (Math.PI + alfa1)/2);
-            r.arc(xScale(xc2), yScale(yc2), rScale(R2), (Math.PI+alfa1)/2, Math.PI - alfa3);
-            r.arc(xScale(xcr), yScale(ycr), rScale(R4), Math.PI - alfa3, Math.PI + alfa3); 
-            r.arc(xScale(xc2_s), yScale(yc2_s), rScale(R2_s), Math.PI + alfa3_s, Math.PI + alfa2_s);
-            if(R1_s!==0){
-                r.arc(xScale(xc1_s), yScale(yc1_s), rScale(R1_s), Math.PI + alfa2_s, (3*Math.PI/2) - alfa_c);
-                r.lineTo(xScale(x2), yScale(y2));
-                r.arc(xScale(xc1_s), yScale(yc1_s), rScale(R1_s-fleje.espesor), 3*Math.PI/2 - alfa_c, Math.PI + alfa2_s, true);
+            if (gap > 0.0) {
+                r.arc(xScale(xc), yScale(yc), rScale(R1), (Math.PI - alfa1)/2, (Math.PI + alfa1)/2);
+                r.arc(xScale(xc2), yScale(yc2), rScale(R2), (Math.PI+alfa1)/2, Math.PI - alfa3);
+                r.arc(xScale(xcr), yScale(ycr), rScale(R4), Math.PI - alfa3, Math.PI + alfa3); 
+                r.arc(xScale(xc2_s), yScale(yc2_s), rScale(R2_s), Math.PI + alfa3_s, Math.PI + alfa2_s);
+                if(R1_s!==0){
+                    r.arc(xScale(xc1_s), yScale(yc1_s), rScale(R1_s), Math.PI + alfa2_s, (3*Math.PI/2) - alfa_c);
+                    r.lineTo(xScale(x2), yScale(y2));
+                    r.arc(xScale(xc1_s), yScale(yc1_s), rScale(R1_s-fleje.espesor), 3*Math.PI/2 - alfa_c, Math.PI + alfa2_s, true);
+                }
+                else{
+                    r.lineTo(xScale(x2), yScale(y2));
+                }
+                r.arc(xScale(xc2_s), yScale(yc2_s), rScale(R2_s-fleje.espesor), Math.PI + alfa2_s, Math.PI + alfa3_s, true);
+                r.arc(xScale(xcr), yScale(ycr), rScale(R4-fleje.espesor), Math.PI + alfa3 , Math.PI - alfa3, true);
+                r.arc(xScale(xc2), yScale(yc2), rScale(R2-fleje.espesor), Math.PI - alfa3, (Math.PI+alfa1)/2, true);
+                r.arc(xScale(xc), yScale(yc), rScale(R1-fleje.espesor), (Math.PI + alfa1)/2, (Math.PI - alfa1)/2, true);
+                r.arc(xScale(-xc2), yScale(yc2), rScale(R2-fleje.espesor), (Math.PI-alfa1)/2, alfa3, true);
+                r.arc(xScale(-xcr), yScale(ycr), rScale(R4-fleje.espesor), alfa3 , - alfa3 , true);
+                r.arc(xScale(-xc2_s), yScale(yc2_s), rScale(R2_s-fleje.espesor), -alfa3_s, -alfa2_s, true);
+                if(R1_s!==0){
+                    r.arc(xScale(-xc1_s), yScale(yc1_s), rScale(R1_s-fleje.espesor), -alfa2_s, 3*Math.PI/2+ alfa_c,true);
+                    r.lineTo(xScale(-x1), yScale(y1));
+                    r.arc(xScale(-xc1_s), yScale(yc1_s), rScale(R1_s), 3*Math.PI/2+ alfa_c, -alfa2_s);
+                }
+                else{
+                    r.lineTo(xScale(-x1), yScale(y1));
+                }
+                r.arc(xScale(-xc2_s), yScale(yc2_s), rScale(R2_s), -alfa2_s, -alfa3_s,);
+                r.arc(xScale(-xcr), yScale(ycr), rScale(R4), -alfa3 ,  alfa3);
+                r.arc(xScale(-xc2), yScale(yc2), rScale(R2), alfa3, (Math.PI-alfa1)/2);
             }
-            else{
-                r.lineTo(xScale(x2), yScale(y2));
-            }
-            r.arc(xScale(xc2_s), yScale(yc2_s), rScale(R2_s-fleje.espesor), Math.PI + alfa2_s, Math.PI + alfa3_s, true);
-            r.arc(xScale(xcr), yScale(ycr), rScale(R4-fleje.espesor), Math.PI + alfa3 , Math.PI - alfa3, true);
-            r.arc(xScale(xc2), yScale(yc2), rScale(R2-fleje.espesor), Math.PI - alfa3, (Math.PI+alfa1)/2, true);
-            r.arc(xScale(xc), yScale(yc), rScale(R1-fleje.espesor), (Math.PI + alfa1)/2, (Math.PI - alfa1)/2, true);
-            r.arc(xScale(-xc2), yScale(yc2), rScale(R2-fleje.espesor), (Math.PI-alfa1)/2, alfa3, true);
-            r.arc(xScale(-xcr), yScale(ycr), rScale(R4-fleje.espesor), alfa3 , - alfa3 , true);
-            r.arc(xScale(-xc2_s), yScale(yc2_s), rScale(R2_s-fleje.espesor), -alfa3_s, -alfa2_s, true);
-            if(R1_s!==0){
-                r.arc(xScale(-xc1_s), yScale(yc1_s), rScale(R1_s-fleje.espesor), -alfa2_s, 3*Math.PI/2+ alfa_c,true);
-                r.lineTo(xScale(-x1), yScale(y1));
-                r.arc(xScale(-xc1_s), yScale(yc1_s), rScale(R1_s), 3*Math.PI/2+ alfa_c, -alfa2_s);
-            }
-            else{
-                r.lineTo(xScale(-x1), yScale(y1));
-            }
-            r.arc(xScale(-xc2_s), yScale(yc2_s), rScale(R2_s), -alfa2_s, -alfa3_s,);
-            r.arc(xScale(-xcr), yScale(ycr), rScale(R4), -alfa3 ,  alfa3);
-            r.arc(xScale(-xc2), yScale(yc2), rScale(R2), alfa3, (Math.PI-alfa1)/2);
- 
             return r.toString()
         }
         

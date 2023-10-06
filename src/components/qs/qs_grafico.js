@@ -5,7 +5,7 @@ import FlowerChart from "./qs_flor_chart";
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
-import {montaje, fleje} from './Grupo_90';
+import {montaje, fleje} from './Grupo_70';
 
 // const ejes = [{op:1, pos: [174, 343.57]},
 //               {op:2, pos: [177.91, 340.49]},
@@ -15,12 +15,13 @@ import {montaje, fleje} from './Grupo_90';
 //               {op:7, pos: [255.65, 255.65, 263.15]}
 //             ]; 
 
-const QS_Grafico = () => {
+const QS_Grafico = () => { 
     const [token] = useCookies(['tec-token']);
 
     const [OP, setOP] = useState(1);
     const [ejes, setEjes] = useState(null);
     const [posiciones, SetPosiciones] = useState(null);
+    const [gap, setGap] = useState(null);
     const [simulador, setSimulador] = useState(false);
     const [ejesSim, setEjesSim] = useState(null);
     const [datos, setDatos] = useState(null);
@@ -56,9 +57,15 @@ const QS_Grafico = () => {
 
     useEffect(()=>{
         const pos = [];
+        let eje_sup;
+        let eje_inf;
+        let Ds;
+        let Di;
+        let gap;
+        let piston;
+        const gap_list = [];
         if (ejes && ejesSim && montaje){
-            console.log('ejes: ', ejes);
-            console.log('ejes sim: ', ejesSim);
+            // Calculo de posiciones
             montaje.map(m => {
                 const line = [];
                 m.rodillos.map((r,i) =>{
@@ -72,22 +79,52 @@ const QS_Grafico = () => {
                     op: m.operacion,
                     posiciones: line
                 });
+                // Calculo del gap y amortiguación entre rodillos
+                switch (m.tipo.slice(0,2)) {
+                    case 'BD':
+                        piston = 60;
+                        eje_inf = simulador ? ejesSim[m.operacion-1].pos['INF'] : ejes[m.operacion-1].pos['INF'];
+                        eje_sup = simulador ? ejesSim[m.operacion-1].pos['SUP'] : ejes[m.operacion-1].pos['SUP'];
+                        Di = m.rodillos.filter(r => r.eje == 'INF')[0].parametros['Df'];
+                        Ds = m.rodillos.filter(r => r.eje == 'SUP')[0].parametros['Df'];
+                        gap = eje_sup + eje_inf - (Ds + Di)/2;
+                        if (gap < fleje.espesor) {
+                            piston = 60 - fleje.espesor + gap;
+                            gap = fleje.espesor;
+                        }
+                        break;
+                    case 'FP':
+                        piston = null;
+                        eje_inf = simulador ? ejesSim[m.operacion-1].pos['INF'] : ejes[m.operacion-1].pos['INF'];
+                        eje_sup = simulador ? ejesSim[m.operacion-1].pos['SUP'] : ejes[m.operacion-1].pos['SUP'];
+                        Di = m.rodillos.filter(r => r.eje == 'INF')[0].parametros['Dext'];
+                        Ds = m.rodillos.filter(r => r.eje == 'SUP')[0].parametros['Dext'];
+                        gap = eje_sup + eje_inf - (Ds + Di)/2;
+                        break;
+                    default:
+                        gap = null;
+                        piston = null;
+                        break;
+                }
+                gap_list.push({
+                    op: m.operacion,
+                    gap: gap,
+                    piston: piston
+                });
             });
-            console.log(pos);
             SetPosiciones(pos);
+            console.log(gap_list);
+            setGap(gap_list);
         }
-    },[montaje, ejes, ejesSim]);
+    },[montaje, ejes, ejesSim, simulador]);
 
     useEffect(()=>{
         if (simulador) {
             const dat = {};
-            console.log(posiciones);
             console.log('copiar posición de ejes simulados en datos ' + OP);
             posiciones.filter(p => p.op == OP)[0].posiciones.map(p => {
-                console.log(p.eje + ' ' + p.pos_sim);
-                dat[p.eje] =  p.pos_sim;
+                dat[p.eje] =  parseFloat(p.pos_sim).toFixed(2);
             });
-            console.log(dat);
             setDatos(dat);
         }
     }, [simulador, OP]);
@@ -108,8 +145,6 @@ const QS_Grafico = () => {
             const Df = r.parametros['Df'];
             temp[OP-1].pos[r.eje] = parseFloat(datos[r.eje]) + Df/2; 
         });
-        console.log('temp: ', temp);
-        console.log('ejes: ', ejes);
         setEjesSim(temp);
     }
 
@@ -147,13 +182,35 @@ return (
                                 />
                             </Col>
                         </Row>
-                        <Row>
-                            {simulador&&posiciones&&posiciones.filter(p => p.op==OP)[0].posiciones.map((p,i) => {
+                    </Form>
+                </Row>
+                <Row>
+                    <Col className="col-6">
+                        <StandChart montaje={montaje.filter(m => m.operacion == OP)}
+                                    ejes={simulador ? ejesSim&&ejesSim.filter(e => e.op == OP)[0].pos : ejes&&ejes.filter(e => e.op == OP)[0].pos}
+                                    posiciones={posiciones&&posiciones.filter(p => p.op==OP)[0].posiciones}
+                                    simulador={simulador}
+                                    gap = {gap&&gap.filter(g => g.op == OP)}
+                                    fleje={fleje}/>  
+                                    
+                                     
+                    </Col>
+                    <Col className="col-6">
+                        <FlowerChart montaje={montaje}
+                                     ejes={simulador ? ejesSim : ejes}
+                                     fleje={fleje}/>
+                    </Col>
+                </Row> 
+                <Form>
+                    <Row>
+                        <Col className="col-6">
+                            <Row>
+                                {simulador&&posiciones&&posiciones.filter(p => p.op==OP)[0].posiciones.map((p,i) => {
                                     return (
-                                        <Col  key={i}>
+                                        <Col  key={i} className="col-3">
                                             <Form.Group controlId={p.eje}>
                                                 <Form.Label>{p.eje}</Form.Label>
-                                                <Form.Control type="text" 
+                                                <Form.Control type="number" 
                                                             name={p.eje} 
                                                             value={datos&&datos[p.eje]}
                                                             onChange={handleDataChange} 
@@ -164,30 +221,17 @@ return (
                                         </Col>
                                     )
                                 })}
-                        </Row>
-                        <Row>
-                            <Col>
-                                {simulador ?  <Button variant="info" type="submit" className={'mx-2'} onClick={simular}>Simular</Button>
-                                                 : 
-                                              <Button variant="info" type="submit" className={'mx-2'} onClick={leerEjes}>Leer</Button>}
-                            </Col>
-                        </Row>
-                    </Form>
-                </Row>
-                <Row>
-                    <Col className="col-6">
-                        <StandChart montaje={montaje.filter(m => m.operacion == OP)}
-                                    ejes={simulador ? ejesSim&&ejesSim.filter(e => e.op == OP)[0].pos : ejes&&ejes.filter(e => e.op == OP)[0].pos}
-                                    posiciones={posiciones&&posiciones.filter(p => p.op==OP)[0].posiciones}
-                                    simulador={simulador}
-                                    fleje={fleje}/>   
-                    </Col>
-                    <Col className="col-6">
-                        <FlowerChart montaje={montaje}
-                                     ejes={simulador ? ejesSim : ejes}
-                                     fleje={fleje}/>
-                    </Col>
-                </Row> 
+                            </Row>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col className="col-6">
+                            {simulador ?  <Button variant="info" type="submit" className={'mx-2'} onClick={simular}>Simular</Button>
+                                            : 
+                                          <Button variant="info" type="submit" className={'mx-2'} onClick={leerEjes}>Leer</Button>}
+                        </Col>
+                    </Row>
+                </Form>
             </Container>
         </React.Fragment>
     )

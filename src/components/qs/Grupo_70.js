@@ -66,15 +66,15 @@ const montaje = [
                 tipo_plano: 'FP_INF',
                 eje: 'INF',
                 parametros: {
-                    Ancho: 150,
-                    Dext: 390.39,
-                    Df: 288.5,
-                    Dc: 392.39,
-                    R1: 41.828,
+                    Ancho: 120,
+                    Dext: 408.327,
+                    Df: 330,
+                    Dc: 410.327,
+                    R1: 32.348,
                     alfa1: 120,
-                    R2: 62.038,
+                    R2: 47.979,
                     alfa2: 30,
-                    R3: 186.115,
+                    R3: 143.937,
                     alfa3: 10.612
                 }
             },
@@ -82,18 +82,18 @@ const montaje = [
                 tipo_plano: 'FP_SUP',
                 eje: 'SUP',
                 parametros: {
-                    Ancho: 150,
-                    Dext: 386.53,
-                    Df: 288.5,
-                    Dc: 388.53,
+                    Ancho: 120,
+                    Dext: 405.361,
+                    Df: 330,
+                    Dc: 407.361,
                     R1: 0,
                     alfa1: 0,
-                    R2: 62.038,
+                    R2: 47.979,
                     alfa2: 53.73,
-                    R3: 186.115,
+                    R3: 143.937,
                     alfa3: 10.612,
-                    Cuchilla: 38.4,
-                    D_cuchilla: 320
+                    Cuchilla: 29.7,
+                    D_cuchilla: 350
                 },
             }
         ]   
@@ -108,15 +108,15 @@ const montaje = [
                 tipo_plano: 'FP_INF',
                 eje: 'INF',
                 parametros: {
-                    Ancho: 150,
-                    Dext: 375.95,
-                    Df: 282,
-                    Dc: 377.95,
-                    R1: 43.844,
+                    Ancho: 120,
+                    Dext: 402.986,
+                    Df: 330,
+                    Dc: 404.986,
+                    R1: 33.908,
                     alfa1: 120,
-                    R2: 53.116,
+                    R2: 41.078,
                     alfa2: 30,
-                    R3: 159.347,
+                    R3: 123.234,
                     alfa3: 11.584
                 }
             },
@@ -124,18 +124,18 @@ const montaje = [
                 tipo_plano: 'FP_SUP',
                 eje: 'SUP',
                 parametros: {
-                    Ancho: 190,
-                    Dext: 373.14,
-                    Df: 282,
-                    Dc: 375.14,
-                    R1: 43.844,
+                    Ancho: 120,
+                    Dext: 400.031,
+                    Df: 330,
+                    Dc: 402.031,
+                    R1: 33.908,
                     alfa1: 120,
-                    R2: 53.116,
+                    R2: 41.078,
                     alfa2: 30,
-                    R3: 159.347,
+                    R3: 123.234,
                     alfa3: 11.584,
-                    Cuchilla: 25.6,
-                    D_cuchilla: 320
+                    Cuchilla: 19.8,
+                    D_cuchilla: 350
                 },
                 
             }
@@ -151,15 +151,15 @@ const montaje = [
                 tipo_plano: 'FP_INF',
                 eje: 'INF',
                 parametros: {
-                    Ancho: 150,
-                    Dext: 370.48,
-                    Df: 284,
-                    Dc: 372.48,
-                    R1: 46.052,
+                    Ancho: 120,
+                    Dext: 396.427,
+                    Df: 330,
+                    Dc: 398.427,
+                    R1: 35.615,
                     alfa1: 120,
-                    R2: 42.427,
+                    R2: 32.811,
                     alfa2: 30,
-                    R3: 127.28,
+                    R3: 98.434,
                     alfa3: 13.262
                 }
             },
@@ -167,18 +167,18 @@ const montaje = [
                 tipo_plano: 'FP_SUP',
                 eje: 'SUP',
                 parametros: {
-                    Ancho: 190,
-                    Dext: 369.58,
-                    Df: 284,
-                    Dc: 371.58,
-                    R1: 46.052,
+                    Ancho: 120,
+                    Dext: 395.735,
+                    Df: 330,
+                    Dc: 397.735,
+                    R1: 35.615,
                     alfa1: 120,
-                    R2: 42.427,
+                    R2: 32.811,
                     alfa2: 30,
-                    R3: 127.28,
+                    R3: 98.434,
                     alfa3: 13.262,
-                    Cuchilla: 12.8,
-                    D_cuchilla: 310
+                    Cuchilla: 9.9,
+                    D_cuchilla: 350
                 }
             }
         ]   
@@ -186,62 +186,40 @@ const montaje = [
     {
         operacion: 7,
         color: 'lime',
-        tipo: 'W',
+        tipo: 'W-4', // Configuración de 4 rodillos de soldadura
         nombre: 'Welding',
         rodillos: [
             {
                 tipo_plano: 'W_Lat',
                 eje: 'LAT_OP',
                 parametros: {
-                    Ancho: 120,
-                    Df: 420,
-                    R1: 45.65,
-                    alfa1: 120,
+                    Ancho: 100,
+                    Df: 430,
+                    R1: 35.5,
                     R2: 2,
-                    alfa2: 7,
-                    C: 2.5
+                    alfa2: 10,
+                    C: 2
                 }
             },
             {
                 tipo_plano: 'W_Lat',
                 eje: 'LAT_MO',
                 parametros: {
-                    Ancho: 120,
-                    Df: 420,
-                    R1: 45.65,
-                    alfa1: 120,
+                    Ancho: 100,
+                    Df: 430,
+                    R1: 35.5,
                     R2: 2,
-                    alfa2: 7,
-                    C: 2.5
-                }
-            },
-            {
-                tipo_plano: 'W_Inf',
-                eje: 'INF',
-                parametros: {
-                    Ancho: 90,
-                    Df: 435,
-                    R1: 45.65,
-                    alfa1: 60,
-                    R2: 2,
-                    alfa2: 7,
-                    C: 2.5
+                    alfa2: 10,
+                    C: 2
                 }
             }
         ]
     }
 ]
 
-// const ejes = [{op:1, pos: [174, 343.57]},
-//               {op:2, pos: [177.91, 340.49]},
-//               {op:4, pos: [207.01, 201.08]},
-//               {op:5, pos: [206.43, 197.73]},
-//               {op:6, pos: [201.79, 187.88]},
-//               {op:7, pos: [255.65, 255.65, 263.15]}
-//             ]; 
 const fleje = {
-    espesor: 5.8,
-    ancho: 273,
+    espesor: 7,
+    ancho: 206,
     calidad: 'S350',
     color: 'aqua'
 }
