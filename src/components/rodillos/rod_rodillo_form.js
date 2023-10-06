@@ -1,10 +1,10 @@
-import { Container } from 'react-bootstrap';
+import { Alert, Container } from 'react-bootstrap';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
 import { Button, Form, Col, Row, Table, Modal } from 'react-bootstrap';
-import { PlusCircle, Clipboard} from 'react-bootstrap-icons';
+import { PlusCircle, Clipboard, Trash} from 'react-bootstrap-icons';
 import PlanoForm from './rod_plano_nuevo';
 import { Link } from 'react-router-dom';
 import {invertirFecha} from '../utilidades/funciones_fecha';
@@ -389,6 +389,23 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         
     };
 
+    const eliminarPlano = (plano) => {        
+        var confirmacion = window.confirm('¿Confirma que desea eliminar plano, con sus revisiones y parámetros?');
+        if(confirmacion){
+            axios.delete(BACKEND_SERVER + `/api/rodillos/plano/${plano}`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                    }
+            })
+            .then( res => {
+                Alert('Plano y revisiones eliminados correctamente');
+            })
+            .catch( err => {
+                console.log(err);
+            });
+        }        
+    };
+
     const handlerClose = () => {
         setShowParam(false);
         setShowParamNot(false);
@@ -590,7 +607,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                         <td>{plano.id}</td>
                                         <td>{plano.nombre}</td>
                                         <td>
-                                            <Clipboard className="mr-3 pencil" onClick={event => {NuevaRevision(plano.id)}}/>                                                        
+                                            <Clipboard className="mr-3 pencil" onClick={event => {NuevaRevision(plano.id)}}/>   
+                                            <Trash className="mr-3 pencil" onClick={event => {eliminarPlano(plano.id)}}/>                                                      
                                         </td>
                                     </tr>
                                     {filaSeleccionada === plano.id && (
