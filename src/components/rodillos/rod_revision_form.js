@@ -55,7 +55,7 @@ const RodRevisionForm = ({plano_id, show, setShowRevision, show_revision, tipo_p
             }
             })
             .then(res => { 
-                alert('Plano guardado correctamente');
+                alert('Revisión guardada correctamente');
                 window.location.href = `/rodillos/editar/${rodillo_id}`;
                 if(valorParametro){
                     for(var x=0;x<valorParametro.length;x++){

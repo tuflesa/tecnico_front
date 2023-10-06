@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
-import { Modal, Button, Form, Col, Row, Tab, Tabs, ListGroup } from 'react-bootstrap';
+import { Modal, Button, Form, Col, Row, Tab, Tabs, ListGroup, Alert } from 'react-bootstrap';
 
 
 const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rodillo_id, rodillo_tipo_plano}) => {
@@ -72,75 +72,83 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
     }
 
     const GuardarPlano = () =>{;
-        var newRodillos=[];
-        newRodillos = [parseInt(rodillo_id)]
-        axios.post(BACKEND_SERVER + `/api/rodillos/plano_nuevo/`, {
-            nombre: datos.nombre,
-            rodillos: newRodillos,
-        }, {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-                }     
-        })
-        .then( res => { 
-            const formData = new FormData();
-                formData.append('plano', res.data.id);
-                formData.append('motivo', datos.motivo);
-                formData.append('archivo', archivo); // Aquí asumiendo que 'archivo' es el archivo seleccionado.
-                formData.append('fecha', datos.fecha);
-            axios.post(BACKEND_SERVER + `/api/rodillos/revision_plano/`, formData, {
-                headers: {
-                  'Content-Type': 'multipart/form-data',
-                  'Authorization': `token ${token['tec-token']}`
-                }
-              })
-              .then(res => { 
-                alert('Plano guardado correctamente');
-                window.location.href = `/rodillos/editar/${rodillo_id}`;
-                if(valorParametro){
-                    for(var x=0;x<valorParametro.length;x++){
-                        axios.post(BACKEND_SERVER + `/api/rodillos/parametros/`, {
-                            nombre: valorParametro[x].nombre,
-                            revision: res.data.id,
-                            valor: valorParametro[x].valor,
-                        }, {
-                            headers: {
-                                'Authorization': `token ${token['tec-token']}`
-                                }     
-                        })
-                        .then( res => { 
-                            console.log('parametros guardados');
-                        })
-                        .catch(err => { 
-                            console.error(err);
-                        });
-                    }
-                }
-              })
-              .catch(err => { 
-                console.error(err);
-              });
-            })
-        
-        if(datos.tipo_plano!==''){
-            axios.patch(BACKEND_SERVER + `/api/rodillos/rodillo_nuevo/${rodillo_id}/`, {
-                tipo_plano: datos.tipo_plano,
+        if(archivo===null){
+            alert('Por favor incluye un archivo');
+        }
+        else{
+            var newRodillos=[];
+            newRodillos = [parseInt(rodillo_id)]
+            axios.post(BACKEND_SERVER + `/api/rodillos/plano_nuevo/`, {
+                nombre: datos.nombre,
+                rodillos: newRodillos,
             }, {
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                     }     
             })
             .then( res => { 
-            })
+                const formData = new FormData();
+                    formData.append('plano', res.data.id);
+                    formData.append('motivo', datos.motivo);
+                    formData.append('archivo', archivo); // Aquí asumiendo que 'archivo' es el archivo seleccionado.
+                    formData.append('fecha', datos.fecha);
+                axios.post(BACKEND_SERVER + `/api/rodillos/revision_plano/`, formData, {
+                    headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'Authorization': `token ${token['tec-token']}`
+                    }
+                })
+                .then(res => { 
+                    alert('Plano guardado correctamente');
+                    window.location.href = `/rodillos/editar/${rodillo_id}`;
+                    if(valorParametro){
+                        for(var x=0;x<valorParametro.length;x++){
+                            axios.post(BACKEND_SERVER + `/api/rodillos/parametros/`, {
+                                nombre: valorParametro[x].nombre,
+                                revision: res.data.id,
+                                valor: valorParametro[x].valor,
+                            }, {
+                                headers: {
+                                    'Authorization': `token ${token['tec-token']}`
+                                    }     
+                            })
+                            .then( res => { 
+                                console.log('parametros guardados');
+                            })
+                            .catch(err => { 
+                                Alert('Revisa los campos obligatorios3333');
+                                console.error(err);
+                            });
+                        }
+                    }
+                })
+                .catch(err => { 
+                    Alert('Revisa los campos obligatorios222');
+                    console.error(err);
+                });
+                })
+            
+                if(datos.tipo_plano!==''){
+                    axios.patch(BACKEND_SERVER + `/api/rodillos/rodillo_nuevo/${rodillo_id}/`, {
+                        tipo_plano: datos.tipo_plano,
+                    }, {
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                            }     
+                    })
+                    .then( res => { 
+                    })
+                    .catch(err => { 
+                        console.log(err);
+                    })
+            
             .catch(err => { 
+                Alert('Revisa los campos obligatorios');
                 console.log(err);
             })
-        
-        .catch(err => { 
-            console.log(err);
-        })
+            }
+            handlerCancelar();
         }
-        handlerCancelar();
     }
 
     const handleValorChange = (parametroId, nuevoValor)=> {
