@@ -96,6 +96,7 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
               })
               .then(res => { 
                 alert('Plano guardado correctamente');
+                window.location.href = `/rodillos/editar/${rodillo_id}`;
                 if(valorParametro){
                     for(var x=0;x<valorParametro.length;x++){
                         axios.post(BACKEND_SERVER + `/api/rodillos/parametros/`, {

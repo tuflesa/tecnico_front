@@ -663,7 +663,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                            show_revision={showRevision}
                            tipo_plano_id={datos.tipo_plano}
                            setParametros={setParametros}
-                           parametros={parametros}/>
+                           parametros={parametros}
+                           rodillo_id={rodillo.id}/>
 
         </Container>
     );

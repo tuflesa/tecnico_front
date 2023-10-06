@@ -5,7 +5,7 @@ import { Modal, Button, Form, Col, Row } from 'react-bootstrap';
 import { BACKEND_SERVER } from '../../constantes';
 import { arch } from 'process';
 
-const RodRevisionForm = ({plano_id, show, setShowRevision, show_revision, tipo_plano_id }) => {
+const RodRevisionForm = ({plano_id, show, setShowRevision, show_revision, tipo_plano_id, rodillo_id }) => {
     const [token] = useCookies(['tec-token']);
     const [archivo, setArchivo] = useState(null);
     const hoy = new Date();
@@ -56,6 +56,7 @@ const RodRevisionForm = ({plano_id, show, setShowRevision, show_revision, tipo_p
             })
             .then(res => { 
                 alert('Plano guardado correctamente');
+                window.location.href = `/rodillos/editar/${rodillo_id}`;
                 if(valorParametro){
                     for(var x=0;x<valorParametro.length;x++){
                         axios.post(BACKEND_SERVER + `/api/rodillos/parametros/`, {
