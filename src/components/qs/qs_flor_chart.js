@@ -25,7 +25,7 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
 
         const svg =svgRef.current;
 
-        const limite = 150;
+        const limite = 300;
                 
         const xScale = scaleLinear()
             .domain([-limite, limite])
@@ -104,7 +104,7 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
             const ycm2 = yi + (L/4) + Math.sin(alfa/2) + (fleje.espesor/2) * Math.cos(alfa/2);
 
             const ycm = (ycm1*M1 + ycm2*M2) /(M1+M2);
-            console.log('ycm: ', ycm);
+            // console.log('ycm: ', ycm);
             
         
             // Dibujo
@@ -360,8 +360,6 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
             console.log(m.nombre + ' desarrollo: ', Desarrollo); 
 
             let gap = -1; // Solo dibujamos si los rodillos no se tocan
-            console.log(ejes);
-            console.log(m);
             if (ejes&&m) {
                 const eje_inf = ejes.filter(e => e.op == m.operacion)[0].pos['INF'];
                 const eje_sup = ejes.filter(e => e.op == m.operacion)[0].pos['SUP'];

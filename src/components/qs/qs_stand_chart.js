@@ -133,13 +133,11 @@ const StandChart = ({montaje, ejes, posiciones, simulador, gap, fleje}) => {
               c = c - (pos_i - pos + fleje.espesor);
               pos= pos_i + fleje.espesor;
             }
-            console.log('OP: ', stand.operacion);
-            console.log('Piston: ', c);
 
             xc = 0;
             yc = pos + R;
             x0 = Ancho / 2;
-            y0 = R + pos + 100;
+            y0 = R + pos;
             x1 = x0;
             y1 = yc - R * Math.cos(alfa/2);
 
@@ -418,7 +416,7 @@ const StandChart = ({montaje, ejes, posiciones, simulador, gap, fleje}) => {
             yc3 = yc2 + (R3-R2) * Math.sin(alfa3);
             x1 = xc3 - R3 * Math.cos(alfa3-alfa4);
             y1 = yc3 - R3 * Math.sin(alfa3-alfa4);
-            y2 = yc2 -(Dc-Dext) / 2;
+            y2 = pos + (Dext-Df)/2; // yc2 -(Dc-Dext) / 2;
             x2 = x1 - Math.tan(alfa3-alfa4) * (y2-y1);
             x3 = -Ancho / 2;
             y3 = y2;
@@ -475,7 +473,7 @@ const StandChart = ({montaje, ejes, posiciones, simulador, gap, fleje}) => {
             yc3 = yc2 - (R3-R2) * Math.sin(alfa3);
             x2 = xc3 - R3 * Math.cos(alfa3-alfa4);
             y2 = yc3 + R3 * Math.sin(alfa3-alfa4);
-            y3 = yc2 + (Dc-Dext)/2;
+            y3 = pos - (Dext - Df)/2;// yc2 + (Dc-Dext)/2;
             x3 = x2 + Math.tan(alfa3-alfa4) * (y3-y2);
             x4 = -Ancho/2;
             y4 = y3;
@@ -513,7 +511,7 @@ const StandChart = ({montaje, ejes, posiciones, simulador, gap, fleje}) => {
             r.lineTo(xScale(-x5), yScale(y5));
 
             const gap = AxisPos0_i + AxisPos0_s - roll_i.parametros.Dext /2 - roll_s.parametros.Dext / 2;
-            console.log(stand.nombre + ' gap: ', gap);
+            // console.log(stand.nombre + ' gap: ', gap);
 
             return r.toString()
         }

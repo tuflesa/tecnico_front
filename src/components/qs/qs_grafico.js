@@ -5,7 +5,8 @@ import FlowerChart from "./qs_flor_chart";
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
-import {montaje, fleje} from './Grupo_70';
+import QSNavBar from "./qs_nav";
+import {montaje, fleje} from './Grupo_164FF';
 
 // const ejes = [{op:1, pos: [174, 343.57]},
 //               {op:2, pos: [177.91, 340.49]},
@@ -113,7 +114,6 @@ const QS_Grafico = () => {
                 });
             });
             SetPosiciones(pos);
-            console.log(gap_list);
             setGap(gap_list);
         }
     },[montaje, ejes, ejesSim, simulador]);
@@ -121,7 +121,6 @@ const QS_Grafico = () => {
     useEffect(()=>{
         if (simulador) {
             const dat = {};
-            console.log('copiar posición de ejes simulados en datos ' + OP);
             posiciones.filter(p => p.op == OP)[0].posiciones.map(p => {
                 dat[p.eje] =  parseFloat(p.pos_sim).toFixed(2);
             });
@@ -139,7 +138,6 @@ const QS_Grafico = () => {
 
     const simular = (event) => {
         event.preventDefault();
-        console.log('simular');
         const temp = [...ejesSim];
         montaje.filter(m => m.operacion == OP)[0].rodillos.map( r => {
             const Df = r.parametros['Df'];
@@ -150,6 +148,7 @@ const QS_Grafico = () => {
 
 return (
         <React.Fragment>
+            <QSNavBar/>
             <Container>
                 <Row>
                     <Form>
