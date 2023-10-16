@@ -8,6 +8,7 @@ import RodTooling from './rod_tooling';
 import RodGrupoNuevo from './rod_grupo_nuevo';
 import RodLista from './rod_rodillo_lista';
 import RodEditar from './rod_rodillo_editar';
+import RodBancada from './rod_bancada_form';
 
 const Rodillos = () => {
     
@@ -15,6 +16,7 @@ const Rodillos = () => {
         <React.Fragment>
             <RodNavBar />
             <Switch>
+                <Route path='/rodillos/bacada' component={RodBancada} />
                 <Route path='/rodillos/tooling' component={RodTooling} />
                 <Route path='/rodillos/grupos' component={RodGruposListado} />
                 <Route path='/rodillos/lista' component={RodLista} />

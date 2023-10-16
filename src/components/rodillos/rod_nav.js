@@ -21,7 +21,7 @@ const RodNavBar = () => {
                                     <NavDropdown.Item href="/rodillos/nuevo">Nuevo rodillo</NavDropdown.Item> 
                                     <NavDropdown.Item href="/rodillos/grupo/nuevo">Nuevo grupo</NavDropdown.Item> 
                                     <NavDropdown.Item href="/rodillos/planos/nuevo">Nuevo Plano</NavDropdown.Item> 
-                                    
+                                    <NavDropdown.Item href="/rodillos/bacada">Nueva Bancada</NavDropdown.Item> 
                                 </NavDropdown>
                             </Nav> 
                             <Navbar.Text className="mr-4" >

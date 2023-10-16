@@ -17,7 +17,7 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
 
     const [datos, setDatos] = useState({
         tipo_plano: rodillo_tipo_plano,
-        nombre: '',
+        nombre: null,
         fecha: fechaString,
         archivo:'',
         motivo: 'nuevo',
@@ -125,6 +125,7 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
                 .catch(err => { 
                     Alert('Revisa los campos obligatorios222');
                     console.error(err);
+                    console.log('estoy en el error 1');
                 });
                 })
             
@@ -140,10 +141,12 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
                     })
                     .catch(err => { 
                         console.log(err);
+                        console.log('estoy en el error 2');
                     })
             
             .catch(err => { 
                 Alert('Revisa los campos obligatorios');
+                console.log('estoy en el error 3');
                 console.log(err);
             })
             }
