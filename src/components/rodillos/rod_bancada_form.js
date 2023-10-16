@@ -55,6 +55,15 @@ const RodBancada = () => {
         }
     }, [maquina]);
 
+    useEffect(() => {
+        if(maquina){
+            console.log('secciones');
+            console.log(secciones);
+            console.log('operaciones');
+            console.log(operaciones);
+        }
+    }, [operaciones]);
+
     const actualizaFiltro = str => {
         setFiltro(str);
     }
@@ -68,41 +77,29 @@ const RodBancada = () => {
                 </Col>
             </ Row>
             {maquina? 
-            <Row>
-                <Col>
-                    <h5 className="mb-3 mt-3">Bancada</h5>
-                    <Table striped bordered hover>
-                        <thead>
-                            {secciones && secciones.map( seccion => {
-                                return (   
-                                    <th>{seccion.nombre}</th>                                             
-                                    /* <tr key={seccion.id}>
-                                        <th>{seccion.nombre}</th>
-                                    </tr> */
-                                )})
-                            }
-                            <tr align='center'>
-                                <th><img src = {rod_inf} width="50" height="50"></img></th>
-                                <th><img src = {rod_sup} width="50" height="50"></img></th>
-                                <th><img src = {rod_inf} width="50" height="50"></img></th>
-                                <th><img src = {rod_sup} width="50" height="50"></img></th>
-                                <th><img src = {rod_inf} width="50" height="50"></img></th>
-                            </tr>
-                        </thead>
-                        {/* <tbody>
-                            {repuestos && repuestos.map( repuesto => {
-                                return (
-                                    <tr key={repuesto.id}>
-                                        <td>{repuesto.nombre}</td>
-                                        <td>{repuesto.proveedor===29?<img src = {logo}></img>:repuesto.proveedor===30?<img src = {cuchilla}></img>:''}</td>
-                                        <td>{repuesto.proveedor}</td>
-                                    </tr>
-                                )})
-                            }
-                        </tbody> */}
-                    </Table>
-                </Col>
-            </Row> 
+                <Row>
+                    <Col>
+                        <h5 className="mb-3 mt-3">Bancada</h5>
+                        <Table striped bordered hover>
+                            <thead>
+                                {secciones && secciones.map(seccion => (
+                                    <th key={seccion.id}>{seccion.nombre}</th>
+                                ))}
+                            </thead>
+                            <tbody>
+                                    {secciones && secciones.map(seccion => (
+                                        <td key={seccion.id}>
+                                            {operaciones && operaciones.map((operacion) => {
+                                                if (operacion.seccion.id === seccion.id) {
+                                                return <td key={operacion.id}>{operacion.nombre}</td>;
+                                                }
+                                            })}
+                                        </td>
+                                    ))}
+                            </tbody>
+                        </Table>
+                    </Col>
+                </Row> 
             :''} 
 
         </Container>
