@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Table } from 'react-bootstrap';
+import { Container, Row, Col, Table, Button } from 'react-bootstrap';
 import logo from '../../assets/logo_bornay.svg';
 import rod_inf from '../../assets/rod_inf.svg';
 import rod_sup from '../../assets/rod_sup.svg';
@@ -17,12 +17,16 @@ const RodBancada = () => {
     const [operaciones, setOperaciones] = useState(null);
     const [secciones, setSecciones] = useState(null);
     const [maquina, setMaquina] = useState('');
+    const [grupo, setGrupo] = useState('');
     const [filtro, setFiltro] = useState(`?maquina__empresa__id=${user['tec-user'].perfil.empresa.id}`);
+    const [OperacionId, setOperacionId] = useState(null);
 
     useEffect(() => {
         const params = new URLSearchParams(filtro);
         const maquinaValue = params.get('maquina');
+        const grupoValue = params.get('grupo');
         setMaquina(maquinaValue);
+        setGrupo(grupoValue);
     }, [filtro]);
 
     useEffect(() => {
@@ -55,18 +59,35 @@ const RodBancada = () => {
         }
     }, [maquina]);
 
-    useEffect(() => {
+    /* useEffect(() => {
         if(maquina){
             console.log('secciones');
             console.log(secciones);
             console.log('operaciones');
             console.log(operaciones);
+            console.log('maquina');
+            console.log(maquina);
+            console.log('grupo');
+            console.log(grupo);
+            console.log('operacionId');
+            console.log(OperacionId);
         }
-    }, [operaciones]);
+    }, [OperacionId]); */
 
     const actualizaFiltro = str => {
         setFiltro(str);
     }
+
+    const RellenarCelda = (opera) => {
+        console.log('estamos viendo rellenacelda opera');
+        console.log(opera);
+    }
+
+    const GuardarId_Operacion = (operationId) => {
+        // Esta función se ejecutará cuando se haga clic en un botón de operación
+        setOperacionId(operationId); // Almacena el ID de la operación seleccionada
+    }
+
     
     return (
         <Container>
@@ -91,7 +112,10 @@ const RodBancada = () => {
                                         <td key={seccion.id}>
                                             {operaciones && operaciones.map((operacion) => {
                                                 if (operacion.seccion.id === seccion.id) {
-                                                return <td key={operacion.id}>{operacion.nombre}</td>;
+                                                return (
+                                                    <Button class="btn btn-outline-primary" key={operacion.id} onClick={()=> GuardarId_Operacion(operacion.id)}>{operacion.nombre}</Button>
+                                                    //<td key={operacion.id}>{operacion.nombre}</td>
+                                                )
                                                 }
                                             })}
                                         </td>

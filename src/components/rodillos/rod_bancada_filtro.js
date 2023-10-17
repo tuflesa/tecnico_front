@@ -12,10 +12,12 @@ const RodBancadaFiltro = ({actualizaFiltro}) => {
         id:'',
         empresa: user['tec-user'].perfil.empresa.id,
         maquina: '',
+        grupo:'',
     });
 
     const [empresas, setEmpresas] = useState(null);
     const [zonas, setZonas] = useState(null);
+    const [grupos, setGrupos] = useState(null);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
@@ -30,6 +32,29 @@ const RodBancadaFiltro = ({actualizaFiltro}) => {
             console.log(err);
         });
     }, [token]);
+
+    useEffect(() => {
+        if (datos.maquina === '') {
+            setGrupos([]);
+            setDatos({
+                ...datos,
+                grupo: '',
+            });
+        }
+        else{
+            axios.get(BACKEND_SERVER + `/api/rodillos/grupo/?maquina=${datos.maquina}`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }
+            })
+            .then( res => {
+                setGrupos(res.data);
+            })
+            .catch( err => {
+                console.log(err);
+            });
+        }
+    }, [datos.maquina]);
 
     useEffect(() => {
         if (datos.empresa === '') {
@@ -59,7 +84,7 @@ const RodBancadaFiltro = ({actualizaFiltro}) => {
     }, [token, datos.empresa]);
 
     useEffect(()=>{
-        const filtro = `?maquina__empresa__id=${datos.empresa}&id=${datos.id}&maquina=${datos.maquina}`
+        const filtro = `?maquina__empresa__id=${datos.empresa}&id=${datos.id}&maquina=${datos.maquina}&grupo=${datos.grupo}`
         actualizaFiltro(filtro);
     },[datos]);
 
@@ -107,6 +132,24 @@ const RodBancadaFiltro = ({actualizaFiltro}) => {
                                     return (
                                     <option key={zona.id} value={zona.id}>
                                         {zona.siglas}
+                                    </option>
+                                    )
+                                })}
+                            </Form.Control>
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="grupo">
+                            <Form.Label>Grupo Ø</Form.Label>
+                            <Form.Control as="select" 
+                                            value={datos.grupo}
+                                            name='grupo'
+                                            onChange={handleInputChange}>
+                                <option key={0} value={''}>Todas</option>
+                                {grupos && grupos.map( grupo => {
+                                    return (
+                                    <option key={grupo.id} value={grupo.id}>
+                                        {grupo.tubo_madre}
                                     </option>
                                     )
                                 })}
