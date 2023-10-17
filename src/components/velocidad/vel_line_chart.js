@@ -118,6 +118,15 @@ const LineChart = ({data, fecha, hora_inicio, hora_fin}) => {
             .style("stroke", "white")
             .attr("opacity", .70)
             .style("pointer-events", "none");
+
+        // Textos
+        data && select(svg).select('.grafico')
+            .selectAll('text')
+            .data(data)
+            .join('text')
+            .attr("fill", value => value.color)
+            .attr("class", value => 't-' + value.siglas)
+            .text('');
         
         // Lisening rectangles: para saber cuando entra y sale el ratón
         data && select(svg).select('.grafico')
@@ -126,26 +135,33 @@ const LineChart = ({data, fecha, hora_inicio, hora_fin}) => {
             .join('rect')
             .attr("width", dimensions.width)
             .attr("height", dimensions.height)
-            .on("mousemove", (event, value) => {
+            .on("mousemove", event => {
               const [xCoord] = pointer(event, this);
               const bisectDate = bisector(d => d.x).left;
               const x0 = xScale.invert(xCoord);
-              const i = bisectDate(value.datos, x0, 1);
-              const d0 = value.datos[i - 1];
-              const d1 = value.datos[i];
-              if(d0&&d1){
-                const d = x0 - d0.x > d1.x - x0 ? d1 : d0;
-                const xPos = xScale(d.x);
-                const yPos = yScale(d.y);
-                // console.log(d.x);
-                select(svg).select('.grafico').select('.'+value.siglas)
-                  .attr("cx", xPos)
-                  .attr("cy", yPos)
-                  .transition()
-                  .duration(50)
-                  .attr("r", 5);
-                }
+              data.map(maquina => {
+                const i = bisectDate(maquina.datos, x0, 1);
+                const d0 = maquina.datos[i - 1];
+                const d1 = maquina.datos[i];
+                if(d0&&d1){
+                  const d = x0 - d0.x > d1.x - x0 ? d1 : d0;
+                  const xPos = xScale(d.x);
+                  const yPos = yScale(d.y);
+                  // console.log(d.x.getHours() + ':' + d.x.getMinutes());
+                  select(svg).select('.grafico').select('.' + maquina.siglas)
+                    .attr("cx", xPos)
+                    .attr("cy", yPos)
+                    .transition()
+                    .duration(50)
+                    .attr("r", 5);
+
+                  select(svg).select('.grafico').select('.t-' + maquina.siglas)
+                    .attr("x", xPos)
+                    .attr("y", yPos - 20)
+                    .text(d.x.toLocaleTimeString() + ' - ' + d.y.toFixed(1) + ' m/min');
+                  }
               });
+            });
 
         select(svg).select('.grid-x')
             // .attr("class","rejilla")
