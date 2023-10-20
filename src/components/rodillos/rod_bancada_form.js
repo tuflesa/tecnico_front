@@ -113,7 +113,7 @@ const RodBancada = () => {
                                             {operaciones && operaciones.map((operacion) => {
                                                 if (operacion.seccion.id === seccion.id) {
                                                 return (
-                                                    <Button class="btn btn-outline-primary" key={operacion.id} onClick={()=> GuardarId_Operacion(operacion.id)}>{operacion.nombre}</Button>
+                                                    <Button class="btn btn-outline-dark" key={operacion.id} onClick={()=> GuardarId_Operacion(operacion.id)}>{operacion.nombre}</Button>
                                                     //<td key={operacion.id}>{operacion.nombre}</td>
                                                 )
                                                 }

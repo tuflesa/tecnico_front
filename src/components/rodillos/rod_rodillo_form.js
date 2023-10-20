@@ -9,6 +9,7 @@ import PlanoForm from './rod_plano_nuevo';
 import { Link } from 'react-router-dom';
 import {invertirFecha} from '../utilidades/funciones_fecha';
 import RodRevisionForm from './rod_revision_form';
+import RodParametrosEstandar from './rod_parametros_estandar';
 
 
 const RodRodilloForm = ({rodillo, setRodillo}) => {
@@ -30,10 +31,11 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [filaSeleccionada, setFilaSeleccionada] = useState(null);
     const [revisiones, setRevisiones] = useState(null);
     const [valor_parametros, setValorParametros] = useState('');
-    const [parametros, setParametros] = useState('');
+    const [parametros, setParametros] = useState(null);
     const [filaSeleccionadaParametros, setFilaSeleccionadaParametros] = useState(null);
     const [plano_id, setPlano_id] = useState(null);
     const [showRevision, setShowRevision] = useState(false);
+    const [showParametros, setShowParametros] = useState(false);
     
     const [show_plano, setShowPlano] = useState(false);
 
@@ -230,6 +232,22 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         }
     }, [token, datos.seccion]);
 
+    useEffect(() => { //recogemos los parámetros que tenemos ya guardados
+        if(rodillo.id){
+            axios.get(BACKEND_SERVER + `/api/rodillos/parametros_estandar/?rodillo=${rodillo.id}`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                    }
+            })
+            .then( r => {
+                setParametros(r.data);
+            })
+            .catch( err => {
+                console.log(err);
+            });
+        }
+    },[token, rodillo, showParametros]);
+
     const handleInputChange = (event) => {
         setDatos({
             ...datos,
@@ -292,7 +310,15 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         setShowPlano(true);
     }
 
+    const añadirParametros = () => {
+        setShowParametros(true);
+    }
+
     const cerrarParametros = () => {
+        setShowParametros(false);
+    }
+
+    const cerrarPlano = () => {
         setShowPlano(false);
     }
 
@@ -312,7 +338,6 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                     <Table striped bordered hover>
                         <thead>
                             <tr>
-                                <th>Parametros</th>
                                 <th>Motivo</th>
                                 <th>Nombre</th>
                                 <th>Archivo</th>
@@ -324,9 +349,6 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                 return (
                                     <React.Fragment key={conjunto.id}>
                                         <tr key={conjunto.id}>
-                                            <td>
-                                                <button type="button" className="btn btn-default" value={conjunto.id} name='prueba2' onClick={event => {abrirParametros(conjunto.id)}}>--</button>
-                                            </td>
                                             <td>{conjunto.motivo}</td>
                                             <td>{conjunto.plano}</td>
                                             <td>
@@ -368,27 +390,6 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         
     };
 
-    const abrirParametros = (revision) => {        
-        axios.get(BACKEND_SERVER + `/api/rodillos/parametros/?revision=${revision}`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-                }
-        })
-        .then( r => {
-            setParametros(r.data);
-            if(r.data.length!==0) 
-                {setShowParam(true);}            
-            else{
-                {setShowParamNot(true);}  
-            }
-        })
-        .catch( err => {
-            console.log(err);
-        });
-        
-        
-    };
-
     const eliminarPlano = (plano) => {        
         var confirmacion = window.confirm('¿Confirma que desea eliminar plano, con sus revisiones y parámetros?');
         if(confirmacion){
@@ -405,11 +406,6 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             });
         }        
     };
-
-    const handlerClose = () => {
-        setShowParam(false);
-        setShowParamNot(false);
-    }
 
     const NuevaRevision = (plano) => {
         setPlano_id(plano);
@@ -568,6 +564,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 </Row>
                 <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
                 {rodillo.length===0?<Button variant="outline-primary" onClick={GuardarRodillo}>Guardar</Button>:<Button variant="outline-primary" onClick={ActualizarRodillo}>Actualizar</Button>}
+                {parametros.length===0?<Button className={'mx-2'} onClick={añadirParametros}>Añadir Parámetros</Button>:<Button className={'mx-2'} onClick={añadirParametros}>Editar Parámetros</Button>}
                 {rodillo.length!==0?
                     <React.Fragment> 
                         <Form.Row>
@@ -622,54 +619,9 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                     </tbody>
                 </Table>
             :"No hay planos relacionados con este rodillo":null}
-
-            <Modal show={showParam} onHide={handlerClose} backdrop="static" keyboard={ false } animation={false}>
-                <Modal.Header>
-                    <Modal.Title>Parametros</Modal.Title>
-                </Modal.Header>
-
-                <Modal.Body>
-                        <Table striped bordered hover>
-                            <thead>
-                                <tr>
-                                    <th>Nombre</th>
-                                    <th>Valor</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {parametros && parametros.map( p => {
-                                    return (
-                                        <tr key={p.id}>
-                                            <td>{p.nombre}</td>
-                                            <td>{p.valor}</td>
-                                        </tr>
-                                    )})
-                                }
-                            </tbody>
-                        </Table>
-                </Modal.Body>
-
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={handlerClose}>Cerrar</Button>
-                </Modal.Footer>
-            </Modal>
-
-            <Modal show={showParamNot} onHide={handlerClose} backdrop="static" keyboard={ false } animation={false} centered>
-                <Modal.Header>
-                    <Modal.Title>Parametros</Modal.Title>
-                </Modal.Header>
-
-                <Modal.Body>
-                    <p>No tenemos parametros para esta revisión.</p>
-                </Modal.Body>
-
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={handlerClose}>Cerrar</Button>
-                </Modal.Footer>
-            </Modal>
             
             <PlanoForm show={show_plano}
-                           handleCloseParametros={cerrarParametros}
+                           handleCloseParametros={cerrarPlano}
                            tipo_seccion={datos.tipo_seccion}
                            tipo_rodillo={datos.tipo_rodillo}
                            rodillo_id={rodillo.id}
@@ -680,9 +632,12 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                            setShowRevision={setShowRevision}
                            show_revision={showRevision}
                            tipo_plano_id={datos.tipo_plano}
-                           setParametros={setParametros}
-                           parametros={parametros}
                            rodillo_id={rodillo.id}/>
+            
+            <RodParametrosEstandar showPa={showParametros}
+                           tipo_plano_id={datos.tipo_plano}
+                           rodillo_id={rodillo.id}
+                           handleClose={cerrarParametros}/>
 
         </Container>
     );

@@ -11,8 +11,6 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
     const [parametros, setParametros] = useState([]);
     const hoy = new Date();
     const fechaString = hoy.getFullYear() + '-' + ('0' + (hoy.getMonth()+1)).slice(-2) + '-' + ('0' + hoy.getDate()).slice(-2);
-    const [introParametros, setIntroParametros] = useState(false);
-    const [valorParametro, setValorParametro] = useState('');
     const [archivo, setArchivo] = useState(null);
 
     const [datos, setDatos] = useState({
@@ -37,8 +35,23 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
         });
     }, [token]);
 
+    useEffect(() => {
+        if(datos.tipo_plano){
+            axios.get(BACKEND_SERVER + `/api/rodillos/plano_parametros/${datos.tipo_plano}`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                  }
+            })
+            .then( res => {
+                setParametros(res.data.nombres); //para sacar los nombres de los parametros de este tipo de plano
+            })
+            .catch( err => {
+                console.log(err);
+            });
+        }
+    }, [datos.tipo_plano]);
+
     const handlerCancelar = () => {
-        setIntroParametros(false);
         setDatos({
             ...datos,
             tipo_plano: '',
@@ -56,20 +69,7 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
         })
     }
 
-    const CargaPlano = () =>{;
-        setIntroParametros(true);
-        axios.get(BACKEND_SERVER + `/api/rodillos/plano_parametros/${datos.tipo_plano}`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            setParametros(res.data.nombres);
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    }
+    
 
     const GuardarPlano = () =>{;
         if(archivo===null){
@@ -101,31 +101,27 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
                 .then(res => { 
                     alert('Plano guardado correctamente');
                     window.location.href = `/rodillos/editar/${rodillo_id}`;
-                    if(valorParametro){
-                        for(var x=0;x<valorParametro.length;x++){
-                            axios.post(BACKEND_SERVER + `/api/rodillos/parametros/`, {
-                                nombre: valorParametro[x].nombre,
-                                revision: res.data.id,
-                                valor: valorParametro[x].valor,
-                            }, {
-                                headers: {
-                                    'Authorization': `token ${token['tec-token']}`
-                                    }     
-                            })
-                            .then( res => { 
-                                console.log('parametros guardados');
-                            })
-                            .catch(err => { 
-                                Alert('Revisa los campos obligatorios3333');
-                                console.error(err);
-                            });
-                        }
+                    for(var x=0;x<parametros.length;x++){
+                        axios.post(BACKEND_SERVER + `/api/rodillos/parametros_estandar/`, {
+                            nombre: parametros[x].nombre,
+                            rodillo: rodillo_id,
+                            valor: 0,
+                        }, {
+                            headers: {
+                                'Authorization': `token ${token['tec-token']}`
+                                }     
+                        })
+                        .then( res => { 
+                            console.log('parametros guardados');
+                        })
+                        .catch(err => { 
+                            Alert('Joooooooo');
+                            console.error(err);
+                        });
                     }
                 })
                 .catch(err => { 
-                    Alert('Revisa los campos obligatorios222');
                     console.error(err);
-                    console.log('estoy en el error 1');
                 });
                 })
             
@@ -141,24 +137,15 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
                     })
                     .catch(err => { 
                         console.log(err);
-                        console.log('estoy en el error 2');
                     })
             
             .catch(err => { 
                 Alert('Revisa los campos obligatorios');
-                console.log('estoy en el error 3');
                 console.log(err);
             })
             }
             handlerCancelar();
         }
-    }
-
-    const handleValorChange = (parametroId, nuevoValor)=> {
-        const parametrosCopia = [...parametros];
-        const indice = parametrosCopia.findIndex(parametro => parametro.id === parametroId);
-        parametrosCopia[indice].valor = nuevoValor;
-        setValorParametro(parametrosCopia);
     }
 
     const handleInputChange_archivo = (event)=> {
@@ -261,37 +248,6 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
                                 </form>
                             </Col>                       
                         </Row>
-                        {introParametros?
-                        <Row>
-                            <Col>
-                                <table striped bordered hover>
-                                    <thead>
-                                        <tr>
-                                            <th>Nombre</th>
-                                            <th>Valor</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        { parametros && parametros.map( parametro => {
-                                            return (
-                                                <tr key={parametro.id}>
-                                                    <td>{parametro.descripcion}</td>
-                                                    <td>
-                                                        <input
-                                                            type="number"
-                                                            name={`valor_${parametro.id}`}
-                                                            value={parametro.valor || ''}
-                                                            onChange={(e)=>handleValorChange(parametro.id, e.target.value)}
-                                                        />
-                                                    </td>
-                                                </tr>
-                                            )})
-                                        }
-                                    </tbody>
-                                </table>
-                            </Col>
-                        </Row>:''}
-                        {!introParametros? <Button variant="outline-primary" onClick={CargaPlano}>Activar Parametros</Button>:''}
                     </Tab>
                 </Tabs>
             </Modal.Body>
