@@ -390,7 +390,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         
     };
 
-    const eliminarPlano = (plano) => {        
+    const eliminarPlano = (plano) => { 
         var confirmacion = window.confirm('¿Confirma que desea eliminar plano, con sus revisiones y parámetros?');
         if(confirmacion){
             axios.delete(BACKEND_SERVER + `/api/rodillos/plano/${plano}`,{
@@ -399,12 +399,25 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                     }
             })
             .then( res => {
-                Alert('Plano y revisiones eliminados correctamente');
+                for(var x=0;x<=parametros.length;x++){
+                    axios.delete(BACKEND_SERVER + `/api/rodillos/parametros_estandar/${parametros[x].id}`,{
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                            }
+                    })
+                    .then( res => {
+                    })
+                    .catch( err => {
+                        console.log(err);
+                    });
+                }
             })
             .catch( err => {
                 console.log(err);
             });
-        }        
+            
+        }  
+        window.location.href = `/rodillos/editar/${rodillo.id}`;      
     };
 
     const NuevaRevision = (plano) => {
