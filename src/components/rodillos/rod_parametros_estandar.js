@@ -36,7 +36,6 @@ const RodParametrosEstandar = ({ rodillo_id, handleClose, showPa }) => {
                     }     
             })
             .then( res => { 
-                console.log('parametros guardados');
             })
             .catch(err => { 
                 console.error(err);

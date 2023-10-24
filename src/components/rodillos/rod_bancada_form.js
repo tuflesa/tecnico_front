@@ -59,28 +59,8 @@ const RodBancada = () => {
         }
     }, [maquina]);
 
-    /* useEffect(() => {
-        if(maquina){
-            console.log('secciones');
-            console.log(secciones);
-            console.log('operaciones');
-            console.log(operaciones);
-            console.log('maquina');
-            console.log(maquina);
-            console.log('grupo');
-            console.log(grupo);
-            console.log('operacionId');
-            console.log(OperacionId);
-        }
-    }, [OperacionId]); */
-
     const actualizaFiltro = str => {
         setFiltro(str);
-    }
-
-    const RellenarCelda = (opera) => {
-        console.log('estamos viendo rellenacelda opera');
-        console.log(opera);
     }
 
     const GuardarId_Operacion = (operationId) => {

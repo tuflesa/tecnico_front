@@ -61,7 +61,6 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
         })
         .then( res => {
             setPlanosExistentes(res.data);
-            console.log(res.data);
         })
         .catch( err => {
             console.log(err);
@@ -151,7 +150,6 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
                                     }     
                             })
                             .then( res => { 
-                                console.log('parametros guardados');
                             })
                             .catch(err => { 
                                 console.error(err);

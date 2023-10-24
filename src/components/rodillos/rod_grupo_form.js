@@ -41,7 +41,6 @@ const RodGrupo = ({grupo, setGrupo}) => {
               }
         })
         .then( res => {
-            console.log(res.data);
         })
         .catch( err => {
             console.log(err);
@@ -85,7 +84,6 @@ const RodGrupo = ({grupo, setGrupo}) => {
     }
 
     const GuardarGrupo = (event) => {
-        console.log(datos);
         event.preventDefault();
         axios.post(BACKEND_SERVER + `/api/rodillos/grupo_nuevo/`, {
             nombre: datos.nombre,
