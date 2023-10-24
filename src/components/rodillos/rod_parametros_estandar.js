@@ -5,9 +5,10 @@ import { Modal, Button, Form, Col, Row } from 'react-bootstrap';
 import { BACKEND_SERVER } from '../../constantes';
 import { arch } from 'process';
 
-const RodParametrosEstandar = ({ rodillo_id, handleClose, showPa }) => {
+const RodParametrosEstandar = ({ rodillo_id, handleClose, showPa, rodillo_inf }) => {
     const [valorParametro, setValorParametro] = useState('');
     const [parametros, setParametros] = useState([]);
+    const [tipo_plano, setTipoPlanos] = useState('');
     const [token] = useCookies(['tec-token']);
     
     useEffect(() => {
@@ -24,6 +25,20 @@ const RodParametrosEstandar = ({ rodillo_id, handleClose, showPa }) => {
                 console.log(err);
             });
         }
+    }, [token]);
+
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + `/api/rodillos/tipo_plano/${rodillo_inf.tipo_plano}/`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+                }
+        })
+        .then( res => {
+            setTipoPlanos(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
     }, [token]);
 
     const GuardarParametros = () =>{
@@ -53,7 +68,7 @@ const RodParametrosEstandar = ({ rodillo_id, handleClose, showPa }) => {
 
     const handlerCancelar = () => {
         handleClose()
-    }
+    }    
 
     return(
         <Modal show={showPa} onHide={handleClose} backdrop="static" keyboard={ false } animation={false} size="lg">
@@ -71,26 +86,33 @@ const RodParametrosEstandar = ({ rodillo_id, handleClose, showPa }) => {
                             <table striped bordered hover>
                                 <thead>
                                     <tr>
-                                        <th>Nombre</th>
-                                        <th>Valor</th>
+                                        <th>Nombre / Valor</th>
+                                        <th>Imagen</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    { parametros && parametros.map( parametro => {
-                                        return (
-                                            <tr key={parametro.id}>
-                                                <td>{parametro.nombre}</td>
-                                                <td>
-                                                    <input
-                                                        type="number"
-                                                        name={`valor_${parametro.id}`}
-                                                        value={parametro.valor || ''}
-                                                        onChange={(e)=>handleValorChange(parametro.id, e.target.value)}
-                                                    />
-                                                </td>
-                                            </tr>
-                                        )})
-                                    }
+                                    <tr>
+                                        <td>
+                                            { parametros && parametros.map( parametro => {
+                                                return (
+                                                    <tr key={parametro.id}>
+                                                        <td>{parametro.nombre}</td>
+                                                        <td>
+                                                            <input
+                                                                type="number"
+                                                                name={`valor_${parametro.id}`}
+                                                                value={parametro.valor || ''}
+                                                                onChange={(e)=>handleValorChange(parametro.id, e.target.value)}
+                                                            />
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            })}
+                                        </td>
+                                        <td>
+                                            <img width='500' height='400' className='img-croquis' src={tipo_plano.croquis} alt="Croquis"/>
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </Col>

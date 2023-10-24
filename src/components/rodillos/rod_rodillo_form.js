@@ -654,6 +654,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             <RodParametrosEstandar showPa={showParametros}
                            tipo_plano_id={datos.tipo_plano}
                            rodillo_id={rodillo.id}
+                           rodillo_inf={rodillo}
                            handleClose={cerrarParametros}/>
 
         </Container>
