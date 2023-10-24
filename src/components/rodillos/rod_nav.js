@@ -15,14 +15,17 @@ const RodNavBar = () => {
                             <Nav className="mr-auto">
                                 <NavDropdown title="Rodillos" id="basic-nav-dropdown">
                                     <NavDropdown.Item href="/rodillos/tooling">Tooling Chart</NavDropdown.Item>
-                                    <NavDropdown.Item href="/rodillos/grupos">Listado de grupos</NavDropdown.Item> 
-                                    <NavDropdown.Item href="/rodillos/lista">Listado de rodillos</NavDropdown.Item>
-                                    <NavDropdown.Divider />
-                                    <NavDropdown.Item href="/rodillos/nuevo">Nuevo rodillo</NavDropdown.Item> 
-                                    <NavDropdown.Item href="/rodillos/grupo/nuevo">Nuevo grupo</NavDropdown.Item> 
-                                    <NavDropdown.Item href="/rodillos/bacada">Nueva Bancada</NavDropdown.Item> 
+                                    <NavDropdown title="Listados" id="listados-dropdown" menuAlign="right">
+                                    <NavDropdown.Item href="/rodillos/grupos">Grupos</NavDropdown.Item> 
+                                    <NavDropdown.Item href="/rodillos/lista">Rodillos</NavDropdown.Item>
+                                    </NavDropdown>
+                                    <NavDropdown title="Nuevos" id="nuevos-dropdown" menuAlign="right">
+                                    <NavDropdown.Item href="/rodillos/nuevo">Rodillo</NavDropdown.Item> 
+                                    <NavDropdown.Item href="/rodillos/grupo/nuevo">Grupo</NavDropdown.Item> 
+                                    <NavDropdown.Item href="/rodillos/bacada">Bancada</NavDropdown.Item> 
+                                    </NavDropdown>
                                 </NavDropdown>
-                            </Nav> 
+                            </Nav>
                             <Navbar.Text className="mr-4" >
                                 Usuario: {user['tec-user'].get_full_name}
                             </Navbar.Text>
