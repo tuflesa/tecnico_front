@@ -4,14 +4,14 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 
-const RodConjunto = ({show, handleClose, operacion_id}) => {
+const RodConjunto = ({show, handleClose, operacion_marcada}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
-//operacion_id es Operacion con Seccion
+    //operacion_marcada es Operacion con Seccion
     useEffect(() => {
         console.log('esto vale operacion_id en crear celda');
-        console.log(operacion_id);
-    }, [token, operacion_id]);
+        console.log(operacion_marcada);
+    }, [token, operacion_marcada]);
 
     const handlerCancelar = () => {
         handleClose();

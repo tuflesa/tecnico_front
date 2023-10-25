@@ -19,7 +19,7 @@ const RodBancada = () => {
     const [maquina, setMaquina] = useState('');
     const [grupo, setGrupo] = useState('');
     const [filtro, setFiltro] = useState(`?maquina__empresa__id=${user['tec-user'].perfil.empresa.id}`);
-    const [OperacionId, setOperacionId] = useState(null);
+    const [operacion_marcada, setOperacionMarcada] = useState(null);
     const [show_conjunto, setShowConjunto] = useState(false);
 
     useEffect(() => {
@@ -65,10 +65,7 @@ const RodBancada = () => {
     }
 
     const GuardarId_Operacion = (operationId) => {
-        console.log('esto vale la operacion marcada');
-        console.log(operationId);
-        // Esta función se ejecutará cuando se haga clic en un botón de operación
-        setOperacionId(operationId); // Almacena el ID de la operación seleccionada
+        setOperacionMarcada(operationId); // Almacena el la operación seleccionada
         AbrirConjunto();
     }
 
@@ -118,7 +115,7 @@ const RodBancada = () => {
                 </Row> 
             :''} 
             <RodConjunto show={show_conjunto}
-                        operacion_id={OperacionId}
+                        operacion_marcada={operacion_marcada}
                         handleClose={CerrarConjunto}/>
         </Container>
     )
