@@ -9,7 +9,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { setMaxListeners } from 'process';
 import { useLocation } from 'react-router-dom';
-
+import RodConjunto from './rod_crear_celda';
 
 const RodBancada = () => {
     const [token] = useCookies(['tec-token']);
@@ -20,6 +20,7 @@ const RodBancada = () => {
     const [grupo, setGrupo] = useState('');
     const [filtro, setFiltro] = useState(`?maquina__empresa__id=${user['tec-user'].perfil.empresa.id}`);
     const [OperacionId, setOperacionId] = useState(null);
+    const [show_conjunto, setShowConjunto] = useState(false);
 
     useEffect(() => {
         const params = new URLSearchParams(filtro);
@@ -64,11 +65,21 @@ const RodBancada = () => {
     }
 
     const GuardarId_Operacion = (operationId) => {
+        console.log('esto vale la operacion marcada');
+        console.log(operationId);
         // Esta función se ejecutará cuando se haga clic en un botón de operación
         setOperacionId(operationId); // Almacena el ID de la operación seleccionada
+        AbrirConjunto();
     }
 
-    
+    const AbrirConjunto = () => {
+        setShowConjunto(true);
+    }
+
+    const CerrarConjunto = () => {
+        setShowConjunto(false);
+    }
+
     return (
         <Container>
             <img src ={logo} width="200" height="200"></img>
@@ -93,7 +104,8 @@ const RodBancada = () => {
                                             {operaciones && operaciones.map((operacion) => {
                                                 if (operacion.seccion.id === seccion.id) {
                                                 return (
-                                                    <Button class="btn btn-outline-dark" key={operacion.id} onClick={()=> GuardarId_Operacion(operacion.id)}>{operacion.nombre}</Button>
+                                                    <Button className="btn btn-outline-dark btn-sm" key={operacion.id} onClick={()=> GuardarId_Operacion(operacion)}>{operacion.nombre}</Button>
+                                                    
                                                     //<td key={operacion.id}>{operacion.nombre}</td>
                                                 )
                                                 }
@@ -105,7 +117,9 @@ const RodBancada = () => {
                     </Col>
                 </Row> 
             :''} 
-
+            <RodConjunto show={show_conjunto}
+                        operacion_id={OperacionId}
+                        handleClose={CerrarConjunto}/>
         </Container>
     )
 }
