@@ -2,56 +2,70 @@ const montaje = [
     {
         operacion: 1,
         color: 'blue',
-        tipo: 'BD',
+        tipo: 'BD_W',
         nombre: 'BD-I',
         rodillos: [
             {
-                tipo_plano: 'BD_INF',
+                tipo_plano: 'BD_W_INF',
                 eje: 'INF',
                 parametros: {
                     Ancho: 660,
-                    Dext: 740,
+                    Dext: 550,
                     Df: 300,
-                    R: 300,
-                    alfa: 120
+                    Dc: 338.5,
+                    R1: 126,
+                    alfa1: 63,
+                    xc1: 155.3,
+                    R2: 489,
+                    alfa2: 12,
+                    R3:15
                 }
             },
             {
-                tipo_plano: 'BD_SUP',
+                tipo_plano: 'BD_W_SUP',
                 eje: 'SUP',
                 parametros: {
-                    Ancho: 520,
+                    Ancho: 246,
                     Df: 740,
-                    R: 281
+                    R: 123,
+                    H: 310.5
                 }
             }
         ]
     },
-    
     {
         operacion: 2,
         color: 'magenta',
-        tipo: 'BD',
+        tipo: 'BD_2R',
         nombre: 'BD-II',
         rodillos: [
             {
-                tipo_plano: 'BD_INF',
+                tipo_plano: 'BD_2R_INF',
                 eje: 'INF',
                 parametros: {
-                    Ancho: 470,
+                    Ancho: 606,
                     Dext: 660,
                     Df: 300,
-                    R: 190,
-                    alfa: 130
+                    R1: 422,
+                    alfa1: 20,
+                    R2: 126,
+                    alfa2: 35,
+                    R3: 377,
+                    alfa3: 21.24,
+                    R4: 40
                 }
             },
             {
-                tipo_plano: 'BD_SUP',
+                tipo_plano: 'BD_2R_SUP',
                 eje: 'SUP',
                 parametros: {
-                    Ancho: 340,
-                    Df: 740,
-                    R: 170
+                    Ancho: 277,
+                    Dext: 740,
+                    R1: 419,
+                    alfa1: 10,
+                    R2: 123,
+                    alfa2: 24.57,
+                    R3: 40
                 }
             }
         ]   
@@ -95,6 +109,7 @@ const montaje = [
                     Cuchilla: 78.3,
                     D_cuchilla: 332
                 },
+
             }
         ]   
     },

@@ -10,7 +10,7 @@ import './qs.css';
 import useResizeObserver from '../utilidades/use_resizeObserver';
 
 
-const StandChart = ({montaje, ejes, fleje}) => {
+const StandChart = ({montaje, ejes, posiciones, simulador, gap, fleje}) => {
     const svgRef = useRef();
     const wrapperRef = useRef();
     const dimensions = useResizeObserver(wrapperRef);
@@ -60,7 +60,7 @@ const StandChart = ({montaje, ejes, fleje}) => {
         function make_x_gridlines() {
             return axisBottom(xScale)
                 .ticks(10)
-          }
+          } 
 
         function make_y_gridlines() {
             return axisLeft(yScale)
@@ -76,8 +76,8 @@ const StandChart = ({montaje, ejes, fleje}) => {
 
             // Rodillo inferior
             // Definición del rodillo
-            const AxisPos0_i = -ejes[2*i]; // Posición del eje inferior referido al centro de la máquina
-            const AxisPos0_s = ejes[2*i+1]; // Posición del eje superior referido al centro de la máquina
+            const AxisPos0_i = -ejes['INF']; // Posición del eje inferior referido al centro de la máquina
+            const AxisPos0_s = ejes['SUP']; // Posición del eje superior referido al centro de la máquina
 
             // Variables
             let R;
@@ -120,7 +120,7 @@ const StandChart = ({montaje, ejes, fleje}) => {
 
             // Rodillo superior
             R = roll_s.parametros.R;
-            Dext = roll_s.parametros.Dext;
+            Dext = roll_s.parametros.Df;
             Ancho = roll_s.parametros.Ancho;
 
             // Calculos
@@ -133,13 +133,11 @@ const StandChart = ({montaje, ejes, fleje}) => {
               c = c - (pos_i - pos + fleje.espesor);
               pos= pos_i + fleje.espesor;
             }
-            console.log('OP: ', stand.operacion);
-            console.log('Piston: ', c);
 
             xc = 0;
             yc = pos + R;
             x0 = Ancho / 2;
-            y0 = R + pos + 100;
+            y0 = R + pos;
             x1 = x0;
             y1 = yc - R * Math.cos(alfa/2);
 
@@ -162,8 +160,8 @@ const StandChart = ({montaje, ejes, fleje}) => {
 
             // Rodillo inferior
             // Definición del rodillo
-            const AxisPos0_i = -ejes[2*i]; // Posición del eje inferior referido al centro de la máquina
-            const AxisPos0_s = ejes[2*i+1]; // Posición del eje superior referido al centro de la máquina
+            const AxisPos0_i = -ejes['INF']; // Posición del eje inferior referido al centro de la máquina
+            const AxisPos0_s = ejes['SUP']; // Posición del eje superior referido al centro de la máquina
 
             // Variables
             let R1, R2, R3;
@@ -267,8 +265,8 @@ const StandChart = ({montaje, ejes, fleje}) => {
 
             // Rodillo inferior
             // Definición del rodillo
-            const AxisPos0_i = -ejes[2*i]; // Posición del eje inferior referido al centro de la máquina
-            const AxisPos0_s = ejes[2*i+1]; // Posición del eje superior referido al centro de la máquina
+            const AxisPos0_i = -ejes['INF']; // Posición del eje inferior referido al centro de la máquina
+            const AxisPos0_s = ejes['SUP']; // Posición del eje superior referido al centro de la máquina
 
             // Variables
             let R1, R2, R3, R4;
@@ -384,8 +382,8 @@ const StandChart = ({montaje, ejes, fleje}) => {
             // Rodillos y ejes
             const roll_i = stand.rodillos[0];
             const roll_s = stand.rodillos[1];
-            const AxisPos0_i = ejes[2*i];
-            const AxisPos0_s = ejes[2*i+1];
+            const AxisPos0_i = ejes['INF'];
+            const AxisPos0_s = ejes['SUP'];
 
             // Dibujo rodillo inferior
             // Variables
@@ -418,7 +416,7 @@ const StandChart = ({montaje, ejes, fleje}) => {
             yc3 = yc2 + (R3-R2) * Math.sin(alfa3);
             x1 = xc3 - R3 * Math.cos(alfa3-alfa4);
             y1 = yc3 - R3 * Math.sin(alfa3-alfa4);
-            y2 = yc2 -(Dc-Dext) / 2;
+            y2 = pos + (Dext-Df)/2; // yc2 -(Dc-Dext) / 2;
             x2 = x1 - Math.tan(alfa3-alfa4) * (y2-y1);
             x3 = -Ancho / 2;
             y3 = y2;
@@ -475,7 +473,7 @@ const StandChart = ({montaje, ejes, fleje}) => {
             yc3 = yc2 - (R3-R2) * Math.sin(alfa3);
             x2 = xc3 - R3 * Math.cos(alfa3-alfa4);
             y2 = yc3 + R3 * Math.sin(alfa3-alfa4);
-            y3 = yc2 + (Dc-Dext)/2;
+            y3 = pos - (Dext - Df)/2;// yc2 + (Dc-Dext)/2;
             x3 = x2 + Math.tan(alfa3-alfa4) * (y3-y2);
             x4 = -Ancho/2;
             y4 = y3;
@@ -513,7 +511,7 @@ const StandChart = ({montaje, ejes, fleje}) => {
             r.lineTo(xScale(-x5), yScale(y5));
 
             const gap = AxisPos0_i + AxisPos0_s - roll_i.parametros.Dext /2 - roll_s.parametros.Dext / 2;
-            console.log(stand.nombre + ' gap: ', gap);
+            // console.log(stand.nombre + ' gap: ', gap);
 
             return r.toString()
         }
@@ -525,9 +523,9 @@ const StandChart = ({montaje, ejes, fleje}) => {
             const roll_Lat_Operador= stand.rodillos[0];
             const roll_Lat_Motor = stand.rodillos[1];
             const roll_Inf = stand.rodillos[2];
-            const AxisPos0_Lat_Operador = ejes[2*i];
-            const AxisPos0_Lat_Motor = ejes[2*i+1];
-            const AxisPos0_Inf = ejes[2*i+2];
+            const AxisPos0_Lat_Operador = ejes['LAT_OP'];
+            const AxisPos0_Lat_Motor = ejes['LAT_MO'];
+            const AxisPos0_Inf = ejes['INF'];
 
             // Variables
             let xc, yc;
@@ -656,6 +654,101 @@ const StandChart = ({montaje, ejes, fleje}) => {
             return r.toString()
         }
 
+        function draw_W_4(stand, i){
+            const r = path();
+
+            // Rodillos y ejes
+            const roll_Lat_Operador= stand.rodillos[0];
+            const roll_Lat_Motor = stand.rodillos[1];
+            const AxisPos0_Lat_Operador = ejes['LAT_OP'];
+            const AxisPos0_Lat_Motor = ejes['LAT_MO'];
+
+            // Variables
+            let xc, yc;
+            let x1, y1, x2, y2, x3, y3, x4, y4, m1, m2, B1, B2;
+            let Ancho, Df, C;
+            let R1, alfa1, R2, alfa2;
+            let pos;
+
+            // Lado operador
+            // Parametros
+            R1 = roll_Lat_Operador.parametros.R1;
+            R2 = roll_Lat_Operador.parametros.R2;
+            alfa2 = roll_Lat_Operador.parametros.alfa2 * Math.PI / 180;
+            Df = roll_Lat_Operador.parametros.Df;
+            Ancho = roll_Lat_Operador.parametros.Ancho;
+            C = roll_Lat_Operador.parametros.C;
+
+            // Calculos
+            pos = -AxisPos0_Lat_Operador + Df/2;
+            xc = pos+R1;
+            yc = 0;
+            x1 = xc - R1 * Math.cos((alfa1/2)-alfa2);
+            y1 = R1 * Math.sin((alfa1/2)-alfa2);
+            m1 = 1/Math.tan(alfa1/2-alfa2);
+            m2 = Math.tan(alfa1/2);
+            B1 = y1 - m1 * x1;
+            B2 = m2 * (C/Math.sin(alfa1/2) - xc);
+            x2 = -(B1+B2)/(m1+m2);
+            y2 = m1 * x2 + B1;
+            y3 = Ancho/2;
+            x3 = -(y3+B2)/m2; 
+            x4 = x3 - 50;
+            y4 = y3;
+
+            // Dibujo lado operador
+            // r.arc(xScale(xc), yScale(yc), rScale(R1), Math.PI - alfa1/2 + alfa2, Math.PI + alfa1/2 - alfa2);
+            // r.arcTo(xScale(x2), yScale(y2), xScale(x3), yScale(y3), rScale(R2));
+            // r.lineTo(xScale(x3), yScale(y3));
+            // r.lineTo(xScale(x4), yScale(y4));
+            // r.moveTo(xScale(x1), yScale(-y1));
+            // r.arcTo(xScale(x2), yScale(-y2), xScale(x3), yScale(-y3), rScale(R2));
+            // r.lineTo(xScale(x3), yScale(-y3));
+            // r.lineTo(xScale(x4), yScale(-y4));
+
+            // Lado motor
+            // Parametros
+            // R1 = roll_Lat_Motor.parametros.R1;
+            // R2 = roll_Lat_Motor.parametros.R2;
+            // alfa1 = roll_Lat_Motor.parametros.alfa1 * Math.PI / 180;
+            // alfa2 = roll_Lat_Motor.parametros.alfa2 * Math.PI / 180;
+            // Df = roll_Lat_Motor.parametros.Df;
+            // Ancho = roll_Lat_Motor.parametros.Ancho;
+            // C = roll_Lat_Motor.parametros.C;
+
+            // Calculos
+            // pos = AxisPos0_Lat_Motor - Df/2;
+            // xc = pos-R1;
+            // yc = 0;
+            // x1 = xc + R1 * Math.cos((alfa1/2)-alfa2);
+            // y1 = R1 * Math.sin((alfa1/2)-alfa2);
+             
+            // m1 = -1/Math.tan(alfa1/2-alfa2);
+            // m2 = Math.tan(alfa1/2);
+            // B1 = y1 - m1 * x1;
+            // B2 = -m2 * (C/Math.sin(alfa1/2) + xc);
+
+            // x2 = (B2-B1)/(m1-m2);
+            // y2 = m1 * x2 + B1;
+            // y3 = Ancho/2;
+            // x3 = (1/m2)*(y3-B2); 
+            // x4 = x3 + 50;
+            // y4 = y3;
+
+            // Dibujo
+            // r.moveTo(xScale(x1), yScale(-y1));
+            // r.arc(xScale(xc), yScale(yc), rScale(R1), alfa1/2 - alfa2, alfa2 -alfa1/2, true);
+            // r.arcTo(xScale(x2), yScale(y2), xScale(x3), yScale(y3), rScale(R2));
+            // r.lineTo(xScale(x3), yScale(y3));
+            // r.lineTo(xScale(x4), yScale(y4));
+            // r.moveTo(xScale(x1), yScale(-y1));
+            // r.arcTo(xScale(x2), yScale(-y2), xScale(x3), yScale(-y3), rScale(R2));
+            // r.lineTo(xScale(x3), yScale(-y3));
+            // r.lineTo(xScale(x4), yScale(-y4));
+
+            return r.toString()
+        }
+
         function draw_stand(stand, i) {
           let p = '';
           switch (stand.tipo) {
@@ -673,6 +766,9 @@ const StandChart = ({montaje, ejes, fleje}) => {
                 break;
             case 'W':
                 p = draw_W(stand, i);
+                break;
+            case 'W-4':
+                p = draw_W_4(stand, i);
                 break;
           }
           return p;
@@ -702,6 +798,52 @@ const StandChart = ({montaje, ejes, fleje}) => {
             .attr('stroke', m => m.color)
             .style("stroke-width", 2)
             .attr('d', (m, i) => draw_stand(m, i));
+
+        posiciones&&select(svg).select('.pos')
+            .selectAll('text')
+            .data(posiciones)
+            .join('text')
+            .attr('x', p => {
+                switch(p.eje) {
+                    case 'INF':
+                        return 400;
+                    case 'SUP':
+                        return 400;
+                    case 'LAT_OP':
+                        return 50;
+                    case 'LAT_MO':
+                        return 400;
+                }
+            })
+            .attr('y', p => {
+                switch(p.eje) {
+                    case 'INF':
+                        return 500;
+                    case 'SUP':
+                        return 50;
+                    case 'LAT_OP':
+                        return 100;
+                    case 'LAT_MO':
+                        return 100;
+                }
+            })
+            .text(p => simulador ? (p.eje + ': ' + p.pos_sim.toFixed(2)) : (p.eje + ': ' + p.pos.toFixed(2)));
+
+        gap&&select(svg).select('.gap')
+            .selectAll('text')
+            .data(gap)
+            .join('text')
+            .attr("x", 50)
+            .attr("y", 500)
+            .text(g => g.gap&&('Gap: ' + g.gap.toFixed(2)));
+
+        gap&&select(svg).select('.piston')
+            .selectAll('text')
+            .data(gap)
+            .join('text')
+            .attr("x", 50)
+            .attr("y", 50)
+            .text(g => g.piston&&('Piston: ' + g.piston.toFixed(2)));
                
     },[dimensions, montaje, ejes, fleje]);
 
@@ -712,7 +854,10 @@ const StandChart = ({montaje, ejes, fleje}) => {
                 <g className='grid-x grid'></g>
                 <g className='grid-y grid'></g>
                 <g className='eje-x'></g>
-                <g className='eje-y'></g>  
+                <g className='eje-y'></g>
+                <g className='pos'></g>
+                <g className='gap'></g>
+                <g className= 'piston'></g>
             </svg>
         </div>
     );

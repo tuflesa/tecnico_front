@@ -25,7 +25,7 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
 
         const svg =svgRef.current;
 
-        const limite = 250;
+        const limite = 300;
                 
         const xScale = scaleLinear()
             .domain([-limite, limite])
@@ -81,7 +81,7 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
             // const Dext = roll.parametros.Dext;
             const Df = roll.parametros.Df;
             // const Ancho = roll.parametros.Ancho;
-            const AxisPos0 = -ejes.filter(e => e.op == m.operacion)[0].pos[0]; // Posición del eje referido al centro de la máquina
+            const AxisPos0 = -ejes.filter(e => e.op == m.operacion)[0].pos['INF']; // Posición del eje referido al centro de la máquina
         
             // Calculos
             const xc = 0;
@@ -104,7 +104,7 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
             const ycm2 = yi + (L/4) + Math.sin(alfa/2) + (fleje.espesor/2) * Math.cos(alfa/2);
 
             const ycm = (ycm1*M1 + ycm2*M2) /(M1+M2);
-            console.log('ycm: ', ycm);
+            // console.log('ycm: ', ycm);
             
         
             // Dibujo
@@ -132,7 +132,7 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
             const Df = roll.parametros.Df;
             const Dc = roll.parametros.Dc;
             const Ancho = roll.parametros.Ancho;
-            const AxisPos0 = -ejes.filter(e => e.op == m.operacion)[0].pos[0]; // Posición del eje referido al centro de la máquina
+            const AxisPos0 = -ejes.filter(e => e.op == m.operacion)[0].pos['INF']; // Posición del eje referido al centro de la máquina
 
             // Calculos
             const xc1 = - roll.parametros.xc1;
@@ -211,7 +211,7 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
             const R3 = roll.parametros.R3;
             const Dext = roll.parametros.Dext;
             const Df = roll.parametros.Df;
-            const AxisPos0 = -ejes.filter(e => e.op == m.operacion)[0].pos[0]; // Posición del eje referido al centro de la máquina
+            const AxisPos0 = -ejes.filter(e => e.op == m.operacion)[0].pos['INF']; // Posición del eje referido al centro de la máquina
 
             // Calculos
             const xc1 = 0;
@@ -279,8 +279,8 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
             // Rodillos y ejes
             const roll_i = m.rodillos[0];
             const roll_s = m.rodillos[1];
-            const AxisPos0_i = ejes.filter(e => e.op == m.operacion)[0].pos[0];
-            const AxisPos0_s = ejes.filter(e => e.op == m.operacion)[0].pos[1];
+            const AxisPos0_i = ejes.filter(e => e.op == m.operacion)[0].pos['INF'];
+            const AxisPos0_s = ejes.filter(e => e.op == m.operacion)[0].pos['SUP'];
 
             // Dibujo rodillo inferior
             // Variables
@@ -355,50 +355,52 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
                 x2 = x1 + fleje.espesor*Math.sin(alfa_c);
                 y2 = y1 - fleje.espesor*Math.cos(alfa_c);
             }
-            // console.log('alfa_c: ', alfa_c*180/Math.PI);
 
-            // Desarrollo
-            // console.log('R4: ', R4);
-            // console.log('alfa3:', alfa3*180/Math.PI);
             const Desarrollo = R1*alfa1 + 2*R2*((Math.PI-alfa1)/2 - alfa3) + 2*R4*(2*alfa3) + 2*R2_s*(alfa2_s-alfa3_s) + 2*R1_s*(alfa1_s/2-alfa_c);
             console.log(m.nombre + ' desarrollo: ', Desarrollo); 
 
-            // Centro de masas
-            
+            let gap = -1; // Solo dibujamos si los rodillos no se tocan
+            if (ejes&&m) {
+                const eje_inf = ejes.filter(e => e.op == m.operacion)[0].pos['INF'];
+                const eje_sup = ejes.filter(e => e.op == m.operacion)[0].pos['SUP'];
+                const Di = m.rodillos.filter(r => r.eje == 'INF')[0].parametros['Dext'];
+                const Ds = m.rodillos.filter(r => r.eje == 'SUP')[0].parametros['Dext'];
+                gap = eje_sup + eje_inf - (Ds + Di)/2;
+            }
 
-            // Dibujo
             const r = path();
-            r.arc(xScale(xc), yScale(yc), rScale(R1), (Math.PI - alfa1)/2, (Math.PI + alfa1)/2);
-            r.arc(xScale(xc2), yScale(yc2), rScale(R2), (Math.PI+alfa1)/2, Math.PI - alfa3);
-            r.arc(xScale(xcr), yScale(ycr), rScale(R4), Math.PI - alfa3, Math.PI + alfa3); 
-            r.arc(xScale(xc2_s), yScale(yc2_s), rScale(R2_s), Math.PI + alfa3_s, Math.PI + alfa2_s);
-            if(R1_s!==0){
-                r.arc(xScale(xc1_s), yScale(yc1_s), rScale(R1_s), Math.PI + alfa2_s, (3*Math.PI/2) - alfa_c);
-                r.lineTo(xScale(x2), yScale(y2));
-                r.arc(xScale(xc1_s), yScale(yc1_s), rScale(R1_s-fleje.espesor), 3*Math.PI/2 - alfa_c, Math.PI + alfa2_s, true);
+            if (gap > 0.0) {
+                r.arc(xScale(xc), yScale(yc), rScale(R1), (Math.PI - alfa1)/2, (Math.PI + alfa1)/2);
+                r.arc(xScale(xc2), yScale(yc2), rScale(R2), (Math.PI+alfa1)/2, Math.PI - alfa3);
+                r.arc(xScale(xcr), yScale(ycr), rScale(R4), Math.PI - alfa3, Math.PI + alfa3); 
+                r.arc(xScale(xc2_s), yScale(yc2_s), rScale(R2_s), Math.PI + alfa3_s, Math.PI + alfa2_s);
+                if(R1_s!==0){
+                    r.arc(xScale(xc1_s), yScale(yc1_s), rScale(R1_s), Math.PI + alfa2_s, (3*Math.PI/2) - alfa_c);
+                    r.lineTo(xScale(x2), yScale(y2));
+                    r.arc(xScale(xc1_s), yScale(yc1_s), rScale(R1_s-fleje.espesor), 3*Math.PI/2 - alfa_c, Math.PI + alfa2_s, true);
+                }
+                else{
+                    r.lineTo(xScale(x2), yScale(y2));
+                }
+                r.arc(xScale(xc2_s), yScale(yc2_s), rScale(R2_s-fleje.espesor), Math.PI + alfa2_s, Math.PI + alfa3_s, true);
+                r.arc(xScale(xcr), yScale(ycr), rScale(R4-fleje.espesor), Math.PI + alfa3 , Math.PI - alfa3, true);
+                r.arc(xScale(xc2), yScale(yc2), rScale(R2-fleje.espesor), Math.PI - alfa3, (Math.PI+alfa1)/2, true);
+                r.arc(xScale(xc), yScale(yc), rScale(R1-fleje.espesor), (Math.PI + alfa1)/2, (Math.PI - alfa1)/2, true);
+                r.arc(xScale(-xc2), yScale(yc2), rScale(R2-fleje.espesor), (Math.PI-alfa1)/2, alfa3, true);
+                r.arc(xScale(-xcr), yScale(ycr), rScale(R4-fleje.espesor), alfa3 , - alfa3 , true);
+                r.arc(xScale(-xc2_s), yScale(yc2_s), rScale(R2_s-fleje.espesor), -alfa3_s, -alfa2_s, true);
+                if(R1_s!==0){
+                    r.arc(xScale(-xc1_s), yScale(yc1_s), rScale(R1_s-fleje.espesor), -alfa2_s, 3*Math.PI/2+ alfa_c,true);
+                    r.lineTo(xScale(-x1), yScale(y1));
+                    r.arc(xScale(-xc1_s), yScale(yc1_s), rScale(R1_s), 3*Math.PI/2+ alfa_c, -alfa2_s);
+                }
+                else{
+                    r.lineTo(xScale(-x1), yScale(y1));
+                }
+                r.arc(xScale(-xc2_s), yScale(yc2_s), rScale(R2_s), -alfa2_s, -alfa3_s,);
+                r.arc(xScale(-xcr), yScale(ycr), rScale(R4), -alfa3 ,  alfa3);
+                r.arc(xScale(-xc2), yScale(yc2), rScale(R2), alfa3, (Math.PI-alfa1)/2);
             }
-            else{
-                r.lineTo(xScale(x2), yScale(y2));
-            }
-            r.arc(xScale(xc2_s), yScale(yc2_s), rScale(R2_s-fleje.espesor), Math.PI + alfa2_s, Math.PI + alfa3_s, true);
-            r.arc(xScale(xcr), yScale(ycr), rScale(R4-fleje.espesor), Math.PI + alfa3 , Math.PI - alfa3, true);
-            r.arc(xScale(xc2), yScale(yc2), rScale(R2-fleje.espesor), Math.PI - alfa3, (Math.PI+alfa1)/2, true);
-            r.arc(xScale(xc), yScale(yc), rScale(R1-fleje.espesor), (Math.PI + alfa1)/2, (Math.PI - alfa1)/2, true);
-            r.arc(xScale(-xc2), yScale(yc2), rScale(R2-fleje.espesor), (Math.PI-alfa1)/2, alfa3, true);
-            r.arc(xScale(-xcr), yScale(ycr), rScale(R4-fleje.espesor), alfa3 , - alfa3 , true);
-            r.arc(xScale(-xc2_s), yScale(yc2_s), rScale(R2_s-fleje.espesor), -alfa3_s, -alfa2_s, true);
-            if(R1_s!==0){
-                r.arc(xScale(-xc1_s), yScale(yc1_s), rScale(R1_s-fleje.espesor), -alfa2_s, 3*Math.PI/2+ alfa_c,true);
-                r.lineTo(xScale(-x1), yScale(y1));
-                r.arc(xScale(-xc1_s), yScale(yc1_s), rScale(R1_s), 3*Math.PI/2+ alfa_c, -alfa2_s);
-            }
-            else{
-                r.lineTo(xScale(-x1), yScale(y1));
-            }
-            r.arc(xScale(-xc2_s), yScale(yc2_s), rScale(R2_s), -alfa2_s, -alfa3_s,);
-            r.arc(xScale(-xcr), yScale(ycr), rScale(R4), -alfa3 ,  alfa3);
-            r.arc(xScale(-xc2), yScale(yc2), rScale(R2), alfa3, (Math.PI-alfa1)/2);
- 
             return r.toString()
         }
         

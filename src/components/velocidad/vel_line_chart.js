@@ -6,7 +6,9 @@ import {
     axisBottom,
     axisLeft,
     line,
-    curveStepAfter
+    curveStepAfter,
+    pointer,
+    bisector
   } from 'd3';
 import moment from 'moment';
 import './velocidad.css';
@@ -32,9 +34,8 @@ const LineChart = ({data, fecha, hora_inicio, hora_fin}) => {
     const svgRef = useRef();
     const wrapperRef = useRef();
     const dimensions = useResizeObserver(wrapperRef);
-    // const [size, setSize] = useState({width: 1150, height: 370})
 
-      // Cuando cambian los datos actualizamos el grafico
+    // Cuando cambian los datos actualizamos el grafico
     useEffect(()=>{
         if (!dimensions) return;
         const width = dimensions.width
@@ -106,6 +107,62 @@ const LineChart = ({data, fecha, hora_inicio, hora_fin}) => {
             .transition()
             .attr('d', value => myLine(value.datos));
 
+        // Circulos para señalizar el cursor
+        data && select(svg).select('.grafico')
+            .selectAll('circle')
+            .data(data)
+            .join('circle')
+            .attr("r", 0)
+            .attr("fill", value => value.color)
+            .attr("class", value => value.siglas)
+            .style("stroke", "white")
+            .attr("opacity", .70)
+            .style("pointer-events", "none");
+
+        // Textos
+        data && select(svg).select('.grafico')
+            .selectAll('text')
+            .data(data)
+            .join('text')
+            .attr("fill", value => value.color)
+            .attr("class", value => 't-' + value.siglas)
+            .text('');
+        
+        // Lisening rectangles: para saber cuando entra y sale el ratón
+        data && select(svg).select('.grafico')
+            .selectAll('rect')
+            .data(data)
+            .join('rect')
+            .attr("width", dimensions.width)
+            .attr("height", dimensions.height)
+            .on("mousemove", event => {
+              const [xCoord] = pointer(event, this);
+              const bisectDate = bisector(d => d.x).left;
+              const x0 = xScale.invert(xCoord);
+              data.map(maquina => {
+                const i = bisectDate(maquina.datos, x0, 1);
+                const d0 = maquina.datos[i - 1];
+                const d1 = maquina.datos[i];
+                if(d0&&d1){
+                  const d = x0 - d0.x > d1.x - x0 ? d1 : d0;
+                  const xPos = xScale(d.x);
+                  const yPos = yScale(d.y);
+                  // console.log(d.x.getHours() + ':' + d.x.getMinutes());
+                  select(svg).select('.grafico').select('.' + maquina.siglas)
+                    .attr("cx", xPos)
+                    .attr("cy", yPos)
+                    .transition()
+                    .duration(50)
+                    .attr("r", 5);
+
+                  select(svg).select('.grafico').select('.t-' + maquina.siglas)
+                    .attr("x", xPos)
+                    .attr("y", yPos - 20)
+                    .text(d.x.toLocaleTimeString() + ' - ' + d.y.toFixed(1) + ' m/min');
+                  }
+              });
+            });
+
         select(svg).select('.grid-x')
             // .attr("class","rejilla")
             .attr('transform',`translate(${margin.left},${margin.top + innerHeight})`)
@@ -124,10 +181,11 @@ const LineChart = ({data, fecha, hora_inicio, hora_fin}) => {
               .tickFormat("")
             );
 
+        
     },[data, fecha, hora_fin, hora_inicio, dimensions]);
 
     return (
-        <div ref={wrapperRef}>
+        <div ref={wrapperRef} id='speedChart'>
             <svg ref={svgRef} 
                  className='speedChart'
                 // width={size.width} 
