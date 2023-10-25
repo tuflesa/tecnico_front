@@ -189,11 +189,20 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
         },
         totalNumber: {
             marginRight: 70,
-            fontSize: 14,
+            fontSize: 10,
             bottom: 30,
             left: 0,
             right: 0,
             textAlign: 'right',
+            color: 'grey',
+        },
+        ComentarioFinal: {
+            position: 'absolute',
+            fontSize: 9,
+            bottom: 50,
+            left: 15,
+            right: 15,
+            textAlign: 'justify',
             color: 'grey',
         },
     });
@@ -280,6 +289,7 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
                         </View>
                     </View>
                 </View>
+                <Text style={styles.ComentarioFinal}>La empresa suministradora de los bienes y/o servicios solicitados deberá aplicar políticas que sean conformes a los objetivos de desarrollo sostenible y responsabilidad social, que incluyen un gobierno corporativo, respeto por el medio ambiente, el cumplimiento de los derechos humanos, prácticas operativas, laborales y comerciales justas y con una preocupación hacia el consumidor, la sociedad y el bien común. </Text>
                 <Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => (`${pageNumber} / ${totalPages}`)} fixed />
                 <View style={styles.page}fixed></View>                
             </Page>
