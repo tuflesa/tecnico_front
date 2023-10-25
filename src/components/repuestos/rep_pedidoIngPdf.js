@@ -210,6 +210,15 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, empresa, lineas_
             textAlign: 'right',
             color: 'grey',
         },
+        ComentarioFinal: {
+            position: 'absolute',
+            fontSize: 9,
+            bottom: 50,
+            left: 15,
+            right: 15,
+            textAlign: 'justify',
+            color: 'grey',
+        },
     });
     return(     
         <Document>
@@ -294,6 +303,7 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, empresa, lineas_
                         </View>
                     </View>
                 </View>
+                <Text style={styles.ComentarioFinal}>The supplying company of the requested goods and/or services must implement policies that are in line with the Sustainable Development Goals and social responsibility objectives. These policies should encompass corporate governance, environmental respect, adherence to human rights, fair operational, labor, and business practices, along with a commitment to consumer welfare, society, and the common good. </Text>
                 <Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => (`${pageNumber} / ${totalPages}`)} fixed />
                 <View style={styles.page}fixed></View>                
             </Page>
