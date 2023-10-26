@@ -9,7 +9,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { setMaxListeners } from 'process';
 import { useLocation } from 'react-router-dom';
-import RodConjunto from './rod_crear_celda';
+import RodConjunto from './rod_crear_conjunto';
 
 const RodBancada = () => {
     const [token] = useCookies(['tec-token']);
@@ -23,6 +23,7 @@ const RodBancada = () => {
     const [show_conjunto, setShowConjunto] = useState(false);
 
     useEffect(() => {
+        console.log(filtro);
         const params = new URLSearchParams(filtro);
         const maquinaValue = params.get('maquina');
         const grupoValue = params.get('grupo');
@@ -116,7 +117,8 @@ const RodBancada = () => {
             :''} 
             <RodConjunto show={show_conjunto}
                         operacion_marcada={operacion_marcada}
-                        handleClose={CerrarConjunto}/>
+                        handleClose={CerrarConjunto}
+                        grupo={grupo}/>
         </Container>
     )
 }
