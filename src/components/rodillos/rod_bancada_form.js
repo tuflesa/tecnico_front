@@ -23,7 +23,6 @@ const RodBancada = () => {
     const [show_conjunto, setShowConjunto] = useState(false);
 
     useEffect(() => {
-        console.log(filtro);
         const params = new URLSearchParams(filtro);
         const maquinaValue = params.get('maquina');
         const grupoValue = params.get('grupo');
@@ -118,7 +117,7 @@ const RodBancada = () => {
             <RodConjunto show={show_conjunto}
                         operacion_marcada={operacion_marcada}
                         handleClose={CerrarConjunto}
-                        grupo={grupo}/>
+                        grupoId={grupo}/>
         </Container>
     )
 }
