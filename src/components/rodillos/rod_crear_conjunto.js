@@ -11,11 +11,12 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId}) => {
     const [ejes, setEjes] = useState(null);
     const [rodillos, setRodillos] = useState(null);
     const [selectedEje, setSelectedEje] = useState(null);
-    const [selectRodilloId, setSelectRodilloId] = useState(null);
+    const [selectRodilloId, setSelectRodilloId] = useState({});
     const [EjesRodillos, setEjesRodillos] = useState([]);
     const [operacion_id, setOperacionId] = useState('');
     const [tubo_madre, setTuboMadre] = useState('');
     const [grupo, setGrupo] = useState(null);
+    const [rod_id, setRod_Id] = useState(''); //para guardar la informacion en EjesRodillos
 
     //operacion_marcada es Operacion con Seccion
   
@@ -68,21 +69,82 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId}) => {
     }, [EjesRodillos]);
 
     useEffect(() => {
-        if(selectRodilloId && selectedEje && tubo_madre){
-            setEjesRodillos([...EjesRodillos, {eje: selectedEje, rodillo: selectRodilloId, operacion: operacion_id, tubo_madre:tubo_madre}]);
+        if(rod_id && selectedEje && tubo_madre){
+            setEjesRodillos([...EjesRodillos, {eje: selectedEje, rodillo: rod_id, operacion: operacion_id, tubo_madre:tubo_madre}]);
         }        
-    }, [selectedEje, selectRodilloId, tubo_madre]);
+    }, [rod_id, selectedEje, tubo_madre]);
 
-    const handlerCancelar = () => {
-        handleClose();
+    const GuardarConjunto = () => {
+        //guardamos primero la Bancada, con el id de bancada guardamos el Conjunto y con el id de conjunto guardamos el Elemento
+        if(EjesRodillos.length===ejes.length){
+            axios.post(BACKEND_SERVER + `/api/rodillos/bancada/`, {
+                seccion: operacion_marcada.seccion.id,
+                grupos: [grupoId],
+            }, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                    }     
+            })
+            .then( res => { 
+                axios.post(BACKEND_SERVER + `/api/rodillos/conjunto/`, {
+                    bancada: res.data.id,
+                    operacion: operacion_id,
+                    icono:null,
+                    tubo_madre:tubo_madre,
+                }, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                        }     
+                })
+                .then( r => { 
+                    for(var x=0;x<EjesRodillos.length;x++){
+                        axios.post(BACKEND_SERVER + `/api/rodillos/elemento/`, {
+                            conjunto: r.data.id,
+                            eje: EjesRodillos[x].eje,
+                            rodillo: EjesRodillos[x].rodillo,
+                        }, {
+                            headers: {
+                                'Authorization': `token ${token['tec-token']}`
+                                }     
+                        })
+                        .then( res => { 
+                        })
+                        .catch(err => { 
+                            console.error(err);
+                        })
+                    }
+                })
+                .catch(err => { 
+                    console.error(err);
+                })
+            })
+            .catch(err => { 
+                console.error(err);
+            });
+            handlerCancelar();
+        }
+        else{
+            alert('Por favor selecciona todos los elementos del conjunto');
+        }
     } 
 
     const handleInputChange = (event) => {
         const campoNombre = event.target.name;
         const idRodillo = event.target.value;
+        setRod_Id(idRodillo);
+        const nuevaSeleccionRodilloId = {...selectRodilloId};
+        nuevaSeleccionRodilloId[campoNombre] = idRodillo;
         setSelectedEje(campoNombre);
-        setSelectRodilloId(idRodillo);
+        setSelectRodilloId(nuevaSeleccionRodilloId);
         setTuboMadre(grupo.tubo_madre);
+    }
+
+    const handlerCancelar = () => {
+        setTuboMadre(null);
+        setEjesRodillos([]);
+        setSelectRodilloId({});
+        setSelectedEje(null);
+        handleClose();
     }
     
     return(
@@ -100,7 +162,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId}) => {
                                 <Form.Control
                                     as="select"
                                     name={eje.id}
-                                    value={selectRodilloId || ''}
+                                    value={selectRodilloId[eje.id] || ''}
                                     onChange={handleInputChange}
                                     placeholder={eje.tipo.nombre}
                                 >
@@ -122,7 +184,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId}) => {
                 </Form>
             </Modal.Body>
             <Modal.Footer>
-                <Button variant="info" onClick={'GuardarConjunto'}>Guardar</Button>
+                <Button variant="info" onClick={GuardarConjunto}>Guardar</Button>
                 <Button variant="waring" onClick={handlerCancelar}>Cancelar</Button>
             </Modal.Footer>
         </Modal>
