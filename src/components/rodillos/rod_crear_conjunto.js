@@ -5,7 +5,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { constants } from 'buffer';
 
-const RodConjunto = ({show, handleClose, operacion_marcada, grupoId}) => {
+const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
     const [ejes, setEjes] = useState(null);
@@ -17,9 +17,35 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId}) => {
     const [tubo_madre, setTuboMadre] = useState('');
     const [grupo, setGrupo] = useState(null);
     const [rod_id, setRod_Id] = useState(''); //para guardar la informacion en EjesRodillos
+    const [elemento_seleccionado, setElementoSeleccionado] = useState(null); //para comprobar si el conjunto esta ya creado
 
     //operacion_marcada es Operacion con Seccion
   
+    useEffect(() => {
+        console.log('Datos que entran');
+        console.log('Datos maquina entran');
+        console.log(maquina);
+        console.log('Datos grupoId entran');
+        console.log(grupoId);
+
+    }, [token, operacion_marcada, grupoId]);
+
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + `/api/rodillos/elemento_select/?conjunto__bancada__seccion__maquina__id=${maquina}&conjunto__bancada__seccion__grupos=${grupoId}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setElementoSeleccionado(res.data);
+            console.log('esto son los elementos encontrados');
+            console.log(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token, maquina, grupoId]);
+    
     useEffect(() => {
         operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/eje/?operacion=${operacion_marcada.id}`,{
             headers: {
@@ -28,6 +54,8 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId}) => {
         })
         .then( res => {
             setEjes(res.data);
+            console.log('estoy recogiendo los ejes y esto vale operacion_marcada');
+            console.log(operacion_marcada);
             setOperacionId(operacion_marcada.id);
         })
         .catch( err => {
@@ -62,11 +90,6 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId}) => {
             console.log(err);
         });
     }, [token, operacion_marcada]);
-
-    useEffect(() => {
-        console.log('Esto es juntar todo');
-        console.log(EjesRodillos);    
-    }, [EjesRodillos]);
 
     useEffect(() => {
         if(rod_id && selectedEje && tubo_madre){
