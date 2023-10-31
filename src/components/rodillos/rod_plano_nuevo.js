@@ -14,6 +14,9 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
     const [archivo, setArchivo] = useState(null);
     const [PlanosExistentes, setPlanosExistentes] = useState(null);
     const [checkboxSeleccionados, setCheckboxSeleccionados] = useState([]);
+    const [rodillos, setRodillos] = useState([]);
+    const [rodillo, setRodillo] = useState([]);
+    var valor = null;
 
     const [datos, setDatos] = useState({
         tipo_plano: rodillo_tipo_plano,
@@ -86,27 +89,43 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
         })
     }
 
-    
-
-    const GuardarPlano = () =>{;
-        if(checkboxSeleccionados.length!==0){
-            for(var z=0;z<checkboxSeleccionados.length;z++){
-                var valor=parseInt(checkboxSeleccionados[z]);
-                axios.patch(BACKEND_SERVER + `/api/rodillos/plano/${valor}/`, {
-                    rodillos:{
-                        action: "add",
-                        value: rodillo_id
-                    }
-                }, {
-                    headers: {
+    const GuardarPlano = async () => {
+        if (checkboxSeleccionados.length !== 0) {
+            const requests = [];
+            for (var z = 0; z < checkboxSeleccionados.length; z++) {
+                valor = parseInt(checkboxSeleccionados[z]);
+                var idRodillo = parseInt(rodillo_id);
+        
+                try {
+                    const res = await axios.get(BACKEND_SERVER + `/api/rodillos/plano/${valor}`, {
+                        headers: {
                         'Authorization': `token ${token['tec-token']}`
-                        }     
-                })
-                .then( res => { 
-                })
-                .catch(err => { 
-                    console.log(err);
-                })
+                        }
+                    });
+            
+                    //setRodillos([...res.data.rodillos, idRodillo]);
+            
+                    requests.push(
+                        axios.patch(BACKEND_SERVER + `/api/rodillos/plano/${valor}/`, {
+                        rodillos: [...res.data.rodillos, idRodillo],
+                        }, {
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                        }
+                        })
+                    );
+
+                } 
+                catch (err) {
+                console.log(err);
+                }
+            }
+            try{
+                await Promise.all(requests);
+                handlerCancelar();
+                window.location.href = `/rodillos/editar/${rodillo_id}`;
+            } catch(error){
+                console.log(error);
             }
         }
         else{
@@ -181,6 +200,7 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
                 })
                 }
             }
+            window.location.href = `/rodillos/editar/${rodillo_id}`;
             handlerCancelar();
         }
     }
@@ -201,6 +221,13 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
         }
     };
     
+    const plano_marcado = (plano) => {
+        for(var x=0;x<plano.rodillos.length;x++){
+            if(plano.rodillos[x].id===rodillo_id){
+                return(true);
+            }
+        }
+    };
 
     return(
         <Modal show={show} onHide={handleCloseParametros} backdrop="static" keyboard={ false } animation={false} size="lg">
@@ -224,6 +251,7 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
                                         type={'checkbox'}
                                         id={plano.id}
                                         onChange={handleCheckboxChange}
+                                        disabled={plano_marcado(plano)}
                                     />
                                 </div>
                             ))}
