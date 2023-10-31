@@ -57,7 +57,7 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
     }, [datos.tipo_plano]);
 
     useEffect(() => { //se recogen los plano que cuadran con el tipo de rodillo
-        axios.get(BACKEND_SERVER + `/api/rodillos/planos_existentes/?rodillos__tipo_plano=${rodillo_tipo_plano}`,{
+        rodillo_tipo_plano && axios.get(BACKEND_SERVER + `/api/rodillos/planos_existentes/?rodillos__tipo_plano=${rodillo_tipo_plano}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
                 }

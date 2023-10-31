@@ -28,7 +28,7 @@ const RodParametrosEstandar = ({ rodillo_id, handleClose, showPa, rodillo_inf })
     }, [token]);
 
     useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/rodillos/tipo_plano/${rodillo_inf.tipo_plano}/`,{
+        rodillo_inf.tipo_plano && axios.get(BACKEND_SERVER + `/api/rodillos/tipo_plano/${rodillo_inf.tipo_plano}/`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
                 }

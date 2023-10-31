@@ -11,7 +11,6 @@ import {invertirFecha} from '../utilidades/funciones_fecha';
 import RodRevisionForm from './rod_revision_form';
 import RodParametrosEstandar from './rod_parametros_estandar';
 
-
 const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
@@ -36,6 +35,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [plano_id, setPlano_id] = useState(null);
     const [showRevision, setShowRevision] = useState(false);
     const [showParametros, setShowParametros] = useState(false);
+    const [tipos_planos, setTiposPlanos] = useState(null);
     
     const [show_plano, setShowPlano] = useState(false);
 
@@ -233,6 +233,24 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         }
     }, [token, datos.seccion]);
 
+    useEffect(() => {
+        console.log('entro en el useEffect');
+        datos.tipo_seccion!=='' && datos.tipo_rodillo!=='' && axios.get(BACKEND_SERVER + `/api/rodillos/tipo_plano/?tipo_seccion=${datos.tipo_seccion}&tipo_rodillo=${datos.tipo_rodillo}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setTiposPlanos(res.data);
+            console.log('tipos de planos');
+            console.log(res.data);
+        })
+        .catch( err => {
+            console.log('error en tipos de planos');
+            console.log(err);
+        });
+    }, [rodillo.length!==0]);
+
     useEffect(() => { //recogemos los parámetros que tenemos ya guardados
         if(rodillo.id){
             axios.get(BACKEND_SERVER + `/api/rodillos/parametros_estandar/?rodillo=${rodillo.id}`,{
@@ -287,6 +305,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             grupo: datos.grupo,
             tipo: datos.tipo_rodillo,
             material: datos.material,
+            tipo_plano: datos.tipo_plano,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -391,7 +410,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         
     };
 
-    const eliminarParametros = ()=>{
+    /* const eliminarParametros = ()=>{
         for(var x=0;x<parametros.length;x++){
             axios.delete(BACKEND_SERVER + `/api/rodillos/parametros_estandar/${parametros[x].id}`,{
                 headers: {
@@ -405,7 +424,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 console.log(err);
             });
         }
-    }
+    } */
 
     const eliminarPlano = (plano) => { 
         var confirmacion = window.confirm('¿Confirma que desea eliminar este plano, en este rodillo?');
@@ -586,7 +605,33 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                             </Form.Control>
                         </Form.Group>
                     </Col>
+                    {rodillo.length!==0?
+                        <Col>
+                            <Form.Group controlId="tipo_plano" >
+                                <Form.Label style={{color:'red'}}>Tipo de plano</Form.Label>
+                                <Form.Control as="select" 
+                                                style={{color:'red'}}
+                                                value={datos.tipo_plano}
+                                                name='tipo_plano'
+                                                onChange={handleInputChange}>
+                                    <option key={0} value={0}>Todos</option>
+                                    {tipos_planos && tipos_planos.map( tipo => {
+                                        return (
+                                        <option key={tipo.id} value={tipo.id}>
+                                            {tipo.nombre}
+                                        </option>
+                                        )
+                                    })}
+                                </Form.Control>
+                            </Form.Group>
+                        </Col>
+                    :''}
                 </Row>
+                {rodillo.length!==0?
+                    <Row style={{marginBottom:'10px'}}>
+                        <Col style={{color:'red'}}>Debemos introducir el tipo de plano y actualizar, si queremos añadir un plano ya creado</Col>
+                    </Row>
+                :''}
                 <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
                 {rodillo?rodillo.length===0?<Button variant="outline-primary" onClick={GuardarRodillo}>Guardar</Button>:<Button variant="outline-primary" onClick={ActualizarRodillo}>Actualizar</Button>:''}
                 {parametros?parametros.length===0?<Button className={'mx-2'} onClick={añadirParametros}>Añadir Parámetros</Button>:<Button className={'mx-2'} onClick={añadirParametros}>Editar Parámetros</Button>:''}
@@ -602,7 +647,6 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                         <PlusCircle className="plus mr-2" size={30} onClick={añadirPlano}/>
                                 </Col>
                             </Row>
-                            
                         </Col>
                         </Form.Row>
                     </React.Fragment>
