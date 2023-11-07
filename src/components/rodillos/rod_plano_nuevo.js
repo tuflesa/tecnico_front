@@ -319,7 +319,7 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="outline-primary" onClick={GuardarPlano}>Guardar</Button>
-                <Button variant="waring" onClick={handlerCancelar}>Cancelar</Button>
+                <Button variant="warning" onClick={handlerCancelar}>Cancelar</Button>
             </Modal.Footer>
             
         </Modal>

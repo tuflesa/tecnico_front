@@ -23,6 +23,8 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina}) =
   
     useEffect(() => {
         console.log('Datos que entran');
+        console.log('Datos operación marcada entran');
+        console.log(operacion_marcada);
         console.log('Datos maquina entran');
         console.log(maquina);
         console.log('Datos grupoId entran');
@@ -31,20 +33,20 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina}) =
     }, [token, operacion_marcada, grupoId]);
 
     useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/rodillos/elemento_select/?conjunto__bancada__seccion__maquina__id=${maquina}&conjunto__bancada__seccion__grupos=${grupoId}`,{
+        maquina && grupoId && axios.get(BACKEND_SERVER + `/api/rodillos/elemento_select/?conjunto__bancada__seccion__maquina__id=${maquina}&conjunto__bancada__seccion__grupos=${grupoId}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
         .then( res => {
             setElementoSeleccionado(res.data);
-            console.log('esto son los elementos encontrados');
+            console.log('elementos seleccionados');
             console.log(res.data);
         })
         .catch( err => {
             console.log(err);
         });
-    }, [token, maquina, grupoId]);
+    }, [maquina, grupoId]);
     
     useEffect(() => {
         operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/eje/?operacion=${operacion_marcada.id}`,{
@@ -98,6 +100,20 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina}) =
     }, [rod_id, selectedEje, tubo_madre]);
 
     const GuardarConjunto = () => {
+        //primero comprobamos si existe la bancada y se si no, se crea, igual con el conjunto y por consiguiente con el elemento.
+        axios.get(BACKEND_SERVER + `/api/rodillos/bancada_grupos/`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( res => {
+            setGrupo(res.data);
+            console.log('que imprime en bancada');
+            console.log(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
         //guardamos primero la Bancada, con el id de bancada guardamos el Conjunto y con el id de conjunto guardamos el Elemento
         if(EjesRodillos.length===ejes.length){
             axios.post(BACKEND_SERVER + `/api/rodillos/bancada/`, {
