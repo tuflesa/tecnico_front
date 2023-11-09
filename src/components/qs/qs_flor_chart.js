@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef} from 'react';
 import {
     select,
     scaleLinear,
@@ -25,7 +25,7 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
 
         const svg =svgRef.current;
 
-        const limite = 300;
+        const limite = fleje.ancho/2;
                 
         const xScale = scaleLinear()
             .domain([-limite, limite])
@@ -128,7 +128,6 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
             let alfa1 = roll.parametros.alfa1 * Math.PI / 180;
             const R2 = roll.parametros.R2;
             let alfa2 = roll.parametros.alfa2 * Math.PI / 180;
-            const Dext = roll.parametros.Dext;
             const Df = roll.parametros.Df;
             const Dc = roll.parametros.Dc;
             const Ancho = roll.parametros.Ancho;
@@ -154,7 +153,7 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
 
             let L; 
             if (d5 > fleje.ancho) {
-                alfa1 = (d5 - fleje.ancho)/(2*R1);
+                alfa1 = alfa1 - (d5 - fleje.ancho)/(2*R1);
                 L = 0;
                 
             }
@@ -357,7 +356,7 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
             }
 
             const Desarrollo = R1*alfa1 + 2*R2*((Math.PI-alfa1)/2 - alfa3) + 2*R4*(2*alfa3) + 2*R2_s*(alfa2_s-alfa3_s) + 2*R1_s*(alfa1_s/2-alfa_c);
-            console.log(m.nombre + ' desarrollo: ', Desarrollo); 
+            // console.log(m.nombre + ' desarrollo: ', Desarrollo); 
 
             let gap = -1; // Solo dibujamos si los rodillos no se tocan
             if (ejes&&m) {
@@ -403,6 +402,31 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
             }
             return r.toString()
         }
+
+        function draw_W(m,i) { //Soldadura de 5 rodillos
+            // Rodillos y ejes
+            const roll_l = m.rodillos[0]; // Lateral OP
+            const roll_i = m.rodillos[2]; // Inferior
+            const AxisPos0_l = ejes.filter(e => e.op == m.operacion)[0].pos['LAT_OP'];
+            const AxisPos0_i = ejes.filter(e => e.op == m.operacion)[0].pos['INF'];
+
+            // Parametros
+            const R1 = roll_l.parametros.R1;
+            const Df_l = roll_l.parametros.Df;
+            const Df_i = roll_i.parametros.Df;
+
+            // Variables
+            const pos_l = AxisPos0_l - Df_l/2;
+            const pos_i = AxisPos0_i - Df_i/2; 
+            const xc1 = R1 - pos_l;
+            const yc2 = R1 - pos_i;
+            const Beta = Math.atan(xc1/yc2);
+
+            // console.log('Beta: ', Beta);
+
+            const r = path();
+            return r.toString()
+        }
         
         function draw_flawer(m,i) {
           let p = '';
@@ -419,7 +443,10 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
                     break;
                 case 'FP':
                     p = draw_FP(m, i);
-                break;
+                    break;
+                case 'W':
+                    p = draw_W(m, i);
+                    break;
             }
         }
           return p;
@@ -441,20 +468,6 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
               .tickFormat("")
             );
 
-        // Dibujo del fleje
-        select(svg).select('.grafico')
-            .selectAll('rect')
-            .data([fleje])
-            .join('rect')
-            .attr('fill', fleje.color) 
-            .attr('opacity', 0.5)
-            .attr('stroke', fleje => fleje.color)
-            .style("stroke-width", 1)
-            .attr('x', xScale(-fleje.ancho/2))
-            .attr('y', yScale(fleje.espesor /2))
-            .attr('width', rScale(fleje.ancho))
-            .attr('height', rScale(fleje.espesor))
-
         // Dibujo de la flor
         select(svg).select('.grafico')
             .selectAll('path')
@@ -466,6 +479,20 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
             .attr('stroke', m => m.color)
             .style("stroke-width", 1)
             .attr('d', (m,i) => draw_flawer(m,i));
+
+        // Dibujo del fleje
+        select(svg).select('.grafico')
+            .selectAll('rect')
+            .data([fleje])
+            .join('rect')
+            .attr('fill', f => f.color) 
+            .attr('opacity', 0.5)
+            .attr('stroke', f => f.color)
+            .style("stroke-width", 1)
+            .attr('x', f => xScale(-f.ancho/2))
+            .attr('y', f => yScale(f.espesor /2))
+            .attr('width', f => rScale(f.ancho))
+            .attr('height', f => rScale(f.espesor));
                
     },[dimensions, montaje, ejes, fleje]);
 

@@ -179,7 +179,7 @@ const StandChart = ({montaje, ejes, posiciones, simulador, gap, fleje}) => {
             Ancho = roll_i.parametros.Ancho;
             alfa1 = roll_i.parametros.alfa1 * Math.PI / 180;
             alfa2 = roll_i.parametros.alfa2 * Math.PI / 180;
-            const Df = roll_i.parametros.Df;
+            let Df = roll_i.parametros.Df;
             const Dc = roll_i.parametros.Dc;
               
             // Calculos
@@ -218,12 +218,12 @@ const StandChart = ({montaje, ejes, posiciones, simulador, gap, fleje}) => {
             // Rodillo superior
             const R = roll_s.parametros.R;
             const H = roll_s.parametros.H;
-            Dext = roll_s.parametros.Dext;
+            Df = roll_s.parametros.Df;
             Ancho = roll_s.parametros.Ancho;
 
             // Calculos
             const alfa = 2 * Math.asin(Ancho / (2*R));
-            pos = AxisPos0_s - Dext / 2;
+            pos = AxisPos0_s - Df / 2;
             const pos_i = roll_i.parametros.Df/2 + AxisPos0_i;
             let c = 60; 
 
@@ -328,7 +328,7 @@ const StandChart = ({montaje, ejes, posiciones, simulador, gap, fleje}) => {
             R3 = roll_s.parametros.R3;
             alfa1 = roll_s.parametros.alfa1 * Math.PI / 180;
             alfa2 = roll_s.parametros.alfa2 * Math.PI / 180;
-            Dext = roll_s.parametros.Dext;
+            Dext = roll_s.parametros.Df;
             Ancho = roll_s.parametros.Ancho;
 
             // Calculos
@@ -340,8 +340,6 @@ const StandChart = ({montaje, ejes, posiciones, simulador, gap, fleje}) => {
               c = c - (pos_i - pos + fleje.espesor);
               pos= pos_i + fleje.espesor;
             }
-            // console.log('OP: ', stand.operacion);
-            // console.log('Piston: ', c);
 
             xc1 = 0;
             yc1 = pos + R1;
@@ -353,7 +351,7 @@ const StandChart = ({montaje, ejes, posiciones, simulador, gap, fleje}) => {
             x1 = xc2 + R2 * Math.sin(alfa2+alfa1);
             y1 = yc2 - R2 * Math.cos(alfa2+alfa1);
             x3 = Ancho/2;
-            y3 = (Dext-Df)/2 - pos;
+            y3 = Dext/2 + pos;
             x2 = x3;
             y2 = y1 + (x2-x1) * Math.tan(alfa2+alfa1);
 
