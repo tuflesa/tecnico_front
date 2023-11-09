@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import StandChart from "./qs_stand_chart";
 import FlowerChart from "./qs_flor_chart";
+import HeightChart from "./qs_height_chart";
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
@@ -456,6 +457,11 @@ return (
                                     )
                                 })}
                             </Row>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col className="col-12">
+                            <HeightChart alturas={alturas}/>
                         </Col>
                     </Row>
                     <Row>
