@@ -45,7 +45,7 @@ const PedidoForm = ({pedido, setPedido}) => {
     const [datos, setDatos] = useState({
         id: pedido ? pedido.id : null,
         proveedor: pedido ? pedido.proveedor.id : null,
-        empresa: pedido ? pedido.empresa : user['tec-user'].perfil.empresa.id,
+        empresa_id: pedido ? pedido.empresa.id : user['tec-user'].perfil.empresa.id,
         numero: pedido ? pedido.numero : '',
         creado_por: pedido ? pedido.creado_por.get_full_name : '',
         fecha_creacion: pedido ? pedido.fecha_creacion : (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
@@ -61,6 +61,29 @@ const PedidoForm = ({pedido, setPedido}) => {
         descripcion: pedido ? pedido.descripcion : '',
         finalizado_auto: pedido ? pedido.finalizado : false,
     });
+
+    useEffect(()=>{
+        pedido && setDatos({
+            id: pedido ? pedido.id : null,
+            proveedor: pedido ? pedido.proveedor.id : null,
+            empresa_id: pedido ? pedido.empresa.id : user['tec-user'].perfil.empresa.id,
+            numero: pedido ? pedido.numero : '',
+            creado_por: pedido ? pedido.creado_por.get_full_name : '',
+            fecha_creacion: pedido ? pedido.fecha_creacion : (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate()),
+            fecha_prevista_entrega: pedido ? pedido.fecha_prevista_entrega : (hoy.getFullYear() + '-'+(hoy.getMonth()+2)+'-'+hoy.getDate()),
+            fecha_entrega: pedido ? pedido.fecha_entrega : '',
+            finalizado: pedido ? pedido.finalizado : false,
+            lineas_pedido: pedido.lineas_pedido ? pedido.lineas_pedido : null,
+            lineas_adicionales: pedido ? pedido.lineas_adicionales : null,
+            direccion_envio: pedido ? (pedido.direccion_envio ? pedido.direccion_envio.id : null) : direcciones[0].id,
+            contacto: pedido ? (pedido.contacto ? pedido.contacto.id : null) : null,
+            observaciones: pedido ? pedido.observaciones : '',
+            observaciones2: pedido ? pedido.observaciones2 : '',
+            descripcion: pedido ? pedido.descripcion : '',
+            finalizado_auto: pedido ? pedido.finalizado : false,
+
+        });
+    },[pedido]);
 
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/repuestos/proveedor/`, {
@@ -87,7 +110,7 @@ const PedidoForm = ({pedido, setPedido}) => {
     },[token, datos.proveedor]);
     
     useEffect(()=>{
-        datos.empresa && axios.get(BACKEND_SERVER + `/api/estructura/direcciones/?empresa=${datos.empresa}`, {
+        datos.empresa_id && axios.get(BACKEND_SERVER + `/api/estructura/direcciones/?empresa=${datos.empresa_id}`, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }     
@@ -95,8 +118,10 @@ const PedidoForm = ({pedido, setPedido}) => {
         .then( res => {                       
             setDirecciones(res.data);
         })
-        .catch(err => { console.log(err);})
-    },[token, datos.empresa]);
+        .catch(err => { 
+            console.log(err);
+        })
+    },[datos.empresa_id]);
 
     useEffect(()=>{
         direcciones && setDatos({
@@ -125,29 +150,6 @@ const PedidoForm = ({pedido, setPedido}) => {
             console.log(err);
         });
     }, [token]);
-
-    useEffect(()=>{
-        pedido && setDatos({
-            id: pedido ? pedido.id : null,
-            proveedor: pedido ? pedido.proveedor.id : null,
-            empresa: pedido ? pedido.empresa : user['tec-user'].perfil.empresa.id,
-            numero: pedido ? pedido.numero : '',
-            creado_por: pedido ? pedido.creado_por.get_full_name : '',
-            fecha_creacion: pedido ? pedido.fecha_creacion : (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate()),
-            fecha_prevista_entrega: pedido ? pedido.fecha_prevista_entrega : (hoy.getFullYear() + '-'+(hoy.getMonth()+2)+'-'+hoy.getDate()),
-            fecha_entrega: pedido ? pedido.fecha_entrega : '',
-            finalizado: pedido ? pedido.finalizado : false,
-            lineas_pedido: pedido.lineas_pedido ? pedido.lineas_pedido : null,
-            lineas_adicionales: pedido ? pedido.lineas_adicionales : null,
-            direccion_envio: pedido ? (pedido.direccion_envio ? pedido.direccion_envio.id : null) : direcciones[0].id,
-            contacto: pedido ? (pedido.contacto ? pedido.contacto.id : null) : null,
-            observaciones: pedido ? pedido.observaciones : '',
-            observaciones2: pedido ? pedido.observaciones2 : '',
-            descripcion: pedido ? pedido.descripcion : '',
-            finalizado_auto: pedido ? pedido.finalizado : false,
-
-        });
-    },[pedido]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -292,7 +294,7 @@ const PedidoForm = ({pedido, setPedido}) => {
         event.preventDefault();
         axios.post(BACKEND_SERVER + `/api/repuestos/pedido/`, {
             proveedor: datos.proveedor,
-            empresa: datos.empresa,
+            empresa: datos.empresa_id,
             fecha_entrega: datos.fecha_entrega,
             fecha_creacion: datos.fecha_creacion,
             fecha_prevista_entrega: datos.fecha_prevista_entrega,
@@ -325,9 +327,9 @@ const PedidoForm = ({pedido, setPedido}) => {
 
     const actualizarDatos = (event) => {
         event.preventDefault();
-        axios.put(BACKEND_SERVER + `/api/repuestos/pedido/${pedido.id}/`, {
+        axios.patch(BACKEND_SERVER + `/api/repuestos/pedido/${pedido.id}/`, {
             proveedor: datos.proveedor,
-            empresa: datos.empresa,
+            empresa: datos.empresa_id,
             fecha_entrega: datos.fecha_entrega,
             fecha_creacion: datos.fecha_creacion,
             fecha_prevista_entrega: datos.fecha_prevista_entrega,
@@ -534,7 +536,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                                     <Form.Label>Empresa (*)</Form.Label>
                                     <Form.Control as="select"  
                                                 name='empresa' 
-                                                value={datos.empresa}
+                                                value={datos.empresa_id}
                                                 onChange={handleInputChange}
                                                 disabled={handleDisabled()}
                                                 placeholder="Empresa">                                                    
@@ -639,22 +641,24 @@ const PedidoForm = ({pedido, setPedido}) => {
                             <Col>
                                 <Form.Group controlId="observaciones">
                                     <Form.Label>Observaciones pedido</Form.Label>
-                                    <Form.Control imput type="text" 
+                                    <Form.Control as="textarea" 
                                                 name='observaciones'
                                                 value = {datos.observaciones}
                                                 onChange = {handleInputChange}
-                                                placeholder="Observaciones">
+                                                placeholder="Observaciones"
+                                                rows={3}>
                                     </Form.Control>
                                 </Form.Group>
                             </Col>
                             <Col>
                                 <Form.Group controlId="observaciones2">
                                     <Form.Label>Observaciones final pedido</Form.Label>
-                                    <Form.Control imput type="text" 
+                                    <Form.Control as="textarea" 
                                                 name='observaciones2'
                                                 value = {datos.observaciones2}
                                                 onChange = {handleInputChange}
-                                                placeholder="Observaciones final del pedido">
+                                                placeholder="Observaciones final del pedido"
+                                                rows={3}>
                                     </Form.Control>
                                 </Form.Group>
                             </Col>
@@ -691,7 +695,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                         fecha_creacion = {moment(pedido.fecha_creacion).format('DD-MM-YYYY')}
                                                         linea={datos.lineas_pedido} 
                                                         VerPdf={verPdf}
-                                                        empresa={empresas.filter( s => s.id === pedido.empresa)[0]} 
+                                                        // empresa={empresas.filter( s => s.id === pedido.empresa)[0]} 
                                                         proveedor={pedido.proveedor}                                                   
                                                         lineas_adicionales={pedido.lineas_adicionales}
                                                         contacto={pedido.contacto}
@@ -706,8 +710,8 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                     <VistaIngPdf    pedido={pedido}
                                                                     fecha_creacion = {moment(pedido.fecha_creacion).format('DD-MM-YYYY')}
                                                                     linea={datos.lineas_pedido} 
-                                                                    VerIngPdf={verIngPdf}
-                                                                    empresa={empresas.filter( s => s.id === pedido.empresa)[0]} 
+                                                                    VerPdf={verPdf}
+                                                                    // empresa={empresas.filter( s => s.id === pedido.empresa)[0]} 
                                                                     proveedor={pedido.proveedor}                                                   
                                                                     lineas_adicionales={pedido.lineas_adicionales}
                                                                     contacto={pedido.contacto}
@@ -855,13 +859,13 @@ const PedidoForm = ({pedido, setPedido}) => {
             <MovimientoForm show={show_movimiento}
                             handleCloseMovimiento ={cerrarMovimiento}
                             linea={lineaMovimiento}
-                            empresa={datos.empresa}
+                            empresa={datos.empresa_id}
                             updatePedido={updatePedido}
             />
             <EntregaForm show={show_entrega}
                             handleCloseEntrega ={cerrarEntrega}
                             linea_adicional={lineaEntrega}
-                            //empresa={datos.empresa}
+                            //empresa={datos.empresa_id}
                             updatePedido={updatePedido}
             />
             <MovLista   show={show_listmovimiento}

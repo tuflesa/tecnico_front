@@ -14,9 +14,14 @@ const RepProveedorForm = ({proveedor}) => {
     
     const [datos, setDatos] = useState({     
         nombre: proveedor.nombre,
+        cif: proveedor.cif,
         direccion: proveedor.direccion,
+        poblacion: proveedor.poblacion,
+        pais: proveedor.pais? proveedor.pais:'España',
         telefono: proveedor.telefono,
-        contactos: proveedor.contactos ? proveedor.contactos : null
+        contactos: proveedor.contactos ? proveedor.contactos : null,
+        condicion_pago: proveedor.condicion_pago? proveedor.condicion_pago : '',
+        condicion_entrega: proveedor.condicion_entrega? proveedor.condicion_entrega : '',
     });
 
     const handleInputChange = (event) => {
@@ -30,8 +35,13 @@ const RepProveedorForm = ({proveedor}) => {
         event.preventDefault()       
         axios.put(BACKEND_SERVER + `/api/repuestos/proveedor/${proveedor.id}/`, {
             nombre: datos.nombre,
+            cif: datos.cif,
             direccion: datos.direccion,
+            poblacion: datos.poblacion,
+            pais: datos.pais,
             telefono: datos.telefono,
+            condicion_entrega: datos.condicion_entrega,
+            condicion_pago: datos.condicion_pago,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -59,8 +69,13 @@ const RepProveedorForm = ({proveedor}) => {
         event.preventDefault()
         axios.post(BACKEND_SERVER + `/api/repuestos/proveedor/`, {
             nombre: datos.nombre,
+            cif: datos.cif,
             direccion: datos.direccion,
+            poblacion: datos.poblacion,
+            pais: datos.pais,
             telefono: datos.telefono,
+            condicion_entrega: datos.condicion_entrega,
+            condicion_pago: datos.condicion_pago,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -124,6 +139,17 @@ const RepProveedorForm = ({proveedor}) => {
                                     />
                                     </Form.Group>
                             </Col>
+                            <Col>
+                                <Form.Group controlId="cif">
+                                    <Form.Label>CIF</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='cif' 
+                                                value={datos.cif}
+                                                onChange={handleInputChange} 
+                                                placeholder="CIF"
+                                    />
+                                    </Form.Group>
+                            </Col>
                         </Row>
                         <Row>
                             <Col>
@@ -137,6 +163,28 @@ const RepProveedorForm = ({proveedor}) => {
                                     />
                                     </Form.Group>
                             </Col>
+                            <Col>
+                                <Form.Group controlId="poblacion">
+                                    <Form.Label>Población</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='poblacion' 
+                                                value={datos.poblacion}
+                                                onChange={handleInputChange} 
+                                                placeholder="Población"
+                                    />
+                                    </Form.Group>
+                            </Col>
+                            <Col>
+                                <Form.Group controlId="pais">
+                                    <Form.Label>Pais</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='pais' 
+                                                value={datos.pais}
+                                                onChange={handleInputChange} 
+                                                placeholder="Pais"
+                                    />
+                                    </Form.Group>
+                            </Col>
                         </Row>
                         <Row>
                             <Col>
@@ -147,6 +195,32 @@ const RepProveedorForm = ({proveedor}) => {
                                                 value={datos.telefono}
                                                 onChange={handleInputChange} 
                                                 placeholder="Telefono"
+                                    />
+                                    </Form.Group>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <Form.Group controlId="condicion_pago">
+                                    <Form.Label>Condición de Pago: </Form.Label>
+                                    <Form.Control type="text" 
+                                                name='condicion_pago' 
+                                                value={datos.condicion_pago}
+                                                onChange={handleInputChange} 
+                                                placeholder="Condición de pago"
+                                    />
+                                    </Form.Group>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <Form.Group controlId="condicion_entrega">
+                                    <Form.Label>Condición de Entrega: Según Icoterm 2020 </Form.Label>
+                                    <Form.Control type="text" 
+                                                name='condicion_entrega' 
+                                                value={datos.condicion_entrega}
+                                                onChange={handleInputChange} 
+                                                placeholder="Condición de entrega"
                                     />
                                     </Form.Group>
                             </Col>
