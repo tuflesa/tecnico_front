@@ -18,16 +18,20 @@ const RodBancada = () => {
     const [secciones, setSecciones] = useState(null);
     const [maquina, setMaquina] = useState('');
     const [grupo, setGrupo] = useState('');
+    const [empresa, setEmpresa] = useState('');
     const [filtro, setFiltro] = useState(`?maquina__empresa__id=${user['tec-user'].perfil.empresa.id}`);
     const [operacion_marcada, setOperacionMarcada] = useState(null);
     const [show_conjunto, setShowConjunto] = useState(false);
+    const [formaciones_completadas, setFormacionesCompletadas] = useState('');
 
     useEffect(() => {
         const params = new URLSearchParams(filtro);
         const maquinaValue = params.get('maquina');
         const grupoValue = params.get('grupo');
+        const empresaValue = params.get('maquina__empresa__id');
         setMaquina(maquinaValue);
         setGrupo(grupoValue);
+        setEmpresa(empresaValue);
     }, [filtro]);
 
     useEffect(() => {
@@ -43,6 +47,22 @@ const RodBancada = () => {
             console.log(err);
         });
     }, [token, filtro]);
+
+    useEffect(() => {
+        maquina && empresa && grupo && axios.get(BACKEND_SERVER + `/api/rodillos/elemento_select/?conjunto__bancada__seccion__maquina__id=${maquina}&conjunto__bancada__grupos=${grupo}&conjunto__bancada__seccion__maquina__empresa=${empresa}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( rr => {
+            setFormacionesCompletadas(rr.data);
+            console.log('que recogemos de elementos');
+            console.log(rr.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [maquina, grupo, empresa]);
 
     useEffect(() => {
         if(maquina){
