@@ -17,23 +17,6 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina}) =
     const [tubo_madre, setTuboMadre] = useState('');
     const [grupo, setGrupo] = useState(null);
     const [rod_id, setRod_Id] = useState(''); //para guardar la informacion en EjesRodillos
-    //const [elemento_seleccionado, setElementoSeleccionado] = useState(null); //para comprobar si el conjunto esta ya creado
-
-    //operacion_marcada es Operacion con Seccion
-
-    /* useEffect(() => {
-        maquina && grupoId && axios.get(BACKEND_SERVER + `/api/rodillos/elemento_select/?conjunto__bancada__seccion__maquina__id=${maquina}&conjunto__bancada__seccion__grupos=${grupoId}`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            setElementoSeleccionado(res.data);
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    }, [maquina, grupoId]); */
     
     useEffect(() => { //PARA OBTENER LOS EJES DE LA OPERACION Y FILTRAR LOS RODILLOS
         operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/eje/?operacion=${operacion_marcada.id}`,{
@@ -93,12 +76,13 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina}) =
             }
         })
         .then( res => {
-            
+            if(res.data.length!==0){
+                bancada_id=res.data[0].id;
+            }
             //guardamos primero la Bancada, con el id de bancada guardamos el Conjunto y con el id de conjunto guardamos el Elemento
             if(EjesRodillos.length===ejes.length){
                 if(res.data.length===0){
-                    bancada_id=(res.data[0].id);
-                    axios.post(BACKEND_SERVER + `/api/rodillos/bancada/`, {
+                    axios.post(BACKEND_SERVER + `/api/rodillos/bancada/`, { //creamos bancada
                         seccion: operacion_marcada.seccion.id,
                         grupos: [grupoId],
                     }, {
@@ -107,7 +91,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina}) =
                             }     
                     })
                     .then( res => { 
-                        axios.post(BACKEND_SERVER + `/api/rodillos/conjunto/`, {
+                        axios.post(BACKEND_SERVER + `/api/rodillos/conjunto/`, { //creamos con id bancada el conjunto
                             bancada: res.data.id,
                             operacion: operacion_id,
                             icono:null,
@@ -119,7 +103,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina}) =
                         })
                         .then( r => { 
                             for(var x=0;x<EjesRodillos.length;x++){
-                                axios.post(BACKEND_SERVER + `/api/rodillos/elemento/`, {
+                                axios.post(BACKEND_SERVER + `/api/rodillos/elemento/`, { //creamos con id de conjunto el elemento
                                     conjunto: r.data.id,
                                     eje: EjesRodillos[x].eje,
                                     rodillo: EjesRodillos[x].rodillo,
@@ -144,16 +128,15 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina}) =
                     });
                     handlerCancelar();
                 }
-                else{
+                else{ //ya tenemos la bancada creada y buscarmos si tenemos conjunto
                     axios.get(BACKEND_SERVER + `/api/rodillos/elemento_select/?conjunto__bancada__seccion__id=${operacion_marcada.seccion.id}&conjunto__bancada__grupos=${grupoId}&conjunto__operacion=${operacion_marcada.id}`,{
                         headers: {
                             'Authorization': `token ${token['tec-token']}`
                         }
                     })
                     .then( rr => {
-                        //setElementoSeleccionado(rr.data);
-                        if(rr.data.length===0){
-                            axios.post(BACKEND_SERVER + `/api/rodillos/conjunto/`, {
+                        if(rr.data.length===0){ //no tenemos conjunto, vamos a crear conjunto y elementos
+                            axios.post(BACKEND_SERVER + `/api/rodillos/conjunto/`, { //creamos conjunto
                                 bancada: bancada_id,
                                 operacion: operacion_id,
                                 icono:null,
@@ -164,8 +147,8 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina}) =
                                     }     
                             })
                             .then( r => { 
-                                for(var x=0;x<EjesRodillos.length;x++){
-                                    axios.post(BACKEND_SERVER + `/api/rodillos/elemento/`, {
+                                for(var x=0;x<EjesRodillos.length;x++){//creamos elementos
+                                    axios.post(BACKEND_SERVER + `/api/rodillos/elemento/`, { 
                                         conjunto: r.data.id,
                                         eje: EjesRodillos[x].eje,
                                         rodillo: EjesRodillos[x].rodillo,
@@ -185,7 +168,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina}) =
                                 console.error(err);
                             })
                         }
-                        else{
+                        else{ //el conjunto y elementos ya existen y machacamos la información
                             for(var x=0;x<rr.data.length;x++){
                                 axios.patch(BACKEND_SERVER + `/api/rodillos/elemento/${rr.data[x].id}/`, {
                                     eje: parseInt(EjesRodillos[x].eje),

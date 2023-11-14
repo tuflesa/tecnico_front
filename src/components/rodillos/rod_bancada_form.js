@@ -80,6 +80,56 @@ const RodBancada = () => {
         }
     }, [maquina]);
 
+    /* useEffect(() => {
+        //cuando tenemos las 2 variables, anotamos en operaciones las que ya tengo completadas.
+        console.log('que vale operaciones');
+        console.log(operaciones);
+        console.log(formaciones_completadas);
+        if(operaciones){
+            for(var x=0; x<operaciones.length;x++){
+                for(var y=0; y<formaciones_completadas.length; y++){
+                    if(operaciones[x].id===formaciones_completadas[y].conjunto.operacion){
+                        const nuevoCampo = 'true';
+                        console.log('operaciones vale: ' + operaciones[x].id + 'formaciones_completas : ' + formaciones_completadas[y].conjunto.operacion)
+                    }
+                    else{
+                        const nuevoCampo = 'false';
+                        console.log('operaciones vale: ' + operaciones[x].id + 'formaciones_completas : ' + formaciones_completadas[y].conjunto.operacion)
+                    }
+                }
+            }
+        }
+    }, [operaciones, formaciones_completadas]); */
+
+    useEffect(() => {
+        // cuando tenemos las 2 variables, anotamos en operaciones las que ya tengo completadas.
+        console.log('que vale operaciones');
+        console.log(operaciones);
+        console.log(formaciones_completadas);
+      
+        if (operaciones && formaciones_completadas) {
+          const nuevasOperaciones = operaciones.map(operacion => {
+            // Inicializamos nuevoCampo en false
+            let nuevoCampo = false;
+      
+            for (let y = 0; y < formaciones_completadas.length; y++) {
+              if (operacion.id === formaciones_completadas[y].conjunto.operacion) {
+                // Si hay una coincidencia, establecemos nuevoCampo en true
+                nuevoCampo = true;
+                break; // Salimos del bucle ya que ya encontramos una coincidencia
+              }
+            }
+      
+            // Devolvemos una nueva operación con el campo nuevoCampo
+            return { ...operacion, nuevoCampo };
+          });
+      
+          // Ahora tienes un nuevo array de operaciones con el campo nuevoCampo agregado
+          console.log(nuevasOperaciones);
+        }
+      }, [operaciones, formaciones_completadas]);
+      
+
     const actualizaFiltro = str => {
         setFiltro(str);
     }
@@ -116,19 +166,25 @@ const RodBancada = () => {
                                 ))}
                             </thead>
                             <tbody>
-                                    {secciones && secciones.map(seccion => (
-                                        <td key={seccion.id}>
-                                            {operaciones && operaciones.map((operacion) => {
-                                                if (operacion.seccion.id === seccion.id) {
-                                                return (
-                                                    <Button className="btn btn-outline-dark btn-sm" key={operacion.id} onClick={()=> GuardarId_Operacion(operacion)}>{operacion.nombre}</Button>
-                                                    
-                                                    //<td key={operacion.id}>{operacion.nombre}</td>
-                                                )
-                                                }
-                                            })}
-                                        </td>
-                                    ))}
+                                {secciones && secciones.map(seccion => (
+                                    <td key={seccion.id}>
+                                        {operaciones && formaciones_completadas && operaciones.map((operacion) => {
+                                        if (operacion.seccion.id === seccion.id) {
+                                            const nuevoCampo = formaciones_completadas.some(item => item.conjunto.operacion === operacion.id);
+
+                                            return (
+                                            <Button
+                                                key={operacion.id}
+                                                className={`btn ${nuevoCampo ? 'btn-primary' : 'btn-outline-dark'} btn-sm`}
+                                                onClick={() => GuardarId_Operacion(operacion)}
+                                            >
+                                                {operacion.nombre}
+                                            </Button>
+                                            );
+                                        }
+                                        })}
+                                    </td>
+                                ))}
                             </tbody>
                         </Table>
                     </Col>
