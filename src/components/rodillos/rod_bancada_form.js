@@ -19,7 +19,7 @@ const RodBancada = () => {
     const [maquina, setMaquina] = useState('');
     const [grupo, setGrupo] = useState('');
     const [empresa, setEmpresa] = useState('');
-    const [filtro, setFiltro] = useState(`?maquina__empresa__id=${user['tec-user'].perfil.empresa.id}`);
+    const [filtro, setFiltro] = useState(`?maquina__empresa__id=${user['tec-user'].perfil.empresa.id}&pertence_grupo=${true}`);
     const [operacion_marcada, setOperacionMarcada] = useState(null);
     const [show_conjunto, setShowConjunto] = useState(false);
     const [formaciones_completadas, setFormacionesCompletadas] = useState('');
@@ -42,31 +42,31 @@ const RodBancada = () => {
         })
         .then( res => {
             setSecciones(res.data);
+            console.log('SECCIONES');
+            console.log(res.data);
         })
         .catch( err => {
             console.log(err);
         });
     }, [token, filtro]);
 
-    useEffect(() => {
-        maquina && empresa && grupo && axios.get(BACKEND_SERVER + `/api/rodillos/elemento_select/?conjunto__bancada__seccion__maquina__id=${maquina}&conjunto__bancada__grupos=${grupo}&conjunto__bancada__seccion__maquina__empresa=${empresa}`,{
+    useEffect(() => { //ESTO TENDRA QUE SER DE CELDA EN VEZ DE ELEMENTO Recogemos las celdas ya creadas según empresa, máquina y grupo, elegidos
+        maquina && empresa && grupo && axios.get(BACKEND_SERVER + `/api/rodillos/celda/?bancada__seccion__maquina__id=${maquina}&bancada__tubo_madre=${grupo}&bancada__seccion__maquina__empresa=${empresa}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }
         })
         .then( rr => {
             setFormacionesCompletadas(rr.data);
-            console.log('que recogemos de elementos');
-            console.log(rr.data);
         })
         .catch( err => {
             console.log(err);
         });
     }, [maquina, grupo, empresa]);
 
-    useEffect(() => {
+    useEffect(() => { //recogemos las operaciones de la máquina elegida
         if(maquina){
-            axios.get(BACKEND_SERVER + `/api/rodillos/operacion/?seccion__maquina__id=${maquina}`,{
+            axios.get(BACKEND_SERVER + `/api/rodillos/operacion/?seccion__maquina__id=${maquina}&seccion_pertenece_grupo=${true}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
@@ -80,33 +80,7 @@ const RodBancada = () => {
         }
     }, [maquina]);
 
-    /* useEffect(() => {
-        //cuando tenemos las 2 variables, anotamos en operaciones las que ya tengo completadas.
-        console.log('que vale operaciones');
-        console.log(operaciones);
-        console.log(formaciones_completadas);
-        if(operaciones){
-            for(var x=0; x<operaciones.length;x++){
-                for(var y=0; y<formaciones_completadas.length; y++){
-                    if(operaciones[x].id===formaciones_completadas[y].conjunto.operacion){
-                        const nuevoCampo = 'true';
-                        console.log('operaciones vale: ' + operaciones[x].id + 'formaciones_completas : ' + formaciones_completadas[y].conjunto.operacion)
-                    }
-                    else{
-                        const nuevoCampo = 'false';
-                        console.log('operaciones vale: ' + operaciones[x].id + 'formaciones_completas : ' + formaciones_completadas[y].conjunto.operacion)
-                    }
-                }
-            }
-        }
-    }, [operaciones, formaciones_completadas]); */
-
-    useEffect(() => {
-        // cuando tenemos las 2 variables, anotamos en operaciones las que ya tengo completadas.
-        console.log('que vale operaciones');
-        console.log(operaciones);
-        console.log(formaciones_completadas);
-      
+    useEffect(() => { //marcamos las operaciones que ya tienen celda y las que no tienen FALTA QUE LAS FORMACIONES_COMPLETADAS SE LEAN DE CELDAS Y NO DEL ELEMENTO
         if (operaciones && formaciones_completadas) {
           const nuevasOperaciones = operaciones.map(operacion => {
             // Inicializamos nuevoCampo en false
@@ -124,7 +98,7 @@ const RodBancada = () => {
             return { ...operacion, nuevoCampo };
           });
       
-          // Ahora tienes un nuevo array de operaciones con el campo nuevoCampo agregado
+          // con este nuevoCampo en el array podemos pintar de un color o de otro
           console.log(nuevasOperaciones);
         }
       }, [operaciones, formaciones_completadas]);
@@ -158,7 +132,7 @@ const RodBancada = () => {
             {maquina? 
                 <Row>
                     <Col>
-                        <h5 className="mb-3 mt-3">Bancada</h5>
+                        <h5 className="mb-3 mt-3">Bancadas</h5>
                         <Table striped bordered hover>
                             <thead>
                                 {secciones && secciones.map(seccion => (

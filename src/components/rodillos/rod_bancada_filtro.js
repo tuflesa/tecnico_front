@@ -84,7 +84,7 @@ const RodBancadaFiltro = ({actualizaFiltro}) => {
     }, [token, datos.empresa]);
 
     useEffect(()=>{
-        const filtro = `?maquina__empresa__id=${datos.empresa}&id=${datos.id}&maquina=${datos.maquina}&grupo=${datos.grupo}`
+        const filtro = `?maquina__empresa__id=${datos.empresa}&id=${datos.id}&maquina=${datos.maquina}&pertenece_grupo=${true}&grupo=${datos.grupo}`
         actualizaFiltro(filtro);
     },[datos]);
 
