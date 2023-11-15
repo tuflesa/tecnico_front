@@ -22,6 +22,7 @@ const RepProveedorForm = ({proveedor}) => {
         contactos: proveedor.contactos ? proveedor.contactos : null,
         condicion_pago: proveedor.condicion_pago? proveedor.condicion_pago : '',
         condicion_entrega: proveedor.condicion_entrega? proveedor.condicion_entrega : '',
+        cod_ekon: proveedor.cod_ekon,
     });
 
     const handleInputChange = (event) => {
@@ -42,6 +43,7 @@ const RepProveedorForm = ({proveedor}) => {
             telefono: datos.telefono,
             condicion_entrega: datos.condicion_entrega,
             condicion_pago: datos.condicion_pago,
+            cod_ekon: datos.cod_ekon,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -76,6 +78,7 @@ const RepProveedorForm = ({proveedor}) => {
             telefono: datos.telefono,
             condicion_entrega: datos.condicion_entrega,
             condicion_pago: datos.condicion_pago,
+            cod_ekon: datos.cod_ekon,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -147,6 +150,17 @@ const RepProveedorForm = ({proveedor}) => {
                                                 value={datos.cif}
                                                 onChange={handleInputChange} 
                                                 placeholder="CIF"
+                                    />
+                                    </Form.Group>
+                            </Col>
+                            <Col>
+                                <Form.Group controlId="cod_ekon">
+                                    <Form.Label>COD EKON</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='cod_ekon' 
+                                                value={datos.cod_ekon}
+                                                onChange={handleInputChange} 
+                                                placeholder="COD EKON"
                                     />
                                     </Form.Group>
                             </Col>

@@ -255,6 +255,7 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
                                 <Text style={{color: 'grey', marginTop: 15}}>Datos Proveedor:</Text>
                                 <Text>{proveedor.nombre}</Text>
                                 <Text>{proveedor.cif}</Text>
+                                <Text>Código:{proveedor.cod_ekon}</Text>
                                 {contacto ? <Text>Att: {contacto.nombre}</Text>:<Text>   </Text>}
                                 <Text>{proveedor.telefono}</Text>
                                 <Text>{proveedor.direccion}</Text>
@@ -269,7 +270,8 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
                                 <Text>{pedido.empresa.nombre}</Text>
                                 <Text>{pedido.empresa.cif}</Text>
                                 <Text>{pedido.empresa.direccion}</Text>
-                                <Text>{pedido.empresa.poblacion + ' - ' + pedido.empresa.codpostal}</Text>
+                                <Text>{pedido.empresa.poblacion}</Text>
+                                <Text>{pedido.empresa.codpostal}</Text>
                                 <Text>España</Text>
                                 <Text>Telf: {pedido.empresa.telefono}</Text>
                             </View>

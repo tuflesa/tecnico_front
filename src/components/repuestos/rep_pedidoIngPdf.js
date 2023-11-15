@@ -263,6 +263,7 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicional
                                 <Text style={{color: 'grey', marginTop: 15}}>Supplier details:</Text>
                                 <Text>{proveedor.nombre}</Text>
                                 <Text>{proveedor.cif}</Text>
+                                <Text>Code:{proveedor.cod_ekon}</Text>
                                 {contacto ? <Text>Attn: {contacto.nombre}</Text>:<Text>   </Text>}
                                 <Text>{proveedor.telefono}</Text>
                                 <Text>{proveedor.direccion}</Text>
@@ -277,7 +278,8 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicional
                                 <Text>{pedido.empresa.nombre}</Text>
                                 <Text>{pedido.empresa.cif}</Text>
                                 <Text>{pedido.empresa.direccion}</Text>
-                                <Text>{pedido.empresa.poblacion + ' - ' + pedido.empresa.codpostal}</Text>
+                                <Text>{pedido.empresa.poblacion}</Text>
+                                <Text>{pedido.empresa.codpostal}</Text>
                                 <Text>Spain</Text>
                                 <Text>Telf: {pedido.empresa.telefono}</Text>
                             </View>
@@ -287,7 +289,7 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicional
                                 {/* <Text>{direccion_envio.cif}</Text> */}
                                 <Text>{direccion_envio.direccion}</Text>
                                 <Text>{direccion_envio.poblacion}</Text>
-                                <Text>{direccion_envio.codpostal + ' - ' + direccion_envio.provincia}</Text>
+                                <Text>{direccion_envio.codpostal + ' ' + direccion_envio.provincia}</Text>
                                 <Text>Spain</Text>
                                 <Text>Telf: {direccion_envio.telefono}</Text>
                             </View>
