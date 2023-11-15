@@ -1,8 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useCookies } from 'react-cookie';
 import { Document, Page, Image, View, Text, StyleSheet, Svg, Path, G, Rect, Polygon } from "@react-pdf/renderer";
 
-const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicionales, proveedor, contacto, direccion_envio}) =>{
+const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, proveedor, contacto, direccion_envio}) =>{
+    //borro empresa y lo sustituyo por pedido.empresa... la variable empresa entraba sin datos
     var total_pedido= 0;
+    const [token] = useCookies(['tec-token']);
+
+    useEffect(()=>{
+        console.log('esto vale proveedor');
+        console.log(proveedor);
+        console.log(pedido);
+    },[token]);
 
     const formatNumber = (numero) =>{
         return new Intl.NumberFormat('de-DE',{ style: 'currency', currency: 'EUR' }).format(numero)
@@ -13,7 +22,6 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
     }
 
     function parseData(){
-        console.log(empresa);
         if(linea){
             return linea.map((data, i)=>{
                 return(
@@ -85,9 +93,20 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
         page:{
             margin: 30,
         },
+        page1:{
+            //marginLeft: 25,
+            //marginRight: 25,
+            textAlign: 'justify',
+            margin: 3,
+            padding: 3,
+            flex: 3,
+            fontSize: 14,
+            marginBottom: 5,
+        },
         page2:{
             marginLeft: 30,
             marginRight: 30,
+            marginBottom: 3,
         },
         page3:{
             marginLeft: 30,
@@ -98,13 +117,13 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
         section: {
             flexDirection: 'row',
             flexGrow: 1,
+            marginBottom: 3,
         },
         imagen: {
             fixed: true,
             width: 200,
             height: 80,
-            margin: 5,
-            padding: 5,
+            marginLeft: -45,
             flexGrow: 1,
             flexDirection: "column",
         },
@@ -120,14 +139,17 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
             padding: 5,
             flex: 1,
             flexDirection: "column",
-            fontSize: 10
+            fontSize: 10,
         },
         section44: {
-            margin: 5,
-            padding: 5,
-            flex: 5,
+            margin: 3,
+            padding: 3,
+            flex: 3,
             flexDirection: "column",
-            fontSize: 10
+            fontSize: 10,
+        },
+        section_negrita: {
+            fontWeight: 'bold',
         },
         section4: {
             margin: 5,
@@ -189,6 +211,7 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
         },
         totalNumber: {
             marginRight: 70,
+            marginBottom: 3,
             fontSize: 10,
             bottom: 30,
             left: 0,
@@ -205,46 +228,70 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
             textAlign: 'justify',
             color: 'grey',
         },
+        textWithMargin: {
+            marginBottom: 5,
+        },
     });
     return(     
         <Document>
             <Page size="A4">
-                <Text render={({ pageNumber, totalPages }) => ("  ")} fixed />  
+                <Text render={({ pageNumber, totalPages }) => ("  ")} fixed /> 
                 <View style={styles.page} >
-                    <View fixed>
+                    <View style={{ flexDirection: 'row' }}>
                         <View style={styles.imagen}>
-                            {empresa.id===1?<VerLogo/>:<Image src= { empresa.logo } width="500" height="500"/>}
+                            {pedido.empresa.id === 1 ? <VerLogo /> : <Image src={pedido.empresa.logo} width="500" height="500" />}
+                        </View>
+                        <View style={{ flex: 1, marginLeft: 10, justifyContent: 'center' }}>
+                            <View style={styles.section_negrita}>
+                                <Text style={styles.page1}>Pedido</Text>
+                                <Text style={styles.section44}>Fecha: {fecha_creacion}</Text>
+                                <Text style={{ ...styles.section44, marginBottom: 5 }}>Nº Pedido: {pedido.numero}</Text>
+                            </View>
                         </View>
                     </View>
                     <View style={styles.page2}>               
                         <View style={styles.section}>
                             <View style={styles.section44}>
-                                <Text>Fecha:    {fecha_creacion}</Text>
-                                {contacto ? <Text>Atención: {contacto.nombre}</Text>:<Text>   </Text>}
-                                <Text>Empresa:  {proveedor.nombre}</Text>
-                                <Text>Asunto:   Pedido</Text>
-                                <Text>De:   {pedido.creado_por.get_full_name}</Text>
+                                <Text style={{color: 'grey', marginTop: 15}}>Datos Proveedor:</Text>
+                                <Text>{proveedor.nombre}</Text>
+                                <Text>{proveedor.cif}</Text>
+                                <Text>Código:{proveedor.cod_ekon}</Text>
+                                {contacto ? <Text>Att: {contacto.nombre}</Text>:<Text>   </Text>}
+                                <Text>{proveedor.telefono}</Text>
+                                <Text>{proveedor.direccion}</Text>
+                                <Text>{proveedor.poblacion}</Text>
+                                <Text>{proveedor.pais}</Text>
+                                <Text style={{marginTop: 15}}>Asunto:   Pedido</Text>
+                                <Text>Creado por:   {pedido.creado_por.get_full_name}</Text>
+                                <Text>Email: {pedido.creado_por.email}</Text>
                             </View>
                             <View style={styles.section4}>
-                                <Text>Dirección de Envío:</Text>
-                                <Text>{empresa.nombre}</Text>
+                                <Text style={{color: 'grey', marginTop: 15}}>Dirección de Facturación:</Text>
+                                <Text>{pedido.empresa.nombre}</Text>
+                                <Text>{pedido.empresa.cif}</Text>
+                                <Text>{pedido.empresa.direccion}</Text>
+                                <Text>{pedido.empresa.poblacion}</Text>
+                                <Text>{pedido.empresa.codpostal}</Text>
+                                <Text>España</Text>
+                                <Text>Telf: {pedido.empresa.telefono}</Text>
+                            </View>
+                            <View style={styles.section4}>
+                                <Text style={{color: 'grey', marginTop: 15}}>Dirección de Envío:</Text>
+                                <Text>{pedido.empresa.nombre}</Text>
+                                {/* <Text>{direccion_envio.cif}</Text> */}
                                 <Text>{direccion_envio.direccion}</Text>
                                 <Text>{direccion_envio.poblacion}</Text>
                                 <Text>{direccion_envio.codpostal + ' - ' + direccion_envio.provincia}</Text>
+                                <Text>España</Text>
+                                <Text>Telf: {direccion_envio.telefono}</Text>
                             </View>
                         </View>
                     </View>
                     <View style={styles.page2}>
                         <View style={styles.section}>
                             <View style={styles.section3}>
-                                <Text>Nº Pedido: {pedido.numero}</Text>                            
-                            </View>
-                        </View>
-                    </View>
-                    <View style={styles.page2}>
-                        <View style={styles.section}>
-                            <View style={styles.section3}>
-                                <Text>Observaciones pedido: {pedido.observaciones}</Text>                            
+                                {/* <Text style={styles.textWithMargin}>Nº Pedido: {pedido.numero}</Text>  */}
+                                <Text style={styles.textWithMargin}>Observaciones pedido: {pedido.observaciones}</Text>                            
                             </View>
                         </View>
                     </View>
@@ -274,7 +321,14 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
                 </View>
                 {Total()}
                 {Total_adic()}
-                <View style={styles.totalNumber}><Text>Total Pedido: {Number.parseFloat(total_pedido).toFixed(2)}€</Text></View>
+                <View style={styles.totalNumber}>
+                    <Text>Base Imponible: {Number.parseFloat(total_pedido).toFixed(2)}€</Text>
+                </View>
+                <View style={styles.totalNumber}>
+                    {proveedor.pais!=='España'?<Text style={{marginBottom:10}}>OPERACION INTRACOMUNITARIA EXENTA DE IVA</Text>:null}
+                </View>
+                {/* <View style={styles.totalNumber}><Text>Iva aplicable: {'        ' + proveedor.iva}%</Text></View> */}
+                {/* <View style={styles.totalNumber}><Text>Total Pedido: {Number.parseFloat((total_pedido)*(proveedor.iva/100+1)).toFixed(2)}€</Text></View> */}
                 <View style={styles.page2}>
                     <View style={styles.section}>
                         <View style={styles.section3}>
@@ -285,7 +339,10 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, empresa, lineas_adicio
                 <View style={styles.page2}>
                     <View style={styles.section}>
                         <View style={styles.section3}>
-                            <Text>Nota: Por favor indicar en nº de pedido en el albarán de entrega.</Text>
+                            <Text style={styles.textWithMargin}>Nota: Por favor indicar en nº de pedido en el albarán de entrega.</Text>
+                            <Text style={styles.textWithMargin}>Condiciones de Pago: {proveedor.condicion_pago}</Text>
+                            <Text style={styles.textWithMargin}>Condiciones de Entrega - Incoterm 2020: {proveedor.condicion_entrega}</Text>
+                            
                         </View>
                     </View>
                 </View>
