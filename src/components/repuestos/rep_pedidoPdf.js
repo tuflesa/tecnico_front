@@ -123,8 +123,7 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
             fixed: true,
             width: 200,
             height: 80,
-            margin: 5,
-            padding: 5,
+            marginLeft: -45,
             flexGrow: 1,
             flexDirection: "column",
         },
@@ -238,32 +237,35 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
             <Page size="A4">
                 <Text render={({ pageNumber, totalPages }) => ("  ")} fixed /> 
                 <View style={styles.page} >
-                    <View fixed>
+                    <View style={{ flexDirection: 'row' }}>
                         <View style={styles.imagen}>
-                            {pedido.empresa.id===1?<VerLogo/>:<Image src= { pedido.empresa.logo } width="500" height="500"/>}
+                            {pedido.empresa.id === 1 ? <VerLogo /> : <Image src={pedido.empresa.logo} width="500" height="500" />}
                         </View>
-                    </View>
-                    <View style={styles.section_negrita}>
-                        <Text style={styles.page1}>Pedido</Text>
-                        <Text style={styles.section44}>Fecha:    {fecha_creacion}</Text>
-                        <Text style={{...styles.section44, marginBottom: 5}}>Nº Pedido: {pedido.numero}</Text> 
+                        <View style={{ flex: 1, marginLeft: 10, justifyContent: 'center' }}>
+                            <View style={styles.section_negrita}>
+                                <Text style={styles.page1}>Pedido</Text>
+                                <Text style={styles.section44}>Fecha: {fecha_creacion}</Text>
+                                <Text style={{ ...styles.section44, marginBottom: 5 }}>Nº Pedido: {pedido.numero}</Text>
+                            </View>
+                        </View>
                     </View>
                     <View style={styles.page2}>               
                         <View style={styles.section}>
                             <View style={styles.section44}>
-                                <Text style={{color: 'grey'}}>Datos Proveedor:</Text>
+                                <Text style={{color: 'grey', marginTop: 15}}>Datos Proveedor:</Text>
                                 <Text>{proveedor.nombre}</Text>
                                 <Text>{proveedor.cif}</Text>
                                 {contacto ? <Text>Att: {contacto.nombre}</Text>:<Text>   </Text>}
                                 <Text>{proveedor.telefono}</Text>
                                 <Text>{proveedor.direccion}</Text>
-                                <Text style={styles.textWithMargin}>{proveedor.poblacion + ' - ' + proveedor.pais}</Text>
-                                <Text>Asunto:   Pedido</Text>
-                                <Text>De:   {pedido.creado_por.get_full_name}</Text>
+                                <Text>{proveedor.poblacion}</Text>
+                                <Text>{proveedor.pais}</Text>
+                                <Text style={{marginTop: 15}}>Asunto:   Pedido</Text>
+                                <Text>Creado por:   {pedido.creado_por.get_full_name}</Text>
                                 <Text>Email: {pedido.creado_por.email}</Text>
                             </View>
                             <View style={styles.section4}>
-                                <Text style={{color: 'grey'}}>Dirección de Facturación:</Text>
+                                <Text style={{color: 'grey', marginTop: 15}}>Dirección de Facturación:</Text>
                                 <Text>{pedido.empresa.nombre}</Text>
                                 <Text>{pedido.empresa.cif}</Text>
                                 <Text>{pedido.empresa.direccion}</Text>
@@ -272,7 +274,7 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
                                 <Text>Telf: {pedido.empresa.telefono}</Text>
                             </View>
                             <View style={styles.section4}>
-                                <Text style={{color: 'grey'}}>Dirección de Envío:</Text>
+                                <Text style={{color: 'grey', marginTop: 15}}>Dirección de Envío:</Text>
                                 <Text>{pedido.empresa.nombre}</Text>
                                 {/* <Text>{direccion_envio.cif}</Text> */}
                                 <Text>{direccion_envio.direccion}</Text>
