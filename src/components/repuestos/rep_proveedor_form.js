@@ -34,7 +34,7 @@ const RepProveedorForm = ({proveedor}) => {
 
     const actualizarDatos = (event) => {
         event.preventDefault()       
-        axios.put(BACKEND_SERVER + `/api/repuestos/proveedor/${proveedor.id}/`, {
+        axios.patch(BACKEND_SERVER + `/api/repuestos/proveedor/${proveedor.id}/`, {
             nombre: datos.nombre,
             cif: datos.cif,
             direccion: datos.direccion,

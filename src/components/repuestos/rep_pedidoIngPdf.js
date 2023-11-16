@@ -121,11 +121,13 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicional
         },
         imagen: {
             fixed: true,
-            width: 200,
+            width: 5,
             height: 80,
-            marginLeft: -45,
+            margin: 5,
+            padding: 5,
+            //marginLeft: -45,
             flexGrow: 1,
-            flexDirection: "column",
+            //flexDirection: "column",
         },
         iconos: {
             fixed: true,
@@ -245,9 +247,9 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicional
                 <View style={styles.page} >
                     <View style={{ flexDirection: 'row' }}>
                         <View style={styles.imagen}>
-                            {pedido.empresa.id === 1 ? <VerLogo /> : <Image src={pedido.empresa.logo} width="500" height="500" />}  
+                            {pedido.empresa.id === 1 ? <VerLogo /> : <Image src={pedido.empresa.logo}/>}  
                         </View>
-                        <View style={{ flex: 1, marginLeft: 10, justifyContent: 'center' }}>
+                        <View style={{ flex: 1, marginLeft: 160, justifyContent: 'center' }}>
                             <View style={styles.section_negrita}>
                                 <Text style={styles.page1}>Purchase Order</Text>
                                 <Text style={styles.section44}>Date:    {fecha_creacion}</Text>
