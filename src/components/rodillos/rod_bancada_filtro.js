@@ -18,6 +18,8 @@ const RodBancadaFiltro = ({actualizaFiltro}) => {
     const [empresas, setEmpresas] = useState(null);
     const [zonas, setZonas] = useState(null);
     const [grupos, setGrupos] = useState(null);
+    const [grupoId, setGrupoId] = useState('');
+    const [tuboMadre, setTuboMadre]=useState('');
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
@@ -84,10 +86,9 @@ const RodBancadaFiltro = ({actualizaFiltro}) => {
     }, [token, datos.empresa]);
 
     useEffect(()=>{
-        const filtro = `?maquina__empresa__id=${datos.empresa}&id=${datos.id}&maquina=${datos.maquina}&pertenece_grupo=${true}&grupo=${datos.grupo}`
+        const filtro = `?maquina__empresa__id=${datos.empresa}&id=${datos.id}&maquina=${datos.maquina}&pertenece_grupo=${true}&grupo=${grupoId}&tubo_madre=${tuboMadre}`
         actualizaFiltro(filtro);
     },[datos]);
-
 
     const handleInputChange = (event) => {
         setDatos({
@@ -95,7 +96,18 @@ const RodBancadaFiltro = ({actualizaFiltro}) => {
             [event.target.name] : event.target.value
         })
     }
-
+  
+    const handleInputChangeGrupo = (event) => {
+        const [id, madre] = event.target.value.split(',');
+        setGrupoId(id);
+        setTuboMadre(madre);
+        // Ahora, grupoId y tuboMadre contienen los dos valores separados
+        setDatos({
+            ...datos,
+            grupo : event.target.value
+        });
+    };
+    
     return ( 
         <Container>
             <h5 className="mb-3 mt-3">Filtro</h5>
@@ -141,18 +153,17 @@ const RodBancadaFiltro = ({actualizaFiltro}) => {
                     <Col>
                         <Form.Group controlId="grupo">
                             <Form.Label>Grupo Ø</Form.Label>
-                            <Form.Control as="select" 
-                                            value={datos.grupo}
-                                            name='grupo'
-                                            onChange={handleInputChange}>
+                            <Form.Control 
+                                as="select" 
+                                value={datos.grupo}
+                                name='grupo'
+                                onChange={handleInputChangeGrupo} >
                                 <option key={0} value={''}>Todas</option>
-                                {grupos && grupos.map( grupo => {
-                                    return (
-                                    <option key={grupo.id} value={grupo.id}>
+                                {grupos && grupos.map(grupo => (
+                                    <option key={grupo.id} value={`${grupo.id},${grupo.tubo_madre}`}>
                                         {grupo.tubo_madre}
                                     </option>
-                                    )
-                                })}
+                                ))}
                             </Form.Control>
                         </Form.Group>
                     </Col>

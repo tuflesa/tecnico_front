@@ -19,6 +19,7 @@ const RodBancada = () => {
     const [maquina, setMaquina] = useState('');
     const [grupo, setGrupo] = useState('');
     const [empresa, setEmpresa] = useState('');
+    const [tubo_madre, setTuboMadre] = useState('');
     const [filtro, setFiltro] = useState(`?maquina__empresa__id=${user['tec-user'].perfil.empresa.id}&pertence_grupo=${true}`);
     const [operacion_marcada, setOperacionMarcada] = useState(null);
     const [show_conjunto, setShowConjunto] = useState(false);
@@ -29,9 +30,11 @@ const RodBancada = () => {
         const maquinaValue = params.get('maquina');
         const grupoValue = params.get('grupo');
         const empresaValue = params.get('maquina__empresa__id');
+        const tuboMadreValue = params.get('tubo_madre');
         setMaquina(maquinaValue);
         setGrupo(grupoValue);
         setEmpresa(empresaValue);
+        setTuboMadre(tuboMadreValue);
     }, [filtro]);
 
     useEffect(() => {
@@ -42,16 +45,14 @@ const RodBancada = () => {
         })
         .then( res => {
             setSecciones(res.data);
-            console.log('SECCIONES');
-            console.log(res.data);
         })
         .catch( err => {
             console.log(err);
         });
     }, [token, filtro]);
 
-    useEffect(() => { //ESTO TENDRA QUE SER DE CELDA EN VEZ DE ELEMENTO Recogemos las celdas ya creadas según empresa, máquina y grupo, elegidos
-        maquina && empresa && grupo && axios.get(BACKEND_SERVER + `/api/rodillos/celda/?bancada__seccion__maquina__id=${maquina}&bancada__tubo_madre=${grupo}&bancada__seccion__maquina__empresa=${empresa}`,{
+    useEffect(() => { //Recogemos las celdas ya creadas según empresa, máquina y grupo, elegidos
+        maquina && empresa && grupo && axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__seccion__maquina__id=${maquina}&bancada__seccion__maquina__empresa=${empresa}&bancada__tubo_madre=${tubo_madre}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }
@@ -80,12 +81,10 @@ const RodBancada = () => {
         }
     }, [maquina]);
 
-    useEffect(() => { //marcamos las operaciones que ya tienen celda y las que no tienen FALTA QUE LAS FORMACIONES_COMPLETADAS SE LEAN DE CELDAS Y NO DEL ELEMENTO
+    useEffect(() => { //para pintar las casillas de distinto color, añadimos nuevoCampo = true si tienen valor
         if (operaciones && formaciones_completadas) {
           const nuevasOperaciones = operaciones.map(operacion => {
-            // Inicializamos nuevoCampo en false
             let nuevoCampo = false;
-      
             for (let y = 0; y < formaciones_completadas.length; y++) {
               if (operacion.id === formaciones_completadas[y].conjunto.operacion) {
                 // Si hay una coincidencia, establecemos nuevoCampo en true
@@ -93,16 +92,11 @@ const RodBancada = () => {
                 break; // Salimos del bucle ya que ya encontramos una coincidencia
               }
             }
-      
-            // Devolvemos una nueva operación con el campo nuevoCampo
+            // Devolvemos una nueva operación incluyendo el campo nuevoCampo
             return { ...operacion, nuevoCampo };
           });
-      
-          // con este nuevoCampo en el array podemos pintar de un color o de otro
-          console.log(nuevasOperaciones);
         }
       }, [operaciones, formaciones_completadas]);
-      
 
     const actualizaFiltro = str => {
         setFiltro(str);
@@ -135,30 +129,33 @@ const RodBancada = () => {
                         <h5 className="mb-3 mt-3">Bancadas</h5>
                         <Table striped bordered hover>
                             <thead>
-                                {secciones && secciones.map(seccion => (
-                                    <th key={seccion.id}>{seccion.nombre}</th>
-                                ))}
+                                <tr>
+                                    {secciones && secciones.map(seccion => (
+                                        <th key={seccion.id}>{seccion.nombre}</th>
+                                    ))}
+                                </tr>
                             </thead>
                             <tbody>
-                                {secciones && secciones.map(seccion => (
-                                    <td key={seccion.id}>
-                                        {operaciones && formaciones_completadas && operaciones.map((operacion) => {
-                                        if (operacion.seccion.id === seccion.id) {
-                                            const nuevoCampo = formaciones_completadas.some(item => item.conjunto.operacion === operacion.id);
-
-                                            return (
-                                            <Button
-                                                key={operacion.id}
-                                                className={`btn ${nuevoCampo ? 'btn-primary' : 'btn-outline-dark'} btn-sm`}
-                                                onClick={() => GuardarId_Operacion(operacion)}
-                                            >
-                                                {operacion.nombre}
-                                            </Button>
-                                            );
-                                        }
-                                        })}
-                                    </td>
-                                ))}
+                                <tr>
+                                    {secciones && secciones.map(seccion => (
+                                        <td key={seccion.id}>
+                                            {operaciones && formaciones_completadas && operaciones.map((operacion) => {
+                                            if (operacion.seccion.id === seccion.id) {
+                                                const nuevoCampo = formaciones_completadas.some(item => item.conjunto.operacion === operacion.id);
+                                                return (
+                                                <Button
+                                                    key={operacion.id}
+                                                    className={`btn ${nuevoCampo ? 'btn-primary' : 'btn-outline-dark'} btn-sm`}
+                                                    onClick={() => GuardarId_Operacion(operacion)}
+                                                >
+                                                    {operacion.nombre}
+                                                </Button>
+                                                );
+                                            }
+                                            })}
+                                        </td>
+                                    ))}
+                                </tr>
                             </tbody>
                         </Table>
                     </Col>

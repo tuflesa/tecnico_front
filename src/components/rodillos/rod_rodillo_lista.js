@@ -99,9 +99,13 @@ const RodLista = () => {
                 <Col>
                     <h5 className="mb-3 mt-3">Lista de Rodillos</h5>
                     <table>
-                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
-                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
-                        <th>Número páginas: {datos.pagina} / {datos.total_pag} - Registros: {count}</th>
+                        <tbody>
+                            <tr>
+                                <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
+                                <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
+                                <th>Número páginas: {datos.pagina} / {datos.total_pag} - Registros: {count}</th>
+                            </tr>
+                        </tbody>
                     </table>
                     <Table striped bordered hover>
                         <thead>
@@ -143,9 +147,13 @@ const RodLista = () => {
             </Row>
             <Row>
                 <table>
-                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
-                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
-                        <th>Número páginas: {datos.pagina} / {datos.total_pag}</th>
+                    <tbody>
+                        <tr>
+                            <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
+                            <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
+                            <th>Número páginas: {datos.pagina} / {datos.total_pag}</th>
+                        </tr>
+                    </tbody>
                 </table>
             </Row>
         </Container>
