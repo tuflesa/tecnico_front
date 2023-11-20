@@ -142,7 +142,8 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina}) =
                     handlerCancelar();
                 }
                 else{ //ya tenemos la bancada creada y buscamos si tenemos conjunto
-                    axios.get(BACKEND_SERVER + `/api/rodillos/conjunto/?tubo_madre=${tubo_madre}&operacion=${operacion_marcada.id}`,{
+                    //axios.get(BACKEND_SERVER + `/api/rodillos/conjunto/?tubo_madre=${tubo_madre}&operacion=${operacion_marcada.id}`,{
+                    axios.get(BACKEND_SERVER + `/api/rodillos/elemento_select/?conjunto__tubo_madre=${tubo_madre}&conjunto__operacion=${operacion_marcada.id}`,{
                         headers: {
                             'Authorization': `token ${token['tec-token']}`
                         }
