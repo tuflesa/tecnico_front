@@ -235,7 +235,6 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     }, [token, datos.seccion]);
 
     useEffect(() => {
-        console.log('entro en el useEffect');
         datos.tipo_seccion!=='' && datos.tipo_rodillo!=='' && axios.get(BACKEND_SERVER + `/api/rodillos/tipo_plano/?tipo_seccion=${datos.tipo_seccion}&tipo_rodillo=${datos.tipo_rodillo}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`

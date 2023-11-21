@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Button, Modal } from 'react-bootstrap';
+import { Row, Col, Form, Button, Modal, Tab, Tabs } from 'react-bootstrap';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
@@ -10,6 +10,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
     const [user] = useCookies(['tec-user']);
     const [ejes, setEjes] = useState(null);
     const [rodillos, setRodillos] = useState(null);
+    const [rodillo_exist, setRodillo_exist] = useState([]);
     const [selectedEje, setSelectedEje] = useState(null);
     const [selectRodilloId, setSelectRodilloId] = useState({});
     const [EjesRodillos, setEjesRodillos] = useState([]);
@@ -18,9 +19,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
     const [grupo, setGrupo] = useState(null);
     const [rod_id, setRod_Id] = useState(''); //para guardar la informacion en EjesRodillos
     
-    useEffect(() => { //PARA OBTENER LOS EJES DE LA OPERACION Y FILTRAR LOS RODILLOS
-        console.log('esto entra en grupoId');
-        console.log(tubomadre);
+    useEffect(() => { //PARA OBTENER LOS EJES DE LA OPERACION Y FILTRAR LOS RODILLOS;
         operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/eje/?operacion=${operacion_marcada.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -62,6 +61,20 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
             console.log(err);
         });
     }, [token, operacion_marcada, grupoId]);
+
+    useEffect(() => { //PARA OBTENER LOS RODILLOS EXISTENTES DE LA MISMA SECCIÓN;
+        operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/lista_rodillos/?operacion__seccion__tipo=${operacion_marcada.seccion.tipo}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setRodillo_exist(res.data.results);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [operacion_marcada, grupoId]);
 
     useEffect(() => { //SI TENEMOS LOS 3 ELEMENTOS ACUMULAMOS LO SELECCIONADO
         if(rod_id && selectedEje && tubo_madre){
@@ -255,35 +268,74 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
                 <Modal.Title>Nuevo Conjunto de Elementos</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Form>
-                    <Row>
-                        <Col>
-                        {ejes && ejes.map(eje => (
-                            <Form.Group controlId={eje.id} key={eje.id}>
-                                <Form.Label>{eje.tipo.nombre}</Form.Label>
-                                <Form.Control
-                                    as="select"
-                                    name={eje.id}
-                                    value={selectRodilloId[eje.id] || ''}
-                                    onChange={handleInputChange}
-                                    placeholder={eje.tipo.nombre}
-                                >
-                                    <option key={0} value={''}>Todas</option>
-                                    {rodillos && rodillos.map(rodillo => {
-                                        if (rodillo.tipo === eje.tipo.id && rodillo.diametro === eje.diametro) {
-                                            return (
-                                                <option key={rodillo.id} value={rodillo.id}>
-                                                    {rodillo.nombre}
-                                                </option>
-                                            )
-                                        }
-                                    })}
-                                </Form.Control>
-                            </Form.Group>
-                        ))}
-                        </Col>
-                    </Row>
-                </Form>
+                <Tabs
+                    defaultActiveKey="conjunto_nuevo"
+                    id="uncontrolled-tab-example"
+                    className="mb-3"
+                    >
+                    <Tab eventKey="conjunto_nuevo" title="Rodillo">
+                        <Form>
+                            <Row>
+                                <Col>
+                                {ejes && ejes.map(eje => (
+                                    <Form.Group controlId={eje.id} key={eje.id}>
+                                        <Form.Label>{eje.tipo.nombre}</Form.Label>
+                                        <Form.Control
+                                            as="select"
+                                            name={eje.id}
+                                            value={selectRodilloId[eje.id] || ''}
+                                            onChange={handleInputChange}
+                                            placeholder={eje.tipo.nombre}
+                                        >
+                                            <option key={0} value={''}>Todas</option>
+                                            {rodillos && rodillos.map(rodillo => {
+                                                if (rodillo.tipo === eje.tipo.id && rodillo.diametro === eje.diametro) {
+                                                    return (
+                                                        <option key={rodillo.id} value={rodillo.id}>
+                                                            {rodillo.nombre}
+                                                        </option>
+                                                    )
+                                                }
+                                            })}
+                                        </Form.Control>
+                                    </Form.Group>
+                                ))}
+                                </Col>
+                            </Row>
+                        </Form>
+                    </Tab>
+                    <Tab eventKey="conjunto_existente" title="Rodillo otra formación">
+                        <Form>
+                            <Row>
+                                <Col>
+                                {ejes && ejes.map(eje => (
+                                    <Form.Group controlId={eje.id} key={eje.id}>
+                                        <Form.Label>{eje.tipo.nombre}</Form.Label>
+                                        <Form.Control
+                                            as="select"
+                                            name={eje.id}
+                                            value={selectRodilloId[eje.id] || ''}
+                                            onChange={handleInputChange}
+                                            placeholder={eje.tipo.nombre}
+                                        >
+                                            <option key={0} value={''}>Todas</option>
+                                            {rodillo_exist && rodillo_exist.map(rod_exist => {
+                                               // if (rod_exist.tipo.id === eje.tipo.id) {
+                                                    return (
+                                                        <option key={rod_exist.id} value={rod_exist.id}>
+                                                            {rod_exist.nombre}
+                                                        </option>
+                                                    )
+                                               // }
+                                            })}
+                                        </Form.Control>
+                                    </Form.Group>
+                                ))}
+                                </Col>
+                            </Row>
+                        </Form>
+                    </Tab>
+                </Tabs>
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="info" onClick={GuardarConjunto}>Guardar</Button>
