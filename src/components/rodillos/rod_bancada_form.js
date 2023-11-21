@@ -165,7 +165,8 @@ const RodBancada = () => {
                         operacion_marcada={operacion_marcada}
                         handleClose={CerrarConjunto}
                         grupoId={grupo}
-                        maquina={maquina}/>
+                        maquina={maquina}
+                        tubomadre={tubo_madre}/>
         </Container>
     )
 }

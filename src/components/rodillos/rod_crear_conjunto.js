@@ -5,7 +5,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { constants } from 'buffer';
 
-const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina}) => {
+const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tubomadre}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
     const [ejes, setEjes] = useState(null);
@@ -19,6 +19,8 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina}) =
     const [rod_id, setRod_Id] = useState(''); //para guardar la informacion en EjesRodillos
     
     useEffect(() => { //PARA OBTENER LOS EJES DE LA OPERACION Y FILTRAR LOS RODILLOS
+        console.log('esto entra en grupoId');
+        console.log(tubomadre);
         operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/eje/?operacion=${operacion_marcada.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -48,7 +50,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina}) =
     }, [token, grupoId, operacion_marcada]);
 
     useEffect(() => { //RODILLOS QUE PODEMOS USAR EN ESTA OPERACIÓN CON ESTE GRUPO
-        operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/rodillo_editar/?operacion=${operacion_marcada.id}&grupoId=${grupoId}`,{
+        operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/rodillo_editar/?operacion=${operacion_marcada.id}&grupo=${grupoId}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -59,7 +61,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina}) =
         .catch( err => {
             console.log(err);
         });
-    }, [token, operacion_marcada]);
+    }, [token, operacion_marcada, grupoId]);
 
     useEffect(() => { //SI TENEMOS LOS 3 ELEMENTOS ACUMULAMOS LO SELECCIONADO
         if(rod_id && selectedEje && tubo_madre){
@@ -84,7 +86,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina}) =
                 if(res.data.length===0){
                     axios.post(BACKEND_SERVER + `/api/rodillos/bancada/`, { //creamos bancada
                         seccion: operacion_marcada.seccion.id,
-                        grupos: [grupoId],
+                        tubo_madre: tubomadre,
                     }, {
                         headers: {
                             'Authorization': `token ${token['tec-token']}`

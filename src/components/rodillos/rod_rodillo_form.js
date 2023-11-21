@@ -51,6 +51,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         tipo_seccion: rodillo.id?rodillo.operacion.seccion.tipo:'',
         tipo_plano: rodillo.id?rodillo.tipo_plano:'',
         rodillo_id: rodillo.id?rodillo.id:'',
+        diametro: rodillo.id?rodillo.diametro:0,
     });
 
     useEffect(() => {
@@ -242,11 +243,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         })
         .then( res => {
             setTiposPlanos(res.data);
-            console.log('tipos de planos');
-            console.log(res.data);
         })
         .catch( err => {
-            console.log('error en tipos de planos');
             console.log(err);
         });
     }, [rodillo.length!==0]);
@@ -283,6 +281,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             tipo: datos.tipo_rodillo,
             material: datos.material,
             tipo_plano: datos.tipo_plano,
+            diametro: datos.diametro,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -299,13 +298,14 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
 
     const ActualizarRodillo = (event) => {
         event.preventDefault();
-        axios.put(BACKEND_SERVER + `/api/rodillos/rodillo_editar/${rodillo.id}/`, {
+        axios.patch(BACKEND_SERVER + `/api/rodillos/rodillo_editar/${rodillo.id}/`, {
             nombre: datos.nombre,
             operacion: datos.operacion,
             grupo: datos.grupo,
             tipo: datos.tipo_rodillo,
             material: datos.material,
             tipo_plano: datos.tipo_plano,
+            diametro: datos.diametro,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -602,6 +602,17 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                     </option>
                                     )
                                 })}
+                            </Form.Control>
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="diametro">
+                            <Form.Label>Diametro interior</Form.Label>
+                            <Form.Control type="text" 
+                                            name='diametro'
+                                            value={datos.diametro}
+                                            onChange={handleInputChange}
+                                            placeholder='Diámetro interior'>
                             </Form.Control>
                         </Form.Group>
                     </Col>
