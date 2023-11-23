@@ -146,7 +146,7 @@ const RodBancada = () => {
                                                 <Button
                                                     key={operacion.id}
                                                     className={`btn ${nuevoCampo ? 'btn-primary' : 'btn-outline-dark'} btn-sm`}
-                                                    onClick={() => GuardarId_Operacion(operacion)}
+                                                    onClick={() => {grupo?GuardarId_Operacion(operacion):alert('Elige grupo')}}
                                                 >
                                                     {operacion.nombre}
                                                 </Button>
@@ -162,11 +162,11 @@ const RodBancada = () => {
                 </Row> 
             :''} 
             <RodConjunto show={show_conjunto}
-                        operacion_marcada={operacion_marcada}
-                        handleClose={CerrarConjunto}
-                        grupoId={grupo}
-                        maquina={maquina}
-                        tubomadre={tubo_madre}/>
+                    operacion_marcada={operacion_marcada}
+                    handleClose={CerrarConjunto}
+                    grupoId={grupo}
+                    maquina={maquina}
+                    tubomadre={tubo_madre}/>
         </Container>
     )
 }
