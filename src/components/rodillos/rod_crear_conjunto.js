@@ -63,13 +63,13 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
     }, [token, operacion_marcada, grupoId]);
 
     useEffect(() => { //PARA OBTENER LOS RODILLOS EXISTENTES DE LA MISMA SECCIÓN;
-        operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/lista_rodillos/?operacion__seccion__tipo=${operacion_marcada.seccion.tipo}`,{
+        operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/rodillos_existentes/?operacion__seccion__tipo=${operacion_marcada.seccion.tipo}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
         .then( res => {
-            setRodillo_exist(res.data.results);
+            setRodillo_exist(res.data);
         })
         .catch( err => {
             console.log(err);
@@ -320,13 +320,13 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
                                         >
                                             <option key={0} value={''}>Todas</option>
                                             {rodillo_exist && rodillo_exist.map(rod_exist => {
-                                               // if (rod_exist.tipo.id === eje.tipo.id) {
+                                                if (rod_exist.diametro === eje.diametro) {
                                                     return (
                                                         <option key={rod_exist.id} value={rod_exist.id}>
                                                             {rod_exist.nombre}
                                                         </option>
                                                     )
-                                               // }
+                                                }
                                             })}
                                         </Form.Control>
                                     </Form.Group>

@@ -124,8 +124,8 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
                 await Promise.all(requests);
                 handlerCancelar();
                 window.location.href = `/rodillos/editar/${rodillo_id}`;
-            } catch(error){
-                console.log(error);
+            } catch(err){
+                console.log(err);
             }
         }
         else{
