@@ -3,6 +3,8 @@ import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table } from 'react-bootstrap';
+import { PencilFill } from 'react-bootstrap-icons';
+import { Link } from 'react-router-dom';
 
 const RodGruposListado = () => {
     const [token] = useCookies(['tec-token']);
@@ -132,6 +134,7 @@ const RodGruposListado = () => {
                                 <th>Nombre</th>
                                 <th>Máquina</th>
                                 <th>Tubo Madre</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -145,6 +148,7 @@ const RodGruposListado = () => {
                                             <td>{linea.nombre}</td>
                                             <td>{linea.maquina.siglas}</td>
                                             <td>{'Ø' + linea.tubo_madre}</td>
+                                            <td><Link title='Detalle/Modificar'to={`/rodillos/grupo_editar/${linea.id}`}><PencilFill className="mr-3 pencil"/></Link></td>
                                         </tr>
                                         {filaSeleccionada === linea.id && (
                                             <tr>

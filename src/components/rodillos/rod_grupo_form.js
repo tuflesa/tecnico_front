@@ -11,14 +11,32 @@ const RodGrupo = ({grupo, setGrupo}) => {
 
     const [empresas, setEmpresas] = useState(null);
     const [zonas, setZonas] = useState([]);
+    const [bancadas, setBancadas] = useState(null);
 
     const [datos, setDatos] = useState({
         id: grupo.id? grupo.id:null,
-        empresa: user['tec-user'].perfil.empresa.id,
-        zona: '',
-        tubo_madre: 0,
-        nombre: '',
+        empresa: grupo.id?grupo.maquina.empresa_id:user['tec-user'].perfil.empresa.id,
+        zona: grupo.id?grupo.maquina.id:'',
+        tubo_madre: grupo.id?grupo.tubo_madre:'',
+        nombre: grupo.id?grupo.nombre:'',
+        bancadas_elegidas:grupo.id?grupo.bancadas:[],
     });
+
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + '/api/rodillos/bancada/',{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setBancadas(res.data);
+            console.log('bancadas');
+            console.log(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
@@ -65,10 +83,10 @@ const RodGrupo = ({grupo, setGrupo}) => {
             })
             .then( res => {
                 setZonas(res.data);
-                setDatos({
+                /* setDatos({
                     ...datos,
                     zona: '',
-                });
+                }); */
             })
             .catch( err => {
                 console.log(err);
@@ -83,12 +101,26 @@ const RodGrupo = ({grupo, setGrupo}) => {
         })
     }
 
+    const handleInputChangeBancada = (bancada) => {
+        setDatos((prevDatos) => {
+          const bancadas_elegidas = prevDatos.bancadas_elegidas.includes(bancada) //miramos si lo marcado ya lo teniamos anteriormente
+            ? prevDatos.bancadas_elegidas.filter((item) => item !== bancada) //filtra el elemento para eliminarlo
+            : [...prevDatos.bancadas_elegidas, bancada]; //lo añadimos si ahora lo hemos incluido
+      
+          return {
+            ...prevDatos,
+            bancadas_elegidas,
+          };
+        });
+      };
+
     const GuardarGrupo = (event) => {
         event.preventDefault();
-        axios.post(BACKEND_SERVER + `/api/rodillos/grupo_nuevo/`, {
+        axios.post(BACKEND_SERVER + `/api/rodillos/grupo_only/`, {
             nombre: datos.nombre,
             maquina: datos.zona,
             tubo_madre: datos.tubo_madre,
+            bancadas:datos.bancadas_elegidas,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -105,10 +137,11 @@ const RodGrupo = ({grupo, setGrupo}) => {
 
     const ActualizarGrupo = (event) => {
         event.preventDefault();
-        axios.patch(BACKEND_SERVER + `/api/rodillos/grupo_nuevo/${grupo.id}/`, {
+        axios.patch(BACKEND_SERVER + `/api/rodillos/grupo_only/${grupo.id}/`, {
             nombre: datos.nombre,
             maquina: datos.zona,
             tubo_madre: datos.tubo_madre,
+            bancadas: datos.bancadas_elegidas,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -149,7 +182,6 @@ const RodGrupo = ({grupo, setGrupo}) => {
                                         value={datos.tubo_madre}
                                         onChange={handleInputChange} 
                                         placeholder="Ø tubo madre"
-                                        autoFocus
                             />
                         </Form.Group>
                     </Col>
@@ -190,6 +222,22 @@ const RodGrupo = ({grupo, setGrupo}) => {
                                     )
                                 })}
                             </Form.Control>
+                        </Form.Group>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
+                        <Form.Group controId="bancadas">
+                            <Form.Label>Bancadas</Form.Label>
+                            {bancadas && bancadas.map((bancada)=>(
+                                <Form.Check
+                                    key={bancada.id}
+                                    type="checkbox"
+                                    label={bancada.nombre}
+                                    checked ={datos.bancadas_elegidas.includes(bancada.id)}
+                                    onChange={()=>handleInputChangeBancada(bancada.id)}
+                                />
+                            ))}
                         </Form.Group>
                     </Col>
                 </Row>

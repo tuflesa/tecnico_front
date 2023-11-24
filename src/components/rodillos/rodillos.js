@@ -9,6 +9,7 @@ import RodGrupoNuevo from './rod_grupo_nuevo';
 import RodLista from './rod_rodillo_lista';
 import RodEditar from './rod_rodillo_editar';
 import RodBancada from './rod_bancada_form';
+import RodGrupoEditar from './rod_grupo_editar';
 
 const Rodillos = () => {
     
@@ -22,6 +23,7 @@ const Rodillos = () => {
                 <Route path='/rodillos/lista' component={RodLista} />
                 <Route path='/rodillos/planos/nuevo' component={RodPlanos} />
                 <Route path='/rodillos/nuevo' component={RodNuevo} />
+                <Route path='/rodillos/grupo_editar/:id' component={RodGrupoEditar} />
                 <Route path='/rodillos/editar/:id' component={RodEditar} />
                 <Route path='/rodillos/grupo/nuevo' component={RodGrupoNuevo} />
                 {/* <Route path='/mantenimiento/tareas_trabajador' component={TareasTrabajador} /> */}
