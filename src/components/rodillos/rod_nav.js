@@ -20,8 +20,8 @@ const RodNavBar = () => {
                                     <NavDropdown.Item href="/rodillos/lista">Rodillos</NavDropdown.Item>
                                     </NavDropdown>
                                     <NavDropdown title="Nuevos" id="nuevos-dropdown" menualign="right">
-                                    <NavDropdown.Item href="/rodillos/nuevo">Rodillo</NavDropdown.Item> 
                                     <NavDropdown.Item href="/rodillos/grupo/nuevo">Grupo</NavDropdown.Item> 
+                                    <NavDropdown.Item href="/rodillos/nuevo">Rodillo</NavDropdown.Item> 
                                     <NavDropdown.Item href="/rodillos/bacada">Bancada</NavDropdown.Item> 
                                     </NavDropdown>
                                 </NavDropdown>

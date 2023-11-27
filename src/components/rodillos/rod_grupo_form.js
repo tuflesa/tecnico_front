@@ -12,6 +12,7 @@ const RodGrupo = ({grupo, setGrupo}) => {
     const [empresas, setEmpresas] = useState(null);
     const [zonas, setZonas] = useState([]);
     const [bancadas, setBancadas] = useState(null);
+    const [filtro, setFiltro] = useState(`?tubo_madre__gte=${0}&tubo_madre__lte=${0}`);
 
     const [datos, setDatos] = useState({
         id: grupo.id? grupo.id:null,
@@ -20,23 +21,27 @@ const RodGrupo = ({grupo, setGrupo}) => {
         tubo_madre: grupo.id?grupo.tubo_madre:'',
         nombre: grupo.id?grupo.nombre:'',
         bancadas_elegidas:grupo.id?grupo.bancadas:[],
+        tubo_madre_gte: 0,
+        tubo_madre_lte: 0,
     });
 
+    useEffect(()=>{
+        setFiltro(`?tubo_madre__gte=${datos.tubo_madre_gte}&tubo_madre__lte=${datos.tubo_madre_lte}`);
+    },[datos, datos.tubo_madre_gte, datos.tubo_madre_lte]);
+
     useEffect(() => {
-        axios.get(BACKEND_SERVER + '/api/rodillos/bancada/',{
+        axios.get(BACKEND_SERVER + `/api/rodillos/bancada/`+ filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
         .then( res => {
             setBancadas(res.data);
-            console.log('bancadas');
-            console.log(res.data);
         })
         .catch( err => {
             console.log(err);
         });
-    }, [token]);
+    }, [token, filtro, datos.tubo_madre_gte, datos.tubo_madre_lte]);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
@@ -227,8 +232,30 @@ const RodGrupo = ({grupo, setGrupo}) => {
                 </Row>
                 <Row>
                     <Col>
+                        <Form.Group controlId="tubo_madre_gte">
+                            <Form.Label>Ø Superior a</Form.Label>
+                            <Form.Control type="text" 
+                                        name='tubo_madre_gte' 
+                                        value={datos.tubo_madre_gte}
+                                        onChange={handleInputChange} 
+                                        placeholder="Ø posterior a..." />
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="tubo_madre_lte">
+                            <Form.Label>Ø Menor a</Form.Label>
+                            <Form.Control type="text" 
+                                        name='tubo_madre_lte' 
+                                        value={datos.tubo_madre_lte}
+                                        onChange={handleInputChange} 
+                                        placeholder="Ø anterior a..." />
+                        </Form.Group>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
                         <Form.Group controId="bancadas">
-                            <Form.Label>Bancadas</Form.Label>
+                            <Form.Label>Bancadas (Escribe los diámetros que deseas ver)</Form.Label>
                             {bancadas && bancadas.map((bancada)=>(
                                 <Form.Check
                                     key={bancada.id}

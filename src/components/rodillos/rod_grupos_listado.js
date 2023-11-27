@@ -25,6 +25,7 @@ const RodGruposListado = () => {
         })
         .then( res => {
             setLineas(res.data);
+            console.log(res.data);
         })
         .catch( err => {
             console.log(err);
@@ -41,10 +42,8 @@ const RodGruposListado = () => {
                     }
                 });
             });
-    
             // Esperar a que todas las solicitudes a las celdas se completen y pasamos la info a respuestasCeldas
             const respuestasCeldas = await Promise.all(solicitudesCeldas);
-    
             // Busco para cada Celda el elemento con el id del conjunto
             const solicitudesElementos = respuestasCeldas.map(res => {
                 return Promise.all(res.data.map(celda => {
@@ -55,10 +54,8 @@ const RodGruposListado = () => {
                     });
                 }));
             });
-    
-            // Esperar a que todas las solicitudes de elementos y copio la info en respuestasElementos
+            // Espero a que todas las solicitudes de elementos y copio la info en respuestasElementos
             const respuestasElementos = await Promise.all(solicitudesElementos);
-    
             // Actualizar los estados
             setFilaSeleccionada(linea.id);
             setShow(!show);
@@ -92,35 +89,6 @@ const RodGruposListado = () => {
             setConjuntos(null);
         }
     }, [show, celdas, elementos]);
-
-    /* const abrirConjuntos = (linea) => {
-        setShow(!show);
-        if(show){
-            const tabla = (
-                <Table striped bordered hover>
-                    <thead>
-                        <tr>
-                            <th>Conjuntos</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {linea.conjuntos && linea.conjuntos.map( conjunto => {
-                            return (
-                                <tr key={conjunto.id}>
-                                    <td>{conjunto.nombre}</td>
-                                </tr>
-                            )})
-                        }
-                    </tbody>
-                </Table>
-            );
-            setValorConjuntos(tabla);
-            setFilaSeleccionada(linea.id);
-        }
-        else{
-            setValorConjuntos('');
-        }
-    }; */
 
     return (
         <Container className='mt-5'>
