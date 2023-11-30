@@ -409,22 +409,6 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         
     };
 
-    /* const eliminarParametros = ()=>{
-        for(var x=0;x<parametros.length;x++){
-            axios.delete(BACKEND_SERVER + `/api/rodillos/parametros_estandar/${parametros[x].id}`,{
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                    }
-            })
-            .then( res => {
-                window.location.href = `/rodillos/editar/${rodillo.id}`; 
-            })
-            .catch( err => {
-                console.log(err);
-            });
-        }
-    } */
-
     const eliminarPlano = (plano) => { 
         var confirmacion = window.confirm('¿Confirma que desea eliminar este plano, en este rodillo?');
         if(confirmacion){
@@ -433,19 +417,37 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                     plano.rodillos.splice(x,1); //elimina el elemento que cumple la condición.
                 }
             }
-            axios.patch(BACKEND_SERVER + `/api/rodillos/plano/${plano.id}/`, {
-                rodillos: plano.rodillos,
-            }, {
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                    }     
-            })
-            .then( res => { 
-                window.location.href = `/rodillos/editar/${rodillo.id}`;
-            })
-            .catch(err => { 
-                console.log(err);
-            })
+            if(plano.rodillos.length===0){
+                var eliminacion = window.confirm('Este plano no está en otro rodillo, va a eliminar el plano. ¿Desea continuar?');
+                if(eliminacion){
+                    axios.delete(BACKEND_SERVER + `/api/rodillos/plano/${plano.id}/`,{
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                            }
+                    })
+                    .then( res => {
+                        window.location.href = `/rodillos/editar/${rodillo.id}`; 
+                    })
+                    .catch( err => {
+                        console.log(err);
+                    });
+                }
+            }
+            else{
+                axios.patch(BACKEND_SERVER + `/api/rodillos/plano/${plano.id}/`, {
+                    rodillos: plano.rodillos,
+                }, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                        }     
+                })
+                .then( res => { 
+                    window.location.href = `/rodillos/editar/${rodillo.id}`;
+                })
+                .catch(err => { 
+                    console.log(err);
+                })
+            }
             
         }    
     };

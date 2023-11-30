@@ -21,8 +21,8 @@ const RodGrupo = ({grupo, setGrupo}) => {
         tubo_madre: grupo.id?grupo.tubo_madre:'',
         nombre: grupo.id?grupo.nombre:'',
         bancadas_elegidas:grupo.id?grupo.bancadas:[],
-        tubo_madre_gte: 0,
-        tubo_madre_lte: 0,
+        tubo_madre_gte: grupo.id?grupo.tubo_madre-5:0,
+        tubo_madre_lte: grupo.id?grupo.tubo_madre+5:0,
     });
 
     useEffect(()=>{

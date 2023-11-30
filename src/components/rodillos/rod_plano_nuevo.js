@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
-import { Modal, Button, Form, Col, Row, Tab, Tabs, ListGroup, Alert } from 'react-bootstrap';
+import { Modal, Button, Form, Col, Row, Tab, Tabs, Alert } from 'react-bootstrap';
 
 
 const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rodillo_id, rodillo_tipo_plano}) => {
@@ -149,15 +149,17 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
                         formData.append('motivo', datos.motivo);
                         formData.append('archivo', archivo); // Aquí asumiendo que 'archivo' es el archivo seleccionado.
                         formData.append('fecha', datos.fecha);
+                    
                     axios.post(BACKEND_SERVER + `/api/rodillos/revision_plano/`, formData, {
                         headers: {
                         'Content-Type': 'multipart/form-data',
                         'Authorization': `token ${token['tec-token']}`
                         }
                     })
-                    .then(res => { 
+                    .then(re => { 
                         alert('Plano guardado correctamente');
                         window.location.href = `/rodillos/editar/${rodillo_id}`;
+
                         for(var x=0;x<parametros.length;x++){
                             axios.post(BACKEND_SERVER + `/api/rodillos/parametros_estandar/`, {
                                 nombre: parametros[x].nombre,
@@ -168,7 +170,7 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
                                     'Authorization': `token ${token['tec-token']}`
                                     }     
                             })
-                            .then( res => { 
+                            .then( r => { 
                             })
                             .catch(err => { 
                                 console.error(err);
@@ -200,7 +202,6 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
                 })
                 }
             }
-            window.location.href = `/rodillos/editar/${rodillo_id}`;
             handlerCancelar();
         }
     }

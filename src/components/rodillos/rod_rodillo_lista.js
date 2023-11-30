@@ -2,21 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
-import { Container, Row, Col, Table, Modal, Button } from 'react-bootstrap';
-import { Trash, PencilFill } from 'react-bootstrap-icons';
+import { Container, Row, Col, Table } from 'react-bootstrap';
+import { PencilFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import RodListaFiltro from './rod_lista_filtro';
 
 const RodLista = () => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
-    const [show, setShow] = useState(false);
+    //const [show, setShow] = useState(false);
     const [count, setCount] = useState(null);
     const [lista_rodillos, setListaRodillos] = useState(null);
     const [filtro, setFiltro] = useState(`?operacion__seccion__maquina__empresa__id=${user['tec-user'].perfil.empresa.id}`);
     const [filtroPag, setFiltroPag] = useState(`&page=${1}`);
-    const [filtroII, setFiltroII] = useState(``);
-    //let filtroPag=(null);
 
     const [datos, setDatos] = useState({
         pagina: 1,
@@ -86,7 +84,7 @@ const RodLista = () => {
         setFiltro(str);
     }
 
-    const handleClose = () => setShow(false);
+    //const handleClose = () => setShow(false);
 
     return (
         <Container className='mt-5'>
@@ -101,8 +99,8 @@ const RodLista = () => {
                     <table>
                         <tbody>
                             <tr>
-                                <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
-                                <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
+                                <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina-1)}}>Pág Anterior</button></th> 
+                                <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina+1)}}>Pág Siguiente</button></th> 
                                 <th>Número páginas: {datos.pagina} / {datos.total_pag} - Registros: {count}</th>
                             </tr>
                         </tbody>
@@ -136,7 +134,7 @@ const RodLista = () => {
                                         <td>{lista.material?lista.material.nombre:''}</td>
                                         <td>{lista.grupo?lista.grupo.nombre:''}</td>
                                         <td>
-                                            <Link title='Detalle/Modificar'to={`/rodillos/editar/${lista.id}`}><PencilFill className="mr-3 pencil"/></Link>
+                                            <Link to={`/rodillos/editar/${lista.id}`}><PencilFill className="mr-3 pencil"/></Link>
                                         </td>
                                     </tr>
                                 )})

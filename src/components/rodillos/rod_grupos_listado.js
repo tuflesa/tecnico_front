@@ -25,7 +25,6 @@ const RodGruposListado = () => {
         })
         .then( res => {
             setLineas(res.data);
-            console.log(res.data);
         })
         .catch( err => {
             console.log(err);
