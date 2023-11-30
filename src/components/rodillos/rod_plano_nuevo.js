@@ -90,119 +90,124 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
     }
 
     const GuardarPlano = async () => {
-        if (checkboxSeleccionados.length !== 0) {
-            const requests = [];
-            for (var z = 0; z < checkboxSeleccionados.length; z++) {
-                valor = parseInt(checkboxSeleccionados[z]);
-                var idRodillo = parseInt(rodillo_id);
-        
-                try {
-                    const res = await axios.get(BACKEND_SERVER + `/api/rodillos/plano/${valor}`, {
-                        headers: {
-                        'Authorization': `token ${token['tec-token']}`
-                        }
-                    });
+        if(rodillo_tipo_plano){
+            if (checkboxSeleccionados.length !== 0) {
+                const requests = [];
+                for (var z = 0; z < checkboxSeleccionados.length; z++) {
+                    valor = parseInt(checkboxSeleccionados[z]);
+                    var idRodillo = parseInt(rodillo_id);
             
-                    //setRodillos([...res.data.rodillos, idRodillo]);
-            
-                    requests.push(
-                        axios.patch(BACKEND_SERVER + `/api/rodillos/plano/${valor}/`, {
-                        rodillos: [...res.data.rodillos, idRodillo],
-                        }, {
-                        headers: {
+                    try {
+                        const res = await axios.get(BACKEND_SERVER + `/api/rodillos/plano/${valor}`, {
+                            headers: {
                             'Authorization': `token ${token['tec-token']}`
-                        }
-                        })
-                    );
+                            }
+                        });
+                
+                        //setRodillos([...res.data.rodillos, idRodillo]);
+                
+                        requests.push(
+                            axios.patch(BACKEND_SERVER + `/api/rodillos/plano/${valor}/`, {
+                            rodillos: [...res.data.rodillos, idRodillo],
+                            }, {
+                            headers: {
+                                'Authorization': `token ${token['tec-token']}`
+                            }
+                            })
+                        );
 
-                } 
-                catch (err) {
-                console.log(err);
+                    } 
+                    catch (err) {
+                    console.log(err);
+                    }
+                }
+                try{
+                    await Promise.all(requests);
+                    handlerCancelar();
+                    window.location.href = `/rodillos/editar/${rodillo_id}`;
+                } catch(err){
+                    console.log(err);
                 }
             }
-            try{
-                await Promise.all(requests);
-                handlerCancelar();
-                window.location.href = `/rodillos/editar/${rodillo_id}`;
-            } catch(err){
-                console.log(err);
-            }
-        }
-        else{
-            if(archivo===null){
-                alert('Por favor incluye un archivo');
-            }
             else{
-                var newRodillos=[];
-                newRodillos = [parseInt(rodillo_id)]
-                axios.post(BACKEND_SERVER + `/api/rodillos/plano_nuevo/`, {
-                    nombre: datos.nombre,
-                    rodillos: newRodillos,
-                }, {
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`
-                        }     
-                })
-                .then( res => { 
-                    const formData = new FormData();
-                        formData.append('plano', res.data.id);
-                        formData.append('motivo', datos.motivo);
-                        formData.append('archivo', archivo); // Aquí asumiendo que 'archivo' es el archivo seleccionado.
-                        formData.append('fecha', datos.fecha);
-                    
-                    axios.post(BACKEND_SERVER + `/api/rodillos/revision_plano/`, formData, {
+                if(archivo===null){
+                    alert('Por favor incluye un archivo');
+                }
+                else{
+                    var newRodillos=[];
+                    newRodillos = [parseInt(rodillo_id)]
+                    axios.post(BACKEND_SERVER + `/api/rodillos/plano_nuevo/`, {
+                        nombre: datos.nombre,
+                        rodillos: newRodillos,
+                    }, {
                         headers: {
-                        'Content-Type': 'multipart/form-data',
-                        'Authorization': `token ${token['tec-token']}`
-                        }
+                            'Authorization': `token ${token['tec-token']}`
+                            }     
                     })
-                    .then(re => { 
-                        alert('Plano guardado correctamente');
-                        window.location.href = `/rodillos/editar/${rodillo_id}`;
+                    .then( res => { 
+                        const formData = new FormData();
+                            formData.append('plano', res.data.id);
+                            formData.append('motivo', datos.motivo);
+                            formData.append('archivo', archivo); // Aquí asumiendo que 'archivo' es el archivo seleccionado.
+                            formData.append('fecha', datos.fecha);
+                        
+                        axios.post(BACKEND_SERVER + `/api/rodillos/revision_plano/`, formData, {
+                            headers: {
+                            'Content-Type': 'multipart/form-data',
+                            'Authorization': `token ${token['tec-token']}`
+                            }
+                        })
+                        .then(re => { 
+                            alert('Plano guardado correctamente');
+                            window.location.href = `/rodillos/editar/${rodillo_id}`;
 
-                        for(var x=0;x<parametros.length;x++){
-                            axios.post(BACKEND_SERVER + `/api/rodillos/parametros_estandar/`, {
-                                nombre: parametros[x].nombre,
-                                rodillo: rodillo_id,
-                                valor: 0,
+                            for(var x=0;x<parametros.length;x++){
+                                axios.post(BACKEND_SERVER + `/api/rodillos/parametros_estandar/`, {
+                                    nombre: parametros[x].nombre,
+                                    rodillo: rodillo_id,
+                                    valor: 0,
+                                }, {
+                                    headers: {
+                                        'Authorization': `token ${token['tec-token']}`
+                                        }     
+                                })
+                                .then( r => { 
+                                })
+                                .catch(err => { 
+                                    console.error(err);
+                                });
+                            }
+                        })
+                        .catch(err => { 
+                            console.error(err);
+                        });
+                        })
+                    
+                        if(datos.tipo_plano!==''){
+                            axios.patch(BACKEND_SERVER + `/api/rodillos/rodillo_nuevo/${rodillo_id}/`, {
+                                tipo_plano: datos.tipo_plano,
                             }, {
                                 headers: {
                                     'Authorization': `token ${token['tec-token']}`
                                     }     
                             })
-                            .then( r => { 
+                            .then( res => { 
                             })
                             .catch(err => { 
-                                console.error(err);
-                            });
-                        }
-                    })
+                                console.log(err);
+                            })
+                    
                     .catch(err => { 
-                        console.error(err);
-                    });
+                        Alert('Revisa los campos obligatorios');
+                        console.log(err);
                     })
-                
-                    if(datos.tipo_plano!==''){
-                        axios.patch(BACKEND_SERVER + `/api/rodillos/rodillo_nuevo/${rodillo_id}/`, {
-                            tipo_plano: datos.tipo_plano,
-                        }, {
-                            headers: {
-                                'Authorization': `token ${token['tec-token']}`
-                                }     
-                        })
-                        .then( res => { 
-                        })
-                        .catch(err => { 
-                            console.log(err);
-                        })
-                
-                .catch(err => { 
-                    Alert('Revisa los campos obligatorios');
-                    console.log(err);
-                })
+                    }
                 }
+                handlerCancelar();
             }
-            handlerCancelar();
+        }
+        else{
+            alert('Por favor introduce el Tipo de plano, gracias');
         }
     }
 
