@@ -5,7 +5,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import { Modal, Button, Form, Col, Row, Tab, Tabs, Alert } from 'react-bootstrap';
 
 
-const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rodillo_id, rodillo_tipo_plano}) => {
+const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rodillo_id, rodillo_tipo_plano, rodillo_t}) => {
     const [token] = useCookies(['tec-token']);
     const [tipo_plano, setTipoPlano] = useState([]);
     const [parametros, setParametros] = useState([]);
@@ -14,12 +14,12 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
     const [archivo, setArchivo] = useState(null);
     const [PlanosExistentes, setPlanosExistentes] = useState(null);
     const [checkboxSeleccionados, setCheckboxSeleccionados] = useState([]);
-    const [rodillos, setRodillos] = useState([]);
-    const [rodillo, setRodillo] = useState([]);
+    //const [rodillos, setRodillos] = useState([]);
+    //const [rodillo, setRodillo] = useState([]);
     var valor = null;
 
     const [datos, setDatos] = useState({
-        tipo_plano: rodillo_tipo_plano,
+        tipo_plano: rodillo_tipo_plano?rodillo_tipo_plano:'',
         nombre: null,
         fecha: fechaString,
         archivo:'',
@@ -57,7 +57,7 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
     }, [datos.tipo_plano]);
 
     useEffect(() => { //se recogen los plano que cuadran con el tipo de rodillo
-        rodillo_tipo_plano && axios.get(BACKEND_SERVER + `/api/rodillos/planos_existentes/?rodillos__tipo_plano=${rodillo_tipo_plano}`,{
+        datos.tipo_plano && axios.get(BACKEND_SERVER + `/api/rodillos/planos_existentes/?rodillos__tipo_plano=${datos.tipo_plano}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
                 }
@@ -68,12 +68,12 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
         .catch( err => {
             console.log(err);
         });
-    }, [token, rodillo_tipo_plano]);
+    }, [token, rodillo_tipo_plano, datos.tipo_plano]);
 
     const handlerCancelar = () => {
         setDatos({
             ...datos,
-            tipo_plano: '',
+            //tipo_plano: '',
             nombre: '',
             fecha: fechaString,
             archivo:'',
@@ -90,7 +90,7 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
     }
 
     const GuardarPlano = async () => {
-        if(rodillo_tipo_plano){
+        if(datos.tipo_plano){
             if (checkboxSeleccionados.length !== 0) {
                 const requests = [];
                 for (var z = 0; z < checkboxSeleccionados.length; z++) {
@@ -159,24 +159,26 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
                         })
                         .then(re => { 
                             alert('Plano guardado correctamente');
-                            window.location.href = `/rodillos/editar/${rodillo_id}`;
-
-                            for(var x=0;x<parametros.length;x++){
-                                axios.post(BACKEND_SERVER + `/api/rodillos/parametros_estandar/`, {
-                                    nombre: parametros[x].nombre,
-                                    rodillo: rodillo_id,
-                                    valor: 0,
-                                }, {
-                                    headers: {
-                                        'Authorization': `token ${token['tec-token']}`
-                                        }     
-                                })
-                                .then( r => { 
-                                })
-                                .catch(err => { 
-                                    console.error(err);
-                                });
+                            if(rodillo_t.tipo_plano===null){
+                                for(var x=0;x<parametros.length;x++){ //damos de alta los parámetros con valor 0
+                                    axios.post(BACKEND_SERVER + `/api/rodillos/parametros_estandar/`, {
+                                        nombre: parametros[x].nombre,
+                                        rodillo: rodillo_id,
+                                        valor: 0,
+                                    }, {
+                                        headers: {
+                                            'Authorization': `token ${token['tec-token']}`
+                                            }     
+                                    })
+                                    .then( r => { 
+                                    })
+                                    .catch(err => { 
+                                        console.error(err);
+                                    });
+                                }
                             }
+                            
+                            window.location.href = `/rodillos/editar/${rodillo_id}`;
                         })
                         .catch(err => { 
                             console.error(err);
@@ -281,7 +283,7 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
                                 <Form.Group controlId="tipo_plano">
                                     <Form.Label>Tipo de plano</Form.Label>
                                     <Form.Control as="select" 
-                                                    value={datos.tipo_plano}
+                                                    value={rodillo_tipo_plano!==null?rodillo_tipo_plano:datos.tipo_plano}
                                                     name='tipo_plano'
                                                     onChange={handleInputChange}
                                                     disabled={rodillo_tipo_plano!==null}>

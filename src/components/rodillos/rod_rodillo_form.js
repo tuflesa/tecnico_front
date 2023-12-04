@@ -25,13 +25,13 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [planos, setPlanos] = useState(null);
     const [valor_conjuntos, setValorConjuntos] = useState('');
     const [show, setShow] = useState(false);
-    const [showParam, setShowParam] = useState(false);
-    const [showParamNot, setShowParamNot] = useState(false);
+    //const [showParam, setShowParam] = useState(false);
+    //const [showParamNot, setShowParamNot] = useState(false);
     const [filaSeleccionada, setFilaSeleccionada] = useState(null);
     const [revisiones, setRevisiones] = useState(null);
-    const [valor_parametros, setValorParametros] = useState('');
-    const [parametros, setParametros] = useState(null);
-    const [filaSeleccionadaParametros, setFilaSeleccionadaParametros] = useState(null);
+    //const [valor_parametros, setValorParametros] = useState('');
+    const [parametros, setParametros] = useState(null); // PARAMETROS GUARDADOS
+    //const [filaSeleccionadaParametros, setFilaSeleccionadaParametros] = useState(null);
     const [plano_id, setPlano_id] = useState(null);
     const [showRevision, setShowRevision] = useState(false);
     const [showParametros, setShowParametros] = useState(false);
@@ -311,7 +311,35 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 }     
         })
         .then( res => { 
-            window.location.href = `/rodillos/editar/${res.data.id}`;
+            if(rodillo.tipo_plano===null && res.data.tipo_plano!==null){//si estamos actualizando el tipo de plano, ponemos los parámentros.
+                alert('INFORMACIÓN ACTUALIZADA');
+                axios.get(BACKEND_SERVER + `/api/rodillos/plano_parametros/${res.data.tipo_plano}`,{
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                        }
+                })
+                .then( re => { //tenemos los nombres de los parametros con re.data.nombres
+                    for(var x=0;x<re.data.nombres.length;x++){ //damos de alta los parámetros con valor 0
+                        axios.post(BACKEND_SERVER + `/api/rodillos/parametros_estandar/`, {
+                            nombre: re.data.nombres[x].nombre,
+                            rodillo: rodillo.id,
+                            valor: 0,
+                        }, {
+                            headers: {
+                                'Authorization': `token ${token['tec-token']}`
+                                }     
+                        })
+                        .then( r => { 
+                        })
+                        .catch(err => { 
+                            console.error(err);
+                        });
+                    }
+                })
+                .catch( err => {
+                    console.log(err);
+                });
+            }
         })
         .catch(err => { 
             console.log(err);
@@ -342,7 +370,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     }
 
     const abrirConjuntos = (plano) => {        
-        axios.get(BACKEND_SERVER + `/api/rodillos/revision_conjuntos/?plano=${plano}`,{
+        axios.get(BACKEND_SERVER + `/api/rodillos/revision_conjuntos/?plano=${plano}`,{ //REVISIONES DE LOS PLANOS
             headers: {
                 'Authorization': `token ${token['tec-token']}`
                 }
@@ -381,11 +409,11 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                             
                                             <td>{invertirFecha(String(conjunto.fecha))}</td>
                                         </tr>
-                                        {filaSeleccionadaParametros === conjunto.id && (
+                                        {/* {filaSeleccionadaParametros === conjunto.id && (
                                             <tr>
                                                 <td colSpan="3">{valor_parametros}</td>
                                             </tr>
-                                        )}
+                                        )} */}
                                     </React.Fragment>
                                 )})
                             }
@@ -706,7 +734,9 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                            tipo_seccion={datos.tipo_seccion}
                            tipo_rodillo={datos.tipo_rodillo}
                            rodillo_id={rodillo.id}
-                           rodillo_tipo_plano={datos.tipo_plano}/>
+                           rodillo_tipo_plano={datos.tipo_plano}
+                           rodillo_t={rodillo}
+                           parametros_est={parametros}/>
             
             <RodRevisionForm showRev={showRevision}
                            plano_id={plano_id}
@@ -719,7 +749,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                            tipo_plano_id={datos.tipo_plano}
                            rodillo_id={rodillo.id}
                            rodillo_inf={rodillo}
-                           handleClose={cerrarParametros}/>
+                           handleClose={cerrarParametros}
+                           parametros_intro={parametros}/>
 
         </Container>
     );

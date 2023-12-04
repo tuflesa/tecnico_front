@@ -5,7 +5,7 @@ import { Modal, Button, Form, Col, Row } from 'react-bootstrap';
 import { BACKEND_SERVER } from '../../constantes';
 import { arch } from 'process';
 
-const RodParametrosEstandar = ({ rodillo_id, handleClose, showPa, rodillo_inf }) => {
+const RodParametrosEstandar = ({ rodillo_id, handleClose, showPa, rodillo_inf, parametros_intro }) => {
     const [valorParametro, setValorParametro] = useState('');
     const [parametros, setParametros] = useState([]);
     const [tipo_plano, setTipoPlanos] = useState('');
@@ -25,7 +25,7 @@ const RodParametrosEstandar = ({ rodillo_id, handleClose, showPa, rodillo_inf })
                 console.log(err);
             });
         }
-    }, [token]);
+    }, [token, parametros_intro]);
 
     useEffect(() => {
         rodillo_inf.tipo_plano && axios.get(BACKEND_SERVER + `/api/rodillos/tipo_plano/${rodillo_inf.tipo_plano}/`,{
