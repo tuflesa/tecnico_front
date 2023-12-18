@@ -11,7 +11,7 @@ import { setMaxListeners } from 'process';
 import { useLocation } from 'react-router-dom';
 import RodConjunto from './rod_crear_conjunto';
 
-const RodBancada = () => {
+const RodBancadaCT = () => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
     const [operaciones, setOperaciones] = useState(null);
@@ -20,7 +20,7 @@ const RodBancada = () => {
     const [grupo, setGrupo] = useState('');
     const [empresa, setEmpresa] = useState('');
     const [tubo_madre, setTuboMadre] = useState('');
-    const [filtro, setFiltro] = useState(`?maquina__empresa__id=${user['tec-user'].perfil.empresa.id}&pertence_grupo=${true}`);
+    const [filtro, setFiltro] = useState(`?maquina__empresa__id=${user['tec-user'].perfil.empresa.id}&pertence_grupo=${false}`);
     const [operacion_marcada, setOperacionMarcada] = useState(null);
     const [show_conjunto, setShowConjunto] = useState(false);
     const [formaciones_completadas, setFormacionesCompletadas] = useState('');
@@ -39,6 +39,7 @@ const RodBancada = () => {
     }, [filtro]);
 
     useEffect(() => {
+        console.log(filtro);
         axios.get(BACKEND_SERVER + `/api/rodillos/seccion/`+filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -46,6 +47,7 @@ const RodBancada = () => {
         })
         .then( res => {
             setSecciones(res.data);
+            console.log(res.data);
         })
         .catch( err => {
             console.log(err);
@@ -68,13 +70,14 @@ const RodBancada = () => {
 
     useEffect(() => { //recogemos las operaciones de la máquina elegida
         if(maquina){
-            axios.get(BACKEND_SERVER + `/api/rodillos/operacion/?seccion__maquina__id=${maquina}&seccion_pertenece_grupo=${true}`,{
+            axios.get(BACKEND_SERVER + `/api/rodillos/operacion_ct/?seccion__maquina__id=${maquina}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
             })
             .then( r => {
                 setOperaciones(r.data);
+                console.log(r.data);
             })
             .catch( err => {
                 console.log(err);
@@ -100,7 +103,10 @@ const RodBancada = () => {
       }, [operaciones, formaciones_completadas]);
 
     const actualizaFiltro = str => {
-        setFiltro(str);
+        console.log('entra para cambiar el filtro');
+        const nuevoFiltro = str.replace('pertenece_grupo=true','pertenece_grupo=false');
+        console.log(nuevoFiltro);
+        setFiltro(nuevoFiltro);
     }
 
     const GuardarId_Operacion = (operationId) => {
@@ -173,4 +179,4 @@ const RodBancada = () => {
         </Container>
     )
 }
-export default RodBancada;
+export default RodBancadaCT;

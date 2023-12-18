@@ -117,7 +117,7 @@ const RodGruposListado = () => {
                                             <td>{'Ø' + linea.tubo_madre}</td>
                                             <td><Link title='Detalle/Modificar'to={`/rodillos/grupo_editar/${linea.id}`}><PencilFill className="mr-3 pencil"/></Link></td>
                                         </tr>
-                                        {filaSeleccionada === linea.id && (
+                                        {filaSeleccionada === linea.id && show === true && (
                                             <tr>
                                                 <td colSpan="4">
                                                         <Table striped bordered hover>

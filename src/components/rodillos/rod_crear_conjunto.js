@@ -5,7 +5,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { constants } from 'buffer';
 
-const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tubomadre}) => {
+const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tubomadre, elementos_formacion}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
     const [ejes, setEjes] = useState(null);
@@ -18,6 +18,23 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
     const [tubo_madre, setTuboMadre] = useState('');
     const [grupo, setGrupo] = useState(null);
     const [rod_id, setRod_Id] = useState(''); //para guardar la informacion en EjesRodillos
+    
+    useEffect(() => { //BUSCAMOS, SI LOS HAY, ELEMENTOS (RODILLOS) DEL CONJUNTO SELECCIONADO.
+        if(elementos_formacion.length>0){ 
+            axios.get(BACKEND_SERVER + `/api/rodillos/elemento_select/?conjunto=${elementos_formacion[0].conjunto.id}`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }
+            })
+            .then( res => {
+                console.log('elementos seleccionados');
+                console.log(res.data);
+            })
+            .catch( err => {
+                console.log(err);
+            });
+        }
+    }, [token, elementos_formacion]);
     
     useEffect(() => { //PARA OBTENER LOS EJES DE LA OPERACION Y FILTRAR LOS RODILLOS;
         operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/eje/?operacion=${operacion_marcada.id}`,{
@@ -244,6 +261,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
     } 
 
     const handleInputChange = (event) => {
+        console.log(event);
         const campoNombre = event.target.name;
         const idRodillo = event.target.value;
         setRod_Id(idRodillo);
