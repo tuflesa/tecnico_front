@@ -87,6 +87,7 @@ const PedidoForm = ({pedido, setPedido}) => {
     },[pedido]);
 
     useEffect(()=>{
+        console.log(pedido);
         axios.get(BACKEND_SERVER + `/api/repuestos/proveedor/`, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -97,6 +98,11 @@ const PedidoForm = ({pedido, setPedido}) => {
         })
         .catch(err => { console.log(err);})
     },[token]);
+
+    useEffect(()=>{
+        console.log(pedido);
+        console.log(datos);
+    },[token, datos]);
 
     useEffect(()=>{
         datos.proveedor && axios.get(BACKEND_SERVER + `/api/repuestos/contacto/?proveedor=${datos.proveedor}`, {
@@ -533,10 +539,10 @@ const PedidoForm = ({pedido, setPedido}) => {
                         </Row>
                         <Row>                                                        
                             <Col>
-                                <Form.Group controlId="empresa">
+                                <Form.Group controlId="empresa_id">
                                     <Form.Label>Empresa (*)</Form.Label>
                                     <Form.Control as="select"  
-                                                name='empresa' 
+                                                name='empresa_id' 
                                                 value={datos.empresa_id}
                                                 onChange={handleInputChange}
                                                 disabled={handleDisabled()}
