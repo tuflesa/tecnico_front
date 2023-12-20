@@ -1,14 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Table, Button } from 'react-bootstrap';
 import logo from '../../assets/logo_bornay.svg';
-import rod_inf from '../../assets/rod_inf.svg';
-import rod_sup from '../../assets/rod_sup.svg';
 import { useCookies } from 'react-cookie';
-import RodBancadaFiltro from './rod_bancada_filtro';
+import RodBancadaCTFiltro from './rod_bancada_ct_filtro';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
-import { setMaxListeners } from 'process';
-import { useLocation } from 'react-router-dom';
 import RodConjunto from './rod_crear_conjunto';
 
 const RodBancadaCT = () => {
@@ -19,27 +15,26 @@ const RodBancadaCT = () => {
     const [maquina, setMaquina] = useState('');
     const [grupo, setGrupo] = useState('');
     const [empresa, setEmpresa] = useState('');
-    const [tubo_madre, setTuboMadre] = useState('');
+    const [dimensiones, setDimensiones] = useState('');
     const [filtro, setFiltro] = useState(`?maquina__empresa__id=${user['tec-user'].perfil.empresa.id}&pertence_grupo=${false}`);
     const [operacion_marcada, setOperacionMarcada] = useState(null);
     const [show_conjunto, setShowConjunto] = useState(false);
     const [formaciones_completadas, setFormacionesCompletadas] = useState('');
     const [formaciones_filtradas, setFormacionesFiltradas] = useState('');
 
-    useEffect(() => {
+    useEffect(() => { //SEPARAR DATOS QUE ENTRAN A TRAVES DEL FILTRO
         const params = new URLSearchParams(filtro);
         const maquinaValue = params.get('maquina');
         const grupoValue = params.get('grupo');
         const empresaValue = params.get('maquina__empresa__id');
-        const tuboMadreValue = params.get('tubo_madre');
+        const dimensionesValue = params.get('dimensiones');
         setMaquina(maquinaValue);
         setGrupo(grupoValue);
         setEmpresa(empresaValue);
-        setTuboMadre(tuboMadreValue);
+        setDimensiones(dimensionesValue);
     }, [filtro]);
 
     useEffect(() => {
-        console.log(filtro);
         axios.get(BACKEND_SERVER + `/api/rodillos/seccion/`+filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -47,15 +42,14 @@ const RodBancadaCT = () => {
         })
         .then( res => {
             setSecciones(res.data);
-            console.log(res.data);
         })
         .catch( err => {
             console.log(err);
         });
     }, [token, filtro]);
 
-    useEffect(() => { //Recogemos las celdas ya creadas según empresa, máquina y grupo, elegidos
-        maquina && empresa && grupo && axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__seccion__maquina__id=${maquina}&bancada__seccion__maquina__empresa=${empresa}&bancada__tubo_madre=${tubo_madre}`,{
+    useEffect(() => { //Recogemos las celdas ya creadas según empresa, máquina, elegidos
+        maquina && empresa && axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__seccion__maquina__id=${maquina}&bancada__seccion__maquina__empresa=${empresa}&bancada__seccion__pertenece_grupo=${false}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }
@@ -66,7 +60,7 @@ const RodBancadaCT = () => {
         .catch( err => {
             console.log(err);
         });
-    }, [maquina, grupo, empresa]);
+    }, [maquina, empresa]);
 
     useEffect(() => { //recogemos las operaciones de la máquina elegida
         if(maquina){
@@ -77,7 +71,6 @@ const RodBancadaCT = () => {
             })
             .then( r => {
                 setOperaciones(r.data);
-                console.log(r.data);
             })
             .catch( err => {
                 console.log(err);
@@ -103,10 +96,7 @@ const RodBancadaCT = () => {
       }, [operaciones, formaciones_completadas]);
 
     const actualizaFiltro = str => {
-        console.log('entra para cambiar el filtro');
-        const nuevoFiltro = str.replace('pertenece_grupo=true','pertenece_grupo=false');
-        console.log(nuevoFiltro);
-        setFiltro(nuevoFiltro);
+        setFiltro(str);
     }
 
     const GuardarId_Operacion = (operationId) => {
@@ -128,7 +118,7 @@ const RodBancadaCT = () => {
             <img src ={logo} width="200" height="200"></img>
             <Row>
                 <Col>
-                    <RodBancadaFiltro actualizaFiltro={actualizaFiltro}/>
+                    <RodBancadaCTFiltro actualizaFiltro={actualizaFiltro}/>
                 </Col>
             </ Row>
             {maquina? 
@@ -174,7 +164,7 @@ const RodBancadaCT = () => {
                     handleClose={CerrarConjunto}
                     grupoId={grupo}
                     maquina={maquina}
-                    tubomadre={tubo_madre}
+                    tubomadre={dimensiones}
                     elementos_formacion={formaciones_filtradas}/>
         </Container>
     )
