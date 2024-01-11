@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, Modal, Table } from 'react-bootstrap';
-import { Trash } from 'react-bootstrap-icons';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
@@ -10,14 +9,13 @@ const NotificacionForm = ({nota, setNota}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
 
-    const [hoy] = useState(new Date);
+    const [hoy] = useState(new Date());
     const [show_error, setShowError] = useState(false);
     const [show, setShow] = useState(false);
     const handleCloseError = () => setShowError(false);
     const handleClose = () => setShow(false);
-    const [usuarios, setUsuarios] = useState(null);
-    const [destrezas, setDestrezas] = useState(null);
-    const soyTecnico = user['tec-user'].perfil.destrezas.filter(s => s === 6);
+    const [, setUsuarios] = useState(null);
+    const [, setDestrezas] = useState(null);
     const nosoyTecnico = user['tec-user'].perfil.puesto.nombre==='Operador'||user['tec-user'].perfil.puesto.nombre==='Mantenimiento'?true:false;
     const [empresas, setEmpresas] = useState(null);
     const [zonas, setZonas] = useState(null);
@@ -47,8 +45,6 @@ const NotificacionForm = ({nota, setNota}) => {
     });
 
     useEffect(()=>{
-        console.log('que entra en nota');
-        console.log(nota);
         setDatos({
             id: nota.id? nota.id : null,
             que: nota.id?nota.que:null,
@@ -69,7 +65,7 @@ const NotificacionForm = ({nota, setNota}) => {
             numero: nota.id? nota.numero:null,
             peligrosidad: nota.id? nota.peligrosidad:false,
         });
-    },[nota]);
+    },[nota, hoy]);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + `/api/administracion/usuarios/?perfil__empresa__id=${user['tec-user'].perfil.empresa.id}`,{
@@ -91,7 +87,7 @@ const NotificacionForm = ({nota, setNota}) => {
         .catch( err => {
             console.log(err);
         });
-    }, [token, datos.empresa]);
+    }, [token, datos.empresa, user]);
 
     useEffect(() => {
         nota.id && axios.get(BACKEND_SERVER + `/api/mantenimiento/reclamos_detalle/?notificacion=${nota.id}`,{
@@ -148,7 +144,7 @@ const NotificacionForm = ({nota, setNota}) => {
         .catch( err => {
             console.log(err);
         }); 
-    }, [token, datos.empresa]);
+    }, [token, datos.empresa, user]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -196,7 +192,6 @@ const NotificacionForm = ({nota, setNota}) => {
                 setNota(res.data);
                 window.confirm('La notificación se ha creado correctamente');
                 window.location.href="javascript: history.go(-1)"
-                
             })
             .catch(err => { 
                 setShowError(true);

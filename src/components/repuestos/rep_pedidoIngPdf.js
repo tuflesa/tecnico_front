@@ -56,11 +56,11 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, empresa, lineas_
 
     function Total(){
         if(linea){
-            linea.map( l => {{total_pedido+=Number(l.total)}})
+            linea.map( l => total_pedido+=Number(l.total))
         }
     }
     function Total_adic(){
-        lineas_adicionales.map( linea => {{total_pedido+=Number(linea.total)}})
+        lineas_adicionales.map( linea => total_pedido+=Number(linea.total))
     }
 
     /* const ExampleSvg = () => (

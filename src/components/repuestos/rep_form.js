@@ -88,6 +88,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         });
     }, [token]);
 
+    /* eslint-disable react-hooks/exhaustive-deps */
     useEffect(() => {
         axios.get(BACKEND_SERVER + `/api/repuestos/repuesto_precio/?repuesto=${repuesto.id}`,{
             headers: {
@@ -132,6 +133,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             stock_T : stock_T
         })        
     },[datos.stocks_minimos]);
+    /* eslint-disable react-hooks/exhaustive-deps */
 
     useEffect(()=>{
         const stock_por_empresa = [];
@@ -142,17 +144,10 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             if(almacenes_por_empresa.length>0){
                 stock_por_empresa.push({empresa: empresa, stock: stock_empresa, stock_minimo: stock_minimo_empresa});            
             }
+            return null;
         });
         setStockEmpresa(stock_por_empresa);        
     },[repuesto, empresas]);
-
-    const formatNumber = (numero) =>{
-        return new Intl.NumberFormat('de-DE',{ style: 'currency', currency: 'EUR' }).format(numero)
-    }
-
-    const formatPorcentaje = (numero) =>{
-        return new Intl.NumberFormat('de-DE').format(numero)
-    }
 
     const updateRepuesto = () => {
         axios.get(BACKEND_SERVER + `/api/repuestos/detalle/${datos.id}/`,{

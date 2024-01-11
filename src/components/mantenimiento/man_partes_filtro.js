@@ -36,6 +36,7 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
         num_parte: '',
     });    
 
+    /* eslint-disable react-hooks/exhaustive-deps */
     useEffect(() => {;
         axios.get(BACKEND_SERVER + '/api/mantenimiento/tipo_tarea/',{
             headers: {
@@ -242,6 +243,7 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
         const activos = datos.estados<3;
         actualizaFiltro(filtro, activos);
     },[datos, token]);
+    /* eslint-disable react-hooks/exhaustive-deps */
 
     const handleInputChange = (event) => {
         setDatos({

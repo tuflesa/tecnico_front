@@ -50,6 +50,7 @@ const ListaDePersonal = ({linea_id, show, handlerClose}) => {
                                     <th>Trabajador</th>
                                     <th>Fecha Inicio</th>
                                     <th>Fecha Fin</th>
+                                    <th>Observaciones Mantenimiento</th>
                                 </tr>
                             </thead>                               
                             <tbody>                                    
@@ -57,8 +58,9 @@ const ListaDePersonal = ({linea_id, show, handlerClose}) => {
                                     return(
                                         <tr key={t.id}>
                                             <td>{t.trabajador.get_full_name}</td>
-                                            <td>{invertirFecha(String(t.fecha_inicio))}</td>
-                                            <td>{t.fecha_fin?invertirFecha(String(t.fecha_fin)):''}</td>
+                                            <td>{invertirFecha(String(t.linea.fecha_inicio))}</td>
+                                            <td>{t.linea.fecha_fin?invertirFecha(String(t.linea.fecha_fin)):''}</td>
+                                            <td>{t.linea.observaciones_trab}</td>
                                         </tr>
                                     )
                                 })}                                

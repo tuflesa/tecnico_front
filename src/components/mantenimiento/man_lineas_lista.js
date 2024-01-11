@@ -6,7 +6,6 @@ import { Container, Row, Col, Table} from 'react-bootstrap';
 import { Trash, PencilFill, Receipt, Eye, PlusSquare, DashSquare, HandThumbsUpFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import ManLineasFiltro from './man_lineas_filtro';
-import { color, filter } from 'd3';
 import {invertirFecha} from '../utilidades/funciones_fecha';
 import ListaDePersonal from './man_equipo_trabajadores';
 import ReactExport from 'react-data-export';
@@ -20,7 +19,7 @@ const ManLineasListado = () => {
     const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
     const ExcelColumn = ReactExport.ExcelFile.ExcelColumn;
 
-    var fecha_hoy=Date.parse(new Date);
+    var fecha_hoy=Date.parse(new Date());
     var mesEnMilisegundos = 1000 * 60 * 60 * 24 * 30;
     var enunmes=fecha_hoy+mesEnMilisegundos;
     var dentrodeunmes = new Date(enunmes);
@@ -49,7 +48,6 @@ const ManLineasListado = () => {
     });
 
     useEffect(()=>{
-        console.log('useEffect actualizando');
         if(activos){
             axios.get(BACKEND_SERVER + '/api/mantenimiento/listado_lineas_activas/'+ filtro,{
                 headers: {
@@ -57,7 +55,7 @@ const ManLineasListado = () => {
                     }
             })
             .then( res => {
-                res.data.results.map( r => {
+                res.data.results.forEach( r => {
                     //solo para poder utilizar los campos en el excel
                     r['priori']=r.tarea.prioridad;
                     r['nom_parte']=r.parte.nombre;
@@ -93,7 +91,7 @@ const ManLineasListado = () => {
             })
             .then( res => {
                 console.log(res.data.results);
-                res.data.results.map( r => {
+                res.data.results.forEach( r => {
                     //solo para poder utilizar los campos en el excel
                     r['priori']=r.tarea.prioridad;
                     r['nom_parte']=r.parte.nombre;
@@ -245,10 +243,8 @@ const ManLineasListado = () => {
     }
 
     useEffect(() => {
+        // eslint-disable-next-line no-unused-vars
         const interval = setInterval(() => {
-            console.log('actualizar_seg');
-            console.log('estoy viendo actualiza_seg');
-            console.log(actualizar_seg)
             setActualizarSeg(true);
         }, 60000);
       }, []);
