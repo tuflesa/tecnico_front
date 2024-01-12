@@ -25,7 +25,7 @@ const HeightChart = ({alturas}) => {
 
         const svg =svgRef.current;
 
-        const limite = 200;
+        const limite = 150;
                 
         const xScale = scaleLinear()
             .domain([0, 10100])
@@ -93,9 +93,7 @@ const HeightChart = ({alturas}) => {
 
     return (
         <div ref={wrapperRef}>
-            <svg ref={svgRef} 
-                 className='heightChart'
-                >
+            <svg ref={svgRef} className='heightChart'>
                 <g className='grafico'></g>
                 <g className='grid-x grid'></g>
                 <g className='grid-y grid'></g>

@@ -801,28 +801,29 @@ const StandChart = ({montaje, ejes, posiciones, simulador, gap, fleje}) => {
             .selectAll('text')
             .data(posiciones)
             .join('text')
+            .style('font-size', 15)//0.03*dimensions.width)//function(d) { return dimensions.width; })
             .attr('x', p => {
                 switch(p.eje) {
                     case 'INF':
-                        return 400;
+                        return xScale(limite*0.6);
                     case 'SUP':
-                        return 400;
+                        return xScale(limite*0.6);
                     case 'LAT_OP':
-                        return 50;
+                        return xScale(-limite*0.8);
                     case 'LAT_MO':
-                        return 400;
+                        return xScale(limite*0.6);
                 }
             })
             .attr('y', p => {
                 switch(p.eje) {
                     case 'INF':
-                        return 500;
+                        return yScale(-limite*0.9);
                     case 'SUP':
-                        return 50;
+                        return yScale(limite*0.9);
                     case 'LAT_OP':
-                        return 100;
+                        return yScale(limite*0.8);
                     case 'LAT_MO':
-                        return 100;
+                        return yScale(limite*0.8);
                 }
             })
             .text(p => simulador ? (p.eje + ': ' + p.pos_sim.toFixed(2)) : (p.eje + ': ' + p.pos.toFixed(2)));
@@ -831,16 +832,16 @@ const StandChart = ({montaje, ejes, posiciones, simulador, gap, fleje}) => {
             .selectAll('text')
             .data(gap)
             .join('text')
-            .attr("x", 50)
-            .attr("y", 500)
+            .attr("x", xScale(-limite*0.8))
+            .attr("y", yScale(-limite*0.9))
             .text(g => g.gap&&('Gap: ' + g.gap.toFixed(2)));
 
         gap&&select(svg).select('.piston')
             .selectAll('text')
             .data(gap)
             .join('text')
-            .attr("x", 50)
-            .attr("y", 50)
+            .attr("x", xScale(-limite*0.8))
+            .attr("y", yScale(limite*0.9))
             .text(g => g.piston&&('Piston: ' + g.piston.toFixed(2)));
                
     },[dimensions, montaje, ejes, fleje]);

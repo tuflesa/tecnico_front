@@ -498,9 +498,7 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
 
     return (
         <div ref={wrapperRef}>
-            <svg ref={svgRef} 
-                 className='standChart'
-                >
+            <svg ref={svgRef} className='standChart'>
                 <g className='grafico'></g>
                 <g className='grid-x grid'></g>
                 <g className='grid-y grid'></g>
