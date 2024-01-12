@@ -1,12 +1,11 @@
-import { Alert, Container } from 'react-bootstrap';
+import { Container } from 'react-bootstrap';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
-import { Button, Form, Col, Row, Table, Modal } from 'react-bootstrap';
+import { Button, Form, Col, Row, Table } from 'react-bootstrap';
 import { PlusCircle, Clipboard, Trash} from 'react-bootstrap-icons';
 import PlanoForm from './rod_plano_nuevo';
-import { Link } from 'react-router-dom';
 import {invertirFecha} from '../utilidades/funciones_fecha';
 import RodRevisionForm from './rod_revision_form';
 import RodParametrosEstandar from './rod_parametros_estandar';
@@ -25,13 +24,9 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [planos, setPlanos] = useState(null);
     const [valor_conjuntos, setValorConjuntos] = useState('');
     const [show, setShow] = useState(false);
-    //const [showParam, setShowParam] = useState(false);
-    //const [showParamNot, setShowParamNot] = useState(false);
     const [filaSeleccionada, setFilaSeleccionada] = useState(null);
     const [revisiones, setRevisiones] = useState(null);
-    //const [valor_parametros, setValorParametros] = useState('');
     const [parametros, setParametros] = useState(null); // PARAMETROS GUARDADOS
-    //const [filaSeleccionadaParametros, setFilaSeleccionadaParametros] = useState(null);
     const [plano_id, setPlano_id] = useState(null);
     const [showRevision, setShowRevision] = useState(false);
     const [showParametros, setShowParametros] = useState(false);
@@ -43,6 +38,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         empresa: rodillo.id?rodillo.operacion.seccion.maquina.empresa_id:'',
         zona: rodillo.id?rodillo.operacion.seccion.maquina.id:'',
         seccion: rodillo.id?rodillo.operacion.seccion.id: '',
+        seccion_ini: rodillo.id?rodillo.operacion.seccion.id: '',
         operacion: rodillo.id?rodillo.operacion.id:'',
         grupo: rodillo.grupo?rodillo.grupo.id:'',
         tipo_rodillo: rodillo.id?rodillo.tipo.id:'',
@@ -51,7 +47,11 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         tipo_seccion: rodillo.id?rodillo.operacion.seccion.tipo:'',
         tipo_plano: rodillo.id?rodillo.tipo_plano:'',
         rodillo_id: rodillo.id?rodillo.id:'',
-        diametro: rodillo.id?rodillo.diametro:0,
+        diametro: rodillo.id?rodillo.diametro:0, //diámetro interior, mandril del rodillo
+        forma: rodillo.id?rodillo.forma:'',
+        descripcion_perfil: rodillo.id?rodillo.descripcion_perfil:'',
+        dimension_perfil: rodillo.id?rodillo.dimension_perfil:'',
+        nombre_seccion:rodillo.id?rodillo.operacion.seccion.nombre:'',
     });
 
     useEffect(() => {
@@ -67,6 +67,10 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             console.log(err);
         });
     }, [token]);
+
+    useEffect(() => {
+        console.log(datos);
+    }, [datos]);
 
     useEffect(() => {
         if(rodillo.id){
@@ -271,6 +275,16 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         })
     }
 
+    const handleInputChangeSeccion = (event) => {
+        console.log(event.target.value)
+        const [valorId, valorNombre] = event.target.value.split(',');// Ahora, seccion_id y seccion_nombre contienen los dos valores separados        
+        setDatos((prevDatos)=>({
+            ...prevDatos,
+            seccion : parseInt(valorId),
+            nombre_seccion: valorNombre,
+        }));
+    };
+
     const GuardarRodillo = (event) => {
         event.preventDefault();
         axios.post(BACKEND_SERVER + `/api/rodillos/rodillo_nuevo/`, {
@@ -281,6 +295,9 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             material: datos.material,
             tipo_plano: datos.tipo_plano,
             diametro: datos.diametro,
+            forma: datos.forma,
+            descripcion_perfil: datos.descripcion_perfil,
+            dimension_perfil: datos.descripcion_perfil,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -305,6 +322,9 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             material: datos.material,
             tipo_plano: datos.tipo_plano,
             diametro: datos.diametro,
+            forma: datos.forma,
+            descripcion_perfil: datos.descripcion_perfil,
+            dimension_perfil: datos.descripcion_perfil
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -546,17 +566,16 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                         <Form.Group controlId="seccion">
                             <Form.Label>Seccion *</Form.Label>
                             <Form.Control as="select" 
-                                            value={datos.seccion}
-                                            name='seccion'
-                                            onChange={handleInputChange}>
-                                <option key={0} value={''}>Todas</option>
-                                {secciones && secciones.map( seccion => {
-                                    return (
-                                    <option key={seccion.id} value={seccion.id}>
-                                        {seccion.nombre}
-                                    </option>
-                                    )
-                                })}
+                                        defaultValue={datos.seccion!==''?datos.seccion:''}
+                                        name='seccion'
+                                        onChange={handleInputChangeSeccion}>
+                                        {datos.seccion>0?<option value={datos.seccion}>Todas</option>:<option key={0} value={''}>Todas</option>}
+                                        {secciones && secciones.map(seccion => (
+                                                <option key={seccion.id} value={`${seccion.id},${seccion.nombre}`}>
+                                                    {seccion.nombre}
+                                                </option>
+                                            )
+                                        )}
                             </Form.Control>
                         </Form.Group>
                     </Col>
@@ -666,6 +685,44 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                             </Form.Group>
                         </Col>
                     :''}
+                    </Row>
+                    <Row>
+                        {datos.nombre_seccion==='cabeza de turco'?
+                            <Col>
+                                <h5>Datos de Cabeza de Turco</h5>
+                            </Col>
+                            :''
+                        }
+                    </Row>
+                    <Row>
+                    {datos.nombre_seccion==='cabeza de turco'?
+                        <Col>
+                            <Form.Group controlId="descripcion_perfil">
+                                <Form.Label>Descripción del perfil</Form.Label>
+                                <Form.Control type="text" 
+                                                name='descripcion_perfil'
+                                                value={datos.descripcion_perfil}
+                                                onChange={handleInputChange}
+                                                placeholder='Descripción del perfil'>
+                                </Form.Control>
+                            </Form.Group>
+                        </Col>
+                        :''
+                    }
+                    {datos.nombre_seccion==='cabeza de turco'?
+                        <Col>
+                            <Form.Group controlId="dimension_perfil">
+                                <Form.Label>Dimensión del perfil</Form.Label>
+                                <Form.Control type="text" 
+                                                name='dimension_perfil'
+                                                value={datos.dimension_perfil}
+                                                onChange={handleInputChange}
+                                                placeholder='Dimensión del perfil'>
+                                </Form.Control>
+                            </Form.Group>
+                        </Col>
+                        :''
+                    }
                 </Row>
                 {rodillo.length!==0?
                     <Row style={{marginBottom:'10px'}}>
@@ -731,12 +788,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             
             <PlanoForm show={show_plano}
                            handleCloseParametros={cerrarPlano}
-                           tipo_seccion={datos.tipo_seccion}
-                           tipo_rodillo={datos.tipo_rodillo}
                            rodillo_id={rodillo.id}
-                           rodillo_tipo_plano={datos.tipo_plano}
-                           rodillo_t={rodillo}
-                           parametros_est={parametros}/>
+                           rodillo={rodillo}/>
             
             <RodRevisionForm showRev={showRevision}
                            plano_id={plano_id}

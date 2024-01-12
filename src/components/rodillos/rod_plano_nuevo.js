@@ -2,62 +2,27 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
-import { Modal, Button, Form, Col, Row, Tab, Tabs, Alert } from 'react-bootstrap';
+import { Modal, Button, Form, Col, Row, Tab, Tabs } from 'react-bootstrap';
 
 
-const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rodillo_id, rodillo_tipo_plano, rodillo_t}) => {
+const PlanoForm = ({show, handleCloseParametros,rodillo_id, rodillo}) => {
     const [token] = useCookies(['tec-token']);
-    const [tipo_plano, setTipoPlano] = useState([]);
-    const [parametros, setParametros] = useState([]);
     const hoy = new Date();
     const fechaString = hoy.getFullYear() + '-' + ('0' + (hoy.getMonth()+1)).slice(-2) + '-' + ('0' + hoy.getDate()).slice(-2);
     const [archivo, setArchivo] = useState(null);
     const [PlanosExistentes, setPlanosExistentes] = useState(null);
     const [checkboxSeleccionados, setCheckboxSeleccionados] = useState([]);
-    //const [rodillos, setRodillos] = useState([]);
-    //const [rodillo, setRodillo] = useState([]);
     var valor = null;
 
     const [datos, setDatos] = useState({
-        tipo_plano: rodillo_tipo_plano?rodillo_tipo_plano:'',
         nombre: null,
         fecha: fechaString,
         archivo:'',
         motivo: 'nuevo',
     });
 
-    useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/rodillos/tipo_plano/?tipo_seccion=${tipo_seccion}&tipo_rodillo=${tipo_rodillo}`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            setTipoPlano(res.data);
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    }, [token]);
-
-    useEffect(() => {
-        if(datos.tipo_plano){
-            axios.get(BACKEND_SERVER + `/api/rodillos/plano_parametros/${datos.tipo_plano}`,{
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                  }
-            })
-            .then( res => {
-                setParametros(res.data.nombres); //para sacar los nombres de los parametros de este tipo de plano
-            })
-            .catch( err => {
-                console.log(err);
-            });
-        }
-    }, [datos.tipo_plano]);
-
-    useEffect(() => { //se recogen los plano que cuadran con el tipo de rodillo
-        datos.tipo_plano && axios.get(BACKEND_SERVER + `/api/rodillos/planos_existentes/?rodillos__tipo_plano=${datos.tipo_plano}`,{
+    useEffect(() => { //Filtramos los planos existentes con la misma máquina, operación y tipo (sup - inf - lat...)
+        rodillo.id && axios.get(BACKEND_SERVER + `/api/rodillos/planos_existentes/?rodillos__tipo=${rodillo.tipo.id}&rodillos__operacion__id=${rodillo.operacion.id}&rodillos__operacion__seccion__maquina__id=${rodillo.operacion.seccion.maquina.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
                 }
@@ -68,7 +33,7 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
         .catch( err => {
             console.log(err);
         });
-    }, [token, rodillo_tipo_plano, datos.tipo_plano]);
+    }, [token, rodillo]);
 
     const handlerCancelar = () => {
         setDatos({
@@ -90,126 +55,82 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
     }
 
     const GuardarPlano = async () => {
-        if(datos.tipo_plano){
-            if (checkboxSeleccionados.length !== 0) {
-                const requests = [];
-                for (var z = 0; z < checkboxSeleccionados.length; z++) {
-                    valor = parseInt(checkboxSeleccionados[z]);
-                    var idRodillo = parseInt(rodillo_id);
+        if (checkboxSeleccionados.length !== 0) {
+            const requests = [];
+            for (var z = 0; z < checkboxSeleccionados.length; z++) {
+                valor = parseInt(checkboxSeleccionados[z]);
+                var idRodillo = parseInt(rodillo_id);
+        
+                try {
+                    const res = await axios.get(BACKEND_SERVER + `/api/rodillos/plano/${valor}`, {
+                        headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                        }
+                    });
             
-                    try {
-                        const res = await axios.get(BACKEND_SERVER + `/api/rodillos/plano/${valor}`, {
-                            headers: {
-                            'Authorization': `token ${token['tec-token']}`
-                            }
-                        });
-                
-                        //setRodillos([...res.data.rodillos, idRodillo]);
-                
-                        requests.push(
-                            axios.patch(BACKEND_SERVER + `/api/rodillos/plano/${valor}/`, {
-                            rodillos: [...res.data.rodillos, idRodillo],
-                            }, {
-                            headers: {
-                                'Authorization': `token ${token['tec-token']}`
-                            }
-                            })
-                        );
-
-                    } 
-                    catch (err) {
-                    console.log(err);
-                    }
-                }
-                try{
-                    await Promise.all(requests);
-                    handlerCancelar();
-                    window.location.href = `/rodillos/editar/${rodillo_id}`;
-                } catch(err){
-                    console.log(err);
-                }
-            }
-            else{
-                if(archivo===null){
-                    alert('Por favor incluye un archivo');
-                }
-                else{
-                    var newRodillos=[];
-                    newRodillos = [parseInt(rodillo_id)]
-                    axios.post(BACKEND_SERVER + `/api/rodillos/plano_nuevo/`, {
-                        nombre: datos.nombre,
-                        rodillos: newRodillos,
-                    }, {
+                    //setRodillos([...res.data.rodillos, idRodillo]);
+            
+                    requests.push(
+                        axios.patch(BACKEND_SERVER + `/api/rodillos/plano/${valor}/`, {
+                        rodillos: [...res.data.rodillos, idRodillo],
+                        }, {
                         headers: {
                             'Authorization': `token ${token['tec-token']}`
-                            }     
-                    })
-                    .then( res => { 
-                        const formData = new FormData();
-                            formData.append('plano', res.data.id);
-                            formData.append('motivo', datos.motivo);
-                            formData.append('archivo', archivo); // Aquí asumiendo que 'archivo' es el archivo seleccionado.
-                            formData.append('fecha', datos.fecha);
-                        
-                        axios.post(BACKEND_SERVER + `/api/rodillos/revision_plano/`, formData, {
-                            headers: {
-                            'Content-Type': 'multipart/form-data',
-                            'Authorization': `token ${token['tec-token']}`
-                            }
+                        }
                         })
-                        .then(re => { 
-                            alert('Plano guardado correctamente');
-                            if(rodillo_t.tipo_plano===null){
-                                for(var x=0;x<parametros.length;x++){ //damos de alta los parámetros con valor 0
-                                    axios.post(BACKEND_SERVER + `/api/rodillos/parametros_estandar/`, {
-                                        nombre: parametros[x].nombre,
-                                        rodillo: rodillo_id,
-                                        valor: 0,
-                                    }, {
-                                        headers: {
-                                            'Authorization': `token ${token['tec-token']}`
-                                            }     
-                                    })
-                                    .then( r => { 
-                                    })
-                                    .catch(err => { 
-                                        console.error(err);
-                                    });
-                                }
-                            }
-                            
-                            window.location.href = `/rodillos/editar/${rodillo_id}`;
-                        })
-                        .catch(err => { 
-                            console.error(err);
-                        });
-                        })
-                    
-                        if(datos.tipo_plano!==''){
-                            axios.patch(BACKEND_SERVER + `/api/rodillos/rodillo_nuevo/${rodillo_id}/`, {
-                                tipo_plano: datos.tipo_plano,
-                            }, {
-                                headers: {
-                                    'Authorization': `token ${token['tec-token']}`
-                                    }     
-                            })
-                            .then( res => { 
-                            })
-                            .catch(err => { 
-                                console.log(err);
-                            })
-                    
-                    .catch(err => { 
-                        Alert('Revisa los campos obligatorios');
-                        console.log(err);
-                    })
-                    }
+                    );
+
+                } 
+                catch (err) {
+                console.log(err);
                 }
+            }
+            try{
+                await Promise.all(requests);
                 handlerCancelar();
+                window.location.href = `/rodillos/editar/${rodillo_id}`;
+            } catch(err){
+                console.log(err);
             }
         }
         else{
-            alert('Por favor introduce el Tipo de plano, gracias');
+            if(archivo===null){
+                alert('Por favor incluye un archivo');
+            }
+            else{
+                var newRodillos=[];
+                newRodillos = [parseInt(rodillo_id)]
+                axios.post(BACKEND_SERVER + `/api/rodillos/plano_nuevo/`, {
+                    nombre: datos.nombre,
+                    rodillos: newRodillos,
+                }, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                        }     
+                })
+                .then( res => { 
+                    const formData = new FormData();
+                        formData.append('plano', res.data.id);
+                        formData.append('motivo', datos.motivo);
+                        formData.append('archivo', archivo); // Aquí asumiendo que 'archivo' es el archivo seleccionado.
+                        formData.append('fecha', datos.fecha);
+                    
+                    axios.post(BACKEND_SERVER + `/api/rodillos/revision_plano/`, formData, {
+                        headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'Authorization': `token ${token['tec-token']}`
+                        }
+                    })
+                    .then(re => { 
+                        alert('Plano guardado correctamente');
+                        window.location.href = `/rodillos/editar/${rodillo_id}`;
+                    })
+                    .catch(err => { 
+                        console.error(err);
+                    });
+                    })
+                }
+            handlerCancelar();
         }
     }
 
@@ -279,25 +200,6 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion, tipo_rodillo, rod
                                     />
                                 </Form.Group>
                             </Col>
-                            <Col>
-                                <Form.Group controlId="tipo_plano">
-                                    <Form.Label>Tipo de plano</Form.Label>
-                                    <Form.Control as="select" 
-                                                    value={rodillo_tipo_plano!==null?rodillo_tipo_plano:datos.tipo_plano}
-                                                    name='tipo_plano'
-                                                    onChange={handleInputChange}
-                                                    disabled={rodillo_tipo_plano!==null}>
-                                        <option key={0} value={0}>Todos</option>
-                                        {tipo_plano && tipo_plano.map( tipo => {
-                                            return (
-                                            <option key={tipo.id} value={tipo.id}>
-                                                {tipo.nombre}
-                                            </option>
-                                            )
-                                        })}
-                                    </Form.Control>
-                                </Form.Group>
-                            </Col>   
                         </Row>
                         <Row>
                             <Col>
