@@ -1,7 +1,7 @@
 import React from 'react';
 import { Document, Page, Image, View, Text, StyleSheet, Svg, Path, G, Rect, Polygon} from "@react-pdf/renderer";
 
-const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, empresa, lineas_adicionales, proveedor, contacto, direccion_envio}) =>{
+const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicionales, proveedor, contacto, direccion_envio}) =>{
     var total_pedido= 0;
 
     const formatNumber = (numero) =>{
@@ -21,7 +21,7 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, empresa, lineas_
                             <View style={styles.section}>
                                 <View style={styles.section6}><Text>{data.descripcion_proveedor +" "+ (data.repuesto.fabricante? " - " + data.repuesto.fabricante:'') + (" - " + data.repuesto.modelo? data.repuesto.modelo:'')}</Text></View>
                                 <View style={styles.section7}><Text>{data.cantidad}</Text></View>
-                                <View style={styles.section7}><Text>{data.repuesto.unidad_siglas}</Text></View>
+                                <View style={styles.section7}><Text>{'pcs'}</Text></View>
                                 <View style={styles.section9}><Text>{formatNumber(data.precio)}</Text></View>
                                 <View style={styles.section9}><Text>{formatPorcentaje(data.descuento) + '%'}</Text></View>
                                 <View style={styles.section9}><Text>{formatNumber(data.total)}</Text></View>
@@ -93,9 +93,20 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, empresa, lineas_
         page:{
             margin: 30,
         },
+        page1:{
+            //marginLeft: 25,
+            //marginRight: 25,
+            textAlign: 'justify',
+            margin: 3,
+            padding: 3,
+            flex: 3,
+            fontSize: 14,
+            marginBottom: 5,
+        },
         page2:{
             marginLeft: 30,
             marginRight: 30,
+            marginBottom: 3,
         },
         page3:{
             marginLeft: 30,
@@ -106,15 +117,17 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, empresa, lineas_
         section: {
             flexDirection: 'row',
             flexGrow: 1,
+            marginBottom: 3,
         },
         imagen: {
             fixed: true,
-            width: 200,
+            width: 5,
             height: 80,
             margin: 5,
             padding: 5,
+            //marginLeft: -45,
             flexGrow: 1,
-            flexDirection: "column",
+            //flexDirection: "column",
         },
         iconos: {
             fixed: true,
@@ -131,11 +144,14 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, empresa, lineas_
             fontSize: 10
         },
         section44: {
-            margin: 5,
-            padding: 5,
-            flex: 5,
+            margin: 3,
+            padding: 3,
+            flex: 3,
             flexDirection: "column",
             fontSize: 10
+        },
+        section_negrita: {
+            fontWeight: 'bold',
         },
         section4: {
             margin: 5,
@@ -203,7 +219,8 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, empresa, lineas_
         },
         totalNumber: {
             marginRight: 70,
-            fontSize: 14,
+            marginBottom: 3,
+            fontSize: 10,
             bottom: 30,
             left: 0,
             right: 0,
@@ -219,54 +236,79 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, empresa, lineas_
             textAlign: 'justify',
             color: 'grey',
         },
+        textWithMargin: {
+            marginBottom: 5,
+        },
     });
     return(     
         <Document>
             <Page size="A4">
                 <Text render={({ pageNumber, totalPages }) => ("  ")} fixed />            
                 <View style={styles.page} >
-                    <View fixed>
+                    <View style={{ flexDirection: 'row' }}>
                         <View style={styles.imagen}>
-                            {empresa.id===1?<VerLogo/>:<Image src= { empresa.logo } width="500" height="500"/>}
+                            {pedido.empresa.id === 1 ? <VerLogo /> : <Image src={pedido.empresa.logo}/>}  
+                        </View>
+                        <View style={{ flex: 1, marginLeft: 160, justifyContent: 'center' }}>
+                            <View style={styles.section_negrita}>
+                                <Text style={styles.page1}>Purchase Order</Text>
+                                <Text style={styles.section44}>Date:    {fecha_creacion}</Text>
+                                <Text style={{...styles.section44, marginBottom: 5}}>Order Nº: {pedido.numero}</Text> 
+                            </View>
                         </View>
                     </View>
                     <View style={styles.page2}>               
                         <View style={styles.section}>
                             <View style={styles.section44}>
-                                <Text>Date: {fecha_creacion}</Text>
-                                {contacto ? <Text>to:   {contacto.nombre}</Text>:<Text>   </Text>}
-                                <Text>Company:  {proveedor.nombre}</Text>
-                                <Text>Subject:  Pedido</Text>
-                                <Text>From: {pedido.creado_por.get_full_name}</Text>
+                                {/* <Text>Date: {fecha_creacion}</Text> */}
+                                {/* {contacto ? <Text>to:   {contacto.nombre}</Text>:<Text>   </Text>} */}
+                                <Text style={{color: 'grey', marginTop: 15}}>Supplier details:</Text>
+                                <Text>{proveedor.nombre}</Text>
+                                <Text>{proveedor.cif}</Text>
+                                <Text>Code:{proveedor.cod_ekon}</Text>
+                                {contacto ? <Text>Attn: {contacto.nombre}</Text>:<Text>   </Text>}
+                                <Text>{proveedor.telefono}</Text>
+                                <Text>{proveedor.direccion}</Text>
+                                <Text>{proveedor.poblacion}</Text>
+                                <Text>{proveedor.pais}</Text>
+                                <Text style={{marginTop: 15}}>Subject:  Pedido</Text>
+                                <Text>Created by: {pedido.creado_por.get_full_name}</Text>
+                                <Text>Email: {pedido.creado_por.email}</Text>
                             </View>
                             <View style={styles.section4}>
-                                <Text>Delivery Address:</Text>
-                                <Text>{empresa.nombre}</Text>
+                                <Text style={{color: 'grey', marginTop: 15}}>Billing address: </Text>
+                                <Text>{pedido.empresa.nombre}</Text>
+                                <Text>{pedido.empresa.cif}</Text>
+                                <Text>{pedido.empresa.direccion}</Text>
+                                <Text>{pedido.empresa.poblacion}</Text>
+                                <Text>{pedido.empresa.codpostal}</Text>
+                                <Text>Spain</Text>
+                                <Text>Telf: {pedido.empresa.telefono}</Text>
+                            </View>
+                            <View style={styles.section4}>
+                                <Text style={{color: 'grey', marginTop: 15}}>Shipping address: </Text>
+                                <Text>{pedido.empresa.nombre}</Text>
+                                {/* <Text>{direccion_envio.cif}</Text> */}
                                 <Text>{direccion_envio.direccion}</Text>
                                 <Text>{direccion_envio.poblacion}</Text>
-                                <Text>{direccion_envio.codpostal + ' - ' + direccion_envio.provincia}</Text>
+                                <Text>{direccion_envio.codpostal + ' ' + direccion_envio.provincia}</Text>
+                                <Text>Spain</Text>
+                                <Text>Telf: {direccion_envio.telefono}</Text>
                             </View>
                         </View>
                     </View>
                     <View style={styles.page2}>
                         <View style={styles.section}>
                             <View style={styles.section3}>
-                                <Text>Nº Order: {pedido.numero}</Text>                            
+                                <Text style={styles.textWithMargin}>Remarks: {pedido.observaciones}</Text>                            
                             </View>
                         </View>
                     </View>
                     <View style={styles.page2}>
                         <View style={styles.section}>
                             <View style={styles.section3}>
-                                <Text>Ordering remarks: {pedido.observaciones}</Text>                            
-                            </View>
-                        </View>
-                    </View>
-                    <View style={styles.page2}>
-                        <View style={styles.section}>
-                            <View style={styles.section5}>
-                                <Text>Dear Sirs:</Text>
-                                <Text>We confirm you the order of the following items/spares:</Text>
+                                <Text>Dear Sirs,</Text>
+                                <Text>We confirm you the purchase order of the following items / spare pants:</Text>
                             </View>
                         </View>
                     </View>
@@ -277,7 +319,7 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, empresa, lineas_
                                 <View style={styles.section7}><Text>Qty</Text></View>
                                 <View style={styles.section7}><Text>Unit</Text></View>
                                 <View style={styles.section8}><Text>Price/Unit</Text></View>
-                                <View style={styles.section8}><Text>Dcnt.</Text></View>
+                                <View style={styles.section8}><Text>Discount</Text></View>
                                 <View style={styles.section8}><Text>Total</Text></View>
                             </View>                                          
                         </View>                    
@@ -289,17 +331,22 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, empresa, lineas_
                 {Total()}
                 {Total_adic()}
                 <View style={styles.totalNumber}><Text>Order total: {Number.parseFloat(total_pedido).toFixed(2)}€</Text></View>
+                <View style={styles.totalNumber}>
+                    {proveedor.pais!=='España'?<Text style={{marginBottom:10}}>INTRA-COMMUNITY TRANSACTION, EXEMPT FROM VAT</Text>:null}
+                </View>
                 <View style={styles.page2}>
                     <View style={styles.section}>
                         <View style={styles.section3}>
-                            <Text>Ordering remarks:  {pedido.observaciones2}</Text>                            
+                            <Text>Remarks:  {pedido.observaciones2}</Text>                            
                         </View>
                     </View>
                 </View>
                 <View style={styles.page2}>
                     <View style={styles.section}>
                         <View style={styles.section3}>
-                            <Text>Note: Please indicate the order number on the delivery note.</Text>
+                            <Text style={styles.textWithMargin}>Note: Please indicate the PO number on the delivery note.</Text>
+                            <Text style={styles.textWithMargin}>Payment Terms: {proveedor.condicion_pago}</Text>
+                            <Text style={styles.textWithMargin}>Delivery Conditions: {'Incoterm 2020 - ' + proveedor.condicion_entrega}</Text> 
                         </View>
                     </View>
                 </View>

@@ -25,7 +25,7 @@ const PedidosFiltro = ({ actualizaFiltro }) => {
     });
 
     useEffect(()=>{
-        const filtro = `?proveedor__nombre__icontains=${datos.nombre}&fecha_creacion__lte=${datos.fecha_creacion_lte}&fecha_creacion__gte=${datos.fecha_creacion_gte}&finalizado=${datos.finalizado}&numero__icontains=${datos.numero}&empresa=${datos.empresa}&creado_por=${datos.creado_por}&descripcion__icontains=${datos.descripcion}`;
+        const filtro = `?empresa__id=${datos.empresa}&finalizado=${datos.finalizado}&creado_por=${datos.creado_por}&proveedor__nombre__icontains=${datos.nombre}&fecha_creacion__lte=${datos.fecha_creacion_lte}&fecha_creacion__gte=${datos.fecha_creacion_gte}&numero__icontains=${datos.numero}&descripcion__icontains=${datos.descripcion}`;
         actualizaFiltro(filtro);
     },[datos, actualizaFiltro]);
 
