@@ -31,6 +31,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [showRevision, setShowRevision] = useState(false);
     const [showParametros, setShowParametros] = useState(false);
     const [tipos_planos, setTiposPlanos] = useState(null);
+    const [formas, setForma] = useState([]);
     
     const [show_plano, setShowPlano] = useState(false);
 
@@ -38,7 +39,6 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         empresa: rodillo.id?rodillo.operacion.seccion.maquina.empresa_id:'',
         zona: rodillo.id?rodillo.operacion.seccion.maquina.id:'',
         seccion: rodillo.id?rodillo.operacion.seccion.id: '',
-        seccion_ini: rodillo.id?rodillo.operacion.seccion.id: '',
         operacion: rodillo.id?rodillo.operacion.id:'',
         grupo: rodillo.grupo?rodillo.grupo.id:'',
         tipo_rodillo: rodillo.id?rodillo.tipo.id:'',
@@ -51,7 +51,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         forma: rodillo.id?rodillo.forma:'',
         descripcion_perfil: rodillo.id?rodillo.descripcion_perfil:'',
         dimension_perfil: rodillo.id?rodillo.dimension_perfil:'',
-        nombre_seccion:rodillo.id?rodillo.operacion.seccion.nombre:'',
+        pertenece_grupo:rodillo.id?rodillo.operacion.seccion.pertenece_grupo:'',
     });
 
     useEffect(() => {
@@ -69,8 +69,18 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     }, [token]);
 
     useEffect(() => {
-        console.log(datos);
-    }, [datos]);
+        axios.get(BACKEND_SERVER + '/api/rodillos/forma/',{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setForma(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
 
     useEffect(() => {
         if(rodillo.id){
@@ -276,12 +286,11 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     }
 
     const handleInputChangeSeccion = (event) => {
-        console.log(event.target.value)
-        const [valorId, valorNombre] = event.target.value.split(',');// Ahora, seccion_id y seccion_nombre contienen los dos valores separados        
+        const [valorId, valorPertenece_grupo] = event.target.value.split(',');// Ahora, seccion_id y seccion_nombre contienen los dos valores separados        
         setDatos((prevDatos)=>({
             ...prevDatos,
             seccion : parseInt(valorId),
-            nombre_seccion: valorNombre,
+            pertenece_grupo: valorPertenece_grupo==="true"?true:false,
         }));
     };
 
@@ -295,9 +304,9 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             material: datos.material,
             tipo_plano: datos.tipo_plano,
             diametro: datos.diametro,
-            forma: datos.forma,
+            forma: parseInt(datos.forma),
             descripcion_perfil: datos.descripcion_perfil,
-            dimension_perfil: datos.descripcion_perfil,
+            dimension_perfil: datos.dimension_perfil,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -322,9 +331,9 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             material: datos.material,
             tipo_plano: datos.tipo_plano,
             diametro: datos.diametro,
-            forma: datos.forma,
+            forma: parseInt(datos.forma),
             descripcion_perfil: datos.descripcion_perfil,
-            dimension_perfil: datos.descripcion_perfil
+            dimension_perfil: datos.dimension_perfil,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -360,10 +369,16 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                     console.log(err);
                 });
             }
+            alert('Actualizado correctamente');
         })
         .catch(err => { 
             console.log(err);
-            alert('Falta datos, por favor rellena todo los datos que tengan *');
+            if(datos.dimension_perfil.length>2){
+                alert('La longitud del campo Dimensión de perfil, no es correcta');
+            }
+            else{
+                alert('Falta datos, por favor rellena todo los datos que tengan *');
+            }
         })
     };
 
@@ -562,23 +577,46 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                             </Form.Control>
                         </Form.Group>
                     </Col>
-                    <Col>
-                        <Form.Group controlId="seccion">
-                            <Form.Label>Seccion *</Form.Label>
-                            <Form.Control as="select" 
-                                        defaultValue={datos.seccion!==''?datos.seccion:''}
-                                        name='seccion'
-                                        onChange={handleInputChangeSeccion}>
-                                        {datos.seccion>0?<option value={datos.seccion}>Todas</option>:<option key={0} value={''}>Todas</option>}
-                                        {secciones && secciones.map(seccion => (
-                                                <option key={seccion.id} value={`${seccion.id},${seccion.nombre}`}>
-                                                    {seccion.nombre}
-                                                </option>
-                                            )
-                                        )}
-                            </Form.Control>
-                        </Form.Group>
-                    </Col>
+                    {rodillo.id?
+                        <Col>
+                            <Form.Group controlId="seccion">
+                                <Form.Label>Seccion *</Form.Label>
+                                <Form.Control as="select" 
+                                                value={datos.seccion}
+                                                name='seccion'
+                                                onChange={handleInputChange}>
+                                    <option key={0} value={''}>Todas</option>
+                                    {secciones && secciones.map( seccion => {
+                                        return (
+                                        <option key={seccion.id} value={seccion.id}>
+                                            {seccion.nombre}
+                                        </option>
+                                        )
+                                    })}
+                                </Form.Control>
+                            </Form.Group>
+                        </Col>
+                    :
+                        <Col>
+                            <Form.Group controlId="seccion">
+                                <Form.Label>Seccion *</Form.Label>
+                                <Form.Control as="select" 
+                                            defaultValue={datos.seccion}
+                                            name='seccion'
+                                            onChange={handleInputChangeSeccion}>
+                                            <option key={0} value={''}>Todas</option>
+                                            {/* {datos.seccion>0?<option value={datos.seccion}>Todas</option>:<option key={0} value={''}>Todas</option>} */}
+                                            {secciones && secciones.map(seccion => (
+                                                    <option key={seccion.id} value={`${seccion.id},${seccion.pertenece_grupo}`}>
+                                                        {seccion.nombre}
+                                                    </option>
+                                                )
+                                                
+                                            )}
+                                </Form.Control>
+                            </Form.Group>
+                        </Col>
+                    }
                     <Col>
                         <Form.Group controlId="operacion">
                             <Form.Label>Operación *</Form.Label>
@@ -598,83 +636,82 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                         </Form.Group>
                     </Col>
                 </Row>
-                <Row>
-                    <Col>
-                        <Form.Group controlId="tipo_rodillo">
-                            <Form.Label>Tipo de Rodillo *</Form.Label>
-                            <Form.Control as="select" 
-                                            value={datos.tipo_rodillo}
-                                            name='tipo_rodillo'
-                                            onChange={handleInputChange}>
-                                <option key={0} value={''}>Todos</option>
-                                {tipo_rodillo && tipo_rodillo.map( tipo => {
-                                    return (
-                                    <option key={tipo.id} value={tipo.id}>
-                                        {tipo.nombre}
-                                    </option>
-                                    )
-                                })}
-                            </Form.Control>
-                        </Form.Group>
-                    </Col>
-                    <Col>
-                        <Form.Group controlId="material">
-                            <Form.Label>Tipo de Material *</Form.Label>
-                            <Form.Control as="select" 
-                                            value={datos.material}
-                                            name='material'
-                                            onChange={handleInputChange}>
-                                <option key={0} value={''}>Todos</option>
-                                {materiales && materiales.map( material => {
-                                    return (
-                                    <option key={material.id} value={material.id}>
-                                        {material.nombre}
-                                    </option>
-                                    )
-                                })}
-                            </Form.Control>
-                        </Form.Group>
-                    </Col>
-                    <Col>
-                        <Form.Group controlId="grupo">
-                            <Form.Label>Grupo al que pertenece</Form.Label>
-                            <Form.Control as="select" 
-                                            value={datos.grupo}
-                                            name='grupo'
-                                            onChange={handleInputChange}>
-                                <option key={0} value={''}>Todos</option>
-                                {grupos && grupos.map(grupo => {
-                                    return (
-                                    <option key={grupo.id} value={grupo.id}>
-                                        {grupo.nombre}
-                                    </option>
-                                    )
-                                })}
-                            </Form.Control>
-                        </Form.Group>
-                    </Col>
-                    <Col>
-                        <Form.Group controlId="diametro">
-                            <Form.Label>Diametro interior</Form.Label>
-                            <Form.Control type="text" 
-                                            name='diametro'
-                                            value={datos.diametro}
-                                            onChange={handleInputChange}
-                                            placeholder='Diámetro interior'>
-                            </Form.Control>
-                        </Form.Group>
-                    </Col>
-                    {rodillo.length!==0?
+                {datos.seccion?
+                <React.Fragment>
+                    {datos.pertenece_grupo===false?
+                        <Row>
+                            <Col>
+                                <Form.Group controlId="forma">
+                                    <Form.Label>Formas del perfil</Form.Label>
+                                    <Form.Control as="select" 
+                                                    value={datos.forma}
+                                                    name='forma'
+                                                    onChange={handleInputChange}>
+                                        <option key={0} value={''}>Todos</option>
+                                        {formas && formas.map( forma => {
+                                            return (
+                                            <option key={forma.id} value={forma.id}>
+                                                {forma.nombre}
+                                            </option>
+                                            )
+                                        })}
+                                    </Form.Control>
+                                </Form.Group>
+                            </Col>
+                            <Col>
+                                <Form.Group controlId="descripcion_perfil">
+                                    <Form.Label>Descripción del perfil</Form.Label>
+                                    <Form.Control type="text" 
+                                                    name='descripcion_perfil'
+                                                    value={datos.descripcion_perfil}
+                                                    onChange={handleInputChange}
+                                                    placeholder='Descripción del perfil'>
+                                    </Form.Control>
+                                </Form.Group>
+                            </Col>
+                            <Col>
+                                <Form.Group controlId="dimension_perfil">
+                                    <Form.Label>Dimensión del perfil</Form.Label>
+                                    <Form.Control type="text" 
+                                                    name='dimension_perfil'
+                                                    value={datos.dimension_perfil}
+                                                    onChange={handleInputChange}
+                                                    placeholder='Dimensión del perfil'>
+                                    </Form.Control>
+                                </Form.Group>
+                            </Col>                    
+                        </Row>
+                        :''}
+                    <Row>
+                        {datos.pertenece_grupo?
+                            <Col>
+                                <Form.Group controlId="grupo">
+                                    <Form.Label>Grupo al que pertenece</Form.Label>
+                                    <Form.Control as="select" 
+                                                    value={datos.grupo}
+                                                    name='grupo'
+                                                    onChange={handleInputChange}>
+                                        <option key={0} value={''}>Todos</option>
+                                        {grupos && grupos.map(grupo => {
+                                            return (
+                                            <option key={grupo.id} value={grupo.id}>
+                                                {grupo.nombre}
+                                            </option>
+                                            )
+                                        })}
+                                    </Form.Control>
+                                </Form.Group>
+                            </Col>
+                        :''}
                         <Col>
-                            <Form.Group controlId="tipo_plano" >
-                                <Form.Label style={{color:'red'}}>Tipo de plano</Form.Label>
+                            <Form.Group controlId="tipo_rodillo">
+                                <Form.Label>Tipo de Rodillo *</Form.Label>
                                 <Form.Control as="select" 
-                                                style={{color:'red'}}
-                                                value={datos.tipo_plano}
-                                                name='tipo_plano'
+                                                value={datos.tipo_rodillo}
+                                                name='tipo_rodillo'
                                                 onChange={handleInputChange}>
-                                    <option key={0} value={0}>Todos</option>
-                                    {tipos_planos && tipos_planos.map( tipo => {
+                                    <option key={0} value={''}>Todos</option>
+                                    {tipo_rodillo && tipo_rodillo.map( tipo => {
                                         return (
                                         <option key={tipo.id} value={tipo.id}>
                                             {tipo.nombre}
@@ -684,46 +721,59 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                 </Form.Control>
                             </Form.Group>
                         </Col>
-                    :''}
-                    </Row>
-                    <Row>
-                        {datos.nombre_seccion==='cabeza de turco'?
+                        <Col>
+                            <Form.Group controlId="material">
+                                <Form.Label>Tipo de Material *</Form.Label>
+                                <Form.Control as="select" 
+                                                value={datos.material}
+                                                name='material'
+                                                onChange={handleInputChange}>
+                                    <option key={0} value={''}>Todos</option>
+                                    {materiales && materiales.map( material => {
+                                        return (
+                                        <option key={material.id} value={material.id}>
+                                            {material.nombre}
+                                        </option>
+                                        )
+                                    })}
+                                </Form.Control>
+                            </Form.Group>
+                        </Col>
+                        <Col>
+                            <Form.Group controlId="diametro">
+                                <Form.Label>Diametro interior</Form.Label>
+                                <Form.Control type="text" 
+                                                name='diametro'
+                                                value={datos.diametro}
+                                                onChange={handleInputChange}
+                                                placeholder='Diámetro interior'>
+                                </Form.Control>
+                            </Form.Group>
+                        </Col>
+                        {rodillo.length!==0?
                             <Col>
-                                <h5>Datos de Cabeza de Turco</h5>
+                                <Form.Group controlId="tipo_plano" >
+                                    <Form.Label style={{color:'red'}}>Tipo de plano</Form.Label>
+                                    <Form.Control as="select" 
+                                                    style={{color:'red'}}
+                                                    value={datos.tipo_plano}
+                                                    name='tipo_plano'
+                                                    onChange={handleInputChange}>
+                                        <option key={0} value={0}>Todos</option>
+                                        {tipos_planos && tipos_planos.map( tipo => {
+                                            return (
+                                            <option key={tipo.id} value={tipo.id}>
+                                                {tipo.nombre}
+                                            </option>
+                                            )
+                                        })}
+                                    </Form.Control>
+                                </Form.Group>
                             </Col>
-                            :''
-                        }
+                        :''}
                     </Row>
-                    <Row>
-                    {datos.nombre_seccion==='cabeza de turco'?
-                        <Col>
-                            <Form.Group controlId="descripcion_perfil">
-                                <Form.Label>Descripción del perfil</Form.Label>
-                                <Form.Control type="text" 
-                                                name='descripcion_perfil'
-                                                value={datos.descripcion_perfil}
-                                                onChange={handleInputChange}
-                                                placeholder='Descripción del perfil'>
-                                </Form.Control>
-                            </Form.Group>
-                        </Col>
-                        :''
-                    }
-                    {datos.nombre_seccion==='cabeza de turco'?
-                        <Col>
-                            <Form.Group controlId="dimension_perfil">
-                                <Form.Label>Dimensión del perfil</Form.Label>
-                                <Form.Control type="text" 
-                                                name='dimension_perfil'
-                                                value={datos.dimension_perfil}
-                                                onChange={handleInputChange}
-                                                placeholder='Dimensión del perfil'>
-                                </Form.Control>
-                            </Form.Group>
-                        </Col>
-                        :''
-                    }
-                </Row>
+                </React.Fragment>
+                :''}
                 {rodillo.length!==0?
                     <Row style={{marginBottom:'10px'}}>
                         <Col style={{color:'red'}}>Debemos introducir el tipo de plano y actualizar, si queremos añadir un plano ya creado</Col>
