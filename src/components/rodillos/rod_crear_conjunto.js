@@ -27,8 +27,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
                 }
             })
             .then( res => {
-                console.log('elementos seleccionados');
-                console.log(res.data);
+                //console.log(res.data);
             })
             .catch( err => {
                 console.log(err);

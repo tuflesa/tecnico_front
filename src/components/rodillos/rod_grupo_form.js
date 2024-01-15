@@ -4,8 +4,14 @@ import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
 import { Button, Form, Col, Row } from 'react-bootstrap';
+import RodBancada from './rod_bancada_form';
+import RodGrupoEditar from './rod_grupo_editar';
+//import { line, link } from 'd3';
+//import { Link } from 'react-router-dom';
+//import { useHistory } from 'react-router-dom';
 
-const RodGrupo = ({grupo, setGrupo}) => {
+
+const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
 
@@ -13,6 +19,7 @@ const RodGrupo = ({grupo, setGrupo}) => {
     const [zonas, setZonas] = useState([]);
     const [bancadas, setBancadas] = useState(null);
     const [filtro, setFiltro] = useState(`?tubo_madre__gte=${0}&tubo_madre__lte=${0}`);
+    const [mostrarRodBancada] = useState(mostrarBancada);
 
     const [datos, setDatos] = useState({
         id: grupo.id? grupo.id:null,
@@ -118,7 +125,7 @@ const RodGrupo = ({grupo, setGrupo}) => {
           };
         });
       };
-
+    
     const GuardarGrupo = (event) => {
         event.preventDefault();
         axios.post(BACKEND_SERVER + `/api/rodillos/grupo_only/`, {
@@ -132,7 +139,7 @@ const RodGrupo = ({grupo, setGrupo}) => {
             }
         })
         .then(res => { 
-            setGrupo(res.data);
+            window.location.href=`/rodillos/grupo_editar/${res.data.id}`;       
         })
         .catch(err => { 
             console.log(err);
@@ -164,7 +171,7 @@ const RodGrupo = ({grupo, setGrupo}) => {
 
     return (
         <Container className='mt-5'>
-            <h5 className='mt-5'>Nuevo Grupo</h5>
+            {grupo.id?<h5 className='mt-5'>Editar Grupo</h5>:<h5 className='mt-5'>Nuevo Grupo</h5>}
             <Form >
                 <Row>
                     <Col>
@@ -271,6 +278,7 @@ const RodGrupo = ({grupo, setGrupo}) => {
             </Form>
             <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
             {grupo.length===0?<Button variant="outline-primary" onClick={GuardarGrupo}>Guardar</Button>:<Button variant="outline-primary" onClick={ActualizarGrupo}>Actualizar</Button>}
+            {mostrarRodBancada && <RodBancada visible={mostrarRodBancada} grupo={grupo} setGrupo={setGrupo} />} {/* mostramos en editar las bancadas de la máquina */}
         </Container>
     )
 }

@@ -1,45 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Table, Button } from 'react-bootstrap';
-import logo from '../../assets/logo_bornay.svg';
-import rod_inf from '../../assets/rod_inf.svg';
-import rod_sup from '../../assets/rod_sup.svg';
 import { useCookies } from 'react-cookie';
-import RodBancadaFiltro from './rod_bancada_filtro';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
-import { setMaxListeners } from 'process';
-import { useLocation } from 'react-router-dom';
 import RodConjunto from './rod_crear_conjunto';
 
-const RodBancada = () => {
+const RodBancada = ({visible, grupo, setGrupo}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
     const [operaciones, setOperaciones] = useState(null);
     const [secciones, setSecciones] = useState(null);
     const [maquina, setMaquina] = useState('');
-    const [grupo, setGrupo] = useState('');
     const [empresa, setEmpresa] = useState('');
     const [tubo_madre, setTuboMadre] = useState('');
-    const [filtro, setFiltro] = useState(`?maquina__empresa__id=${user['tec-user'].perfil.empresa.id}&pertence_grupo=${true}`);
     const [operacion_marcada, setOperacionMarcada] = useState(null);
     const [show_conjunto, setShowConjunto] = useState(false);
     const [formaciones_completadas, setFormacionesCompletadas] = useState('');
     const [formaciones_filtradas, setFormacionesFiltradas] = useState('');
 
     useEffect(() => {
-        const params = new URLSearchParams(filtro);
-        const maquinaValue = params.get('maquina');
-        const grupoValue = params.get('grupo');
-        const empresaValue = params.get('maquina__empresa__id');
-        const tuboMadreValue = params.get('tubo_madre');
-        setMaquina(maquinaValue);
-        setGrupo(grupoValue);
-        setEmpresa(empresaValue);
-        setTuboMadre(tuboMadreValue);
-    }, [filtro]);
+        setMaquina(grupo.maquina.id);
+        setEmpresa(grupo.maquina.empresa.id);
+        setTuboMadre(grupo.tubo_madre);
+    }, [grupo]);
 
     useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/rodillos/seccion/`+filtro,{
+        grupo.id && axios.get(BACKEND_SERVER + `/api/rodillos/seccion/?maquina__empresa__id=${grupo.maquina.empresa.id}&id=${grupo.id}&maquina=${grupo.maquina.id}&pertenece_grupo=${true}&grupo=${grupo.id}&tubo_madre=${grupo.tuboMadre}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -50,7 +36,7 @@ const RodBancada = () => {
         .catch( err => {
             console.log(err);
         });
-    }, [token, filtro]);
+    }, [token, grupo]);
 
     useEffect(() => { //Recogemos las celdas ya creadas según empresa, máquina y grupo, elegidos
         maquina && empresa && grupo && axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__seccion__maquina__id=${maquina}&bancada__seccion__maquina__empresa=${empresa}&bancada__tubo_madre=${tubo_madre}`,{
@@ -68,7 +54,7 @@ const RodBancada = () => {
 
     useEffect(() => { //recogemos las operaciones de la máquina elegida
         if(maquina){
-            axios.get(BACKEND_SERVER + `/api/rodillos/operacion/?seccion__maquina__id=${maquina}&seccion_pertenece_grupo=${true}`,{
+            axios.get(BACKEND_SERVER + `/api/rodillos/operacion/?seccion__maquina__id=${maquina}&seccion__pertenece_grupo=${true}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
@@ -99,10 +85,6 @@ const RodBancada = () => {
         }
       }, [operaciones, formaciones_completadas]);
 
-    const actualizaFiltro = str => {
-        setFiltro(str);
-    }
-
     const GuardarId_Operacion = (operationId) => {
         setOperacionMarcada(operationId); // Almacena la operación seleccionada
         setFormacionesFiltradas(formaciones_completadas.filter(formacion => formacion.conjunto.operacion === operationId.id)); //pasa los elemenos de esta operación
@@ -118,13 +100,7 @@ const RodBancada = () => {
     }
 
     return (
-        <Container>
-            <img src ={logo} width="200" height="200"></img>
-            <Row>
-                <Col>
-                    <RodBancadaFiltro actualizaFiltro={actualizaFiltro}/>
-                </Col>
-            </ Row>
+        <Container style = {{display: visible? 'block': 'none'}}>
             {maquina? 
                 <Row>
                     <Col>
@@ -166,7 +142,7 @@ const RodBancada = () => {
             <RodConjunto show={show_conjunto}
                     operacion_marcada={operacion_marcada}
                     handleClose={CerrarConjunto}
-                    grupoId={grupo}
+                    grupoId={grupo.id}
                     maquina={maquina}
                     tubomadre={tubo_madre}
                     elementos_formacion={formaciones_filtradas}/>

@@ -24,7 +24,7 @@ const RodGrupoEditar = ({ match }) => {
 
     return ( 
         <React.Fragment>
-            {grupo ? <RodGrupo grupo={grupo} setGrupo={setGrupo} /> : null}
+            {grupo ? <RodGrupo grupo={grupo} setGrupo={setGrupo} mostrarBancada={true}/> : null}
         </React.Fragment>
      );
 }
