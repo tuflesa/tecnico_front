@@ -25,13 +25,15 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [valor_conjuntos, setValorConjuntos] = useState('');
     const [show, setShow] = useState(false);
     const [filaSeleccionada, setFilaSeleccionada] = useState(null);
-    const [revisiones, setRevisiones] = useState(null);
+    const [, setRevisiones] = useState(null);
     const [parametros, setParametros] = useState(null); // PARAMETROS GUARDADOS
     const [plano_id, setPlano_id] = useState(null);
     const [showRevision, setShowRevision] = useState(false);
     const [showParametros, setShowParametros] = useState(false);
     const [tipos_planos, setTiposPlanos] = useState(null);
     const [formas, setForma] = useState([]);
+    const [no_modificar, setNoModificar] = useState(false);
+    const [no_modificar_tipoplano, setNoModificar_tipoplano] = useState(false);
     
     const [show_plano, setShowPlano] = useState(false);
 
@@ -53,6 +55,42 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         dimension_perfil: rodillo.id?rodillo.dimension_perfil:'',
         pertenece_grupo:rodillo.id?rodillo.operacion.seccion.pertenece_grupo:'',
     });
+
+    useEffect(() => { //si hay tipo de plano grabado, no podemos modificarlo, ya tenemos parametros dados de alta
+        if(rodillo.tipo_plano){
+            setNoModificar_tipoplano(true);
+        }
+    }, [token]);
+
+    useEffect(() => { // si ya tenemos elemenotos vinculados a este rodillo, no podemos modificar el rodillo.
+        axios.get(BACKEND_SERVER + `/api/rodillos/elemento/?rodillo=${rodillo.id}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            if(res.data.length>0){
+                setNoModificar(true);
+            }
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
+
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setEmpresas(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
@@ -91,6 +129,9 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             })
             .then( res => {
                 setPlanos(res.data);
+                if(res.data.length!==0){
+                    setNoModificar(true);
+                }
             })
             .catch( err => {
                 console.log(err);
@@ -388,6 +429,12 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         }
     }
 
+    const handleDisabled_plano_elemento = () => {
+        if(no_modificar){
+            return true
+        }
+    }
+
     const añadirPlano = () => {
         setShowPlano(true);
     }
@@ -565,7 +612,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                             <Form.Control as="select" 
                                             value={datos.zona}
                                             name='zona'
-                                            onChange={handleInputChange}>
+                                            onChange={handleInputChange}
+                                            disabled={handleDisabled_plano_elemento()}>
                                 <option key={0} value={''}>Todas</option>
                                 {zonas && zonas.map( zona => {
                                     return (
@@ -584,7 +632,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                 <Form.Control as="select" 
                                                 value={datos.seccion}
                                                 name='seccion'
-                                                onChange={handleInputChange}>
+                                                onChange={handleInputChange}
+                                                disabled={handleDisabled_plano_elemento()}>
                                     <option key={0} value={''}>Todas</option>
                                     {secciones && secciones.map( seccion => {
                                         return (
@@ -623,7 +672,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                             <Form.Control as="select" 
                                             value={datos.operacion}
                                             name='operacion'
-                                            onChange={handleInputChange}>
+                                            onChange={handleInputChange}
+                                            disabled={handleDisabled_plano_elemento()}>
                                 <option key={0} value={''}>Todos</option>
                                 {operaciones && operaciones.map( operacion => {
                                     return (
@@ -646,7 +696,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                     <Form.Control as="select" 
                                                     value={datos.forma}
                                                     name='forma'
-                                                    onChange={handleInputChange}>
+                                                    onChange={handleInputChange}
+                                                    disabled={handleDisabled_plano_elemento()}>
                                         <option key={0} value={''}>Todos</option>
                                         {formas && formas.map( forma => {
                                             return (
@@ -665,7 +716,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                                     name='descripcion_perfil'
                                                     value={datos.descripcion_perfil}
                                                     onChange={handleInputChange}
-                                                    placeholder='Descripción del perfil'>
+                                                    placeholder='Descripción del perfil'
+                                                    disabled={handleDisabled_plano_elemento()}>
                                     </Form.Control>
                                 </Form.Group>
                             </Col>
@@ -676,7 +728,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                                     name='dimension_perfil'
                                                     value={datos.dimension_perfil}
                                                     onChange={handleInputChange}
-                                                    placeholder='Dimensión del perfil'>
+                                                    placeholder='Dimensión del perfil'
+                                                    disabled={handleDisabled_plano_elemento()}>
                                     </Form.Control>
                                 </Form.Group>
                             </Col>                    
@@ -690,7 +743,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                     <Form.Control as="select" 
                                                     value={datos.grupo}
                                                     name='grupo'
-                                                    onChange={handleInputChange}>
+                                                    onChange={handleInputChange}
+                                                    disabled={handleDisabled_plano_elemento()}>
                                         <option key={0} value={''}>Todos</option>
                                         {grupos && grupos.map(grupo => {
                                             return (
@@ -709,7 +763,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                 <Form.Control as="select" 
                                                 value={datos.tipo_rodillo}
                                                 name='tipo_rodillo'
-                                                onChange={handleInputChange}>
+                                                onChange={handleInputChange}
+                                                disabled={handleDisabled_plano_elemento()}>
                                     <option key={0} value={''}>Todos</option>
                                     {tipo_rodillo && tipo_rodillo.map( tipo => {
                                         return (
@@ -746,7 +801,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                                 name='diametro'
                                                 value={datos.diametro}
                                                 onChange={handleInputChange}
-                                                placeholder='Diámetro interior'>
+                                                placeholder='Diámetro interior'
+                                                disabled={handleDisabled_plano_elemento()}>
                                 </Form.Control>
                             </Form.Group>
                         </Col>
@@ -758,7 +814,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                                     style={{color:'red'}}
                                                     value={datos.tipo_plano}
                                                     name='tipo_plano'
-                                                    onChange={handleInputChange}>
+                                                    onChange={handleInputChange}
+                                                    disabled={no_modificar_tipoplano?true:false}>
                                         <option key={0} value={0}>Todos</option>
                                         {tipos_planos && tipos_planos.map( tipo => {
                                             return (
