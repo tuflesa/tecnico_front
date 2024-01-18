@@ -100,8 +100,6 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
     }, [rod_id, selectedEje, tubo_madre]);
 
     const GuardarConjunto = () => {
-        console.log('que datos tengo al guardar');
-        console.log(EjesRodillos);
         //primero comprobamos si existe la bancada y si no, se crea, igual con LA CELDA, conjunto y por consiguiente con el elemento.
         var bancada_id='';
         axios.get(BACKEND_SERVER + `/api/rodillos/bancada_grupos/?seccion=${operacion_marcada.seccion.id}&tubo_madre=${tubo_madre}`,{
@@ -263,7 +261,6 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
     } 
 
     const handleInputChange = (event) => {
-        console.log(event);
         const campoNombre = event.target.name;
         const idRodillo = event.target.value;
         setRod_Id(idRodillo);
@@ -271,7 +268,6 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
         nuevaSeleccionRodilloId[campoNombre] = idRodillo;
         setSelectedEje(campoNombre);
         setSelectRodilloId(nuevaSeleccionRodilloId);
-        //setTuboMadre(grupo.tubo_madre);
     }
 
     const handlerCancelar = () => {

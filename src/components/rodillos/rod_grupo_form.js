@@ -190,7 +190,7 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
                     <Col>
                         <Form.Group controlId="tubo_madre">
                             <Form.Label>Ø del tubo madre *</Form.Label>
-                            <Form.Control type="text" 
+                            <Form.Control type="number" 
                                         name='tubo_madre' 
                                         value={datos.tubo_madre}
                                         onChange={handleInputChange} 
@@ -242,7 +242,7 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
                     <Col>
                         <Form.Group controlId="tubo_madre_gte">
                             <Form.Label>Ø Superior a</Form.Label>
-                            <Form.Control type="text" 
+                            <Form.Control type="number" 
                                         name='tubo_madre_gte' 
                                         value={datos.tubo_madre_gte}
                                         onChange={handleInputChange} 
@@ -252,7 +252,7 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
                     <Col>
                         <Form.Group controlId="tubo_madre_lte">
                             <Form.Label>Ø Menor a</Form.Label>
-                            <Form.Control type="text" 
+                            <Form.Control type="number" 
                                         name='tubo_madre_lte' 
                                         value={datos.tubo_madre_lte}
                                         onChange={handleInputChange} 
