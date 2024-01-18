@@ -58,6 +58,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
         })
         .then( res => {
             setGrupo(res.data);
+            setTuboMadre(res.data.tubo_madre);
         })
         .catch( err => {
             console.log(err);
@@ -270,7 +271,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
         nuevaSeleccionRodilloId[campoNombre] = idRodillo;
         setSelectedEje(campoNombre);
         setSelectRodilloId(nuevaSeleccionRodilloId);
-        setTuboMadre(grupo.tubo_madre);
+        //setTuboMadre(grupo.tubo_madre);
     }
 
     const handlerCancelar = () => {

@@ -160,7 +160,8 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
             }
         })
         .then(res => { 
-            setGrupo(res.data);
+            //setGrupo(res.data);
+            window.location.href=`/rodillos/grupo_editar/${res.data.id}`;
         })
         .catch(err => { 
             console.log(err);
