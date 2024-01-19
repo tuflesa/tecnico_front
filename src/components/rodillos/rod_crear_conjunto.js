@@ -18,6 +18,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
     const [tubo_madre, setTuboMadre] = useState('');
     const [grupo, setGrupo] = useState(null);
     const [rod_id, setRod_Id] = useState(''); //para guardar la informacion en EjesRodillos
+    const [rodillo_elegido, setRodillo_elegido] = useState([]);
     
     useEffect(() => { //BUSCAMOS, SI LOS HAY, ELEMENTOS (RODILLOS) DEL CONJUNTO SELECCIONADO.
         if(elementos_formacion.length>0){ 
@@ -27,14 +28,17 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
                 }
             })
             .then( res => {
-                //console.log(res.data);
+                setRodillo_elegido(res.data);
             })
             .catch( err => {
                 console.log(err);
             });
         }
+        else{
+            setRodillo_elegido([]);
+        }
     }, [token, elementos_formacion]);
-    
+
     useEffect(() => { //PARA OBTENER LOS EJES DE LA OPERACION Y FILTRAR LOS RODILLOS;
         operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/eje/?operacion=${operacion_marcada.id}`,{
             headers: {
@@ -296,6 +300,23 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
                                 {ejes && ejes.map(eje => (
                                     <Form.Group controlId={eje.id} key={eje.id}>
                                         <Form.Label>{eje.tipo.nombre}</Form.Label>
+                                        <Form.Control
+                                            as="text"
+                                            name={eje.id}
+                                            value={rodillo_elegido[eje.id] || ''}
+                                            onChange={handleInputChange}
+                                            placeholder={eje.tipo.nombre}
+                                        >
+                                            {rodillo_elegido && rodillo_elegido.map(rod => {
+                                                if (rod.rodillo.tipo.id === eje.tipo.id && rod.rodillo.diametro === eje.diametro && rod.conjunto.operacion.id === eje.operacion) {
+                                                    return (
+                                                        <option key={rod.rodillo.id} value={rod.rodillo.id}>
+                                                            {rod.rodillo.nombre}
+                                                        </option>
+                                                    )
+                                                }
+                                            })}
+                                        </Form.Control>
                                         <Form.Control
                                             as="select"
                                             name={eje.id}
