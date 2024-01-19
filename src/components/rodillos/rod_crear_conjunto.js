@@ -4,6 +4,7 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { constants } from 'buffer';
+import { domainToASCII } from 'url';
 
 const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tubomadre, elementos_formacion}) => {
     const [token] = useCookies(['tec-token']);
@@ -19,7 +20,13 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
     const [grupo, setGrupo] = useState(null);
     const [rod_id, setRod_Id] = useState(''); //para guardar la informacion en EjesRodillos
     const [rodillo_elegido, setRodillo_elegido] = useState([]);
+    const [bancadas, setBancadas] = useState(null);
     
+
+    const [datos, setDatos] = useState({
+        bancada_elegida:'',
+    });
+
     useEffect(() => { //BUSCAMOS, SI LOS HAY, ELEMENTOS (RODILLOS) DEL CONJUNTO SELECCIONADO.
         if(elementos_formacion.length>0){ 
             axios.get(BACKEND_SERVER + `/api/rodillos/elemento_select/?conjunto=${elementos_formacion[0].conjunto.id}`,{
@@ -102,6 +109,20 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
             setEjesRodillos([...EjesRodillos, {eje: selectedEje, rodillo: rod_id, operacion: operacion_id, tubo_madre:tubo_madre}]);
         }        
     }, [rod_id, selectedEje, tubo_madre]);
+    
+    useEffect(() => { //BUSCAMOS LAS BANCADAS QUE PRECISAMOS PARA ESTA OPERACIÓN
+        operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/bancada/?seccion=${operacion_marcada.seccion.id}&tubo_madre__gte=${tubomadre-10}&tubo_madre__lte=${tubomadre+10}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setBancadas(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token, operacion_marcada]);
 
     const GuardarConjunto = () => {
         //primero comprobamos si existe la bancada y si no, se crea, igual con LA CELDA, conjunto y por consiguiente con el elemento.
@@ -262,6 +283,10 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
         .catch( err => {
             console.log(err);
         });
+        setDatos({
+            ...datos,
+            bancada_elegida : ''
+        });
     } 
 
     const handleInputChange = (event) => {
@@ -280,7 +305,19 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
         setSelectRodilloId({});
         setSelectedEje(null);
         handleClose();
+        setDatos({
+            ...datos,
+            bancada_elegida : ''
+        });
     }
+
+    const handleInputChangeBancada = (bancadaId) => {
+        setDatos(prevDatos => ({
+            ...prevDatos,
+            bancada_elegida: bancadaId
+        }));
+    };
+    
     
     return(
         <Modal show={show} onHide={handleClose} backdrop="static" keyboard={ false } animation={false} size="lg">
@@ -324,7 +361,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
                                             onChange={handleInputChange}
                                             placeholder={eje.tipo.nombre}
                                         >
-                                            <option key={0} value={''}>Todas</option>
+                                            <option key={0} value={''}>Elegir rodillo</option>
                                             {rodillos && rodillos.map(rodillo => {
                                                 if (rodillo.tipo === eje.tipo.id && rodillo.diametro === eje.diametro) {
                                                     return (
@@ -355,7 +392,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
                                             onChange={handleInputChange}
                                             placeholder={eje.tipo.nombre}
                                         >
-                                            <option key={0} value={''}>Todas</option>
+                                            <option key={0} value={''}>Elegir rodillo otras formaciones</option>
                                             {rodillo_exist && rodillo_exist.map(rod_exist => {
                                                 if (rod_exist.diametro === eje.diametro) {
                                                     return (
@@ -368,6 +405,26 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
                                         </Form.Control>
                                     </Form.Group>
                                 ))}
+                                </Col>
+                            </Row>
+                        </Form>
+                    </Tab>
+                    <Tab eventKey="bancadas_existente" title="Bancadas de otras formación">
+                        <Form>
+                            <Row>
+                                <Col>
+                                    <Form.Group controId="bancadas">
+                                        <Form.Label>Bancadas (Selecciona una opción)</Form.Label>
+                                        {bancadas && bancadas.map((bancada)=>(
+                                            <Form.Check
+                                                key={bancada.id}
+                                                type="checkbox"
+                                                label={bancada.nombre}
+                                                checked ={datos.bancada_elegida === bancada.id}
+                                                onChange={()=>handleInputChangeBancada(bancada.id)}
+                                            />
+                                        ))}
+                                    </Form.Group>
                                 </Col>
                             </Row>
                         </Form>
