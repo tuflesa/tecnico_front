@@ -345,7 +345,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
                                             placeholder={eje.tipo.nombre}
                                         >
                                             {rodillo_elegido && rodillo_elegido.map(rod => {
-                                                if (rod.rodillo.tipo.id === eje.tipo.id && rod.rodillo.diametro === eje.diametro && rod.conjunto.operacion.id === eje.operacion) {
+                                                if (rod.eje.tipo.id === eje.tipo.id && rod.rodillo.diametro === eje.diametro && rod.conjunto.operacion.id === eje.operacion) {
                                                     return (
                                                         <option key={rod.rodillo.id} value={rod.rodillo.id}>
                                                             {rod.rodillo.nombre}
