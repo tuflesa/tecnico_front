@@ -29,7 +29,7 @@ const RodGruposListado = () => {
     });
 
     useEffect(()=>{
-        setFiltro(`?tubo_madre=${datos.tubo_madre}&nombre__icontains=${datos.nombre}&maquina__id=${datos.maquina}`);
+        setFiltro(`?tubo_madre=${datos.tubo_madre}&nombre__icontains=${datos.nombre}&maquina__id=${datos.maquina}&maquina__empresa=${datos.empresa}`);
     },[datos]);
 
     useEffect(() => {
