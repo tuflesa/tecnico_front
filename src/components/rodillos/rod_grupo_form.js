@@ -5,11 +5,6 @@ import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
 import { Button, Form, Col, Row } from 'react-bootstrap';
 import RodBancada from './rod_bancada_form';
-import RodGrupoEditar from './rod_grupo_editar';
-//import { line, link } from 'd3';
-//import { Link } from 'react-router-dom';
-//import { useHistory } from 'react-router-dom';
-
 
 const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
     const [token] = useCookies(['tec-token']);
