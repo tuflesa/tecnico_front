@@ -17,7 +17,7 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
 
     const [empresas, setEmpresas] = useState(null);
     const [zonas, setZonas] = useState([]);
-    const [bancadas, setBancadas] = useState(null);
+    //const [bancadas, setBancadas] = useState(null);
     const [filtro, setFiltro] = useState(`?tubo_madre__gte=${0}&tubo_madre__lte=${0}`);
     const [mostrarRodBancada] = useState(mostrarBancada);
 
@@ -28,27 +28,7 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
         tubo_madre: grupo.id?grupo.tubo_madre:'',
         nombre: grupo.id?grupo.nombre:'',
         bancadas_elegidas:grupo.id?grupo.bancadas:[],
-        tubo_madre_gte: grupo.id?grupo.tubo_madre-5:0,
-        tubo_madre_lte: grupo.id?grupo.tubo_madre+5:0,
     });
-
-    useEffect(()=>{
-        setFiltro(`?tubo_madre__gte=${datos.tubo_madre_gte}&tubo_madre__lte=${datos.tubo_madre_lte}`);
-    },[datos, datos.tubo_madre_gte, datos.tubo_madre_lte]);
-
-    useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/rodillos/bancada/`+ filtro,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            setBancadas(res.data);
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    }, [token, filtro, datos.tubo_madre_gte, datos.tubo_madre_lte]);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
@@ -112,19 +92,6 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
             [event.target.name] : event.target.value
         })
     }
-
-    const handleInputChangeBancada = (bancada) => {
-        setDatos((prevDatos) => {
-          const bancadas_elegidas = prevDatos.bancadas_elegidas.includes(bancada) //miramos si lo marcado ya lo teniamos anteriormente
-            ? prevDatos.bancadas_elegidas.filter((item) => item !== bancada) //filtra el elemento para eliminarlo
-            : [...prevDatos.bancadas_elegidas, bancada]; //lo añadimos si ahora lo hemos incluido
-      
-          return {
-            ...prevDatos,
-            bancadas_elegidas,
-          };
-        });
-      };
     
     const GuardarGrupo = (event) => {
         event.preventDefault();
@@ -235,44 +202,6 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
                                     )
                                 })}
                             </Form.Control>
-                        </Form.Group>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col>
-                        <Form.Group controlId="tubo_madre_gte">
-                            <Form.Label>Ø Superior a</Form.Label>
-                            <Form.Control type="number" 
-                                        name='tubo_madre_gte' 
-                                        value={datos.tubo_madre_gte}
-                                        onChange={handleInputChange} 
-                                        placeholder="Ø posterior a..." />
-                        </Form.Group>
-                    </Col>
-                    <Col>
-                        <Form.Group controlId="tubo_madre_lte">
-                            <Form.Label>Ø Menor a</Form.Label>
-                            <Form.Control type="number" 
-                                        name='tubo_madre_lte' 
-                                        value={datos.tubo_madre_lte}
-                                        onChange={handleInputChange} 
-                                        placeholder="Ø anterior a..." />
-                        </Form.Group>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col>
-                        <Form.Group controId="bancadas">
-                            <Form.Label>Bancadas (Escribe los diámetros que deseas ver)</Form.Label>
-                            {bancadas && bancadas.map((bancada)=>(
-                                <Form.Check
-                                    key={bancada.id}
-                                    type="checkbox"
-                                    label={bancada.nombre}
-                                    checked ={datos.bancadas_elegidas.includes(bancada.id)}
-                                    onChange={()=>handleInputChangeBancada(bancada.id)}
-                                />
-                            ))}
                         </Form.Group>
                     </Col>
                 </Row>
