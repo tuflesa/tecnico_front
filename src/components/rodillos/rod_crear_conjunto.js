@@ -3,12 +3,10 @@ import { Row, Col, Form, Button, Modal, Tab, Tabs } from 'react-bootstrap';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
-import { constants } from 'buffer';
-import { domainToASCII } from 'url';
 
 const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tubomadre, elementos_formacion}) => {
     const [token] = useCookies(['tec-token']);
-    const [user] = useCookies(['tec-user']);
+
     const [ejes, setEjes] = useState(null);
     const [rodillos, setRodillos] = useState(null);
     const [rodillo_exist, setRodillo_exist] = useState([]);
@@ -16,8 +14,8 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
     const [selectRodilloId, setSelectRodilloId] = useState({});
     const [EjesRodillos, setEjesRodillos] = useState([]);
     const [operacion_id, setOperacionId] = useState('');
-    const [tubo_madre, setTuboMadre] = useState('');
-    const [grupo, setGrupo] = useState(null);
+    const [tubo_madre, setTuboMadre] = useState(0);
+    const [, setGrupo] = useState(null);
     const [rod_id, setRod_Id] = useState(''); //para guardar la informacion en EjesRodillos
     const [rodillo_elegido, setRodillo_elegido] = useState([]);
     const [bancadas, setBancadas] = useState(null);
@@ -37,6 +35,8 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
             })
             .then( res => {
                 setRodillo_elegido(res.data);
+                console.log('que rodillo tenemos ya?????');
+                console.log(res.data);
             })
             .catch( err => {
                 console.log(err);
