@@ -44,7 +44,7 @@ const RodBancadaCTFiltro = ({actualizaFiltro}) => {
             });
         }
         else{
-            axios.get(BACKEND_SERVER + `/api/rodillos/grupo/?maquina=${datos.maquina}`,{
+            datos.maquina && axios.get(BACKEND_SERVER + `/api/rodillos/grupo/?maquina=${datos.maquina}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }

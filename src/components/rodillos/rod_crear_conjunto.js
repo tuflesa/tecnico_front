@@ -35,8 +35,6 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
             })
             .then( res => {
                 setRodillo_elegido(res.data);
-                console.log('que rodillo tenemos ya?????');
-                console.log(res.data);
             })
             .catch( err => {
                 console.log(err);
@@ -135,11 +133,14 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
             }
         })
         .then( res => {
-            if(res.data.length!==0){
+            if(res.data.length!==0){ //si hay bancada cojo el id
                 bancada_id=res.data[0].id;
+                if(datos.bancada_elegida){
+                    alert('Si ya tenemos bancada de grupo, no podemos coger una bancada adicional');
+                }
             }
             //guardamos primero la Bancada, guardamos el Conjunto y con el id de conjunto guardamos el Elemento, AL FINAL GUARDAMOS CELDA CON ID BANCADA E ID CONJUNTO
-            if(EjesRodillos.length===ejes.length){
+            if(EjesRodillos.length===ejes.length || datos.bancada_elegida){
                 var bancadas_nuevas = datos.bancadas_guardar;
                 if(res.data.length===0){
                     axios.post(BACKEND_SERVER + `/api/rodillos/bancada/`, { //creamos bancada
@@ -152,62 +153,93 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
                     })
                     .then( res => { 
                         bancadas_nuevas.push(res.data.id);
-                        axios.post(BACKEND_SERVER + `/api/rodillos/conjunto/`, { //creamos conjunto
-                            operacion: operacion_id,
-                            tubo_madre:tubo_madre,
-                        }, {
-                            headers: {
-                                'Authorization': `token ${token['tec-token']}`
-                                }     
-                        })
-                        .then( r => { 
-                            for(var x=0;x<EjesRodillos.length;x++){
-                                axios.post(BACKEND_SERVER + `/api/rodillos/elemento/`, { //creamos con id de conjunto el elemento
-                                    conjunto: r.data.id,
-                                    eje: EjesRodillos[x].eje,
-                                    rodillo: EjesRodillos[x].rodillo,
-                                }, {
-                                    headers: {
-                                        'Authorization': `token ${token['tec-token']}`
-                                        }     
-                                })
-                                .then( res => { 
-                                    axios.patch(BACKEND_SERVER + `/api/rodillos/grupo/${grupoId}/`, {
-                                        bancadas: bancadas_nuevas,
+                        if(datos.bancada_elegida){
+                            axios.get(BACKEND_SERVER + `/api/rodillos/celda_duplicar/?bancada=${parseInt(datos.bancada_elegida)}`,{
+                                headers: {
+                                    'Authorization': `token ${token['tec-token']}`
+                                  }
+                            })
+                            .then( r => {
+                                //creamos CELDA con el Id de la bancada nueva y el Id de conjunto recogido de la bancada seleccionada
+                                for(var x=0;x<r.data.length;x++){
+                                    axios.post(BACKEND_SERVER + `/api/rodillos/celda/`, { 
+                                        conjunto: r.data[x].conjunto.id, 
+                                        bancada: res.data.id, 
+                                        icono: null,
+                                    }, {
+                                        headers: {
+                                            'Authorization': `token ${token['tec-token']}`
+                                            }     
+                                    })
+                                    .then( res => {  
+                                    })
+                                    .catch(err => { 
+                                        console.error(err);
+                                    })
+                                }
+                            })
+                            .catch( err => {
+                                console.log(err);
+                            });
+                        }
+                        else{
+                            axios.post(BACKEND_SERVER + `/api/rodillos/conjunto/`, { //creamos conjunto
+                                operacion: operacion_id,
+                                tubo_madre:tubo_madre,
+                            }, {
+                                headers: {
+                                    'Authorization': `token ${token['tec-token']}`
+                                    }     
+                            })
+                            .then( r => { 
+                                for(var x=0;x<EjesRodillos.length;x++){
+                                    axios.post(BACKEND_SERVER + `/api/rodillos/elemento/`, { //creamos con id de conjunto el elemento
+                                        conjunto: r.data.id,
+                                        eje: EjesRodillos[x].eje,
+                                        rodillo: EjesRodillos[x].rodillo,
                                     }, {
                                         headers: {
                                             'Authorization': `token ${token['tec-token']}`
                                             }     
                                     })
                                     .then( res => { 
+                                        axios.patch(BACKEND_SERVER + `/api/rodillos/grupo/${grupoId}/`, {
+                                            bancadas: bancadas_nuevas,
+                                        }, {
+                                            headers: {
+                                                'Authorization': `token ${token['tec-token']}`
+                                                }     
+                                        })
+                                        .then( res => { 
+                                        })
+                                        .catch(err => { 
+                                            console.error(err);
+                                        })
+                                        handlerCancelar();                                    
                                     })
                                     .catch(err => { 
                                         console.error(err);
                                     })
-                                    handlerCancelar();                                    
+                                }
+                                axios.post(BACKEND_SERVER + `/api/rodillos/celda/`, { //creamos CELDA con el Id de bancada y el Id de conjunto
+                                    conjunto: r.data.id,
+                                    bancada: res.data.id,
+                                    icono: null,
+                                }, {
+                                    headers: {
+                                        'Authorization': `token ${token['tec-token']}`
+                                        }     
+                                })
+                                .then( res => {  
                                 })
                                 .catch(err => { 
                                     console.error(err);
                                 })
-                            }
-                            axios.post(BACKEND_SERVER + `/api/rodillos/celda/`, { //creamos CELDA con el Id de bancada y el Id de conjunto
-                                conjunto: r.data.id,
-                                bancada: res.data.id,
-                                icono: null,
-                            }, {
-                                headers: {
-                                    'Authorization': `token ${token['tec-token']}`
-                                    }     
-                            })
-                            .then( res => {  
                             })
                             .catch(err => { 
                                 console.error(err);
                             })
-                        })
-                        .catch(err => { 
-                            console.error(err);
-                        })
+                        }
                     })
                     .catch(err => { 
                         console.error(err);
@@ -216,7 +248,6 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
                     
                 }
                 else{ //ya tenemos la bancada creada y buscamos si tenemos conjunto
-                    //axios.get(BACKEND_SERVER + `/api/rodillos/conjunto/?tubo_madre=${tubo_madre}&operacion=${operacion_marcada.id}`,{
                     axios.get(BACKEND_SERVER + `/api/rodillos/elemento_select/?conjunto__tubo_madre=${tubo_madre}&conjunto__operacion=${operacion_marcada.id}`,{
                         headers: {
                             'Authorization': `token ${token['tec-token']}`
@@ -437,6 +468,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
                                                 key={bancada.id}
                                                 type="checkbox"
                                                 label={bancada.nombre}
+                                                value = {datos.bancada_elegida}
                                                 checked ={datos.bancada_elegida === bancada.id}
                                                 onChange={()=>handleInputChangeBancada(bancada.id)}
                                             />

@@ -18,7 +18,7 @@ const RodGruposListado = () => {
     const [conjuntos, setConjuntos] = useState(null);
     const [empresas, setEmpresas] = useState(null);
     const [zonas, setZonas] = useState(null);
-    const [filtro, setFiltro] = useState(null);
+    const [filtro, setFiltro] = useState(`?tubo_madre=${0}&nombre__icontains=${''}&maquina__id=${''}&maquina__empresa=${''}`);
 
     const [datos, setDatos] = useState({
         empresa: user['tec-user'].perfil.empresa.id,
@@ -164,7 +164,8 @@ const RodGruposListado = () => {
                                     name='nombre' 
                                     value={datos.nombre}
                                     onChange={handleInputChange} 
-                                    placeholder="Nombre grupo" />
+                                    placeholder="Nombre grupo" 
+                                    autoFocus/>
                     </Form.Group>
                 </Col>
                 <Col>
