@@ -19,6 +19,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
     const [rod_id, setRod_Id] = useState(''); //para guardar la informacion en EjesRodillos
     const [rodillo_elegido, setRodillo_elegido] = useState([]);
     const [bancadas, setBancadas] = useState(null);
+    var bancadas_nuevas=[''];
     
 
     const [datos, setDatos] = useState({
@@ -141,7 +142,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
             }
             //guardamos primero la Bancada, guardamos el Conjunto y con el id de conjunto guardamos el Elemento, AL FINAL GUARDAMOS CELDA CON ID BANCADA E ID CONJUNTO
             if(EjesRodillos.length===ejes.length || datos.bancada_elegida){
-                var bancadas_nuevas = datos.bancadas_guardar;
+                bancadas_nuevas = datos.bancadas_guardar;
                 if(res.data.length===0){
                     axios.post(BACKEND_SERVER + `/api/rodillos/bancada/`, { //creamos bancada
                         seccion: operacion_marcada.seccion.id,
@@ -181,6 +182,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
                             .catch( err => {
                                 console.log(err);
                             });
+                            ActualizarGrupo();
                         }
                         else{
                             axios.post(BACKEND_SERVER + `/api/rodillos/conjunto/`, { //creamos conjunto
@@ -202,20 +204,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
                                             'Authorization': `token ${token['tec-token']}`
                                             }     
                                     })
-                                    .then( res => { 
-                                        axios.patch(BACKEND_SERVER + `/api/rodillos/grupo/${grupoId}/`, {
-                                            bancadas: bancadas_nuevas,
-                                        }, {
-                                            headers: {
-                                                'Authorization': `token ${token['tec-token']}`
-                                                }     
-                                        })
-                                        .then( res => { 
-                                        })
-                                        .catch(err => { 
-                                            console.error(err);
-                                        })
-                                        handlerCancelar();                                    
+                                    .then( res => {                       
                                     })
                                     .catch(err => { 
                                         console.error(err);
@@ -240,12 +229,11 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
                                 console.error(err);
                             })
                         }
+                        ActualizarGrupo();
                     })
                     .catch(err => { 
                         console.error(err);
-                    });
-                    //aqui pongo el pach y actualizo bancadas del grupo
-                    
+                    });                    
                 }
                 else{ //ya tenemos la bancada creada y buscamos si tenemos conjunto
                     axios.get(BACKEND_SERVER + `/api/rodillos/elemento_select/?conjunto__tubo_madre=${tubo_madre}&conjunto__operacion=${operacion_marcada.id}`,{
@@ -336,6 +324,22 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
             bancada_elegida : ''
         });
     } 
+
+    const ActualizarGrupo = () => {
+        bancadas_nuevas && axios.patch(BACKEND_SERVER + `/api/rodillos/grupo/${grupoId}/`, {
+            bancadas: bancadas_nuevas,
+        }, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+                }     
+        })
+        .then( res => { 
+        })
+        .catch(err => { 
+            console.error(err);
+        })
+        handlerCancelar();
+    }
 
     const handleInputChange = (event) => {
         const campoNombre = event.target.name;
