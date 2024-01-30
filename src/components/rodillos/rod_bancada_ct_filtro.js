@@ -12,14 +12,11 @@ const RodBancadaCTFiltro = ({actualizaFiltro}) => {
         id:'',
         empresa: user['tec-user'].perfil.empresa.id,
         maquina: '',
-        grupo:'',
         dimensiones:'',
     });
 
     const [empresas, setEmpresas] = useState(null);
     const [zonas, setZonas] = useState(null);
-    const [grupos, setGrupos] = useState(null);
-    const [grupoId, setGrupoId] = useState('');
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
@@ -34,29 +31,6 @@ const RodBancadaCTFiltro = ({actualizaFiltro}) => {
             console.log(err);
         });
     }, [token]);
-
-    useEffect(() => {
-        if (datos.maquina === '') {
-            setGrupos([]);
-            setDatos({
-                ...datos,
-                grupo: '',
-            });
-        }
-        else{
-            datos.maquina && axios.get(BACKEND_SERVER + `/api/rodillos/grupo/?maquina=${datos.maquina}`,{
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                }
-            })
-            .then( res => {
-                setGrupos(res.data);
-            })
-            .catch( err => {
-                console.log(err);
-            });
-        }
-    }, [datos.maquina]);
 
     useEffect(() => {
         if (datos.empresa === '') {
@@ -86,7 +60,7 @@ const RodBancadaCTFiltro = ({actualizaFiltro}) => {
     }, [token, datos.empresa]);
 
     useEffect(()=>{
-        const filtro = `?maquina__empresa__id=${datos.empresa}&id=${datos.id}&maquina=${datos.maquina}&pertenece_grupo=${false}&grupo=${grupoId}&dimensiones=${datos.dimensiones}`
+        const filtro = `?maquina__empresa__id=${datos.empresa}&id=${datos.id}&maquina=${datos.maquina}&pertenece_grupo=${false}&dimensiones=${datos.dimensiones}`
         actualizaFiltro(filtro);
     },[datos]);
 
@@ -96,16 +70,6 @@ const RodBancadaCTFiltro = ({actualizaFiltro}) => {
             [event.target.name] : event.target.value
         })
     }
-  
-    const handleInputChangeGrupo = (event) => {
-        const [id, madre] = event.target.value.split(',');
-        setGrupoId(id);
-        // Ahora, grupoId y tuboMadre contienen los dos valores separados
-        setDatos({
-            ...datos,
-            grupo : event.target.value
-        });
-    };
     
     return ( 
         <Container>

@@ -5,7 +5,7 @@ import { useCookies } from 'react-cookie';
 import RodBancadaCTFiltro from './rod_bancada_ct_filtro';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
-import RodConjunto from './rod_crear_conjunto';
+import RodConjuntoCT from './rod_crear_conjunto_ct';
 
 const RodBancadaCT = () => {
     const [token] = useCookies(['tec-token']);
@@ -13,7 +13,7 @@ const RodBancadaCT = () => {
     const [operaciones, setOperaciones] = useState(null);
     const [secciones, setSecciones] = useState(null);
     const [maquina, setMaquina] = useState('');
-    const [grupo, setGrupo] = useState('');
+    //const [grupo, setGrupo] = useState('');
     const [empresa, setEmpresa] = useState('');
     const [dimensiones, setDimensiones] = useState('');
     const [filtro, setFiltro] = useState(`?maquina__empresa__id=${user['tec-user'].perfil.empresa.id}&pertence_grupo=${false}`);
@@ -25,11 +25,11 @@ const RodBancadaCT = () => {
     useEffect(() => { //SEPARAR DATOS QUE ENTRAN A TRAVES DEL FILTRO
         const params = new URLSearchParams(filtro);
         const maquinaValue = params.get('maquina');
-        const grupoValue = params.get('grupo');
+        //const grupoValue = params.get('grupo');
         const empresaValue = params.get('maquina__empresa__id');
         const dimensionesValue = params.get('dimensiones');
         setMaquina(maquinaValue);
-        setGrupo(grupoValue);
+        //setGrupo(grupoValue);
         setEmpresa(empresaValue);
         setDimensiones(dimensionesValue);
     }, [filtro]);
@@ -144,7 +144,7 @@ const RodBancadaCT = () => {
                                                 <Button
                                                     key={operacion.id}
                                                     className={`btn ${nuevoCampo ? 'btn-primary' : 'btn-outline-dark'} btn-sm`}
-                                                    onClick={() => {grupo?GuardarId_Operacion(operacion):alert('Elige grupo')}}
+                                                    onClick={() => {dimensiones?GuardarId_Operacion(operacion):alert('Elige dimensiones')}}
                                                 >
                                                     {operacion.nombre}
                                                 </Button>
@@ -159,13 +159,14 @@ const RodBancadaCT = () => {
                     </Col>
                 </Row> 
             :''} 
-            <RodConjunto show={show_conjunto}
+            <RodConjuntoCT show={show_conjunto}
                     operacion_marcada={operacion_marcada}
                     handleClose={CerrarConjunto}
-                    grupoId={grupo}
+                    //grupoId={grupo}
                     maquina={maquina}
                     tubomadre={dimensiones}
-                    elementos_formacion={formaciones_filtradas}/>
+                    elementos_formacion={formaciones_filtradas}
+                    dimensiones={dimensiones}/>
         </Container>
     )
 }
