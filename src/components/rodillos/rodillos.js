@@ -11,6 +11,7 @@ import RodEditar from './rod_rodillo_editar';
 import RodBancada from './rod_bancada_form';
 import RodGrupoEditar from './rod_grupo_editar';
 import RodBancadaCT from './rod_bancada_ct';
+import RodBancadaCTListado from './rod_bancada_ct_listado';
 
 const Rodillos = () => {
     
@@ -20,6 +21,7 @@ const Rodillos = () => {
             <Switch>
                 <Route path='/rodillos/lista' component={RodLista} />
                 <Route path='/rodillos/bacada' component={RodBancada} />
+                <Route path='/rodillos/lista_bancadas_ct' component={RodBancadaCTListado} />
                 <Route path='/rodillos/bacada_ct' component={RodBancadaCT} />
                 <Route path='/rodillos/tooling' component={RodTooling} />
                 <Route path='/rodillos/grupos' component={RodGruposListado} />
