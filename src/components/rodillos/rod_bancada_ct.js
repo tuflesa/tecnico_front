@@ -13,7 +13,6 @@ const RodBancadaCT = () => {
     const [operaciones, setOperaciones] = useState(null);
     const [secciones, setSecciones] = useState(null);
     const [maquina, setMaquina] = useState('');
-    //const [grupo, setGrupo] = useState('');
     const [empresa, setEmpresa] = useState('');
     const [dimensiones, setDimensiones] = useState('');
     const [filtro, setFiltro] = useState(`?maquina__empresa__id=${user['tec-user'].perfil.empresa.id}&pertence_grupo=${false}`);
@@ -25,11 +24,9 @@ const RodBancadaCT = () => {
     useEffect(() => { //SEPARAR DATOS QUE ENTRAN A TRAVES DEL FILTRO
         const params = new URLSearchParams(filtro);
         const maquinaValue = params.get('maquina');
-        //const grupoValue = params.get('grupo');
         const empresaValue = params.get('maquina__empresa__id');
         const dimensionesValue = params.get('dimensiones');
         setMaquina(maquinaValue);
-        //setGrupo(grupoValue);
         setEmpresa(empresaValue);
         setDimensiones(dimensionesValue);
     }, [filtro]);
@@ -49,7 +46,7 @@ const RodBancadaCT = () => {
     }, [token, filtro]);
 
     useEffect(() => { //Recogemos las celdas ya creadas según empresa, máquina, elegidos
-        maquina && empresa && axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__seccion__maquina__id=${maquina}&bancada__seccion__maquina__empresa=${empresa}&bancada__seccion__pertenece_grupo=${false}`,{
+        dimensiones && maquina && empresa && axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__seccion__maquina__id=${maquina}&bancada__seccion__maquina__empresa=${empresa}&bancada__seccion__pertenece_grupo=${false}&bancada__dimensiones=${dimensiones}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }
@@ -60,7 +57,7 @@ const RodBancadaCT = () => {
         .catch( err => {
             console.log(err);
         });
-    }, [maquina, empresa]);
+    }, [maquina, empresa, dimensiones]);
 
     useEffect(() => { //recogemos las operaciones de la máquina elegida
         if(maquina){
@@ -162,7 +159,6 @@ const RodBancadaCT = () => {
             <RodConjuntoCT show={show_conjunto}
                     operacion_marcada={operacion_marcada}
                     handleClose={CerrarConjunto}
-                    //grupoId={grupo}
                     maquina={maquina}
                     tubomadre={dimensiones}
                     elementos_formacion={formaciones_filtradas}
