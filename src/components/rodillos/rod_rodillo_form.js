@@ -243,7 +243,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 console.log(err);
             });
 
-            axios.get(BACKEND_SERVER + `/api/rodillos/grupo/?maquina=${datos.zona}`,{
+            axios.get(BACKEND_SERVER + `/api/rodillos/grupo_nuevo/?maquina=${datos.zona}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }

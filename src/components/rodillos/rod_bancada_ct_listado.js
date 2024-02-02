@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
-import { Container, Row, Col, Table, Form } from 'react-bootstrap';
+import { Container, Row, Col, Table, Form, Button } from 'react-bootstrap';
 import { PencilFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 
@@ -14,12 +14,15 @@ const RodBancadaCTListado = () => {
     const [zonas, setZonas] = useState(null);
     const [bancadas, setBancadas] = useState(null);
     const [filtro, setFiltro] = useState(`?dimensiones__icontains=${''}&seccion__maquina__id=${''}&seccion__maquina__empresa=${''}&seccion__pertenece_grupo=${false}`);//BUSCANDO LAS BANCADAS CT
+    const [count, setCount] = useState(null);
 
     const [datos, setDatos] = useState({
         empresa: user['tec-user'].perfil.empresa.id,
         zona: '',
         dimensiones: '',
         maquina: '',
+        pagina: 1,
+        total_pag:0,
     });
 
     useEffect(()=>{
@@ -33,7 +36,8 @@ const RodBancadaCTListado = () => {
               }
         })
         .then( res => {
-            setBancadas(res.data);
+            setBancadas(res.data.results);
+            setCount(res.data.count);
         })
         .catch( err => {
             console.log(err);
@@ -87,6 +91,41 @@ const RodBancadaCTListado = () => {
             [event.target.name] : event.target.value
         })
     }
+
+    useEffect(()=>{
+        if(count % 20 === 0){
+            setDatos({
+                ...datos,
+                total_pag:Math.trunc(count/20),
+            })
+        }
+        else if(count % 20 !== 0){
+            setDatos({
+                ...datos,
+                total_pag:Math.trunc(count/20)+1,
+            })
+        }
+    }, [count]);
+
+    const cambioPagina = (pag) => {
+        if(pag<=0){
+            pag=1;
+        }
+        if(pag>count/20){
+            if(count % 20 === 0){
+                pag=Math.trunc(count/20);
+            }
+            if(count % 20 !== 0){
+                pag=Math.trunc(count/20)+1;
+            }
+        }
+        if(pag>0){
+            setDatos({
+                ...datos,
+                pagina: pag,
+            })
+        }
+    } 
 
     return (
         <Container className='mt-5'>
@@ -146,6 +185,18 @@ const RodBancadaCTListado = () => {
             <Row>
                 <Col>
                     <h5 className="mb-3 mt-3">Listado de Bancadas de Cabeza de Turco</h5>
+                    <Row>
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
+                                    <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
+                                    <th>Número páginas: {datos.pagina} / {datos.total_pag}</th>
+                                    <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </Row>
                     <Table striped bordered hover>
                         <thead>
                             <tr>
