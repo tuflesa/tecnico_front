@@ -167,7 +167,7 @@ const RodBancadaCTListado = () => {
                                             <td>{bancada.dimensiones}</td>
                                             <td>{bancada.seccion.maquina.empresa.nombre}</td>
                                             <td>{bancada.seccion.maquina.siglas}</td>
-                                            {/* <td><Link title='Detalle/Modificar'to={`/rodillos/bacada_ct/${bancada.id}`}><PencilFill className="mr-3 pencil"/></Link></td> */}
+                                            <td><Link title='Detalle/Modificar'to={`/rodillos/bacada_ct_editar/${bancada.id}`}><PencilFill className="mr-3 pencil"/></Link></td>
                                         </tr>}
                                         {/* {filaSeleccionada === linea.id && show === true && (
                                             <tr>

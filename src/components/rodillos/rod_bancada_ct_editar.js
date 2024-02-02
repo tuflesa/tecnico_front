@@ -9,7 +9,7 @@ const RodBancadaCT_Editar = ({ match }) => {
     const [bancada, setBancada] = useState(null)
 
     useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/rodillos/bancada/${match.params.id}`,{
+        axios.get(BACKEND_SERVER + `/api/rodillos/bancada_ct/${match.params.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -24,7 +24,7 @@ const RodBancadaCT_Editar = ({ match }) => {
 
     return ( 
         <React.Fragment>
-            {bancada ? <RodBancadaCT bancada={bancada} setBancada={setBancada}/> : null}
+            {bancada ? <RodBancadaCT bancada={bancada}/> : null}
         </React.Fragment>
      );
 }

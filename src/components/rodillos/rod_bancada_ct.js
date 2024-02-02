@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Table, Button } from 'react-bootstrap';
+import { Container, Row, Col, Table, Button, Form } from 'react-bootstrap';
 import logo from '../../assets/logo_bornay.svg';
 import { useCookies } from 'react-cookie';
 import RodBancadaCTFiltro from './rod_bancada_ct_filtro';
@@ -7,7 +7,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import RodConjuntoCT from './rod_crear_conjunto_ct';
 
-const RodBancadaCT = () => {
+const RodBancadaCT = ({bancada}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
     const [operaciones, setOperaciones] = useState(null);
@@ -22,14 +22,25 @@ const RodBancadaCT = () => {
     const [formaciones_filtradas, setFormacionesFiltradas] = useState('');
 
     useEffect(() => { //SEPARAR DATOS QUE ENTRAN A TRAVES DEL FILTRO
-        const params = new URLSearchParams(filtro);
-        const maquinaValue = params.get('maquina');
-        const empresaValue = params.get('maquina__empresa__id');
-        const dimensionesValue = params.get('dimensiones');
-        setMaquina(maquinaValue);
-        setEmpresa(empresaValue);
-        setDimensiones(dimensionesValue);
-    }, [filtro]);
+        if(!bancada){
+            const params = new URLSearchParams(filtro);
+            const maquinaValue = params.get('maquina');
+            const empresaValue = params.get('maquina__empresa__id');
+            const dimensionesValue = params.get('dimensiones');
+            setMaquina(maquinaValue);
+            setEmpresa(empresaValue);
+            setDimensiones(dimensionesValue);
+        }
+        else{
+            const params = new URLSearchParams(filtro);
+            const maquinaValue = bancada.seccion.maquina.id;
+            const empresaValue = bancada.seccion.maquina.empresa.id;
+            const dimensionesValue = bancada.dimensiones;
+            setMaquina(maquinaValue);
+            setEmpresa(empresaValue);
+            setDimensiones(dimensionesValue);
+        }
+    }, [filtro, bancada]);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + `/api/rodillos/seccion/`+filtro,{
@@ -113,15 +124,50 @@ const RodBancadaCT = () => {
     return (
         <Container>
             <img src ={logo} width="200" height="200"></img>
-            <Row>
-                <Col>
-                    <RodBancadaCTFiltro actualizaFiltro={actualizaFiltro}/>
-                </Col>
-            </ Row>
+            {!bancada?
+                <Row>
+                    <Col>
+                        <RodBancadaCTFiltro actualizaFiltro={actualizaFiltro}/>
+                    </Col>
+                </ Row>
+            :
+                <Row>
+                    <Col>
+                        <Form.Group controlId="empresa">
+                            <Form.Label>Empresa *</Form.Label>
+                            <Form.Control type="text" 
+                                        name='empresa' 
+                                        value={bancada.seccion.maquina.empresa.siglas}
+                                        disabled
+                            />
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="maquina">
+                            <Form.Label>Máquina *</Form.Label>
+                            <Form.Control type="text" 
+                                        name='maquina' 
+                                        value={bancada.seccion.maquina.siglas}
+                                        disabled
+                            />
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="dimensiones">
+                            <Form.Label>Dimensiones *</Form.Label>
+                            <Form.Control type="text" 
+                                        name='dimensiones' 
+                                        value={bancada.dimensiones}
+                                        disabled
+                            />
+                        </Form.Group>
+                    </Col>
+                </Row>
+            }
             {maquina? 
                 <Row>
                     <Col>
-                        <h5 className="mb-3 mt-3">Bancadas</h5>
+                        <h5 className="mb-3 mt-3">Bancadas de Cabeza de Turco</h5>
                         <Table striped bordered hover>
                             <thead>
                                 <tr>
