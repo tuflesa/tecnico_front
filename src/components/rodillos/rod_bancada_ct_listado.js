@@ -5,6 +5,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table, Form, Button } from 'react-bootstrap';
 import { PencilFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
+import logo from '../../assets/logo_bornay.svg';
 
 const RodBancadaCTListado = () => {
     const [token] = useCookies(['tec-token']);
@@ -129,9 +130,7 @@ const RodBancadaCTListado = () => {
 
     return (
         <Container className='mt-5'>
-            {/* <Row>
-                <Col><h5 className="mb-3 mt-3">Filtros Bancadas CT</h5></Col>
-            </Row> */}
+            <img src ={logo} width="200" height="200"></img>
             <Row>
                 <Col>
                     <Form.Group controlId="nombre">

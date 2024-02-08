@@ -24,6 +24,7 @@ const RodNavBar = () => {
                                     <NavDropdown.Item href="/rodillos/grupo/nuevo">Grupo</NavDropdown.Item> 
                                     <NavDropdown.Item href="/rodillos/nuevo">Rodillo</NavDropdown.Item> 
                                     <NavDropdown.Item href="/rodillos/bacada_ct">Bancada CT</NavDropdown.Item> 
+                                    <NavDropdown.Item href="/rodillos/montaje">Montaje Bancadas</NavDropdown.Item> 
                                     </NavDropdown>
                                 </NavDropdown>
                             </Nav>

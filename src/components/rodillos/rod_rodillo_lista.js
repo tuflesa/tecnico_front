@@ -6,6 +6,7 @@ import { Container, Row, Col, Table, Button } from 'react-bootstrap';
 import { PencilFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import RodListaFiltro from './rod_lista_filtro';
+import logo from '../../assets/logo_bornay.svg';
 
 const RodLista = () => {
     const [token] = useCookies(['tec-token']);
@@ -88,6 +89,7 @@ const RodLista = () => {
 
     return (
         <Container className='mt-5'>
+            <img src ={logo} width="200" height="200"></img>
             <Row>
                 <Col>
                     <RodListaFiltro actualizaFiltro={actualizaFiltro}/>

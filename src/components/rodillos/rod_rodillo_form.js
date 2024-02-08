@@ -9,6 +9,7 @@ import PlanoForm from './rod_plano_nuevo';
 import {invertirFecha} from '../utilidades/funciones_fecha';
 import RodRevisionForm from './rod_revision_form';
 import RodParametrosEstandar from './rod_parametros_estandar';
+import logo from '../../assets/logo_bornay.svg';
 
 const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [token] = useCookies(['tec-token']);
@@ -569,6 +570,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
 
     return (
         <Container className='mt-5 pt-1'>
+            <img src ={logo} width="200" height="200"></img>
             {rodillo.length===0?
                 <h5 className='mt-5'>Nuevo Rodillo</h5>:
                 <h5 className='mt-5'>Editar Rodillo</h5>}

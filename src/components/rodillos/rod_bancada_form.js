@@ -46,6 +46,8 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
         })
         .then( rr => {
             setFormacionesCompletadas(rr.data);
+            console.log('ESTAS SON LAS CELDAS EN BANCADAS FORM');
+            console.log(rr.data);
         })
         .catch( err => {
             console.log(err);

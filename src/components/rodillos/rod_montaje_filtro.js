@@ -4,27 +4,21 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 
-const RodListaFiltro = ({actualizaFiltro}) => {
+const RodMontajeFiltro = ({actualizaFiltro}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
 
+    const [empresas, setEmpresas] = useState(null);
+    const [zonas, setZonas] = useState(null);
+    const [grupos, setGrupos] = useState(null);
+    const [bancadas, setBancadas] = useState(null);
+
     const [datos, setDatos] = useState({
         id:'',
-        nombre: '',
         empresa: user['tec-user'].perfil.empresa.id,
         maquina: '',
-        seccion: '',
-        operacion: '',
-        tipo_rodillo: '',
-        grupo:'',
+        grupo: '',
     });
-
-    const [empresas, setEmpresas] = useState(null);
-    const [secciones, setSecciones] = useState(null);
-    const [operaciones, setOperaciones] = useState(null);
-    const [zonas, setZonas] = useState(null);
-    const [equipos, setEquipos] = useState(null);
-    const [tipo_rodillo, setTipoRodillo] = useState(null);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
@@ -38,17 +32,6 @@ const RodListaFiltro = ({actualizaFiltro}) => {
         .catch( err => {
             console.log(err);
         });
-        axios.get(BACKEND_SERVER + '/api/rodillos/tipo_rodillo/',{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            setTipoRodillo(res.data);
-        })
-        .catch( err => {
-            console.log(err);
-        });
     }, [token]);
 
     useEffect(() => {
@@ -57,8 +40,6 @@ const RodListaFiltro = ({actualizaFiltro}) => {
             setDatos({
                 ...datos,
                 maquina: '',
-                seccion: '',
-                operacion: ''
             });
         }
         else {
@@ -72,8 +53,6 @@ const RodListaFiltro = ({actualizaFiltro}) => {
                 setDatos({
                     ...datos,
                     maquina: '',
-                    seccion: '',
-                    operacion: ''
                 });
             })
             .catch( err => {
@@ -84,25 +63,23 @@ const RodListaFiltro = ({actualizaFiltro}) => {
 
     useEffect(() => {
         if (datos.maquina === '') {
-            setSecciones([]);
+            setGrupos([]);
             setDatos({
                 ...datos,
-                seccion: '',
-                operacion: '',
+                grupo: '',
             });
         }
         else {
-            axios.get(BACKEND_SERVER + `/api/rodillos/seccion/?maquina__id=${datos.maquina}`,{
+            axios.get(BACKEND_SERVER + `/api/rodillos/grupo_montaje/?maquina=${datos.maquina}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
             })
             .then( res => {
-                setSecciones(res.data);
+                setGrupos(res.data);
                 setDatos({
                     ...datos,
-                    seccion: '',
-                    operacion: '',
+                    grupo: '',
                 });
             })
             .catch( err => {
@@ -112,29 +89,36 @@ const RodListaFiltro = ({actualizaFiltro}) => {
     }, [token, datos.maquina]);
 
     useEffect(() => {
-        if (datos.seccion === '') {
-            setOperaciones([]);
+        if (datos.maquina === '') {
+            setBancadas([]);
+            setDatos({
+                ...datos,
+                bancada: '',
+            });
         }
         else {
-            axios.get(BACKEND_SERVER + `/api/rodillos/operacion/?seccion__id=${datos.seccion}`,{
+            axios.get(BACKEND_SERVER + `/api/rodillos/bancada_montaje_ct/?seccion__maquina=${datos.maquina}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
             })
             .then( res => {
-                setOperaciones(res.data);
+                setBancadas(res.data);
+                setDatos({
+                    ...datos,
+                    bancada: '',
+                });
             })
             .catch( err => {
                 console.log(err);
             });
         }
-    }, [token, datos.seccion]);
-    
+    }, [token, datos.maquina]);
+
     useEffect(()=>{
-        const filtro = `?operacion__seccion__maquina__empresa__id=${datos.empresa}&nombre__icontains=${datos.nombre}&id=${datos.id}&tipo=${datos.tipo_rodillo}&operacion__seccion__maquina=${datos.maquina}&operacion__seccion=${datos.seccion}&operacion__id=${datos.operacion}`
+        const filtro = `?maquina__empresa__id=${datos.empresa}&tubo_madre=${datos.grupo}&maquina=${datos.maquina}&bancada=${datos.dimensiones}`
         actualizaFiltro(filtro);
     },[datos]);
-
 
     const handleInputChange = (event) => {
         setDatos({
@@ -142,43 +126,11 @@ const RodListaFiltro = ({actualizaFiltro}) => {
             [event.target.name] : event.target.value
         })
     }
-
+    
     return ( 
         <Container>
-            {/* <h5 className="mb-3 mt-3">Filtro</h5> */}
+            <h5 className="mb-3 mt-3">Filtro</h5>
             <Form>
-                <Row>                    
-                    <Col>
-                        <Form.Group controlId="formNombre">
-                            <Form.Label>Nombre contiene</Form.Label>
-                            <Form.Control type="text" 
-                                        name='nombre' 
-                                        value={datos.nombre}
-                                        onChange={handleInputChange}                                        
-                                        placeholder="Nombre contiene"
-                                        autoFocus/>
-                        </Form.Group>
-                    </Col>
-                    <Col>
-                        <Form.Group controlId="tipo">
-                            <Form.Label>Tipo</Form.Label>
-                            <Form.Control as="select"  
-                                        name='tipo_rodillo' 
-                                        value={datos.tipo_rodillo}
-                                        onChange={handleInputChange}
-                                        placeholder="Tipo rodillo">
-                                            <option key={0} value={''}>Todos</option>
-                                        {tipo_rodillo && tipo_rodillo.map( tipo => {
-                                            return (
-                                            <option key={tipo.id} value={tipo.id}>
-                                                {tipo.nombre}
-                                            </option>
-                                            )
-                                        })}
-                            </Form.Control>
-                        </Form.Group>
-                    </Col>
-                </Row>
                 <Row>
                     <Col>
                         <Form.Group controlId="empresa">
@@ -217,46 +169,47 @@ const RodListaFiltro = ({actualizaFiltro}) => {
                             </Form.Control>
                         </Form.Group>
                     </Col>
+                </Row>
+                <Row>
                     <Col>
-                        <Form.Group controlId="seccion">
-                            <Form.Label>Sección</Form.Label>
-                            <Form.Control as="select" 
-                                            value={datos.seccion}
-                                            name='seccion'
-                                            onChange={handleInputChange}>
+                        <Form.Group controlId="grupo">
+                            <Form.Label>Grupo Ø</Form.Label>
+                            <Form.Control 
+                                as="select" 
+                                value={datos.grupo}
+                                name='grupo'
+                                onChange={handleInputChange} >
                                 <option key={0} value={''}>Todas</option>
-                                {secciones && secciones.map( seccion => {
-                                    return (
-                                    <option key={seccion.id} value={seccion.id}>
-                                        {seccion.nombre}
+                                {grupos && grupos.map(grupo => (
+                                    <option key={grupo.id} value={grupo.tubo_madre}>
+                                        {grupo.tubo_madre}
                                     </option>
-                                    )
-                                })}
+                                ))}
                             </Form.Control>
                         </Form.Group>
                     </Col>
                     <Col>
-                        <Form.Group controlId="operacion">
-                            <Form.Label>Operación</Form.Label>
-                            <Form.Control as="select" 
-                                            value={datos.operacion}
-                                            name='operacion'
-                                            onChange={handleInputChange}>
-                                <option key={0} value={''}>Todos</option>
-                                {operaciones && operaciones.map( operacion => {
-                                    return (
-                                    <option key={operacion.id} value={operacion.id}>
-                                        {operacion.nombre}
+                        <Form.Group controlId="dimensiones">
+                            <Form.Label>Dimenesiones</Form.Label>
+                            <Form.Control 
+                                as="select" 
+                                value={datos.dimensiones}
+                                name='dimensiones'
+                                onChange={handleInputChange} >
+                                <option key={0} value={''}>Todas</option>
+                                {bancadas && bancadas.map(bancada => (
+                                    <option key={bancada.id} value={bancada.id}>
+                                        {bancada.dimensiones}
                                     </option>
-                                    )
-                                })}
+                                ))}
                             </Form.Control>
                         </Form.Group>
                     </Col>
+                    
                 </Row>
             </Form>
         </Container>
      );
 }
  
-export default RodListaFiltro;
+export default RodMontajeFiltro;
