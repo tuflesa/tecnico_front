@@ -12,12 +12,19 @@ const RodMontajeFiltro = ({actualizaFiltro}) => {
     const [zonas, setZonas] = useState(null);
     const [grupos, setGrupos] = useState(null);
     const [bancadas, setBancadas] = useState(null);
+    const [tubo_madre, setTuboMadre] = useState(null);
+    const [grupoId, setGrupoId] = useState(null);
+    const [dimensionesID, setDimensionesId] = useState(null);
+    const [dimensiones, setDimensiones] = useState(null);
 
     const [datos, setDatos] = useState({
         id:'',
         empresa: user['tec-user'].perfil.empresa.id,
         maquina: '',
         grupo: '',
+        tubo_madre:'',
+        dimensiones:'',
+        nombre:'',
     });
 
     useEffect(() => {
@@ -67,6 +74,7 @@ const RodMontajeFiltro = ({actualizaFiltro}) => {
             setDatos({
                 ...datos,
                 grupo: '',
+                dimensiones:'',
             });
         }
         else {
@@ -80,6 +88,7 @@ const RodMontajeFiltro = ({actualizaFiltro}) => {
                 setDatos({
                     ...datos,
                     grupo: '',
+                    dimensiones:'',
                 });
             })
             .catch( err => {
@@ -116,7 +125,7 @@ const RodMontajeFiltro = ({actualizaFiltro}) => {
     }, [token, datos.maquina]);
 
     useEffect(()=>{
-        const filtro = `?maquina__empresa__id=${datos.empresa}&tubo_madre=${datos.grupo}&maquina=${datos.maquina}&bancada=${datos.dimensiones}`
+        const filtro = `?maquina__empresa__id=${datos.empresa}&tubo_madre=${tubo_madre}&grupo=${grupoId}&maquina=${datos.maquina}&bancada=${dimensionesID}&nombre=${'M-'+tubo_madre + '-' + dimensiones}`
         actualizaFiltro(filtro);
     },[datos]);
 
@@ -126,15 +135,37 @@ const RodMontajeFiltro = ({actualizaFiltro}) => {
             [event.target.name] : event.target.value
         })
     }
+
+    const handleInputChangeGrupo = (event) => {
+        const [id, madre] = event.target.value.split(',');
+        setGrupoId(id);
+        setTuboMadre(madre);
+        // Ahora, grupoId y tuboMadre contienen los dos valores separados
+        setDatos({
+            ...datos,
+            grupo : event.target.value
+        });
+    };
+
+    const handleInputChangeDimensiones = (event) => {
+        const [id, dimensiones] = event.target.value.split(',');
+        setDimensionesId(id);
+        setDimensiones(dimensiones);
+        // Ahora, grupoId y tuboMadre contienen los dos valores separados
+        setDatos({
+            ...datos,
+            dimensiones : event.target.value
+        });
+    };
     
     return ( 
         <Container>
-            <h5 className="mb-3 mt-3">Filtro</h5>
+            <h5 className="mb-3 mt-3">Datos del Montaje</h5>
             <Form>
                 <Row>
                     <Col>
                         <Form.Group controlId="empresa">
-                            <Form.Label>Empresa</Form.Label>
+                            <Form.Label>Empresa *</Form.Label>
                             <Form.Control as="select"  
                                         name='empresa' 
                                         value={datos.empresa}
@@ -153,7 +184,7 @@ const RodMontajeFiltro = ({actualizaFiltro}) => {
                     </Col>
                     <Col>
                         <Form.Group controlId="maquina">
-                            <Form.Label>Máquina</Form.Label>
+                            <Form.Label>Máquina *</Form.Label>
                             <Form.Control as="select" 
                                             value={datos.maquina}
                                             name='maquina'
@@ -173,15 +204,15 @@ const RodMontajeFiltro = ({actualizaFiltro}) => {
                 <Row>
                     <Col>
                         <Form.Group controlId="grupo">
-                            <Form.Label>Grupo Ø</Form.Label>
+                            <Form.Label>Grupo Ø *</Form.Label>
                             <Form.Control 
                                 as="select" 
                                 value={datos.grupo}
                                 name='grupo'
-                                onChange={handleInputChange} >
+                                onChange={handleInputChangeGrupo} >
                                 <option key={0} value={''}>Todas</option>
                                 {grupos && grupos.map(grupo => (
-                                    <option key={grupo.id} value={grupo.tubo_madre}>
+                                    <option key={grupo.id} value={`${grupo.id},${grupo.tubo_madre}`}>
                                         {grupo.tubo_madre}
                                     </option>
                                 ))}
@@ -190,15 +221,15 @@ const RodMontajeFiltro = ({actualizaFiltro}) => {
                     </Col>
                     <Col>
                         <Form.Group controlId="dimensiones">
-                            <Form.Label>Dimenesiones</Form.Label>
+                            <Form.Label>Cabeza de turco *</Form.Label>
                             <Form.Control 
                                 as="select" 
                                 value={datos.dimensiones}
                                 name='dimensiones'
-                                onChange={handleInputChange} >
+                                onChange={handleInputChangeDimensiones} >
                                 <option key={0} value={''}>Todas</option>
                                 {bancadas && bancadas.map(bancada => (
-                                    <option key={bancada.id} value={bancada.id}>
+                                    <option key={bancada.id} value={`${bancada.id},${bancada.dimensiones}`}>
                                         {bancada.dimensiones}
                                     </option>
                                 ))}

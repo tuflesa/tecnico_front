@@ -21,7 +21,7 @@ const Rodillos = () => {
         <React.Fragment>
             <RodNavBar />
             <Switch>
-            <Route path='/rodillos/montaje' component={RodMontaje} />
+                <Route path='/rodillos/montaje' component={RodMontaje} />
                 <Route path='/rodillos/lista' component={RodLista} />
                 <Route path='/rodillos/bacada_ct_editar/:id' component={RodBancadaCT_Editar} />
                 <Route path='/rodillos/bacada' component={RodBancada} />

@@ -5,6 +5,7 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import RodMontajeFiltro from './rod_montaje_filtro';
+import RodMontajeConjunto from './rod_montaje_conjunto';
 
 
 const RodMontaje = () => {
@@ -13,35 +14,47 @@ const RodMontaje = () => {
 
     const [filtro, setFiltro] = useState(`?maquina__empresa__id=${user['tec-user'].perfil.empresa.id}`);
     const [bancadas, setBancadas] = useState(null);
-    const [maquina, setMaquina] = useState('');
-    const [empresa, setEmpresa] = useState('');
-    const [dimensiones, setDimensiones] = useState('');
+    const [bancada_ct, setBancadaCT] = useState(null);
     const [operaciones, setOperaciones] = useState(null);
     const [secciones, setSecciones] = useState(null);
-    const [grupo_id, setGrupoid] = useState(null);
     const [formaciones_completadas, setFormacionesCompletadas] = useState('');
     const [formaciones_filtradas, setFormacionesFiltradas] = useState('');
     const [operacion_marcada, setOperacionMarcada] = useState(null);
     const [show_conjunto, setShowConjunto] = useState(false);
+    const [grabado, setGrabar] = useState(false);
 
-    //BUSCAMOS LAS CELDAS DE LAS BANCADAS RECIBIDAS PARA PINTARLAS
+
+    const [datos, setDatos] = useState({
+        maquina: '',
+        grupo:'',
+        bancada_ct:'',
+        nombre:'',
+        tubo_madre:'',
+    });
+
     useEffect(() => { //SEPARAR DATOS QUE ENTRAN A TRAVES DEL FILTRO
-        setBancadas(null);
+        setGrabar(false);
         setFormacionesCompletadas('');
         const params = new URLSearchParams(filtro);
         const maquinaValue = params.get('maquina');
-        const empresaValue = params.get('maquina__empresa__id');
         const dimensionesValue = params.get('bancada');
-        const grupoValue = params.get('tubo_madre');
-        setMaquina(maquinaValue);
-        setEmpresa(empresaValue);
-        setDimensiones(dimensionesValue);
-        setGrupoid(grupoValue);
+        const tubo_madreValue = params.get('tubo_madre');
+        const grupoIdValue = params.get('grupo');
+        const nombreValue = params.get('nombre');
+        setDatos({
+            ...datos,
+            grupo: grupoIdValue,
+            maquina: maquinaValue,
+            bancada_ct: dimensionesValue,
+            nombre: nombreValue==='M-null-null'?'':nombreValue,
+            tubo_madre: tubo_madreValue,
+            dimensiones: dimensionesValue, 
+        });
     }, [filtro]);
 
     useEffect(() => { //recogemos las operaciones de la máquina elegida F1,F2....
-        if(maquina){
-            axios.get(BACKEND_SERVER + `/api/rodillos/operacion/?seccion__maquina__id=${maquina}`,{
+        if(datos.maquina){
+            axios.get(BACKEND_SERVER + `/api/rodillos/operacion/?seccion__maquina__id=${datos.maquina}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
@@ -56,8 +69,8 @@ const RodMontaje = () => {
     }, [bancadas]);
 
     useEffect(() => { //recogemos las operaciones de la máquina elegida F1,F2....
-        if(maquina){
-            axios.get(BACKEND_SERVER + `/api/rodillos/seccion/?maquina__id=${maquina}`,{
+        if(datos.maquina){
+            axios.get(BACKEND_SERVER + `/api/rodillos/seccion/?maquina__id=${datos.maquina}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
@@ -72,19 +85,20 @@ const RodMontaje = () => {
     }, [bancadas]);
 
     useEffect(() => {
-        dimensiones && grupo_id && maquina && axios.get(BACKEND_SERVER + `/api/rodillos/bancada_montaje/?seccion__maquina=${maquina}&tubo_madre=${grupo_id}`,{
+        datos.bancada_ct && datos.tubo_madre && datos.maquina && axios.get(BACKEND_SERVER + `/api/rodillos/bancada_montaje/?seccion__maquina=${datos.maquina}&tubo_madre=${datos.tubo_madre}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }
         })
         .then( res => {
             setBancadas(res.data);
-            axios.get(BACKEND_SERVER + `/api/rodillos/bancada_montaje/${dimensiones}`,{
+            datos.bancada_ct && axios.get(BACKEND_SERVER + `/api/rodillos/bancada_montaje/${datos.bancada_ct}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
             })
             .then( r => {
+                setBancadaCT(r.data.id);
                 setBancadas(prevBancadas => { //unimos en la misma variable las bancadas del grupo elegido con la CT.
                     return [...prevBancadas, r.data];
                 });
@@ -96,7 +110,7 @@ const RodMontaje = () => {
         .catch( err => {
             console.log(err);
         });
-    }, [dimensiones]);
+    }, [datos.bancada_ct, datos.grupo]);
 
     useEffect(() => { //Recogemos las celdas ya creadas según empresa, máquina, elegidos
         if(bancadas){
@@ -143,6 +157,47 @@ const RodMontaje = () => {
         AbrirConjunto();
     }
 
+    const handlerGuardar = () => { //Guardamos el montaje, primero comprobamos si ya existe.
+        if(datos.nombre===''||datos.maquina===''||datos.grupo===''||datos.bancada_ct===''){
+            alert('Revisa los datos obligatorios');
+        }
+        else{
+            axios.get(BACKEND_SERVER + `/api/rodillos/montaje/?maquina=${datos.maquina}&grupo=${datos.grupo}&bancadas=${bancada_ct}`,{ //buscamos el montaje
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }
+            })
+            .then( rr => {
+                if(rr.data.length!==0){
+                    alert('Este montaje ya está creado');
+                }
+                else{
+                    axios.post(BACKEND_SERVER + `/api/rodillos/montaje/`, { //creamos el montaje
+                        nombre: datos.nombre,
+                        maquina: datos.maquina,
+                        grupo:datos.grupo,
+                        bancadas:datos.bancada_ct,
+                    }, {
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                            }     
+                    })
+                    .then( res => { 
+                        alert('Montaje creado con exito');
+                        setGrabar(true);
+                    })
+                    .catch( err => {
+                        console.log(err);
+                    });
+                }
+            })
+            .catch( err => {
+                console.log(err);
+                alert('Revisa los campos obligatorios');
+            });
+        }
+    }
+
     const AbrirConjunto = () => {
         setShowConjunto(true);
     }
@@ -163,6 +218,21 @@ const RodMontaje = () => {
                     <RodMontajeFiltro actualizaFiltro={actualizaFiltro}/>
                 </Col>
             </ Row>
+            <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
+            {bancadas && operaciones && formaciones_completadas?grabado?<Button variant="outline-primary" disabled={grabado?true:false} onClick={handlerGuardar}>Guardar</Button>:<Button variant="outline-primary" onClick={handlerGuardar}>Guardar</Button>:''}
+            <Row>
+                <Col>
+                    <Form.Group controlId="nombre">
+                        <Form.Label>Nombre del montaje *</Form.Label>
+                        <Form.Control type="text" 
+                                    name='nombre' 
+                                    value={datos.nombre}
+                                    placeholder="Montaje"
+                                    disabled
+                        />
+                    </Form.Group>
+                </Col>
+            </Row>
             {bancadas && operaciones && formaciones_completadas?
                 <Row>
                     <Col>
@@ -186,7 +256,7 @@ const RodMontaje = () => {
                                                 <Button
                                                     key={operacion.id}
                                                     className={`btn ${nuevoCampo ? 'btn-primary' : 'btn-outline-dark'} btn-sm`}
-                                                    onClick={() => {dimensiones?GuardarId_Operacion(operacion):alert('Elige dimensiones')}}
+                                                    onClick={() => {datos.bancada_ct?GuardarId_Operacion(operacion):alert('Elige dimensiones')}}
                                                 >
                                                     {operacion.nombre}
                                                 </Button>
@@ -201,7 +271,12 @@ const RodMontaje = () => {
                     </Col>
                 </Row>
             :null}
-            <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
+            
+            <RodMontajeConjunto show={show_conjunto}
+                    operacion_marcada={operacion_marcada}
+                    handleClose={CerrarConjunto}
+                    elementos_formacion={formaciones_filtradas}
+                    tubo_madre={datos.tubo_madre}/>
         </Container>
     )
 }
