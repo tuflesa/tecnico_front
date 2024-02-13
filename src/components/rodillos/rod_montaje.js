@@ -8,7 +8,7 @@ import RodMontajeFiltro from './rod_montaje_filtro';
 import RodMontajeConjunto from './rod_montaje_conjunto';
 
 
-const RodMontaje = () => {
+const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
     const [user] = useCookies(['tec-user']);
     const [token] = useCookies(['tec-token']);
 
@@ -25,14 +25,21 @@ const RodMontaje = () => {
 
 
     const [datos, setDatos] = useState({
-        maquina: '',
+        maquina:'',
         grupo:'',
         bancada_ct:'',
         nombre:'',
         tubo_madre:'',
     });
 
+    useEffect(() => { 
+        console.log('DATOS');
+        console.log(datos);
+    }, [datos, token]);
+
     useEffect(() => { //SEPARAR DATOS QUE ENTRAN A TRAVES DEL FILTRO
+        console.log('que entra en montaje_edi');
+        console.log(montaje_edi);
         setGrabar(false);
         setFormacionesCompletadas('');
         const params = new URLSearchParams(filtro);
@@ -43,14 +50,14 @@ const RodMontaje = () => {
         const nombreValue = params.get('nombre');
         setDatos({
             ...datos,
-            grupo: grupoIdValue,
-            maquina: maquinaValue,
-            bancada_ct: dimensionesValue,
-            nombre: nombreValue==='M-null-null'?'':nombreValue,
-            tubo_madre: tubo_madreValue,
-            dimensiones: dimensionesValue, 
+            grupo: montaje_edi?montaje_edi.grupo.id:grupoIdValue,
+            maquina: montaje_edi?montaje_edi.maquina.id:maquinaValue,
+            bancada_ct: montaje_edi?montaje_edi.bancadas.id:dimensionesValue,
+            nombre: montaje_edi?montaje_edi.nombre:nombreValue==='M-null-null'?'':nombreValue,
+            tubo_madre: montaje_edi?montaje_edi.grupo.tubo_madre:tubo_madreValue,
+            dimensiones: montaje_edi?montaje_edi.bancadas.dimensiones:dimensionesValue, 
         });
-    }, [filtro]);
+    }, [filtro, montaje_edi]);
 
     useEffect(() => { //recogemos las operaciones de la máquina elegida F1,F2....
         if(datos.maquina){
@@ -213,11 +220,65 @@ const RodMontaje = () => {
     return (
         <Container>
             <img src ={logo} width="200" height="200"></img>
-            <Row>
-                <Col>
-                    <RodMontajeFiltro actualizaFiltro={actualizaFiltro}/>
-                </Col>
-            </ Row>
+            {montaje_edi?
+                <Form>
+                    <Row>
+                        <Col>
+                            <Form.Group controlId="empresa">
+                                <Form.Label>Empresa</Form.Label>
+                                <Form.Control type="text" 
+                                            name='empresa' 
+                                            value={montaje_edi.maquina.empresa.siglas}
+                                            placeholder="Empresa"
+                                            disabled
+                                />
+                            </Form.Group>
+                        </Col>
+                        <Col>
+                            <Form.Group controlId="maquina">
+                                <Form.Label>Maquina</Form.Label>
+                                <Form.Control type="text" 
+                                            name='maquina' 
+                                            value={montaje_edi.maquina.siglas}
+                                            placeholder="Maquina"
+                                            disabled
+                                />
+                            </Form.Group>
+                        </Col>
+                        
+                    </Row>
+                    <Row>
+                        <Col>
+                            <Form.Group controlId="grupo">
+                                <Form.Label>Grupo</Form.Label>
+                                <Form.Control type="text" 
+                                            name='grupo' 
+                                            value={montaje_edi.grupo.nombre}
+                                            placeholder="Grupo"
+                                            disabled
+                                />
+                            </Form.Group>
+                        </Col>
+                        <Col>
+                            <Form.Group controlId="dimensiones">
+                                <Form.Label>Cabeza de Turco</Form.Label>
+                                <Form.Control type="text" 
+                                            name='dimensiones' 
+                                            value={montaje_edi.bancadas.dimensiones}
+                                            placeholder="Cabeza de turco"
+                                            disabled
+                                />
+                            </Form.Group>
+                        </Col>
+                    </Row>
+                </Form>
+                :
+                <Row>
+                    <Col>
+                        <RodMontajeFiltro actualizaFiltro={actualizaFiltro}/>
+                    </Col>
+                </ Row>
+            }
             <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
             {bancadas && operaciones && formaciones_completadas?grabado?<Button variant="outline-primary" disabled={grabado?true:false} onClick={handlerGuardar}>Guardar</Button>:<Button variant="outline-primary" onClick={handlerGuardar}>Guardar</Button>:''}
             <Row>

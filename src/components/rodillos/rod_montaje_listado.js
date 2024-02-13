@@ -4,7 +4,7 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { PencilFill, Trash } from 'react-bootstrap-icons';
+import { Trash, Eye } from 'react-bootstrap-icons';
 import RodMontajeListadoFiltro from './Rod_montaje_listado_filtro';
 import logo from '../../assets/logo_bornay.svg';
 
@@ -15,6 +15,7 @@ const RodMontajeListado = () => {
     const [montajes, setMontajes] = useState(null)
     const [filtro, setFiltro] = useState(``);
     const [refrescar, setRefrescar] = useState(false);
+    const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Director Técnico'?false:true;
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + `/api/rodillos/montaje_listado/`+filtro,{
@@ -79,9 +80,9 @@ const RodMontajeListado = () => {
                                         <td>{montaje.bancadas.dimensiones}</td>
                                         <td>
                                             <Link to={`/rodillos/montaje_editar/${montaje.id}`}>
-                                                <PencilFill className="mr-3 pencil"/>
+                                                <Eye className="mr-3 pencil"/>
                                             </Link>
-                                            <Trash className="trash"  onClick={event =>{EliminaMontaje(montaje)}} />
+                                            {nosoyTecnico?<Trash className="trash"  onClick={event =>{EliminaMontaje(montaje)}} />:''}
                                         </td>
                                     </tr>
                                 )})

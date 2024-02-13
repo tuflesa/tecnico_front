@@ -151,7 +151,7 @@ const RodMontajeListadoFiltro = ({actualizaFiltro}) => {
         const [id, dimensiones] = event.target.value.split(',');
         setDimensionesId(id);
         setDimensiones(dimensiones);
-        // Ahora, grupoId y tuboMadre contienen los dos valores separados
+        // Ahora, dimensionesId y dimensiones contienen los dos valores separados
         setDatos({
             ...datos,
             dimensiones : event.target.value
@@ -247,7 +247,6 @@ const RodMontajeListadoFiltro = ({actualizaFiltro}) => {
                             </Form.Control>
                         </Form.Group>
                     </Col>
-                    
                 </Row>
             </Form>
         </Container>

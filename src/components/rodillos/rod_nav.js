@@ -5,6 +5,7 @@ import { useCookies } from 'react-cookie';
 
 const RodNavBar = () => {
     const [user] = useCookies(['tec-user']);
+    const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Director Técnico'?false:true;
 
     return (
             <React.Fragment>
@@ -12,6 +13,7 @@ const RodNavBar = () => {
                         <Navbar.Brand href="/home">Dep.Técnico</Navbar.Brand>
                         <Navbar.Toggle aria-controls="basic-navbar-nav"/>
                         <Navbar.Collapse id="basic-navbar-nav">
+                            {nosoyTecnico?
                             <Nav className="mr-auto">
                                 <NavDropdown title="Rodillos" id="basic-nav-dropdown">
                                     <NavDropdown.Item href="/rodillos/tooling">Tooling Chart</NavDropdown.Item>
@@ -29,6 +31,14 @@ const RodNavBar = () => {
                                     </NavDropdown>
                                 </NavDropdown>
                             </Nav>
+                            :
+                            <Nav className="mr-auto">
+                                <NavDropdown title="Rodillos" id="basic-nav-dropdown">
+                                    <NavDropdown.Item href="/rodillos/tooling">Tooling Chart</NavDropdown.Item>
+                                    <NavDropdown.Item href="/rodillos/montaje_lista">Montajes</NavDropdown.Item>
+                                </NavDropdown>
+                            </Nav>
+                            }
                             <Navbar.Text className="mr-4" >
                                 Usuario: {user['tec-user'].get_full_name}
                             </Navbar.Text>
