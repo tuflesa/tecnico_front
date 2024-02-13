@@ -14,6 +14,7 @@ import RodBancadaCT from './rod_bancada_ct';
 import RodBancadaCTListado from './rod_bancada_ct_listado';
 import RodBancadaCT_Editar from './rod_bancada_ct_editar';
 import RodMontaje from './rod_montaje';
+import RodMontajeListado from './rod_montaje_listado';
 
 const Rodillos = () => {
     
@@ -22,6 +23,8 @@ const Rodillos = () => {
             <RodNavBar />
             <Switch>
                 <Route path='/rodillos/montaje' component={RodMontaje} />
+                <Route path='/rodillos/montaje_lista' component={RodMontajeListado} />
+                <Route path='/rodillos/montaje_editar/:id' component={RodMontaje} />
                 <Route path='/rodillos/lista' component={RodLista} />
                 <Route path='/rodillos/bacada_ct_editar/:id' component={RodBancadaCT_Editar} />
                 <Route path='/rodillos/bacada' component={RodBancada} />
