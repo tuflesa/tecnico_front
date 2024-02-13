@@ -14,6 +14,7 @@ const RodMontajeListado = () => {
 
     const [montajes, setMontajes] = useState(null)
     const [filtro, setFiltro] = useState(``);
+    const [refrescar, setRefrescar] = useState(false);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + `/api/rodillos/montaje_listado/`+filtro,{
@@ -27,11 +28,26 @@ const RodMontajeListado = () => {
         .catch( err => {
             console.log(err);
         });
-    }, [token, filtro]);
+    }, [token, filtro, refrescar]);
 
     const actualizaFiltro = str => {
         setFiltro(str);
     }
+
+    const EliminaMontaje = (montaje) => {
+        axios.delete(BACKEND_SERVER + `/api/rodillos/montaje/${montaje.id}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            alert('Montaje '+montaje.nombre+' eliminado correctamente');
+            setRefrescar(!refrescar);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    };
 
     return ( 
         <Container>
@@ -65,7 +81,7 @@ const RodMontajeListado = () => {
                                             <Link to={`/rodillos/montaje_editar/${montaje.id}`}>
                                                 <PencilFill className="mr-3 pencil"/>
                                             </Link>
-                                            <Trash className="trash"  onClick={'handlerBorrar'} />
+                                            <Trash className="trash"  onClick={event =>{EliminaMontaje(montaje)}} />
                                         </td>
                                     </tr>
                                 )})
