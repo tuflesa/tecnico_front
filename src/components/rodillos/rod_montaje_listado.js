@@ -21,6 +21,10 @@ const RodMontajeListado = () => {
     const [celdas, setCeldas] = useState(null);
     const [elementos, setElementos] = useState(null);
     const [conjuntos, setConjuntos] = useState(null);
+    const [celdasCT, setCeldasCT] = useState(null);
+    const [elementosCT, setElementosCT] = useState(null);
+    const [conjuntosCT, setConjuntosCT] = useState(null);
+    const [conjuntos_completados, setConjuntosCompletados] = useState(null);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + `/api/rodillos/montaje_listado/`+filtro,{
@@ -63,11 +67,102 @@ const RodMontajeListado = () => {
             setConjuntos(null);
         }
     }, [show, celdas, elementos]);
-    
- 
-    const actualizaFiltro = str => {
-        setFiltro(str);
-    }
+
+    useEffect(() => {
+        if (show && celdasCT && elementosCT) {
+            const datosTablaCompletado = elementosCT.flatMap(item => (
+                item.map(d => ({
+                    id: d.id,
+                    nombreOperacion: d.conjunto.operacion.nombre,
+                    //tuboMadre: d.bancada.dimensiones,
+                    diametroEje: d.eje.diametro,
+                    nombreRodillo: d.rodillo.nombre,
+                    ordenOperacion: d.conjunto.operacion.orden,
+                    dimensioneseBancada: d.rodillo.descripcion_perfil,
+                }))
+            ));
+            // Ordenar por el campo ordenOperacion
+            datosTablaCompletado.sort((a, b) => a.ordenOperacion - b.ordenOperacion);
+            setConjuntosCT(datosTablaCompletado);
+        } else {
+            setConjuntosCT(null);
+        }
+    }, [conjuntos]);
+
+    useEffect(() => {
+        if (show && conjuntos && conjuntosCT) {
+           const unimos = conjuntos.concat(conjuntosCT);
+           unimos.sort((a, b) => a.ordenOperacion - b.ordenOperacion);
+           setConjuntosCompletados(unimos);
+        } else {
+            setConjuntosCompletados(null);
+        }
+    }, [conjuntosCT]);
+
+    const cogerDatos = async (montaje) => {
+        try {
+            // Hacer las solicitudes a las celdas de todas las bancadas y lo guarda en solicitudesCeldas
+            const solicitudesCeldas = montaje.grupo.bancadas.map(bancadaId => {
+                return axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__id=${bancadaId}`, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }
+                });
+            });
+            const solicitudesCeldasCT = axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__id=${montaje.bancadas.id}`, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }
+            });
+            // Esperar a que todas las solicitudes a las celdas se completen y pasamos la info a respuestasCeldas
+            const respuestasCeldas = await Promise.all(solicitudesCeldas);
+            const respuestasCeldasCT = await solicitudesCeldasCT;
+            // Busco para cada Celda el elemento con el id del conjunto
+            const solicitudesElementos = respuestasCeldas.map(res => {
+                return Promise.all(res.data.map(celda => {
+                    return axios.get(BACKEND_SERVER + `/api/rodillos/elemento_select/?conjunto__id=${celda.conjunto.id}`, {
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                        }
+                    });
+                }));
+            });
+            const solicitudesElementosCT = Promise.all(respuestasCeldasCT.data.map(ress => {
+                return axios.get(BACKEND_SERVER + `/api/rodillos/elemento_select/?conjunto__id=${ress.conjunto.id}`, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }
+                });
+            }));
+            // Espero a que todas las solicitudes de elementos y copio la info en respuestasElementos
+            const respuestasElementos = await Promise.all(solicitudesElementos);
+            const respuestasElementosCT = await solicitudesElementosCT;
+            // Actualizar los estados
+            setFilaSeleccionada(montaje.id);
+            setShow(!show);
+            setCeldas(respuestasCeldas.map(res => res.data));
+            setCeldasCT(respuestasCeldasCT.data);
+            setElementos(respuestasElementos.map(res => res.map(r => r.data)));
+            setElementosCT(respuestasElementosCT.map(res => res.data));
+            /* const dimensionesElementosCT = respuestasElementosCT.map(res => {
+                const newData = res.data.map(item => ({
+                    ...item,  // Conserva todas las propiedades existentes
+                    dimensiones: montaje.bancadas.dimensiones  // Agrega el campo externo
+                }));
+                return newData;
+            });
+            setElementosCT(dimensionesElementosCT); */
+        } catch (err) {
+            console.log(err);
+        }
+    };
+
+    useEffect(() => {
+        console.log('DATOS QUE SALEN DESPUES DE TODOS LOS ARREGLOS ELEMENTOS');
+        console.log(elementos);
+        console.log(elementosCT);
+        console.log(conjuntos_completados);
+    }, [conjuntos_completados]);
 
     const EliminaMontaje = (montaje) => {
         axios.delete(BACKEND_SERVER + `/api/rodillos/montaje/${montaje.id}`,{
@@ -84,39 +179,9 @@ const RodMontajeListado = () => {
         });
     };
 
-    const cogerDatos = async (montaje) => {
-        try {
-            // Hacer las solicitudes a las celdas de todas las bancadas y lo guarda en solicitudesCeldas
-            const solicitudesCeldas = montaje.grupo.bancadas.map(bancadaId => {
-                return axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__id=${bancadaId}`, {
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`
-                    }
-                });
-            });
-            // Esperar a que todas las solicitudes a las celdas se completen y pasamos la info a respuestasCeldas
-            const respuestasCeldas = await Promise.all(solicitudesCeldas);
-            // Busco para cada Celda el elemento con el id del conjunto
-            const solicitudesElementos = respuestasCeldas.map(res => {
-                return Promise.all(res.data.map(celda => {
-                    return axios.get(BACKEND_SERVER + `/api/rodillos/elemento_select/?conjunto__id=${celda.conjunto.id}`, {
-                        headers: {
-                            'Authorization': `token ${token['tec-token']}`
-                        }
-                    });
-                }));
-            });
-            // Espero a que todas las solicitudes de elementos y copio la info en respuestasElementos
-            const respuestasElementos = await Promise.all(solicitudesElementos);
-            // Actualizar los estados
-            setFilaSeleccionada(montaje.id);
-            setShow(!show);
-            setCeldas(respuestasCeldas.map(res => res.data));
-            setElementos(respuestasElementos.map(res => res.map(r => r.data)));
-        } catch (err) {
-            console.log(err);
-        }
-    };
+    const actualizaFiltro = str => {
+        setFiltro(str);
+    }
 
     return ( 
         <Container>
@@ -166,15 +231,17 @@ const RodMontajeListado = () => {
                                                                 <tr>
                                                                     <th>Operación</th>
                                                                     <th>Tubo madre</th>
+                                                                    <th>Dimensiones</th>
                                                                     <th>Eje</th>
                                                                     <th>Rodillo</th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
-                                                                {conjuntos && conjuntos.map((conjunto, index) => (
+                                                                {conjuntos_completados && conjuntos_completados.map((conjunto, index) => (
                                                                     <tr key={index}>
                                                                         <td>{conjunto.nombreOperacion}</td>
                                                                         <td>{conjunto.tuboMadre}</td>
+                                                                        <td>{conjunto.dimensioneseBancada}</td>
                                                                         <td>{conjunto.diametroEje}</td>
                                                                         <td>{conjunto.nombreRodillo}</td>
                                                                     </tr>

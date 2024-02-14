@@ -16,8 +16,6 @@ const RodMontajeEditar = ({ match }) => {
         })
         .then( res => {
             setMontajeEditar(res.data);
-            console.log('estoy en editar');
-            console.log(res.data);
         })
         .catch( err => {
             console.log(err);
