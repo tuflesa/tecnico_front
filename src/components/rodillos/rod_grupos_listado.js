@@ -144,8 +144,8 @@ const RodGruposListado = () => {
             setShow(!show);
             setCeldas(respuestasCeldas.map(res => res.data));
             setElementos(respuestasElementos.map(res => res.map(r => r.data)));
-        } catch (error) {
-            console.log(error);
+        } catch (err) {
+            console.log(err);
         }
     };
 

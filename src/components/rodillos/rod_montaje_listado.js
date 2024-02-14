@@ -144,25 +144,10 @@ const RodMontajeListado = () => {
             setCeldasCT(respuestasCeldasCT.data);
             setElementos(respuestasElementos.map(res => res.map(r => r.data)));
             setElementosCT(respuestasElementosCT.map(res => res.data));
-            /* const dimensionesElementosCT = respuestasElementosCT.map(res => {
-                const newData = res.data.map(item => ({
-                    ...item,  // Conserva todas las propiedades existentes
-                    dimensiones: montaje.bancadas.dimensiones  // Agrega el campo externo
-                }));
-                return newData;
-            });
-            setElementosCT(dimensionesElementosCT); */
         } catch (err) {
             console.log(err);
         }
     };
-
-    useEffect(() => {
-        console.log('DATOS QUE SALEN DESPUES DE TODOS LOS ARREGLOS ELEMENTOS');
-        console.log(elementos);
-        console.log(elementosCT);
-        console.log(conjuntos_completados);
-    }, [conjuntos_completados]);
 
     const EliminaMontaje = (montaje) => {
         axios.delete(BACKEND_SERVER + `/api/rodillos/montaje/${montaje.id}`,{
