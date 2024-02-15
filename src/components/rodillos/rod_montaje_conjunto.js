@@ -114,12 +114,13 @@ const RodMontajeConjunto = ({show, handleClose, operacion_marcada, elementos_for
                                             name={eje.id}
                                             value={rodillo_elegido[eje.id] || ''}
                                             placeholder={eje.tipo.nombre}
+                                            rows={4}
                                         >
                                             {rodillo_elegido && rodillo_elegido.map(rod => { //rodillo elegido lo cogemos del elemento, también el comentario
                                                 if (rod.eje.tipo.id === eje.tipo.id && rod.rodillo.diametro === eje.diametro && rod.conjunto.operacion.id === eje.operacion) {
                                                     return (
                                                         <option key={rod.rodillo.id} value={rod.rodillo.id}>
-                                                            {rod.id}
+                                                            {rod.anotciones_montaje}
                                                         </option>
                                                     )
                                                 }
@@ -131,12 +132,11 @@ const RodMontajeConjunto = ({show, handleClose, operacion_marcada, elementos_for
                             </Row>
                         </Form>
                     </Tab>
-                    <Tab eventKey="anotaciones_op" title="Anotaciones Operación">
+                    <Tab eventKey="anotaciones_op" title="Anotaciones Montaje Operación">
                         <Form>
                             <Row>
                                 <Col>
                                     <Form.Group controlId="anotaciones_op">
-                                        <Form.Label>Anotaciones *</Form.Label>
                                         <Form.Control as="text"  
                                                     name='anotacion_op' 
                                                     placeholder="Anotaciones">   

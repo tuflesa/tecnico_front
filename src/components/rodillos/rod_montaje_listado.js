@@ -52,7 +52,9 @@ const RodMontajeListado = () => {
                                 tuboMadre: d.rodillo.grupo.tubo_madre,
                                 diametroEje: d.eje.diametro,
                                 nombreRodillo: d.rodillo.nombre,
-                                ordenOperacion: d.conjunto.operacion.orden
+                                ordenOperacion: d.conjunto.operacion.orden,
+                                anotacionMontaje: d.anotciones_montaje
+
                             }));
                         }
                         return [];
@@ -79,6 +81,7 @@ const RodMontajeListado = () => {
                     nombreRodillo: d.rodillo.nombre,
                     ordenOperacion: d.conjunto.operacion.orden,
                     dimensioneseBancada: d.rodillo.descripcion_perfil,
+                    anotacionMontaje: d.anotciones_montaje
                 }))
             ));
             // Ordenar por el campo ordenOperacion
@@ -210,7 +213,7 @@ const RodMontajeListado = () => {
                                         </tr>
                                         {filaSeleccionada === montaje.id && show === true && (
                                             <tr>
-                                                <td colSpan="4">
+                                                <td colSpan="5">
                                                         <Table striped bordered hover>
                                                             <thead>
                                                                 <tr>
@@ -219,6 +222,7 @@ const RodMontajeListado = () => {
                                                                     <th>Dimensiones</th>
                                                                     <th>Eje</th>
                                                                     <th>Rodillo</th>
+                                                                    <th>Anotaciones Montaje Rodillo</th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
@@ -229,6 +233,7 @@ const RodMontajeListado = () => {
                                                                         <td>{conjunto.dimensioneseBancada}</td>
                                                                         <td>{conjunto.diametroEje}</td>
                                                                         <td>{conjunto.nombreRodillo}</td>
+                                                                        <td>{conjunto.anotacionMontaje}</td>
                                                                     </tr>
                                                                 ))}
                                                             </tbody>
