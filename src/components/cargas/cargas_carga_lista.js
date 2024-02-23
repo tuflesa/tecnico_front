@@ -2,9 +2,9 @@ import React , { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
-import { Container, Row, Table, Modal, Button } from 'react-bootstrap';
+import { Container, Row, Table, Modal, Button, Form } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { Trash, PencilFill, Truck } from 'react-bootstrap-icons';
+import { Trash, PencilFill, Truck, DoorClosed } from 'react-bootstrap-icons';
 import CargasFiltro from './cargas_carga_filtro';
 import useInterval from '../utilidades/use_interval';
 
@@ -13,7 +13,8 @@ const CargasLista = () => {
     const [cargas, setCargas] = useState([]);
     const [filtro, setFiltro] = useState(null);
     const [show, setShow] = useState(false);
-    const [cargaBorrar, setCargaBorrar] = useState(null);
+    const [showPuerta, setShowPuerta] = useState(false);
+    const [carga, setCarga] = useState(null);
 
     const actualiza_lista = ()=> {
         // console.log('actualiza lista');
@@ -38,7 +39,7 @@ const CargasLista = () => {
               }
         })
         .then(res => {
-            //console.log(res.data);
+            console.log(res.data);
             setCargas(res.data);
         })
     },[token, filtro]);
@@ -48,29 +49,56 @@ const CargasLista = () => {
     }
 
     const handleTrashClick = (carga) => {
-        console.log(carga);
+        // console.log(carga);
         setShow(true);
-        setCargaBorrar(carga);
+        setCarga(carga);
+    }
+
+    const handleGateClick = (carga) => {
+        setShowPuerta(true);
+        setCarga(carga);
     }
 
     const handleClose = () => setShow(false);
+    const handleClosePuerta = () => setShowPuerta(false);
 
     const borrarCarga = () => {
-        console.log('Borrar ' + cargaBorrar.remolque);
-        axios.delete(BACKEND_SERVER + `/api/cargas/carga/${cargaBorrar.id}/`, {
+        // console.log('Borrar ' + carga.remolque);
+        axios.delete(BACKEND_SERVER + `/api/cargas/carga/${carga.id}/`, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
             })
             .then(res => {
-                // console.log(res);
-                // Actualiza la lista de empresas
-                const cargasActual = cargas.filter(carga => carga.id !== cargaBorrar.id);
+                const cargasActual = cargas.filter(carga => carga.id !== carga.id);
                 setCargas(cargasActual);
                 setShow(false);
-                setCargaBorrar(null);
+                setCarga(null);
             })
             .catch(err => {console.log(err);})
+    }
+
+    const guardarPuerta = () => {
+        axios.patch(BACKEND_SERVER + `/api/cargas/carga/${carga.id}/`,
+            {puerta: Number(carga.puerta)},
+            {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+            })
+            .then(res => {
+                setShowPuerta(false);
+                setCarga(null);
+                actualiza_lista();
+            })
+            .catch(err => {console.log(err);})
+    }
+
+    const handleInputChange = (event) => {
+        setCarga({
+            ...carga,
+            [event.target.name] : event.target.value
+        })
     }
 
     return (
@@ -96,6 +124,7 @@ const CargasLista = () => {
                             <th>Bruto</th>
                             <th>Neto</th>
                             <th>Salida</th>
+                            <th>Puerta</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -115,6 +144,7 @@ const CargasLista = () => {
                                     <td>{carga.bruto}</td>
                                     <td>{parseInt(carga.bruto)>parseInt(carga.tara) ? carga.bruto - carga.tara : null}</td>
                                     <td>{carga.fecha_salida}</td>
+                                    <td>{carga.puerta}</td>
                                     <td>
                                         <Link to={`/cargas/${carga.id}`}>
                                             <Truck className="mr-2 pencil"/>
@@ -122,6 +152,7 @@ const CargasLista = () => {
                                         <Link to={`/cargas/editar/${carga.id}`}>
                                             <PencilFill className="mr-2 pencil"/>
                                         </Link>
+                                        <DoorClosed className="trash" onClick={event => {handleGateClick(carga)}} />
                                         <Trash className="trash" onClick={event => {handleTrashClick(carga)}} />
                                     </td>
                                 </tr>
@@ -130,11 +161,12 @@ const CargasLista = () => {
                     </tbody>
                 </Table>
             </Row>
+
             <Modal show={show} onHide={handleClose} backdrop="static" keyboard={ false }>
                 <Modal.Header closeButton>
                     <Modal.Title>Borrar</Modal.Title>
                 </Modal.Header>
-                <Modal.Body>Está a punto de borrar la carga: <strong>{cargaBorrar && cargaBorrar.remolque}</strong></Modal.Body>
+                <Modal.Body>Está a punto de borrar la carga: <strong>{carga && carga.remolque}</strong></Modal.Body>
                 <Modal.Footer>
                     <Button variant="danger" onClick={borrarCarga}>
                         Borrar
@@ -143,6 +175,34 @@ const CargasLista = () => {
                         Cancelar
                     </Button>
                 </Modal.Footer>
+            </Modal>
+
+            <Modal show={showPuerta} onHide={null} backdrop="static" keyboard={ false }>
+                <Modal.Header closeButton>
+                    <Modal.Title>Asignar puerta de carga</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <h4>Matrícula {carga&&carga.matricula} </h4>
+                    <Form>
+                        <Form.Group controlId="Puerta">
+                            <Form.Label>Puerta nº</Form.Label>
+                            <Form.Control type="text" 
+                                        name='puerta' 
+                                        value={carga&&carga.puerta}
+                                        onChange={handleInputChange}
+                                        />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="danger" onClick={guardarPuerta}>
+                        Guardar
+                    </Button>
+                    <Button variant="waring" onClick={handleClosePuerta}>
+                        Cancelar
+                    </Button>
+                </Modal.Footer>
+                
             </Modal>
         </Container>
     )
