@@ -32,14 +32,7 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
         tubo_madre:'',
     });
 
-    useEffect(() => { 
-        console.log('DATOS');
-        console.log(datos);
-    }, [datos, token]);
-
     useEffect(() => { //SEPARAR DATOS QUE ENTRAN A TRAVES DEL FILTRO
-        console.log('que entra en montaje_edi');
-        console.log(montaje_edi);
         setGrabar(false);
         setFormacionesCompletadas('');
         const params = new URLSearchParams(filtro);
