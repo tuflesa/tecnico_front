@@ -19,14 +19,13 @@ const RodNavBar = () => {
                                     <NavDropdown.Item href="/rodillos/tooling">Tooling Chart</NavDropdown.Item>
                                     <NavDropdown title="Listados" id="listados-dropdown" menualign="right">
                                     <NavDropdown.Item href="/rodillos/lista">Rodillos</NavDropdown.Item>
+                                    <NavDropdown.Item href="/rodillos/grupos">Bancadas RD</NavDropdown.Item> 
                                     <NavDropdown.Item href="/rodillos/lista_bancadas_ct">Bancadas CT</NavDropdown.Item>
                                     <NavDropdown.Item href="/rodillos/montaje_lista">Montajes</NavDropdown.Item>
                                     </NavDropdown>
                                     <NavDropdown title="Nuevos" id="nuevos-dropdown" menualign="right">
                                     <NavDropdown.Item href="/rodillos/grupo/nuevo">Grupo</NavDropdown.Item> 
-                                    <NavDropdown.Item href="/rodillos/nuevo">Rodillo</NavDropdown.Item>  
-                                    </NavDropdown>
-                                    <NavDropdown title="Nuevos/Modificar" id="nuevos-dropdown" menualign="right">
+                                    <NavDropdown.Item href="/rodillos/nuevo">Rodillo</NavDropdown.Item> 
                                     <NavDropdown.Item href="/rodillos/grupos">Bancadas RD</NavDropdown.Item> 
                                     <NavDropdown.Item href="/rodillos/bacada_ct">Bancada CT</NavDropdown.Item> 
                                     <NavDropdown.Item href="/rodillos/montaje">Montaje Bancadas</NavDropdown.Item> 

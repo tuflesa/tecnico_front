@@ -64,10 +64,10 @@ const RodTooling = () => {
         .catch( err => {
             console.log(err);
         });
-    }, [token, filtro]);
+    }, [filtro]);
 
     useEffect(() => { //recogemos las secciones de la máquina elegida
-        axios.get(BACKEND_SERVER + `/api/rodillos/seccion/`+filtro,{
+        axios.get(BACKEND_SERVER + `/api/rodillos/seccion/` + filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -78,7 +78,7 @@ const RodTooling = () => {
         .catch( err => {
             console.log(err);
         });
-    }, [token, filtro]);
+    }, [filtro]);
 
     useEffect(() => { //recogemos las operaciones de la máquina elegida
         if(maquina){

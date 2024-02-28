@@ -21,7 +21,7 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
     useEffect(() => {
         setMaquina(grupo.maquina.id);
         setEmpresa(grupo.maquina.empresa.id);
-        setTuboMadre(grupo.tubo_madre);
+        setTuboMadre(grupo.tubo_madre);        
     }, [grupo]);
 
     useEffect(() => {
@@ -38,19 +38,30 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
         });
     }, [token, grupo]);
 
-    useEffect(() => { //Recogemos las celdas ya creadas según empresa, máquina y grupo, elegidos
-        maquina && empresa && grupo && axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__seccion__maquina__id=${maquina}&bancada__seccion__maquina__empresa=${empresa}&bancada__tubo_madre=${tubo_madre}`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
+    useEffect(() => { //Recogemos las celdas ya creadas según el grupo, elegidos
+        const formacionesCompletadasArray = [];
+        let objetosAcumulados = 0;
+        for(var x=0;x<grupo.bancadas.length;x++){
+            //maquina && empresa && grupo && axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__seccion__maquina__id=${maquina}&bancada__seccion__maquina__empresa=${empresa}&bancada__tubo_madre=${tubo_madre}`,{
+            if (maquina && empresa && grupo) {
+                axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__id=${grupo.bancadas[x]}`,{
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }
+                })
+                .then( rr => {
+                    formacionesCompletadasArray.push(...rr.data);
+                    objetosAcumulados += rr.data.length;
+                    if (objetosAcumulados === formacionesCompletadasArray.length) {//si tengo todas las respuesta, paso la información a formacionescompletadas.
+                        setFormacionesCompletadas(formacionesCompletadasArray);
+                    }
+                })
+                .catch( err => {
+                    console.log(err);
+                });
             }
-        })
-        .then( rr => {
-            setFormacionesCompletadas(rr.data);
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    }, [maquina, grupo, empresa]);
+        }
+    }, [grupo, maquina, empresa]);
 
     useEffect(() => { //recogemos las operaciones de la máquina elegida
         if(maquina){

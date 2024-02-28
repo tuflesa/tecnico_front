@@ -122,7 +122,7 @@ const RodMontajeListadoFiltro = ({actualizaFiltro}) => {
                 console.log(err);
             });
         }
-    }, [token, datos.maquina]);
+    }, [datos.maquina]);
 
     useEffect(()=>{
         const filtro = `?maquina__id=${datos.maquina}&grupo__id=${grupoId===null?'':grupoId}&bancadas__id=${dimensionesID===null?'':dimensionesID}&nombre__icontains=${datos.nombre}`

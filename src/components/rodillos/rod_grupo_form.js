@@ -95,7 +95,6 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
             nombre: datos.nombre,
             maquina: datos.zona,
             tubo_madre: datos.tubo_madre,
-            bancadas:datos.bancadas_elegidas,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -116,7 +115,6 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
             nombre: datos.nombre,
             maquina: datos.zona,
             tubo_madre: datos.tubo_madre,
-            bancadas: datos.bancadas_elegidas,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -171,7 +169,8 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
                                         name='empresa' 
                                         value={datos.empresa}
                                         onChange={handleInputChange}
-                                        placeholder="Empresa">
+                                        placeholder="Empresa"
+                                        disabled={grupo.length!==0}>
                                         <option key={0} value={''}>Todas</option>    
                                         {empresas && empresas.map( empresa => {
                                             return (
@@ -189,7 +188,8 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
                             <Form.Control as="select" 
                                             value={datos.zona}
                                             name='zona'
-                                            onChange={handleInputChange}>
+                                            onChange={handleInputChange}
+                                            disabled={grupo.length!==0}>
                                 <option key={0} value={''}>Todas</option>
                                 {zonas && zonas.map( zona => {
                                     return (
