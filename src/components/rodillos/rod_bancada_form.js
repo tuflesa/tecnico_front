@@ -79,23 +79,6 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
         }
     }, [maquina]);
 
-    useEffect(() => { //para pintar las casillas de distinto color, añadimos nuevoCampo = true si tienen valor
-        if (operaciones && formaciones_completadas) {
-          const nuevasOperaciones = operaciones.map(operacion => {
-            let nuevoCampo = false;
-            for (let y = 0; y < formaciones_completadas.length; y++) {
-              if (operacion.id === formaciones_completadas[y].conjunto.operacion) {
-                // Si hay una coincidencia, establecemos nuevoCampo en true
-                nuevoCampo = true;
-                break; // Salimos del bucle ya que ya encontramos una coincidencia
-              }
-            }
-            // Devolvemos una nueva operación incluyendo el campo nuevoCampo
-            return { ...operacion, nuevoCampo };
-          });
-        }
-      }, [operaciones, formaciones_completadas]);
-
     const GuardarId_Operacion = (operationId) => {
         setOperacionMarcada(operationId); // Almacena la operación seleccionada
         setFormacionesFiltradas(formaciones_completadas.filter(formacion => formacion.conjunto.operacion === operationId.id)); //pasa los elementos de esta operación
@@ -115,7 +98,7 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
             {maquina? 
                 <Row>
                     <Col>
-                        <h5 className="mb-3 mt-3">Bancadas</h5>
+                        <h5 className="mb-3 mt-3">Formación de Bancadas / rojo = bancada de otra formación /</h5>
                         <Table striped bordered hover>
                             <thead>
                                 <tr>
@@ -128,17 +111,27 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                                 <tr>
                                     {secciones && secciones.map(seccion => (
                                         <td key={seccion.id}>
-                                            {operaciones && formaciones_completadas && operaciones.map((operacion) => {
+                                            {operaciones && operaciones.map((operacion) => {
                                             if (operacion.seccion.id === seccion.id) {
-                                                const nuevoCampo = formaciones_completadas.some(form_completas => form_completas.conjunto.operacion === operacion.id);
+                                                let nuevoCampo = false;
+                                                let nuevoCampo2 = false;
+                                                formaciones_completadas && formaciones_completadas.forEach(form_completas => {
+                                                    if(form_completas.conjunto.operacion===operacion.id){
+                                                        nuevoCampo=true;
+                                                    }
+                                                    if(form_completas.bancada.tubo_madre!==grupo.tubo_madre && form_completas.conjunto.operacion===operacion.id){
+                                                        nuevoCampo2=true;
+                                                    }
+                                                    // Aquí puedes agregar el resto de tu lógica
+                                                });
                                                 return (
-                                                <Button
-                                                    key={operacion.id}
-                                                    className={`btn ${nuevoCampo ? 'btn-primary' : 'btn-outline-dark'} btn-sm`}
-                                                    onClick={() => {grupo?GuardarId_Operacion(operacion):alert('Elige grupo')}}
-                                                >
-                                                    {operacion.nombre}
-                                                </Button>
+                                                    <Button
+                                                        key={operacion.id}
+                                                        className={`btn ${nuevoCampo2 ? 'btn-danger' : nuevoCampo ? 'btn-primary' : 'btn-outline-dark'} btn-sm`}
+                                                        onClick={() => {grupo?GuardarId_Operacion(operacion):alert('Elige grupo')}}
+                                                    >
+                                                        {operacion.nombre}
+                                                    </Button>
                                                 );
                                             }
                                             })}
