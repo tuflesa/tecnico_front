@@ -41,6 +41,8 @@ const RodMontajeListado = () => {
     }, [token, filtro, refrescar]);
 
     useEffect(() => {
+        console.log('con que datos jugamos el elementos');
+        console.log(elementos);
         if (show && celdas && elementos) {
             const datosTabla = elementos.flatMap(e => { //en esta operación creamos un array con la información que queremos mostras
                 if (e) {
@@ -53,7 +55,8 @@ const RodMontajeListado = () => {
                                 diametroEje: d.eje.diametro,
                                 nombreRodillo: d.rodillo.nombre,
                                 ordenOperacion: d.conjunto.operacion.orden,
-                                anotacionMontaje: d.anotciones_montaje
+                                anotacionMontaje: d.anotciones_montaje,
+                                ordenSeccion: d.conjunto.operacion.seccion.orden,
 
                             }));
                         }
@@ -62,8 +65,15 @@ const RodMontajeListado = () => {
                 }
                 return [];
             });
-            // Ordenar por el campo ordenOperacion
-            datosTabla.sort((a, b) => a.ordenOperacion - b.ordenOperacion);
+            datosTabla.sort((a, b) => {
+                if (a.ordenSeccion === b.ordenSeccion) {
+                    // Si las secciones son iguales, ordenar por ordenOperacion
+                    return a.ordenOperacion - b.ordenOperacion;
+                } else {
+                    // Si las secciones son diferentes, ordenar por ordenSeccion
+                    return a.ordenSeccion - b.ordenSeccion;
+                }
+            });
             setConjuntos(datosTabla);
         } else {
             setConjuntos(null);
@@ -81,11 +91,19 @@ const RodMontajeListado = () => {
                     nombreRodillo: d.rodillo.nombre,
                     ordenOperacion: d.conjunto.operacion.orden,
                     dimensioneseBancada: d.rodillo.descripcion_perfil,
-                    anotacionMontaje: d.anotciones_montaje
+                    anotacionMontaje: d.anotciones_montaje,
+                    ordenSeccion: d.conjunto.operacion.seccion.orden,
                 }))
             ));
-            // Ordenar por el campo ordenOperacion
-            datosTablaCompletado.sort((a, b) => a.ordenOperacion - b.ordenOperacion);
+            datosTablaCompletado.sort((a, b) => {
+                if (a.ordenSeccion === b.ordenSeccion) {
+                    // Si las secciones son iguales, ordenar por ordenOperacion
+                    return a.ordenOperacion - b.ordenOperacion;
+                } else {
+                    // Si las secciones son diferentes, ordenar por ordenSeccion
+                    return a.ordenSeccion - b.ordenSeccion;
+                }
+            });
             setConjuntosCT(datosTablaCompletado);
         } else {
             setConjuntosCT(null);
@@ -95,6 +113,8 @@ const RodMontajeListado = () => {
     useEffect(() => {
         if (show && conjuntos && conjuntosCT) {
            const unimos = conjuntos.concat(conjuntosCT);
+           console.log('que vale unimos');
+           console.log(unimos);
            unimos.sort((a, b) => a.ordenOperacion - b.ordenOperacion);
            setConjuntosCompletados(unimos);
         } else {
