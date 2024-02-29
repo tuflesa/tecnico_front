@@ -49,8 +49,6 @@ const RodMontajeListado = () => {
     }, [token, filtro, refrescar]);
 
     useEffect(() => {
-        console.log('con que datos jugamos el elementos');
-        console.log(elementos);
         if (show && celdas && elementos) {
             const datosTabla = elementos.flatMap(e => { //en esta operación creamos un array con la información que queremos mostras
                 if (e) {
@@ -73,15 +71,6 @@ const RodMontajeListado = () => {
                 }
                 return [];
             });
-            datosTabla.sort((a, b) => {
-                if (a.ordenSeccion === b.ordenSeccion) {
-                    // Si las secciones son iguales, ordenar por ordenOperacion
-                    return a.ordenOperacion - b.ordenOperacion;
-                } else {
-                    // Si las secciones son diferentes, ordenar por ordenSeccion
-                    return a.ordenSeccion - b.ordenSeccion;
-                }
-            });
             setConjuntos(datosTabla);
         } else {
             setConjuntos(null);
@@ -103,32 +92,28 @@ const RodMontajeListado = () => {
                     ordenSeccion: d.conjunto.operacion.seccion.orden,
                 }))
             ));
-            datosTablaCompletado.sort((a, b) => {
-                if (a.ordenSeccion === b.ordenSeccion) {
-                    // Si las secciones son iguales, ordenar por ordenOperacion
-                    return a.ordenOperacion - b.ordenOperacion;
-                } else {
-                    // Si las secciones son diferentes, ordenar por ordenSeccion
-                    return a.ordenSeccion - b.ordenSeccion;
-                }
-            });
             setConjuntosCT(datosTablaCompletado);
         } else {
             setConjuntosCT(null);
         }
     }, [conjuntos]);
 
-    useEffect(() => {
+    useEffect(() => { //ordenar por sección y luego por operación
         if (show && conjuntos && conjuntosCT) {
-           const unimos = conjuntos.concat(conjuntosCT);
-           console.log('que vale unimos');
-           console.log(unimos);
-           unimos.sort((a, b) => a.ordenOperacion - b.ordenOperacion);
-           setConjuntosCompletados(unimos);
+            const unimos = conjuntos.concat(conjuntosCT);
+            unimos.sort((a, b) => {
+                if (a.ordenSeccion === b.ordenSeccion) {
+                    return a.ordenOperacion - b.ordenOperacion;
+                } else {
+                    return a.ordenSeccion - b.ordenSeccion;
+                }
+            });
+            setConjuntosCompletados(unimos);
         } else {
             setConjuntosCompletados(null);
         }
     }, [conjuntosCT]);
+    
 
     const cogerDatos = async (montaje) => {
         try {
