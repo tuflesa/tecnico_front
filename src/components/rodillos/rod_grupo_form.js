@@ -13,8 +13,6 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
 
     const [empresas, setEmpresas] = useState(null);
     const [zonas, setZonas] = useState([]);
-    //const [bancadas, setBancadas] = useState(null);
-    const [filtro, setFiltro] = useState(`?tubo_madre__gte=${0}&tubo_madre__lte=${0}`);
     const [mostrarRodBancada] = useState(mostrarBancada);
 
     const [datos, setDatos] = useState({
@@ -71,10 +69,6 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
             })
             .then( res => {
                 setZonas(res.data);
-                /* setDatos({
-                    ...datos,
-                    zona: '',
-                }); */
             })
             .catch( err => {
                 console.log(err);
@@ -121,7 +115,6 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
             }
         })
         .then(res => { 
-            //setGrupo(res.data);
             window.location.href=`/rodillos/grupo_editar/${res.data.id}`;
         })
         .catch(err => { 

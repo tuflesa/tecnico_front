@@ -39,7 +39,6 @@ const RodMontajeListado = () => {
               }
         })
         .then( res => {
-            //setMontajes(res.data);
             setMontajes(res.data.results);
             setCount(res.data.count);
         })
@@ -83,7 +82,6 @@ const RodMontajeListado = () => {
                 item.map(d => ({
                     id: d.id,
                     nombreOperacion: d.conjunto.operacion.nombre,
-                    //tuboMadre: d.bancada.dimensiones,
                     diametroEje: d.eje.diametro,
                     nombreRodillo: d.rodillo.nombre,
                     ordenOperacion: d.conjunto.operacion.orden,
@@ -117,7 +115,7 @@ const RodMontajeListado = () => {
 
     const cogerDatos = async (montaje) => {
         try {
-            // Hacer las solicitudes a las celdas de todas las bancadas y lo guarda en solicitudesCeldas
+            // recojo todas las celdas de todas las bancadas del grupo.
             const solicitudesCeldas = montaje.grupo.bancadas.map(bancadaId => {
                 return axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__id=${bancadaId}`, {
                     headers: {
@@ -130,10 +128,8 @@ const RodMontajeListado = () => {
                     'Authorization': `token ${token['tec-token']}`
                 }
             });
-            // Esperar a que todas las solicitudes a las celdas se completen y pasamos la info a respuestasCeldas
             const respuestasCeldas = await Promise.all(solicitudesCeldas);
             const respuestasCeldasCT = await solicitudesCeldasCT;
-            // Busco para cada Celda el elemento con el id del conjunto
             const solicitudesElementos = respuestasCeldas.map(res => {
                 return Promise.all(res.data.map(celda => {
                     return axios.get(BACKEND_SERVER + `/api/rodillos/elemento_select/?conjunto__id=${celda.conjunto.id}`, {
@@ -150,10 +146,10 @@ const RodMontajeListado = () => {
                     }
                 });
             }));
-            // Espero a que todas las solicitudes de elementos y copio la info en respuestasElementos
+            // espero a que todas las solicitudes de elementos y copio la info en respuestasElementos
             const respuestasElementos = await Promise.all(solicitudesElementos);
             const respuestasElementosCT = await solicitudesElementosCT;
-            // Actualizar los estados
+            // actualizamos con los datos a tratar
             setFilaSeleccionada(montaje.id);
             setShow(!show);
             setCeldas(respuestasCeldas.map(res => res.data));

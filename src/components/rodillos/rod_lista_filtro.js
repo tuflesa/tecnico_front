@@ -145,7 +145,6 @@ const RodListaFiltro = ({actualizaFiltro}) => {
 
     return ( 
         <Container>
-            {/* <h5 className="mb-3 mt-3">Filtro</h5> */}
             <Form>
                 <Row>                    
                     <Col>

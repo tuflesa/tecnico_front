@@ -140,7 +140,6 @@ const RodMontajeFiltro = ({actualizaFiltro}) => {
         const [id, madre] = event.target.value.split(',');
         setGrupoId(id);
         setTuboMadre(madre);
-        // Ahora, grupoId y tuboMadre contienen los dos valores separados
         setDatos({
             ...datos,
             grupo : event.target.value
@@ -151,7 +150,6 @@ const RodMontajeFiltro = ({actualizaFiltro}) => {
         const [id, dimensiones] = event.target.value.split(',');
         setDimensionesId(id);
         setDimensiones(dimensiones);
-        // Ahora, grupoId y tuboMadre contienen los dos valores separados
         setDatos({
             ...datos,
             dimensiones : event.target.value

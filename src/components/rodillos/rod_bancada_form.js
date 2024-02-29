@@ -122,7 +122,6 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                                                     if(form_completas.bancada.tubo_madre!==grupo.tubo_madre && form_completas.conjunto.operacion===operacion.id){
                                                         nuevoCampo2=true;
                                                     }
-                                                    // Aquí puedes agregar el resto de tu lógica
                                                 });
                                                 return (
                                                     <Button

@@ -136,22 +136,20 @@ const RodMontajeListadoFiltro = ({actualizaFiltro}) => {
         })
     }
 
-    const handleInputChangeGrupo = (event) => {
+    const handleInputChangeGrupo = (event) => { //separar los 2 valores recogido
         const [id, madre] = event.target.value.split(',');
         setGrupoId(id);
         setTuboMadre(madre);
-        // Ahora, grupoId y tuboMadre contienen los dos valores separados
         setDatos({
             ...datos,
             grupo : event.target.value
         });
     };
 
-    const handleInputChangeDimensiones = (event) => {
+    const handleInputChangeDimensiones = (event) => { //separar los 2 valores recogido
         const [id, dimensiones] = event.target.value.split(',');
         setDimensionesId(id);
         setDimensiones(dimensiones);
-        // Ahora, dimensionesId y dimensiones contienen los dos valores separados
         setDatos({
             ...datos,
             dimensiones : event.target.value
