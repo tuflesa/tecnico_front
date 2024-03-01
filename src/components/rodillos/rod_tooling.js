@@ -34,7 +34,7 @@ const RodTooling = () => {
     }, [filtro]);
 
     useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/rodillos/montaje_tooling/`+filtro,{
+        maquina && axios.get(BACKEND_SERVER + `/api/rodillos/montaje_tooling/`+filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -64,7 +64,7 @@ const RodTooling = () => {
         .catch( err => {
             console.log(err);
         });
-    }, [filtro]);
+    }, [filtro, maquina]);
 
     useEffect(() => { //recogemos las secciones de la máquina elegida
         axios.get(BACKEND_SERVER + `/api/rodillos/seccion/` + filtro,{
@@ -121,9 +121,10 @@ const RodTooling = () => {
 
     useEffect(() => {
         if (celdasCT) {
-            const datosTablaCelCT = celdasCT.flatMap(e => { //en esta operación creamos un array con la información que queremos mostras
+            const datosTablaCelCT = celdasCT.flatMap(e => { //idem celdas
                 if (e) {
                     return e.map(d => ({
+                        repetido: 0,
                         cel:d,
                         seccion: d.bancada.seccion.id,
                         operacion: d.conjunto.operacion,
@@ -140,7 +141,11 @@ const RodTooling = () => {
 
     useEffect(() => { //Para tener todas las celdas juntos BD y CT
         if (conjuntosCel && conjuntosCelCT) {
-           const unimos = conjuntosCel.concat(conjuntosCelCT);
+            const unimos = conjuntosCel.concat(conjuntosCelCT);
+            unimos.forEach((element, index) => {
+                element.numCelda = index + 1;
+            });
+            console.log('unimos:  ', unimos);            
            setConjuntosCompletadosCel(unimos);
         } else {
             setConjuntosCompletadosCel(null);
@@ -269,14 +274,15 @@ const RodTooling = () => {
                                                         return (
                                                             <td key={seccion.id}>
                                                                 {conjuntos_completadosCel && conjuntos_completadosCel.map((conjunto) => {
-                                                                    if (conjunto.seccion === seccion.id && bancada.id === conjunto.bancada) {
+                                                                    if (conjunto.seccion === seccion.id && bancada.id === conjunto.bancada && (!conjunto.cel.bancada.seccion.pertenece_grupo || montaje.grupo.tubo_madre === conjunto.cel.bancada.tubo_madre)) {
                                                                         return (
-                                                                            <td key={conjunto.cel.id}>
-                                                                                <img 
+                                                                            <td key={conjunto.numCelda}>
+                                                                                {/* <img 
                                                                                     src={conjunto.cel.icono} 
                                                                                     alt="" // Sin texto alternativo 
                                                                                     style={{ width: '35px', height: '35px' }} 
-                                                                                />
+                                                                                /> */}
+                                                                                <>{conjunto.numCelda}</>
                                                                             </td>
                                                                         );                                                                      
                                                                     }

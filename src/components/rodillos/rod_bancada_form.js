@@ -81,7 +81,7 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
 
     const GuardarId_Operacion = (operationId) => {
         setOperacionMarcada(operationId); // Almacena la operación seleccionada
-        setFormacionesFiltradas(formaciones_completadas.filter(formacion => formacion.conjunto.operacion === operationId.id)); //pasa los elementos de esta operación
+        setFormacionesFiltradas(formaciones_completadas? formaciones_completadas.filter(formacion => formacion.conjunto.operacion === operationId.id):[]); //pasa los elementos de esta operación
         AbrirConjunto();
     }
 
