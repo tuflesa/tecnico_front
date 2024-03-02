@@ -88,8 +88,21 @@ const CargasLista = () => {
             })
             .then(res => {
                 setShowPuerta(false);
-                setCarga(null);
+                //setCarga(null);
                 actualiza_lista();
+            })
+            .catch(err => {console.log(err);})
+
+        axios.post(BACKEND_SERVER + `/api/cargas/llamada/`,
+            {   carga: carga.id,
+                puerta: Number(carga.puerta)},
+            {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+            })
+            .then(res => {
+                console.log(res.data);
             })
             .catch(err => {console.log(err);})
     }

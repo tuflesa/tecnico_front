@@ -10,6 +10,7 @@ import CargasLista from './cargas_carga_lista';
 import CargaNueva from './cargas_carga_nueva';
 import CargaDetalle from './cargas_carga_detalle';
 import CargaEditar from './cargas_carga_editar';
+import LlamadasLista from './cargas_llamadas_lista';
 
 const Cargas = () => {
     return (
@@ -26,6 +27,7 @@ const Cargas = () => {
                 <Route path='/cargas/nueva' exact component={CargaNueva} />
                 <Route path='/cargas/editar/:id' component={CargaEditar} />
                 <Route path='/cargas/:id' component={CargaDetalle} />
+                <Route paht='/cargas/llamadas/ultimas_llamadas' exact component={LlamadasLista} />
             </Switch>
         </React.Fragment>
     )
