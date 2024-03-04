@@ -98,7 +98,7 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
             {maquina? 
                 <Row>
                     <Col>
-                        <h5 className="mb-3 mt-3">Formación de Bancadas / rojo = bancada de otra formación /</h5>
+                        <h5 className="mb-3 mt-3">Formación de Bancadas</h5>
                         <Table striped bordered hover>
                             <thead>
                                 <tr>
@@ -126,7 +126,7 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                                                 return (
                                                     <Button
                                                         key={operacion.id}
-                                                        className={`btn ${nuevoCampo2 ? 'btn-danger' : nuevoCampo ? 'btn-primary' : 'btn-outline-dark'} btn-sm`}
+                                                        className={`btn ${nuevoCampo2 ? 'btn-primary' : nuevoCampo ? 'btn-verde-primary' : 'btn-gris-primary'} btn-sm`}
                                                         onClick={() => {grupo?GuardarId_Operacion(operacion):alert('Elige grupo')}}
                                                     >
                                                         {operacion.nombre}

@@ -11,3 +11,15 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.btn-verde-primary {
+  background-color: green; /* Cambia el color a tu verde */
+  color: white; 
+  border: 1px solid green;
+}
+
+.btn-gris-primary {
+  background-color: grey; /* Cambia el color a tu verde */
+  color: black; 
+  border: 1px solid grey
+}
