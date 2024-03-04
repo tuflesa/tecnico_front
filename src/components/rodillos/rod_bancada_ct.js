@@ -86,7 +86,7 @@ const RodBancadaCT = ({bancada}) => {
         }
     }, [maquina]);
 
-    useEffect(() => { //para pintar las casillas de distinto color, añadimos nuevoCampo = true si tienen valor
+    /* useEffect(() => { //para pintar las casillas de distinto color, añadimos nuevoCampo = true si tienen valor
         if (operaciones && formaciones_completadas) {
           const nuevasOperaciones = operaciones.map(operacion => {
             let nuevoCampo = false;
@@ -101,7 +101,7 @@ const RodBancadaCT = ({bancada}) => {
             return { ...operacion, nuevoCampo };
           });
         }
-      }, [operaciones, formaciones_completadas]);
+      }, [operaciones, formaciones_completadas]); */
 
     const actualizaFiltro = str => {
         setFiltro(str);
@@ -182,11 +182,11 @@ const RodBancadaCT = ({bancada}) => {
                                         <td key={seccion.id}>
                                             {operaciones && formaciones_completadas && operaciones.map((operacion) => {
                                             if (operacion.seccion.id === seccion.id) {
-                                                const nuevoCampo = formaciones_completadas.some(form_completas => form_completas.conjunto.operacion === operacion.id);
+                                                const colorBoton = formaciones_completadas.some(form_completas => form_completas.conjunto.operacion === operacion.id);
                                                 return (
                                                 <Button
                                                     key={operacion.id}
-                                                    className={`btn ${nuevoCampo ? 'btn-primary' : 'btn-outline-dark'} btn-sm`}
+                                                    className={`btn ${colorBoton ? 'btn-verde-primary' : 'btn-gris-primary'} btn-sm`}
                                                     onClick={() => {dimensiones?GuardarId_Operacion(operacion):alert('Elige dimensiones')}}
                                                 >
                                                     {operacion.nombre}

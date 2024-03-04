@@ -113,20 +113,20 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                                         <td key={seccion.id}>
                                             {operaciones && operaciones.map((operacion) => {
                                             if (operacion.seccion.id === seccion.id) {
-                                                let nuevoCampo = false;
-                                                let nuevoCampo2 = false;
+                                                let colorBoton1 = false;
+                                                let colorBoton2 = false;
                                                 formaciones_completadas && formaciones_completadas.forEach(form_completas => {
                                                     if(form_completas.conjunto.operacion===operacion.id){
-                                                        nuevoCampo=true;
+                                                        colorBoton1=true;
                                                     }
                                                     if(form_completas.bancada.tubo_madre!==grupo.tubo_madre && form_completas.conjunto.operacion===operacion.id){
-                                                        nuevoCampo2=true;
+                                                        colorBoton2=true;
                                                     }
                                                 });
                                                 return (
                                                     <Button
                                                         key={operacion.id}
-                                                        className={`btn ${nuevoCampo2 ? 'btn-primary' : nuevoCampo ? 'btn-verde-primary' : 'btn-gris-primary'} btn-sm`}
+                                                        className={`btn ${colorBoton2 ? 'btn-primary' : colorBoton1 ? 'btn-verde-primary' : 'btn-gris-primary'} btn-sm`}
                                                         onClick={() => {grupo?GuardarId_Operacion(operacion):alert('Elige grupo')}}
                                                     >
                                                         {operacion.nombre}
