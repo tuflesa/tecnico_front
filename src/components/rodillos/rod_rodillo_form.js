@@ -325,11 +325,21 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     },[token, rodillo, showParametros]);
 
     useEffect(() => { //montamos el nombre cuando tenemos todos los datos.
-        if(!datos.nombre&&datos.zona&&datos.operacion&&datos.tipo_rodillo&&datos.grupo_tubo_madre){
-            setDatos({
-                ...datos,
-                nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-G'+datos.grupo_tubo_madre),
-            })
+        if(datos.pertenece_grupo){
+            if(!datos.nombre&&datos.zona&&datos.operacion&&datos.tipo_rodillo&&datos.grupo_tubo_madre){
+                setDatos({
+                    ...datos,
+                    nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-'+datos.grupo_tubo_madre+'Ø'),
+                })
+            }
+        }
+        else{
+            if(!datos.nombre&&datos.zona_siglas&&datos.operacion_nombre&&datos.tipo_rodillo_siglas&&datos.descripcion_perfil){
+                setDatos({
+                    ...datos,
+                    nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-'+datos.descripcion_perfil),
+                })
+            }
         }
     },[datos]);
 
@@ -594,7 +604,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         const [id, madre] = event.target.value.split(',');
         setDatos({
             ...datos,
-            grupo : parseInt(id),
+            grupo : id,
             grupo_tubo_madre: madre,
         });
     };
@@ -603,7 +613,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         const [id, siglas] = event.target.value.split(',');
         setDatos({
             ...datos,
-            tipo_rodillo : parseInt(id),
+            tipo_rodillo : id,
             tipo_rodillo_siglas: siglas,
         });
     };
@@ -612,7 +622,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         const [id, nombre] = event.target.value.split(',');
         setDatos({
             ...datos,
-            operacion : parseInt(id),
+            operacion : id,
             operacion_nombre: nombre,
         });
     };
