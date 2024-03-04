@@ -54,6 +54,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         rodillo_id: rodillo.id?rodillo.id:'',
         diametro: rodillo.id?rodillo.diametro:0, //diámetro interior, mandril del rodillo
         forma: rodillo.id?rodillo.forma:'',
+        forma_nombre: '',
         descripcion_perfil: rodillo.id?rodillo.descripcion_perfil:'',
         dimension_perfil: rodillo.id?rodillo.dimension_perfil:'',
         pertenece_grupo:rodillo.id?rodillo.operacion.seccion.pertenece_grupo:'',
@@ -334,11 +335,21 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             }
         }
         else{
-            if(!datos.nombre&&datos.zona_siglas&&datos.operacion_nombre&&datos.tipo_rodillo_siglas&&datos.descripcion_perfil){
-                setDatos({
-                    ...datos,
-                    nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-'+datos.descripcion_perfil),
-                })
+            if(datos.forma_nombre==='Redondo'){
+                if(!datos.nombre&&datos.zona_siglas&&datos.operacion_nombre&&datos.tipo_rodillo_siglas&&datos.descripcion_perfil){
+                    setDatos({
+                        ...datos,
+                        nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-'+datos.descripcion_perfil+'Ø'),
+                    })
+                }
+            }
+            else{
+                if(!datos.nombre&&datos.zona_siglas&&datos.operacion_nombre&&datos.tipo_rodillo_siglas&&datos.descripcion_perfil){
+                    setDatos({
+                        ...datos,
+                        nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-'+datos.descripcion_perfil),
+                    })
+                }
             }
         }
     },[datos]);
@@ -627,6 +638,15 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         });
     };
 
+    const handleInputChangeFormaPerfil = (event) => {
+        const [id, nombre] = event.target.value.split(',');
+        setDatos({
+            ...datos,
+            forma : id,
+            forma_nombre: nombre,
+        });
+    };
+
     return (
         <Container className='mt-5 pt-1'>
             <img src ={logo} width="200" height="200"></img>
@@ -734,14 +754,14 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                 <Form.Group controlId="forma">
                                     <Form.Label>Formas del perfil</Form.Label>
                                     <Form.Control as="select" 
-                                                    value={datos.forma}
+                                                    value={rodillo.id? datos.forma :`${datos.forma},${datos.forma_nombre}`}
                                                     name='forma'
-                                                    onChange={handleInputChange}
+                                                    onChange={handleInputChangeFormaPerfil}
                                                     disabled={handleDisabled_plano_elemento()}>
                                         <option key={0} value={''}>Todos</option>
                                         {formas && formas.map( forma => {
                                             return (
-                                            <option key={forma.id} value={forma.id}>
+                                            <option key={forma.id} value={rodillo.id? forma.id : `${forma.id},${forma.nombre}`}>
                                                 {forma.nombre}
                                             </option>
                                             )
