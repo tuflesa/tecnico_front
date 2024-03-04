@@ -41,8 +41,10 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [datos, setDatos] = useState({
         empresa: rodillo.id?rodillo.operacion.seccion.maquina.empresa_id:'',
         zona: rodillo.id?rodillo.operacion.seccion.maquina.id:'',
+        zona_siglas: rodillo.id?rodillo.operacion.seccion.maquina.siglas:'',
         seccion: rodillo.id?rodillo.operacion.seccion.id: '',
         operacion: rodillo.id?rodillo.operacion.id:'',
+        operacion_nombre: rodillo.id?rodillo.operacion.nombre:'',
         grupo: rodillo.grupo?rodillo.grupo.id:'',
         tipo_rodillo: rodillo.id?rodillo.tipo.id:'',
         material: rodillo.id?rodillo.material.id:'',
@@ -55,6 +57,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         descripcion_perfil: rodillo.id?rodillo.descripcion_perfil:'',
         dimension_perfil: rodillo.id?rodillo.dimension_perfil:'',
         pertenece_grupo:rodillo.id?rodillo.operacion.seccion.pertenece_grupo:'',
+        grupo_tubo_madre: rodillo.grupo?rodillo.grupo.tubo_madre:'',
+        tipo_rodillo_siglas: rodillo.id?rodillo.tipo.siglas:'',
     });
 
     useEffect(() => { //si hay tipo de plano grabado, no podemos modificarlo, ya tenemos parametros dados de alta
@@ -320,6 +324,15 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         }
     },[token, rodillo, showParametros]);
 
+    useEffect(() => { //montamos el nombre cuando tenemos todos los datos.
+        if(!datos.nombre&&datos.zona&&datos.operacion&&datos.tipo_rodillo&&datos.grupo_tubo_madre){
+            setDatos({
+                ...datos,
+                nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-G'+datos.grupo_tubo_madre),
+            })
+        }
+    },[datos]);
+
     const handleInputChange = (event) => {
         setDatos({
             ...datos,
@@ -333,6 +346,15 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             ...prevDatos,
             seccion : parseInt(valorId),
             pertenece_grupo: valorPertenece_grupo==="true"?true:false,
+        }));
+    };
+
+    const handleInputChangeZona = (event) => {
+        const [Id, siglas] = event.target.value.split(',');      
+        setDatos((prevDatos)=>({
+            ...prevDatos,
+            zona : parseInt(Id),
+            zona_siglas: siglas,
         }));
     };
 
@@ -568,6 +590,33 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         setShowRevision(true);
     }
 
+    const handleInputChangeGrupo = (event) => {
+        const [id, madre] = event.target.value.split(',');
+        setDatos({
+            ...datos,
+            grupo : parseInt(id),
+            grupo_tubo_madre: madre,
+        });
+    };
+
+    const handleInputChangeTipo = (event) => {
+        const [id, siglas] = event.target.value.split(',');
+        setDatos({
+            ...datos,
+            tipo_rodillo : parseInt(id),
+            tipo_rodillo_siglas: siglas,
+        });
+    };
+
+    const handleInputChangeOperacion = (event) => {
+        const [id, nombre] = event.target.value.split(',');
+        setDatos({
+            ...datos,
+            operacion : parseInt(id),
+            operacion_nombre: nombre,
+        });
+    };
+
     return (
         <Container className='mt-5 pt-1'>
             <img src ={logo} width="200" height="200"></img>
@@ -577,13 +626,13 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             <Form >
                 <Row>
                     <Form.Group controlId="nombre">
-                        <Form.Label>Nombre del rodillo *</Form.Label>
+                        <Form.Label>Nombre del rodillo</Form.Label>
                         <Form.Control type="text" 
                                     name='nombre' 
                                     value={datos.nombre}
                                     onChange={handleInputChange} 
-                                    placeholder="Rodillo"
-                                    autoFocus
+                                    placeholder="Nombre Rodillo"
+                                    disabled
                         />
                     </Form.Group>
                 </Row>
@@ -596,7 +645,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                         value={datos.empresa}
                                         onChange={handleInputChange}
                                         disabled={handleDisabled()}
-                                        placeholder="Empresa">
+                                        placeholder="Empresa"
+                                        autoFocus>
                                         <option key={0} value={''}>Todas</option>    
                                         {empresas && empresas.map( empresa => {
                                             return (
@@ -612,14 +662,14 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                         <Form.Group controlId="zona">
                             <Form.Label>Zona *</Form.Label>
                             <Form.Control as="select" 
-                                            value={datos.zona}
+                                            value={rodillo.id ? datos.zona :`${datos.zona},${datos.zona_siglas}`}
                                             name='zona'
-                                            onChange={handleInputChange}
+                                            onChange={handleInputChangeZona}
                                             disabled={handleDisabled_plano_elemento()}>
                                 <option key={0} value={''}>Todas</option>
                                 {zonas && zonas.map( zona => {
                                     return (
-                                    <option key={zona.id} value={zona.id}>
+                                    <option key={zona.id} value={rodillo.id ? zona.id : `${zona.id},${zona.siglas}`}>
                                         {zona.siglas}
                                     </option>
                                     )
@@ -627,59 +677,37 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                             </Form.Control>
                         </Form.Group>
                     </Col>
-                    {rodillo.id?
-                        <Col>
-                            <Form.Group controlId="seccion">
-                                <Form.Label>Seccion *</Form.Label>
-                                <Form.Control as="select" 
-                                                value={datos.seccion}
-                                                name='seccion'
-                                                onChange={handleInputChange}
-                                                disabled={handleDisabled_plano_elemento()}>
-                                    <option key={0} value={''}>Todas</option>
-                                    {secciones && secciones.map( seccion => {
-                                        return (
-                                        <option key={seccion.id} value={seccion.id}>
-                                            {seccion.nombre}
-                                        </option>
-                                        )
-                                    })}
-                                </Form.Control>
-                            </Form.Group>
-                        </Col>
-                    :
-                        <Col>
-                            <Form.Group controlId="seccion">
-                                <Form.Label>Seccion *</Form.Label>
-                                <Form.Control as="select" 
-                                            defaultValue={datos.seccion}
+                    <Col>
+                        <Form.Group controlId="seccion">
+                            <Form.Label>Seccion *</Form.Label>
+                            <Form.Control as="select" 
+                                            value={rodillo.id ? datos.seccion :`${datos.seccion},${datos.pertenece_grupo}`}
                                             name='seccion'
-                                            onChange={handleInputChangeSeccion}>
-                                            <option key={0} value={''}>Todas</option>
-                                            {/* {datos.seccion>0?<option value={datos.seccion}>Todas</option>:<option key={0} value={''}>Todas</option>} */}
-                                            {secciones && secciones.map(seccion => (
-                                                    <option key={seccion.id} value={`${seccion.id},${seccion.pertenece_grupo}`}>
-                                                        {seccion.nombre}
-                                                    </option>
-                                                )
-                                                
-                                            )}
-                                </Form.Control>
-                            </Form.Group>
-                        </Col>
-                    }
+                                            onChange={handleInputChangeSeccion}
+                                            disabled={handleDisabled_plano_elemento()}>
+                                        <option key={0} value={''}>Todas</option>
+                                        {secciones && secciones.map( seccion => {
+                                            return (
+                                            <option key={seccion.id} value={rodillo.id ? seccion.id : `${seccion.id},${seccion.pertenece_grupo}`}>
+                                                {seccion.nombre}
+                                            </option>
+                                            )
+                                        })}
+                            </Form.Control>
+                        </Form.Group>
+                    </Col>
                     <Col>
                         <Form.Group controlId="operacion">
                             <Form.Label>Operación *</Form.Label>
                             <Form.Control as="select" 
-                                            value={datos.operacion}
+                                            value={rodillo.id ? datos.operacion :`${datos.operacion},${datos.operacion_nombre}`}
                                             name='operacion'
-                                            onChange={handleInputChange}
+                                            onChange={handleInputChangeOperacion}
                                             disabled={handleDisabled_plano_elemento()}>
                                 <option key={0} value={''}>Todos</option>
                                 {operaciones && operaciones.map( operacion => {
                                     return (
-                                    <option key={operacion.id} value={operacion.id}>
+                                    <option key={operacion.id} value={rodillo.id? operacion.id : `${operacion.id},${operacion.nombre}`}>
                                         {operacion.nombre}
                                     </option>
                                     )
@@ -743,18 +771,19 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                 <Form.Group controlId="grupo">
                                     <Form.Label>Grupo al que pertenece</Form.Label>
                                     <Form.Control as="select" 
-                                                    value={datos.grupo}
+                                                    value={rodillo.id ? datos.grupo :`${datos.grupo},${datos.grupo_tubo_madre}`}
                                                     name='grupo'
-                                                    onChange={handleInputChange}
+                                                    onChange={handleInputChangeGrupo}
                                                     disabled={handleDisabled_plano_elemento()}>
-                                        <option key={0} value={''}>Todos</option>
-                                        {grupos && grupos.map(grupo => {
-                                            return (
-                                            <option key={grupo.id} value={grupo.id}>
-                                                {grupo.nombre}
-                                            </option>
-                                            )
-                                        })}
+                                            <option key={0} value={''}>Todos</option>
+                                            {grupos && grupos.map(grupo => {
+                                                
+                                                    return (
+                                                    <option key={grupo.id} value={rodillo.id ? grupo.id : `${grupo.id},${grupo.tubo_madre}`}>
+                                                        {grupo.nombre}
+                                                    </option>
+                                                    )
+                                            })}
                                     </Form.Control>
                                 </Form.Group>
                             </Col>
@@ -763,14 +792,14 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                             <Form.Group controlId="tipo_rodillo">
                                 <Form.Label>Tipo de Rodillo *</Form.Label>
                                 <Form.Control as="select" 
-                                                value={datos.tipo_rodillo}
+                                                value={rodillo.id ? datos.tipo_rodillo :`${datos.tipo_rodillo},${datos.tipo_rodillo_siglas}`}
                                                 name='tipo_rodillo'
-                                                onChange={handleInputChange}
+                                                onChange={handleInputChangeTipo}
                                                 disabled={handleDisabled_plano_elemento()}>
                                     <option key={0} value={''}>Todos</option>
                                     {tipo_rodillo && tipo_rodillo.map( tipo => {
                                         return (
-                                        <option key={tipo.id} value={tipo.id}>
+                                        <option key={tipo.id} value={rodillo.id ? tipo.id : `${tipo.id},${tipo.siglas}`}>
                                             {tipo.nombre}
                                         </option>
                                         )

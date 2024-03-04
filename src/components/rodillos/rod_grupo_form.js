@@ -86,7 +86,7 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
     const GuardarGrupo = (event) => {
         event.preventDefault();
         axios.post(BACKEND_SERVER + `/api/rodillos/grupo_only/`, {
-            nombre: datos.nombre,
+            nombre: 'Grupo-'+datos.tubo_madre+'Ø',
             maquina: datos.zona,
             tubo_madre: datos.tubo_madre,
         }, {
@@ -132,13 +132,13 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
                 <Row>
                     <Col>
                         <Form.Group controlId="nombre">
-                            <Form.Label>Nombre del grupo *</Form.Label>
+                            <Form.Label>Nombre del grupo</Form.Label>
                             <Form.Control type="text" 
                                         name='nombre' 
                                         value={datos.nombre}
                                         onChange={handleInputChange} 
                                         placeholder="Nombre grupo"
-                                        autoFocus
+                                        disabled
                             />
                         </Form.Group>
                     </Col>
@@ -150,6 +150,7 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
                                         value={datos.tubo_madre}
                                         onChange={handleInputChange} 
                                         placeholder="Ø tubo madre"
+                                        autoFocus
                             />
                         </Form.Group>
                     </Col>
