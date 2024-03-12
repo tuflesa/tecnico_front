@@ -86,7 +86,7 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
     const GuardarGrupo = (event) => {
         event.preventDefault();
         axios.post(BACKEND_SERVER + `/api/rodillos/grupo_only/`, {
-            nombre: 'Grupo-'+datos.tubo_madre+'Ø',
+            nombre: 'Grupo-'+'Ø'+datos.tubo_madre,
             maquina: datos.zona,
             tubo_madre: datos.tubo_madre,
         }, {
@@ -106,7 +106,7 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
     const ActualizarGrupo = (event) => {
         event.preventDefault();
         axios.patch(BACKEND_SERVER + `/api/rodillos/grupo_only/${grupo.id}/`, {
-            nombre: datos.nombre,
+            nombre: 'Grupo-'+'Ø'+datos.tubo_madre,
             maquina: datos.zona,
             tubo_madre: datos.tubo_madre,
         }, {
@@ -145,7 +145,7 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
                     <Col>
                         <Form.Group controlId="tubo_madre">
                             <Form.Label>Ø del tubo madre *</Form.Label>
-                            <Form.Control type="number" 
+                            <Form.Control type="text" 
                                         name='tubo_madre' 
                                         value={datos.tubo_madre}
                                         onChange={handleInputChange} 

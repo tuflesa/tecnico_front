@@ -146,6 +146,7 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                     operacion_marcada={operacion_marcada}
                     handleClose={CerrarConjunto}
                     grupoId={grupo.id}
+                    grupo_bancadas={grupo.bancadas}
                     maquina={maquina}
                     tubomadre={tubo_madre}
                     elementos_formacion={formaciones_filtradas}/>

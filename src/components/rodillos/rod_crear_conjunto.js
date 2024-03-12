@@ -4,7 +4,7 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 
-const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tubomadre, elementos_formacion}) => {
+const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tubomadre, elementos_formacion, grupo_bancadas}) => {
     const [token] = useCookies(['tec-token']);
 
     const [ejes, setEjes] = useState(null);
@@ -12,21 +12,35 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
     const [rodillo_exist, setRodillo_exist] = useState([]);
     const [selectedEje, setSelectedEje] = useState(null);
     const [selectRodilloId, setSelectRodilloId] = useState({});
+    const [operacion_rod, setOperacionRod] = useState('');
     const [EjesRodillos, setEjesRodillos] = useState([]);
     const [operacion_id, setOperacionId] = useState('');
-    const [tubo_madre, setTuboMadre] = useState(0);
+    const [grupoId_rod, setGrupoId_Rod] = useState(0);
+    const [tubo_madre_rod, setTuboMadreRod] = useState(0);
     const [show_act, setShow_act] = useState(false);
-    const [, setGrupo] = useState(null);
+    const [grupos, setGrupo] = useState(null);
     const [rod_id, setRod_Id] = useState(''); //para guardar la informacion en EjesRodillos
     const [rodillo_elegido, setRodillo_elegido] = useState([]);
     const [bancadas, setBancadas] = useState(null);
     var bancadas_nuevas=[''];
     
+    
 
     const [datos, setDatos] = useState({
         bancada_elegida:'',
-        bancadas_guardar:[],
+        bancadas_guardar:grupo_bancadas?grupo_bancadas:[],
     });
+
+    useEffect(() => {
+        if (grupoId_rod!==null && rodillos) {
+            for(var y=0;y<rodillos.length;y++){
+                if(rodillos[y].grupo.id === parseInt(grupoId_rod)){
+                    setTuboMadreRod(rodillos[y].grupo.tubo_madre);
+                    break
+                }
+            }
+        }
+    }, [grupoId_rod]);
 
     useEffect(() => { //BUSCAMOS, SI LOS HAY, ELEMENTOS (RODILLOS) DEL CONJUNTO SELECCIONADO.
         if(elementos_formacion.length>0){ 
@@ -62,16 +76,14 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
         });
     }, [token, operacion_marcada]);
 
-    useEffect(() => { //PARA OBTENER DEL GRUPO EL TUBO_MADRE
-        grupoId && axios.get(BACKEND_SERVER + `/api/rodillos/grupo/${grupoId}`,{
+    useEffect(() => { //PARA OBTENER LOS GRUPOS
+        grupoId && axios.get(BACKEND_SERVER + `/api/rodillos/grupo_only/`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }
         })
         .then( res => {
             setGrupo(res.data);
-            setTuboMadre(res.data.tubo_madre);
-            datos.bancadas_guardar=(res.data.bancadas);   
         })
         .catch( err => {
             console.log(err);
@@ -79,7 +91,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
     }, [token, grupoId, operacion_marcada]);
 
     useEffect(() => { //RODILLOS QUE PODEMOS USAR EN ESTA OPERACIÓN CON ESTE GRUPO
-        operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/rodillo_editar/?operacion=${operacion_marcada.id}&grupo=${grupoId}`,{
+        operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/rodillos/?operacion__id=${operacion_marcada.id}&grupo__id=${grupoId}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -107,10 +119,10 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
     }, [operacion_marcada, grupoId]);
 
     useEffect(() => { //SI TENEMOS LOS 3 ELEMENTOS ACUMULAMOS LO SELECCIONADO
-        if(rod_id && selectedEje && tubo_madre){
-            setEjesRodillos([...EjesRodillos, {eje: selectedEje, rodillo: rod_id, operacion: operacion_id, tubo_madre:tubo_madre}]);
+        if(rod_id && selectedEje && operacion_rod && tubo_madre_rod){
+            setEjesRodillos([...EjesRodillos, {eje: selectedEje, rodillo: rod_id, operacion: operacion_rod, TuboMadreRod:tubo_madre_rod}]);
         }        
-    }, [rod_id, selectedEje, tubo_madre]);
+    }, [rod_id, selectedEje, operacion_rod, tubo_madre_rod]);
     
     useEffect(() => { //BUSCAMOS LAS BANCADAS QUE PRECISAMOS PARA ESTA OPERACIÓN
         operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/bancada/?seccion=${operacion_marcada.seccion.id}&tubo_madre__gte=${tubomadre-10}&tubo_madre__lte=${tubomadre+10}`,{
@@ -127,113 +139,67 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
     }, [token, operacion_marcada]);
 
     const GuardarConjunto = () => {
-        //primero comprobamos si existe la bancada y si no, se crea, igual con LA CELDA, CONJUNTO y por consiguiente con el ELEMENTO.
-        var bancada_id='';
-        axios.get(BACKEND_SERVER + `/api/rodillos/bancada_grupos/?seccion=${operacion_marcada.seccion.id}&tubo_madre=${tubo_madre}`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
+        var rodillo_tubo_madre = EjesRodillos[0].TuboMadreRod;
+        var rodillo_operacion = EjesRodillos[0].operacion;
+        var no_coincide=true;
+        var x=0;
+        for(x=0;x<EjesRodillos.length;x++){
+            if(EjesRodillos[x].TuboMadreRod!==rodillo_tubo_madre||EjesRodillos[x].operacion!==rodillo_operacion){
+                no_coincide=false;
+                alert('Los rodillos seleccionados no coinciden en su Ø o su operación');
+                handlerCancelar();
+                break
             }
-        })
-        .then( res => {
-            if(res.data.length!==0){ //si hay bancada cojo el id
-                alert('SI TENEMOS BANCADA');
-                bancada_id=res.data[0].id;
-                if(datos.bancada_elegida){
-                    alert('Si ya tenemos bancada de grupo, no podemos coger una bancada adicional');
-                    return;
+        }
+        if(no_coincide===true){
+            //primero comprobamos si existe la bancada y si no, se crea, igual con LA CELDA, CONJUNTO y por consiguiente con el ELEMENTO.
+            var bancada_id='';
+            axios.get(BACKEND_SERVER + `/api/rodillos/bancada_grupos/?seccion=${operacion_marcada.seccion.id}&tubo_madre=${tubomadre}`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
                 }
-            }
-            //guardamos primero la Bancada, guardamos el Conjunto y con el id de conjunto guardamos el Elemento, AL FINAL GUARDAMOS CELDA CON ID BANCADA E ID CONJUNTO
-            if(EjesRodillos.length===ejes.length || datos.bancada_elegida){
-                bancadas_nuevas = datos.bancadas_guardar;//datos.bancadas_guardar = tiene las bancadas ya guardadas en este grupo
-                if(datos.bancada_elegida){ //si hemos elegido una bancada de otra formación
-                    bancadas_nuevas.push(datos.bancada_elegida);
-                    alert('elegimos bancada de otra formación, por lo que solo actualizamos grupo, metiendo la bancada ya creada');
-                    setShow_act(true);
-                    ActualizarGrupo(bancadas_nuevas);
-                    return;
+            })
+            .then( res => {
+                if(res.data.length!==0){ //si hay bancada cojo el id
+                    alert('SI TENEMOS BANCADA');
+                    bancada_id=res.data[0].id;
+                    if(datos.bancada_elegida){
+                        alert('Si ya tenemos bancada de grupo, no podemos coger una bancada adicional');
+                        return;
+                    }
                 }
-                else if(res.data.length===0){
-                    axios.post(BACKEND_SERVER + `/api/rodillos/bancada/`, { //creamos la bancada
-                        seccion: operacion_marcada.seccion.id,
-                        tubo_madre: tubomadre,
-                    }, {
-                        headers: {
-                            'Authorization': `token ${token['tec-token']}`
-                            }     
-                    })
-                    .then( res => { 
-                        bancadas_nuevas.push(res.data.id);
-                        axios.post(BACKEND_SERVER + `/api/rodillos/conjunto/`, { //creamos conjunto
-                            operacion: operacion_id,
-                            tubo_madre:tubo_madre,
+                //guardamos primero la Bancada, guardamos el Conjunto y con el id de conjunto guardamos el Elemento, AL FINAL GUARDAMOS CELDA CON ID BANCADA E ID CONJUNTO
+                if(EjesRodillos.length===ejes.length || datos.bancada_elegida){
+                    bancadas_nuevas = datos.bancadas_guardar;//datos.bancadas_guardar = tiene las bancadas ya guardadas en este grupo
+                    if(datos.bancada_elegida){ //si hemos elegido una bancada de otra formación
+                        bancadas_nuevas.push(datos.bancada_elegida);
+                        alert('elegimos bancada de otra formación, por lo que solo actualizamos grupo, metiendo la bancada ya creada');
+                        setShow_act(true);
+                        ActualizarGrupo(bancadas_nuevas);
+                        return;
+                    }
+                    else if(res.data.length===0){
+                        axios.post(BACKEND_SERVER + `/api/rodillos/bancada/`, { //creamos la bancada
+                            seccion: operacion_marcada.seccion.id,
+                            tubo_madre: tubomadre,
                         }, {
                             headers: {
                                 'Authorization': `token ${token['tec-token']}`
                                 }     
                         })
-                        .then( r => { 
-                            for(var x=0;x<EjesRodillos.length;x++){
-                                axios.post(BACKEND_SERVER + `/api/rodillos/elemento/`, { //creamos con id de conjunto el elemento
-                                    conjunto: r.data.id,
-                                    eje: EjesRodillos[x].eje,
-                                    rodillo: EjesRodillos[x].rodillo,
-                                }, {
-                                    headers: {
-                                        'Authorization': `token ${token['tec-token']}`
-                                        }     
-                                })
-                                .then( res => {                       
-                                })
-                                .catch(err => { 
-                                    console.error(err);
-                                })
-                            }
-                            axios.post(BACKEND_SERVER + `/api/rodillos/celda/`, { //creamos CELDA con el Id de bancada y el Id de conjunto
-                                conjunto: r.data.id,
-                                bancada: res.data.id,
-                                icono: null,
-                            }, {
-                                headers: {
-                                    'Authorization': `token ${token['tec-token']}`
-                                    }     
-                            })
-                            .then( res => {  
-                                setShow_act(true);
-                                ActualizarGrupo(bancadas_nuevas);
-                                alert('creamos la bancada y todo lo demás, actualizando grupo');
-                            })
-                            .catch(err => { 
-                                console.error(err);
-                            })
-                        })
-                        .catch(err => { 
-                            console.error(err);
-                        })
-                    })
-                    .catch(err => { 
-                        console.error(err);
-                    });                    
-                }
-                if(bancada_id){ //ya tenemos la bancada creada y buscamos si tenemos conjunto
-                    axios.get(BACKEND_SERVER + `/api/rodillos/elemento_select/?conjunto__tubo_madre=${tubo_madre}&conjunto__operacion=${operacion_marcada.id}`,{
-                        headers: {
-                            'Authorization': `token ${token['tec-token']}`
-                        }
-                    })
-                    .then( rr => {
-                        if(rr.data.length===0){ //no tenemos conjunto, vamos a crear conjunto y elementos
-                            axios.post(BACKEND_SERVER + `/api/rodillos/conjunto/`, { //creamos conjunto
-                                operacion: operacion_id,
-                                tubo_madre:tubo_madre,
+                        .then( res => { 
+                            bancadas_nuevas.push(res.data.id);
+                            axios.post(BACKEND_SERVER + `/api/rodillos/conjunto/`, { //creamos conjunto, con operacion y tubo_madre del rodillo que debe de coincidir todos.
+                                operacion: operacion_rod,
+                                tubo_madre:tubo_madre_rod,
                             }, {
                                 headers: {
                                     'Authorization': `token ${token['tec-token']}`
                                     }     
                             })
                             .then( r => { 
-                                for(var x=0;x<EjesRodillos.length;x++){//creamos elementos
-                                    axios.post(BACKEND_SERVER + `/api/rodillos/elemento/`, { 
+                                for(var x=0;x<EjesRodillos.length;x++){
+                                    axios.post(BACKEND_SERVER + `/api/rodillos/elemento/`, { //creamos con id de conjunto el elemento
                                         conjunto: r.data.id,
                                         eje: EjesRodillos[x].eje,
                                         rodillo: EjesRodillos[x].rodillo,
@@ -242,8 +208,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
                                             'Authorization': `token ${token['tec-token']}`
                                             }     
                                     })
-                                    .then( res => { 
-                                        
+                                    .then( res => {                       
                                     })
                                     .catch(err => { 
                                         console.error(err);
@@ -251,60 +216,125 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
                                 }
                                 axios.post(BACKEND_SERVER + `/api/rodillos/celda/`, { //creamos CELDA con el Id de bancada y el Id de conjunto
                                     conjunto: r.data.id,
-                                    bancada: bancada_id,
+                                    bancada: res.data.id,
                                     icono: null,
+                                    operacion: operacion_marcada.id,
                                 }, {
                                     headers: {
                                         'Authorization': `token ${token['tec-token']}`
                                         }     
                                 })
                                 .then( res => {  
-                                    alert('estaba la bancada pero esta celda es nueva');
+                                    setShow_act(true);
+                                    ActualizarGrupo(bancadas_nuevas);
                                 })
                                 .catch(err => { 
                                     console.error(err);
-                                    return;
                                 })
                             })
                             .catch(err => { 
                                 console.error(err);
                             })
-                            handlerCancelar();
-                        }
-                        else{ //el conjunto y elementos ya existen y machacamos la información
-                            for(var x=0;x<rr.data.length;x++){
-                                axios.patch(BACKEND_SERVER + `/api/rodillos/elemento/${rr.data[x].id}/`, {
-                                    eje: parseInt(EjesRodillos[x].eje),
-                                    rodillo: parseInt(EjesRodillos[x].rodillo),
+                        })
+                        .catch(err => { 
+                            console.error(err);
+                        });                    
+                    }
+                    //CAMBIAR LA BUSQUEDA DE ELEMENTO_SELECT A CELDA COMPARANDO OPERACION Y BANCADA
+                    if(bancada_id){ //ya tenemos la bancada creada y buscamos si tenemos conjunto
+                        axios.get(BACKEND_SERVER + `/api/rodillos/elemento_select/?conjunto__tubo_madre=${tubo_madre_rod}&conjunto__operacion=${operacion_marcada.id}`,{
+                            headers: {
+                                'Authorization': `token ${token['tec-token']}`
+                            }
+                        })
+                        .then( rr => {
+                            //TENDREMOS QUE VER SI LO QUE HEMOS ELEGIDO ESTA EN OTRO CONJUNTO O SE CREA NUEVO
+                            if(rr.data.length===0){ //no tenemos conjunto, vamos a crear conjunto y elementos
+                                axios.post(BACKEND_SERVER + `/api/rodillos/conjunto/`, { //creamos conjunto
+                                    operacion: operacion_rod,
+                                    tubo_madre:tubo_madre_rod,
                                 }, {
                                     headers: {
                                         'Authorization': `token ${token['tec-token']}`
                                         }     
                                 })
-                                .then( res => { 
-                                    alert('el conjunto ya existia y hemos machacado');
+                                .then( r => { 
+                                    for(var x=0;x<EjesRodillos.length;x++){//creamos elementos
+                                        axios.post(BACKEND_SERVER + `/api/rodillos/elemento/`, { 
+                                            conjunto: r.data.id,
+                                            eje: EjesRodillos[x].eje,
+                                            rodillo: EjesRodillos[x].rodillo,
+                                        }, {
+                                            headers: {
+                                                'Authorization': `token ${token['tec-token']}`
+                                                }     
+                                        })
+                                        .then( res => { 
+                                            
+                                        })
+                                        .catch(err => { 
+                                            console.error(err);
+                                        })
+                                    }
+                                    axios.post(BACKEND_SERVER + `/api/rodillos/celda/`, { //creamos CELDA con el Id de bancada y el Id de conjunto
+                                        conjunto: r.data.id,
+                                        bancada: bancada_id,
+                                        icono: null,
+                                        operacion: operacion_marcada.id,
+                                    }, {
+                                        headers: {
+                                            'Authorization': `token ${token['tec-token']}`
+                                            }     
+                                    })
+                                    .then( res => {  
+                                        alert('estaba la bancada pero esta celda es nueva');
+                                    })
+                                    .catch(err => { 
+                                        console.error(err);
+                                        return;
+                                    })
                                 })
                                 .catch(err => { 
                                     console.error(err);
                                 })
+                                handlerCancelar();
                             }
-                            handlerCancelar();
-                        }
-                    })
+                            else{ //el conjunto y elementos ya existen y machacamos la información
+                                //TENDREMOS QUE VER SI LO QUE HEMOS ELEGIDO ESTA EN OTRO CONJUNTO O SE CREA NUEVO
+                                for(var x=0;x<rr.data.length;x++){
+                                    axios.patch(BACKEND_SERVER + `/api/rodillos/elemento/${rr.data[x].id}/`, {
+                                        eje: parseInt(EjesRodillos[x].eje),
+                                        rodillo: parseInt(EjesRodillos[x].rodillo),
+                                    }, {
+                                        headers: {
+                                            'Authorization': `token ${token['tec-token']}`
+                                            }     
+                                    })
+                                    .then( res => { 
+                                        alert('el conjunto ya existia y hemos machacado');
+                                    })
+                                    .catch(err => { 
+                                        console.error(err);
+                                    })
+                                }
+                                handlerCancelar();
+                            }
+                        })
+                    }
+                    handlerCancelar();
                 }
-                handlerCancelar();
-            }
-            else{
-                alert('Por favor selecciona todos los elementos del conjunto');
-            }
-        })
-        .catch( err => {
-            console.log(err);
-        });
-        setDatos({
-            ...datos,
-            bancada_elegida : ''
-        });
+                else{
+                    alert('Por favor selecciona todos los elementos del conjunto');
+                }
+            })
+            .catch( err => {
+                console.log(err);
+            });
+            setDatos({
+                ...datos,
+                bancada_elegida : ''
+            });
+        }
     } 
 
     const ActualizarGrupo = (actualizar_bancadas) => {
@@ -326,20 +356,29 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
     }
 
     const handleInputChange = (event) => {
-        const campoNombre = event.target.name;
-        const idRodillo = event.target.value;
-        setRod_Id(idRodillo);
+        console.log('tiene que venir el conjunto')
+        const selectedValue = event.target.options[event.target.selectedIndex].value;
+        const [rodilloId, operacion, grupo, eje] = selectedValue.split(',');
+        const grupoID = grupo;
+        const operacion_rodillo = operacion;
+        const valores_rodillo = selectedValue;
+        const rodillo_id = rodilloId;
+        const ejeId_posicion = eje;
+        setRod_Id(rodillo_id);
+        setGrupoId_Rod(grupoID);
+        setOperacionRod(operacion_rodillo);
         const nuevaSeleccionRodilloId = {...selectRodilloId};
-        nuevaSeleccionRodilloId[campoNombre] = idRodillo;
-        setSelectedEje(campoNombre);
-        setSelectRodilloId(nuevaSeleccionRodilloId);
+        nuevaSeleccionRodilloId[ejeId_posicion] = valores_rodillo;
+        setSelectedEje(ejeId_posicion);
+        setSelectRodilloId(nuevaSeleccionRodilloId); //solo lo uso para la posición del rodillo en el conjunto
     }
 
     const handlerCancelar = () => {
-        setTuboMadre(null);
+        setGrupoId_Rod(null);
         setEjesRodillos([]);
         setSelectRodilloId({});
         setSelectedEje(null);
+        setOperacionRod('');
         handleClose();
         setDatos({
             ...datos,
@@ -377,8 +416,9 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
                                             as="text"
                                             name={eje.id}
                                             value={rodillo_elegido[eje.id] || ''}
-                                            onChange={handleInputChange}
+                                            //onChange={handleInputChange}
                                             placeholder={eje.tipo.nombre}
+                                            style={{fontWeight: 'bold', color: 'red'}}
                                         >
                                             {rodillo_elegido && rodillo_elegido.map(rod => {
                                                 if (rod.eje.tipo.id === eje.tipo.id && rod.rodillo.diametro === eje.diametro && rod.conjunto.operacion.id === eje.operacion) {
@@ -401,7 +441,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
                                             {rodillos && rodillos.map(rodillo => {
                                                 if (rodillo.tipo === eje.tipo.id && rodillo.diametro === eje.diametro) {
                                                     return (
-                                                        <option key={rodillo.id} value={rodillo.id}>
+                                                        <option key={rodillo.id} value={`${rodillo.id},${rodillo.operacion},${rodillo.grupo.id},${eje.id}`}>
                                                             {rodillo.nombre}
                                                         </option>
                                                     )
@@ -432,7 +472,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
                                             {rodillo_exist && rodillo_exist.map(rod_exist => {
                                                 if (rod_exist.diametro === eje.diametro) {
                                                     return (
-                                                        <option key={rod_exist.id} value={rod_exist.id}>
+                                                        <option key={rod_exist.id} value={`${rod_exist.id},${rod_exist.operacion.id},${rod_exist.grupo.id},${eje.id}`}>
                                                             {rod_exist.nombre}
                                                         </option>
                                                     )

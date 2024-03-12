@@ -69,6 +69,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     }, [token]);
 
     useEffect(() => { // si ya tenemos elemenotos vinculados a este rodillo, no podemos modificar el rodillo.
+        console.log(rodillo);
         rodillo.id && axios.get(BACKEND_SERVER + `/api/rodillos/elemento/?rodillo=${rodillo.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -330,7 +331,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             if(!datos.nombre&&datos.zona&&datos.operacion&&datos.tipo_rodillo&&datos.grupo_tubo_madre){
                 setDatos({
                     ...datos,
-                    nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-'+datos.grupo_tubo_madre+'Ø'),
+                    nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-'+'Ø'+datos.grupo_tubo_madre),
                 })
             }
         }
@@ -339,7 +340,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 if(!datos.nombre&&datos.zona_siglas&&datos.operacion_nombre&&datos.tipo_rodillo_siglas&&datos.descripcion_perfil){
                     setDatos({
                         ...datos,
-                        nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-'+datos.descripcion_perfil+'Ø'),
+                        nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-'+'Ø'+datos.descripcion_perfil),
                     })
                 }
             }
@@ -426,7 +427,6 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         })
         .then( res => { 
             if(rodillo.tipo_plano===null && res.data.tipo_plano!==null){//si estamos actualizando el tipo de plano, ponemos los parámentros.
-                alert('INFORMACIÓN ACTUALIZADA');
                 axios.get(BACKEND_SERVER + `/api/rodillos/plano_parametros/${res.data.tipo_plano}`,{
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
@@ -444,6 +444,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                 }     
                         })
                         .then( r => { 
+                            window.location.href = `/rodillos/editar/${rodillo.id}`; 
                         })
                         .catch(err => { 
                             console.error(err);
@@ -857,7 +858,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                         </Col>
                         <Col>
                             <Form.Group controlId="diametro">
-                                <Form.Label>Diametro interior</Form.Label>
+                                <Form.Label>Diametro eje</Form.Label>
                                 <Form.Control type="text" 
                                                 name='diametro'
                                                 value={datos.diametro}
@@ -877,7 +878,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                                     name='tipo_plano'
                                                     onChange={handleInputChange}
                                                     disabled={no_modificar_tipoplano?true:false}>
-                                        <option key={0} value={0}>Todos</option>
+                                        <option key={0} value={0}>Ninguno</option>
                                         {tipos_planos && tipos_planos.map( tipo => {
                                             return (
                                             <option key={tipo.id} value={tipo.id}>
@@ -899,7 +900,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 :''}
                 <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
                 {rodillo?rodillo.length===0?<Button variant="outline-primary" onClick={GuardarRodillo}>Guardar</Button>:<Button variant="outline-primary" onClick={ActualizarRodillo}>Actualizar</Button>:''}
-                {parametros?parametros.length===0?<Button className={'mx-2'} onClick={añadirParametros}>Añadir Parámetros</Button>:<Button className={'mx-2'} onClick={añadirParametros}>Editar Parámetros</Button>:''}
+                {rodillo.tipo_plano?parametros?parametros.length===0?<Button className={'mx-2'} onClick={añadirParametros}>Añadir Parámetros</Button>:<Button className={'mx-2'} onClick={añadirParametros}>Editar Parámetros</Button>:'':''}
                 {rodillo.length!==0?
                     <React.Fragment> 
                         <Form.Row>
