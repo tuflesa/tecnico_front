@@ -38,11 +38,6 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
     });
 
     useEffect(() => {
-        console.log('operacion_marcada:',operacion_marcada);
-        console.log('cambio de datos:',datos);
-    }, [token, datos]);
-
-    useEffect(() => {
         if (grupoId_rod!==null && rodillos) {
             for(var y=0;y<rodillos.length;y++){
                 if(rodillos[y].grupo.id === parseInt(grupoId_rod)){
@@ -81,7 +76,6 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
             })
             .then( res => {
                 setOperaciones_filtro(res.data);
-                console.log('estas son las operaciones', res.data);
             })
             .catch( err => {
                 console.log(err);
@@ -103,21 +97,6 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
             console.log(err);
         });
     }, [token, operacion_marcada]);
-
-    /* useEffect(() => { 
-        operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/conjunto_operacion/?operacion.seccion=${operacion_marcada.seccion.id}`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            setConjuntos(res.data);
-            console.log('los conjuntos cogidos serían',res.data);
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    }, [token, operacion_marcada]); */
 
     useEffect(() => { //PARA OBTENER LOS GRUPOS
         grupoId && axios.get(BACKEND_SERVER + `/api/rodillos/grupo_only/`,{
@@ -148,7 +127,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
     }, [token, operacion_marcada, grupoId]);
 
     useEffect(() => {
-        setFiltro(`&operacion__id=${datos.operacion_filtro}`)
+        setFiltro(`&operacion__id=${datos.operacion_filtro}&tubo_madre=${datos.tubo_madre_filtro}`)
     }, [datos.operacion_filtro, datos.tubo_madre_filtro]);
 
     useEffect(() => { //PARA OBTENER LOS CONJUNTO YA CREADOS
@@ -159,7 +138,6 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
         })
         .then( res => {
             seConjuntos_exist(res.data);
-            console.log('conjuntos existentes.....:',res.data);
         })
         .catch( err => {
             console.log(err);
@@ -174,7 +152,6 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
             })
             .then( res => {
                 setTuboMadre_unicos(res.data);
-                console.log('Tubo madre unicos.....:',res.data);
             })
             .catch( err => {
                 console.log(err);
@@ -425,14 +402,18 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
         setSelectedEje(null);
         setOperacionRod('');
         handleClose();
+        setFiltro(``);
         setDatos({
             ...datos,
-            bancada_elegida : ''
+            bancada_elegida:'',
+            bancadas_guardar:[],
+            operacion_filtro:'',
+            tubo_madre_filtro:``,
+
         });
     }
 
     const handleInputChange = (event) => {
-        console.log('tiene que venir el conjunto')
         const selectedValue = event.target.options[event.target.selectedIndex].value;
         const [rodilloId, operacion, grupo, eje] = selectedValue.split(',');
         const grupoID = grupo;
