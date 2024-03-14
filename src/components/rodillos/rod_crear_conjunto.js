@@ -148,11 +148,11 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
     }, [token, operacion_marcada, grupoId]);
 
     useEffect(() => {
-        //setFiltro(`&operacion__id=${datos.operacion_filtro}`)
+        setFiltro(`&operacion__id=${datos.operacion_filtro}`)
     }, [datos.operacion_filtro, datos.tubo_madre_filtro]);
 
     useEffect(() => { //PARA OBTENER LOS CONJUNTO YA CREADOS
-        operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/conjunto_operacion/?operacion__seccion__id=${operacion_marcada.seccion.id}`,{
+        operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/conjunto_operacion/?operacion__seccion__id=${operacion_marcada.seccion.id}`+filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -538,13 +538,13 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
                     </Tab>
                     <Tab eventKey="conjunto_existente" title="Conjunto rodillo otra formación">
                         <Form>
-                            <Row>
+                            <Row>               {/*FILTROS*/}
                                 <Col>
                                     <Form.Group controlId="operacion">
                                         <Form.Label>Operación</Form.Label>
                                         <Form.Control 
                                             as="select" 
-                                            value={datos.operacion}
+                                            value={datos.operacion_filtro}
                                             name='operacion'
                                             onChange={handleInputChangeOpFiltro} >
                                             <option key={0} value={''}>Todas</option>
