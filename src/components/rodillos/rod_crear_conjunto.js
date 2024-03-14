@@ -9,7 +9,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
 
     const [ejes, setEjes] = useState(null);
     const [rodillos, setRodillos] = useState(null);
-    const [rodillo_exist, setRodillo_exist] = useState([]);
+    const [conjuntos_exist, seConjuntos_exist] = useState([]);
     const [selectedEje, setSelectedEje] = useState(null);
     const [selectRodilloId, setSelectRodilloId] = useState({});
     const [operacion_rod, setOperacionRod] = useState('');
@@ -22,6 +22,10 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
     const [rod_id, setRod_Id] = useState(''); //para guardar la informacion en EjesRodillos
     const [rodillo_elegido, setRodillo_elegido] = useState([]);
     const [bancadas, setBancadas] = useState(null);
+    const [operaciones_filtro, setOperaciones_filtro] = useState([]);
+    const [tuboMadre_unicos, setTuboMadre_unicos] = useState([]);
+    const [filtro, setFiltro] = useState(``);
+    
     var bancadas_nuevas=[''];
     
     
@@ -29,7 +33,14 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
     const [datos, setDatos] = useState({
         bancada_elegida:'',
         bancadas_guardar:grupo_bancadas?grupo_bancadas:[],
+        operacion_filtro:'',
+        tubo_madre_filtro:``,
     });
+
+    useEffect(() => {
+        console.log('operacion_marcada:',operacion_marcada);
+        console.log('cambio de datos:',datos);
+    }, [token, datos]);
 
     useEffect(() => {
         if (grupoId_rod!==null && rodillos) {
@@ -61,6 +72,23 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
         }
     }, [token, elementos_formacion]);
 
+    useEffect(() => { //BUSCAMOS, LAS OPERACIONES DE LA SECCIÓN MARCADA.
+        if(operacion_marcada!==null){ 
+            axios.get(BACKEND_SERVER + `/api/rodillos/operacion/?seccion=${operacion_marcada.seccion.id}`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }
+            })
+            .then( res => {
+                setOperaciones_filtro(res.data);
+                console.log('estas son las operaciones', res.data);
+            })
+            .catch( err => {
+                console.log(err);
+            });
+        }
+    }, [token, operacion_marcada]);
+
     useEffect(() => { //PARA OBTENER LOS EJES DE LA OPERACION Y FILTRAR LOS RODILLOS;
         operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/eje/?operacion=${operacion_marcada.id}`,{
             headers: {
@@ -75,6 +103,21 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
             console.log(err);
         });
     }, [token, operacion_marcada]);
+
+    /* useEffect(() => { 
+        operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/conjunto_operacion/?operacion.seccion=${operacion_marcada.seccion.id}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setConjuntos(res.data);
+            console.log('los conjuntos cogidos serían',res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token, operacion_marcada]); */
 
     useEffect(() => { //PARA OBTENER LOS GRUPOS
         grupoId && axios.get(BACKEND_SERVER + `/api/rodillos/grupo_only/`,{
@@ -104,19 +147,39 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
         });
     }, [token, operacion_marcada, grupoId]);
 
-    useEffect(() => { //PARA OBTENER LOS RODILLOS EXISTENTES DE LA MISMA SECCIÓN;
-        operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/rodillos_existentes/?operacion__seccion__tipo=${operacion_marcada.seccion.tipo}`,{
+    useEffect(() => {
+        //setFiltro(`&operacion__id=${datos.operacion_filtro}`)
+    }, [datos.operacion_filtro, datos.tubo_madre_filtro]);
+
+    useEffect(() => { //PARA OBTENER LOS CONJUNTO YA CREADOS
+        operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/conjunto_operacion/?operacion__seccion__id=${operacion_marcada.seccion.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
         .then( res => {
-            setRodillo_exist(res.data);
+            seConjuntos_exist(res.data);
+            console.log('conjuntos existentes.....:',res.data);
         })
         .catch( err => {
             console.log(err);
         });
-    }, [operacion_marcada, grupoId]);
+    }, [operacion_marcada, grupoId, token, filtro]);
+
+    useEffect(() => { //PARA OBTENER LOS Ø DE TUBO MADRE UNICOS
+            axios.get(BACKEND_SERVER + `/api/rodillos/grupo_only/`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                  }
+            })
+            .then( res => {
+                setTuboMadre_unicos(res.data);
+                console.log('Tubo madre unicos.....:',res.data);
+            })
+            .catch( err => {
+                console.log(err);
+            });
+    }, [conjuntos_exist, token]);
 
     useEffect(() => { //SI TENEMOS LOS 3 ELEMENTOS ACUMULAMOS LO SELECCIONADO
         if(rod_id && selectedEje && operacion_rod && tubo_madre_rod){
@@ -355,6 +418,19 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
         handlerCancelar();
     }
 
+    const handlerCancelar = () => {
+        setGrupoId_Rod(null);
+        setEjesRodillos([]);
+        setSelectRodilloId({});
+        setSelectedEje(null);
+        setOperacionRod('');
+        handleClose();
+        setDatos({
+            ...datos,
+            bancada_elegida : ''
+        });
+    }
+
     const handleInputChange = (event) => {
         console.log('tiene que venir el conjunto')
         const selectedValue = event.target.options[event.target.selectedIndex].value;
@@ -373,23 +449,29 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
         setSelectRodilloId(nuevaSeleccionRodilloId); //solo lo uso para la posición del rodillo en el conjunto
     }
 
-    const handlerCancelar = () => {
-        setGrupoId_Rod(null);
-        setEjesRodillos([]);
-        setSelectRodilloId({});
-        setSelectedEje(null);
-        setOperacionRod('');
-        handleClose();
-        setDatos({
-            ...datos,
-            bancada_elegida : ''
-        });
+    const handleInputChange_conjunto = (event) => {
+        console.log('RECOJO EL CONJUNTO YA CREADO');
+        console.log(event);
     }
 
     const handleInputChangeBancada = (bancadaId) => {
         setDatos(prevDatos => ({
             ...prevDatos,
             bancada_elegida: bancadaId
+        }));
+    };
+
+    const handleInputChangeOpFiltro = (event) => {
+        setDatos(prevDatos => ({
+            ...prevDatos,
+            operacion_filtro: event.target.value
+        }));
+    };
+
+    const handleInputChangeTuboFiltro = (event) => {
+        setDatos(prevDatos => ({
+            ...prevDatos,
+            tubo_madre_filtro: event.target.value
         }));
     };
     
@@ -454,33 +536,74 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
                             </Row>
                         </Form>
                     </Tab>
-                    <Tab eventKey="conjunto_existente" title="Rodillo otra formación">
+                    <Tab eventKey="conjunto_existente" title="Conjunto rodillo otra formación">
                         <Form>
                             <Row>
                                 <Col>
-                                {ejes && ejes.map(eje => (
-                                    <Form.Group controlId={eje.id} key={eje.id}>
-                                        <Form.Label>{eje.tipo.nombre}</Form.Label>
+                                    <Form.Group controlId="operacion">
+                                        <Form.Label>Operación</Form.Label>
+                                        <Form.Control 
+                                            as="select" 
+                                            value={datos.operacion}
+                                            name='operacion'
+                                            onChange={handleInputChangeOpFiltro} >
+                                            <option key={0} value={''}>Todas</option>
+                                            {operaciones_filtro && operaciones_filtro.map(operacion => (
+                                                <option key={operacion.id} value={operacion.id}>
+                                                    {operacion.nombre}
+                                                </option>
+                                            ))}
+                                        </Form.Control>
+                                    </Form.Group>
+                                </Col>
+                                <Col>
+                                    {/* <Form.Group controlId="tubo_madre">
+                                        <Form.Label>Nombre Montaje</Form.Label>
+                                        <Form.Control type="text" 
+                                                    name='tubo_madre' 
+                                                    value={datos.tubo_madre_filtro}
+                                                    onChange={handleInputChangeTuboFiltro} 
+                                                    placeholder="tubo madre" 
+                                                    autoFocus />
+                                    </Form.Group> */}
+                                    <Form.Group controlId="tubo_madre">
+                                        <Form.Label>Tubo Madre</Form.Label>
+                                        <Form.Control 
+                                            as="select" 
+                                            value={datos.tubo_madre_filtro}
+                                            name='tubo_madre'
+                                            onChange={handleInputChangeTuboFiltro} >
+                                            <option key={0} value={0}>Todas</option>
+                                            {tuboMadre_unicos && tuboMadre_unicos.map(conjunto => (
+                                                <option key={conjunto.id} value={conjunto.tubo_madre}>
+                                                    {conjunto.tubo_madre}
+                                                </option>
+                                            ))}
+                                        </Form.Control>
+                                    </Form.Group>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col>
+                                    <Form.Group controlId="conjunto">
+                                        <Form.Label>Conjunto existente</Form.Label>
                                         <Form.Control
                                             as="select"
-                                            name={eje.id}
-                                            value={selectRodilloId[eje.id] || ''}
-                                            onChange={handleInputChange}
-                                            placeholder={eje.tipo.nombre}
+                                            name='conjunto'
+                                            value={datos.conjunto_elegido}
+                                            onChange={handleInputChange_conjunto}
+                                            placeholder="Conjunto Existente"
                                         >
-                                            <option key={0} value={''}>Elegir rodillo otras formaciones</option>
-                                            {rodillo_exist && rodillo_exist.map(rod_exist => {
-                                                if (rod_exist.diametro === eje.diametro) {
-                                                    return (
-                                                        <option key={rod_exist.id} value={`${rod_exist.id},${rod_exist.operacion.id},${rod_exist.grupo.id},${eje.id}`}>
-                                                            {rod_exist.nombre}
-                                                        </option>
-                                                    )
-                                                }
+                                            <option key={0} value={''}>Conjuntos rodillos otras formaciones</option>
+                                            {conjuntos_exist && conjuntos_exist.map(conjunto => {
+                                                return (
+                                                    <option key={conjunto.id} value={conjunto.id}>
+                                                        {conjunto.operacion.nombre + '- Ø'+ conjunto.tubo_madre}
+                                                    </option>
+                                                )
                                             })}
                                         </Form.Control>
                                     </Form.Group>
-                                ))}
                                 </Col>
                             </Row>
                         </Form>
