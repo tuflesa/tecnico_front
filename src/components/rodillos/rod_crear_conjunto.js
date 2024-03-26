@@ -3,8 +3,9 @@ import { Row, Col, Form, Button, Modal, Tab, Tabs, Alert } from 'react-bootstrap
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
+import { ClockHistory } from 'react-bootstrap-icons';
 
-const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tubomadre, elementos_formacion, grupo_bancadas}) => {
+const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tubomadre, elementos_formacion, grupo_bancadas, colorAzul, colorAzulB, colorVerde}) => {
     const [token] = useCookies(['tec-token']);
 
     const [ejes, setEjes] = useState(null);
@@ -25,17 +26,40 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
     const [operaciones_filtro, setOperaciones_filtro] = useState([]);
     const [tuboMadre_unicos, setTuboMadre_unicos] = useState([]);
     const [filtro, setFiltro] = useState(``);
+    const [conjunto_id, setConjunto_id] = useState('');
+    const [bancada_id, setBancada_id] = useState('');
+    const [bancada_otraformacion_id, setBancadaOtraFormacion_id] = useState('');
     
     var bancadas_nuevas=[''];
+    var bancadas_nuevas2=[''];
     
     
 
     const [datos, setDatos] = useState({
-        bancada_elegida:'',
-        bancadas_guardar:grupo_bancadas?grupo_bancadas:[],
-        operacion_filtro:'',
-        tubo_madre_filtro:``,
+        bancada_elegida: '',
+        bancadas_guardar: grupo_bancadas ? grupo_bancadas : [''],
+        operacion_filtro: '',
+        tubo_madre_filtro: ``,
+        conjunto_elegido: '',
     });
+
+    useEffect(() => {
+        if (token && grupo_bancadas && operacion_marcada) {
+            const EncuentraBancada = grupo_bancadas.find(grupo_bancada =>
+                grupo_bancada.seccion.tipo === operacion_marcada.seccion.tipo
+            );
+            if (EncuentraBancada) {
+                if(EncuentraBancada.tubo_madre === tubomadre){
+                    setBancada_id(EncuentraBancada.id);
+                }
+                else{
+                    setBancadaOtraFormacion_id(EncuentraBancada.id);
+                }
+                
+            }
+        }
+    }, [token, grupo_bancadas, operacion_marcada]);
+    
 
     useEffect(() => {
         if (grupoId_rod!==null && rodillos) {
@@ -98,7 +122,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
         });
     }, [token, operacion_marcada]);
 
-    useEffect(() => { //PARA OBTENER LOS GRUPOS
+    /* useEffect(() => { //PARA OBTENER LOS GRUPOS
         grupoId && axios.get(BACKEND_SERVER + `/api/rodillos/grupo_only/`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -110,7 +134,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
         .catch( err => {
             console.log(err);
         });
-    }, [token, grupoId, operacion_marcada]);
+    }, [token, grupoId, operacion_marcada]); */
 
     useEffect(() => { //RODILLOS QUE PODEMOS USAR EN ESTA OPERACIÓN CON ESTE GRUPO
         operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/rodillos/?operacion__id=${operacion_marcada.id}&grupo__id=${grupoId}`,{
@@ -178,20 +202,166 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
         });
     }, [token, operacion_marcada]);
 
-    const GuardarConjunto = () => {
+    /* useEffect(() => {
+        operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/bancada_grupos/?seccion=${operacion_marcada.seccion.id}&tubo_madre=${tubomadre}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( res => {
+            if(res.data.length!==0){ //si hay bancada cojo el id
+                bancada_id=res.data[0].id;
+            }
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token, operacion_marcada]); */
+
+    const Guardar = () => {
+        if(datos.bancada_elegida){ //si hemos elegido una bancada de otra formación
+            //bancadas_nuevas = datos.bancadas_guardar;
+            bancadas_nuevas = grupo_bancadas?grupo_bancadas:[''];
+            bancadas_nuevas2 = grupo_bancadas?grupo_bancadas.map(bancada => bancada.id):'';
+            if(bancada_id){
+                alert('Si ya tenemos bancada de grupo, no podemos coger una bancada adicional');
+                bancadas_nuevas2=[''];
+                return;
+            }
+            else{
+                bancadas_nuevas2.push(datos.bancada_elegida);
+                //setShow_act(true);
+                ActualizarGrupo(bancadas_nuevas2);
+                return;
+            }
+        }
+        else{ 
+            if(datos.conjunto_elegido){ //conjunto de otra formación
+                GuardarBancadaCelda();
+            }
+            else{ //rodillos nuestros
+                var rodillo_tubo_madre = EjesRodillos[0].TuboMadreRod;
+                var rodillo_operacion = EjesRodillos[0].operacion;
+                var no_coincide=false;
+                var x=0;
+                for(x=0;x<EjesRodillos.length;x++){
+                    if(EjesRodillos[x].TuboMadreRod!==rodillo_tubo_madre||EjesRodillos[x].operacion!==rodillo_operacion){
+                        no_coincide=true;
+                        alert('Los rodillos seleccionados no coinciden en su Ø o su operación');
+                        handlerCancelar();
+                        break
+                    }
+                }
+                if(no_coincide===false){
+                    if(elementos_formacion===''){ //NO EXISTE CELDA
+                        alert('no tenemos celda y vamos a crear conjunto y elementos');
+                        if(EjesRodillos.length===ejes.length){//cantidad de rodillo igual a cantidad de ejes
+                            axios.post(BACKEND_SERVER + `/api/rodillos/conjunto/`, { //creamos conjunto, (Operación y Tubo_madre del rodillo).
+                                operacion: operacion_rod,
+                                tubo_madre:tubo_madre_rod,
+                            }, {
+                                headers: {
+                                    'Authorization': `token ${token['tec-token']}`
+                                    }     
+                            })
+                            .then( r => { 
+                                setConjunto_id(r.data.id);
+                                for(var x=0;x<EjesRodillos.length;x++){
+                                    axios.post(BACKEND_SERVER + `/api/rodillos/elemento/`, { //creamos los elementos.
+                                        conjunto: r.data.id,
+                                        eje: EjesRodillos[x].eje,
+                                        rodillo: EjesRodillos[x].rodillo,
+                                    }, {
+                                        headers: {
+                                            'Authorization': `token ${token['tec-token']}`
+                                            }     
+                                    })
+                                    .then( res => {   
+                                        GuardarBancadaCelda();                    
+                                    })
+                                    .catch(err => { 
+                                        console.error(err);
+                                    })
+                                }
+                            })
+                            .catch(err => { 
+                                console.error(err);
+                            })
+                        }
+                    }
+                    else{
+                        //ya tenemos celda habra que machacar
+                    }
+                }
+                else{
+                    alert('Por favor selecciona todos los elementos del conjunto');
+                }
+            }
+        }
+    }
+
+    const GuardarBancadaCelda = () => {  
+        bancadas_nuevas = datos.bancadas_guardar
+        if(!bancada_id){
+            axios.post(BACKEND_SERVER + `/api/rodillos/bancada/`, { //creamos la bancada
+                seccion: operacion_marcada.seccion.id,
+                tubo_madre: tubomadre,
+            }, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                    }     
+            })
+            .then( res => { 
+                bancadas_nuevas.push(res.data.id);
+            })
+            .catch(err => { 
+                console.error(err);
+            })
+        }
+        else{ 
+            if(elementos_formacion){//TENGO CELDA??? MACHACO EN ELEMENTO
+                axios.patch(BACKEND_SERVER + `/api/rodillos/elemento/?conjunto=${elementos_formacion[0].conjunto.id}`, {
+                    //COMO POSICIONO EN EL EJE CORRECTO??????????
+                    /* eje: parseInt(EjesRodillos[x].eje),
+                    rodillo: parseInt(EjesRodillos[x].rodillo), */
+                }, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                        }     
+                })
+                .then( res => { 
+                    alert('el conjunto ya existia y hemos machacado');
+                })
+                .catch(err => { 
+                    console.error(err);
+                })
+            }
+            else{
+                //CREO CELDA
+
+            }
+        }
+    }
+
+    const ElimniarBancada = () => { 
+        bancadas_nuevas = grupo_bancadas.filter(bancada => bancada.id !== bancada_otraformacion_id).map(bancada => bancada.id);
+        ActualizarGrupo(bancadas_nuevas);
+    }
+
+    const GuardarConjunto = () => {      //GUARDARRRRR
         var rodillo_tubo_madre = EjesRodillos[0].TuboMadreRod;
         var rodillo_operacion = EjesRodillos[0].operacion;
-        var no_coincide=true;
+        var no_coincide=false;
         var x=0;
         for(x=0;x<EjesRodillos.length;x++){
             if(EjesRodillos[x].TuboMadreRod!==rodillo_tubo_madre||EjesRodillos[x].operacion!==rodillo_operacion){
-                no_coincide=false;
+                no_coincide=true;
                 alert('Los rodillos seleccionados no coinciden en su Ø o su operación');
                 handlerCancelar();
                 break
             }
         }
-        if(no_coincide===true){
+        if(no_coincide===false){
             //primero comprobamos si existe la bancada y si no, se crea, igual con LA CELDA, CONJUNTO y por consiguiente con el ELEMENTO.
             var bancada_id='';
             axios.get(BACKEND_SERVER + `/api/rodillos/bancada_grupos/?seccion=${operacion_marcada.seccion.id}&tubo_madre=${tubomadre}`,{
@@ -378,7 +548,9 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
     } 
 
     const ActualizarGrupo = (actualizar_bancadas) => {
-        datos.bancadas_guardar && actualizar_bancadas && axios.patch(BACKEND_SERVER + `/api/rodillos/grupo/${grupoId}/`, {
+        var idsBancadas=[];
+        idsBancadas = actualizar_bancadas.map(bancada => bancada.id);
+        datos.bancadas_guardar && actualizar_bancadas && axios.patch(BACKEND_SERVER + `/api/rodillos/grupo_only/${grupoId}/`, {
             bancadas: actualizar_bancadas,
         }, {
             headers: {
@@ -403,6 +575,12 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
         setOperacionRod('');
         handleClose();
         setFiltro(``);
+        //bancada_id = '';
+        setBancada_id('');
+        setBancadaOtraFormacion_id('');
+        colorAzul=false;
+        colorAzulB=false;
+        colorVerde=false;
         setDatos({
             ...datos,
             bancada_elegida:'',
@@ -431,8 +609,10 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
     }
 
     const handleInputChange_conjunto = (event) => {
-        console.log('RECOJO EL CONJUNTO YA CREADO');
-        console.log(event);
+        setDatos(prevDatos => ({
+            ...prevDatos,
+            conjunto_elegido: event.target.value
+        }));
     }
 
     const handleInputChangeBancada = (bancadaId) => {
@@ -455,7 +635,6 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
             tubo_madre_filtro: event.target.value
         }));
     };
-    
     
     return(
         <Modal show={show} onHide={handleClose} backdrop="static" keyboard={ false } animation={false} size="lg">
@@ -527,7 +706,8 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
                                             as="select" 
                                             value={datos.operacion_filtro}
                                             name='operacion'
-                                            onChange={handleInputChangeOpFiltro} >
+                                            onChange={handleInputChangeOpFiltro} 
+                                            disabled={colorVerde?true:false}> {/*si tenemos rodillos nuestros, no podemos coger de otro*/}
                                             <option key={0} value={''}>Todas</option>
                                             {operaciones_filtro && operaciones_filtro.map(operacion => (
                                                 <option key={operacion.id} value={operacion.id}>
@@ -538,23 +718,15 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
                                     </Form.Group>
                                 </Col>
                                 <Col>
-                                    {/* <Form.Group controlId="tubo_madre">
-                                        <Form.Label>Nombre Montaje</Form.Label>
-                                        <Form.Control type="text" 
-                                                    name='tubo_madre' 
-                                                    value={datos.tubo_madre_filtro}
-                                                    onChange={handleInputChangeTuboFiltro} 
-                                                    placeholder="tubo madre" 
-                                                    autoFocus />
-                                    </Form.Group> */}
                                     <Form.Group controlId="tubo_madre">
                                         <Form.Label>Tubo Madre</Form.Label>
                                         <Form.Control 
                                             as="select" 
                                             value={datos.tubo_madre_filtro}
                                             name='tubo_madre'
-                                            onChange={handleInputChangeTuboFiltro} >
-                                            <option key={0} value={0}>Todas</option>
+                                            onChange={handleInputChangeTuboFiltro} 
+                                            disabled={colorVerde?true:false}>
+                                            <option key={0} value={``}>Todas</option>
                                             {tuboMadre_unicos && tuboMadre_unicos.map(conjunto => (
                                                 <option key={conjunto.id} value={conjunto.tubo_madre}>
                                                     {conjunto.tubo_madre}
@@ -574,6 +746,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
                                             value={datos.conjunto_elegido}
                                             onChange={handleInputChange_conjunto}
                                             placeholder="Conjunto Existente"
+                                            disabled={colorVerde?true:false}
                                         >
                                             <option key={0} value={''}>Conjuntos rodillos otras formaciones</option>
                                             {conjuntos_exist && conjuntos_exist.map(conjunto => {
@@ -601,8 +774,10 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
                                                 type="checkbox"
                                                 label={bancada.nombre}
                                                 value = {datos.bancada_elegida}
-                                                checked ={datos.bancada_elegida === bancada.id}
+                                                //checked ={bancada_id?bancada_id===bancada.id:bancada_otraformacion_id?bancada_otraformacion_id===bancada.id:''}
+                                                //checked={(bancada_id && bancada_id === bancada.id) || (bancada_otraformacion_id && bancada_otraformacion_id === bancada.id)}
                                                 onChange={()=>handleInputChangeBancada(bancada.id)}
+                                                disabled={colorVerde?true:colorAzul?true:false}
                                             />
                                         ))}
                                     </Form.Group>
@@ -613,7 +788,8 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
                 </Tabs>
             </Modal.Body>
             <Modal.Footer>
-                <Button variant="info" onClick={GuardarConjunto}>Guardar</Button>
+                {colorAzulB?<Button variant="info" onClick={ElimniarBancada}>Eliminar Bancada</Button>:''}
+                <Button disabled={colorAzulB?true:false} variant="info" onClick={Guardar}>Guardar</Button>
                 <Button variant="waring" onClick={handlerCancelar}>Cancelar</Button>
             </Modal.Footer>
         </Modal>

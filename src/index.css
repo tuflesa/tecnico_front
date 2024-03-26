@@ -12,14 +12,57 @@ code {
     monospace;
 }
 
-.btn-verde-primary {
-  background-color: green; /* Cambia el color a tu verde */
+.btn-primary:hover,
+.btn-verde:hover,
+.btn-gris-primary:hover,
+.btn-naranja-primary:hover {
+  background-color: black;
+  border-color: black;
+  color:white;
+}
+
+.btn-primary:hover,
+.btn-verde:active,
+.btn-gris-primary:active,
+.btn-naranja-primary:active {
+  background-color: black;
+  border-color: black;
+  color:white;
+}
+
+
+.btn-verde {
+  background-color: green; /* Cambia el color a verde */
+  color: white; 
+  border: 1px solid green;
+}
+
+.btn-verde:focus {
+  background-color: green; /* Cambia el color a verde */
   color: white; 
   border: 1px solid green;
 }
 
 .btn-gris-primary {
-  background-color: grey; /* Cambia el color a tu verde */
+  background-color: grey; /* Cambia el color gris */
   color: black; 
-  border: 1px solid grey
+  border: 1px solid grey;
+}
+
+.btn-gris-primary:focus {
+  background-color: grey; /* Cambia el color gris */
+  color: black; 
+  border: 1px solid grey;
+}
+
+.btn-naranja-primary {
+  background-color: rgb(243, 145, 8); /* Cambia el color naranja */
+  color: black; 
+  border: 1px solid rgb(243, 145, 8)
+}
+
+.btn-naranja-primary:focus {
+  background-color: rgb(243, 145, 8); /* Cambia el color naranja */
+  color: black; 
+  border: 1px solid rgb(243, 145, 8)
 }

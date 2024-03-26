@@ -14,14 +14,17 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
     const [empresa, setEmpresa] = useState('');
     const [tubo_madre, setTuboMadre] = useState('');
     const [operacion_marcada, setOperacionMarcada] = useState(null);
-    const [show_conjunto, setShowConjunto] = useState(false);
     const [formaciones_completadas, setFormacionesCompletadas] = useState('');
     const [formaciones_filtradas, setFormacionesFiltradas] = useState('');
+    const [colorVerde, setColorVerde] = useState(false);
+    const [colorAzul, setColorAzul] = useState(false);
+    const [colorAzulB, setColorAzulB] = useState(false);
+    const [show_conjunto, setShowConjunto] = useState(false);
 
     useEffect(() => {
         setMaquina(grupo.maquina.id);
         setEmpresa(grupo.maquina.empresa.id);
-        setTuboMadre(grupo.tubo_madre);        
+        setTuboMadre(grupo.tubo_madre);  
     }, [grupo]);
 
     useEffect(() => {
@@ -44,7 +47,7 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
         for(var x=0;x<grupo.bancadas.length;x++){
             //maquina && empresa && grupo && axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__seccion__maquina__id=${maquina}&bancada__seccion__maquina__empresa=${empresa}&bancada__tubo_madre=${tubo_madre}`,{
             if (maquina && empresa && grupo) {
-                axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__id=${grupo.bancadas[x]}`,{
+                axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__id=${grupo.bancadas[x].id}`,{
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
                     }
@@ -79,13 +82,30 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
         }
     }, [maquina]);
 
-    const GuardarId_Operacion = (operationId) => {
+    const GuardarId_Operacion = (operationId, colorV, colorA, colorAB) => {
         setOperacionMarcada(operationId); // Almacena la operación seleccionada
         setFormacionesFiltradas(formaciones_completadas? formaciones_completadas.filter(formacion => formacion.conjunto.operacion === operationId.id):[]); //pasa los elementos de esta operación
-        AbrirConjunto();
+        let newColorVerde = colorV;
+        let newColorAzul = colorA;
+        let newColorAzulB = colorAB;
+
+        if (colorV === true) {
+            newColorVerde = true;
+        };
+        if (colorA === true) {
+            newColorAzul = true;
+        };
+        if (colorAB === true) {
+            newColorAzulB = true;
+        };
+        
+        AbrirConjunto(newColorVerde, newColorAzul, newColorAzulB);
     }
 
-    const AbrirConjunto = () => {
+    const AbrirConjunto = (colorV, colorA, colorAB) => {
+        setColorVerde(colorV); // Actualiza el estado de colorVerde
+        setColorAzul(colorA); // Actualiza el estado de colorAzul de conjunto
+        setColorAzulB(colorAB); // Actualiza el estado de colorAzul de bancada
         setShowConjunto(true);
     }
 
@@ -115,19 +135,23 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                                             if (operacion.seccion.id === seccion.id) {
                                                 let colorBoton1 = false;
                                                 let colorBoton2 = false;
+                                                let colorBoton3 = false;
                                                 formaciones_completadas && formaciones_completadas.forEach(form_completas => {
-                                                    if(form_completas.conjunto.operacion===operacion.id){
-                                                        colorBoton1=true;
+                                                    if(form_completas.conjunto.operacion===operacion.id && form_completas.bancada.tubo_madre===form_completas.conjunto.tubo_madre && form_completas.bancada.tubo_madre===grupo.tubo_madre ){
+                                                        colorBoton1=true; //tenemos rodillos propios
                                                     }
-                                                    if(form_completas.bancada.tubo_madre!==grupo.tubo_madre && form_completas.conjunto.operacion===operacion.id){
-                                                        colorBoton2=true;
+                                                    if( form_completas.bancada.tubo_madre!==form_completas.conjunto.tubo_madre && form_completas.conjunto.operacion===operacion.id){
+                                                        colorBoton2=true; //tenemos conjunto de otra formación
+                                                    }
+                                                    if(form_completas.bancada.tubo_madre!==grupo.tubo_madre && form_completas.conjunto.operacion===operacion.id ){
+                                                        colorBoton3=true; //tenemos bancada de otra formación
                                                     }
                                                 });
                                                 return (
                                                     <Button
                                                         key={operacion.id}
-                                                        className={`btn ${colorBoton2 ? 'btn-primary' : colorBoton1 ? 'btn-verde-primary' : 'btn-gris-primary'} btn-sm`}
-                                                        onClick={() => {grupo?GuardarId_Operacion(operacion):alert('Elige grupo')}}
+                                                        className={`btn ${colorBoton2 ? 'btn-primary' : colorBoton1 ? 'btn-verde' : colorBoton3? 'btn-naranja-primary' : 'btn-gris-primary'} btn-sm`}
+                                                        onClick={() => {grupo?GuardarId_Operacion(operacion, colorBoton1, colorBoton2, colorBoton3):alert('Elige grupo')}}
                                                     >
                                                         {operacion.nombre}
                                                     </Button>
@@ -149,7 +173,10 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                     grupo_bancadas={grupo.bancadas}
                     maquina={maquina}
                     tubomadre={tubo_madre}
-                    elementos_formacion={formaciones_filtradas}/>
+                    elementos_formacion={formaciones_filtradas}
+                    colorAzul={colorAzul}
+                    colorAzulB={colorAzulB}
+                    colorVerde={colorVerde}/>
         </Container>
     )
 }
