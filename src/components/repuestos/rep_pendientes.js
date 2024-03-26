@@ -39,7 +39,7 @@ const RepPendientes = () => {
     },[datos.pagina2, token]);
 
     useEffect(() => {
-        setFiltro(`?empresa=${datos.empresa}&page=${datos.pagina}&finalizado=${false}&fecha_prevista_entrega__lte=${datos.hoy}&creado_por=${nosoyTecnico?user['tec-user'].perfil.usuario:''}`);
+        setFiltro(`?empresa__id=${datos.empresa}&page=${datos.pagina}&finalizado=${false}&fecha_prevista_entrega__lte=${datos.hoy}&creado_por=${nosoyTecnico?user['tec-user'].perfil.usuario:''}`);
     },[datos.pagina, datos.empresa, datos.hoy, token]);
     
     useEffect(() => { //buscamos articulos con stock por debajo del stock mínimo
