@@ -44,6 +44,7 @@ const NotificacionForm = ({nota, setNota}) => {
         zona: nota.zona?nota.zona.id:null,
         numero: nota.id? nota.numero:null,
         peligrosidad: nota.id? nota.peligrosidad:false,
+        seguridad: nota.id? nota.seguridad:false,
     });
 
     useEffect(()=>{
@@ -68,6 +69,7 @@ const NotificacionForm = ({nota, setNota}) => {
             zona: nota.zona?nota.zona.id:null,
             numero: nota.id? nota.numero:null,
             peligrosidad: nota.id? nota.peligrosidad:false,
+            seguridad: nota.id? nota.seguridad:false,
         });
     },[nota]);
 
@@ -164,6 +166,13 @@ const NotificacionForm = ({nota, setNota}) => {
         })
     }
 
+    const handleSeguro = (event) => {
+        setDatos({
+            ...datos,
+            seguridad : !datos.seguridad
+        })
+    }
+
     const crearNota = (event) => {
         event.preventDefault();
         if(datos.zona===null||datos.zona===''){
@@ -187,6 +196,7 @@ const NotificacionForm = ({nota, setNota}) => {
                 empresa: datos.empresa,
                 zona: datos.zona,
                 peligrosidad: datos.peligrosidad,
+                seguridad: datos.seguridad,
             }, {
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
@@ -223,6 +233,7 @@ const NotificacionForm = ({nota, setNota}) => {
             conclusion: datos.conclusion,
             zona: datos.zona,
             peligrosidad: datos.peligrosidad,
+            seguridad: datos.seguridad,
             //empresa: datos.empresa,
         }, {
             headers: {
@@ -445,7 +456,17 @@ const NotificacionForm = ({nota, setNota}) => {
                                                 onChange = {handlePeligro} />
                                 </Form.Group>
                             </Col>
-                        </Row>    
+                        </Row>  
+                        <Row>
+                            <Col style={ { color: 'red' } }>
+                                <Form.Group className="mb-3" controlId="peligro">
+                                    <Form.Check type="checkbox" 
+                                                label="Seguridad"
+                                                checked = {datos.seguridad}
+                                                onChange = {handleSeguro} />
+                                </Form.Group>
+                            </Col>
+                        </Row>   
                         <Row> 
                             {nota.id?
                                 <h5 className="pb-3 pt-1 mt-2">Estado de la notificación</h5>:null}
