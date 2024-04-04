@@ -41,10 +41,6 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
     });
 
     useEffect(() => {
-        console.log('que vale elementos_formacion', elementos_formacion);
-    }, [elementos_formacion]);
-
-    useEffect(() => {
         if (grupoId_rod!==null && rodillos) {
             for(var y=0;y<rodillos.length;y++){
                 if(rodillos[y].grupo.id === parseInt(grupoId_rod)){
@@ -175,7 +171,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
         if(datos.bancada_elegida){ //si hemos elegido una bancada de otra formación
             bancadas_nuevas = grupo_bancadas?grupo_bancadas:[''];
             bancadas_nuevas2 = grupo_bancadas?grupo_bancadas.map(bancada => bancada.id):'';
-            if(bancadaId){
+            if(bancada_id){
                 alert('Si ya tenemos bancada de grupo, no podemos coger una bancada adicional');
                 bancadas_nuevas2=[''];
                 return;
@@ -192,12 +188,12 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
                     SustituirConjuntoEnCelda(datos.conjunto_elegido);
                 }
                 else{
-                    if(bancada_id || bancadaId){
+                    if(bancada_id || bancada_id){
                         if(bancada_id){
                             GuardarCelda(bancada_id); //tengo bancada, crear celda
                         }
-                        if(bancadaId){
-                            GuardarCelda(bancadaId); //tengo bancada, crear celda
+                        if(bancada_id){
+                            GuardarCelda(bancada_id); //tengo bancada, crear celda
                         }
                     }
                     else{
@@ -234,29 +230,13 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
         }
     }
 
-    /* const SustituirConjuntoEnCelda = (conjuntoId)=>{
-        axios.get(BACKEND_SERVER + `/api/rodillos/celda/?operacion=${elementos_formacion[0].conjunto.operacion}&bancada=${bancada_id}`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            console.log('esto es lo que recogemos con celda: ',res.data);
-            console.log('y esto es el conjutoId que entra: ', conjuntoId);
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    } */
-
     const SustituirConjuntoEnCelda = (conjuntoId)=>{
-        conjuntoId && axios.get(BACKEND_SERVER + `/api/rodillos/celda/?operacion=${elementos_formacion[0].conjunto.operacion}&bancada=${bancada_id}`,{
+        conjuntoId && axios.get(BACKEND_SERVER + `/api/rodillos/celda/?conjunto__id=${elementos_formacion[0].conjunto.id}&bancada=${bancada_id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
         .then( res => {
-            console.log('esto es lo que recogemos del get:',res.data);
             axios.patch(BACKEND_SERVER + `/api/rodillos/celda/${res.data[0].id}/`, {
                 conjunto: conjuntoId,
             }, {
@@ -304,13 +284,11 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
                         y=y+1;
                         if(y===(EjesRodillos.length)){
                             if(colorAzul){
-                                console.log('la celda era azul, tendré que sustituir un conjunto por otro en la celda y ya');
-                                //tengo celda solo sustituyo el numero del conjunto en dicha celda
-                                SustituirConjuntoEnCelda(r.data.id);
+                                SustituirConjuntoEnCelda(r.data.id); //tengo celda solo sustituyo el numero del conjunto en dicha celda
                             }
                             if(colorAzul===false && colorVerde===false){
-                                if(bancadaId){
-                                    GuardarCelda(bancadaId); //tengo bancada creo celda
+                                if(bancada_id){
+                                    GuardarCelda(bancada_id); //tengo bancada creo celda
                                 }
                                 else{
                                     GuardarBancada(); //creo bancada y celda
@@ -493,7 +471,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
                                             style={{fontWeight: 'bold', color: 'red'}}
                                         >
                                             {rodillo_elegido && rodillo_elegido.map(rod => {
-                                                if (rod.eje.tipo.id === eje.tipo.id && rod.rodillo.diametro === eje.diametro && rod.conjunto.operacion.id === eje.operacion) {
+                                                if (rod.eje.tipo.id === eje.tipo.id && rod.rodillo.diametro === eje.diametro) {
                                                     return (
                                                         <option key={rod.rodillo.id} value={rod.rodillo.id}>
                                                             {rod.rodillo.nombre}

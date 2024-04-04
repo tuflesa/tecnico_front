@@ -59,7 +59,6 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                     objetosAcumulados += rr.data.length;
                     if (objetosAcumulados === formacionesCompletadasArray.length) {//si tengo todas las respuesta, paso la información a formacionescompletadas.
                         setFormacionesCompletadas(formacionesCompletadasArray);
-                        console.log('esto es lo que filtra para pintar: ', formacionesCompletadasArray);
                     }
                 })
                 .catch( err => {
@@ -86,7 +85,6 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
     }, [maquina]);
 
     useEffect(() => { //cogemos el id de la bancada marcada
-        console.log('entramos a buscar la bancada');
         if (grupo && operacion_marcada) {
             const EncuentraBancada = grupo.bancadas.find(grupo_bancada =>
                 grupo_bancada.seccion.tipo === operacion_marcada.seccion.tipo
@@ -97,16 +95,14 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                 }
                 else{
                     setBancadaOtraFormacion(EncuentraBancada);
-                }
-                console.log('bancada encontrada', EncuentraBancada);
-                
+                }                
             }
         }  
     }, [operacion_marcada, grupo]);
 
     const GuardarId_Operacion = (operationId, colorV, colorA, colorAB) => {
         setOperacionMarcada(operationId); // Almacena la operación seleccionada
-        setFormacionesFiltradas(formaciones_completadas? formaciones_completadas.filter(formacion => formacion.conjunto.operacion === operationId.id):[]); //pasa los elementos de esta operación
+        setFormacionesFiltradas(formaciones_completadas? formaciones_completadas.filter(formacion => formacion.operacion === operationId.id):[]); //pasa los elementos de esta operación
         let newColorVerde = colorV;
         let newColorAzul = colorA;
         let newColorAzulB = colorAB;
