@@ -16,19 +16,18 @@ const Cargas = () => {
     return (
         <React.Fragment>
             <CargasNavBar />
-            <Switch>
-                <Route path='/cargas/agencias' exact component={CargasAgenciaLista} />
-                <Route path='/cargas/agencia/nueva' exact component={CargasAgenciaNueva} />
-                <Route path='/cargas/agencia/:id' component={CargasAgenciaDetalle} />
+                <Switch>
+                    <Route path='/cargas/agencias' exact component={CargasAgenciaLista} />
+                    <Route path='/cargas/agencia/nueva' exact component={CargasAgenciaNueva} />
+                    <Route path='/cargas/agencia/:id' component={CargasAgenciaDetalle} />
 
-                <Route path='/cargas' exact>
-                    <CargasLista />
-                </Route>
-                <Route path='/cargas/nueva' exact component={CargaNueva} />
-                <Route path='/cargas/editar/:id' component={CargaEditar} />
-                <Route path='/cargas/:id' component={CargaDetalle} />
-                <Route paht='/cargas/llamadas/ultimas_llamadas' exact component={LlamadasLista} />
-            </Switch>
+                    <Route path='/cargas' exact component ={CargasLista} />
+                    <Route path='/cargas/nueva' exact component={CargaNueva} /> 
+                    <Route path='/cargas/editar/:id' component={CargaEditar} />
+                    <Route path='/cargas/detalle/:id' component={CargaDetalle} />
+                    
+                    <Route paht='/cargas/llamadas/ultimas_llamadas' exact component={LlamadasLista} />
+                 </Switch>
         </React.Fragment>
     )
 }

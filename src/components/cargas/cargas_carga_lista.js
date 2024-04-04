@@ -25,7 +25,7 @@ const CargasLista = () => {
               }
         })
         .then(res => {
-            //console.log(res.data);
+            console.log(res.data);
             setCargas(res.data);
         })
     }
@@ -117,7 +117,6 @@ const CargasLista = () => {
     return (
         <Container >
             <Row className="justify-content-center">
-                
                     <CargasFiltro actualizaFiltro={actualizaFiltro} />
             </Row>
             <Row>
@@ -138,6 +137,7 @@ const CargasLista = () => {
                             <th>Neto</th>
                             <th>Salida</th>
                             <th>Puerta</th>
+                            <th>Observaciones</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -158,8 +158,9 @@ const CargasLista = () => {
                                     <td>{parseInt(carga.bruto)>parseInt(carga.tara) ? carga.bruto - carga.tara : null}</td>
                                     <td>{carga.fecha_salida}</td>
                                     <td>{carga.puerta}</td>
+                                    <td>{carga.observaciones}</td>
                                     <td>
-                                        <Link to={`/cargas/${carga.id}`}>
+                                        <Link to={`/cargas/detalle/${carga.id}`}>
                                             <Truck className="mr-2 pencil"/>
                                         </Link>
                                         <Link to={`/cargas/editar/${carga.id}`}>

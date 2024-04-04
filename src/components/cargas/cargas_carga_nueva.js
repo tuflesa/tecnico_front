@@ -19,7 +19,8 @@ const CargaNueva = () => {
         agencia: 0,
         destino: '',
         tara: '',
-        bruto: ''
+        bruto: '',
+        observaciones: ''
     }
 
     return (
