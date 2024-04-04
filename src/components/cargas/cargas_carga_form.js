@@ -96,8 +96,8 @@ const CargaForm = ({ carga }) => {
 
         if (datos.fecha_salida === null) { // && Number.isInteger(parseInt(datos.bruto))) {
             datos.fecha_salida = new Date();
-            // datos.fecha_salida.setHours( datos.fecha_salida.getHours() + 2 );
-            // console.log(datos.fecha_salida);
+            datos.fecha_salida.setHours( datos.fecha_salida.getHours() + 2 );
+            console.log(datos.fecha_salida);
         } 
         // if (datos.bruto===''){
         //     datos.bruto = null;
