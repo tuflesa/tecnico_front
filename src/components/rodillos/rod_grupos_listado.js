@@ -119,7 +119,7 @@ const RodGruposListado = () => {
         try {
             // Hacer las solicitudes a las celdas de todas las bancadas y lo guarda en solicitudesCeldas
             const solicitudesCeldas = linea.bancadas.map(bancadaId => {
-                return axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__id=${bancadaId}`, {
+                return axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__id=${bancadaId.id}`, {
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
                     }

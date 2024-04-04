@@ -117,7 +117,7 @@ const RodMontajeListado = () => {
         try {
             // recojo todas las celdas de todas las bancadas del grupo.
             const solicitudesCeldas = montaje.grupo.bancadas.map(bancadaId => {
-                return axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__id=${bancadaId}`, {
+                return axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__id=${bancadaId.id}`, {
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
                     }

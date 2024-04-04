@@ -30,8 +30,6 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
     var bancadas_nuevas2=[''];
     var conjunto_id='';
     
-    
-
     const [datos, setDatos] = useState({
         bancada_elegida: '',
         bancadas_guardar: grupo_bancadas ? grupo_bancadas : [''],
