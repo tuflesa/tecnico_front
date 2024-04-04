@@ -308,7 +308,7 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicional
                         <View style={styles.section}>
                             <View style={styles.section3}>
                                 <Text>Dear Sirs,</Text>
-                                <Text>We confirm you the purchase order of the following items / spare pants:</Text>
+                                <Text>We confirm you the purchase order of the following items / spare parts:</Text>
                             </View>
                         </View>
                     </View>
