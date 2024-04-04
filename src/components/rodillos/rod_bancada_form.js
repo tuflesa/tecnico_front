@@ -59,6 +59,7 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                     objetosAcumulados += rr.data.length;
                     if (objetosAcumulados === formacionesCompletadasArray.length) {//si tengo todas las respuesta, paso la información a formacionescompletadas.
                         setFormacionesCompletadas(formacionesCompletadasArray);
+                        console.log('esto es lo que filtra para pintar: ', formacionesCompletadasArray);
                     }
                 })
                 .catch( err => {
@@ -85,6 +86,7 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
     }, [maquina]);
 
     useEffect(() => { //cogemos el id de la bancada marcada
+        console.log('entramos a buscar la bancada');
         if (grupo && operacion_marcada) {
             const EncuentraBancada = grupo.bancadas.find(grupo_bancada =>
                 grupo_bancada.seccion.tipo === operacion_marcada.seccion.tipo
@@ -96,10 +98,11 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                 else{
                     setBancadaOtraFormacion(EncuentraBancada);
                 }
+                console.log('bancada encontrada', EncuentraBancada);
                 
             }
         }  
-    }, [grupo, operacion_marcada]);
+    }, [operacion_marcada, grupo]);
 
     const GuardarId_Operacion = (operationId, colorV, colorA, colorAB) => {
         setOperacionMarcada(operationId); // Almacena la operación seleccionada
@@ -162,10 +165,10 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                                                     if(form_completas.conjunto.operacion===operacion.id && form_completas.bancada.tubo_madre===form_completas.conjunto.tubo_madre && form_completas.bancada.tubo_madre===grupo.tubo_madre ){
                                                         colorBoton1=true; //tenemos rodillos propios
                                                     }
-                                                    if( form_completas.bancada.tubo_madre!==form_completas.conjunto.tubo_madre && form_completas.conjunto.operacion===operacion.id){
+                                                    if( form_completas.bancada.tubo_madre!==form_completas.conjunto.tubo_madre && form_completas.operacion===operacion.id){
                                                         colorBoton2=true; //tenemos conjunto de otra formación
                                                     }
-                                                    if(form_completas.bancada.tubo_madre!==grupo.tubo_madre && form_completas.conjunto.operacion===operacion.id ){
+                                                    if(form_completas.bancada.tubo_madre!==grupo.tubo_madre && form_completas.operacion===operacion.id ){
                                                         colorBoton3=true; //tenemos bancada de otra formación
                                                     }
                                                 });
@@ -189,6 +192,7 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                 </Row> 
             :''} 
             <RodConjunto show={show_conjunto}
+                    setShow={setShowConjunto}
                     operacion_marcada={operacion_marcada}
                     handleClose={CerrarConjunto}
                     grupoId={grupo.id}
@@ -200,7 +204,7 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                     colorAzulB={colorAzulB}
                     colorVerde={colorVerde}
                     bancada_id={bancada_id}
-                    bancada_otraformacion_id={bancada_otraformacion}/>
+                    bancada_otraformacion={bancada_otraformacion}/>
         </Container>
     )
 }

@@ -4,8 +4,9 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 
-const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tubomadre, elementos_formacion, grupo_bancadas, colorAzul, colorAzulB, colorVerde, bancada_id, bancada_otraformacion_id: bancada_otraformacion}) => {
+const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, maquina, tubomadre, elementos_formacion, grupo_bancadas, colorAzul, colorAzulB, colorVerde, bancada_id, bancada_otraformacion}) => {
     const [token] = useCookies(['tec-token']);
+    const [bancadaId, setBancadaId] = useState(bancada_id); // Estado para bancada_id
 
     const [ejes, setEjes] = useState(null);
     const [rodillos, setRodillos] = useState(null);
@@ -38,6 +39,10 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
         tubo_madre_filtro: ``,
         conjunto_elegido: '',
     });
+
+    useEffect(() => {
+        console.log('que vale elementos_formacion', elementos_formacion);
+    }, [elementos_formacion]);
 
     useEffect(() => {
         if (grupoId_rod!==null && rodillos) {
@@ -170,7 +175,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
         if(datos.bancada_elegida){ //si hemos elegido una bancada de otra formación
             bancadas_nuevas = grupo_bancadas?grupo_bancadas:[''];
             bancadas_nuevas2 = grupo_bancadas?grupo_bancadas.map(bancada => bancada.id):'';
-            if(bancada_id){
+            if(bancadaId){
                 alert('Si ya tenemos bancada de grupo, no podemos coger una bancada adicional');
                 bancadas_nuevas2=[''];
                 return;
@@ -183,18 +188,20 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
         }
         else{ 
             if(datos.conjunto_elegido){ //conjunto de otra formación
-                console.log('EL CONJUNTO ES DE OTRA FORMACIÓN');
-                if(colorAzul){//¿tenia ya conjunto?
-                    //sustituyo conjunto
+                if(colorAzul){//¿tenia ya conjunto? sustituyo conjunto en celda
+                    SustituirConjuntoEnCelda(datos.conjunto_elegido);
                 }
                 else{
-                    if(bancada_id){
-                        console.log('tengo bancada, crear celda');
-                        //tengo bancada, crear celda
+                    if(bancada_id || bancadaId){
+                        if(bancada_id){
+                            GuardarCelda(bancada_id); //tengo bancada, crear celda
+                        }
+                        if(bancadaId){
+                            GuardarCelda(bancadaId); //tengo bancada, crear celda
+                        }
                     }
                     else{
-                        console.log('crear bancada y celda');
-                        //crear bancada y celda
+                        GuardarBancada(); //crear bancada y celda
                     }
                 }
             }
@@ -217,7 +224,6 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
                         //SI EXISTE CELDA con conjunto y elemento - MACHACO ELEMENTO
                     }
                     if(colorAzul || colorVerde===false){ //no tengo conjunto ni elemento
-                        console.log('celda en azul o sin celda, paso a guardar el conjunto y el elemento');
                         GuardarConjuntoElemento();
                     }
                 }
@@ -228,8 +234,50 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
         }
     }
 
+    /* const SustituirConjuntoEnCelda = (conjuntoId)=>{
+        axios.get(BACKEND_SERVER + `/api/rodillos/celda/?operacion=${elementos_formacion[0].conjunto.operacion}&bancada=${bancada_id}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            console.log('esto es lo que recogemos con celda: ',res.data);
+            console.log('y esto es el conjutoId que entra: ', conjuntoId);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    } */
+
+    const SustituirConjuntoEnCelda = (conjuntoId)=>{
+        conjuntoId && axios.get(BACKEND_SERVER + `/api/rodillos/celda/?operacion=${elementos_formacion[0].conjunto.operacion}&bancada=${bancada_id}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            console.log('esto es lo que recogemos del get:',res.data);
+            axios.patch(BACKEND_SERVER + `/api/rodillos/celda/${res.data[0].id}/`, {
+                conjunto: conjuntoId,
+            }, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                    }     
+            })
+            .then( res => { 
+                handleClose();
+                setShow(false);
+            })
+            .catch(err => { 
+                console.error(err);
+            })
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }
+
     const GuardarConjuntoElemento = () => { 
-        alert('vamos a crear conjunto y elementos');
         if(EjesRodillos.length===ejes.length){//cantidad de rodillo igual a cantidad de ejes
             axios.post(BACKEND_SERVER + `/api/rodillos/conjunto/`, { //creamos conjunto, (Operación y Tubo_madre del rodillo).
                 operacion: operacion_rod,
@@ -253,19 +301,18 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
                             }     
                     })
                     .then( res => {   
-                        y++;   
+                        y=y+1;
                         if(y===(EjesRodillos.length)){
                             if(colorAzul){
                                 console.log('la celda era azul, tendré que sustituir un conjunto por otro en la celda y ya');
                                 //tengo celda solo sustituyo el numero del conjunto en dicha celda
+                                SustituirConjuntoEnCelda(r.data.id);
                             }
-                            if(colorVerde===false){
-                                if(bancada_id){
-                                    console.log('no tengo la celda pero si bancada, voy a crear la celda') ;
-                                    GuardarCelda(); //tengo bancada creo celda
+                            if(colorAzul===false && colorVerde===false){
+                                if(bancadaId){
+                                    GuardarCelda(bancadaId); //tengo bancada creo celda
                                 }
                                 else{
-                                    console.log('no tengo bancada y voy a crear bancada y celda') ;
                                     GuardarBancada(); //creo bancada y celda
                                 }
                             } 
@@ -283,6 +330,9 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
     }
 
     const GuardarCelda = (id_bancada) => {
+        if(datos.conjunto_elegido){
+            conjunto_id=datos.conjunto_elegido;
+        }
         id_bancada && axios.post(BACKEND_SERVER + `/api/rodillos/celda/`, { //creamos celda
             bancada: id_bancada,
             conjunto: conjunto_id,
@@ -294,7 +344,8 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
                 }     
         })
         .then( res => { 
-            ActualizarGrupo(bancadas_nuevas2);
+            handleClose();
+            setShow(false);
         })
         .catch(err => { 
             console.error(err);
@@ -314,7 +365,9 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
         })
         .then( res => { 
             bancadas_nuevas2.push(res.data.id);
+            setBancadaId(res.data.id);
             GuardarCelda(res.data.id);
+            ActualizarGrupo(bancadas_nuevas2);
         })
         .catch(err => { 
             console.error(err);
@@ -354,7 +407,6 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
         setOperacionRod('');
         handleClose();
         setFiltro(``);
-        bancada_id='';
         bancada_otraformacion='';
         colorAzul=false;
         colorAzulB=false;
@@ -555,7 +607,7 @@ const RodConjunto = ({show, handleClose, operacion_marcada, grupoId, maquina, tu
                                                 value = {datos.bancada_elegida}
                                                 checked={(bancada_id && bancada_id === bancada.id) || (bancada_otraformacion.id && bancada_otraformacion.id === bancada.id) || (datos.bancada_elegida === bancada.id)}
                                                 onChange={()=>handleInputChangeBancada(bancada.id)}
-                                                disabled={colorVerde?true:colorAzul?true:bancada_otraformacion.id?true:false}
+                                                disabled={bancada_id?true:colorAzul?true:bancada_otraformacion.id?true:false}
                                             />
                                         ))}
                                     </Form.Group>
