@@ -29,7 +29,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
     var bancadas_nuevas=[''];
     var bancadas_nuevas2=[''];
     var conjunto_id='';
-    
+
     const [datos, setDatos] = useState({
         bancada_elegida: '',
         bancadas_guardar: grupo_bancadas ? grupo_bancadas : [''],
@@ -245,6 +245,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
             .then( res => { 
                 handleClose();
                 setShow(false);
+                window.location.href=`/rodillos/grupo_editar/${grupoId}`;
             })
             .catch(err => { 
                 console.error(err);
@@ -322,6 +323,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
         .then( res => { 
             handleClose();
             setShow(false);
+            window.location.href=`/rodillos/grupo_editar/${grupoId}`;
         })
         .catch(err => { 
             console.error(err);
@@ -368,6 +370,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
         .then( res => { 
             datos.bancadas_guardar=[];
             setShow_act(false);
+            window.location.href=`/rodillos/grupo_editar/${grupoId}`;
         })
         .catch(err => { 
             console.error(err);
