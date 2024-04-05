@@ -186,12 +186,12 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
                     SustituirConjuntoEnCelda(datos.conjunto_elegido);
                 }
                 else{
-                    if(bancada_id || bancada_id){
+                    if(bancada_id || bancadaId){
                         if(bancada_id){
                             GuardarCelda(bancada_id); //tengo bancada, crear celda
                         }
-                        if(bancada_id){
-                            GuardarCelda(bancada_id); //tengo bancada, crear celda
+                        if(bancadaId){
+                            GuardarCelda(bancadaId); //tengo bancada grabada sin actualizar, crear celda
                         }
                     }
                     else{
@@ -213,11 +213,10 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
                     }
                 }
                 if(no_coincide===false){
-                    if(colorVerde){ 
-                        console.log('celda en verde');
-                        //SI EXISTE CELDA con conjunto y elemento - MACHACO ELEMENTO
+                    if(colorVerde===true){ 
+                        alert('Ya tenemos elementos creados originales'); //Si tengo ya un juego original para esta formación, no puedo poner otro.
                     }
-                    if(colorAzul || colorVerde===false){ //no tengo conjunto ni elemento
+                    if(colorAzul===true || colorVerde===false){ //no tengo conjunto ni elemento
                         GuardarConjuntoElemento();
                     }
                 }
@@ -229,31 +228,21 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
     }
 
     const SustituirConjuntoEnCelda = (conjuntoId)=>{
-        conjuntoId && axios.get(BACKEND_SERVER + `/api/rodillos/celda/?conjunto__id=${elementos_formacion[0].conjunto.id}&bancada=${bancada_id}`,{
+        conjuntoId && axios.patch(BACKEND_SERVER + `/api/rodillos/celda/${elementos_formacion[0].id}/`, {
+            conjunto: conjuntoId,
+        }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
-              }
+                }     
         })
-        .then( res => {
-            axios.patch(BACKEND_SERVER + `/api/rodillos/celda/${res.data[0].id}/`, {
-                conjunto: conjuntoId,
-            }, {
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                    }     
-            })
-            .then( res => { 
-                handleClose();
-                setShow(false);
-                window.location.href=`/rodillos/grupo_editar/${grupoId}`;
-            })
-            .catch(err => { 
-                console.error(err);
-            })
+        .then( res => { 
+            handleClose();
+            setShow(false);
+            window.location.href=`/rodillos/grupo_editar/${grupoId}`;
         })
-        .catch( err => {
-            console.log(err);
-        });
+        .catch(err => { 
+            console.error(err);
+        })
     }
 
     const GuardarConjuntoElemento = () => { 
@@ -281,8 +270,8 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
                     })
                     .then( res => {   
                         y=y+1;
-                        if(y===(EjesRodillos.length)){
-                            if(colorAzul){
+                        if(y>(EjesRodillos.length)){
+                            if(colorAzul===true){
                                 SustituirConjuntoEnCelda(r.data.id); //tengo celda solo sustituyo el numero del conjunto en dicha celda
                             }
                             if(colorAzul===false && colorVerde===false){

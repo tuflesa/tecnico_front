@@ -59,6 +59,7 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                     objetosAcumulados += rr.data.length;
                     if (objetosAcumulados === formacionesCompletadasArray.length) {//si tengo todas las respuesta, paso la información a formacionescompletadas.
                         setFormacionesCompletadas(formacionesCompletadasArray);
+                        console.log('esto son las formaciones completadas: ', formacionesCompletadasArray);
                     }
                 })
                 .catch( err => {
@@ -161,12 +162,16 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                                                     if(form_completas.conjunto.operacion===operacion.id && form_completas.bancada.tubo_madre===form_completas.conjunto.tubo_madre && form_completas.bancada.tubo_madre===grupo.tubo_madre ){
                                                         colorBoton1=true; //tenemos rodillos propios
                                                     }
+                                                    if(form_completas.operacion!==form_completas.conjunto.operacion.id && form_completas.operacion===operacion.id){
+                                                        colorBoton3=true; //tenemos bancada de otra formación
+                                                    }
                                                     if( form_completas.bancada.tubo_madre!==form_completas.conjunto.tubo_madre && form_completas.operacion===operacion.id){
                                                         colorBoton2=true; //tenemos conjunto de otra formación
                                                     }
                                                     if(form_completas.bancada.tubo_madre!==grupo.tubo_madre && form_completas.operacion===operacion.id ){
                                                         colorBoton3=true; //tenemos bancada de otra formación
                                                     }
+                                                    
                                                 });
                                                 return (
                                                     <Button
@@ -187,6 +192,7 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                     </Col>
                 </Row> 
             :''} 
+            {operacion_marcada?
             <RodConjunto show={show_conjunto}
                     setShow={setShowConjunto}
                     operacion_marcada={operacion_marcada}
@@ -201,6 +207,7 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                     colorVerde={colorVerde}
                     bancada_id={bancada_id}
                     bancada_otraformacion={bancada_otraformacion}/>
+            :''}
         </Container>
     )
 }
