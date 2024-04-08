@@ -25,10 +25,10 @@ const LlamadasLista = () => {
             if (res.data.length > 0){
                 if ((lastcall===null) || lastcall && (res.data[0].id != lastcall.id)){
                     setFlash(true);
-                    setLastcall(res.data[0]);
-                    setLlamadas(res.data.slice(1));
                 }
                 else setFlash(false);
+                setLastcall(res.data[0]);
+                setLlamadas(res.data.slice(1));
             }
             else {
                 setLastcall(null);
