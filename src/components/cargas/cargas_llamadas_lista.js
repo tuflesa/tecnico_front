@@ -38,6 +38,7 @@ const LlamadasLista = () => {
             // console.log('ultima llamada: ', lastcall);
             // console.log('llamadas anteriores: ', llamadas);
         })
+        .catch(err => { console.log(err);})
     }
 
     const actualiza_fondo = () => {

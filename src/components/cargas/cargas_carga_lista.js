@@ -124,7 +124,6 @@ const CargasLista = () => {
                 <Table striped bordered hover>
                     <thead>
                         <tr>
-                            <th>Empresa</th>
                             <th>Entrada</th>
                             <th>Hora</th>
                             <th>Matricula</th>
@@ -145,7 +144,6 @@ const CargasLista = () => {
                         {cargas && cargas.map( carga => {
                             return (
                                 <tr key={carga.id}>
-                                    <td>{carga.empresa.nombre}</td>
                                     <td>{carga.fecha_entrada}</td>
                                     <td>{carga.hora_entrada}</td>
                                     <td>{carga.matricula}</td>
