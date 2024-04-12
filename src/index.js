@@ -19,6 +19,8 @@ import Mantenimiento from './components/mantenimiento/mantenimiento';
 import Rodillos from './components/rodillos/rodillos';
 import { CookiesProvider, useCookies } from 'react-cookie';
 import QS from './components/qs/qs';
+import CargasLista from './components/cargas/cargas_carga_lista';
+import LlamadasLista from './components/cargas/cargas_llamadas_lista';
 
 const Render = () => {
   const [token] = useCookies(['tec-token']);
@@ -64,6 +66,9 @@ const Render = () => {
             </Route>
           <Route path='/qs'>
             {token['tec-token'] ? <QS /> : <Redirect to="/" />}
+          </Route>
+          <Route path='/llamadas'>
+            <LlamadasLista />
           </Route>
         </Switch>
       </BrowserRouter>
