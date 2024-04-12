@@ -67,9 +67,6 @@ const Render = () => {
           <Route path='/qs'>
             {token['tec-token'] ? <QS /> : <Redirect to="/" />}
           </Route>
-          <Route path='/llamadas'>
-            <LlamadasLista />
-          </Route>
         </Switch>
       </BrowserRouter>
   )

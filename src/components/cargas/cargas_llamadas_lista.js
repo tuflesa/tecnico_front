@@ -8,7 +8,7 @@ import { Container, Row, Table} from 'react-bootstrap';
 const LlamadasLista = () => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
-    const [filtro, setFiltro] = useState('?carga__empresa=' + (user['tec-user'] ? user['tec-user'].perfil.empresa.id : '1') + '&carga__bruto__isnull=true');
+    const [filtro, setFiltro] = useState('?carga__empresa=' + user['tec-user'].perfil.empresa.id + '&carga__bruto__isnull=true');
     const [llamadas, setLlamadas] = useState([]);
     const [lastcall, setLastcall] = useState(null);
     const [flash, setFlash] = useState(false);
