@@ -59,7 +59,6 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                     objetosAcumulados += rr.data.length;
                     if (objetosAcumulados === formacionesCompletadasArray.length) {//si tengo todas las respuesta, paso la información a formacionescompletadas.
                         setFormacionesCompletadas(formacionesCompletadasArray);
-                        console.log('esto son las formaciones completadas: ', formacionesCompletadasArray);
                     }
                 })
                 .catch( err => {

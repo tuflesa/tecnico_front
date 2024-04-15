@@ -59,6 +59,8 @@ const RodTooling = () => {
                 }
             }
             setBancadas(newBancadas); // Para tener todas las bancadas juntos BD y CT
+            console.log('estas son todas las BANCADAS juntas', newBancadas);
+            console.log('estas son los MONTAJES: ', res.data);
             cogerDatos(res.data);
         })
         .catch( err => {
@@ -74,6 +76,7 @@ const RodTooling = () => {
         })
         .then( res => {
             setSecciones(res.data);
+            console.log('aqui tenemos las SECCIONES',res.data);
         })
         .catch( err => {
             console.log(err);
@@ -105,7 +108,7 @@ const RodTooling = () => {
                             return c.map(d => ({
                                 cel:d,
                                 seccion: d.bancada.seccion.id,
-                                operacion: d.conjunto.operacion,
+                                operacion: d.operacion,
                                 bancada: d.bancada.id,
                             }));
                         }       
@@ -127,7 +130,7 @@ const RodTooling = () => {
                         repetido: 0,
                         cel:d,
                         seccion: d.bancada.seccion.id,
-                        operacion: d.conjunto.operacion,
+                        operacion: d.operacion,
                         bancada: d.bancada.id,
                     }));
                 }
@@ -273,16 +276,22 @@ const RodTooling = () => {
                                                     if (bancada.seccion === seccion.id && montaje.id === bancada.montaje_id) {
                                                         return (
                                                             <td key={seccion.id}>
-                                                                {conjuntos_completadosCel && conjuntos_completadosCel.map((conjunto) => {
-                                                                    if (conjunto.seccion === seccion.id && bancada.id === conjunto.bancada && (!conjunto.cel.bancada.seccion.pertenece_grupo || montaje.grupo.tubo_madre === conjunto.cel.bancada.tubo_madre)) {
+                                                                {conjuntos_completadosCel && conjuntos_completadosCel.map((celda) => {
+                                                                    console.log('DENTRO DEL IF QUE VALE B-MONTAJE', bancada.montaje_id);
+                                                                    console.log('DENTRO DEL IF QUE VALE B-SECCION', bancada.seccion);
+                                                                    console.log('DENTRO DEL IF QUE VALE MONTAJE', montaje.id);
+                                                                    console.log('DENTRO DEL IF QUE VALE SECCION', seccion.id);
+                                                                    console.log('celdaaaaa',celda);
+                                                                    // if (conjunto.seccion === seccion.id && bancada.id === conjunto.bancada && (!conjunto.cel.bancada.seccion.pertenece_grupo || montaje.grupo.tubo_madre === conjunto.cel.bancada.tubo_madre)) {
+                                                                    if (celda.seccion === seccion.id && bancada.id === celda.bancada &&  (!celda.cel.bancada.seccion.pertenece_grupo || montaje.grupo.tubo_madre === celda.cel.bancada.tubo_madre)) {
                                                                         return (
-                                                                            <td key={conjunto.numCelda}>
+                                                                            <td key={celda.numCelda}>
                                                                                 {/* <img 
                                                                                     src={conjunto.cel.icono} 
                                                                                     alt="" // Sin texto alternativo 
                                                                                     style={{ width: '35px', height: '35px' }} 
                                                                                 /> */}
-                                                                                <>{conjunto.numCelda}</>
+                                                                                <>{celda.numCelda}</>
                                                                             </td>
                                                                         );                                                                      
                                                                     }
@@ -291,7 +300,7 @@ const RodTooling = () => {
                                                             </td>
                                                         );
                                                     }
-                                                    return null;
+                                                    else{ return (null); }
                                                 })}
                                             </React.Fragment>
                                         ))}

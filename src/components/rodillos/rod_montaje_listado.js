@@ -276,7 +276,6 @@ const RodMontajeListado = () => {
                                                                     <th>Operación</th>
                                                                     <th>Tubo madre</th>
                                                                     <th>Dimensiones</th>
-                                                                    <th>Eje</th>
                                                                     <th>Rodillo</th>
                                                                     <th>Anotaciones Montaje Rodillo</th>
                                                                 </tr>
@@ -287,7 +286,6 @@ const RodMontajeListado = () => {
                                                                         <td>{conjunto.nombreOperacion}</td>
                                                                         <td>{conjunto.tuboMadre}</td>
                                                                         <td>{conjunto.dimensioneseBancada}</td>
-                                                                        <td>{conjunto.diametroEje}</td>
                                                                         <td>{conjunto.nombreRodillo}</td>
                                                                         <td>{conjunto.anotacionMontaje}</td>
                                                                     </tr>

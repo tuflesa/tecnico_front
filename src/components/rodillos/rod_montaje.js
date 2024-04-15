@@ -309,7 +309,7 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
                                                 return (
                                                 <Button
                                                     key={operacion.id}
-                                                    className={`btn ${nuevoCampo ? 'btn-primary' : 'btn-outline-dark'} btn-sm`}
+                                                    className={`btn ${nuevoCampo ? 'btn-verde' : 'btn-outline-dark'} btn-sm`}
                                                     onClick={() => {datos.bancada_ct?GuardarId_Operacion(operacion):alert('Elige dimensiones')}}
                                                 >
                                                     {operacion.nombre}

@@ -52,28 +52,36 @@ const RodGruposListado = () => {
     }, [token, filtro]);
 
     useEffect(() => {
-        if (show && celdas) {
-            const conjuntosTabla = elementos && elementos.map(e => {
-                return e && e.map(c => {
-                    return c && c.map(d => {
-                        return (
-                            <tr key={d.id}>
-                                <td>{d.conjunto.operacion.nombre}</td>
-                                <td>{d.rodillo.grupo.tubo_madre}</td>
-                                <td>{d.eje.diametro}</td>
-                                <td>{d.rodillo.nombre}</td>
-                            </tr>
-                        )
-                    })
-                })
-            });
-
-            setConjuntos(conjuntosTabla);
+        if (show && celdas && elementos) {
+            // Aplanar la estructura para obtener un solo arreglo de objetos
+            const conjuntosTabla = elementos
+                .flatMap(e => e ? e.flatMap(c => c ? c : []) : [])
+                .filter(Boolean)
+                .map(d => ({
+                    elemento: d,
+                    seccionOrden: d.conjunto.operacion.seccion.orden,
+                    operacionOrden: d.conjunto.operacion.orden
+                }));    
+            // Ordenar el arreglo basado en seccionOrden y operacionOrden
+            const sortedConjuntos = conjuntosTabla.sort((a, b) => {
+                if (a.seccionOrden !== b.seccionOrden) {
+                    return a.seccionOrden - b.seccionOrden;
+                } else {
+                    return a.operacionOrden - b.operacionOrden;
+                }
+            }).map(d => (
+                <tr key={d.elemento.id}>
+                    <td>{d.elemento.conjunto.operacion.nombre}</td>
+                    <td>{d.elemento.rodillo.grupo.tubo_madre}</td>
+                    <td>{d.elemento.rodillo.nombre}</td>
+                </tr>
+            ));    
+            setConjuntos(sortedConjuntos);
         } else {
             setConjuntos(null);
         }
     }, [show, celdas, elementos]);
-
+    
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
             headers: {
@@ -300,7 +308,6 @@ const RodGruposListado = () => {
                                                                 <tr>
                                                                     <th>Operación</th>
                                                                     <th>Tubo madre</th>
-                                                                    <th>Eje</th>
                                                                     <th>Rodillo</th>
                                                                 </tr>
                                                             </thead>
