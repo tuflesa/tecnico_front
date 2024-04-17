@@ -64,6 +64,7 @@ const RodBancadaCT = ({bancada}) => {
         })
         .then( rr => {
             setFormacionesCompletadas(rr.data);
+            console.log('celdas?????', rr.data);
         })
         .catch( err => {
             console.log(err);
@@ -209,7 +210,8 @@ const RodBancadaCT = ({bancada}) => {
                     maquina={maquina}
                     tubomadre={dimensiones}
                     elementos_formacion={formaciones_filtradas}
-                    dimensiones={dimensiones}/>
+                    dimensiones={dimensiones}
+                    bancada_id={formaciones_completadas.length>0?formaciones_completadas[0].bancada.id:null}/>
         </Container>
     )
 }

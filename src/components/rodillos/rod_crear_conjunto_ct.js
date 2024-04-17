@@ -4,7 +4,7 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 
-const RodConjuntoCT = ({show, handleClose, operacion_marcada, elementos_formacion, dimensiones}) => {
+const RodConjuntoCT = ({show, handleClose, operacion_marcada, elementos_formacion, dimensiones, bancada_id}) => {
     const [token] = useCookies(['tec-token']);
 
     const [ejes, setEjes] = useState(null);
@@ -12,14 +12,16 @@ const RodConjuntoCT = ({show, handleClose, operacion_marcada, elementos_formacio
     const [rodillo_exist, setRodillo_exist] = useState([]);
     const [selectedEje, setSelectedEje] = useState(null);
     const [selectRodilloId, setSelectRodilloId] = useState({});
+    const [selectRodilloNom, setSelectRodilloNom] = useState({});
     const [EjesRodillos, setEjesRodillos] = useState([]);
     const [operacion_id, setOperacionId] = useState('');
     const [rod_id, setRod_Id] = useState(''); //para guardar la informacion en EjesRodillos
+    const [rod_nom, setRod_Nom] = useState(''); //para guardar la informacion en EjesRodillos
     const [rodillo_elegido, setRodillo_elegido] = useState([]);
-    
+    const [filtro, setFiltro] = useState(``);
 
     const [datos, setDatos] = useState({
-        dimensiones:'',
+        dimension: '',
     });
 
     useEffect(() => { //BUSCAMOS, SI LOS HAY, ELEMENTOS (RODILLOS) DEL CONJUNTO SELECCIONADO.
@@ -71,7 +73,7 @@ const RodConjuntoCT = ({show, handleClose, operacion_marcada, elementos_formacio
     }, [token, operacion_marcada]);
 
     useEffect(() => { //PARA OBTENER LOS RODILLOS EXISTENTES DE LA MISMA SECCIÓN;
-        operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/rodillos_existentes/?operacion__seccion__tipo=${operacion_marcada.seccion.tipo}`,{
+        operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/rodillos_existentes/?operacion__seccion__tipo=${operacion_marcada.seccion.tipo}`+ filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -82,13 +84,17 @@ const RodConjuntoCT = ({show, handleClose, operacion_marcada, elementos_formacio
         .catch( err => {
             console.log(err);
         });
-    }, [operacion_marcada]);
+    }, [operacion_marcada, filtro]);
 
     useEffect(() => { //SI TENEMOS LOS 3 ELEMENTOS ACUMULAMOS LO SELECCIONADO
         if(rod_id && selectedEje && dimensiones){
             setEjesRodillos([...EjesRodillos, {eje: selectedEje, rodillo: rod_id, operacion: operacion_id, dimensiones:dimensiones}]);
         }        
     }, [rod_id, selectedEje, dimensiones]);
+
+    const GuardarCT = () => {
+
+    }
 
     const GuardarConjunto = () => {
         //primero comprobamos si existe la bancada y si no, se crea, igual con LA CELDA, conjunto y por consiguiente con el elemento.
@@ -101,9 +107,6 @@ const RodConjuntoCT = ({show, handleClose, operacion_marcada, elementos_formacio
         .then( res => {
             if(res.data.length!==0){ //si hay bancada cojo el id
                 bancada_id=res.data[0].id;
-                if(datos.bancada_elegida){
-                    alert('Si ya tenemos bancada de grupo, no podemos coger una bancada adicional');
-                }
             }
             //guardamos primero la Bancada, guardamos el Conjunto y con el id de conjunto guardamos el Elemento, AL FINAL GUARDAMOS CELDA CON ID BANCADA E ID CONJUNTO
             if(EjesRodillos.length===ejes.length){
@@ -259,6 +262,22 @@ const RodConjuntoCT = ({show, handleClose, operacion_marcada, elementos_formacio
         });
     } 
 
+    const handlerCancelar = () => {
+        setEjesRodillos([]);
+        setSelectRodilloId({});
+        setSelectRodilloNom({});
+        setSelectedEje(null);
+        handleClose();
+        datos.dimension='';
+    }   
+
+    const handleInputChangeDimension = (event) => {
+        setDatos(prevDatos => ({
+            ...prevDatos,
+            dimension: event.target.value
+        }));
+    };
+    
     const handleInputChange = (event) => {
         const campoNombre = event.target.name;
         const idRodillo = event.target.value;
@@ -269,12 +288,25 @@ const RodConjuntoCT = ({show, handleClose, operacion_marcada, elementos_formacio
         setSelectRodilloId(nuevaSeleccionRodilloId);
     }
 
-    const handlerCancelar = () => {
-        setEjesRodillos([]);
-        setSelectRodilloId({});
-        setSelectedEje(null);
-        handleClose();
-    }   
+    const handleInputChangeRodExi = (event) => {
+        const [id, rodillo_nombre] = event.target.value.split(',');
+        const campoNombre = event.target.name;
+        const idRodillo = id;
+        const nomRodillo = rodillo_nombre;
+        setRod_Id(idRodillo);
+        setRod_Nom(nomRodillo);
+        const nuevaSeleccionRodilloId = {...selectRodilloId};
+        const nuevaSeleccionRodilloNom = {...selectRodilloNom};
+        nuevaSeleccionRodilloId[campoNombre] = idRodillo;
+        nuevaSeleccionRodilloNom[campoNombre] = nomRodillo;
+        setSelectedEje(campoNombre);
+        setSelectRodilloId(nuevaSeleccionRodilloId);
+        setSelectRodilloNom(nuevaSeleccionRodilloNom);
+    };
+
+    useEffect(() => {
+        setFiltro(`&nombre__icontains=${datos.dimension}`)
+    }, [datos.dimension]);
     
     return(
         <Modal show={show} onHide={handleClose} backdrop="static" keyboard={ false } animation={false} size="lg">
@@ -339,21 +371,39 @@ const RodConjuntoCT = ({show, handleClose, operacion_marcada, elementos_formacio
                         <Form>
                             <Row>
                                 <Col>
+                                    <Form.Group controlId="dimension">
+                                        <Form.Label style={{color: 'red'}}>Filtrar por Dimensiones</Form.Label>
+                                        <Form.Control type="text" 
+                                                    name='dimension' 
+                                                    value={datos.dimension}
+                                                    onChange={handleInputChangeDimension}                                        
+                                                    placeholder="Contiene"
+                                                    style={{color: 'red'}}/>
+                                    </Form.Group>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col>
                                 {ejes && ejes.map(eje => (
-                                    <Form.Group controlId={eje.id} key={eje.id}>
-                                        <Form.Label>{eje.tipo.nombre}</Form.Label>
+                                    <Form.Group controlId="rod_elegido">
+                                        <Form.Label>Rodillo {eje.tipo.nombre}</Form.Label>
+                                        <Form.Control type="text" 
+                                                    name='rod_elegido' 
+                                                    value={selectRodilloNom[eje.id]}                                       
+                                                    placeholder="Rodillo"
+                                                    style={{ color: 'blue' }}/>
                                         <Form.Control
                                             as="select"
                                             name={eje.id}
                                             value={selectRodilloId[eje.id] || ''}
-                                            onChange={handleInputChange}
+                                            onChange={handleInputChangeRodExi}
                                             placeholder={eje.tipo.nombre}
                                         >
-                                            <option key={0} value={''}>Elegir rodillo otras formaciones</option>
+                                            <option key={0} value={''}>Elegir rodillo</option>
                                             {rodillo_exist && rodillo_exist.map(rod_exist => {
                                                 if (rod_exist.diametro === eje.diametro) {
                                                     return (
-                                                        <option key={rod_exist.id} value={rod_exist.id}>
+                                                        <option key={rod_exist.id} value={`${rod_exist.id},${rod_exist.nombre}`}>
                                                             {rod_exist.nombre}
                                                         </option>
                                                     )
