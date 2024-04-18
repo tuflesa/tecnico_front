@@ -32,15 +32,12 @@ const RodBancadaCT = ({bancada}) => {
             setDimensiones(dimensionesValue);
         }
         else{
-            const params = new URLSearchParams(filtro);
-            const maquinaValue = bancada.seccion.maquina.id;
-            const empresaValue = bancada.seccion.maquina.empresa.id;
-            const dimensionesValue = bancada.dimensiones;
-            setMaquina(maquinaValue);
-            setEmpresa(empresaValue);
-            setDimensiones(dimensionesValue);
+            setMaquina(bancada.seccion.maquina.id);
+            setEmpresa(bancada.seccion.maquina.empresa.id);
+            setDimensiones(bancada.dimensiones);
+            setFiltro(`?maquina__empresa__id=${bancada.seccion.maquina.empresa.id}&pertenece_grupo=${false}&maquina__id=${bancada.seccion.maquina.id}`);
         }
-    }, [filtro, bancada]);
+    }, [filtro, bancada]); 
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + `/api/rodillos/seccion/`+filtro,{
