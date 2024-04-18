@@ -15,7 +15,7 @@ const RodBancadaCT = ({bancada}) => {
     const [maquina, setMaquina] = useState('');
     const [empresa, setEmpresa] = useState('');
     const [dimensiones, setDimensiones] = useState('');
-    const [filtro, setFiltro] = useState(`?maquina__empresa__id=${user['tec-user'].perfil.empresa.id}&pertence_grupo=${false}`);
+    const [filtro, setFiltro] = useState(`?maquina__empresa__id=${user['tec-user'].perfil.empresa.id}&pertenece_grupo=${false}`);
     const [operacion_marcada, setOperacionMarcada] = useState(null);
     const [show_conjunto, setShowConjunto] = useState(false);
     const [formaciones_completadas, setFormacionesCompletadas] = useState('');
@@ -64,7 +64,6 @@ const RodBancadaCT = ({bancada}) => {
         })
         .then( rr => {
             setFormacionesCompletadas(rr.data);
-            console.log('celdas?????', rr.data);
         })
         .catch( err => {
             console.log(err);
@@ -207,8 +206,6 @@ const RodBancadaCT = ({bancada}) => {
             <RodConjuntoCT show={show_conjunto}
                     operacion_marcada={operacion_marcada}
                     handleClose={CerrarConjunto}
-                    maquina={maquina}
-                    tubomadre={dimensiones}
                     elementos_formacion={formaciones_filtradas}
                     dimensiones={dimensiones}
                     bancada_id={formaciones_completadas.length>0?formaciones_completadas[0].bancada.id:null}/>
