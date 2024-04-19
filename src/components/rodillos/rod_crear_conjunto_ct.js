@@ -179,6 +179,7 @@ const RodConjuntoCT = ({show, handleClose, operacion_marcada, elementos_formacio
             conjunto: conjuntoId,
             bancada: bancadaId,
             icono: null,
+            operacion: operacion_id,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`

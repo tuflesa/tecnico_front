@@ -69,7 +69,6 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     }, [token]);
 
     useEffect(() => { // si ya tenemos elemenotos vinculados a este rodillo, no podemos modificar el rodillo.
-        console.log(rodillo);
         rodillo.id && axios.get(BACKEND_SERVER + `/api/rodillos/elemento/?rodillo=${rodillo.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`

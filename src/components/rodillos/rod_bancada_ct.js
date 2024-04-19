@@ -35,12 +35,12 @@ const RodBancadaCT = ({bancada}) => {
             setMaquina(bancada.seccion.maquina.id);
             setEmpresa(bancada.seccion.maquina.empresa.id);
             setDimensiones(bancada.dimensiones);
-            setFiltro(`?maquina__empresa__id=${bancada.seccion.maquina.empresa.id}&pertenece_grupo=${false}&maquina__id=${bancada.seccion.maquina.id}`);
+            setFiltro(`?maquina__empresa__id=${bancada.seccion.maquina.empresa.id}&pertenece_grupo=${false}&maquina=${bancada.seccion.maquina.id}&dimensiones=${dimensiones}`);
         }
     }, [filtro, bancada]); 
 
     useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/rodillos/seccion/`+filtro,{
+        maquina && axios.get(BACKEND_SERVER + `/api/rodillos/seccion/`+filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -84,6 +84,8 @@ const RodBancadaCT = ({bancada}) => {
     }, [maquina]);
 
     /* useEffect(() => { //para pintar las casillas de distinto color, añadimos nuevoCampo = true si tienen valor
+        console.log('que vale formaciones_completadas: ', formaciones_completadas);
+        console.log('que vale operaciones: ', operaciones);
         if (operaciones && formaciones_completadas) {
           const nuevasOperaciones = operaciones.map(operacion => {
             let nuevoCampo = false;
