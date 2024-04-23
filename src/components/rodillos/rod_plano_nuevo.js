@@ -5,7 +5,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import { Modal, Button, Form, Col, Row, Tab, Tabs } from 'react-bootstrap';
 
 
-const PlanoForm = ({show, handleCloseParametros,rodillo_id, rodillo}) => {
+const PlanoForm = ({show, handleCloseParametros,rodillo_id, rodillo, plano_length}) => {
     const [token] = useCookies(['tec-token']);
     const hoy = new Date();
     const fechaString = hoy.getFullYear() + '-' + ('0' + (hoy.getMonth()+1)).slice(-2) + '-' + ('0' + hoy.getDate()).slice(-2);
@@ -15,11 +15,22 @@ const PlanoForm = ({show, handleCloseParametros,rodillo_id, rodillo}) => {
     var valor = null;
 
     const [datos, setDatos] = useState({
-        nombre: null,
+        nombre: rodillo?'PL' + '-' + rodillo.nombre + '-' + (plano_length+1) : null,
         fecha: fechaString,
         archivo:'',
         motivo: 'nuevo',
+        cod_antiguo: '',
+        descripcion: '',
     });
+
+    useEffect(() => {
+        if (rodillo) {
+            setDatos(prevDatos => ({
+                ...prevDatos,
+                nombre: 'PL' + '-' + rodillo.nombre + '-' + (plano_length + 1)
+            }));
+        }
+    }, [rodillo, plano_length]);
 
     useEffect(() => { //Filtramos los planos existentes con la misma máquina, operación y tipo (sup - inf - lat...)
         rodillo.id && axios.get(BACKEND_SERVER + `/api/rodillos/planos_existentes/?rodillos__tipo=${rodillo.tipo.id}&rodillos__operacion__id=${rodillo.operacion.id}&rodillos__operacion__seccion__maquina__id=${rodillo.operacion.seccion.maquina.id}`,{
@@ -38,8 +49,6 @@ const PlanoForm = ({show, handleCloseParametros,rodillo_id, rodillo}) => {
     const handlerCancelar = () => {
         setDatos({
             ...datos,
-            //tipo_plano: '',
-            nombre: '',
             fecha: fechaString,
             archivo:'',
         })
@@ -103,6 +112,8 @@ const PlanoForm = ({show, handleCloseParametros,rodillo_id, rodillo}) => {
                 axios.post(BACKEND_SERVER + `/api/rodillos/plano_nuevo/`, {
                     nombre: datos.nombre,
                     rodillos: newRodillos,
+                    cod_antiguo: datos.cod_antiguo,
+                    descripcion: datos.descripcion,
                 }, {
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
@@ -196,7 +207,29 @@ const PlanoForm = ({show, handleCloseParametros,rodillo_id, rodillo}) => {
                                                 value={datos.nombre}
                                                 onChange={handleInputChange} 
                                                 placeholder="Nombre plano"
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col>
+                                <Form.Group controlId="cod_antiguo">
+                                    <Form.Label>Código antiguo</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='cod_antiguo' 
+                                                value={datos.cod_antiguo}
+                                                onChange={handleInputChange} 
+                                                placeholder="Codigo antiguo"
                                                 autoFocus
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col>
+                                <Form.Group controlId="descripcion">
+                                    <Form.Label>Descripción plano</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='descripcion' 
+                                                value={datos.descripcion}
+                                                onChange={handleInputChange} 
+                                                placeholder="Descripción plano"
                                     />
                                 </Form.Group>
                             </Col>

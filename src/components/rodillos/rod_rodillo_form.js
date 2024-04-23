@@ -924,6 +924,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                             <th>Revisiones</th>
                             <th>Código</th>
                             <th>Nombre</th>
+                            <th>Cod Antiguo</th>
+                            <th>Descripción</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -937,6 +939,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                         </td>
                                         <td>{plano.id}</td>
                                         <td>{plano.nombre}</td>
+                                        <td>{plano.cod_antiguo}</td>
+                                        <td>{plano.descripcion}</td>
                                         <td>
                                             <Clipboard className="mr-3 pencil" onClick={event => {NuevaRevision(plano.id)}}/>   
                                             <Trash className="mr-3 pencil" onClick={event => {eliminarPlano(plano)}}/>                                                      
@@ -957,7 +961,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             <PlanoForm show={show_plano}
                            handleCloseParametros={cerrarPlano}
                            rodillo_id={rodillo.id}
-                           rodillo={rodillo}/>
+                           rodillo={rodillo}
+                           plano_length = {planos?planos.length:0}/>
             
             <RodRevisionForm showRev={showRevision}
                            plano_id={plano_id}
