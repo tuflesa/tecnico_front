@@ -134,7 +134,7 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
         }
     }, [bancadas]);
 
-    useEffect(() => { //para pintar las casillas de distinto color, añadimos nuevoCampo = true si tienen valor
+    /* useEffect(() => { //para pintar las casillas de distinto color, añadimos nuevoCampo = true si tienen valor
         if (operaciones && formaciones_completadas) {
             const nuevasOperaciones = operaciones.map(operacion => {
                 let nuevoCampo = false;
@@ -149,7 +149,7 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
                 return { ...operacion, nuevoCampo };
             });
         }
-      }, [operaciones, formaciones_completadas]);
+      }, [operaciones, formaciones_completadas]); */
 
     const GuardarId_Operacion = (operationId) => {
         setOperacionMarcada(operationId); // Almacena la operación seleccionada
@@ -303,17 +303,36 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
                                 <tr>
                                     {secciones && secciones.map(seccion => (
                                         <td key={seccion.id}>
-                                            {operaciones && formaciones_completadas && operaciones.map((operacion) => {
-                                            if (operacion.seccion.id === seccion.id) {                                                
-                                                const nuevoCampo = formaciones_completadas.some(form_completas => form_completas.conjunto.operacion === operacion.id);
+                                            {operaciones && operaciones.map((operacion) => {
+                                            if (operacion.seccion.id === seccion.id) {
+                                                let colorBoton1 = false;
+                                                let colorBoton2 = false;
+                                                let colorBoton3 = false;
+                                                formaciones_completadas && formaciones_completadas.forEach(form_completas => {
+                                                    if(form_completas.conjunto.operacion===operacion.id && form_completas.bancada.tubo_madre===form_completas.conjunto.tubo_madre && form_completas.bancada.tubo_madre===bancadas.tubo_madre ){
+                                                        colorBoton1=true; //tenemos rodillos propios
+                                                    }
+                                                    /* if(form_completas.operacion!==form_completas.conjunto.operacion.id && form_completas.operacion===operacion.id){
+                                                        colorBoton3=true; //tenemos bancada de otra formación
+                                                    } */
+                                                    if( form_completas.bancada.tubo_madre!==form_completas.conjunto.tubo_madre && form_completas.operacion===operacion.id && form_completas.operacion===form_completas.conjunto.operacion){
+                                                        colorBoton2=true; //tenemos conjunto de otra formación
+                                                    }
+                                                    if(form_completas.bancada.tubo_madre!==bancadas.tubo_madre && form_completas.operacion===operacion.id ){
+                                                        colorBoton2=true; //tenemos bancada de otra formación
+                                                    }
+                                                    if(form_completas.operacion!==form_completas.conjunto.operacion && form_completas.bancada.tubo_madre!==form_completas.conjunto.tubo_madre && form_completas.operacion===operacion.id){
+                                                        colorBoton3=true; //tenemos conjunto de otra formación y de otra posición
+                                                    }
+                                                });
                                                 return (
-                                                <Button
-                                                    key={operacion.id}
-                                                    className={`btn ${nuevoCampo ? 'btn-verde' : 'btn-outline-dark'} btn-sm`}
-                                                    onClick={() => {datos.bancada_ct?GuardarId_Operacion(operacion):alert('Elige dimensiones')}}
-                                                >
-                                                    {operacion.nombre}
-                                                </Button>
+                                                    <Button
+                                                        key={operacion.id}
+                                                        className={`btn ${colorBoton2 ? 'btn-primary' : colorBoton1 ? 'btn-verde' : colorBoton3? 'btn-naranja-primary' : 'btn-gris-primary'} btn-sm`}
+                                                        onClick={() => {montaje_edi.grupo.id?GuardarId_Operacion(operacion, colorBoton1, colorBoton2, colorBoton3):alert('Elige grupo')}}
+                                                    >
+                                                        {operacion.nombre}
+                                                    </Button>
                                                 );
                                             }
                                             })}

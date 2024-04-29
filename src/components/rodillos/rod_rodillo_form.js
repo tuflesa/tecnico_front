@@ -29,6 +29,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [, setRevisiones] = useState(null);
     const [parametros, setParametros] = useState(null); // PARAMETROS GUARDADOS
     const [plano_id, setPlano_id] = useState(null);
+    const [plano_nombre, setPlano_nombre] = useState(null);
     const [showRevision, setShowRevision] = useState(false);
     const [showParametros, setShowParametros] = useState(false);
     const [tipos_planos, setTiposPlanos] = useState(null);
@@ -523,7 +524,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                     <React.Fragment key={conjunto.id}>
                                         <tr key={conjunto.id}>
                                             <td>{conjunto.motivo}</td>
-                                            <td>{conjunto.plano}</td>
+                                            <td>{conjunto.nombre}</td>
                                             <td>
                                                 <a href={conjunto.archivo}
                                                 target="_blank"
@@ -607,7 +608,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     };
 
     const NuevaRevision = (plano) => {
-        setPlano_id(plano);
+        setPlano_id(plano.id);
+        setPlano_nombre(plano.nombre);
         setShowRevision(true);
     }
 
@@ -922,7 +924,6 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                     <thead>
                         <tr>
                             <th>Revisiones</th>
-                            <th>Código</th>
                             <th>Nombre</th>
                             <th>Cod Antiguo</th>
                             <th>Descripción</th>
@@ -937,12 +938,11 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                         <td>
                                             <button type="button" className="btn btn-default" value={plano.id} name='prueba' onClick={event => {abrirConjuntos(plano.id)}}>--</button>
                                         </td>
-                                        <td>{plano.id}</td>
                                         <td>{plano.nombre}</td>
                                         <td>{plano.cod_antiguo}</td>
                                         <td>{plano.descripcion}</td>
                                         <td>
-                                            <Clipboard className="mr-3 pencil" onClick={event => {NuevaRevision(plano.id)}}/>   
+                                            <Clipboard className="mr-3 pencil" onClick={event => {NuevaRevision(plano)}}/>   
                                             <Trash className="mr-3 pencil" onClick={event => {eliminarPlano(plano)}}/>                                                      
                                         </td>
                                     </tr>
@@ -966,10 +966,12 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             
             <RodRevisionForm showRev={showRevision}
                            plano_id={plano_id}
+                           plano_nombre={plano_nombre}
                            setShowRevision={setShowRevision}
                            show_revision={showRevision}
                            tipo_plano_id={datos.tipo_plano}
-                           rodillo_id={rodillo.id}/>
+                           rodillo_id={rodillo.id}
+                           rodillo={rodillo}/>
             
             <RodParametrosEstandar showPa={showParametros}
                            tipo_plano_id={datos.tipo_plano}

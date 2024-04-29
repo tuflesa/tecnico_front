@@ -21,6 +21,7 @@ const PlanoForm = ({show, handleCloseParametros,rodillo_id, rodillo, plano_lengt
         motivo: 'nuevo',
         cod_antiguo: '',
         descripcion: '',
+        nombre_revision: rodillo?'PL' + '-' + rodillo.nombre + '-' + (plano_length+1)+'-'+'R'+(0) : null,
     });
 
     useEffect(() => {
@@ -125,6 +126,7 @@ const PlanoForm = ({show, handleCloseParametros,rodillo_id, rodillo, plano_lengt
                         formData.append('motivo', datos.motivo);
                         formData.append('archivo', archivo); // Aquí asumiendo que 'archivo' es el archivo seleccionado.
                         formData.append('fecha', datos.fecha);
+                        formData.append('nombre', datos.nombre_revision);
                     
                     axios.post(BACKEND_SERVER + `/api/rodillos/revision_plano/`, formData, {
                         headers: {

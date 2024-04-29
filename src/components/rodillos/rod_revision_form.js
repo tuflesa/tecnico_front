@@ -5,12 +5,13 @@ import { Modal, Button, Form, Col, Row } from 'react-bootstrap';
 import { BACKEND_SERVER } from '../../constantes';
 import { arch } from 'process';
 
-const RodRevisionForm = ({plano_id, show, setShowRevision, show_revision, tipo_plano_id, rodillo_id }) => {
+const RodRevisionForm = ({plano_id, show, setShowRevision, show_revision, tipo_plano_id, rodillo_id, rodillo, plano_nombre}) => {
     const [token] = useCookies(['tec-token']);
     const [archivo, setArchivo] = useState(null);
     const hoy = new Date();
     const fechaString = hoy.getFullYear() + '-' + ('0' + (hoy.getMonth()+1)).slice(-2) + '-' + ('0' + hoy.getDate()).slice(-2);
     const [tipo_plano, setTipoPlano] = useState([]);
+    const [revisiones, setRevisiones] = useState('');
 
     const [datos, setDatos] = useState({
         tipo_plano: tipo_plano,
@@ -18,6 +19,37 @@ const RodRevisionForm = ({plano_id, show, setShowRevision, show_revision, tipo_p
         fecha: fechaString,
         motivo: '',
     });
+ 
+    useEffect(() => {
+            plano_id && axios.get(BACKEND_SERVER + `/api/rodillos/revision_planos/?plano__id=${plano_id}`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                  }
+            })
+            .then( res => {
+                setRevisiones(res.data);
+                datos.nombre='PL-'+ plano_nombre+'-'+'R'+(res.data.length);
+            })
+            .catch( err => {
+                console.log(err);
+            });
+    }, [plano_id, token]);
+
+    useEffect(() => {
+        if(tipo_plano_id){
+            axios.get(BACKEND_SERVER + `/api/rodillos/tipo_plano/${tipo_plano_id}/`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                  }
+            })
+            .then( res => {
+                setTipoPlano(res.data);
+            })
+            .catch( err => {
+                console.log(err);
+            });
+        }
+    }, [token]);
 
     const GuardarRevision = () =>{
         if(archivo===null){
@@ -29,6 +61,7 @@ const RodRevisionForm = ({plano_id, show, setShowRevision, show_revision, tipo_p
             formData.append('motivo', datos.motivo);
             formData.append('archivo', archivo); // Aquí asumiendo que 'archivo' es el archivo seleccionado.
             formData.append('fecha', datos.fecha);
+            formData.append('nombre', datos.nombre);
 
         axios.post(BACKEND_SERVER + `/api/rodillos/revision_plano/`, formData, {
             headers: {
@@ -63,22 +96,6 @@ const RodRevisionForm = ({plano_id, show, setShowRevision, show_revision, tipo_p
         })
     }
 
-    useEffect(() => {
-        if(tipo_plano_id){
-            axios.get(BACKEND_SERVER + `/api/rodillos/tipo_plano/${tipo_plano_id}/`,{
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                  }
-            })
-            .then( res => {
-                setTipoPlano(res.data);
-            })
-            .catch( err => {
-                console.log(err);
-            });
-        }
-    }, [token]);
-
     return(
         <Modal show={show_revision} onHide={handlerCancelar} backdrop="static" keyboard={ false } animation={false} size="lg">
             <Modal.Header>
@@ -97,6 +114,19 @@ const RodRevisionForm = ({plano_id, show, setShowRevision, show_revision, tipo_p
                             </Form.Control>
                         </Form.Group>
                     </Col>
+                    <Col>
+                        <Form.Group controlId="nombre">
+                            <Form.Label>Nombre *</Form.Label>
+                            <Form.Control type="text"  
+                                        name='nombre' 
+                                        value={datos.nombre}
+                                        onChange={handleInputChange}
+                                        disabled={true}> 
+                            </Form.Control>
+                        </Form.Group>
+                    </Col>
+                </Row>
+                <Row>
                     <Col>
                         <Form.Group controlId="motivo">
                             <Form.Label>Motivo *</Form.Label>

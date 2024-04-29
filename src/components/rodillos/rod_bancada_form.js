@@ -161,14 +161,14 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                                                     if(form_completas.conjunto.operacion===operacion.id && form_completas.bancada.tubo_madre===form_completas.conjunto.tubo_madre && form_completas.bancada.tubo_madre===grupo.tubo_madre ){
                                                         colorBoton1=true; //tenemos rodillos propios
                                                     }
-                                                    if(form_completas.operacion!==form_completas.conjunto.operacion.id && form_completas.operacion===operacion.id){
+                                                    /* if(form_completas.operacion!==form_completas.conjunto.operacion.id && form_completas.operacion===operacion.id){
                                                         colorBoton3=true; //tenemos bancada de otra formación
-                                                    }
+                                                    } */
                                                     if( form_completas.bancada.tubo_madre!==form_completas.conjunto.tubo_madre && form_completas.operacion===operacion.id && form_completas.operacion===form_completas.conjunto.operacion){
                                                         colorBoton2=true; //tenemos conjunto de otra formación
                                                     }
                                                     if(form_completas.bancada.tubo_madre!==grupo.tubo_madre && form_completas.operacion===operacion.id ){
-                                                        colorBoton3=true; //tenemos bancada de otra formación
+                                                        colorBoton2=true; //tenemos bancada de otra formación
                                                     }
                                                     if(form_completas.operacion!==form_completas.conjunto.operacion && form_completas.bancada.tubo_madre!==form_completas.conjunto.tubo_madre && form_completas.operacion===operacion.id){
                                                         colorBoton3=true; //tenemos conjunto de otra formación y de otra posición
