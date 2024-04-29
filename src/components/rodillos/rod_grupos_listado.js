@@ -264,7 +264,7 @@ const RodGruposListado = () => {
             </Row>
             <Row>
                 <Col>
-                    <h5 className="mb-3 mt-3">Listado de Grupos de montaje</h5>
+                    <h5 className="mb-3 mt-3">Listado bancadas RD</h5>
                     <Row>
                         <table>
                             <tbody>

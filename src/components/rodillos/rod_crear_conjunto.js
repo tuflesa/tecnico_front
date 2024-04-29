@@ -34,7 +34,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
         bancada_elegida: '',
         bancadas_guardar: grupo_bancadas ? grupo_bancadas : [''],
         operacion_filtro: '',
-        tubo_madre_filtro: ``,
+        tubo_madre_filtro: '',
         conjunto_elegido: '',
     });
 
@@ -114,11 +114,21 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
     }, [token, operacion_marcada, grupoId]);
 
     useEffect(() => {
-        setFiltro(`&operacion__id=${datos.operacion_filtro}&tubo_madre=${datos.tubo_madre_filtro}`)
-    }, [datos.operacion_filtro, datos.tubo_madre_filtro]);
+        var valormenos=tubomadre -10;
+        var valormayor=tubomadre +10;
+        if(!datos.tubo_madre_filtro){
+            valormenos = tubomadre -10;
+            valormayor = tubomadre +10;
+        }
+        else{
+            valormenos = datos.tubo_madre_filtro;
+            valormayor = datos.tubo_madre_filtro;
+        }
+        setFiltro(`&operacion__id=${datos.operacion_filtro}&tubo_madre__gte=${valormenos}&tubo_madre__lte=${valormayor}`);
+    }, [datos.operacion_filtro, datos.tubo_madre_filtro, tubomadre, operacion_marcada]);
 
     useEffect(() => { //PARA OBTENER LOS CONJUNTO YA CREADOS
-        operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/conjunto_operacion/?operacion__seccion__id=${operacion_marcada.seccion.id}`+filtro,{
+        filtro && operacion_marcada && tubomadre && axios.get(BACKEND_SERVER + `/api/rodillos/conjunto_operacion/?operacion__seccion__id=${operacion_marcada.seccion.id}`+filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -129,10 +139,10 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
         .catch( err => {
             console.log(err);
         });
-    }, [operacion_marcada, grupoId, token, filtro]);
+    }, [filtro]);
 
     useEffect(() => { //PARA OBTENER LOS Ø DE TUBO MADRE UNICOS
-            axios.get(BACKEND_SERVER + `/api/rodillos/grupo_only/`,{
+        axios.get(BACKEND_SERVER + `/api/rodillos/grupo_only/?tubo_madre__gte=${tubomadre-10}&tubo_madre__lte=${tubomadre+10}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                   }
@@ -143,7 +153,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
             .catch( err => {
                 console.log(err);
             });
-    }, [conjuntos_exist, token]);
+    }, [token, tubomadre, operacion_marcada]);
 
     useEffect(() => { //SI TENEMOS LOS 3 ELEMENTOS ACUMULAMOS LO SELECCIONADO
         if(rod_id && selectedEje && operacion_rod && tubo_madre_rod){
@@ -275,7 +285,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
                                 SustituirConjuntoEnCelda(r.data.id); //tengo celda solo sustituyo el numero del conjunto en dicha celda
                             }
                             if(colorAzul===false && colorVerde===false){
-                                if(bancada_id){
+                                if(bancada_id || bancadaId){
                                     GuardarCelda(bancada_id); //tengo bancada creo celda
                                 }
                                 else{
