@@ -16,7 +16,7 @@ const RodNavBar = () => {
                             {nosoyTecnico?
                             <Nav className="mr-auto">
                                 <NavDropdown title="Rodillos" id="basic-nav-dropdown">
-                                    <NavDropdown.Item href="/rodillos/tooling">Tooling Chart</NavDropdown.Item>
+                                    {/* <NavDropdown.Item href="/rodillos/tooling">Tooling Chart</NavDropdown.Item> */}
                                     <NavDropdown title="Listados" id="listados-dropdown" menualign="right">
                                     <NavDropdown.Item href="/rodillos/lista">Rodillos</NavDropdown.Item>
                                     <NavDropdown.Item href="/rodillos/grupos">Bancadas RD</NavDropdown.Item> 
@@ -35,7 +35,7 @@ const RodNavBar = () => {
                             :
                             <Nav className="mr-auto">
                                 <NavDropdown title="Rodillos" id="basic-nav-dropdown">
-                                    <NavDropdown.Item href="/rodillos/tooling">Tooling Chart</NavDropdown.Item>
+                                    {/* <NavDropdown.Item href="/rodillos/tooling">Tooling Chart</NavDropdown.Item> */}
                                     <NavDropdown.Item href="/rodillos/montaje_lista">Montajes</NavDropdown.Item>
                                 </NavDropdown>
                             </Nav>
