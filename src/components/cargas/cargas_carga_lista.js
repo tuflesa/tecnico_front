@@ -25,7 +25,7 @@ const CargasLista = () => {
               }
         })
         .then(res => {
-            //console.log(res.data);
+            console.log(res.data);
             setCargas(res.data);
         })
     }
@@ -88,8 +88,21 @@ const CargasLista = () => {
             })
             .then(res => {
                 setShowPuerta(false);
-                setCarga(null);
+                //setCarga(null);
                 actualiza_lista();
+            })
+            .catch(err => {console.log(err);})
+
+        axios.post(BACKEND_SERVER + `/api/cargas/llamada/`,
+            {   carga: carga.id,
+                puerta: Number(carga.puerta)},
+            {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+            })
+            .then(res => {
+                console.log(res.data);
             })
             .catch(err => {console.log(err);})
     }
@@ -104,7 +117,6 @@ const CargasLista = () => {
     return (
         <Container >
             <Row className="justify-content-center">
-                
                     <CargasFiltro actualizaFiltro={actualizaFiltro} />
             </Row>
             <Row>
@@ -112,7 +124,6 @@ const CargasLista = () => {
                 <Table striped bordered hover>
                     <thead>
                         <tr>
-                            <th>Empresa</th>
                             <th>Entrada</th>
                             <th>Hora</th>
                             <th>Matricula</th>
@@ -125,6 +136,7 @@ const CargasLista = () => {
                             <th>Neto</th>
                             <th>Salida</th>
                             <th>Puerta</th>
+                            <th>Observaciones</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -132,7 +144,6 @@ const CargasLista = () => {
                         {cargas && cargas.map( carga => {
                             return (
                                 <tr key={carga.id}>
-                                    <td>{carga.empresa.nombre}</td>
                                     <td>{carga.fecha_entrada}</td>
                                     <td>{carga.hora_entrada}</td>
                                     <td>{carga.matricula}</td>
@@ -145,8 +156,9 @@ const CargasLista = () => {
                                     <td>{parseInt(carga.bruto)>parseInt(carga.tara) ? carga.bruto - carga.tara : null}</td>
                                     <td>{carga.fecha_salida}</td>
                                     <td>{carga.puerta}</td>
+                                    <td>{carga.observaciones}</td>
                                     <td>
-                                        <Link to={`/cargas/${carga.id}`}>
+                                        <Link to={`/cargas/detalle/${carga.id}`}>
                                             <Truck className="mr-2 pencil"/>
                                         </Link>
                                         <Link to={`/cargas/editar/${carga.id}`}>

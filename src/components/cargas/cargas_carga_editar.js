@@ -45,7 +45,8 @@ const CargaEditar = ({ match }) => {
                 tara: Number.isInteger(parseInt(res.data.tara)) ? res.data.tara : '',
                 destino: res.data.destino,
                 bruto: Number.isInteger(parseInt(res.data.bruto)) ? res.data.bruto : '',
-                fecha_salida: res.data.fecha_salida
+                fecha_salida: res.data.fecha_salida,
+                observaciones: res.data.observaciones
                 });
         })
         .catch( err => {
@@ -102,7 +103,8 @@ const CargaEditar = ({ match }) => {
             tara: datos.tara,
             destino: datos.destino,
             bruto: datos.bruto ? datos.bruto : null,
-            fecha_salida: datos.fecha_salida ? datos.fecha_salida : null
+            fecha_salida: datos.fecha_salida ? datos.fecha_salida : null,
+            observaciones: datos.observaciones
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -271,6 +273,18 @@ const CargaEditar = ({ match }) => {
                                             value={parseInt(datos.bruto) > parseInt(datos.tara) ? datos.bruto - datos.tara : null}
                                             placeholder="Neto" 
                                             disabled={true}/>
+                            </Form.Group>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col>
+                            <Form.Group controlId="observaciones">
+                                <Form.Label>Observaciones</Form.Label>
+                                <Form.Control type="text" 
+                                            name='observaciones' 
+                                            value={datos.observaciones}
+                                            placeholder="Observaciones" 
+                                            onChange={handleInputChange}/>
                             </Form.Group>
                         </Col>
                     </Row>

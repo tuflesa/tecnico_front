@@ -28,7 +28,8 @@ const CargaForm = ({ carga }) => {
         destino: carga.destino,
         bruto: Number.isInteger(parseInt(carga.bruto)) ? carga.bruto : '',
         fecha_salida: carga.fecha_salida,
-        bascula: ''
+        bascula: '',
+        observaciones: ''
     });
  
     useEffect(()=>{
@@ -96,7 +97,7 @@ const CargaForm = ({ carga }) => {
         if (datos.fecha_salida === null) { // && Number.isInteger(parseInt(datos.bruto))) {
             datos.fecha_salida = new Date();
             datos.fecha_salida.setHours( datos.fecha_salida.getHours() + 2 );
-            // console.log(datos.fecha_salida);
+            console.log(datos.fecha_salida);
         } 
         // if (datos.bruto===''){
         //     datos.bruto = null;
@@ -114,7 +115,8 @@ const CargaForm = ({ carga }) => {
             tara: datos.tara,
             destino: datos.destino,
             bruto: !pesoDisabled || datos.bruto ? datos.bruto : peso,
-            fecha_salida: datos.fecha_salida
+            fecha_salida: datos.fecha_salida,
+            observaciones: datos.observaciones
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -142,7 +144,8 @@ const CargaForm = ({ carga }) => {
             tara: !pesoDisabled ? (Number.isInteger(parseInt(datos.tara)) ? datos.tara : null) : peso,
             destino: datos.destino,
             bruto: Number.isInteger(parseInt(datos.bruto)) ? datos.bruto : null,
-            fecha_salida: datos.fecha_salida
+            fecha_salida: datos.fecha_salida,
+            observaciones: datos.observaciones
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -376,6 +379,19 @@ const CargaForm = ({ carga }) => {
                                             value={parseInt(datos.bruto) > parseInt(datos.tara) ? datos.bruto - datos.tara : null}
                                             placeholder="Neto" 
                                             disabled={true}/>
+                            </Form.Group>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col>
+                            <Form.Group controlId="observaciones">
+                                <Form.Label>Observaciones</Form.Label>
+                                <Form.Control type="text" 
+                                            name='observaciones' 
+                                            value={datos.observaciones}
+                                            placeholder="Observaciones" 
+                                            onChange={handleInputChange}
+                                            />
                             </Form.Group>
                         </Col>
                     </Row>

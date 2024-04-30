@@ -7,7 +7,7 @@ import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
 import QSNavBar from "./qs_nav";
-import {montaje, fleje} from './Grupo_152FF';
+import {montaje, fleje} from './Grupo_150';
 
 // const ejes = [{op:1, pos: [174, 343.57]},
 //               {op:2, pos: [177.91, 340.49]},
@@ -132,11 +132,11 @@ const QS_Grafico = () => {
         const gap_list = [];
         const H =[{nombre: 'MIN',
                    color:'red', 
-                   puntos:[{x: 0, y:-20, OP: 0, nombre: 'ET'}, {x:1590, y:10, OP:1, nombre: 'BD1'}, {x:2760, y:20, OP:2, nombre: 'BD2'}, {x:6320, y:30, OP:4, nombre: 'FP1'},{x:7570, y:40, OP:5, nombre: 'FP2'},{x:8820, y:50, OP:6, nombre: 'FP3'}, {x:10070, y:40, OP:7, nombre: 'W'}]
+                   puntos:[{x: 0, y:0, OP: 0, nombre: 'ET'}, {x:1590, y:10, OP:1, nombre: 'BD1'}, {x:2760, y:20, OP:2, nombre: 'BD2'}, {x:6320, y:30, OP:4, nombre: 'FP1'},{x:7570, y:40, OP:5, nombre: 'FP2'},{x:8820, y:50, OP:6, nombre: 'FP3'}, {x:10070, y:40, OP:7, nombre: 'W'}]
                   }, 
                   {nombre: 'MAX',
                    color: 'blue',
-                   puntos:[{x: 0, y:-20, OP: 0, nombre: 'ET'}, {x:1590, y:-10, OP:1, nombre: 'BD1'}, {x:2760, y:-20, OP:2, nombre: 'BD2'}, {x:6320, y:-30, OP:4, nombre: 'FP1'},{x:7570, y:-40, OP:5, nombre: 'FP2'},{x:8820, y:-50, OP:6, nombre: 'FP3'}]
+                   puntos:[{x: 0, y:0, OP: 0, nombre: 'ET'}, {x:1590, y:-10, OP:1, nombre: 'BD1'}, {x:2760, y:-20, OP:2, nombre: 'BD2'}, {x:6320, y:-30, OP:4, nombre: 'FP1'},{x:7570, y:-40, OP:5, nombre: 'FP2'},{x:8820, y:-50, OP:6, nombre: 'FP3'}]
                 }];
 
         if (ejes && ejesSim && montaje){

@@ -9,20 +9,20 @@ const montaje = [
                 tipo_plano: 'BD_INF',
                 eje: 'INF',
                 parametros: {
-                    Ancho: 660,
-                    Dext: 740,
+                    Ancho: 500,
+                    Dext: 600,
                     Df: 300,
-                    R: 300,
-                    alfa: 120
+                    R: 220,
+                    alfa: 100
                 }
             },
             {
                 tipo_plano: 'BD_SUP',
                 eje: 'SUP',
                 parametros: {
-                    Ancho: 520,
+                    Ancho: 330,
                     Df: 740,
-                    R: 281
+                    R: 201
                 }
             }
         ]
@@ -38,10 +38,10 @@ const montaje = [
                 tipo_plano: 'BD_INF',
                 eje: 'INF',
                 parametros: {
-                    Ancho: 470,
-                    Dext: 660,
+                    Ancho: 410,
+                    Dext: 550,
                     Df: 300,
-                    R: 190,
+                    R: 140,
                     alfa: 130
                 }
             },
@@ -49,9 +49,9 @@ const montaje = [
                 tipo_plano: 'BD_SUP',
                 eje: 'SUP',
                 parametros: {
-                    Ancho: 340,
+                    Ancho: 250,
                     Df: 740,
-                    R: 170
+                    R: 125
                 }
             }
         ]   
@@ -66,34 +66,34 @@ const montaje = [
                 tipo_plano: 'FP_INF',
                 eje: 'INF',
                 parametros: {
-                    Ancho: 230,
-                    Dext: 474.5,//476.87,
-                    Df: 295.8,
-                    Dc: 481.37,
-                    R1: 73.8,
-                    alfa1: 117.5,
-                    R2: 110.4,
-                    alfa2: 31.25,
-                    R3: 0,
-                    alfa3: 2
+                    Ancho: 180,
+                    Dext: 436.456,
+                    Df: 295,
+                    Dc: 444.956,
+                    R1: 60.388,
+                    alfa1: 120,
+                    R2: 89.567,
+                    alfa2: 30,
+                    R3: 268.702,
+                    alfa3: 10.612
                 }
             },
             {
                 tipo_plano: 'FP_SUP',
                 eje: 'SUP',
                 parametros: {
-                    Ancho: 230,
-                    Dext: 468.0,//471.86,
-                    Df: 295.8,
-                    Dc: 474.86,
+                    Ancho: 180,
+                    Dext: 430.951,
+                    Df: 295,
+                    Dc: 439.451,
                     R1: 0,
                     alfa1: 0,
-                    R2: 110.4,
-                    alfa2: 54.19,
-                    R3: 0,
-                    alfa3: 4,
-                    Cuchilla: 66.6,
-                    D_cuchilla: 320
+                    R2: 89.567,
+                    alfa2: 53.74,
+                    R3: 268.702,
+                    alfa3: 10.612,
+                    Cuchilla: 55.3,
+                    D_cuchilla: 328
                 },
 
             }
@@ -109,34 +109,34 @@ const montaje = [
                 tipo_plano: 'FP_INF',
                 eje: 'INF',
                 parametros: {
-                    Ancho: 230,
-                    Dext: 462.5, //466.46,
-                    Df: 296.36,
-                    Dc: 469.46,
-                    R1: 77.2,
+                    Ancho: 180,
+                    Dext: 428.492,
+                    Df: 297,
+                    Dc: 436.992,
+                    R1: 63.303,
                     alfa1: 120,
-                    R2: 95.9,
+                    R2: 76.689,
                     alfa2: 30,
-                    R3: 0,
-                    alfa3: 4
+                    R3: 230.067,
+                    alfa3: 11.584
                 }
             },
             {
                 tipo_plano: 'FP_SUP',
                 eje: 'SUP',
                 parametros: {
-                    Ancho: 230,
-                    Dext: 456.0, //459.94,
-                    Df: 296.36,
-                    Dc: 462.94,
-                    R1: 77.2,
+                    Ancho: 180,
+                    Dext: 422.985,
+                    Df: 297,
+                    Dc: 431.485,
+                    R1: 63.303,
                     alfa1: 120,
-                    R2: 95.9,
+                    R2: 76.689,
                     alfa2: 30,
-                    R3: 0,
-                    alfa3: 5,
-                    Cuchilla: 44.4,
-                    D_cuchilla: 320
+                    R3: 230.067,
+                    alfa3: 11.584,
+                    Cuchilla: 36.8,
+                    D_cuchilla: 332
                 },
                 
             }
@@ -152,34 +152,34 @@ const montaje = [
                 tipo_plano: 'FP_INF',
                 eje: 'INF',
                 parametros: {
-                    Ancho: 230,
-                    Dext: 447.0, //451.7,
-                    Df: 297,
-                    Dc: 454.7,
-                    R1: 80.7,
+                    Ancho: 180,
+                    Dext: 415.252,
+                    Df: 296,
+                    Dc: 423.752,
+                    R1: 66.494,
                     alfa1: 120,
-                    R2: 77,
+                    R2: 61.258,
                     alfa2: 30,
-                    R3: 0,
-                    alfa3: 3
+                    R3: 183.775,
+                    alfa3: 13.262
                 }
             },
             {
                 tipo_plano: 'FP_SUP',
                 eje: 'SUP',
                 parametros: {
-                    Ancho: 230,
-                    Dext: 445.5, //450.18,
-                    Df: 297,
-                    Dc: 453.18,
-                    R1: 80.7,
+                    Ancho: 180,
+                    Dext: 413.964,
+                    Df: 296,
+                    Dc: 422.464,
+                    R1: 66.494,
                     alfa1: 120,
-                    R2: 77,
+                    R2: 61.258,
                     alfa2: 30,
-                    R3: 0,
-                    alfa3: 5,
-                    Cuchilla: 22.1,
-                    D_cuchilla: 330
+                    R3: 183.775,
+                    alfa3: 13.262,
+                    Cuchilla: 18.4,
+                    D_cuchilla: 332
                 }
             }
         ]   
@@ -194,9 +194,9 @@ const montaje = [
                 tipo_plano: 'W_Lat',
                 eje: 'LAT_OP',
                 parametros: {
-                    Ancho: 165,
-                    Df: 375,
-                    R1: 70.15,
+                    Ancho: 160,
+                    Df: 385,
+                    R1: 64.7,
                     alfa1: 120,
                     R2: 3,
                     alfa2: 7,
@@ -207,9 +207,9 @@ const montaje = [
                 tipo_plano: 'W_Lat',
                 eje: 'LAT_MO',
                 parametros: {
-                    Ancho: 165,
-                    Df: 375,
-                    R1: 70.15,
+                    Ancho: 160,
+                    Df: 385,
+                    R1: 64.7,
                     alfa1: 120,
                     R2: 3,
                     alfa2: 7,
@@ -221,8 +221,8 @@ const montaje = [
                 eje: 'INF',
                 parametros: {
                     Ancho: 110,
-                    Df: 385,
-                    R1: 70.15,
+                    Df: 395,
+                    R1: 64.7,
                     alfa1: 60,
                     R2: 3,
                     alfa2: 7,
@@ -234,8 +234,8 @@ const montaje = [
 ]
 
 const fleje = {
-    espesor: 2,
-    ancho: 473,
+    espesor: 8,
+    ancho: 374,
     calidad: 'S350',
     color: 'aqua'
 }
