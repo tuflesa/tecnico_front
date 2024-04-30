@@ -1,4 +1,4 @@
-import { Container, Row, Col, Form, Button, Table } from 'react-bootstrap';
+/* import { Container, Row, Col, Form, Button, Table } from 'react-bootstrap';
 import { PlusCircle } from 'react-bootstrap-icons';
 import React, { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
@@ -111,7 +111,7 @@ const RodPlanos = () => {
                                 <th>Archivo</th>
                             </tr>
                         </thead>
-                        {/* <tbody>
+                        <tbody>
                             {datos.equipos && datos.equipos.map( equipo => {
                                 return (
                                     <tr key={equipo.id}>
@@ -126,7 +126,7 @@ const RodPlanos = () => {
                                     </tr>
                                 )})
                             }
-                        </tbody> */}
+                        </tbody>
                     </Table>
                 </Col>
             </Form.Row>
@@ -137,4 +137,4 @@ const RodPlanos = () => {
   export default RodPlanos;
   
   
-  
+   */

@@ -2,14 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
-import { Container, Row, Col, Table, Button} from 'react-bootstrap';
-import { Trash, PencilFill } from 'react-bootstrap-icons';
+import { Container, Row, Col, Table } from 'react-bootstrap';
+import { PencilFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import ManNotificacionesFiltro from './man_notificaciones_filtro';
 
 const ManNotificacionesLista = () => {
     const [token] = useCookies(['tec-token']);
-    const [user] = useCookies(['tec-user']);
     
     const [notas, setNotas]  = useState(null);
     const [filtro, setFiltro] = useState(null);

@@ -19,10 +19,12 @@ const RepInventarioFiltro = ({actualizaFiltro}) => {
         nombre_comun: '',
     });
 
+    /* eslint-disable react-hooks/exhaustive-deps */
     useEffect(()=>{  
         const filtro = `?repuesto__nombre__icontains=${datos.nombre}&repuesto__nombre_comun__icontains=${datos.nombre_comun}&repuesto__fabricante__icontains=${datos.fabricante}&almacen__id=${datos.almacen}&almacen__empresa__id=${datos.empresa}&repuesto__descatalogado=${false}`;      
         actualizaFiltro(filtro);
     },[datos.nombre, datos.fabricante, datos.almacen, datos.nombre_comun, datos.id]);
+    /* eslint-disable react-hooks/exhaustive-deps */
 
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/repuestos/almacen/?empresa=${datos.empresa}`,{
@@ -36,7 +38,7 @@ const RepInventarioFiltro = ({actualizaFiltro}) => {
         .catch( err => {
             console.log(err);
         });
-    }, [token]);
+    }, [token, datos.empresa]);
 
     const handleInputChange = (event) => {
         setDatos({

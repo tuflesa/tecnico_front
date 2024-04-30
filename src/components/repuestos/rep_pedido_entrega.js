@@ -12,7 +12,7 @@ const EntregaForm = ({show, updatePedido, linea_adicional, handleCloseEntrega}) 
  
     const hoy = new Date();
     const fechaString = hoy.getFullYear() + '-' + ('0' + (hoy.getMonth()+1)).slice(-2) + '-' + ('0' + hoy.getDate()).slice(-2);
-    const [entrega, setEntrega]=useState(null)
+    const [, setEntrega]=useState(null)
 
     const [datos, setDatos] = useState({  
         linea_adicional:linea_adicional ? linea_adicional.id : '',
@@ -32,6 +32,7 @@ const EntregaForm = ({show, updatePedido, linea_adicional, handleCloseEntrega}) 
         datos.albaran = '';
     } 
 
+    /* eslint-disable react-hooks/exhaustive-deps */
     useEffect(()=>{
         setDatos({
             linea_adicional:linea_adicional ? linea_adicional.id : '',
@@ -45,6 +46,7 @@ const EntregaForm = ({show, updatePedido, linea_adicional, handleCloseEntrega}) 
             usuario: user['tec-user'].id,
         });
     },[linea_adicional]);
+    /* eslint-disable react-hooks/exhaustive-deps */
 
     const actualizarRecibir = () =>{
         axios.patch(BACKEND_SERVER + `/api/repuestos/linea_adicional_pedido/${linea_adicional.id}/`, {

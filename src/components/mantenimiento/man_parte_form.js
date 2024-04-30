@@ -7,8 +7,6 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import LineaTareaNueva from './man_parte_lineatarea';
 import LineasPartesMov from './man_parte_lineas_mov';
-import { style } from 'd3';
-import { constants } from 'buffer';
 
 const ParteForm = ({parte, setParte, op}) => {
     const [token] = useCookies(['tec-token']);
@@ -19,14 +17,14 @@ const ParteForm = ({parte, setParte, op}) => {
     const [secciones, setSecciones] = useState(null);
     const [zonas, setZonas] = useState(null);
     const [equipos, setEquipos] = useState(null);
-    const [hoy] = useState(new Date);
+    const [hoy] = useState(new Date());
     const [show_linea, setShowLinea] = useState(false);
     const [show_error, setShowError] = useState(false);
     const [show_listlineastareas, setShowListLineasTareas] = useState(false);
     const [lineaLineasTareas, setListLineasTareas] = useState(null);
-    const [cambio_fecha, setCambioFecha] = useState(false);
+    const [, setCambioFecha] = useState(false);
     const [estados, setEstados] = useState(null);
-    const [actualizar, setActualizar] = useState('');
+    const [, setActualizar] = useState('');
     const [lineas, setLineas] = useState(null);
     const soyTecnico = user['tec-user'].perfil.destrezas.filter(s => s === 6);
     const nosoyTecnico = user['tec-user'].perfil.puesto.nombre==='Operador'||user['tec-user'].perfil.puesto.nombre==='Mantenimiento'?true:false;
@@ -53,6 +51,7 @@ const ParteForm = ({parte, setParte, op}) => {
         finalizar: parte.estado===3?true:false,
     });
 
+    /* eslint-disable react-hooks/exhaustive-deps */
     useEffect(()=>{
         setDatos({
             id: parte.id ? parte.id : null,
@@ -76,7 +75,7 @@ const ParteForm = ({parte, setParte, op}) => {
             finalizar: parte.estado===3?true:false,
         });
     },[parte]);
-  
+
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/mantenimiento/tipo_tarea/',{
             headers: {
@@ -283,6 +282,7 @@ const ParteForm = ({parte, setParte, op}) => {
             console.log(err);
         });
     }, [token]); 
+    /* eslint-disable react-hooks/exhaustive-deps */
 
     const updateParte = () => {
         parte.id && axios.get(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo_detalle/${parte.id}/`,{
@@ -675,10 +675,6 @@ const ParteForm = ({parte, setParte, op}) => {
         });                 
     }
 
-    const handleDisabled = () => {
-        return (user['tec-user'].perfil.puesto.nombre==='Mantenimiento')
-    }
-
     const handleDisabledMantenimiento = () => {
         return (user['tec-user'].perfil.puesto.nombre==='Mantenimiento')
     }
@@ -945,12 +941,11 @@ const ParteForm = ({parte, setParte, op}) => {
                                         <th>Nombre</th>
                                         <th>Especialidad</th>
                                         <th>Observaciones Técnico</th>
-                                        <th>Observaciones Mantenimiento</th>
+                                        {datos.tipo===1? <th>Tipo Periodo</th>:null}
+                                        {datos.tipo===1?<th>Cantidad Periodos</th>:null}
                                         {(user['tec-user'].perfil.puesto.nombre !=='Operario')? 
                                         <th style={{width:125}}>Acciones</th>
                                         :null}
-                                        {datos.tipo===1? <th>Tipo Periodo</th>:null}
-                                        {datos.tipo===1?<th>Cantidad Periodos</th>:null}
                                     </tr>
                                 </thead>                                                                             
                                 <tbody>
@@ -961,17 +956,16 @@ const ParteForm = ({parte, setParte, op}) => {
                                                 <td>{linea.tarea.nombre}</td>
                                                 <td>{linea.tarea.especialidad_nombre}</td>
                                                 <td>{linea.tarea.observaciones}</td>
-                                                <td>{linea.observaciones_trab}</td>
-                                                <td>                                            
-                                                    <Receipt className="mr-3 pencil" onClick={event =>{listarLineasTareas(linea.tarea)}}/>
-                                                    <Link to={`/mantenimiento/linea_tarea/${linea.id}`}><PencilFill className="mr-3 pencil"/></Link> 
-                                                    {nosoyTecnico?'':<Trash className="mr-3 pencil"  onClick={event =>{BorrarLinea(linea.tarea)}} />}
-                                                </td>
                                                 {datos.tipo===1? 
                                                     <td>{linea.tarea.tipo_periodo?linea.tarea.tipo_periodo.nombre:'0'}</td> : ''}
                                                 {datos.tipo===1? 
                                                     <td>{linea.tarea.periodo?linea.tarea.periodo:'0'}</td>
                                                 :''}
+                                                <td>                                            
+                                                    <Receipt className="mr-3 pencil" onClick={event =>{listarLineasTareas(linea.tarea)}}/>
+                                                    <Link to={`/mantenimiento/linea_tarea/${linea.id}`}><PencilFill className="mr-3 pencil"/></Link> 
+                                                    {nosoyTecnico?'':<Trash className="mr-3 pencil"  onClick={event =>{BorrarLinea(linea.tarea)}} />}
+                                                </td>
                                             </tr>
                                         )})
                                     }

@@ -11,18 +11,19 @@ const ManPendientes = () => {
     const [tareas, setTareas] = useState(null);
     const [partes, setPartes] = useState(null);
     const [user] = useCookies(['tec-user']); 
-    var fecha_hoy=Date.parse(new Date);
+    var fecha_hoy=Date.parse(new Date());
     var semanaEnMilisegundos = 1000 * 60 * 60 * 24 * 7;
     var enunasemana=fecha_hoy-semanaEnMilisegundos;
     var dentrodeunasemana = new Date(enunasemana);
     var fechaenunasemanaString = (dentrodeunasemana.getFullYear() + '-' + ('0' + (dentrodeunasemana.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunasemana.getDate()).slice(-2));  
 
-    const [datos, setDatos] = useState({
+    const [datos] = useState({
         fecha_plan_lte: fechaenunasemanaString,
         empresa: user['tec-user'].perfil.empresa.id,
     });
     const filtro = `?fecha_plan__lte=${datos.fecha_plan_lte}&parte__empresa__id=${datos.empresa}`;
 
+    /* eslint-disable react-hooks/exhaustive-deps */
     useEffect(()=>{        
         axios.get(BACKEND_SERVER + `/api/mantenimiento/lineas_activas_sinPaginar/`+ filtro,{
             headers: {
@@ -50,6 +51,7 @@ const ManPendientes = () => {
             console.log(err); 
         })       
     }, [token]);
+    /* eslint-disable react-hooks/exhaustive-deps */
 
     return (  
         <Container className="mb-5 mt-5"> 

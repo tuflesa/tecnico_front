@@ -12,7 +12,7 @@ const RepInventario = () => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
 
-    const [datos, setDatos] = useState({        
+    const [datos] = useState({        
         empresa: user['tec-user'].perfil.empresa.id,        
     }); 
     const[listInventario, setListInventario]=useState(null);
@@ -42,14 +42,15 @@ const RepInventario = () => {
                     }
             })
             .then( res => {
-                {res.data && res.data.map( r => {
+                res.data && res.data.map( r => {
                     r['alm'] = r.almacen.nombre;
                     r['articulo'] = r.repuesto.nombre;
                     r['fabricante'] = r.repuesto.fabricante;
                     r['nombre_comun']=r.repuesto.nombre_comun;
                     r['id_rep']=r.repuesto.id;
                     r['critico']=r.repuesto.es_critico;
-                })}
+                    return null;
+                })
                 setListInventario(res.data);
                 setBuscando(false);
             })

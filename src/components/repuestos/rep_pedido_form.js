@@ -15,7 +15,6 @@ import VistaPdf from './rep_pedidoPdf';
 import { PDFViewer } from '@react-pdf/renderer';
 import VistaIngPdf from './rep_pedidoIngPdf';
 import moment from 'moment';
-import { locales } from 'moment';
 
 const PedidoForm = ({pedido, setPedido}) => {
     const [token] = useCookies(['tec-token']);
@@ -34,7 +33,7 @@ const PedidoForm = ({pedido, setPedido}) => {
     const [lineaEntrega, setLineaEntrega] = useState(null);
     const [listMovimiento, setListMovimiento] = useState(null);
     const [listEntrega, setListEntrega] = useState(null);
-    const [hoy] = useState(new Date);
+    const [hoy] = useState(new Date());
     const [proveedores, setProveedores]= useState(null);
     const [verPdf, setVerPdf] = useState(false);
     const [verIngPdf, setVerIngPdf] = useState(false);

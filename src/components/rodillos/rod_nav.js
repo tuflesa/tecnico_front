@@ -5,6 +5,7 @@ import { useCookies } from 'react-cookie';
 
 const RodNavBar = () => {
     const [user] = useCookies(['tec-user']);
+    const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Director Técnico'?false:true;
 
     return (
             <React.Fragment>
@@ -12,18 +13,33 @@ const RodNavBar = () => {
                         <Navbar.Brand href="/home">Dep.Técnico</Navbar.Brand>
                         <Navbar.Toggle aria-controls="basic-navbar-nav"/>
                         <Navbar.Collapse id="basic-navbar-nav">
+                            {nosoyTecnico?
                             <Nav className="mr-auto">
                                 <NavDropdown title="Rodillos" id="basic-nav-dropdown">
-                                    <NavDropdown.Item href="/rodillos/tooling">Tooling Chart</NavDropdown.Item>
-                                    <NavDropdown.Item href="/rodillos/grupos">Listado de grupos</NavDropdown.Item> 
-                                    <NavDropdown.Item href="/rodillos/lista">Listado de rodillos</NavDropdown.Item>
-                                    <NavDropdown.Divider />
-                                    <NavDropdown.Item href="/rodillos/nuevo">Nuevo rodillo</NavDropdown.Item> 
-                                    <NavDropdown.Item href="/rodillos/grupo/nuevo">Nuevo grupo</NavDropdown.Item> 
-                                    <NavDropdown.Item href="/rodillos/planos/nuevo">Nuevo Plano</NavDropdown.Item> 
-                                    
+                                    {/* <NavDropdown.Item href="/rodillos/tooling">Tooling Chart</NavDropdown.Item> */}
+                                    <NavDropdown title="Listados" id="listados-dropdown" menualign="right">
+                                    <NavDropdown.Item href="/rodillos/lista">Rodillos</NavDropdown.Item>
+                                    <NavDropdown.Item href="/rodillos/grupos">Bancadas RD</NavDropdown.Item> 
+                                    <NavDropdown.Item href="/rodillos/lista_bancadas_ct">Bancadas CT</NavDropdown.Item>
+                                    <NavDropdown.Item href="/rodillos/montaje_lista">Montajes</NavDropdown.Item>
+                                    </NavDropdown>
+                                    <NavDropdown title="Nuevos" id="nuevos-dropdown" menualign="right">
+                                    <NavDropdown.Item href="/rodillos/grupo/nuevo">Grupo</NavDropdown.Item> 
+                                    <NavDropdown.Item href="/rodillos/nuevo">Rodillo</NavDropdown.Item> 
+                                    <NavDropdown.Item href="/rodillos/grupos">Bancadas RD</NavDropdown.Item> 
+                                    <NavDropdown.Item href="/rodillos/bacada_ct">Bancada CT</NavDropdown.Item> 
+                                    <NavDropdown.Item href="/rodillos/montaje">Montaje Bancadas</NavDropdown.Item> 
+                                    </NavDropdown>
                                 </NavDropdown>
-                            </Nav> 
+                            </Nav>
+                            :
+                            <Nav className="mr-auto">
+                                <NavDropdown title="Rodillos" id="basic-nav-dropdown">
+                                    {/* <NavDropdown.Item href="/rodillos/tooling">Tooling Chart</NavDropdown.Item> */}
+                                    <NavDropdown.Item href="/rodillos/montaje_lista">Montajes</NavDropdown.Item>
+                                </NavDropdown>
+                            </Nav>
+                            }
                             <Navbar.Text className="mr-4" >
                                 Usuario: {user['tec-user'].get_full_name}
                             </Navbar.Text>

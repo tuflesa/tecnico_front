@@ -1,49 +1,318 @@
-import React from 'react';
-import { Container, Row, Col, Table } from 'react-bootstrap';
+import React, { useEffect, useState } from 'react';
+import { Container, Row, Col, Table, Button, Form } from 'react-bootstrap';
 import logo from '../../assets/logo_bornay.svg';
-import rod_inf from '../../assets/rod_inf.svg';
-import rod_sup from '../../assets/rod_sup.svg';
+import { useCookies } from 'react-cookie';
+import RodMontajeListadoFiltro from './Rod_montaje_listado_filtro';
+import { BACKEND_SERVER } from '../../constantes';
+import axios from 'axios';
 
 const RodTooling = () => {
-    var numero = 2;
+    const [user] = useCookies(['tec-user']);
+    const [token] = useCookies(['tec-token']);
+
+    const [montajes, setMontajes] = useState(null)
+    const [filtro, setFiltro] = useState(``);
+    const [, setFilaSeleccionada] = useState(null);
+    const [show, setShow] = useState(false);
+    const [celdas, setCeldas] = useState(null);
+    const [elementos, setElementos] = useState(null);
+    const [celdasCT, setCeldasCT] = useState(null);
+    const [elementosCT, setElementosCT] = useState(null);
+    const [conjuntosCel, setConjuntosCel] = useState(null);
+    const [conjuntosCelCT, setConjuntosCelCT] = useState(null);
+    const [conjuntos_completadosCel, setConjuntosCompletadosCel] = useState(null);
+    const [maquina, setMaquina] = useState(null);
+    const [operaciones, setOperaciones] = useState(null);
+    const [secciones, setSecciones] = useState(null);
+    const [bancadas, setBancadas] = useState(null);
+
+    useEffect(() => { //SEPARAR DATOS QUE ENTRAN A TRAVES DEL FILTRO
+        const params = new URLSearchParams(filtro);
+        const maquinaValue = params.get('maquina__id');
+        setMaquina(maquinaValue);
+        setMontajes([]);
+    }, [filtro]);
+
+    useEffect(() => {
+        maquina && axios.get(BACKEND_SERVER + `/api/rodillos/montaje_tooling/`+filtro,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setMontajes(res.data);
+            let newBancadas = []; // Crear un nuevo array para almacenar los nuevos elementos
+            for (var x = 0; x < res.data.length; x++) {
+                var Idmontaje = {
+                    ...res.data[x].bancadas,
+                    montaje_id: res.data[x].id,
+                }
+                newBancadas = newBancadas.concat(Idmontaje);
+                for (var y = 0; y < res.data[x].grupo.bancadas.length; y++) {
+                    // Crear un nuevo objeto con el campo adicional
+                    var IDmontaje = {
+                        ...res.data[x].grupo.bancadas[y],
+                        montaje_id: res.data[x].id,
+                        seccion: res.data[x].grupo.bancadas[y].seccion.id
+                    };
+                    newBancadas = newBancadas.concat(IDmontaje);
+                }
+            }
+            setBancadas(newBancadas); // Para tener todas las bancadas juntos BD y CT
+            console.log('estas son todas las BANCADAS juntas', newBancadas);
+            console.log('estas son los MONTAJES: ', res.data);
+            cogerDatos(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [filtro, maquina]);
+
+    useEffect(() => { //recogemos las secciones de la máquina elegida
+        axios.get(BACKEND_SERVER + `/api/rodillos/seccion/` + filtro,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setSecciones(res.data);
+            console.log('aqui tenemos las SECCIONES',res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [filtro]);
+
+    useEffect(() => { //recogemos las operaciones de la máquina elegida
+        if(maquina){
+            axios.get(BACKEND_SERVER + `/api/rodillos/operacion/?seccion__maquina__id=${maquina}`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }
+            })
+            .then( r => {
+                setOperaciones(r.data);
+            })
+            .catch( err => {
+                console.log(err);
+            });
+        }
+    }, [maquina]);
+
+    useEffect(() => {
+        if (celdas) {
+            const datosTablaCel = celdas.flatMap(e => { //en esta operación creamos un array con la información que queremos mostras
+                if (e) {
+                    return e.flatMap(c => {
+                        if(c){
+                            return c.map(d => ({
+                                cel:d,
+                                seccion: d.bancada.seccion.id,
+                                operacion: d.operacion,
+                                bancada: d.bancada.id,
+                            }));
+                        }       
+                    });
+                }
+                return [];
+            });
+            setConjuntosCel(datosTablaCel);
+        } else {
+            setConjuntosCel(null);
+        }
+    }, [celdas]);
+
+    useEffect(() => {
+        if (celdasCT) {
+            const datosTablaCelCT = celdasCT.flatMap(e => { //idem celdas
+                if (e) {
+                    return e.map(d => ({
+                        repetido: 0,
+                        cel:d,
+                        seccion: d.bancada.seccion.id,
+                        operacion: d.operacion,
+                        bancada: d.bancada.id,
+                    }));
+                }
+                return [];
+            });
+            setConjuntosCelCT(datosTablaCelCT);
+        } else {
+            setConjuntosCelCT(null);
+        }
+    }, [celdasCT]);
+
+    useEffect(() => { //Para tener todas las celdas juntos BD y CT
+        if (conjuntosCel && conjuntosCelCT) {
+            const unimos = conjuntosCel.concat(conjuntosCelCT);
+            unimos.forEach((element, index) => {
+                element.numCelda = index + 1;
+            });
+            console.log('unimos:  ', unimos);            
+           setConjuntosCompletadosCel(unimos);
+        } else {
+            setConjuntosCompletadosCel(null);
+        }
+    }, [conjuntosCel, conjuntosCelCT]);
+
+    const cogerDatos = async (montajes) => {
+        try {
+            // Arrays para almacenar la información de todos los montajes
+            let todasLasCeldas = [];
+            let todasLasCeldasCT = [];
+            let todosLosElementos = [];
+            let todosLosElementosCT = [];
     
+            // Procesar cada montaje individualmente
+            await Promise.all(montajes.map(async (montaje) => {
+                // Hacer las solicitudes a las celdas de todas las bancadas y guardarlas en solicitudesCeldas
+                const solicitudesCeldas = montaje.grupo.bancadas.map(bancadaId => {
+                    return axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__id=${bancadaId.id}`, {
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                        }
+                    });
+                });
+    
+                const solicitudesCeldasCT = axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__id=${montaje.bancadas.id}`, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }
+                });
+    
+                // Esperar a que todas las solicitudes a las celdas se completen y pasar la info a respuestasCeldas
+                const respuestasCeldas = await Promise.all(solicitudesCeldas);
+                const respuestasCeldasCT = await solicitudesCeldasCT;
+    
+                // Buscar para cada Celda el elemento con el id del conjunto
+                const solicitudesElementos = respuestasCeldas.map(res => {
+                    return Promise.all(res.data.map(celda => {
+                        return axios.get(BACKEND_SERVER + `/api/rodillos/elemento_select/?conjunto__id=${celda.conjunto.id}`, {
+                            headers: {
+                                'Authorization': `token ${token['tec-token']}`
+                            }
+                        });
+                    }));
+                });
+    
+                const solicitudesElementosCT = Promise.all(respuestasCeldasCT.data.map(ress => {
+                    return axios.get(BACKEND_SERVER + `/api/rodillos/elemento_select/?conjunto__id=${ress.conjunto.id}`, {
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                        }
+                    });
+                }));
+    
+                // Esperar a que todas las solicitudes de elementos se completen y copiar la info en respuestasElementos
+                const respuestasElementos = await Promise.all(solicitudesElementos);
+                const respuestasElementosCT = await solicitudesElementosCT;
+    
+                // Almacenar la información del montaje actual en los arrays respectivos
+                todasLasCeldas.push(respuestasCeldas.map(res => res.data));
+                todasLasCeldasCT.push(respuestasCeldasCT.data);
+                todosLosElementos.push(respuestasElementos.map(res => res.map(r => r.data)));
+                todosLosElementosCT.push(respuestasElementosCT.map(res => res.data));
+            }));
+    
+            // Actualizar los estados con la información de todos los montajes
+            setFilaSeleccionada(montajes.map(montaje => montaje.id));
+            setShow(!show);
+            setCeldas(todasLasCeldas);
+            setCeldasCT(todasLasCeldasCT);
+            setElementos(todosLosElementos); //POR SI QUIERO LUEGO HACER UN CLICK Y VER INFORMACIÓN
+            setElementosCT(todosLosElementosCT);
+        } catch (err) {
+            console.log(err);
+        }
+    }; 
+    const actualizaFiltro = str => {
+        setFiltro(str);
+    }
+
     return (
         <Container>
-            <img src ={logo} width="500" height="500"></img>
+            <img src ={logo} width="200" height="200"></img>
             <Row>
                 <Col>
-                    <h5 className="mb-3 mt-3">Lista de Almacenes</h5>
-                    <Table striped bordered hover>
-                        <thead>
-                            <tr>
-                                <th colspan ={numero}>Id Repuesto precio</th>
-                                <th>Nombre</th>
-                                <th>Imagen</th>
-                                <th>Proveedor</th>
-                            </tr>
-                            <tr align='center'>
-                                <th><img src = {rod_inf} width="50" height="50"></img></th>
-                                <th><img src = {rod_sup} width="50" height="50"></img></th>
-                                <th><img src = {rod_inf} width="50" height="50"></img></th>
-                                <th><img src = {rod_sup} width="50" height="50"></img></th>
-                                <th><img src = {rod_inf} width="50" height="50"></img></th>
-                            </tr>
-                        </thead>
-                        {/* <tbody>
-                            {repuestos && repuestos.map( repuesto => {
-                                return (
-                                    <tr key={repuesto.id}>
-                                        <td>{repuesto.nombre}</td>
-                                        <td>{repuesto.proveedor===29?<img src = {logo}></img>:repuesto.proveedor===30?<img src = {cuchilla}></img>:''}</td>
-                                        <td>{repuesto.proveedor}</td>
-                                    </tr>
-                                )})
-                            }
-                        </tbody> */}
-                    </Table>
+                    <RodMontajeListadoFiltro actualizaFiltro={actualizaFiltro}/>
                 </Col>
-            </Row>  
+            </ Row>
+            <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
+            {maquina && conjuntosCel!==null && conjuntosCel.length!==0 &&(
+                <Row>
+                    <Col>
+                        <h5 className="mb-3 mt-3">Bancadas</h5>
+                        <Table striped bordered hover>
+                            <thead>
+                                <tr>
+                                    <th>{'Nombre'}</th> 
+                                    {secciones && secciones.map(seccion => (
+                                        <th key={seccion.id}>
+                                            {seccion.nombre}
+                                            <Row>
+                                                {operaciones && operaciones.map((operacion) => (
+                                                    operacion.seccion.id === seccion.id && (
+                                                        <Col key={operacion.id}>
+                                                            <img 
+                                                                src={operacion.icono} 
+                                                                alt="" // Sin texto alternativo 
+                                                                style={{ width: '30px', height: '30px' }} 
+                                                            />
+                                                        </Col>
+                                                    )
+                                                ))}
+                                            </Row>
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {montajes && montajes.map(montaje => (
+                                    <tr key={montaje.id}>
+                                        <td>{montaje.grupo.nombre} - {montaje.nombre}</td> 
+                                        {secciones && secciones.map(seccion => (
+                                            <React.Fragment key={seccion.id}>
+                                                {bancadas && bancadas.map(bancada => {
+                                                    if (bancada.seccion === seccion.id && montaje.id === bancada.montaje_id) {
+                                                        return (
+                                                            <td key={seccion.id}>
+                                                                {conjuntos_completadosCel && conjuntos_completadosCel.map((celda) => {
+                                                                    console.log('DENTRO DEL IF QUE VALE B-MONTAJE', bancada.montaje_id);
+                                                                    console.log('DENTRO DEL IF QUE VALE B-SECCION', bancada.seccion);
+                                                                    console.log('DENTRO DEL IF QUE VALE MONTAJE', montaje.id);
+                                                                    console.log('DENTRO DEL IF QUE VALE SECCION', seccion.id);
+                                                                    console.log('celdaaaaa',celda);
+                                                                    // if (conjunto.seccion === seccion.id && bancada.id === conjunto.bancada && (!conjunto.cel.bancada.seccion.pertenece_grupo || montaje.grupo.tubo_madre === conjunto.cel.bancada.tubo_madre)) {
+                                                                    if (celda.seccion === seccion.id && bancada.id === celda.bancada &&  (!celda.cel.bancada.seccion.pertenece_grupo || montaje.grupo.tubo_madre === celda.cel.bancada.tubo_madre)) {
+                                                                        return (
+                                                                            <td key={celda.numCelda}>
+                                                                                {/* <img 
+                                                                                    src={conjunto.cel.icono} 
+                                                                                    alt="" // Sin texto alternativo 
+                                                                                    style={{ width: '35px', height: '35px' }} 
+                                                                                /> */}
+                                                                                <>{celda.numCelda}</>
+                                                                            </td>
+                                                                        );                                                                      
+                                                                    }
+                                                                    return null;
+                                                                })}  
+                                                            </td>
+                                                        );
+                                                    }
+                                                    else{ return (null); }
+                                                })}
+                                            </React.Fragment>
+                                        ))}
+                                    </tr>
+                                ))}
+                            </tbody>
 
+
+                        </Table>
+                    </Col>
+                </Row> 
+            )}
         </Container>
     )
 }

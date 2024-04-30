@@ -46,7 +46,7 @@ const ManNotificacionesFiltro = ({actualizaFiltro}) => {
         .catch( err => {
             console.log(err);
         });
-    }, [token]);
+    }, [token, user]);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
@@ -74,14 +74,16 @@ const ManNotificacionesFiltro = ({actualizaFiltro}) => {
         .catch( err => {
             console.log(err);
         }); 
-    }, [token, datos.empresa]);
+    }, [token, datos.empresa, user]);
 
+    /* eslint-disable react-hooks/exhaustive-deps */
     useEffect(()=>{
         const filtro1 = `?quien=${datos.quien}&finalizado=${datos.finalizado}&revisado=${datos.revisado}&descartado=${datos.descartado}&fecha_creacion__lte=${datos.fecha_creacion_lte}&fecha_creacion__gte=${datos.fecha_creacion_gte}&numero__icontains=${datos.numero}&zona__id=${datos.zona}&empresa__id=${datos.empresa}`;
         //let filtro2 = `&empresa__id=${datos.empresa}`;
         //const filtro = filtro1 + filtro2;
         actualizaFiltro(filtro1);
     },[datos, token]);
+    /* eslint-disable react-hooks/exhaustive-deps */
 
     const handleInputChange = (event) => {
         setDatos({

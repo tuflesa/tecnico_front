@@ -16,7 +16,7 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
     const [primera_vez, setPrimeraVez] = useState(true);
     const [abrirFiltro, setabrirFiltro] = useState(false);
     
-    var fecha_hoy=Date.parse(new Date);
+    var fecha_hoy=Date.parse(new Date());
     var mesEnMilisegundos = 1000 * 60 * 60 * 24 * 7;  //cambiado a una semana, en vez del mes
     var enunmes=fecha_hoy+mesEnMilisegundos;
     var dentrodeunmes = new Date(enunmes);
@@ -73,8 +73,9 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
         .catch( err => {
             console.log(err);
         });
-    }, [token]);
+    }, [token, user]);
 
+    /* eslint-disable react-hooks/exhaustive-deps */
     useEffect(() => {
         axios.get(BACKEND_SERVER + `/api/estructura/zona/?empresa=${datos.empresa}`,{
             headers: {
@@ -160,6 +161,7 @@ const ManEquipoFiltro = ({actualizaFiltro}) => {
         const filtro = `?parte__tipo=${datos.tipo}&parte__empresa=${datos.empresa}&parte__zona=${datos.zona}&parte__seccion__id=${datos.seccion}&parte__equipo__id=${datos.equipo}&fecha_plan__lte=${datos.fecha_plan_lte}&tarea__especialidad=${datos.especialidad}`;
         actualizaFiltro(filtro);
     },[datos]);
+    /* eslint-enable react-hooks/exhaustive-deps */
 
     const handleInputChange = (event) => {
         setDatos({

@@ -9,7 +9,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
     const [estados, setEstados] = useState(null);
     const [tipo_periodos, setTipoPeriodo] = useState(null);
     const [user] = useCookies(['tec-user']);
-    const [hoy] = useState(new Date);
+    const [hoy] = useState(new Date());
     const nosoyTecnico = user['tec-user'].perfil.puesto.nombre==='Operador'||user['tec-user'].perfil.puesto.nombre==='Mantenimiento'?true:false;
 
     const [datos, setDatos] = useState({
@@ -75,10 +75,10 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
             nombre: datos.nombre,
             prioridad: datos.prioridad,
             observaciones: datos.observaciones,
-            observaciones_trab: datos.observaciones_trab,
+            //observaciones_trab: datos.observaciones_trab,
             tipo_periodo: datos.tipo_periodo,
             periodo: datos.periodo,
-            fecha_plan: datos.fecha_plan,
+            //fecha_plan: datos.fecha_plan,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -96,6 +96,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
             fecha_fin:datos.fecha_fin,
             fecha_plan:datos.fecha_plan,
             estado: datos.estado,
+            observaciones_trab: datos.observaciones_trab,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -345,7 +346,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                             <Col>
                                 <Form.Group id="observaciones_trab">
                                     <Form.Label>Conclusiones Personal Mantenmiento</Form.Label>
-                                    <Form.Control as="textarea" rows={3}
+                                    <Form.Control as="textarea" rows={4}
                                                 name='observaciones_trab' 
                                                 value={datos.observaciones_trab}
                                                 onChange={handleInputChange} 

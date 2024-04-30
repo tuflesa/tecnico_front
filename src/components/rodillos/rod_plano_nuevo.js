@@ -2,39 +2,58 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
-import { Modal, Button, Form, Col, Row, Tab, Tabs, ListGroup } from 'react-bootstrap';
+import { Modal, Button, Form, Col, Row, Tab, Tabs } from 'react-bootstrap';
 
 
-const PlanoForm = ({show, handleCloseParametros, tipo_seccion}) => {
+const PlanoForm = ({show, handleCloseParametros,rodillo_id, rodillo, plano_length}) => {
     const [token] = useCookies(['tec-token']);
-    const [tipo_plano, setTipoPlano] = useState([]);
-    const [parametros, setParametros] = useState([]);
     const hoy = new Date();
     const fechaString = hoy.getFullYear() + '-' + ('0' + (hoy.getMonth()+1)).slice(-2) + '-' + ('0' + hoy.getDate()).slice(-2);
-    const [introParametros, setIntroParametros] = useState(false);
-    const [valorParametro, setValorParametro] = useState('');
+    const [archivo, setArchivo] = useState(null);
+    const [PlanosExistentes, setPlanosExistentes] = useState(null);
+    const [checkboxSeleccionados, setCheckboxSeleccionados] = useState([]);
+    var valor = null;
 
     const [datos, setDatos] = useState({
-        tipo_plano: '',
-        nombre: '',
+        nombre: rodillo?'PL' + '-' + rodillo.nombre + '-' + (plano_length+1) : null,
         fecha: fechaString,
+        archivo:'',
+        motivo: 'nuevo',
+        cod_antiguo: '',
+        descripcion: '',
+        nombre_revision: rodillo?'PL' + '-' + rodillo.nombre + '-' + (plano_length+1)+'-'+'R'+(0) : null,
     });
 
     useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/rodillos/tipo_plano/?tipo_seccion=${tipo_seccion}`,{
+        if (rodillo) {
+            setDatos(prevDatos => ({
+                ...prevDatos,
+                nombre: 'PL' + '-' + rodillo.nombre + '-' + (plano_length + 1)
+            }));
+        }
+    }, [rodillo, plano_length]);
+
+    useEffect(() => { //Filtramos los planos existentes con la misma máquina, operación y tipo (sup - inf - lat...)
+        rodillo.id && axios.get(BACKEND_SERVER + `/api/rodillos/planos_existentes/?rodillos__tipo=${rodillo.tipo.id}&rodillos__operacion__id=${rodillo.operacion.id}&rodillos__operacion__seccion__maquina__id=${rodillo.operacion.seccion.maquina.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
-              }
+                }
         })
         .then( res => {
-            setTipoPlano(res.data);
+            setPlanosExistentes(res.data);
         })
         .catch( err => {
             console.log(err);
         });
-    }, [token]);
+    }, [token, rodillo]);
 
     const handlerCancelar = () => {
+        setDatos({
+            ...datos,
+            fecha: fechaString,
+            archivo:'',
+        })
+        setCheckboxSeleccionados([]);
         handleCloseParametros()
     }
 
@@ -45,36 +64,112 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion}) => {
         })
     }
 
-    const CargaPlano = () =>{;
-        setIntroParametros(true);
-        axios.get(BACKEND_SERVER + `/api/rodillos/plano_parametros/${datos.tipo_plano}`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            setParametros(res.data.nombres);
+    const GuardarPlano = async () => {
+        if (checkboxSeleccionados.length !== 0) {
+            const requests = [];
+            for (var z = 0; z < checkboxSeleccionados.length; z++) {
+                valor = parseInt(checkboxSeleccionados[z]);
+                var idRodillo = parseInt(rodillo_id);
+        
+                try {
+                    const res = await axios.get(BACKEND_SERVER + `/api/rodillos/plano/${valor}`, {
+                        headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                        }
+                    });
+            
+                    //setRodillos([...res.data.rodillos, idRodillo]);
+            
+                    requests.push(
+                        axios.patch(BACKEND_SERVER + `/api/rodillos/plano/${valor}/`, {
+                        rodillos: [...res.data.rodillos, idRodillo],
+                        }, {
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                        }
+                        })
+                    );
 
-            console.log(res.data);
-        })
-        .catch( err => {
-            console.log(err);
-        });
+                } 
+                catch (err) {
+                console.log(err);
+                }
+            }
+            try{
+                await Promise.all(requests);
+                handlerCancelar();
+                window.location.href = `/rodillos/editar/${rodillo_id}`;
+            } catch(err){
+                console.log(err);
+            }
+        }
+        else{
+            if(archivo===null){
+                alert('Por favor incluye un archivo');
+            }
+            else{
+                var newRodillos=[];
+                newRodillos = [parseInt(rodillo_id)]
+                axios.post(BACKEND_SERVER + `/api/rodillos/plano_nuevo/`, {
+                    nombre: datos.nombre,
+                    rodillos: newRodillos,
+                    cod_antiguo: datos.cod_antiguo,
+                    descripcion: datos.descripcion,
+                }, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                        }     
+                })
+                .then( res => { 
+                    const formData = new FormData();
+                        formData.append('plano', res.data.id);
+                        formData.append('motivo', datos.motivo);
+                        formData.append('archivo', archivo); // Aquí asumiendo que 'archivo' es el archivo seleccionado.
+                        formData.append('fecha', datos.fecha);
+                        formData.append('nombre', datos.nombre_revision);
+                    
+                    axios.post(BACKEND_SERVER + `/api/rodillos/revision_plano/`, formData, {
+                        headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'Authorization': `token ${token['tec-token']}`
+                        }
+                    })
+                    .then(re => { 
+                        alert('Plano guardado correctamente');
+                        window.location.href = `/rodillos/editar/${rodillo_id}`;
+                    })
+                    .catch(err => { 
+                        console.error(err);
+                    });
+                    })
+                }
+            handlerCancelar();
+        }
     }
 
-    const GuardarParametros = () =>{;
-        console.log('aquí guardará los datos almacenados en valor parametro y se saldrá');
-        console.log(valorParametro);
-        handlerCancelar();
-
+    const handleInputChange_archivo = (event)=> {
+        const selectedFile = event.target.files[0];
+        setArchivo(selectedFile);
     }
 
-    const handleValorChange = (parametroId, nuevoValor)=> {
-        const parametrosCopia = [...parametros];
-        const indice = parametrosCopia.findIndex(parametro => parametro.id === parametroId);
-        parametrosCopia[indice].valor = nuevoValor;
-        setValorParametro(parametrosCopia);
-    }
+    const handleCheckboxChange = (event) => {
+        const checkboxId = event.target.id;
+        if (event.target.checked) {
+            // Agrega el checkbox seleccionado al estado
+            setCheckboxSeleccionados([...checkboxSeleccionados, checkboxId]);
+        } else {
+            // Elimina el checkbox deseleccionado del estado
+            setCheckboxSeleccionados(checkboxSeleccionados.filter(id => id !== checkboxId));
+        }
+    };
+    
+    const plano_marcado = (plano) => {
+        for(var x=0;x<plano.rodillos.length;x++){
+            if(plano.rodillos[x].id===rodillo_id){
+                return(true);
+            }
+        }
+    };
 
     return(
         <Modal show={show} onHide={handleCloseParametros} backdrop="static" keyboard={ false } animation={false} size="lg">
@@ -89,61 +184,59 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion}) => {
                     >
                     <Tab eventKey="Plano" title="Plano existente">
                         <Form>
-                                <div key={'0'} className="mb-3">
-                                <Form.Check
-                                    reverse
-                                    label="1"
-                                    name="group1"
-                                    type={'checkbox'}
-                                    id={`0`}
-                                />
-                                <Form.Check
-                                    reverse
-                                    label="2"
-                                    name="group1"
-                                    type={'checkbox'}
-                                    id={`1`}
-                                />
-                                <Form.Check
-                                    reverse
-                                    disabled
-                                    label="3 (disabled)"
-                                    type={'checkbox'}
-                                    id={`2`}
-                                />
+                            {PlanosExistentes && PlanosExistentes.map(plano => (
+                                <div key={plano.id} className="mb-3">
+                                    <Form.Check
+                                        reverse
+                                        label={plano.nombre}
+                                        name="existente"
+                                        type={'checkbox'}
+                                        id={plano.id}
+                                        onChange={handleCheckboxChange}
+                                        disabled={plano_marcado(plano)}
+                                    />
                                 </div>
+                            ))}
                         </Form>
                     </Tab>
                     <Tab eventKey="Plano_nuevo" title="Plano nuevo">
                         <Row>
-                            <Form.Group controlId="nombre">
-                                <Form.Label>Nombre plano *</Form.Label>
-                                <Form.Control type="text" 
-                                            name='nombre' 
-                                            value={datos.nombre}
-                                            onChange={handleInputChange} 
-                                            placeholder="Nombre plano"
-                                            autoFocus
-                                />
-                            </Form.Group>
                             <Col>
-                                <Form.Group controlId="tipo_plano">
-                                    <Form.Label>Tipo de plano *</Form.Label>
-                                    <Form.Control as="select" 
-                                                    value={datos.tipo_plano}
-                                                    name='tipo_plano'
-                                                    onChange={handleInputChange}>
-                                        <option key={0} value={''}>Todos</option>
-                                        {tipo_plano && tipo_plano.map( tipo => {
-                                            return (
-                                            <option key={tipo.id} value={tipo.id}>
-                                                {tipo.nombre}
-                                            </option>
-                                            )
-                                        })}
-                                    </Form.Control>
+                                <Form.Group controlId="nombre">
+                                    <Form.Label>Nombre plano *</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='nombre' 
+                                                value={datos.nombre}
+                                                onChange={handleInputChange} 
+                                                placeholder="Nombre plano"
+                                    />
                                 </Form.Group>
-                            </Col>   
+                            </Col>
+                            <Col>
+                                <Form.Group controlId="cod_antiguo">
+                                    <Form.Label>Código antiguo</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='cod_antiguo' 
+                                                value={datos.cod_antiguo}
+                                                onChange={handleInputChange} 
+                                                placeholder="Codigo antiguo"
+                                                autoFocus
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col>
+                                <Form.Group controlId="descripcion">
+                                    <Form.Label>Descripción plano</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='descripcion' 
+                                                value={datos.descripcion}
+                                                onChange={handleInputChange} 
+                                                placeholder="Descripción plano"
+                                    />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                        <Row>
                             <Col>
                                 <Form.Group controlId="fecha">
                                     <Form.Label>Fecha *</Form.Label>
@@ -153,44 +246,25 @@ const PlanoForm = ({show, handleCloseParametros, tipo_seccion}) => {
                                                 onChange={handleInputChange}>  
                                     </Form.Control>
                                 </Form.Group>
-                            </Col>                        
-                        </Row>
-                        {introParametros?
-                        <Row>
+                            </Col> 
                             <Col>
-                                <table striped bordered hover>
-                                    <thead>
-                                        <tr>
-                                            <th>Nombre</th>
-                                            <th>Valor</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        { parametros && parametros.map( parametro => {
-                                            return (
-                                                <tr key={parametro.id}>
-                                                    <td>{parametro.descripcion}</td>
-                                                    <td>
-                                                        <input
-                                                            type="number"
-                                                            name={`valor_${parametro.id}`}
-                                                            value={parametro.valor || ''}
-                                                            onChange={(e)=>handleValorChange(parametro.id, e.target.value)}
-                                                        />
-                                                    </td>
-                                                </tr>
-                                            )})
-                                        }
-                                    </tbody>
-                                </table>
-                            </Col>
-                        </Row>:''}
+                                <form encType='multipart/form-data'>
+                                    <Form.Group controlId="archivo">
+                                        <Form.Label>Archivo *</Form.Label>
+                                        <Form.Control type="file"  
+                                                    name='archivo' 
+                                                    onChange={handleInputChange_archivo}>  
+                                        </Form.Control>
+                                    </Form.Group>
+                                </form>
+                            </Col>                       
+                        </Row>
                     </Tab>
                 </Tabs>
             </Modal.Body>
             <Modal.Footer>
-                {!introParametros? <Button variant="outline-primary" onClick={CargaPlano}>Activar Parametros</Button>:<Button variant="outline-primary" onClick={GuardarParametros}>Guardar Parametros</Button>}
-                <Button variant="waring" onClick={handlerCancelar}>Cancelar</Button>
+                <Button variant="outline-primary" onClick={GuardarPlano}>Guardar</Button>
+                <Button variant="warning" onClick={handlerCancelar}>Cancelar</Button>
             </Modal.Footer>
             
         </Modal>
