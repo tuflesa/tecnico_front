@@ -7,43 +7,37 @@ import { PencilFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import logo from '../../assets/logo_bornay.svg';
 
-const RodGruposListado = () => {
+const RodBancadaCTListado = () => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
 
-    const [lineas, setLineas] = useState(null);
-    const [show, setShow] = useState(false);
-    const [filaSeleccionada, setFilaSeleccionada] = useState(null);
-    const [celdas, setCeldas] = useState(null);
-    const [elementos, setElementos] = useState(null);
-    const [conjuntos, setConjuntos] = useState(null);
     const [empresas, setEmpresas] = useState(null);
     const [zonas, setZonas] = useState(null);
-    const [filtro, setFiltro] = useState(`?tubo_madre=${0}&nombre__icontains=${''}&maquina__id=${''}&maquina__empresa=${''}`);
+    const [bancadas, setBancadas] = useState(null);
+    const [filtro, setFiltro] = useState(`?dimensiones__icontains=${''}&seccion__maquina__id=${''}&seccion__maquina__empresa=${''}&seccion__pertenece_grupo=${false}`);//BUSCANDO LAS BANCADAS CT
     const [count, setCount] = useState(null);
 
     const [datos, setDatos] = useState({
         empresa: user['tec-user'].perfil.empresa.id,
         zona: '',
-        tubo_madre: '',
-        nombre: '',
+        dimensiones: '',
         maquina: '',
         pagina: 1,
         total_pag:0,
     });
 
     useEffect(()=>{
-        setFiltro(`?tubo_madre=${datos.tubo_madre}&nombre__icontains=${datos.nombre}&maquina__id=${datos.maquina}&maquina__empresa=${datos.empresa}`);
+        setFiltro(`?dimensiones__icontains=${datos.dimensiones}&seccion__maquina__id=${datos.maquina}&seccion__maquina__empresa=${datos.empresa}&seccion__pertenece_grupo=${false}`);
     },[datos]);
 
     useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/rodillos/grupo/` + filtro,{
+        axios.get(BACKEND_SERVER + `/api/rodillos/bancada_ct/`+ filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
         .then( res => {
-            setLineas(res.data.results);
+            setBancadas(res.data.results);
             setCount(res.data.count);
         })
         .catch( err => {
@@ -51,37 +45,6 @@ const RodGruposListado = () => {
         });
     }, [token, filtro]);
 
-    useEffect(() => {
-        if (show && celdas && elementos) {
-            // Aplanar la estructura para obtener un solo arreglo de objetos
-            const conjuntosTabla = elementos
-                .flatMap(e => e ? e.flatMap(c => c ? c : []) : [])
-                .filter(Boolean)
-                .map(d => ({
-                    elemento: d,
-                    seccionOrden: d.conjunto.operacion.seccion.orden,
-                    operacionOrden: d.conjunto.operacion.orden
-                }));    
-            // Ordenar el arreglo basado en seccionOrden y operacionOrden
-            const sortedConjuntos = conjuntosTabla.sort((a, b) => {
-                if (a.seccionOrden !== b.seccionOrden) {
-                    return a.seccionOrden - b.seccionOrden;
-                } else {
-                    return a.operacionOrden - b.operacionOrden;
-                }
-            }).map(d => (
-                <tr key={d.elemento.id}>
-                    <td>{d.elemento.conjunto.operacion.nombre}</td>
-                    <td>{d.elemento.rodillo.grupo.tubo_madre}</td>
-                    <td>{d.elemento.rodillo.nombre}</td>
-                </tr>
-            ));    
-            setConjuntos(sortedConjuntos);
-        } else {
-            setConjuntos(null);
-        }
-    }, [show, celdas, elementos]);
-    
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
             headers: {
@@ -122,40 +85,6 @@ const RodGruposListado = () => {
             });
         }
     }, [token, datos.empresa]);
-
-    const cogerDatos = async (linea) => {
-        try {
-            // Hacer las solicitudes a las celdas de todas las bancadas y lo guarda en solicitudesCeldas
-            const solicitudesCeldas = linea.bancadas.map(bancadaId => {
-                return axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__id=${bancadaId.id}`, {
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`
-                    }
-                });
-            });
-            // Esperar a que todas las solicitudes a las celdas se completen y pasamos la info a respuestasCeldas
-            const respuestasCeldas = await Promise.all(solicitudesCeldas);
-            // Busco para cada Celda el elemento con el id del conjunto
-            const solicitudesElementos = respuestasCeldas.map(res => {
-                return Promise.all(res.data.map(celda => {
-                    return axios.get(BACKEND_SERVER + `/api/rodillos/elemento_select/?conjunto__id=${celda.conjunto.id}`, {
-                        headers: {
-                            'Authorization': `token ${token['tec-token']}`
-                        }
-                    });
-                }));
-            });
-            // Espero a que todas las solicitudes de elementos y copio la info en respuestasElementos
-            const respuestasElementos = await Promise.all(solicitudesElementos);
-            // Actualizar los estados
-            setFilaSeleccionada(linea.id);
-            setShow(!show);
-            setCeldas(respuestasCeldas.map(res => res.data));
-            setElementos(respuestasElementos.map(res => res.map(r => r.data)));
-        } catch (err) {
-            console.log(err);
-        }
-    };
 
     const handleInputChange = (event) => {
         setDatos({
@@ -205,23 +134,13 @@ const RodGruposListado = () => {
             <Row>
                 <Col>
                     <Form.Group controlId="nombre">
-                        <Form.Label>Nombre grupo</Form.Label>
+                        <Form.Label>Dimensiones</Form.Label>
                         <Form.Control type="text" 
-                                    name='nombre' 
-                                    value={datos.nombre}
+                                    name='dimensiones' 
+                                    value={datos.dimensiones}
                                     onChange={handleInputChange} 
-                                    placeholder="Nombre grupo" 
+                                    placeholder="Dimensiones" 
                                     autoFocus/>
-                    </Form.Group>
-                </Col>
-                <Col>
-                    <Form.Group controlId="tubo_madre">
-                        <Form.Label>Ø Tubo Madre</Form.Label>
-                        <Form.Control type="number" 
-                                    name='tubo_madre' 
-                                    value={datos.tubo_madre}
-                                    onChange={handleInputChange} 
-                                    placeholder="Ø tubo madre" />
                     </Form.Group>
                 </Col>
                 <Col>
@@ -264,7 +183,7 @@ const RodGruposListado = () => {
             </Row>
             <Row>
                 <Col>
-                    <h5 className="mb-3 mt-3">Listado bancadas RD</h5>
+                    <h5 className="mb-3 mt-3">Listado de Bancadas de Cabeza de Turco</h5>
                     <Row>
                         <table>
                             <tbody>
@@ -281,34 +200,36 @@ const RodGruposListado = () => {
                         <thead>
                             <tr>
                                 <th style={{ width: 10 }}>boton</th>
-                                <th>Nombre</th>
+                                <th>Dimensiones</th>
+                                <th>Empresa</th>
                                 <th>Máquina</th>
-                                <th>Tubo Madre</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {lineas && lineas.map(linea => {
+                            {bancadas && bancadas.map(bancada => {
                                 return (
-                                    <React.Fragment key={linea.id}>
-                                        <tr>
+                                    <React.Fragment key={bancada.id}>
+                                        {<tr>
                                             <td>
-                                                <button type="button" className="btn btn-default" value={linea.id} name='prueba' onClick={event => { cogerDatos(linea) }}>--</button>
+                                                <button type="button" className="btn btn-default" value={bancada.id} name='prueba' onClick={event => { 'cogerDatos(bancada)' }}>--</button>
                                             </td>
-                                            <td>{linea.nombre}</td>
-                                            <td>{linea.maquina.siglas}</td>
-                                            <td>{'Ø' + linea.tubo_madre}</td>
-                                            <td><Link title='Detalle/Modificar'to={`/rodillos/grupo_editar/${linea.id}`}><PencilFill className="mr-3 pencil"/></Link></td>
-                                        </tr>
-                                        {filaSeleccionada === linea.id && show === true && (
+                                            <td>{bancada.dimensiones}</td>
+                                            <td>{bancada.seccion.maquina.empresa.nombre}</td>
+                                            <td>{bancada.seccion.maquina.siglas}</td>
+                                            <td><Link title='Detalle/Modificar'to={`/rodillos/bacada_ct_editar/${bancada.id}`}><PencilFill className="mr-3 pencil"/></Link></td>
+                                        </tr>}
+                                        {/* {filaSeleccionada === linea.id && show === true && (
                                             <tr>
                                                 <td colSpan="4">
                                                         <Table striped bordered hover>
                                                             <thead>
                                                                 <tr>
-                                                                    <th>Operación</th>
-                                                                    <th>Tubo madre</th>
                                                                     <th>Rodillo</th>
+                                                                    <th>Operación</th>
+                                                                    <th>Descripción perfil</th>
+                                                                    <th>Dimensión</th>
+                                                                    <th>Eje</th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
@@ -317,7 +238,7 @@ const RodGruposListado = () => {
                                                         </Table>
                                                 </td>
                                             </tr>
-                                        )}
+                                        )} */}
                                     </React.Fragment>
                                 )
                             })}
@@ -325,21 +246,8 @@ const RodGruposListado = () => {
                     </Table>
                 </Col>
             </Row>
-            <Row>
-                <table>
-                    <tbody>
-                        <tr>
-                            <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
-                            <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
-                            <th>Número páginas: {datos.pagina} / {datos.total_pag}</th>
-                            <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
-                        </tr>
-                    </tbody>
-                </table>
-            </Row>
         </Container>
     )
 }
 
-
-export default RodGruposListado;
+export default RodBancadaCTListado;

@@ -8,7 +8,6 @@ import { BACKEND_SERVER } from '../../constantes';
 const ManNavBar = () => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
-    const [mantenimiento, setMantenimiento] = useState(false);
     const [notificacion, setnotificacion] = useState(null);
 
     const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Técnico'&&user['tec-user'].perfil.puesto.nombre!=='Director Técnico'?true:false;
@@ -25,7 +24,7 @@ const ManNavBar = () => {
         .catch( err => {
             console.log(err);
         });
-    }, [token]); 
+    }, [token, user]); 
 
     return (
             <React.Fragment>

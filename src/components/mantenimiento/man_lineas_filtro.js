@@ -16,7 +16,7 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
     const [especialidades, setEspecialidades] = useState(null);
     const [tipotarea, setTipoTarea] = useState(null);
 
-    var fecha_hoy=Date.parse(new Date);
+    var fecha_hoy=Date.parse(new Date());
     var mesEnMilisegundos = 1000 * 60 * 60 * 24 * 30;
     var enunmes=fecha_hoy+mesEnMilisegundos;
     var dentrodeunmes = new Date(enunmes);
@@ -100,6 +100,7 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
         });
     }, [token]);
 
+    /* eslint-disable react-hooks/exhaustive-deps */
     useEffect(() => {
         if (datos.empresa === '') {
             setZonas([]);
@@ -234,6 +235,7 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
         const activos = datos.estado<3;
         actualizaFiltro(filtro, activos);
     },[datos, token]);
+    /* eslint-disable react-hooks/exhaustive-deps */
 
     const handleInputChange = (event) => {
         setDatos({

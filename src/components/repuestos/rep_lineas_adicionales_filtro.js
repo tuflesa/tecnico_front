@@ -6,7 +6,6 @@ import axios from 'axios';
 
 const LineasAdicionalesFiltro = ({ actualizaFiltro }) => {
     const [empresas, setEmpresas] = useState(null);
-    const [usuarios, setUsuarios] = useState(null);
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
 

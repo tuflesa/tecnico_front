@@ -35,6 +35,7 @@ const EquipoForm = ({show, repuesto_id, handleCloseEquipo, equiposAsignados, upd
         });
     }, [token]);
 
+    /* eslint-disable react-hooks/exhaustive-deps */
     useEffect(() => {
         if (datos.empresa === '') {
             setZonas([]);
@@ -122,6 +123,7 @@ const EquipoForm = ({show, repuesto_id, handleCloseEquipo, equiposAsignados, upd
             });
         }
     }, [token, datos.seccion]);
+    /* eslint-disable react-hooks/exhaustive-deps */
 
     useEffect(() =>{
         setGuardarDisabled(datos.equipo === '');

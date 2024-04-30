@@ -1,33 +1,33 @@
-import React, { useState, useEffect } from 'react';
+//import React, { useState, useEffect } from 'react';
 import './repuestos.css';
-import { Container, Row, Col, Table, Modal, Button } from 'react-bootstrap';
-import { useCookies } from 'react-cookie';
-import axios from 'axios';
-import { BACKEND_SERVER } from '../../constantes';
-import { filter } from 'd3';
+import { Container, Row, Col, Table, Button } from 'react-bootstrap';
+//import { useCookies } from 'react-cookie';
+//import axios from 'axios';
+//import { BACKEND_SERVER } from '../../constantes';
+//import { filter } from 'd3';
 import logo from '../../assets/icono_1.svg';
-import cuchilla from '../../assets/cuchilla_1.svg';
-import logo_bor from '../../assets/bitmap.svg';
+//import cuchilla from '../../assets/cuchilla_1.svg';
+//import logo_bor from '../../assets/bitmap.svg';
 
 
 const Programadores = () => {
-    const [user] = useCookies(['tec-user']);
-    const [token] = useCookies(['tec-token']);
+    //const [user] = useCookies(['tec-user']);
+    //const [token] = useCookies(['tec-token']);
 
-    const soyProgramador = user['tec-user'].perfil.destrezas.filter(s => s === 7);
+    /* const soyProgramador = user['tec-user'].perfil.destrezas.filter(s => s === 7);
     const [precios, setPrecios] = useState(null);
     const [lista_precios, setListaPrecios] = useState(null);
     const [repuestos, setRepuestos] = useState(null);
     const [linea_pedidos, setLineaPedidos] = useState(null);
-    //const generico_id = 32;
+    const generico_id = 32;
     const generico_id = 273;
     const right =[];
     const Nright = [];
     const SinProveedor = [];
-    const ConProveedor = [];
+    const ConProveedor = []; */
     
-    var numero = 2;
-    var SiEsta = '';
+    //var numero = 2;
+    //var SiEsta = '';
 
     //vamos a copiar las observaciones de los trabajadores de las tareas a las lineas de parte
     /* axios.get(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_trabajo/`,{

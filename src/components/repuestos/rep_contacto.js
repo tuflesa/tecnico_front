@@ -23,6 +23,7 @@ const ContactoForm = ({show, proveedor_id, handleCloseContacto, updateProveedorC
         })
     }
 
+    /* eslint-disable react-hooks/exhaustive-deps */
     useEffect(()=>{
         contacto && setDatos({
             nombre: contacto.nombre,
@@ -32,6 +33,7 @@ const ContactoForm = ({show, proveedor_id, handleCloseContacto, updateProveedorC
             proveedor: proveedor_id
         });
     },[contacto]);
+    /* eslint-disable react-hooks/exhaustive-deps */
 
     const handlerCancelar = () => {
         AnularContacto();

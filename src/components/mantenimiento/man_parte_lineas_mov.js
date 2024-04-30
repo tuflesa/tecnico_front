@@ -7,6 +7,7 @@ import {invertirFecha} from '../utilidades/funciones_fecha';
 import { PencilFill, Receipt } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import ListaDePersonal from './man_equipo_trabajadores';
+import { constants } from 'buffer';
 
 const LineasPartesMov = ({tarea, handleCloseList, show, parte}) => {
     const [token] = useCookies(['tec-token']);
@@ -14,6 +15,7 @@ const LineasPartesMov = ({tarea, handleCloseList, show, parte}) => {
     const [show2, setShow2] = useState(false);
     const [linea_id, setLinea_id] = useState(null);
 
+    /* eslint-disable react-hooks/exhaustive-deps */
     useEffect(()=>{
         tarea && axios.get(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_mov/?tarea=${tarea.id}&parte=${parte.id}`,{
             headers: {
@@ -35,6 +37,7 @@ const LineasPartesMov = ({tarea, handleCloseList, show, parte}) => {
             console.log(err);
         });
     },[tarea, token]);
+    /* eslint-disable react-hooks/exhaustive-deps */
 
     const handlerListCancelar = () => {      
         handleCloseList();

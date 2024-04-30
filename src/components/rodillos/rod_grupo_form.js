@@ -4,20 +4,24 @@ import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
 import { Button, Form, Col, Row } from 'react-bootstrap';
+import RodBancada from './rod_bancada_form';
+import logo from '../../assets/logo_bornay.svg';
 
-const RodGrupo = ({grupo, setGrupo}) => {
+const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
 
     const [empresas, setEmpresas] = useState(null);
     const [zonas, setZonas] = useState([]);
+    const [mostrarRodBancada] = useState(mostrarBancada);
 
     const [datos, setDatos] = useState({
         id: grupo.id? grupo.id:null,
-        empresa: user['tec-user'].perfil.empresa.id,
-        zona: '',
-        tubo_madre: 0,
-        nombre: '',
+        empresa: grupo.id?grupo.maquina.empresa_id:user['tec-user'].perfil.empresa.id,
+        zona: grupo.id?grupo.maquina.id:'',
+        tubo_madre: grupo.id?grupo.tubo_madre:'',
+        nombre: grupo.id?grupo.nombre:'',
+        bancadas_elegidas:grupo.id?grupo.bancadas:[],
     });
 
     useEffect(() => {
@@ -41,7 +45,6 @@ const RodGrupo = ({grupo, setGrupo}) => {
               }
         })
         .then( res => {
-            console.log(res.data);
         })
         .catch( err => {
             console.log(err);
@@ -66,10 +69,6 @@ const RodGrupo = ({grupo, setGrupo}) => {
             })
             .then( res => {
                 setZonas(res.data);
-                setDatos({
-                    ...datos,
-                    zona: '',
-                });
             })
             .catch( err => {
                 console.log(err);
@@ -83,12 +82,11 @@ const RodGrupo = ({grupo, setGrupo}) => {
             [event.target.name] : event.target.value
         })
     }
-
+    
     const GuardarGrupo = (event) => {
-        console.log(datos);
         event.preventDefault();
-        axios.post(BACKEND_SERVER + `/api/rodillos/grupo_nuevo/`, {
-            nombre: datos.nombre,
+        axios.post(BACKEND_SERVER + `/api/rodillos/grupo_only/`, {
+            nombre: 'Grupo-'+'Ø'+datos.tubo_madre,
             maquina: datos.zona,
             tubo_madre: datos.tubo_madre,
         }, {
@@ -97,7 +95,7 @@ const RodGrupo = ({grupo, setGrupo}) => {
             }
         })
         .then(res => { 
-            setGrupo(res.data);
+            window.location.href=`/rodillos/grupo_editar/${res.data.id}`;       
         })
         .catch(err => { 
             console.log(err);
@@ -107,8 +105,8 @@ const RodGrupo = ({grupo, setGrupo}) => {
 
     const ActualizarGrupo = (event) => {
         event.preventDefault();
-        axios.patch(BACKEND_SERVER + `/api/rodillos/grupo_nuevo/${grupo.id}/`, {
-            nombre: datos.nombre,
+        axios.patch(BACKEND_SERVER + `/api/rodillos/grupo_only/${grupo.id}/`, {
+            nombre: 'Grupo-'+'Ø'+datos.tubo_madre,
             maquina: datos.zona,
             tubo_madre: datos.tubo_madre,
         }, {
@@ -117,7 +115,7 @@ const RodGrupo = ({grupo, setGrupo}) => {
             }
         })
         .then(res => { 
-            setGrupo(res.data);
+            window.location.href=`/rodillos/grupo_editar/${res.data.id}`;
         })
         .catch(err => { 
             console.log(err);
@@ -128,18 +126,19 @@ const RodGrupo = ({grupo, setGrupo}) => {
 
     return (
         <Container className='mt-5'>
-            <h5 className='mt-5'>Nuevo Grupo</h5>
+            <img src ={logo} width="200" height="200"></img>
+            {grupo.id?<h5 className='mt-5'>Editar Grupo</h5>:<h5 className='mt-5'>Nuevo Grupo</h5>}
             <Form >
                 <Row>
                     <Col>
                         <Form.Group controlId="nombre">
-                            <Form.Label>Nombre del grupo *</Form.Label>
+                            <Form.Label>Nombre del grupo</Form.Label>
                             <Form.Control type="text" 
                                         name='nombre' 
                                         value={datos.nombre}
                                         onChange={handleInputChange} 
                                         placeholder="Nombre grupo"
-                                        autoFocus
+                                        disabled
                             />
                         </Form.Group>
                     </Col>
@@ -164,7 +163,8 @@ const RodGrupo = ({grupo, setGrupo}) => {
                                         name='empresa' 
                                         value={datos.empresa}
                                         onChange={handleInputChange}
-                                        placeholder="Empresa">
+                                        placeholder="Empresa"
+                                        disabled={grupo.length!==0}>
                                         <option key={0} value={''}>Todas</option>    
                                         {empresas && empresas.map( empresa => {
                                             return (
@@ -182,7 +182,8 @@ const RodGrupo = ({grupo, setGrupo}) => {
                             <Form.Control as="select" 
                                             value={datos.zona}
                                             name='zona'
-                                            onChange={handleInputChange}>
+                                            onChange={handleInputChange}
+                                            disabled={grupo.length!==0}>
                                 <option key={0} value={''}>Todas</option>
                                 {zonas && zonas.map( zona => {
                                     return (
@@ -198,6 +199,7 @@ const RodGrupo = ({grupo, setGrupo}) => {
             </Form>
             <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
             {grupo.length===0?<Button variant="outline-primary" onClick={GuardarGrupo}>Guardar</Button>:<Button variant="outline-primary" onClick={ActualizarGrupo}>Actualizar</Button>}
+            {mostrarRodBancada && <RodBancada visible={mostrarRodBancada} grupo={grupo} setGrupo={setGrupo} />} {/* mostramos en editar las bancadas de la máquina */}
         </Container>
     )
 }

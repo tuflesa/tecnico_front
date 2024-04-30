@@ -66,6 +66,7 @@ const RepLista = () => {
         }
     }, [repuestos]); */
 
+    /* eslint-disable react-hooks/exhaustive-deps */
     useEffect(()=>{
         if(count % 20 === 0){
             setDatos({
@@ -80,6 +81,7 @@ const RepLista = () => {
             })
         }
     }, [count, filtro]);
+    /* eslint-disable react-hooks/exhaustive-deps */
 
     const cambioPagina = (pag) => {
         if(pag<=0){

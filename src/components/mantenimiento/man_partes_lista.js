@@ -10,8 +10,7 @@ import ManPartesFiltro from './man_partes_filtro';
 const ManListaPartes = () => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
-    
-    const soyTecnico = user['tec-user'].perfil.destrezas.filter(s => s === 6);
+
     const [partes, setPartes]  = useState(null);
     const [filtro, setFiltro] = useState(`?estado=${''}&empresa__id=${user['tec-user'].perfil.empresa.id}&creado_por=${user['tec-user'].perfil.usuario}`);
     const [activos, setActivos] = useState(true);

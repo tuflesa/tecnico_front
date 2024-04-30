@@ -28,6 +28,7 @@ const TareasTrabajador = () => {
         pagina: 1,
     });
 
+    /* eslint-disable react-hooks/exhaustive-deps */
     useEffect(() => {
         filtro && axios.get(BACKEND_SERVER + `/api/mantenimiento/lineas_de_un_trabajador/`+ filtro,{
             headers: {
@@ -49,6 +50,7 @@ const TareasTrabajador = () => {
                     r['fecha_plani']=r.linea.fecha_plan?invertirFecha(String(r.linea.fecha_plan)):'';
                     r['fecha_f']=r.fecha_fin?invertirFecha(String(r.fecha_fin)):'';
                     r['equipoT']=r.linea.parte.seccion?r.linea.parte.seccion.siglas_zona +' - '+r.linea.parte.seccion.nombre + (r.linea.parte.equipo?' - ' + r.linea.parte.equipo.nombre:''):null;
+                    return r;
             })
             setLineasUsuarios(res.data.results);
             setCount(res.data.count);
@@ -62,6 +64,7 @@ const TareasTrabajador = () => {
             console.log(err);
         });
     }, [filtro, datos.pagina]);
+    /* eslint-disable react-hooks/exhaustive-deps */
 
     const actualizaFiltro = str => {
         setFiltro(str);

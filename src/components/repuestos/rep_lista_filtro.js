@@ -33,6 +33,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
     const [zonas, setZonas] = useState(null);
     const [equipos, setEquipos] = useState(null);
 
+    /* eslint-disable react-hooks/exhaustive-deps */
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
             headers: {
@@ -155,6 +156,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
             });
         }
     }, [token, datos.seccion]);
+    /* eslint-disable react-hooks/exhaustive-deps */
 
     useEffect(()=>{
         const filtro1 = `?precios__modelo_proveedor__icontains=${datos.modelo_proveedor}&nombre__icontains=${datos.nombre}&nombre_comun__icontains=${datos.nombre_comun}&precios__fabricante__icontains=${datos.fabricante}&id=${datos.id}&es_critico=${datos.critico}&descatalogado=${datos.descatalogado}&tipo_repuesto=${datos.tipo_repuesto}&proveedores__id=${datos.proveedor}`;

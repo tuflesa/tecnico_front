@@ -14,7 +14,7 @@ const ManPorEquipos = () => {
     const [user] = useCookies(['tec-user']);
 
     const [lineas, setLineas] = useState(null);  
-    const [hoy] = useState(new Date);
+    const [hoy] = useState(new Date());
     const [show, setShow] = useState(false);
     const [linea_id, setLinea_id] = useState(null);
     const [linea_completa, setLinea_completa] = useState(null);
@@ -26,13 +26,13 @@ const ManPorEquipos = () => {
     const [abrirFiltro, setabrirFiltro] = useState(false);
     const [actualizar_seg, setActualizarSeg] = useState(false);
 
-    var dentrodeunmes=null;
-    var fechaenunmesString=null;
-    var fecha_hoy=Date.parse(hoy);
-    var mesEnMilisegundos = 1000 * 60 * 60 * 24 * 7;  //cambiado a una semana, en vez del mes
-    var enunmes=fecha_hoy+mesEnMilisegundos;
-    dentrodeunmes = new Date(enunmes);
-    fechaenunmesString = dentrodeunmes.getFullYear() + '-' + ('0' + (dentrodeunmes.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunmes.getDate()).slice(-2);
+    //var dentrodeunmes=null;
+    //var fechaenunmesString=null;
+    //var fecha_hoy=Date.parse(hoy);
+    //var mesEnMilisegundos = 1000 * 60 * 60 * 24 * 7;  //cambiado a una semana, en vez del mes
+    //var enunmes=fecha_hoy+mesEnMilisegundos;
+    //dentrodeunmes = new Date(enunmes);
+    //fechaenunmesString = dentrodeunmes.getFullYear() + '-' + ('0' + (dentrodeunmes.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunmes.getDate()).slice(-2);
     
     const actualizaFiltro = str => {
         setFiltro(str);
@@ -72,7 +72,7 @@ const ManPorEquipos = () => {
             console.log(err);
         });
         setActualizarSeg(false);
-    }, [token, filtro, datos.observaciones, actualizar_seg]); 
+    }, [token, filtro, datos.observaciones, actualizar_seg, user]); 
  
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea_filtro/?trabajador=${user['tec-user'].perfil.usuario}`,{
@@ -86,7 +86,7 @@ const ManPorEquipos = () => {
         .catch( err => {
             console.log(err);
         });
-    }, [token]);
+    }, [token, user]);
 
     const comparar = (x) => {
         for(var y=0;y<lineasTrabajadores.length;y++){
