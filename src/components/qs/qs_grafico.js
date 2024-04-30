@@ -7,7 +7,7 @@ import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
 import QSNavBar from "./qs_nav";
-import {montaje, fleje} from './Grupo_150';
+import {montaje, fleje} from './Grupo_164FF_W';
 
 // const ejes = [{op:1, pos: [174, 343.57]},
 //               {op:2, pos: [177.91, 340.49]},
@@ -44,6 +44,19 @@ const QS_Grafico = () => {
         })
         .then( res => {
                 setEjes(res.data);
+        })
+    }
+
+    const leerPC = (event) => {
+        event.preventDefault();
+        axios.get(BACKEND_SERVER + '/api/qs/pc/',{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+                }
+        })
+        .then( res => {
+                console.log(res.data);
+                console.log(ejesSim);
         })
     }
 
@@ -466,7 +479,10 @@ return (
                     </Row>
                     <Row>
                         <Col className="col-6">
-                            {simulador ?  <Button variant="info" type="submit" className={'mx-2'} onClick={simular}>Simular</Button>
+                            {simulador ?  <React.Fragment>
+                                            <Button variant="info" type="submit" className={'mx-2'} onClick={simular}>Simular</Button>
+                                            <Button variant="info" type="submit" className={'mx-2'} onClick={leerPC}>Leer PC</Button>
+                                          </React.Fragment>    
                                             : 
                                           <Button variant="info" type="submit" className={'mx-2'} onClick={leerEjes}>Leer</Button>}
                         </Col>

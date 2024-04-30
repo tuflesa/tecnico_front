@@ -104,7 +104,7 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
             const ycm2 = yi + (L/4) + Math.sin(alfa/2) + (fleje.espesor/2) * Math.cos(alfa/2);
 
             const ycm = (ycm1*M1 + ycm2*M2) /(M1+M2);
-            // console.log('ycm: ', ycm);
+            console.log('ycm: ', ycm);
             
         
             // Dibujo
