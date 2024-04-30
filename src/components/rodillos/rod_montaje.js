@@ -14,7 +14,8 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
 
     const [filtro, setFiltro] = useState(`?maquina__empresa__id=${user['tec-user'].perfil.empresa.id}`);
     const [bancadas, setBancadas] = useState(null);
-    const [bancada_ct, setBancadaCT] = useState(null);
+    //const [bancadasColor, setBancadascolor] = useState(null);
+    const [bancadaCT, setBancadaCT] = useState(null);
     const [operaciones, setOperaciones] = useState(null);
     const [secciones, setSecciones] = useState(null);
     const [formaciones_completadas, setFormacionesCompletadas] = useState('');
@@ -30,6 +31,7 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
         bancada_ct:'',
         nombre:'',
         tubo_madre:'',
+        grupo_tubomadre: '',
     });
 
     useEffect(() => { //SEPARAR DATOS QUE ENTRAN A TRAVES DEL FILTRO
@@ -44,6 +46,7 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
         setDatos({
             ...datos,
             grupo: montaje_edi?montaje_edi.grupo.id:grupoIdValue,
+            grupo_tubomadre: montaje_edi?montaje_edi.grupo.tubo_madre:grupoIdValue,
             maquina: montaje_edi?montaje_edi.maquina.id:maquinaValue,
             bancada_ct: montaje_edi?montaje_edi.bancadas.id:dimensionesValue,
             nombre: montaje_edi?montaje_edi.nombre:nombreValue==='M-null-null'?'':nombreValue,
@@ -85,31 +88,33 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
     }, [bancadas]);
 
     useEffect(() => {
-        datos.bancada_ct && datos.tubo_madre && datos.maquina && axios.get(BACKEND_SERVER + `/api/rodillos/bancada_montaje/?seccion__maquina=${datos.maquina}&tubo_madre=${datos.tubo_madre}`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-            }
-        })
-        .then( res => {
-            setBancadas(res.data);
-            datos.bancada_ct && axios.get(BACKEND_SERVER + `/api/rodillos/bancada_montaje/${datos.bancada_ct}`,{
+        if(datos.grupo && datos.bancada_ct!=='null'){ //buscamos las bancadas RD y luego las bancadas CT al final las juntamos
+            datos.grupo && axios.get(BACKEND_SERVER + `/api/rodillos/grupo_montaje/${datos.grupo}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
             })
-            .then( r => {
-                setBancadaCT(r.data.id);
-                setBancadas(prevBancadas => { //unimos en la misma variable las bancadas del grupo elegido con la CT.
-                    return [...prevBancadas, r.data];
+            .then( res => {
+                setBancadas(res.data.bancadas);
+                datos.bancada_ct && axios.get(BACKEND_SERVER + `/api/rodillos/bancada_montaje/${datos.bancada_ct}`,{
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }
+                })
+                .then( r => {
+                    setBancadaCT(r.data.id);
+                    setBancadas(prevBancadas => { //unimos en la misma variable las bancadas del grupo elegido con la CT.
+                        return [...prevBancadas, r.data];
+                    });
+                })
+                .catch( err => {
+                    console.log(err);
                 });
             })
             .catch( err => {
                 console.log(err);
             });
-        })
-        .catch( err => {
-            console.log(err);
-        });
+        }
     }, [datos.bancada_ct, datos.grupo]);
 
     useEffect(() => { //Recogemos las celdas ya creadas según empresa, máquina, elegidos
@@ -134,23 +139,6 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
         }
     }, [bancadas]);
 
-    /* useEffect(() => { //para pintar las casillas de distinto color, añadimos nuevoCampo = true si tienen valor
-        if (operaciones && formaciones_completadas) {
-            const nuevasOperaciones = operaciones.map(operacion => {
-                let nuevoCampo = false;
-                for (let y = 0; y < formaciones_completadas.length; y++) {
-                if (operacion.id === formaciones_completadas[y].conjunto.operacion) {
-                    // Si hay una coincidencia, establecemos nuevoCampo en true
-                    nuevoCampo = true;
-                    break; // Salimos del bucle ya que ya encontramos una coincidencia
-                }
-                }
-                // Devolvemos una nueva operación incluyendo el campo nuevoCampo
-                return { ...operacion, nuevoCampo };
-            });
-        }
-      }, [operaciones, formaciones_completadas]); */
-
     const GuardarId_Operacion = (operationId) => {
         setOperacionMarcada(operationId); // Almacena la operación seleccionada
         setFormacionesFiltradas(formaciones_completadas.filter(formacion => formacion.conjunto.operacion === operationId.id)); //pasa los elemenos de esta operación
@@ -162,7 +150,7 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
             alert('Revisa los datos obligatorios');
         }
         else{
-            axios.get(BACKEND_SERVER + `/api/rodillos/montaje/?maquina=${datos.maquina}&grupo=${datos.grupo}&bancadas=${bancada_ct}`,{ //buscamos el montaje
+            axios.get(BACKEND_SERVER + `/api/rodillos/montaje/?maquina=${datos.maquina}&grupo=${datos.grupo}&bancadas=${datos.bancada_ct}`,{ //buscamos el montaje
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
@@ -208,6 +196,7 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
 
     const actualizaFiltro = str => {
         setFiltro(str);
+        datos.nombre='';
     }
 
     return (
@@ -309,7 +298,7 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
                                                 let colorBoton2 = false;
                                                 let colorBoton3 = false;
                                                 formaciones_completadas && formaciones_completadas.forEach(form_completas => {
-                                                    if(form_completas.conjunto.operacion===operacion.id && form_completas.bancada.tubo_madre===form_completas.conjunto.tubo_madre && form_completas.bancada.tubo_madre===bancadas.tubo_madre ){
+                                                    if(form_completas.bancada.tubo_madre===form_completas.conjunto.tubo_madre && form_completas.operacion===operacion.id){
                                                         colorBoton1=true; //tenemos rodillos propios
                                                     }
                                                     /* if(form_completas.operacion!==form_completas.conjunto.operacion.id && form_completas.operacion===operacion.id){
@@ -318,7 +307,7 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
                                                     if( form_completas.bancada.tubo_madre!==form_completas.conjunto.tubo_madre && form_completas.operacion===operacion.id && form_completas.operacion===form_completas.conjunto.operacion){
                                                         colorBoton2=true; //tenemos conjunto de otra formación
                                                     }
-                                                    if(form_completas.bancada.tubo_madre!==bancadas.tubo_madre && form_completas.operacion===operacion.id ){
+                                                    if(form_completas.bancada.tubo_madre!==datos.grupo_tubomadre && form_completas.operacion===operacion.id ){
                                                         colorBoton2=true; //tenemos bancada de otra formación
                                                     }
                                                     if(form_completas.operacion!==form_completas.conjunto.operacion && form_completas.bancada.tubo_madre!==form_completas.conjunto.tubo_madre && form_completas.operacion===operacion.id){
@@ -329,7 +318,7 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
                                                     <Button
                                                         key={operacion.id}
                                                         className={`btn ${colorBoton2 ? 'btn-primary' : colorBoton1 ? 'btn-verde' : colorBoton3? 'btn-naranja-primary' : 'btn-gris-primary'} btn-sm`}
-                                                        onClick={() => {montaje_edi.grupo.id?GuardarId_Operacion(operacion, colorBoton1, colorBoton2, colorBoton3):alert('Elige grupo')}}
+                                                        onClick={() => {GuardarId_Operacion(operacion, colorBoton1, colorBoton2, colorBoton3)}}
                                                     >
                                                         {operacion.nombre}
                                                     </Button>

@@ -83,25 +83,6 @@ const RodBancadaCT = ({bancada}) => {
         }
     }, [maquina]);
 
-    /* useEffect(() => { //para pintar las casillas de distinto color, añadimos nuevoCampo = true si tienen valor
-        console.log('que vale formaciones_completadas: ', formaciones_completadas);
-        console.log('que vale operaciones: ', operaciones);
-        if (operaciones && formaciones_completadas) {
-          const nuevasOperaciones = operaciones.map(operacion => {
-            let nuevoCampo = false;
-            for (let y = 0; y < formaciones_completadas.length; y++) {
-              if (operacion.id === formaciones_completadas[y].conjunto.operacion) {
-                // Si hay una coincidencia, establecemos nuevoCampo en true
-                nuevoCampo = true;
-                break; // Salimos del bucle ya que ya encontramos una coincidencia
-              }
-            }
-            // Devolvemos una nueva operación incluyendo el campo nuevoCampo
-            return { ...operacion, nuevoCampo };
-          });
-        }
-      }, [operaciones, formaciones_completadas]); */
-
     const actualizaFiltro = str => {
         setFiltro(str);
     }
@@ -182,10 +163,11 @@ const RodBancadaCT = ({bancada}) => {
                                             {operaciones && formaciones_completadas && operaciones.map((operacion) => {
                                             if (operacion.seccion.id === seccion.id) {
                                                 const colorBoton = formaciones_completadas.some(form_completas => form_completas.conjunto.operacion === operacion.id);
+                                                //const colorNaranja = formaciones_completadas.some(form_completas => form_completas.conjunto.operacion !== operacion.id);
                                                 return (
                                                 <Button
                                                     key={operacion.id}
-                                                    className={`btn ${colorBoton ? 'btn-verde-primary' : 'btn-gris-primary'} btn-sm`}
+                                                    className={`btn ${colorBoton ? 'btn-primary' : 'btn-gris-primary'} btn-sm`}
                                                     onClick={() => {dimensiones?GuardarId_Operacion(operacion):alert('Elige dimensiones')}}
                                                 >
                                                     {operacion.nombre}

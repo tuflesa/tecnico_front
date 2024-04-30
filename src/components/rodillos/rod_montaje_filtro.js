@@ -113,6 +113,9 @@ const RodMontajeFiltro = ({actualizaFiltro}) => {
             })
             .then( res => {
                 setBancadas(res.data);
+                setDimensionesId('');
+                setTuboMadre('');
+                setDimensiones('');
                 setDatos({
                     ...datos,
                     bancada: '',
