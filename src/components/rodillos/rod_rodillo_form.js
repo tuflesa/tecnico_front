@@ -382,29 +382,45 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
 
     const GuardarRodillo = (event) => {
         event.preventDefault();
-        axios.post(BACKEND_SERVER + `/api/rodillos/rodillo_nuevo/`, {
-            nombre: datos.nombre,
-            operacion: datos.operacion,
-            grupo: datos.grupo,
-            tipo: datos.tipo_rodillo,
-            material: datos.material,
-            tipo_plano: datos.tipo_plano,
-            diametro: datos.diametro,
-            forma: parseInt(datos.forma),
-            descripcion_perfil: datos.descripcion_perfil,
-            dimension_perfil: datos.dimension_perfil,
-        }, {
+        axios.get(BACKEND_SERVER + `/api/rodillos/rodillos/?nombre=${datos.nombre}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
-                }     
+                }
         })
-        .then( res => { 
-            window.location.href = `/rodillos/editar/${res.data.id}`;
+        .then(res => {
+            if(res.data.length!==0){
+                alert('Este rodillo ya existe');
+            }
+            else{
+                axios.post(BACKEND_SERVER + `/api/rodillos/rodillo_nuevo/`, {
+                    nombre: datos.nombre,
+                    operacion: datos.operacion,
+                    grupo: datos.grupo,
+                    tipo: datos.tipo_rodillo,
+                    material: datos.material,
+                    tipo_plano: datos.tipo_plano,
+                    diametro: datos.diametro,
+                    forma: parseInt(datos.forma),
+                    descripcion_perfil: datos.descripcion_perfil,
+                    dimension_perfil: datos.dimension_perfil,
+                }, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                        }     
+                })
+                .then( res => { 
+                    window.location.href = `/rodillos/editar/${res.data.id}`;
+                })
+                .catch(err => { 
+                    console.log(err);
+                    alert('Falta datos, por favor rellena todo los datos que tengan *');
+                })
+            }
         })
-        .catch(err => { 
+        .catch( err => {
             console.log(err);
-            alert('Falta datos, por favor rellena todo los datos que tengan *');
-        })
+        });
+        
     };
 
     const ActualizarRodillo = (event) => {
