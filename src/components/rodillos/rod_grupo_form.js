@@ -39,19 +39,6 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
     }, [token]);
 
     useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/rodillos/grupo_nuevo/`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    }, [token]);
-
-    useEffect(() => {
         if (datos.empresa === '') {
             setZonas([]);
             setDatos({
@@ -85,22 +72,38 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
     
     const GuardarGrupo = (event) => {
         event.preventDefault();
-        axios.post(BACKEND_SERVER + `/api/rodillos/grupo_only/`, {
-            nombre: 'Grupo-'+'Ø'+datos.tubo_madre,
-            maquina: datos.zona,
-            tubo_madre: datos.tubo_madre,
-        }, {
+        axios.get(BACKEND_SERVER + `/api/rodillos/grupo_nuevo/?tubo_madre=${datos.tubo_madre}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            if(res.data.length!==0){
+                alert('Este grupo ya existe');
+            }
+            else{
+                axios.post(BACKEND_SERVER + `/api/rodillos/grupo_only/`, {
+                    nombre: 'Grupo-'+'Ø'+datos.tubo_madre,
+                    maquina: datos.zona,
+                    tubo_madre: datos.tubo_madre,
+                }, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }
+                })
+                .then(res => { 
+                    window.location.href=`/rodillos/grupo_editar/${res.data.id}`;       
+                })
+                .catch(err => { 
+                    console.log(err);
+                    alert('Falta datos, por favor rellena todos los campos obligatorios.');
+                });
             }
         })
-        .then(res => { 
-            window.location.href=`/rodillos/grupo_editar/${res.data.id}`;       
-        })
-        .catch(err => { 
+        .catch( err => {
             console.log(err);
-            alert('Falta datos, por favor rellena todos los campos obligatorios.');
         });
+        
     };  
 
     const ActualizarGrupo = (event) => {
