@@ -488,18 +488,6 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         })
     };
 
-    const handleDisabled = () => {
-        if(rodillo.id){
-            return true
-        }
-    }
-
-    const handleDisabled_plano_elemento = () => {
-        if(no_modificar){
-            return true
-        }
-    }
-
     const añadirPlano = () => {
         setShowPlano(true);
     }
@@ -700,7 +688,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                         name='empresa' 
                                         value={datos.empresa}
                                         onChange={handleInputChange}
-                                        disabled={handleDisabled()}
+                                        disabled={rodillo.id?true:false}
                                         placeholder="Empresa"
                                         autoFocus>
                                         <option key={0} value={''}>Todas</option>    
@@ -721,7 +709,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                             value={rodillo.id ? datos.zona :`${datos.zona},${datos.zona_siglas}`}
                                             name='zona'
                                             onChange={handleInputChangeZona}
-                                            disabled={handleDisabled_plano_elemento()}>
+                                            disabled={rodillo.id?true:false}>
                                 <option key={0} value={''}>Todas</option>
                                 {zonas && zonas.map( zona => {
                                     return (
@@ -740,7 +728,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                             value={rodillo.id ? datos.seccion :`${datos.seccion},${datos.pertenece_grupo}`}
                                             name='seccion'
                                             onChange={handleInputChangeSeccion}
-                                            disabled={handleDisabled_plano_elemento()}>
+                                            disabled={rodillo.id?true:false}>
                                         <option key={0} value={''}>Todas</option>
                                         {secciones && secciones.map( seccion => {
                                             return (
@@ -759,7 +747,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                             value={rodillo.id ? datos.operacion :`${datos.operacion},${datos.operacion_nombre}`}
                                             name='operacion'
                                             onChange={handleInputChangeOperacion}
-                                            disabled={handleDisabled_plano_elemento()}>
+                                            disabled={rodillo.id?true:false}>
                                 <option key={0} value={''}>Todos</option>
                                 {operaciones && operaciones.map( operacion => {
                                     return (
@@ -783,7 +771,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                                     value={rodillo.id? datos.forma :`${datos.forma},${datos.forma_nombre}`}
                                                     name='forma'
                                                     onChange={handleInputChangeFormaPerfil}
-                                                    disabled={handleDisabled_plano_elemento()}>
+                                                    disabled={rodillo.id?true:false}>
                                         <option key={0} value={''}>Todos</option>
                                         {formas && formas.map( forma => {
                                             return (
@@ -803,7 +791,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                                     value={datos.descripcion_perfil}
                                                     onChange={handleInputChange}
                                                     placeholder='Descripción del perfil'
-                                                    disabled={handleDisabled_plano_elemento()}>
+                                                    disabled={rodillo.id?true:false}>
                                     </Form.Control>
                                 </Form.Group>
                             </Col>
@@ -815,7 +803,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                                     value={datos.dimension_perfil}
                                                     onChange={handleInputChange}
                                                     placeholder='Dimensión del perfil'
-                                                    disabled={handleDisabled_plano_elemento()}>
+                                                    disabled={rodillo.id?true:false}>
                                     </Form.Control>
                                 </Form.Group>
                             </Col>                    
@@ -830,7 +818,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                                     value={rodillo.id ? datos.grupo :`${datos.grupo},${datos.grupo_tubo_madre}`}
                                                     name='grupo'
                                                     onChange={handleInputChangeGrupo}
-                                                    disabled={handleDisabled_plano_elemento()}>
+                                                    disabled={rodillo.id?true:false}>
                                             <option key={0} value={''}>Todos</option>
                                             {grupos && grupos.map(grupo => {
                                                 
@@ -851,7 +839,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                                 value={rodillo.id ? datos.tipo_rodillo :`${datos.tipo_rodillo},${datos.tipo_rodillo_siglas}`}
                                                 name='tipo_rodillo'
                                                 onChange={handleInputChangeTipo}
-                                                disabled={handleDisabled_plano_elemento()}>
+                                                disabled={rodillo.id?true:false}>
                                     <option key={0} value={''}>Todos</option>
                                     {tipo_rodillo && tipo_rodillo.map( tipo => {
                                         return (
@@ -889,7 +877,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                                 value={datos.diametro}
                                                 onChange={handleInputChange}
                                                 placeholder='Diámetro interior'
-                                                disabled={handleDisabled_plano_elemento()}>
+                                                disabled={rodillo.id?true:false}>
                                 </Form.Control>
                             </Form.Group>
                         </Col>
