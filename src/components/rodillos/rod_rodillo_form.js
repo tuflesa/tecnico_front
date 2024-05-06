@@ -276,7 +276,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             });
         }
         else{
-            axios.get(BACKEND_SERVER + `/api/rodillos/operacion/?seccion=${datos.seccion}`,{
+            axios.get(BACKEND_SERVER + `/api/rodillos/operacion/?seccion__id=${datos.seccion}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
@@ -337,10 +337,10 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         }
         else{
             if(datos.forma_nombre==='Redondo'){
-                if(!datos.nombre&&datos.zona_siglas&&datos.operacion_nombre&&datos.tipo_rodillo_siglas&&datos.descripcion_perfil){
+                if(!datos.nombre&&datos.zona_siglas&&datos.operacion_nombre&&datos.tipo_rodillo_siglas&&datos.dimension_perfil){
                     setDatos({
                         ...datos,
-                        nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-'+'Ø'+datos.descripcion_perfil),
+                        nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-'+'Ø'+datos.dimension_perfil),
                     })
                 }
             }
@@ -353,12 +353,13 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 }
             }
         }
-    },[datos]);
+    },[datos, datos.tipo_rodillo_siglas]);
 
     const handleInputChange = (event) => {
         setDatos({
             ...datos,
-            [event.target.name] : event.target.value
+            [event.target.name] : event.target.value,
+            nombre: '',
         })
     }
 
@@ -368,6 +369,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             ...prevDatos,
             seccion : parseInt(valorId),
             pertenece_grupo: valorPertenece_grupo==="true"?true:false,
+            nombre: '',
+            operacion: '',
         }));
     };
 
@@ -377,6 +380,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             ...prevDatos,
             zona : parseInt(Id),
             zona_siglas: siglas,
+            nombre: '',
         }));
     };
 
@@ -635,6 +639,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             ...datos,
             grupo : id,
             grupo_tubo_madre: madre,
+            nombre: '',
         });
     };
 
@@ -644,6 +649,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             ...datos,
             tipo_rodillo : id,
             tipo_rodillo_siglas: siglas,
+            nombre: '',
         });
     };
 
@@ -653,6 +659,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             ...datos,
             operacion : id,
             operacion_nombre: nombre,
+            nombre: '',
         });
     };
 
@@ -662,6 +669,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             ...datos,
             forma : id,
             forma_nombre: nombre,
+            nombre: '',
         });
     };
 

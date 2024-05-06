@@ -195,6 +195,9 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
                 if(colorAzul){//¿tenia ya conjunto? sustituyo conjunto en celda
                     SustituirConjuntoEnCelda(datos.conjunto_elegido);
                 }
+                if(colorAzulB){//¿tenia ya conjunto naranja? sustituyo conjunto en celda
+                    SustituirConjuntoEnCelda(datos.conjunto_elegido);
+                }
                 else{
                     if(bancada_id || bancadaId){
                         if(bancada_id){
@@ -284,7 +287,10 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
                             if(colorAzul===true){
                                 SustituirConjuntoEnCelda(r.data.id); //tengo celda solo sustituyo el numero del conjunto en dicha celda
                             }
-                            if(colorAzul===false && colorVerde===false){
+                            else if(colorAzulB===true){
+                                SustituirConjuntoEnCelda(r.data.id); //tengo celda solo sustituyo el numero del conjunto en dicha celda
+                            }
+                            else if(colorAzul===false && colorVerde===false){
                                 if(bancada_id || bancadaId){
                                     GuardarCelda(bancada_id); //tengo bancada creo celda
                                 }
