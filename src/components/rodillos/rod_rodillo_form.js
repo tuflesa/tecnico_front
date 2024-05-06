@@ -276,7 +276,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             });
         }
         else{
-            axios.get(BACKEND_SERVER + `/api/rodillos/operacion/?seccion=${datos.seccion}`,{
+            axios.get(BACKEND_SERVER + `/api/rodillos/operacion/?seccion__id=${datos.seccion}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
@@ -370,6 +370,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             seccion : parseInt(valorId),
             pertenece_grupo: valorPertenece_grupo==="true"?true:false,
             nombre: '',
+            operacion: '',
         }));
     };
 
