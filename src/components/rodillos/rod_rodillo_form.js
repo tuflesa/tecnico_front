@@ -276,7 +276,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             });
         }
         else{
-            axios.get(BACKEND_SERVER + `/api/rodillos/operacion/?seccion=${datos.seccion}`,{
+            axios.get(BACKEND_SERVER + `/api/rodillos/operacion/?seccion__id=${datos.seccion}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
@@ -337,10 +337,10 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         }
         else{
             if(datos.forma_nombre==='Redondo'){
-                if(!datos.nombre&&datos.zona_siglas&&datos.operacion_nombre&&datos.tipo_rodillo_siglas&&datos.descripcion_perfil){
+                if(!datos.nombre&&datos.zona_siglas&&datos.operacion_nombre&&datos.tipo_rodillo_siglas&&datos.dimension_perfil){
                     setDatos({
                         ...datos,
-                        nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-'+'Ø'+datos.descripcion_perfil),
+                        nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-'+'Ø'+datos.dimension_perfil),
                     })
                 }
             }
@@ -353,12 +353,13 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 }
             }
         }
-    },[datos]);
+    },[datos, datos.tipo_rodillo_siglas]);
 
     const handleInputChange = (event) => {
         setDatos({
             ...datos,
-            [event.target.name] : event.target.value
+            [event.target.name] : event.target.value,
+            nombre: '',
         })
     }
 
@@ -368,6 +369,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             ...prevDatos,
             seccion : parseInt(valorId),
             pertenece_grupo: valorPertenece_grupo==="true"?true:false,
+            nombre: '',
+            operacion: '',
         }));
     };
 
@@ -377,34 +380,51 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             ...prevDatos,
             zona : parseInt(Id),
             zona_siglas: siglas,
+            nombre: '',
         }));
     };
 
     const GuardarRodillo = (event) => {
         event.preventDefault();
-        axios.post(BACKEND_SERVER + `/api/rodillos/rodillo_nuevo/`, {
-            nombre: datos.nombre,
-            operacion: datos.operacion,
-            grupo: datos.grupo,
-            tipo: datos.tipo_rodillo,
-            material: datos.material,
-            tipo_plano: datos.tipo_plano,
-            diametro: datos.diametro,
-            forma: parseInt(datos.forma),
-            descripcion_perfil: datos.descripcion_perfil,
-            dimension_perfil: datos.dimension_perfil,
-        }, {
+        axios.get(BACKEND_SERVER + `/api/rodillos/rodillos/?nombre=${datos.nombre}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
-                }     
+                }
         })
-        .then( res => { 
-            window.location.href = `/rodillos/editar/${res.data.id}`;
+        .then(res => {
+            if(res.data.length!==0){
+                alert('Este rodillo ya existe');
+            }
+            else{
+                axios.post(BACKEND_SERVER + `/api/rodillos/rodillo_nuevo/`, {
+                    nombre: datos.nombre,
+                    operacion: datos.operacion,
+                    grupo: datos.grupo,
+                    tipo: datos.tipo_rodillo,
+                    material: datos.material,
+                    tipo_plano: datos.tipo_plano,
+                    diametro: datos.diametro,
+                    forma: parseInt(datos.forma),
+                    descripcion_perfil: datos.descripcion_perfil,
+                    dimension_perfil: datos.dimension_perfil,
+                }, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                        }     
+                })
+                .then( res => { 
+                    window.location.href = `/rodillos/editar/${res.data.id}`;
+                })
+                .catch(err => { 
+                    console.log(err);
+                    alert('Falta datos, por favor rellena todo los datos que tengan *');
+                })
+            }
         })
-        .catch(err => { 
+        .catch( err => {
             console.log(err);
-            alert('Falta datos, por favor rellena todo los datos que tengan *');
-        })
+        });
+        
     };
 
     const ActualizarRodillo = (event) => {
@@ -467,18 +487,6 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             }
         })
     };
-
-    const handleDisabled = () => {
-        if(rodillo.id){
-            return true
-        }
-    }
-
-    const handleDisabled_plano_elemento = () => {
-        if(no_modificar){
-            return true
-        }
-    }
 
     const añadirPlano = () => {
         setShowPlano(true);
@@ -619,6 +627,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             ...datos,
             grupo : id,
             grupo_tubo_madre: madre,
+            nombre: '',
         });
     };
 
@@ -628,6 +637,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             ...datos,
             tipo_rodillo : id,
             tipo_rodillo_siglas: siglas,
+            nombre: '',
         });
     };
 
@@ -637,6 +647,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             ...datos,
             operacion : id,
             operacion_nombre: nombre,
+            nombre: '',
         });
     };
 
@@ -646,6 +657,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             ...datos,
             forma : id,
             forma_nombre: nombre,
+            nombre: '',
         });
     };
 
@@ -676,7 +688,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                         name='empresa' 
                                         value={datos.empresa}
                                         onChange={handleInputChange}
-                                        disabled={handleDisabled()}
+                                        disabled={rodillo.id?true:false}
                                         placeholder="Empresa"
                                         autoFocus>
                                         <option key={0} value={''}>Todas</option>    
@@ -697,7 +709,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                             value={rodillo.id ? datos.zona :`${datos.zona},${datos.zona_siglas}`}
                                             name='zona'
                                             onChange={handleInputChangeZona}
-                                            disabled={handleDisabled_plano_elemento()}>
+                                            disabled={rodillo.id?true:false}>
                                 <option key={0} value={''}>Todas</option>
                                 {zonas && zonas.map( zona => {
                                     return (
@@ -716,7 +728,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                             value={rodillo.id ? datos.seccion :`${datos.seccion},${datos.pertenece_grupo}`}
                                             name='seccion'
                                             onChange={handleInputChangeSeccion}
-                                            disabled={handleDisabled_plano_elemento()}>
+                                            disabled={rodillo.id?true:false}>
                                         <option key={0} value={''}>Todas</option>
                                         {secciones && secciones.map( seccion => {
                                             return (
@@ -735,7 +747,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                             value={rodillo.id ? datos.operacion :`${datos.operacion},${datos.operacion_nombre}`}
                                             name='operacion'
                                             onChange={handleInputChangeOperacion}
-                                            disabled={handleDisabled_plano_elemento()}>
+                                            disabled={rodillo.id?true:false}>
                                 <option key={0} value={''}>Todos</option>
                                 {operaciones && operaciones.map( operacion => {
                                     return (
@@ -759,7 +771,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                                     value={rodillo.id? datos.forma :`${datos.forma},${datos.forma_nombre}`}
                                                     name='forma'
                                                     onChange={handleInputChangeFormaPerfil}
-                                                    disabled={handleDisabled_plano_elemento()}>
+                                                    disabled={rodillo.id?true:false}>
                                         <option key={0} value={''}>Todos</option>
                                         {formas && formas.map( forma => {
                                             return (
@@ -779,7 +791,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                                     value={datos.descripcion_perfil}
                                                     onChange={handleInputChange}
                                                     placeholder='Descripción del perfil'
-                                                    disabled={handleDisabled_plano_elemento()}>
+                                                    disabled={rodillo.id?true:false}>
                                     </Form.Control>
                                 </Form.Group>
                             </Col>
@@ -791,7 +803,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                                     value={datos.dimension_perfil}
                                                     onChange={handleInputChange}
                                                     placeholder='Dimensión del perfil'
-                                                    disabled={handleDisabled_plano_elemento()}>
+                                                    disabled={rodillo.id?true:false}>
                                     </Form.Control>
                                 </Form.Group>
                             </Col>                    
@@ -806,7 +818,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                                     value={rodillo.id ? datos.grupo :`${datos.grupo},${datos.grupo_tubo_madre}`}
                                                     name='grupo'
                                                     onChange={handleInputChangeGrupo}
-                                                    disabled={handleDisabled_plano_elemento()}>
+                                                    disabled={rodillo.id?true:false}>
                                             <option key={0} value={''}>Todos</option>
                                             {grupos && grupos.map(grupo => {
                                                 
@@ -827,7 +839,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                                 value={rodillo.id ? datos.tipo_rodillo :`${datos.tipo_rodillo},${datos.tipo_rodillo_siglas}`}
                                                 name='tipo_rodillo'
                                                 onChange={handleInputChangeTipo}
-                                                disabled={handleDisabled_plano_elemento()}>
+                                                disabled={rodillo.id?true:false}>
                                     <option key={0} value={''}>Todos</option>
                                     {tipo_rodillo && tipo_rodillo.map( tipo => {
                                         return (
@@ -865,7 +877,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                                 value={datos.diametro}
                                                 onChange={handleInputChange}
                                                 placeholder='Diámetro interior'
-                                                disabled={handleDisabled_plano_elemento()}>
+                                                disabled={rodillo.id?true:false}>
                                 </Form.Control>
                             </Form.Group>
                         </Col>
