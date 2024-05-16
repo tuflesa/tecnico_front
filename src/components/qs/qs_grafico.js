@@ -7,7 +7,7 @@ import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
 import QSNavBar from "./qs_nav";
-import {montaje, fleje} from './Grupo_164FF_W';
+import {montaje, fleje} from './Grupo_152FF';
 
 // const ejes = [{op:1, pos: [174, 343.57]},
 //               {op:2, pos: [177.91, 340.49]},
