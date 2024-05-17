@@ -88,7 +88,7 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
     }, [bancadas]);
 
     useEffect(() => {
-        if(datos.grupo && datos.bancada_ct!=='null'){ //buscamos las bancadas RD y luego las bancadas CT al final las juntamos
+        if(datos.grupo!=='null' && datos.bancada_ct!=='null'){ //buscamos las bancadas RD y luego las bancadas CT al final las juntamos
             datos.grupo && axios.get(BACKEND_SERVER + `/api/rodillos/grupo_montaje/${datos.grupo}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`

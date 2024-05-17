@@ -106,7 +106,7 @@ const RodMontajeFiltro = ({actualizaFiltro}) => {
             });
         }
         else {
-            axios.get(BACKEND_SERVER + `/api/rodillos/bancada_montaje_ct/?seccion__maquina=${datos.maquina}`,{
+            datos.maquina && axios.get(BACKEND_SERVER + `/api/rodillos/bancada_montaje_ct/?seccion__maquina=${datos.maquina}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
