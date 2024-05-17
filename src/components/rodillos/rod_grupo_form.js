@@ -72,7 +72,7 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
     
     const GuardarGrupo = (event) => {
         event.preventDefault();
-        axios.get(BACKEND_SERVER + `/api/rodillos/grupo_nuevo/?tubo_madre=${datos.tubo_madre}`,{
+        axios.get(BACKEND_SERVER + `/api/rodillos/grupo_nuevo/?tubo_madre=${datos.tubo_madre}&maquina=${datos.zona}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }

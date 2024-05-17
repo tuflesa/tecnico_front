@@ -19,7 +19,7 @@ const RodGruposListado = () => {
     const [conjuntos, setConjuntos] = useState(null);
     const [empresas, setEmpresas] = useState(null);
     const [zonas, setZonas] = useState(null);
-    const [filtro, setFiltro] = useState(`?tubo_madre=${0}&nombre__icontains=${''}&maquina__id=${''}&maquina__empresa=${''}`);
+    const [filtro, setFiltro] = useState(`?tubo_madre=${0}&nombre__icontains=${''}&maquina__id=${''}&maquina__empresa=${user['tec-user'].perfil.empresa.id}`);
     const [count, setCount] = useState(null);
 
     const [datos, setDatos] = useState({
