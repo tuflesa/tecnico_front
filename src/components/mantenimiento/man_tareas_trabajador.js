@@ -172,7 +172,7 @@ const TareasTrabajador = () => {
                                         <td>{lineasUs.linea.parte.tipo_nombre==="Preventivo"?lineasUs.linea.tarea.tipo_periodo.cantidad_dias:null}</td>
                                         <td>
                                         <Receipt className="mr-3 pencil" onClick={event =>{listarTrabajadores(lineasUs.linea.id)}}/>
-                                        <Link to={`/mantenimiento/parte_op/${lineasUs.linea.parte.id}`}><Eye className="mr-3 pencil"/></Link>
+                                        <a href={`/mantenimiento/parte_op/${lineasUs.linea.parte.id}`} target="_blank" rel="noopener noreferrer"><Eye className="mr-3 pencil"/></a>
                                         </td>
                                     </tr>
                                 )})

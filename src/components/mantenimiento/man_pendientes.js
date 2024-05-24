@@ -75,8 +75,8 @@ const ManPendientes = () => {
                                         <td>{linea.parte.seccion.siglas_zona}</td>
                                         <td>{linea.tarea.especialidad_nombre}</td>
                                         <td>
-                                            <Link to={`/mantenimiento/linea_tarea/${linea.id}`}><PencilFill className="mr-3 pencil"/></Link>
-                                            <Link to={`/mantenimiento/parte/${linea.parte.id}`}><Eye className="mr-3 pencil"/></Link>
+                                            <a href={`/mantenimiento/linea_tarea/${linea.id}`} target="_blank" rel="noopener noreferrer"><PencilFill className="mr-3 pencil"/></a>
+                                            <a href={`/mantenimiento/parte/${linea.parte.id}`} target="_blank" rel="noopener noreferrer"><Eye className="mr-3 pencil"/></a>
                                         </td>
                                     </tr>
                                 )})
@@ -100,7 +100,7 @@ const ManPendientes = () => {
                                     <tr key={parte.id}>
                                         <td>{parte.nombre}</td>
                                         <td>{parte.creado_por.get_full_name}</td>
-                                        <td><Link to={`/mantenimiento/parte/${parte.id}`}><PencilFill className="mr-3 pencil"/></Link></td>
+                                        <td><a href={`/mantenimiento/parte/${parte.id}`} target="_blank" rel="noopener noreferrer"><PencilFill className="mr-3 pencil"/></a></td>
                                         
                                     </tr>
                                 )})

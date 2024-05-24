@@ -360,7 +360,8 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                         </Row>                    
                         <Form.Row className="justify-content-center">
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button>
-                                <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar</Button>
+                                <Button variant="info" className={'mx-2'} onClick={() => window.close()}>Cerrar</Button>
+                                {/* <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar</Button> */}
                         </Form.Row>
                     </Form>
                 </Col>

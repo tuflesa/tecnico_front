@@ -498,7 +498,8 @@ const NotificacionForm = ({nota, setNota}) => {
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarNota}>Actualizar</Button> :
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={crearNota}>Guardar</Button>
                             }
-                            <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar</Button>
+                            <Button variant="info" className={'mx-2'} onClick={() => window.close()}>Cerrar</Button>
+                            {/* <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar</Button> */}
                             <Button variant="danger" type="submit" className={'mx-2'} onClick={reclamar_nota}>Reclamar</Button>
                             <Button variant="danger" className="mr-3 trash" onClick={event => {listado_reclamaciones()}}>R / {reclamaciones?reclamaciones.length:0}</Button>
                             {/* <Trash className="mr-3 trash" onClick={event => {listado_reclamaciones()}} /> */}

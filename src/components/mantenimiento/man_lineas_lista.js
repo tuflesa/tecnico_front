@@ -3,7 +3,7 @@ import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table} from 'react-bootstrap';
-import { Trash, PencilFill, Receipt, Eye, PlusSquare, DashSquare, HandThumbsUpFill } from 'react-bootstrap-icons';
+import { Trash, PencilFill, Receipt, Eye, PlusSquare, DashSquare, HandThumbsUpFill, Pencil } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import ManLineasFiltro from './man_lineas_filtro';
 import { color, filter } from 'd3';
@@ -308,12 +308,16 @@ const ManLineasListado = () => {
                                         <td>{linea.fecha_inicio?invertirFecha(String(linea.fecha_inicio)):''}</td>
                                         <td>{linea.fecha_fin?invertirFecha(String(linea.fecha_fin)):''}</td>
                                         <td>                                            
-                                            <Link to={`/mantenimiento/linea_tarea/${linea.id}`}>
-                                                <PencilFill className="mr-3 pencil"/>                                                
-                                            </Link>  
+                                            {/* <Link to={`/mantenimiento/linea_tarea/${linea.id}`}><PencilFill className="mr-3 pencil"/></Link>  */}
+                                            <a href={`/mantenimiento/linea_tarea/${linea.id}`} target="_blank" rel="noopener noreferrer">
+                                                <PencilFill className="mr-3 pencil"/>
+                                            </a> 
                                             <Trash className="mr-3 pencil"  onClick={event =>{BorrarLinea(linea)}} />                                       
                                             <Receipt className="mr-3 pencil" onClick={event =>{listarTrabajadores(linea.id)}}/>
-                                            <Link to={`/mantenimiento/parte/${linea.parte.id}`}><Eye className="mr-3 pencil"/></Link>
+                                            {/* <Link to={`/mantenimiento/parte/${linea.parte.id}`}><Eye className="mr-3 pencil"/></Link> */}
+                                            <a href={`/mantenimiento/parte/${linea.parte.id}`} target="_blank" rel="noopener noreferrer">
+                                                <Eye className="mr-3 pencil"/>
+                                            </a>
                                         </td>
                                     </tr>
                                 )})
