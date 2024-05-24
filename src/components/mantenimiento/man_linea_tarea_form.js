@@ -223,18 +223,6 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                                 </Form.Group>
                             </Col>
                             <Col>
-                                <Form.Group id="nombre">
-                                    <Form.Label>Nombre</Form.Label>
-                                    <Form.Control type="text" 
-                                                name='nombre' 
-                                                value={datos.nombre}
-                                                onChange={handleInputChange} 
-                                                placeholder="Nombre"
-                                                disabled={nosoyTecnico? + true: + false}
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col>
                                 <Form.Group id="especialidad">
                                     <Form.Label>Especialidad</Form.Label>
                                     <Form.Control type="text" 
@@ -244,6 +232,20 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                                     />
                                 </Form.Group>
                             </Col>                                          
+                        </Row>
+                        <Row>
+                            <Col>
+                                <Form.Group id="nombre">
+                                    <Form.Label>Nombre</Form.Label>
+                                    <Form.Control as="textarea" rows={1}
+                                                name='nombre' 
+                                                value={datos.nombre}
+                                                onChange={handleInputChange} 
+                                                placeholder="Nombre"
+                                                disabled={nosoyTecnico? + true: + false}
+                                    />
+                                </Form.Group>
+                            </Col>
                         </Row>
                         <Row>
                             <Col>

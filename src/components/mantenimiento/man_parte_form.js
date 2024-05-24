@@ -710,19 +710,6 @@ const ParteForm = ({parte, setParte, op}) => {
                                 </Form.Group>
                             </Col> 
                             <Col>
-                                <Form.Group id="nombre">
-                                    <Form.Label>Nombre(*)</Form.Label>
-                                    <Form.Control type="text" 
-                                                name='nombre' 
-                                                value={datos.nombre}
-                                                onChange={handleInputChange} 
-                                                placeholder="Nombre"
-                                                disabled={nosoyTecnico? true: false}
-                                                autoFocus
-                                    />
-                                </Form.Group>
-                            </Col> 
-                            <Col>
                                 <Form.Group controlId="creado_nombre">
                                     <Form.Label>Creado por (*)</Form.Label>
                                     <Form.Control   type="text" 
@@ -751,6 +738,21 @@ const ParteForm = ({parte, setParte, op}) => {
                                     </Form.Control>
                                 </Form.Group>
                             </Col>           
+                        </Row>
+                        <Row>
+                            <Col>
+                                <Form.Group id="nombre">
+                                    <Form.Label>Nombre(*)</Form.Label>
+                                    <Form.Control as="textarea" rows={1}
+                                                name='nombre' 
+                                                value={datos.nombre}
+                                                onChange={handleInputChange} 
+                                                placeholder="Nombre"
+                                                disabled={nosoyTecnico? true: false}
+                                                autoFocus
+                                    />
+                                </Form.Group>
+                            </Col> 
                         </Row>
                         <Row>
                             <Col>
