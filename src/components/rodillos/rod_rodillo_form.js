@@ -18,6 +18,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [empresas, setEmpresas] = useState(null);
     const [zonas, setZonas] = useState([]);
     const [secciones, setSecciones] = useState([]);
+    const [ejes, setEjes] = useState([]);
     const [operaciones, setOperaciones] = useState([]);
     const [tipo_rodillo, setTipoRodillo] = useState([]);
     const [materiales, setMateriales] = useState([]);
@@ -53,7 +54,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         tipo_seccion: rodillo.id?rodillo.operacion.seccion.tipo:'',
         tipo_plano: rodillo.id?rodillo.tipo_plano:'',
         rodillo_id: rodillo.id?rodillo.id:'',
-        diametro: rodillo.id?rodillo.diametro:0, //diámetro interior, mandril del rodillo
+        diametro: rodillo.id?rodillo.diametro:'', //diámetro interior, mandril del rodillo
         forma: rodillo.id?rodillo.forma:'',
         forma_nombre: '',
         descripcion_perfil: rodillo.id?rodillo.descripcion_perfil:'',
@@ -84,6 +85,24 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             console.log(err);
         });
     }, [token]);
+
+    useEffect(() => { // buscamos los ejes según la máquina elegida.
+        datos.zona && datos.tipo_rodillo && datos.operacion && axios.get(BACKEND_SERVER + `/api/rodillos/eje_operacion/?operacion__seccion__maquina__id=${datos.zona}&operacion__id=${datos.operacion}&tipo=${datos.tipo_rodillo}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setEjes(res.data);
+            setDatos({
+                ...datos,
+                diametro: res.data[0].diametro,
+            })
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [datos.operacion, datos.tipo_rodillo, datos.zona]);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
@@ -869,16 +888,34 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                 </Form.Control>
                             </Form.Group>
                         </Col>
+                        {/* <Col>
+                            <Form.Group controlId="diametro">
+                                <Form.Label>Diametro Eje *</Form.Label>
+                                <Form.Control as="select" 
+                                                value={datos.diametro}
+                                                name='eje'
+                                                onChange={handleInputChange}>
+                                    <option key={0} value={''}>Todos</option>
+                                    {ejes && ejes.map( eje => {
+                                        return (
+                                        <option key={eje.id} value={eje.id}>
+                                            {eje.diametro}
+                                        </option>
+                                        )
+                                    })}
+                                </Form.Control>
+                            </Form.Group>
+                        </Col> */}
                         <Col>
                             <Form.Group controlId="diametro">
-                                <Form.Label>Diametro eje</Form.Label>
-                                <Form.Control type="text" 
-                                                name='diametro'
-                                                value={datos.diametro}
-                                                onChange={handleInputChange}
-                                                placeholder='Diámetro interior'
-                                                disabled={rodillo.id?true:false}>
-                                </Form.Control>
+                            <Form.Label>Diametro del eje</Form.Label>
+                            <Form.Control type="text" 
+                                        name='diametro' 
+                                        value={datos.diametro}
+                                        onChange={handleInputChange} 
+                                        placeholder="Diametro"
+                                        disabled
+                            />
                             </Form.Group>
                         </Col>
                         {rodillo.length!==0?
