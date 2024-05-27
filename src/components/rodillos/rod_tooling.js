@@ -254,7 +254,7 @@ const RodTooling = () => {
                                                     operacion.seccion.id === seccion.id && (
                                                         <Col key={operacion.id}>
                                                             <img 
-                                                                src={operacion.icono} 
+                                                                src={operacion.icono.icono} 
                                                                 alt="" // Sin texto alternativo 
                                                                 style={{ width: '30px', height: '30px' }} 
                                                             />
@@ -277,11 +277,6 @@ const RodTooling = () => {
                                                         return (
                                                             <td key={seccion.id}>
                                                                 {conjuntos_completadosCel && conjuntos_completadosCel.map((celda) => {
-                                                                    console.log('DENTRO DEL IF QUE VALE B-MONTAJE', bancada.montaje_id);
-                                                                    console.log('DENTRO DEL IF QUE VALE B-SECCION', bancada.seccion);
-                                                                    console.log('DENTRO DEL IF QUE VALE MONTAJE', montaje.id);
-                                                                    console.log('DENTRO DEL IF QUE VALE SECCION', seccion.id);
-                                                                    console.log('celdaaaaa',celda);
                                                                     // if (conjunto.seccion === seccion.id && bancada.id === conjunto.bancada && (!conjunto.cel.bancada.seccion.pertenece_grupo || montaje.grupo.tubo_madre === conjunto.cel.bancada.tubo_madre)) {
                                                                     if (celda.seccion === seccion.id && bancada.id === celda.bancada &&  (!celda.cel.bancada.seccion.pertenece_grupo || montaje.grupo.tubo_madre === celda.cel.bancada.tubo_madre)) {
                                                                         return (
