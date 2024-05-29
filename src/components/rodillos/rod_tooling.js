@@ -268,6 +268,29 @@ const RodTooling = () => {
                             </thead>
                             <tbody>
                                 {montajes && montajes.map(montaje => (
+                                    <tr>
+                                        <td key={montaje.id}>{montaje.nombre}</td>
+                                        {secciones && secciones.map(seccion => (
+                                            <td key={seccion.id}>
+                                                <Row>
+                                                    {operaciones && operaciones.map((operacion) => (
+                                                        operacion.seccion.id === seccion.id && (
+                                                            <Col key={operacion.id}>
+                                                                {operacion.nombre}
+                                                                {/* <img 
+                                                                    src={operacion.icono.icono} 
+                                                                    alt="" // Sin texto alternativo 
+                                                                    style={{ width: '30px', height: '30px' }} 
+                                                                /> */}
+                                                            </Col>
+                                                        )
+                                                    ))}
+                                                </Row>
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))}
+                                {/* {montajes && montajes.map(montaje => (
                                     <tr key={montaje.id}>
                                         <td>{montaje.grupo.nombre} - {montaje.nombre}</td> 
                                         {secciones && secciones.map(seccion => (
@@ -277,15 +300,15 @@ const RodTooling = () => {
                                                         return (
                                                             <td key={seccion.id}>
                                                                 {conjuntos_completadosCel && conjuntos_completadosCel.map((celda) => {
-                                                                    // if (conjunto.seccion === seccion.id && bancada.id === conjunto.bancada && (!conjunto.cel.bancada.seccion.pertenece_grupo || montaje.grupo.tubo_madre === conjunto.cel.bancada.tubo_madre)) {
+                                                                     if (conjunto.seccion === seccion.id && bancada.id === conjunto.bancada && (!conjunto.cel.bancada.seccion.pertenece_grupo || montaje.grupo.tubo_madre === conjunto.cel.bancada.tubo_madre)) {
                                                                     if (celda.seccion === seccion.id && bancada.id === celda.bancada &&  (!celda.cel.bancada.seccion.pertenece_grupo || montaje.grupo.tubo_madre === celda.cel.bancada.tubo_madre)) {
                                                                         return (
                                                                             <td key={celda.numCelda}>
-                                                                                {/* <img 
+                                                                                <img 
                                                                                     src={conjunto.cel.icono} 
                                                                                     alt="" // Sin texto alternativo 
                                                                                     style={{ width: '35px', height: '35px' }} 
-                                                                                /> */}
+                                                                                />
                                                                                 <>{celda.numCelda}</>
                                                                             </td>
                                                                         );                                                                      
@@ -300,10 +323,8 @@ const RodTooling = () => {
                                             </React.Fragment>
                                         ))}
                                     </tr>
-                                ))}
+                                ))} */}
                             </tbody>
-
-
                         </Table>
                     </Col>
                 </Row> 
