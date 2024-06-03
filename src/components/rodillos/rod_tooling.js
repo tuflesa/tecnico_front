@@ -150,6 +150,7 @@ const RodTooling = () => {
             });
             console.log('unimos:  ', unimos);            
            setConjuntosCompletadosCel(unimos);
+           console.log('UNIMOS......:', unimos);
         } else {
             setConjuntosCompletadosCel(null);
         }
@@ -275,14 +276,18 @@ const RodTooling = () => {
                                                 <Row>
                                                     {operaciones && operaciones.map((operacion) => (
                                                         operacion.seccion.id === seccion.id && (
-                                                            <Col key={operacion.id}>
-                                                                {operacion.nombre}
-                                                                {/* <img 
-                                                                    src={operacion.icono.icono} 
-                                                                    alt="" // Sin texto alternativo 
-                                                                    style={{ width: '30px', height: '30px' }} 
-                                                                /> */}
-                                                            </Col>
+                                                            <React.Fragment key={operacion.id}>
+                                                                {/* {celdas && celdas.map((celda) => ( */}
+                                                                        <Col key={operacion.id}>
+                                                                            {montaje.grupo.id}
+                                                                            {/* <img 
+                                                                                src={operacion.icono.icono} 
+                                                                                alt="" // Sin texto alternativo 
+                                                                                style={{ width: '30px', height: '30px' }} 
+                                                                            /> */}
+                                                                        </Col>
+                                                                {/* ))} */}
+                                                            </React.Fragment>
                                                         )
                                                     ))}
                                                 </Row>
