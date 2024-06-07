@@ -25,6 +25,7 @@ const RodTooling = () => {
     const [operaciones, setOperaciones] = useState(null);
     const [secciones, setSecciones] = useState(null);
     const [bancadas, setBancadas] = useState(null);
+    const [pinta, setPinta] = useState(null);
 
     useEffect(() => { //SEPARAR DATOS QUE ENTRAN A TRAVES DEL FILTRO
         const params = new URLSearchParams(filtro);
@@ -230,6 +231,73 @@ const RodTooling = () => {
         setFiltro(str);
     }
 
+    const bancada_redonda = (bancadaId, operacion)=>{
+        return (
+            <Col key={operacion.id}>
+                {bancadaId.operacion}
+            </Col>
+        );
+    }
+
+    const bancada_cabeza = (bancadaId, operacion)=>{
+        return (
+            <Col key={operacion.id}>
+                {bancadaId.operacion}
+            </Col>
+        );
+    }
+
+    const getCeldaCorrecta = (montaje, operacion, seccion) => { //buscas la celda correcta en este punto
+        console.log('conjuntos_completadosCel',conjuntos_completadosCel);
+        if(conjuntos_completadosCel){
+            const bancadaCeldas = conjuntos_completadosCel.filter(bancadaId => {
+                if(bancadaId.operacion===operacion.id){
+                    bancada_redonda(bancadaId, operacion);
+                }
+                else{
+                    bancada_cabeza(bancadaId, operacion);
+                }
+                
+            })
+        }
+        return (
+            <Col key={operacion.id}>
+                {operacion.id}
+            </Col>
+        );
+
+        /* const bancadaCeldas = montaje.grupo.bancadas.filter(bancadaId => {
+            return bancadaId.seccion.id === seccion.id;
+        })
+        console.log('bancadaCeldas',bancadaCeldas);
+        console.log('montaje',montaje);
+        if(seccion.pertenece_grupo){
+            axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__seccion__id=${bancadaCeldas[0].seccion.id}&operacion=${operacion.id}&conjunto__tubo_madre=${montaje.grupo.tubo_madre}`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                  }
+            })
+            .then( res => {                
+                console.log('esta sería la celda',res.data);
+                const bancadaCumple = res.data.filter(item => item.bancada.tubo_madre === item.conjunto.tubo_madre);
+                if (bancadaCumple.length > 0) {
+                    console.log('Este es la bancada que cumple todas las condiciones', bancadaCumple);
+                    pintando(res.data, operacion.id);
+                }
+            })
+            .catch( err => {
+                console.log(err);
+            });
+        }else if(!seccion.pertenece_grupo){
+            return (
+                <Col key={operacion.id}>
+                    {montaje.bancadas.dimensiones}
+                </Col>
+            );
+        } */
+    };
+    
+
     return (
         <Container>
             <img src ={logo} width="200" height="200"></img>
@@ -277,16 +345,7 @@ const RodTooling = () => {
                                                     {operaciones && operaciones.map((operacion) => (
                                                         operacion.seccion.id === seccion.id && (
                                                             <React.Fragment key={operacion.id}>
-                                                                {/* {celdas && celdas.map((celda) => ( */}
-                                                                        <Col key={operacion.id}>
-                                                                            {montaje.grupo.id}
-                                                                            {/* <img 
-                                                                                src={operacion.icono.icono} 
-                                                                                alt="" // Sin texto alternativo 
-                                                                                style={{ width: '30px', height: '30px' }} 
-                                                                            /> */}
-                                                                        </Col>
-                                                                {/* ))} */}
+                                                                {getCeldaCorrecta(montaje, operacion, seccion)}
                                                             </React.Fragment>
                                                         )
                                                     ))}
