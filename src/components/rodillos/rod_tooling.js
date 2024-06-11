@@ -25,7 +25,6 @@ const RodTooling = () => {
     const [operaciones, setOperaciones] = useState(null);
     const [secciones, setSecciones] = useState(null);
     const [bancadas, setBancadas] = useState(null);
-    const [pinta, setPinta] = useState(null);
 
     useEffect(() => { //SEPARAR DATOS QUE ENTRAN A TRAVES DEL FILTRO
         const params = new URLSearchParams(filtro);
@@ -60,8 +59,6 @@ const RodTooling = () => {
                 }
             }
             setBancadas(newBancadas); // Para tener todas las bancadas juntos BD y CT
-            console.log('estas son todas las BANCADAS juntas', newBancadas);
-            console.log('estas son los MONTAJES: ', res.data);
             cogerDatos(res.data);
         })
         .catch( err => {
@@ -77,7 +74,6 @@ const RodTooling = () => {
         })
         .then( res => {
             setSecciones(res.data);
-            console.log('aqui tenemos las SECCIONES',res.data);
         })
         .catch( err => {
             console.log(err);
@@ -148,10 +144,8 @@ const RodTooling = () => {
             const unimos = conjuntosCel.concat(conjuntosCelCT);
             unimos.forEach((element, index) => {
                 element.numCelda = index + 1;
-            });
-            console.log('unimos:  ', unimos);            
+            });           
            setConjuntosCompletadosCel(unimos);
-           console.log('UNIMOS......:', unimos);
         } else {
             setConjuntosCompletadosCel(null);
         }
@@ -231,73 +225,6 @@ const RodTooling = () => {
         setFiltro(str);
     }
 
-    const bancada_redonda = (bancadaId, operacion)=>{
-        return (
-            <Col key={operacion.id}>
-                {bancadaId.operacion}
-            </Col>
-        );
-    }
-
-    const bancada_cabeza = (bancadaId, operacion)=>{
-        return (
-            <Col key={operacion.id}>
-                {bancadaId.operacion}
-            </Col>
-        );
-    }
-
-    const getCeldaCorrecta = (montaje, operacion, seccion) => { //buscas la celda correcta en este punto
-        console.log('conjuntos_completadosCel',conjuntos_completadosCel);
-        if(conjuntos_completadosCel){
-            const bancadaCeldas = conjuntos_completadosCel.filter(bancadaId => {
-                if(bancadaId.operacion===operacion.id){
-                    bancada_redonda(bancadaId, operacion);
-                }
-                else{
-                    bancada_cabeza(bancadaId, operacion);
-                }
-                
-            })
-        }
-        return (
-            <Col key={operacion.id}>
-                {operacion.id}
-            </Col>
-        );
-
-        /* const bancadaCeldas = montaje.grupo.bancadas.filter(bancadaId => {
-            return bancadaId.seccion.id === seccion.id;
-        })
-        console.log('bancadaCeldas',bancadaCeldas);
-        console.log('montaje',montaje);
-        if(seccion.pertenece_grupo){
-            axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__seccion__id=${bancadaCeldas[0].seccion.id}&operacion=${operacion.id}&conjunto__tubo_madre=${montaje.grupo.tubo_madre}`,{
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                  }
-            })
-            .then( res => {                
-                console.log('esta sería la celda',res.data);
-                const bancadaCumple = res.data.filter(item => item.bancada.tubo_madre === item.conjunto.tubo_madre);
-                if (bancadaCumple.length > 0) {
-                    console.log('Este es la bancada que cumple todas las condiciones', bancadaCumple);
-                    pintando(res.data, operacion.id);
-                }
-            })
-            .catch( err => {
-                console.log(err);
-            });
-        }else if(!seccion.pertenece_grupo){
-            return (
-                <Col key={operacion.id}>
-                    {montaje.bancadas.dimensiones}
-                </Col>
-            );
-        } */
-    };
-    
-
     return (
         <Container>
             <img src ={logo} width="200" height="200"></img>
@@ -337,57 +264,53 @@ const RodTooling = () => {
                             </thead>
                             <tbody>
                                 {montajes && montajes.map(montaje => (
-                                    <tr>
-                                        <td key={montaje.id}>{montaje.nombre}</td>
+                                    <tr key={montaje.id}>
+                                        {console.log('montaje',montaje)}
+                                        {console.log('conjuntos_completadosCel',conjuntos_completadosCel)}
+                                        <td>{montaje.nombre}</td>
                                         {secciones && secciones.map(seccion => (
                                             <td key={seccion.id}>
                                                 <Row>
                                                     {operaciones && operaciones.map((operacion) => (
-                                                        operacion.seccion.id === seccion.id && (
-                                                            <React.Fragment key={operacion.id}>
-                                                                {getCeldaCorrecta(montaje, operacion, seccion)}
-                                                            </React.Fragment>
-                                                        )
+                                                        <React.Fragment key={operacion.id}>
+                                                            {conjuntos_completadosCel?.filter(celda => 
+                                                                operacion.seccion.id === seccion.id &&
+                                                                celda.cel.conjunto.tubo_madre !== null &&
+                                                                celda.cel.bancada.tubo_madre !== celda.cel.conjunto.tubo_madre &&
+                                                                seccion.id === celda.seccion && operacion.id === celda.operacion &&
+                                                                montaje.grupo.tubo_madre === celda.cel.bancada.tubo_madre
+                                                            ).map(celda => (
+                                                                    <Col key={celda.id}style={{ color: 'red'}}>
+                                                                        {'-->'}
+                                                                    </Col>
+                                                                ))}
+                                                            {conjuntos_completadosCel?.filter(celda => 
+                                                                operacion.seccion.id === seccion.id &&
+                                                                celda.cel.conjunto.tubo_madre !== null &&
+                                                                celda.cel.bancada.tubo_madre === celda.cel.conjunto.tubo_madre &&
+                                                                seccion.id === celda.seccion && operacion.id === celda.operacion &&
+                                                                montaje.grupo.tubo_madre === celda.cel.conjunto.tubo_madre
+                                                            ).map(celda => (
+                                                                    <Col key={celda.id}>
+                                                                        {celda.cel.id}
+                                                                    </Col>
+                                                                ))}
+                                                        {conjuntos_completadosCel?.filter(celda => 
+                                                            operacion.seccion.id === seccion.id &&
+                                                            celda.cel.conjunto.tubo_madre === null &&
+                                                            seccion.id === celda.seccion && operacion.id === celda.operacion
+                                                        ).map(celda => (
+                                                                <Col key={celda.id}>
+                                                                    {celda.cel.id}
+                                                                </Col>
+                                                            ))}
+                                                    </React.Fragment>
                                                     ))}
                                                 </Row>
                                             </td>
                                         ))}
                                     </tr>
                                 ))}
-                                {/* {montajes && montajes.map(montaje => (
-                                    <tr key={montaje.id}>
-                                        <td>{montaje.grupo.nombre} - {montaje.nombre}</td> 
-                                        {secciones && secciones.map(seccion => (
-                                            <React.Fragment key={seccion.id}>
-                                                {bancadas && bancadas.map(bancada => {
-                                                    if (bancada.seccion === seccion.id && montaje.id === bancada.montaje_id) {
-                                                        return (
-                                                            <td key={seccion.id}>
-                                                                {conjuntos_completadosCel && conjuntos_completadosCel.map((celda) => {
-                                                                     if (conjunto.seccion === seccion.id && bancada.id === conjunto.bancada && (!conjunto.cel.bancada.seccion.pertenece_grupo || montaje.grupo.tubo_madre === conjunto.cel.bancada.tubo_madre)) {
-                                                                    if (celda.seccion === seccion.id && bancada.id === celda.bancada &&  (!celda.cel.bancada.seccion.pertenece_grupo || montaje.grupo.tubo_madre === celda.cel.bancada.tubo_madre)) {
-                                                                        return (
-                                                                            <td key={celda.numCelda}>
-                                                                                <img 
-                                                                                    src={conjunto.cel.icono} 
-                                                                                    alt="" // Sin texto alternativo 
-                                                                                    style={{ width: '35px', height: '35px' }} 
-                                                                                />
-                                                                                <>{celda.numCelda}</>
-                                                                            </td>
-                                                                        );                                                                      
-                                                                    }
-                                                                    return null;
-                                                                })}  
-                                                            </td>
-                                                        );
-                                                    }
-                                                    else{ return (null); }
-                                                })}
-                                            </React.Fragment>
-                                        ))}
-                                    </tr>
-                                ))} */}
                             </tbody>
                         </Table>
                     </Col>
