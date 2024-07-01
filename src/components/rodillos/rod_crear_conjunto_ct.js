@@ -25,7 +25,6 @@ const RodConjuntoCT = ({show, handleClose, operacion_marcada, elementos_formacio
     });
 
     useEffect(() => { //BUSCAMOS, SI LOS HAY, ELEMENTOS (RODILLOS) DEL CONJUNTO SELECCIONADO.
-        console.log('elementos_formacion[0].conjunto.id',elementos_formacion[0].conjunto.id)
         if(elementos_formacion.length>0){ 
             axios.get(BACKEND_SERVER + `/api/rodillos/elemento_select/?conjunto__id=${elementos_formacion[0].conjunto.id}`,{
                 headers: {
@@ -34,7 +33,6 @@ const RodConjuntoCT = ({show, handleClose, operacion_marcada, elementos_formacio
             })
             .then( res => {
                 setRodillo_elegido(res.data);
-                console.log(res.data);
             })
             .catch( err => {
                 console.log(err);
@@ -266,7 +264,7 @@ const RodConjuntoCT = ({show, handleClose, operacion_marcada, elementos_formacio
                                             placeholder={eje.tipo.nombre}
                                         >
                                             {rodillo_elegido && rodillo_elegido.map(rod => {
-                                                if (rod.eje.tipo.id === eje.tipo.id && rod.conjunto.operacion.id === eje.operacion) {
+                                                if (rod.eje.id === eje.id && rod.eje.tipo.id === eje.tipo.id && rod.conjunto.operacion.id === eje.operacion) {
                                                     return (
                                                         <option key={rod.rodillo.id} value={rod.rodillo.id}>
                                                             {rod.rodillo.nombre}
