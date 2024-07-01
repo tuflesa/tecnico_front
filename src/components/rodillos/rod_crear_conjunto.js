@@ -602,8 +602,9 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
                 </Tabs>
             </Modal.Body>
             <Modal.Footer>
+                {console.log('bancada_otraformacion.id', bancada_otraformacion.id,'datos.conjunto_elegido',datos.conjunto_elegido, 'selectRodilloId', selectRodilloId )}
                 {bancada_otraformacion.id?<Button variant="info" onClick={ElimniarBancada}>Eliminar Bancada</Button>:''}
-                <Button disabled={bancada_otraformacion.id?true:false} variant="info" onClick={Guardar}>Guardar</Button>
+                <Button disabled={bancada_otraformacion.id ===undefined  && datos.conjunto_elegido===''  && selectRodilloId && Object.keys(selectRodilloId).length===0 ?true:false} variant="info" onClick={Guardar}>Guardar</Button>
                 <Button variant="waring" onClick={handlerCancelar}>Cancelar</Button>
             </Modal.Footer>
         </Modal>
