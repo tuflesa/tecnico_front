@@ -373,7 +373,7 @@ const NotificacionForm = ({nota, setNota}) => {
                             <Col>
                                 <Form.Group id="que">
                                     <Form.Label>Qué sucede(*)</Form.Label>
-                                    <Form.Control type="text" 
+                                    <Form.Control as="textarea" rows={4}
                                                 name='que' 
                                                 value={datos.que}
                                                 onChange={handleInputChange} 
@@ -537,24 +537,24 @@ const NotificacionForm = ({nota, setNota}) => {
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarNota}>Actualizar</Button> :
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={crearNota}>Guardar</Button>
                             }
-                            <Button variant="info" className={'mx-2'} onClick={() => window.close()}>Cerrar</Button>
-                            {/* <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar</Button> */}
+                            {nota.id ? 
+                                <Button variant="info" className={'mx-2'} onClick={() => window.close()}>Cerrar</Button> :
+                                <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar</Button>
+                            }
                             <Button variant="danger" type="submit" className={'mx-2'} onClick={reclamar_nota}>Reclamar</Button>
                             <Button variant="danger" className="mr-3 trash" onClick={event => {listado_reclamaciones()}}>R / {reclamaciones?reclamaciones.length:0}</Button>
-                            {/* <Trash className="mr-3 trash" onClick={event => {listado_reclamaciones()}} /> */}
                         </Form.Row>
                     </Form>
                 </Col>
             </Row>
-            
             <Modal show={show_error} onHide={handleCloseError} backdrop="static" keyboard={ false } animation={false}>
                 <Modal.Header closeButton>
                     <Modal.Title>Error</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>Error al guardar formulario. Revise que todos los campos con asterisco esten cumplimentados</Modal.Body>
-                <Modal.Footer>
+                {/* <Modal.Footer>
                     <Button variant="secondary" onClick={handleCloseError}>Cerrar</Button>
-                </Modal.Footer>
+                </Modal.Footer> */}
             </Modal>
 
             <Modal show={show} onHide={handleClose} backdrop="static" keyboard={ false } animation={false}>
