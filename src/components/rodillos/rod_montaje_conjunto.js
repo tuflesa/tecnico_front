@@ -4,7 +4,7 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 
-const RodMontajeConjunto = ({show, handleClose, operacion_marcada, elementos_formacion, tubo_madre}) => {
+const RodMontajeConjunto = ({show, handleClose, operacion_marcada, elementos_formacion, tubo_madre, color}) => {
     const [token] = useCookies(['tec-token']);
 
     const [ejes, setEjes] = useState(null);
@@ -13,7 +13,7 @@ const RodMontajeConjunto = ({show, handleClose, operacion_marcada, elementos_for
 
     useEffect(() => { //BUSCAMOS, SI LOS HAY, ELEMENTOS (RODILLOS) DEL CONJUNTO SELECCIONADO.
         if(elementos_formacion.length>0){ 
-            axios.get(BACKEND_SERVER + `/api/rodillos/elemento_select/?conjunto=${elementos_formacion[0].conjunto.id}`,{
+            axios.get(BACKEND_SERVER + `/api/rodillos/elemento_select/?conjunto__id=${elementos_formacion[0].conjunto.id}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
@@ -87,7 +87,14 @@ const RodMontajeConjunto = ({show, handleClose, operacion_marcada, elementos_for
                                             placeholder={eje.tipo.nombre}
                                         >
                                             {rodillo_elegido && rodillo_elegido.map(rod => {
-                                                if (rod.eje.tipo.id === eje.tipo.id && rod.rodillo.diametro === eje.diametro) {
+                                                if (color===3 && rod.eje.tipo.id === eje.tipo.id && rod.rodillo.diametro === eje.diametro) {
+                                                    return (
+                                                        <option key={rod.rodillo.id} value={rod.rodillo.id}>
+                                                            {rod.rodillo.nombre}
+                                                        </option>
+                                                    )
+                                                }
+                                                if (color!==3 && rod.eje.tipo.id === eje.tipo.id && rod.rodillo.diametro === eje.diametro && rod.eje.id === eje.id) {
                                                     return (
                                                         <option key={rod.rodillo.id} value={rod.rodillo.id}>
                                                             {rod.rodillo.nombre}

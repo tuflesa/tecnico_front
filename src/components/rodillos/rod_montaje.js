@@ -23,6 +23,7 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
     const [operacion_marcada, setOperacionMarcada] = useState(null);
     const [show_conjunto, setShowConjunto] = useState(false);
     const [grabado, setGrabar] = useState(false);
+    const [color_cel, setColor] = useState(0);
 
 
     const [datos, setDatos] = useState({
@@ -139,7 +140,16 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
         }
     }, [bancadas]);
 
-    const GuardarId_Operacion = (operationId) => {
+    const GuardarId_Operacion = (operationId, color1, color2, color3) => {
+        if(color1){
+            setColor(1);
+        }
+        else if(color2){
+            setColor(2);
+        }
+        else if(color3){
+            setColor(3);
+        }
         setOperacionMarcada(operationId); // Almacena la operación seleccionada
         setFormacionesFiltradas(formaciones_completadas.filter(formacion => formacion.operacion === operationId.id)); //pasa los elemenos de esta operación
         AbrirConjunto();
@@ -338,7 +348,8 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
                     operacion_marcada={operacion_marcada}
                     handleClose={CerrarConjunto}
                     elementos_formacion={formaciones_filtradas}
-                    tubo_madre={datos.tubo_madre}/>
+                    tubo_madre={datos.tubo_madre}
+                    color={color_cel}/>
         </Container>
     )
 }
