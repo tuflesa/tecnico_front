@@ -180,7 +180,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     }, [token]);
 
     useEffect(() => {
-        axios.get(BACKEND_SERVER + '/api/rodillos/tipo_rodillo/',{
+        datos.operacion && axios.get(BACKEND_SERVER + `/api/rodillos/eje_operacion/?operacion__id=${datos.operacion}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -191,7 +191,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         .catch( err => {
             console.log(err);
         });
-    }, [token]);
+    }, [datos.operacion]);
 
     useEffect(() => {
         if (datos.empresa === '') {
@@ -862,8 +862,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                     <option key={0} value={''}>Todos</option>
                                     {tipo_rodillo && tipo_rodillo.map( tipo => {
                                         return (
-                                        <option key={tipo.id} value={rodillo.id ? tipo.id : `${tipo.id},${tipo.siglas}`}>
-                                            {tipo.nombre}
+                                        <option key={tipo.tipo.id} value={rodillo.id ? tipo.tipo.id : `${tipo.tipo.id},${tipo.tipo.siglas}`}>
+                                            {tipo.tipo.nombre}
                                         </option>
                                         )
                                     })}
