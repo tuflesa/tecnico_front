@@ -207,7 +207,8 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                     colorAzulB={colorAzulB}
                     colorVerde={colorVerde}
                     bancada_id={bancada_id}
-                    bancada_otraformacion={bancada_otraformacion}/>
+                    bancada_otraformacion={bancada_otraformacion}
+                    empresa_id={empresa}/>
             :''}
         </Container>
     )

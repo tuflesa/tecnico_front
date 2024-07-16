@@ -4,7 +4,7 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 
-const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, maquina, tubomadre, elementos_formacion, grupo_bancadas, colorAzul, colorAzulB, colorVerde, bancada_id, bancada_otraformacion}) => {
+const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, empresa_id, maquina, tubomadre, elementos_formacion, grupo_bancadas, colorAzul, colorAzulB, colorVerde, bancada_id, bancada_otraformacion}) => {
     const [token] = useCookies(['tec-token']);
     const [bancadaId, setBancadaId] = useState(bancada_id); // Estado para bancada_id
 
@@ -142,7 +142,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
     }, [filtro]);
 
     useEffect(() => { //PARA OBTENER LOS Ø DE TUBO MADRE UNICOS
-        axios.get(BACKEND_SERVER + `/api/rodillos/grupo_only/?tubo_madre__gte=${tubomadre-10}&tubo_madre__lte=${tubomadre+10}`,{
+        axios.get(BACKEND_SERVER + `/api/rodillos/grupo_only/?tubo_madre__gte=${tubomadre-10}&tubo_madre__lte=${tubomadre+10}&maquina__empresa=${empresa_id}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                   }
@@ -213,6 +213,10 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
                 }
             }
             else{ //rodillos nuestros
+                if(EjesRodillos.length===0){
+                    alert('Introduce algún dato');
+                    return;
+                }
                 var rodillo_tubo_madre = EjesRodillos[0].TuboMadreRod;
                 var rodillo_operacion = EjesRodillos[0].operacion;
                 var no_coincide=false;
@@ -602,9 +606,8 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
                 </Tabs>
             </Modal.Body>
             <Modal.Footer>
-                {console.log('bancada_otraformacion.id', bancada_otraformacion.id,'datos.conjunto_elegido',datos.conjunto_elegido, 'selectRodilloId', selectRodilloId )}
                 {bancada_otraformacion.id?<Button variant="info" onClick={ElimniarBancada}>Eliminar Bancada</Button>:''}
-                <Button disabled={datos.bancada_elegida ===undefined  && bancada_otraformacion.id ===undefined  && datos.conjunto_elegido===''  && selectRodilloId && Object.keys(selectRodilloId).length===0 ?true:false} variant="info" onClick={Guardar}>Guardar</Button>
+                <Button variant="info" onClick={Guardar}>Guardar</Button>
                 <Button variant="waring" onClick={handlerCancelar}>Cancelar</Button>
             </Modal.Footer>
         </Modal>
