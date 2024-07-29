@@ -34,7 +34,7 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
     },[buscando, filtroII, show]);
   
     useEffect(()=>{
-        const filtro2 = `?stocks_minimos__almacen__id=${almacen}&page=${datos.pagina}&nombre__icontains=${datos.nombre}&id=${datos.id}&nombre_comun__icontains=${datos.nombre_comun}`;
+        const filtro2 = `?stocks_minimos__almacen__id=${almacen}&page=${datos.pagina}&nombre__icontains=${datos.nombre}&id=${datos.id}&nombre_comun__icontains=${datos.nombre_comun}&descatalogado=${false}`;
         actualizaFiltro(filtro2);
     },[datos.id, datos.nombre, datos.nombre_comun, almacen, datos.pagina]);
 
