@@ -60,6 +60,9 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         pertenece_grupo:rodillo.id?rodillo.operacion.seccion.pertenece_grupo:'',
         grupo_tubo_madre: rodillo.grupo?rodillo.grupo.tubo_madre:'',
         tipo_rodillo_siglas: rodillo.id?rodillo.tipo.siglas:'',
+        espesores: rodillo.id?rodillo.espesor:false,
+        espesor_menor: rodillo.id?rodillo.espesor_1:'',
+        espesor_mayor: rodillo.id?rodillo.espesor_2:'',
     });
 
     useEffect(() => { //si hay tipo de plano grabado, no podemos modificarlo, ya tenemos parametros dados de alta
@@ -332,31 +335,55 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     useEffect(() => { //montamos el nombre cuando tenemos todos los datos.
         if(datos.pertenece_grupo){
             if(!datos.nombre&&datos.zona&&datos.operacion&&datos.tipo_rodillo&&datos.grupo_tubo_madre){
-                setDatos({
-                    ...datos,
-                    nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-'+'Ø'+datos.grupo_tubo_madre),
-                })
+                if(datos.espesores){
+                    setDatos({
+                        ...datos,
+                        nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-'+'Ø'+datos.grupo_tubo_madre+'-'+datos.espesor_menor+'÷'+datos.espesor_mayor),
+                    }) 
+                }
+                else{
+                    setDatos({
+                        ...datos,
+                        nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-'+'Ø'+datos.grupo_tubo_madre),
+                    })
+                }
             }
         }
         else{
             if(datos.forma_nombre==='Redondo'){
                 if(!datos.nombre&&datos.zona_siglas&&datos.operacion_nombre&&datos.tipo_rodillo_siglas&&datos.dimension_perfil){
-                    setDatos({
-                        ...datos,
-                        nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-'+'Ø'+datos.dimension_perfil),
-                    })
+                    if(datos.espesores){
+                        setDatos({
+                            ...datos,
+                            nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-'+'Ø'+datos.dimension_perfil+'-'+datos.espesor_menor+'÷'+datos.espesor_mayor),
+                        })
+                    }
+                    else{
+                        setDatos({
+                            ...datos,
+                            nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-'+'Ø'+datos.dimension_perfil),
+                        })
+                    }
                 }
             }
             else{
                 if(!datos.nombre&&datos.zona_siglas&&datos.operacion_nombre&&datos.tipo_rodillo_siglas&&datos.descripcion_perfil){
-                    setDatos({
-                        ...datos,
-                        nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-'+datos.descripcion_perfil),
-                    })
+                    if(datos.espesores){
+                        setDatos({
+                            ...datos,
+                            nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-'+datos.descripcion_perfil+'-'+datos.espesor_menor+'÷'+datos.espesor_mayor),
+                        }) 
+                    }
+                    else{
+                        setDatos({
+                            ...datos,
+                            nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-'+datos.descripcion_perfil),
+                        })
+                    }
                 }
             }
         }
-    },[datos, datos.tipo_rodillo_siglas]);
+    },[datos, datos.tipo_rodillo_siglas, datos.espesor_menor, datos.espesor_mayor]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -409,6 +436,9 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                     forma: parseInt(datos.forma),
                     descripcion_perfil: datos.descripcion_perfil,
                     dimension_perfil: datos.dimension_perfil,
+                    espesor: datos.espesores,
+                    espesor_1: datos.espesor_menor,
+                    espesor_2: datos.espesor_mayor,
                 }, {
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
@@ -441,6 +471,9 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             forma: parseInt(datos.forma),
             descripcion_perfil: datos.descripcion_perfil,
             dimension_perfil: datos.dimension_perfil,
+            espesor: datos.espesores,
+            espesor_1: datos.espesor_menor,
+            espesor_2: datos.espesor_mayor,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -662,6 +695,13 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         });
     };
 
+    const handleInputespesores = (event) => {
+        setDatos({
+            ...datos,
+            espesores : !datos.espesores
+        })
+    }
+
     return (
         <Container className='mt-5 pt-1'>
             <img src ={logo} width="200" height="200"></img>
@@ -673,6 +713,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                     <Form.Group controlId="nombre">
                         <Form.Label>Nombre del rodillo</Form.Label>
                         <Form.Control type="text" 
+                                    className="input-auto-width"
                                     name='nombre' 
                                     value={datos.nombre}
                                     onChange={handleInputChange} 
@@ -825,7 +866,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                                 
                                                     return (
                                                     <option key={grupo.id} value={rodillo.id ? grupo.id : `${grupo.id},${grupo.tubo_madre}`}>
-                                                        {grupo.nombre}
+                                                        {grupo.nombre + ' - ' + grupo.espesor_1 + '÷' + grupo.espesor_2}
                                                     </option>
                                                     )
                                             })}
@@ -864,6 +905,42 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                             />
                             </Form.Group>
                         </Col>
+                    </Row>
+                    <Row>
+                        <Col>
+                            <Form.Group className="mb-3" controlId="espesores">
+                                <Form.Check type="checkbox" 
+                                            label="¿Tiene espesores?"
+                                            checked = {datos.espesores}
+                                            onChange = {handleInputespesores} />
+                            </Form.Group>
+                        </Col>
+                        {datos.espesores?
+                            <Col>
+                                <Form.Group controlId="espesor_menor">
+                                    <Form.Label>Rango espesor menor</Form.Label>
+                                    <Form.Control type="text" 
+                                                    name='espesor_menor'
+                                                    value={datos.espesor_menor}
+                                                    onChange={handleInputChange}
+                                                    placeholder='Rango espesores'>
+                                    </Form.Control>
+                                </Form.Group>
+                            </Col>
+                        : ''}
+                        {datos.espesores?
+                            <Col>
+                                <Form.Group controlId="espesor_mayor">
+                                    <Form.Label>Rango espesor mayor</Form.Label>
+                                    <Form.Control type="text" 
+                                                    name='espesor_mayor'
+                                                    value={datos.espesor_mayor}
+                                                    onChange={handleInputChange}
+                                                    placeholder='Rango espesores'>
+                                    </Form.Control>
+                                </Form.Group>
+                            </Col>
+                        :''}
                         {rodillo.length!==0?
                             <Col>
                                 <Form.Group controlId="tipo_plano" >

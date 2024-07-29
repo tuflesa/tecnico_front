@@ -282,6 +282,7 @@ const RodGruposListado = () => {
                             <tr>
                                 <th style={{ width: 10 }}>boton</th>
                                 <th>Nombre</th>
+                                <th>Rango espesores</th>
                                 <th>Máquina</th>
                                 <th>Tubo Madre</th>
                                 <th>Acciones</th>
@@ -296,6 +297,7 @@ const RodGruposListado = () => {
                                                 <button type="button" className="btn btn-default" value={linea.id} name='prueba' onClick={event => { cogerDatos(linea) }}>--</button>
                                             </td>
                                             <td>{linea.nombre}</td>
+                                            <td>{linea.espesor_1 +'÷'+linea.espesor_2}</td>
                                             <td>{linea.maquina.siglas}</td>
                                             <td>{'Ø' + linea.tubo_madre}</td>
                                             <td><Link title='Detalle/Modificar'to={`/rodillos/grupo_editar/${linea.id}`}><PencilFill className="mr-3 pencil"/></Link></td>

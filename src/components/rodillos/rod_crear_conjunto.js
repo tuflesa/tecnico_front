@@ -25,6 +25,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, em
     const [operaciones_filtro, setOperaciones_filtro] = useState([]);
     const [tuboMadre_unicos, setTuboMadre_unicos] = useState([]);
     const [filtro, setFiltro] = useState(``);
+    const [espesores_unidos, setEspesores_unidos] = useState(``);
     
     var bancadas_nuevas=[''];
     var bancadas_nuevas2=[''];
@@ -162,7 +163,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, em
     }, [rod_id, selectedEje, operacion_rod, tubo_madre_rod]);
     
     useEffect(() => { //BUSCAMOS LAS BANCADAS QUE PRECISAMOS PARA ESTA OPERACIÓN
-        operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/bancada/?seccion=${operacion_marcada.seccion.id}&tubo_madre__gte=${tubomadre-10}&tubo_madre__lte=${tubomadre+10}`,{
+        operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/bancada_grupos/?seccion=${operacion_marcada.seccion.id}&tubo_madre__gte=${tubomadre-10}&tubo_madre__lte=${tubomadre+10}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -267,6 +268,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, em
             axios.post(BACKEND_SERVER + `/api/rodillos/conjunto/`, { //creamos conjunto, (Operación y Tubo_madre del rodillo).
                 operacion: operacion_rod,
                 tubo_madre:tubo_madre_rod,
+                espesores: espesores_unidos!=='÷'?espesores_unidos:'',
             }, {
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
@@ -411,15 +413,17 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, em
 
     const handleInputChange = (event) => {
         const selectedValue = event.target.options[event.target.selectedIndex].value;
-        const [rodilloId, operacion, grupo, eje] = selectedValue.split(',');
+        const [rodilloId, operacion, grupo, eje, espesor_1, espesor_2] = selectedValue.split(',');
         const grupoID = grupo;
         const operacion_rodillo = operacion;
         const valores_rodillo = selectedValue;
         const rodillo_id = rodilloId;
         const ejeId_posicion = eje;
+        const espesores = espesor_1 + '÷' + espesor_2;
         setRod_Id(rodillo_id);
         setGrupoId_Rod(grupoID);
         setOperacionRod(operacion_rodillo);
+        setEspesores_unidos(espesores)
         const nuevaSeleccionRodilloId = {...selectRodilloId};
         nuevaSeleccionRodilloId[ejeId_posicion] = valores_rodillo;
         setSelectedEje(ejeId_posicion);
@@ -502,7 +506,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, em
                                             {rodillos && rodillos.map(rodillo => {
                                                 if (rodillo.tipo === eje.tipo.id && rodillo.diametro === eje.diametro) {
                                                     return (
-                                                        <option key={rodillo.id} value={`${rodillo.id},${rodillo.operacion},${rodillo.grupo.id},${eje.id}`}>
+                                                        <option key={rodillo.id} value={`${rodillo.id},${rodillo.operacion},${rodillo.grupo.id},${eje.id},${rodillo.espesor_1},${rodillo.espesor_2}`}>
                                                             {rodillo.nombre}
                                                         </option>
                                                     )
@@ -548,7 +552,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, em
                                             <option key={0} value={``}>Todas</option>
                                             {tuboMadre_unicos && tuboMadre_unicos.map(conjunto => (
                                                 <option key={conjunto.id} value={conjunto.tubo_madre}>
-                                                    {conjunto.tubo_madre}
+                                                    {conjunto.tubo_madre + ' - ' + conjunto.espesor_1 + '÷' + conjunto.espesor_2}
                                                 </option>
                                             ))}
                                         </Form.Control>
@@ -571,7 +575,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, em
                                             {conjuntos_exist && conjuntos_exist.map(conjunto => {
                                                 return (
                                                     <option key={conjunto.id} value={conjunto.id}>
-                                                        {conjunto.operacion.nombre + '- Ø'+ conjunto.tubo_madre}
+                                                        {conjunto.espesores!==''?conjunto.operacion.nombre + '- Ø'+ conjunto.tubo_madre + '-' + conjunto.espesores : conjunto.operacion.nombre + '- Ø'+ conjunto.tubo_madre}
                                                     </option>
                                                 )
                                             })}

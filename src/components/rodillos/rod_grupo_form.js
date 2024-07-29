@@ -22,6 +22,8 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
         tubo_madre: grupo.id?grupo.tubo_madre:'',
         nombre: grupo.id?grupo.nombre:'',
         bancadas_elegidas:grupo.id?grupo.bancadas:[],
+        espesor_menor: grupo.id?grupo.espesor_1:'',
+        espesor_mayor: grupo.id?grupo.espesor_2:'',
     });
 
     useEffect(() => {
@@ -72,7 +74,7 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
     
     const GuardarGrupo = (event) => {
         event.preventDefault();
-        axios.get(BACKEND_SERVER + `/api/rodillos/grupo_nuevo/?tubo_madre=${datos.tubo_madre}&maquina=${datos.zona}`,{
+        axios.get(BACKEND_SERVER + `/api/rodillos/grupo_nuevo/?tubo_madre=${datos.tubo_madre}&maquina=${datos.zona}&espesor_1=${datos.espesor_menor}&espesor_2=${datos.espesor_mayor}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -83,9 +85,11 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
             }
             else{
                 axios.post(BACKEND_SERVER + `/api/rodillos/grupo_only/`, {
-                    nombre: 'Grupo-'+'Ø'+datos.tubo_madre,
+                    nombre: 'Grupo-'+'Ø'+datos.tubo_madre+'-'+datos.espesor_menor+'÷'+datos.espesor_mayor,
                     maquina: datos.zona,
                     tubo_madre: datos.tubo_madre,
+                    espesor_1: datos.espesor_menor,
+                    espesor_2: datos.espesor_mayor,
                 }, {
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
@@ -108,23 +112,36 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
 
     const ActualizarGrupo = (event) => {
         event.preventDefault();
-        axios.patch(BACKEND_SERVER + `/api/rodillos/grupo_only/${grupo.id}/`, {
-            nombre: 'Grupo-'+'Ø'+datos.tubo_madre,
-            maquina: datos.zona,
-            tubo_madre: datos.tubo_madre,
-        }, {
+        axios.get(BACKEND_SERVER + `/api/rodillos/grupo_nuevo/?tubo_madre=${datos.tubo_madre}&maquina=${datos.zona}&espesor_1=${datos.espesor_menor}&espesor_2=${datos.espesor_mayor}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            if(res.data.length!==0){
+                alert('Con esta modificación ya existe un grupo');
             }
-        })
-        .then(res => { 
-            window.location.href=`/rodillos/grupo_editar/${res.data.id}`;
-        })
-        .catch(err => { 
-            console.log(err);
-            alert('Falta datos, por favor rellena todos los campos obligatorios.');
+            else{
+                axios.patch(BACKEND_SERVER + `/api/rodillos/grupo_only/${grupo.id}/`, {
+                    nombre: 'Grupo-'+'Ø'+datos.tubo_madre,
+                    maquina: datos.zona,
+                    tubo_madre: datos.tubo_madre,            
+                    espesor_1: datos.espesor_menor,
+                    espesor_2: datos.espesor_mayor,
+                }, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }
+                })
+                .then(res => { 
+                    window.location.href=`/rodillos/grupo_editar/${res.data.id}`;
+                })
+                .catch(err => { 
+                    console.log(err);
+                    alert('Falta datos, por favor rellena todos los campos obligatorios.');
+                });
+            }
         });
-        
     };
 
     return (
@@ -195,6 +212,28 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
                                     </option>
                                     )
                                 })}
+                            </Form.Control>
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="espesor_menor">
+                            <Form.Label>Rango espesor menor *</Form.Label>
+                            <Form.Control type="text" 
+                                            name='espesor_menor'
+                                            value={datos.espesor_menor}
+                                            onChange={handleInputChange}
+                                            placeholder='Rango espesores'>
+                            </Form.Control>
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="espesor_mayor">
+                            <Form.Label>Rango espesor mayor *</Form.Label>
+                            <Form.Control type="text" 
+                                            name='espesor_mayor'
+                                            value={datos.espesor_mayor}
+                                            onChange={handleInputChange}
+                                            placeholder='Rango espesores'>
                             </Form.Control>
                         </Form.Group>
                     </Col>
