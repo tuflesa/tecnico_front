@@ -26,7 +26,7 @@ const RodConjuntoCT = ({show, handleClose, operacion_marcada, elementos_formacio
 
     useEffect(() => { //BUSCAMOS, SI LOS HAY, ELEMENTOS (RODILLOS) DEL CONJUNTO SELECCIONADO.
         if(elementos_formacion.length>0){ 
-            axios.get(BACKEND_SERVER + `/api/rodillos/elemento_select/?conjunto=${elementos_formacion[0].conjunto.id}`,{
+            axios.get(BACKEND_SERVER + `/api/rodillos/elemento_select/?conjunto__id=${elementos_formacion[0].conjunto.id}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
@@ -264,7 +264,7 @@ const RodConjuntoCT = ({show, handleClose, operacion_marcada, elementos_formacio
                                             placeholder={eje.tipo.nombre}
                                         >
                                             {rodillo_elegido && rodillo_elegido.map(rod => {
-                                                if (rod.eje.tipo.id === eje.tipo.id && rod.conjunto.operacion.id === eje.operacion) {
+                                                if (rod.eje.id === eje.id && rod.eje.tipo.id === eje.tipo.id && rod.conjunto.operacion.id === eje.operacion) {
                                                     return (
                                                         <option key={rod.rodillo.id} value={rod.rodillo.id}>
                                                             {rod.rodillo.nombre}

@@ -88,7 +88,7 @@ const LineasPartesMov = ({tarea, handleCloseList, show, parte}) => {
                                                 <td>{lista.fecha_inicio?invertirFecha(String(lista.fecha_inicio)):'Tarea NO iniciada'}</td> 
                                                 <td>{lista.fecha_fin?invertirFecha(String(lista.fecha_fin)):'Tarea NO finalizada'}</td>
                                                 <td>                                            
-                                                    <Link to={`/mantenimiento/linea_tarea/${lista.id}`}><PencilFill className="mr-3 pencil"/></Link> 
+                                                    <a href={`/mantenimiento/linea_tarea/${lista.id}`} target="_blank" rel="noopener noreferrer"><PencilFill className="mr-3 pencil"/></a> 
                                                     <Receipt className="mr-3 pencil" onClick={event =>{listarTrabajadores(lista)}}/>                                        
                                                 </td>
                                             </tr>

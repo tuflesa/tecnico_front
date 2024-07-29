@@ -31,7 +31,7 @@ const Rodillos = () => {
                 <Route path='/rodillos/bacada' component={RodBancada} />
                 <Route path='/rodillos/lista_bancadas_ct' component={RodBancadaCTListado} />
                 <Route path='/rodillos/bacada_ct' component={RodBancadaCT} />
-                <Route path='/rodillos/tooling' component={RodLista} /> {/* cambio la lista en vez de tooling a la de rodillos para subir proyect */}
+                <Route path='/rodillos/tooling' component={RodTooling} /> {/* cambio la lista en vez de tooling a la de rodillos para subir proyect */}
                 <Route path='/rodillos/grupos' component={RodGruposListado} />
                 {/* <Route path='/rodillos/planos/nuevo' component={RodPlanos} /> */}
                 <Route path='/rodillos/nuevo' component={RodNuevo} />

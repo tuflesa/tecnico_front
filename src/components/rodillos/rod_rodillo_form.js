@@ -18,9 +18,9 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [empresas, setEmpresas] = useState(null);
     const [zonas, setZonas] = useState([]);
     const [secciones, setSecciones] = useState([]);
+    const [ejes, setEjes] = useState([]);
     const [operaciones, setOperaciones] = useState([]);
     const [tipo_rodillo, setTipoRodillo] = useState([]);
-    const [materiales, setMateriales] = useState([]);
     const [grupos, setGrupos] = useState([]);
     const [planos, setPlanos] = useState(null);
     const [valor_conjuntos, setValorConjuntos] = useState('');
@@ -48,12 +48,11 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         operacion_nombre: rodillo.id?rodillo.operacion.nombre:'',
         grupo: rodillo.grupo?rodillo.grupo.id:'',
         tipo_rodillo: rodillo.id?rodillo.tipo.id:'',
-        material: rodillo.id?rodillo.material.id:'',
         nombre: rodillo.id?rodillo.nombre:'',
         tipo_seccion: rodillo.id?rodillo.operacion.seccion.tipo:'',
         tipo_plano: rodillo.id?rodillo.tipo_plano:'',
         rodillo_id: rodillo.id?rodillo.id:'',
-        diametro: rodillo.id?rodillo.diametro:0, //diámetro interior, mandril del rodillo
+        diametro: rodillo.id?rodillo.diametro:'', //diámetro interior, mandril del rodillo
         forma: rodillo.id?rodillo.forma:'',
         forma_nombre: '',
         descripcion_perfil: rodillo.id?rodillo.descripcion_perfil:'',
@@ -84,6 +83,24 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             console.log(err);
         });
     }, [token]);
+
+    useEffect(() => { // buscamos los ejes según la máquina elegida.
+        datos.zona && datos.tipo_rodillo && datos.operacion && axios.get(BACKEND_SERVER + `/api/rodillos/eje_operacion/?operacion__seccion__maquina__id=${datos.zona}&operacion__id=${datos.operacion}&tipo=${datos.tipo_rodillo}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setEjes(res.data);
+            setDatos({
+                ...datos,
+                diametro: res.data[0].diametro,
+            })
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [datos.operacion, datos.tipo_rodillo, datos.zona]);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
@@ -147,21 +164,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     }, [token, rodillo]);
 
     useEffect(() => {
-        axios.get(BACKEND_SERVER + '/api/rodillos/materiales/',{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            setMateriales(res.data);
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    }, [token]);
-
-    useEffect(() => {
-        axios.get(BACKEND_SERVER + '/api/rodillos/tipo_rodillo/',{
+        datos.operacion && axios.get(BACKEND_SERVER + `/api/rodillos/eje_operacion/?operacion__id=${datos.operacion}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -172,7 +175,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         .catch( err => {
             console.log(err);
         });
-    }, [token]);
+    }, [datos.operacion]);
 
     useEffect(() => {
         if (datos.empresa === '') {
@@ -401,7 +404,6 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                     operacion: datos.operacion,
                     grupo: datos.grupo,
                     tipo: datos.tipo_rodillo,
-                    material: datos.material,
                     tipo_plano: datos.tipo_plano,
                     diametro: datos.diametro,
                     forma: parseInt(datos.forma),
@@ -434,7 +436,6 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             operacion: datos.operacion,
             grupo: datos.grupo,
             tipo: datos.tipo_rodillo,
-            material: datos.material,
             tipo_plano: datos.tipo_plano,
             diametro: datos.diametro,
             forma: parseInt(datos.forma),
@@ -843,26 +844,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                     <option key={0} value={''}>Todos</option>
                                     {tipo_rodillo && tipo_rodillo.map( tipo => {
                                         return (
-                                        <option key={tipo.id} value={rodillo.id ? tipo.id : `${tipo.id},${tipo.siglas}`}>
-                                            {tipo.nombre}
-                                        </option>
-                                        )
-                                    })}
-                                </Form.Control>
-                            </Form.Group>
-                        </Col>
-                        <Col>
-                            <Form.Group controlId="material">
-                                <Form.Label>Tipo de Material *</Form.Label>
-                                <Form.Control as="select" 
-                                                value={datos.material}
-                                                name='material'
-                                                onChange={handleInputChange}>
-                                    <option key={0} value={''}>Todos</option>
-                                    {materiales && materiales.map( material => {
-                                        return (
-                                        <option key={material.id} value={material.id}>
-                                            {material.nombre}
+                                        <option key={tipo.tipo.id} value={rodillo.id ? tipo.tipo.id : `${tipo.tipo.id},${tipo.tipo.siglas}`}>
+                                            {tipo.tipo.nombre}
                                         </option>
                                         )
                                     })}
@@ -871,14 +854,14 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                         </Col>
                         <Col>
                             <Form.Group controlId="diametro">
-                                <Form.Label>Diametro eje</Form.Label>
-                                <Form.Control type="text" 
-                                                name='diametro'
-                                                value={datos.diametro}
-                                                onChange={handleInputChange}
-                                                placeholder='Diámetro interior'
-                                                disabled={rodillo.id?true:false}>
-                                </Form.Control>
+                            <Form.Label>Diametro del eje</Form.Label>
+                            <Form.Control type="text" 
+                                        name='diametro' 
+                                        value={datos.diametro}
+                                        onChange={handleInputChange} 
+                                        placeholder="Diametro"
+                                        disabled
+                            />
                             </Form.Group>
                         </Col>
                         {rodillo.length!==0?

@@ -124,7 +124,7 @@ const ManNotificacionesLista = () => {
                                         <td>{nota.descartado?'Si':'No'}</td>
                                         <td>{nota.finalizado?'Si':'No'}</td>
                                         <td style={{width:115}}>
-                                            <Link to={`/mantenimiento/notificacion/${nota.id}`}><PencilFill className="mr-3 pencil"/></Link>
+                                            <a href={`/mantenimiento/notificacion/${nota.id}`} target="_blank" rel="noopener noreferrer"><PencilFill className="mr-3 pencil"/></a>
                                             {/* <Trash className="trash"  onClick={event =>{BorrarNota(nota)}} />  */}
                                         </td>
                                     </tr>

@@ -222,18 +222,6 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                                 </Form.Group>
                             </Col>
                             <Col>
-                                <Form.Group id="nombre">
-                                    <Form.Label>Nombre</Form.Label>
-                                    <Form.Control type="text" 
-                                                name='nombre' 
-                                                value={datos.nombre}
-                                                onChange={handleInputChange} 
-                                                placeholder="Nombre"
-                                                disabled={nosoyTecnico? + true: + false}
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col>
                                 <Form.Group id="especialidad">
                                     <Form.Label>Especialidad</Form.Label>
                                     <Form.Control type="text" 
@@ -243,6 +231,20 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                                     />
                                 </Form.Group>
                             </Col>                                          
+                        </Row>
+                        <Row>
+                            <Col>
+                                <Form.Group id="nombre">
+                                    <Form.Label>Nombre</Form.Label>
+                                    <Form.Control as="textarea" rows={1}
+                                                name='nombre' 
+                                                value={datos.nombre}
+                                                onChange={handleInputChange} 
+                                                placeholder="Nombre"
+                                                disabled={nosoyTecnico? + true: + false}
+                                    />
+                                </Form.Group>
+                            </Col>
                         </Row>
                         <Row>
                             <Col>
@@ -357,7 +359,8 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                         </Row>                    
                         <Form.Row className="justify-content-center">
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button>
-                                <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar</Button>
+                                <Button variant="info" className={'mx-2'} onClick={() => window.close()}>Cerrar</Button>
+                                {/* <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar</Button> */}
                         </Form.Row>
                     </Form>
                 </Col>

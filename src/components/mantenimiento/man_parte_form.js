@@ -701,19 +701,6 @@ const ParteForm = ({parte, setParte, op}) => {
                                 </Form.Group>
                             </Col> 
                             <Col>
-                                <Form.Group id="nombre">
-                                    <Form.Label>Nombre(*)</Form.Label>
-                                    <Form.Control type="text" 
-                                                name='nombre' 
-                                                value={datos.nombre}
-                                                onChange={handleInputChange} 
-                                                placeholder="Nombre"
-                                                disabled={nosoyTecnico? true: false}
-                                                autoFocus
-                                    />
-                                </Form.Group>
-                            </Col> 
-                            <Col>
                                 <Form.Group controlId="creado_nombre">
                                     <Form.Label>Creado por (*)</Form.Label>
                                     <Form.Control   type="text" 
@@ -742,6 +729,21 @@ const ParteForm = ({parte, setParte, op}) => {
                                     </Form.Control>
                                 </Form.Group>
                             </Col>           
+                        </Row>
+                        <Row>
+                            <Col>
+                                <Form.Group id="nombre">
+                                    <Form.Label>Nombre(*)</Form.Label>
+                                    <Form.Control as="textarea" rows={1}
+                                                name='nombre' 
+                                                value={datos.nombre}
+                                                onChange={handleInputChange} 
+                                                placeholder="Nombre"
+                                                disabled={nosoyTecnico? true: false}
+                                                autoFocus
+                                    />
+                                </Form.Group>
+                            </Col> 
                         </Row>
                         <Row>
                             <Col>
@@ -912,7 +914,7 @@ const ParteForm = ({parte, setParte, op}) => {
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button> :
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={crearParte}>Guardar</Button>
                             }
-                            <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
+                            <Button variant="info" className={'mx-2'} onClick={() => window.close()}>Cerrar</Button>
                         </Form.Row>
                         :<Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>}
                     </Form>
@@ -963,7 +965,7 @@ const ParteForm = ({parte, setParte, op}) => {
                                                 :''}
                                                 <td>                                            
                                                     <Receipt className="mr-3 pencil" onClick={event =>{listarLineasTareas(linea.tarea)}}/>
-                                                    <Link to={`/mantenimiento/linea_tarea/${linea.id}`}><PencilFill className="mr-3 pencil"/></Link> 
+                                                    <a href={`/mantenimiento/linea_tarea/${linea.id}`} target="_blank" rel="noopener noreferrer"><PencilFill className="mr-3 pencil"/></a>
                                                     {nosoyTecnico?'':<Trash className="mr-3 pencil"  onClick={event =>{BorrarLinea(linea.tarea)}} />}
                                                 </td>
                                             </tr>
