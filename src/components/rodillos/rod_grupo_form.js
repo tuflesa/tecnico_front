@@ -144,6 +144,11 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
         });
     };
 
+    const styles = {
+        textAlign: 'right',
+        color: 'red',
+        fontSize: 'smaller'}
+
     return (
         <Container className='mt-5'>
             <img src ={logo} width="200" height="200"></img>
@@ -239,6 +244,8 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
                     </Col>
                 </Row>
             </Form>
+            <h5 style={styles}>Solo se permite el punto para poner el décimal, no guardará si ponemos coma</h5>
+
             <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
             {grupo.length===0?<Button variant="outline-primary" onClick={GuardarGrupo}>Guardar</Button>:<Button variant="outline-primary" onClick={ActualizarGrupo}>Actualizar</Button>}
             {mostrarRodBancada && <RodBancada visible={mostrarRodBancada} grupo={grupo} setGrupo={setGrupo} />} {/* mostramos en editar las bancadas de la máquina */}

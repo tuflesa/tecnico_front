@@ -702,6 +702,11 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         })
     }
 
+    const styles = {
+        textAlign: 'right',
+        color: 'red',
+        fontSize: 'smaller'}
+
     return (
         <Container className='mt-5 pt-1'>
             <img src ={logo} width="200" height="200"></img>
@@ -966,6 +971,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                     </Row>
                 </React.Fragment>
                 :''}
+                <h5 style={styles}>Si tenemos espesores, solo se permite el punto para poner el décimal, no guardará si ponemos comas</h5>
                 {rodillo.length!==0?
                     <Row style={{marginBottom:'10px'}}>
                         <Col style={{color:'red'}}>Debemos introducir el tipo de plano y actualizar, si queremos añadir un plano ya creado</Col>
