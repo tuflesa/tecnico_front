@@ -866,7 +866,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                                 
                                                     return (
                                                     <option key={grupo.id} value={rodillo.id ? grupo.id : `${grupo.id},${grupo.tubo_madre}`}>
-                                                        {grupo.nombre + ' - ' + grupo.espesor_1 + '÷' + grupo.espesor_2}
+                                                        {grupo.nombre}
                                                     </option>
                                                     )
                                             })}
