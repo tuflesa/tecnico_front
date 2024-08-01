@@ -21,6 +21,7 @@ import RepTraspasoAlmacen from './rep_traspaso_almacen';
 import RepPrecio from './rep_precio';
 import Programadores from './a_rep_programadores';
 import LineaAdicional from './rep_lineas_adicionales';
+import RepPedidosPRL from './rep_pedidos_prl';
 import { useCookies } from 'react-cookie';
 
 const Repuestos = () => {
@@ -32,6 +33,7 @@ const Repuestos = () => {
             <RepNavBar />
             <Switch>
                 <Route path='/repuestos/precio' component={RepPrecio} />
+                <Route path='/repuestos/prl' component={RepPedidosPRL} />
                 <Route path='/repuestos/programadores' component={Programadores} />
                 <Route path='/repuestos/traspasos' component={RepTraspasoAlmacen} /> 
                 <Route path='/repuestos/inventario' component={RepInventario} /> 

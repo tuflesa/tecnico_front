@@ -61,6 +61,8 @@ const PedidoForm = ({pedido, setPedido}) => {
         observaciones2: pedido ? pedido.observaciones2 : '',
         descripcion: pedido ? pedido.descripcion : '',
         finalizado_auto: pedido ? pedido.finalizado : false,
+        intervencion: pedido ? pedido.intervencion : false,
+        revisado: pedido ? pedido.revisado : false,
     });
 
     useEffect(()=>{
@@ -82,12 +84,13 @@ const PedidoForm = ({pedido, setPedido}) => {
             observaciones2: pedido ? pedido.observaciones2 : '',
             descripcion: pedido ? pedido.descripcion : '',
             finalizado_auto: pedido ? pedido.finalizado : false,
+            intervencion: pedido ? pedido.intervencion : false,
+            revisado: pedido ? pedido.revisado : false,
 
         });
     },[pedido]);
 
     useEffect(()=>{
-        console.log(pedido);
         axios.get(BACKEND_SERVER + `/api/repuestos/proveedor/`, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -98,11 +101,6 @@ const PedidoForm = ({pedido, setPedido}) => {
         })
         .catch(err => { console.log(err);})
     },[token]);
-
-    useEffect(()=>{
-        console.log(pedido);
-        console.log(datos);
-    },[token, datos]);
 
     useEffect(()=>{
         datos.proveedor && axios.get(BACKEND_SERVER + `/api/repuestos/contacto/?proveedor=${datos.proveedor}`, {
@@ -169,6 +167,20 @@ const PedidoForm = ({pedido, setPedido}) => {
         setDatos({
             ...datos,
             finalizado : !datos.finalizado
+        })
+    }
+
+    const handleRevisado = (event) => {
+        setDatos({
+            ...datos,
+            revisado : !datos.revisado
+        })
+    }
+
+    const handleIntervencion = (event) => {
+        setDatos({
+            ...datos,
+            intervencion : !datos.intervencion
         })
     }
 
@@ -312,6 +324,8 @@ const PedidoForm = ({pedido, setPedido}) => {
             observaciones: datos.observaciones,
             observaciones2: datos.observaciones2,
             descripcion: datos.descripcion,
+            intervencion: datos.intervencion,
+            revisado: datos.revisado,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -346,6 +360,8 @@ const PedidoForm = ({pedido, setPedido}) => {
             observaciones: datos.observaciones,
             observaciones2: datos.observaciones2,
             descripcion: datos.descripcion,
+            intervencion: datos.intervencion,
+            revisado: datos.revisado,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -679,6 +695,26 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                 onChange = {handleFinalizado} />
                                 </Form.Group>
                             </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <Form.Group className="mb-3" controlId="intervencion" style={{color:'red'}}>
+                                    <Form.Check type="checkbox" 
+                                                label="¿Intervención Externa?"
+                                                checked = {datos.intervencion}
+                                                onChange = {handleIntervencion} />
+                                </Form.Group>
+                            </Col>
+                            {datos.intervencion?
+                                <Col>
+                                    <Form.Group className="mb-3" controlId="revisado" style={{color:'blue'}}>
+                                        <Form.Check type="checkbox" 
+                                                    label="Documentación revisada por PRL"
+                                                    checked = {datos.revisado}
+                                                    onChange = {handleRevisado} />
+                                    </Form.Group>
+                                </Col>
+                            :''}
                         </Row>                     
                         <Form.Row className="justify-content-center">
                             {pedido ? 
