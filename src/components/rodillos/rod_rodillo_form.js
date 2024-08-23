@@ -61,8 +61,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         grupo_tubo_madre: rodillo.grupo?rodillo.grupo.tubo_madre:'',
         tipo_rodillo_siglas: rodillo.id?rodillo.tipo.siglas:'',
         espesores: rodillo.id?rodillo.espesor:false,
-        espesor_menor: rodillo.id?rodillo.espesor_1:'',
-        espesor_mayor: rodillo.id?rodillo.espesor_2:'',
+        espesor_menor: rodillo.id?rodillo.espesor_1:0,
+        espesor_mayor: rodillo.id?rodillo.espesor_2:0,
     });
 
     useEffect(() => { //si hay tipo de plano grabado, no podemos modificarlo, ya tenemos parametros dados de alta
