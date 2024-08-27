@@ -22,8 +22,8 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
         tubo_madre: grupo.id?grupo.tubo_madre:'',
         nombre: grupo.id?grupo.nombre:'',
         bancadas_elegidas:grupo.id?grupo.bancadas:[],
-        espesor_menor: grupo.id?grupo.espesor_1:'',
-        espesor_mayor: grupo.id?grupo.espesor_2:'',
+        espesor_1: grupo.id?grupo.espesor_1:'',
+        espesor_2: grupo.id?grupo.espesor_2:'',
     });
 
     useEffect(() => {
@@ -71,10 +71,25 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
             [event.target.name] : event.target.value
         })
     }
+
+    const handleInputChange_zona = (event) => {
+        const selectedOption = event.target.options[event.target.selectedIndex];
+        const id = event.target.value;
+        const espesor1 = selectedOption.getAttribute('data-espesor1');
+        const espesor2 = selectedOption.getAttribute('data-espesor2');
+    
+        setDatos({
+            ...datos,
+            zona: id,
+            espesor_1: espesor1,
+            espesor_2: espesor2,
+        });
+    };
+    
     
     const GuardarGrupo = (event) => {
         event.preventDefault();
-        axios.get(BACKEND_SERVER + `/api/rodillos/grupo_nuevo/?tubo_madre=${datos.tubo_madre}&maquina=${datos.zona}&espesor_1=${datos.espesor_menor}&espesor_2=${datos.espesor_mayor}`,{
+        axios.get(BACKEND_SERVER + `/api/rodillos/grupo_nuevo/?tubo_madre=${datos.tubo_madre}&maquina=${datos.zona}&espesor_1=${datos.espesor_1}&espesor_2=${datos.espesor_2}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -85,11 +100,11 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
             }
             else{
                 axios.post(BACKEND_SERVER + `/api/rodillos/grupo_only/`, {
-                    nombre: 'Grupo-'+'Ø'+datos.tubo_madre+'-'+datos.espesor_menor+'÷'+datos.espesor_mayor,
+                    nombre: 'Grupo-'+'Ø'+datos.tubo_madre+'-'+datos.espesor_1+'÷'+datos.espesor_2,
                     maquina: datos.zona,
                     tubo_madre: datos.tubo_madre,
-                    espesor_1: datos.espesor_menor,
-                    espesor_2: datos.espesor_mayor,
+                    espesor_1: datos.espesor_1,
+                    espesor_2: datos.espesor_2,
                 }, {
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
@@ -112,7 +127,7 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
 
     const ActualizarGrupo = (event) => {
         event.preventDefault();
-        axios.get(BACKEND_SERVER + `/api/rodillos/grupo_nuevo/?tubo_madre=${datos.tubo_madre}&maquina=${datos.zona}&espesor_1=${datos.espesor_menor}&espesor_2=${datos.espesor_mayor}`,{
+        axios.get(BACKEND_SERVER + `/api/rodillos/grupo_nuevo/?tubo_madre=${datos.tubo_madre}&maquina=${datos.zona}&espesor_1=${datos.espesor_1}&espesor_2=${datos.espesor_2}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -126,8 +141,8 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
                     nombre: 'Grupo-'+'Ø'+datos.tubo_madre,
                     maquina: datos.zona,
                     tubo_madre: datos.tubo_madre,            
-                    espesor_1: datos.espesor_menor,
-                    espesor_2: datos.espesor_mayor,
+                    espesor_1: datos.espesor_1,
+                    espesor_2: datos.espesor_2,
                 }, {
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
@@ -176,6 +191,7 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
                                         onChange={handleInputChange} 
                                         placeholder="Ø tubo madre"
                                         autoFocus
+                                        disabled={grupo.length!==0}
                             />
                         </Form.Group>
                     </Col>
@@ -207,12 +223,12 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
                             <Form.Control as="select" 
                                             value={datos.zona}
                                             name='zona'
-                                            onChange={handleInputChange}
+                                            onChange={handleInputChange_zona}
                                             disabled={grupo.length!==0}>
                                 <option key={0} value={''}>Todas</option>
                                 {zonas && zonas.map( zona => {
                                     return (
-                                    <option key={zona.id} value={zona.id}>
+                                    <option key={zona.id} value={zona.id} data-espesor1={zona.espesor_1} data-espesor2 = {zona.espesor_2}>
                                         {zona.siglas}
                                     </option>
                                     )
@@ -221,24 +237,26 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
                         </Form.Group>
                     </Col>
                     <Col>
-                        <Form.Group controlId="espesor_menor">
+                        <Form.Group controlId="espesor_1">
                             <Form.Label>Rango espesor menor *</Form.Label>
                             <Form.Control type="text" 
-                                            name='espesor_menor'
-                                            value={datos.espesor_menor}
+                                            name='espesor_1'
+                                            value={datos.espesor_1}
                                             onChange={handleInputChange}
-                                            placeholder='Rango espesores'>
+                                            placeholder='Rango espesores'
+                                            disabled={grupo.length!==0}>
                             </Form.Control>
                         </Form.Group>
                     </Col>
                     <Col>
-                        <Form.Group controlId="espesor_mayor">
+                        <Form.Group controlId="espesor_2">
                             <Form.Label>Rango espesor mayor *</Form.Label>
                             <Form.Control type="text" 
-                                            name='espesor_mayor'
-                                            value={datos.espesor_mayor}
+                                            name='espesor_2'
+                                            value={datos.espesor_2}
                                             onChange={handleInputChange}
-                                            placeholder='Rango espesores'>
+                                            placeholder='Rango espesores'
+                                            disabled={grupo.length!==0}>
                             </Form.Control>
                         </Form.Group>
                     </Col>

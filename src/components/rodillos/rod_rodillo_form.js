@@ -915,7 +915,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                         <Col>
                             <Form.Group className="mb-3" controlId="espesores">
                                 <Form.Check type="checkbox" 
-                                            label="¿Tiene espesores?"
+                                            label="¿Rango de espesores?"
                                             checked = {datos.espesores}
                                             onChange = {handleInputespesores} />
                             </Form.Group>

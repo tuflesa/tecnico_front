@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
-import { Container, Row, Col, Table, Form, Button } from 'react-bootstrap';
-import { PencilFill } from 'react-bootstrap-icons';
+import { Container, Row, Col, Table, Form, Button, Alert } from 'react-bootstrap';
+import { PencilFill, Trash } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import logo from '../../assets/logo_bornay.svg';
 
@@ -199,6 +199,27 @@ const RodGruposListado = () => {
         }
     } 
 
+    const BorrarGrupo = (grupo)=>{
+        if(grupo.bancadas.length!==0){
+            alert('Ya existen datos relacionados con este grupo, por favor contacte con el administrador. Gracias');
+        }
+        else{
+            axios.delete(BACKEND_SERVER + `/api/rodillos/grupo_only/${grupo.id}/`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }
+            })
+            .then( res => {
+                alert(grupo.nombre + ', borrado correctamente. Gracias');
+                window.location.href=`/rodillos/grupos/`;
+            })
+            .catch( err => {
+                console.log(err);
+            });
+        }
+        
+    }
+
     return (
         <Container className='mt-5'>
             <img src ={logo} width="200" height="200"></img>
@@ -300,7 +321,9 @@ const RodGruposListado = () => {
                                             <td>{linea.espesor_1 +'÷'+linea.espesor_2}</td>
                                             <td>{linea.maquina.siglas}</td>
                                             <td>{'Ø' + linea.tubo_madre}</td>
-                                            <td><Link title='Detalle/Modificar'to={`/rodillos/grupo_editar/${linea.id}`}><PencilFill className="mr-3 pencil"/></Link></td>
+                                            <td><Link title='Detalle/Modificar'to={`/rodillos/grupo_editar/${linea.id}`}><PencilFill className="mr-3 pencil"/></Link>
+                                                <Trash className="trash"  onClick={event =>{BorrarGrupo(linea)}}></Trash>
+                                            </td>
                                         </tr>
                                         {filaSeleccionada === linea.id && show === true && (
                                             <tr>
