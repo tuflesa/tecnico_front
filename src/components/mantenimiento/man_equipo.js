@@ -265,7 +265,7 @@ const ManPorEquipos = () => {
                 }
             })
             .then( re => {
-                if(re.data.parte.tipo===1){
+                if(re.data.parte.tipo===1 || re.data.parte.tipo===7){
                     var fechaString= null;
                     var diaEnMilisegundos = 1000 * 60 * 60 * 24;
                     var fecha=Date.parse(re.data.fecha_fin);

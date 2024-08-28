@@ -223,7 +223,7 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateP
                         </Col>
                     </Row>
                     <Row>
-                        {parte.tipo===1?
+                        {parte.tipo===1 || parte.tipo===7?
                             <Col>
                                 <Form.Group id="tipo_periodo">
                                     <Form.Label>Tipo Periodo</Form.Label>
@@ -250,7 +250,7 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateP
                         : null}
                     </Row>
                     <Row>
-                        {parte.tipo===1?  
+                        {parte.tipo===1 || parte.tipo===7?  
                             <Col>
                                 <Form.Group controlId="periodo">
                                     <Form.Label>Cantidad de Periodos</Form.Label>

@@ -248,7 +248,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                         </Row>
                         <Row>
                             <Col>
-                                {linea_tarea.parte.tipo===1? //si es un preventivo
+                                {linea_tarea.parte.tipo===1 || linea_tarea.parte.tipo===7? //si es un preventivo
                                     <Form.Group id="tipo_periodo">
                                         <Form.Label>Tipo Periodo</Form.Label>
                                         <Form.Control as="select"  
@@ -271,7 +271,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                                 : null}
                             </Col>
                             <Col>
-                                {linea_tarea.parte.tipo===1? //si es un preventivo
+                                {linea_tarea.parte.tipo===1 || linea_tarea.parte.tipo===7? //si es un preventivo
                                     <Form.Group controlId="periodo">
                                         <Form.Label>Cantidad de Periodos</Form.Label>
                                         <Form.Control as="select" 
