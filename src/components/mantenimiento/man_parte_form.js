@@ -240,7 +240,7 @@ const ParteForm = ({parte, setParte, op}) => {
             const unique = (value, index, self) => {
                 return self.indexOf(value.tarea) === index.tarea
             }
-            if(parte.tipo_nombre==="Preventivo"){
+            if(parte.tipo_nombre==="Preventivo" || parte.tipo_nombre==="Ins. per. reglamentaria"){
                 let hash = {};
                 var array = [''];
                 const prueba = res.data.filter((r=> r.fecha_fin===null));
@@ -298,7 +298,7 @@ const ParteForm = ({parte, setParte, op}) => {
                     }
             })
             .then( res => {
-                if(parte.tipo_nombre==="Preventivo"){
+                if(parte.tipo_nombre==="Preventivo" || parte.tipo_nombre==="Ins. per. reglamentaria"){
                     const prueba = res.data.filter((r=> r.fecha_fin===null));
                     setLineas(prueba.sort(function(a, b){
                         if(a.tarea.prioridad < b.tarea.prioridad){
