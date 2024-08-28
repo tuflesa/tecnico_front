@@ -4,7 +4,7 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 
-const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, empresa_id, maquina, tubomadre, elementos_formacion, grupo_bancadas, colorAzul, colorAzulB, colorVerde, bancada_id, bancada_otraformacion}) => {
+const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, grupoEspesor, empresa_id, maquina, tubomadre, elementos_formacion, grupo_bancadas, colorAzul, colorAzulB, colorVerde, bancada_id, bancada_otraformacion}) => {
     const [token] = useCookies(['tec-token']);
     const [bancadaId, setBancadaId] = useState(bancada_id); // Estado para bancada_id
 
@@ -101,7 +101,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, em
     }, [token, operacion_marcada]);
 
     useEffect(() => { //RODILLOS QUE PODEMOS USAR EN ESTA OPERACIÓN CON ESTE GRUPO
-        operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/rodillos/?operacion__id=${operacion_marcada.id}&grupo__id=${grupoId}`,{
+        operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/rodillos/?operacion__id=${operacion_marcada.id}&grupo__tubo_madre=${tubomadre}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -347,6 +347,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, em
         axios.post(BACKEND_SERVER + `/api/rodillos/bancada/`, { //creamos la bancada
             seccion: operacion_marcada.seccion.id,
             tubo_madre: tubomadre,
+            espesores: grupoEspesor,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -595,7 +596,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, em
                                             <Form.Check
                                                 key={bancada.id}
                                                 type="checkbox"
-                                                label={bancada.nombre}
+                                                label={bancada.nombre +'  -  ('+ bancada.espesores+')'}
                                                 value = {datos.bancada_elegida}
                                                 checked={(bancada_id && bancada_id === bancada.id) || (bancada_otraformacion.id && bancada_otraformacion.id === bancada.id) || (datos.bancada_elegida === bancada.id)}
                                                 onChange={()=>handleInputChangeBancada(bancada.id)}
