@@ -943,8 +943,8 @@ const ParteForm = ({parte, setParte, op}) => {
                                         <th>Nombre</th>
                                         <th>Especialidad</th>
                                         <th>Observaciones Técnico</th>
-                                        {datos.tipo===1 || datos.tipo===7? <th>Tipo Periodo</th>:null}
-                                        {datos.tipo===1 || datos.tipo===7?<th>Cantidad Periodos</th>:null}
+                                        {datos.tipo===1 || datos.tipo===7?<th>Frecuencia</th>:null}
+                                        {datos.tipo===1 || datos.tipo===7? <th>Periodo/s</th>:null}
                                         {(user['tec-user'].perfil.puesto.nombre !=='Operario')? 
                                         <th style={{width:125}}>Acciones</th>
                                         :null}
@@ -960,9 +960,9 @@ const ParteForm = ({parte, setParte, op}) => {
                                                 <td>{linea.tarea.especialidad_nombre}</td>
                                                 <td>{linea.tarea.observaciones}</td>
                                                 {datos.tipo===1 || datos.tipo===7? 
-                                                    <td>{linea.tarea.tipo_periodo?linea.tarea.tipo_periodo.nombre:'0'}</td> : ''}
-                                                {datos.tipo===1 || datos.tipo===7? 
                                                     <td>{linea.tarea.periodo?linea.tarea.periodo:'0'}</td>:''}
+                                                {datos.tipo===1 || datos.tipo===7? 
+                                                    <td>{linea.tarea.tipo_periodo?linea.tarea.tipo_periodo.nombre:'0'}</td> : ''}
                                                 <td>                                            
                                                     <Receipt className="mr-3 pencil" onClick={event =>{listarLineasTareas(linea.tarea)}}/>
                                                     <a href={`/mantenimiento/linea_tarea/${linea.id}`} target="_blank" rel="noopener noreferrer"><PencilFill className="mr-3 pencil"/></a>

@@ -249,31 +249,8 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                         <Row>
                             <Col>
                                 {linea_tarea.parte.tipo===1 || linea_tarea.parte.tipo===7? //si es un preventivo
-                                    <Form.Group id="tipo_periodo">
-                                        <Form.Label>Tipo Periodo</Form.Label>
-                                        <Form.Control as="select"  
-                                                    name='tipo_periodo' 
-                                                    value={datos.tipo_periodo}
-                                                    onChange={handleInputChange}
-                                                    placeholder="Tipo Periodo"
-                                                    disabled={nosoyTecnico? + true: + false}>  
-                                                    {datos.tipo_periodo===''?  <option key={0} value={''}>Seleccionar</option>:''}   
-                                                    {/* {linea_tarea.tipo_periodo===null?  <option key={0} value={''}>Seleccionar</option>:''}                                                */}
-                                                    {tipo_periodos && tipo_periodos.map( periodo => {
-                                                        return (
-                                                        <option key={periodo.id} value={periodo.id}>
-                                                            {periodo.nombre}
-                                                        </option>
-                                                        )
-                                                    })}
-                                        </Form.Control>
-                                    </Form.Group>
-                                : null}
-                            </Col>
-                            <Col>
-                                {linea_tarea.parte.tipo===1 || linea_tarea.parte.tipo===7? //si es un preventivo
                                     <Form.Group controlId="periodo">
-                                        <Form.Label>Cantidad de Periodos</Form.Label>
+                                        <Form.Label>Frecuencia</Form.Label>
                                         <Form.Control as="select" 
                                                         value={datos.periodo}
                                                         name='periodo'
@@ -291,6 +268,29 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                                                         <option key={9} value={9}>9</option>
                                                         <option key={10} value={10}>10</option>
                                                         <option key={11} value={10}>11</option>                                        
+                                        </Form.Control>
+                                    </Form.Group>
+                                : null}
+                            </Col>
+                            <Col>
+                                {linea_tarea.parte.tipo===1 || linea_tarea.parte.tipo===7? //si es un preventivo
+                                    <Form.Group id="tipo_periodo">
+                                        <Form.Label>Periodo/s</Form.Label>
+                                        <Form.Control as="select"  
+                                                    name='tipo_periodo' 
+                                                    value={datos.tipo_periodo}
+                                                    onChange={handleInputChange}
+                                                    placeholder="Tipo Periodo"
+                                                    disabled={nosoyTecnico? + true: + false}>  
+                                                    {datos.tipo_periodo===''?  <option key={0} value={''}>Seleccionar</option>:''}   
+                                                    {/* {linea_tarea.tipo_periodo===null?  <option key={0} value={''}>Seleccionar</option>:''}                                                */}
+                                                    {tipo_periodos && tipo_periodos.map( periodo => {
+                                                        return (
+                                                        <option key={periodo.id} value={periodo.id}>
+                                                            {periodo.nombre}
+                                                        </option>
+                                                        )
+                                                    })}
                                         </Form.Control>
                                     </Form.Group>
                                 : null}

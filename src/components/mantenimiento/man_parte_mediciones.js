@@ -487,28 +487,8 @@ const ParteMediciones = ({parte, setParte}) => {
                                 </Form.Group>
                             </Col> 
                             <Col>
-                                <Form.Group id="tipo_periodo">
-                                    <Form.Label>Tipo Periodo</Form.Label>
-                                    <Form.Control as="select"  
-                                                name='tipo_periodo' 
-                                                value={datos.tipo_periodo}
-                                                onChange={handleInputChange}
-                                                placeholder="Tipo Periodo">  
-                                                {datos.tipo_periodo===''?  <option key={0} value={''}>Seleccionar</option>:''}   
-                                                {parte.tipo_periodo===null?  <option key={0} value={''}>Seleccionar</option>:''}                                               
-                                                {tipo_periodo && tipo_periodo.map( periodo => {
-                                                    return (
-                                                    <option key={periodo.id} value={periodo.id}>
-                                                        {periodo.nombre}
-                                                    </option>
-                                                    )
-                                                })}
-                                    </Form.Control>
-                                </Form.Group>
-                            </Col>
-                            <Col>
                                 <Form.Group controlId="periodo">
-                                    <Form.Label>Cantidad de Periodos</Form.Label>
+                                    <Form.Label>Frecuencia</Form.Label>
                                     <Form.Control as="select" 
                                                     value={datos.periodo}
                                                     name='periodo'
@@ -527,7 +507,27 @@ const ParteMediciones = ({parte, setParte}) => {
                                                     <option key={11} value={10}>11</option>                                        
                                     </Form.Control>
                                 </Form.Group>
-                            </Col>                 
+                            </Col>
+                            <Col>
+                                <Form.Group id="tipo_periodo">
+                                    <Form.Label>Periodo/s</Form.Label>
+                                    <Form.Control as="select"  
+                                                name='tipo_periodo' 
+                                                value={datos.tipo_periodo}
+                                                onChange={handleInputChange}
+                                                placeholder="Tipo Periodo">  
+                                                {datos.tipo_periodo===''?  <option key={0} value={''}>Seleccionar</option>:''}   
+                                                {parte.tipo_periodo===null?  <option key={0} value={''}>Seleccionar</option>:''}                                               
+                                                {tipo_periodo && tipo_periodo.map( periodo => {
+                                                    return (
+                                                    <option key={periodo.id} value={periodo.id}>
+                                                        {periodo.nombre}
+                                                    </option>
+                                                    )
+                                                })}
+                                    </Form.Control>
+                                </Form.Group>
+                            </Col>          
                         </Row>                          
                         <Row>                            
                             <Col>
