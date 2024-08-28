@@ -592,11 +592,12 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, gr
                                 <Col>
                                     <Form.Group controlId="bancadas">
                                         <Form.Label>Bancadas (Selecciona una opción)</Form.Label>
+                                        {console.log('bancadas',bancadas)}
                                         {bancadas && bancadas.map((bancada)=>(
                                             <Form.Check
                                                 key={bancada.id}
                                                 type="checkbox"
-                                                label={bancada.nombre +'  -  ('+ bancada.espesores+')'}
+                                                label={bancada.seccion.nombre==='Formadora'?bancada.nombre +'  -  ('+ bancada.espesores+')':bancada.nombre}
                                                 value = {datos.bancada_elegida}
                                                 checked={(bancada_id && bancada_id === bancada.id) || (bancada_otraformacion.id && bancada_otraformacion.id === bancada.id) || (datos.bancada_elegida === bancada.id)}
                                                 onChange={()=>handleInputChangeBancada(bancada.id)}
