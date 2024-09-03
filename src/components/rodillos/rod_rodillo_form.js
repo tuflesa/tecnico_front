@@ -971,7 +971,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                     </Row>
                 </React.Fragment>
                 :''}
-                <h5 style={styles}>Si tenemos espesores, solo se permite el punto para poner el décimal, no guardará si ponemos comas</h5>
+                <h5 style={styles}>Si tenemos espesores, solo se permite el punto para poner el decimal, no guardará si ponemos comas</h5>
                 {rodillo.length!==0?
                     <Row style={{marginBottom:'10px'}}>
                         <Col style={{color:'red'}}>Debemos introducir el tipo de plano y actualizar, si queremos añadir un plano ya creado</Col>
