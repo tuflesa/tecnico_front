@@ -43,6 +43,12 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, tipo_plano_
             })
             .catch(err => { 
                 alert('NO SE GUARDA LA INSTANCIA, REVISAR');
+                console.log('nombre:',rodillo.nombre + '1')
+                console.log('rodillo_id:',rodillo_id)
+                console.log('material:',material)
+                console.log('especial:',especial)
+                console.log('diametroFG:',diametroFG)
+
                 console.log(err);
             });
         } else {
