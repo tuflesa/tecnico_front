@@ -178,7 +178,7 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
                                                 name='descripcion_proveedor' 
                                                 value={datos.descripcion_proveedor}
                                                 onChange={handleInputChange} 
-                                                placeholder="Descirpción proveedor"
+                                                placeholder="Descripción proveedor"
                                     />
                                 </Form.Group>
                             </Col>
