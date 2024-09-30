@@ -5,13 +5,12 @@ import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
 import { Button, Form, Col, Row, Table, Modal } from 'react-bootstrap';
 import { PlusCircle } from 'react-bootstrap-icons';
-//import PlanoForm from './rod_plano_nuevo';
-//import {invertirFecha} from '../utilidades/funciones_fecha';
-//import RodRevisionForm from './rod_revision_form';
 import RodParametrosEstandar from './rod_parametros_estandar';
-import RodCrearInstancia from './rod_crear_instancia';
+//import RodCrearInstancia from './rod_crear_instancia';
 import logo from '../../assets/logo_bornay.svg';
 import RodPlanosRodillo from './rod_rodillo_planos';
+import RodInstanciasRodillo from './rod_rodillo_instancias';
+import RodCrearInstancia from './rod_crear_instancia';
 
 const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [token] = useCookies(['tec-token']);
@@ -24,24 +23,13 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [operaciones, setOperaciones] = useState([]);
     const [tipo_rodillo, setTipoRodillo] = useState([]);
     const [grupos, setGrupos] = useState([]);
-    //const [planos, setPlanos] = useState(null);
-    //const [valor_conjuntos, setValorConjuntos] = useState('');
-    //const [show, setShow] = useState(false);
-    //const [filaSeleccionada, setFilaSeleccionada] = useState(null);
-    //const [, setRevisiones] = useState(null);
     const [parametros, setParametros] = useState(null); // PARAMETROS GUARDADOS
-    //const [plano_id, setPlano_id] = useState(null);
-    //const [plano_nombre, setPlano_nombre] = useState(null);
-    //const [showRevision, setShowRevision] = useState(false);
     const [showParametros, setShowParametros] = useState(false);
     const [tipos_planos, setTiposPlanos] = useState(null);
     const [formas, setForma] = useState([]);
     const [no_modificar, setNoModificar] = useState(false);
     const [no_modificar_tipoplano, setNoModificar_tipoplano] = useState(false);
     const [rodillo_nuevo, setRodilloNuevo] = useState('');
-    const [instancias, setInstancias] = useState(null);
-    
-    //const [show_plano, setShowPlano] = useState(false);
     const [show_instancia, setShowInstancia] = useState(false);
 
     const [datos, setDatos] = useState({
@@ -151,41 +139,6 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             console.log(err);
         });
     }, [token]);
-
-    /* useEffect(() => {
-        if(rodillo.id){
-            axios.get(BACKEND_SERVER + `/api/rodillos/plano/?rodillos=${rodillo.id}`,{
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                  }
-            })
-            .then( res => {
-                setPlanos(res.data);
-                if(res.data.length!==0){
-                    setNoModificar(true);
-                }
-            })
-            .catch( err => {
-                console.log(err);
-            });
-        }
-    }, [token, rodillo]); */
-
-    useEffect(() => {
-        if(rodillo.id){
-            axios.get(BACKEND_SERVER + `/api/rodillos/instancia_listado/?rodillo__id=${rodillo.id}`,{
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                  }
-            })
-            .then( res => {
-                setInstancias(res.data);
-            })
-            .catch( err => {
-                console.log(err);
-            });
-        }
-    }, [token, rodillo]);
 
     useEffect(() => {
         datos.operacion && axios.get(BACKEND_SERVER + `/api/rodillos/eje_operacion/?operacion__id=${datos.operacion}`,{
@@ -545,14 +498,6 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         })
     };
 
-    /* const añadirPlano = () => {
-        setShowPlano(true);
-    }
-    
-    const cerrarPlano = () => {
-        setShowPlano(false);
-    } */
-
     const añadirInstancia = () => {
         setShowInstancia(true);
     }
@@ -895,61 +840,20 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 {rodillo?rodillo.length===0?<Button variant="outline-primary" onClick={GuardarRodillo}>Guardar</Button>:<Button variant="outline-primary" onClick={ActualizarRodillo}>Actualizar</Button>:''}
                 {rodillo.tipo_plano?parametros?parametros.length===0?<Button className={'mx-2'} onClick={añadirParametros}>Añadir Parámetros</Button>:<Button className={'mx-2'} onClick={añadirParametros}>Editar Parámetros</Button>:'':''}
             </Form>
-            {rodillo.length!==0?
-                <React.Fragment> 
-                    <Form.Row>
-                    <Col>
-                        <Row>
-                            <Col>
-                            <h5 className="pb-3 pt-1 mt-2">Añadir Instancia:</h5>
-                            </Col>
-                            <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
-                                    <PlusCircle className="plus mr-2" size={30} onClick={'añadirPlano'}/>
-                            </Col>
-                        </Row>
-                    </Col>
-                    </Form.Row>
-                </React.Fragment>
-            :null}
-               
-            {instancias?instancias.length!==0?
-                <Table striped bordered hover>
-                    <thead>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Material</th>
-                            <th>Especial</th>
-                            <th>Diámetro FG</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        { instancias && instancias.map( instancia => {
-                            return (
-                                <React.Fragment key={instancia.id}>
-                                    <tr key={instancia.id}>
-                                        <td>{instancia.nombre}</td>
-                                        <td>{instancia.material.nombre}</td>
-                                        <td>{instancia.especial===false?'NO':'SI'}</td>
-                                        <td>{'Ø'+instancia.diametro}</td>
-                                    </tr>
-                                </React.Fragment>
-                            )})
-                        }
-                    </tbody>
-                </Table>
-            :null:null}    
 
             <RodPlanosRodillo
                     rodillo={rodillo}
                     rodillo_nuevo={rodillo_nuevo}
                     tipo_plano_id={datos.tipo_plano}/>
 
+            <RodInstanciasRodillo
+                    rodillo={rodillo}/>
+
             <RodCrearInstancia show={show_instancia}
                            rodillo_id={rodillo_nuevo.id}
                            rodillo={rodillo_nuevo}
                            handleClose={cerrarInstancia}
-                           tipo_plano_id={datos.tipo_plano}/>
+                           instancias_length={0}/>
             
             <RodParametrosEstandar showPa={showParametros}
                            tipo_plano_id={datos.tipo_plano}

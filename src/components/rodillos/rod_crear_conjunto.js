@@ -69,7 +69,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, gr
         }
     }, [token, elementos_formacion]);
 
-    useEffect(() => { //BUSCAMOS, LAS OPERACIONES DE LA SECCIÓN MARCADA.
+    useEffect(() => { //BUSCAMOS, LAS OPERACIONES PARA EL FILTRO DE CONJUNTOS DE OTRAS FORMACIONES.
         if(operacion_marcada!==null){ 
             axios.get(BACKEND_SERVER + `/api/rodillos/operacion/?seccion=${operacion_marcada.seccion.id}`,{
                 headers: {
@@ -592,7 +592,6 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, gr
                                 <Col>
                                     <Form.Group controlId="bancadas">
                                         <Form.Label>Bancadas (Selecciona una opción)</Form.Label>
-                                        {console.log('bancadas',bancadas)}
                                         {bancadas && bancadas.map((bancada)=>(
                                             <Form.Check
                                                 key={bancada.id}

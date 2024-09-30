@@ -4,7 +4,7 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 
-const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, tipo_plano_id }) => {
+const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_length }) => {
     const [token] = useCookies(['tec-token']);
     const [material, setMaterial] = useState('');
     const [especial, setEspecial] = useState(false);
@@ -28,7 +28,7 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, tipo_plano_
     const GuardarInstancia = () => {
         if (material) {
             axios.post(BACKEND_SERVER + `/api/rodillos/instancia_nueva/`, {
-                nombre: rodillo.nombre + '-1',
+                nombre: rodillo.nombre + '-' + instancias_length,
                 rodillo: rodillo_id,
                 material: material,
                 especial: especial,
