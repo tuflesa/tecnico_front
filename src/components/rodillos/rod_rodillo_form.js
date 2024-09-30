@@ -850,10 +850,11 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                     rodillo={rodillo}/>
 
             <RodCrearInstancia show={show_instancia}
-                           rodillo_id={rodillo_nuevo.id}
-                           rodillo={rodillo_nuevo}
-                           handleClose={cerrarInstancia}
-                           instancias_length={0}/>
+                            setShow={setShowInstancia}
+                            rodillo_id={rodillo_nuevo.id}
+                            rodillo={rodillo_nuevo}
+                            handleClose={cerrarInstancia}
+                            instancias_length={0}/>
             
             <RodParametrosEstandar showPa={showParametros}
                            tipo_plano_id={datos.tipo_plano}

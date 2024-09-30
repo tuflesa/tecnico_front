@@ -69,6 +69,8 @@ const RodInstanciasRodillo = ({rodillo}) => {
                                 <th>Material</th>
                                 <th>Especial</th>
                                 <th>Diámetro FG</th>
+                                <th>Diámetro EXT</th>
+                                <th>Activa QS</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -81,6 +83,8 @@ const RodInstanciasRodillo = ({rodillo}) => {
                                             <td>{instancia.material.nombre}</td>
                                             <td>{instancia.especial===false?'NO':'SI'}</td>
                                             <td>{'Ø'+instancia.diametro}</td>
+                                            <td>{'Ø'+instancia.diametro_ext}</td>
+                                            <td>{instancia.activa_qs===false?'NO':'SI'}</td>
                                         </tr>
                                     </React.Fragment>
                                 )})

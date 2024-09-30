@@ -4,12 +4,14 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 
-const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_length }) => {
+const RodCrearInstancia = ({show, setShow, handlerClose, rodillo_id, rodillo, instancias_length }) => {
     const [token] = useCookies(['tec-token']);
     const [material, setMaterial] = useState('');
     const [especial, setEspecial] = useState(false);
     const [materiales, setMateriales] = useState([]);
     const [diametroFG, setDiametroFG] = useState([]);
+    const [diametroEXT, setDiametroEXT] = useState([]);
+    const [activa_qs, setActivaQS] = useState(true);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + `/api/rodillos/materiales/`,{
@@ -33,6 +35,8 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
                 material: material,
                 especial: especial,
                 diametro: diametroFG,
+                diametro_ext: diametroEXT,
+                activa_qs: activa_qs,
             }, {
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
@@ -43,18 +47,16 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
             })
             .catch(err => { 
                 alert('NO SE GUARDA LA INSTANCIA, REVISAR');
-                console.log('nombre:',rodillo.nombre + '1')
-                console.log('rodillo_id:',rodillo_id)
-                console.log('material:',material)
-                console.log('especial:',especial)
-                console.log('diametroFG:',diametroFG)
-
                 console.log(err);
             });
         } else {
             alert('Por favor selecciona un material.');
         }
     }    
+
+    const cerrarInstancia = () => {
+        window.location.href = `/rodillos/editar/${rodillo_id}`;
+    }
 
     const handleEspecialChange = (event) => {
         setEspecial(event.target.value);
@@ -66,6 +68,14 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
 
     const handleDiametroChange = (event) => {
         setDiametroFG(event.target.value);
+    }; 
+
+    const handleDiametroEXTChange = (event) => {
+        setDiametroEXT(event.target.value);
+    }; 
+
+    const handleInputactiva_qs = (event) => {
+        setActivaQS(event.target.value);
     }; 
 
     return(
@@ -93,7 +103,7 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
                 <Row>
                     <Col>
                         <Form.Group controlId="formSelectFromVariable">
-                            <Form.Label>Seleccione una opción dinámica</Form.Label>
+                            <Form.Label>Selecciona el material</Form.Label>
                             <Form.Control as="select" value={material} onChange={handleMaterialChange}>
                                 <option value="">Selecciona una opción</option> {/* Opción predeterminada */}
                                 {materiales.map((opcion, index) => (
@@ -107,7 +117,7 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
                 </Row>
                 <Row>
                     <Col>
-                        <Form.Group controlId="formUserInput">
+                        <Form.Group controlId="diametro">
                             <Form.Label>Introduce el diámetro de FG</Form.Label>
                             <Form.Control
                                 type="text"
@@ -118,9 +128,33 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
                         </Form.Group>
                     </Col>
                 </Row>
+                <Row>
+                    <Col>
+                        <Form.Group controlId="diametro_ext">
+                            <Form.Label>Introduce el diámetro de EXT</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Introduce el Ø EXT"
+                                value={diametroEXT}
+                                onChange={handleDiametroEXTChange}
+                            />
+                        </Form.Group>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
+                        <Form.Group className="mb-3" controlId="activa_qs">
+                            <Form.Check type="checkbox" 
+                                        label="¿Activa en QS?"
+                                        checked = {activa_qs}
+                                        onChange = {handleInputactiva_qs} />
+                        </Form.Group>
+                    </Col>
+                </Row>
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="warning" onClick={GuardarInstancia}>Aceptar</Button>
+                <Button variant="warning" onClick={cerrarInstancia}>Cancelar</Button>
             </Modal.Footer>
         </Modal>
     );
