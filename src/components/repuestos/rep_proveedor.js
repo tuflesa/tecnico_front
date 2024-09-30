@@ -173,7 +173,7 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
                         <Row>
                             <Col>
                                 <Form.Group id="descripcion_proveedor">
-                                    <Form.Label>Descirpción Proveedor</Form.Label>
+                                    <Form.Label>Descripción Proveedor</Form.Label>
                                     <Form.Control type="text" 
                                                 name='descripcion_proveedor' 
                                                 value={datos.descripcion_proveedor}
