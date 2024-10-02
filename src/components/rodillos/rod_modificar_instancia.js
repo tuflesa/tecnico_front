@@ -4,16 +4,20 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 
-const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_length, instancia_activa, modificar_instancia}) => {
+const RodModificarInstancia = ({show, handlerClose, instancia}) => {
     const [token] = useCookies(['tec-token']);
-    const [material, setMaterial] = useState('');
-    const [especial, setEspecial] = useState(false);
     const [materiales, setMateriales] = useState([]);
-    const [diametroFG, setDiametroFG] = useState([]);
-    const [diametroEXT, setDiametroEXT] = useState([]);
-    const [activa_qs, setActivaQS] = useState(instancia_activa===true?false:true);
-    const [obsoleta, setObsoleta] = useState(false);
-
+    const [datos, setDatos] = useState({
+        id: instancia.id? instancia.id:null,
+        nombre: instancia.id?instancia.nombre:'',
+        rodillo: instancia.id?instancia.rodillo.id:'',
+        material: instancia.id?instancia.material.id:'',
+        especial: instancia.id?instancia.especial:'',
+        diametroFG: instancia.id?instancia.diametro:'',
+        diametroEXT: instancia.id?instancia.diametro_ext:'',
+        activa_qs:instancia.id?instancia.activa_qs:'',
+        obsoleta: instancia.id?instancia.obsoleta:'',
+    });
     useEffect(() => {
         axios.get(BACKEND_SERVER + `/api/rodillos/materiales/`,{
             headers: {
@@ -28,80 +32,66 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
         });
     }, [token]);
 
-    const GuardarInstancia = () => {
-        if (material) {
-            axios.post(BACKEND_SERVER + `/api/rodillos/instancia_nueva/`, {
-                nombre: rodillo.nombre + '-' + instancias_length,
-                rodillo: rodillo_id,
-                material: material,
-                especial: especial,
-                diametro: diametroFG,
-                diametro_ext: diametroEXT,
-                activa_qs: activa_qs,
-                obsoleta: obsoleta,
-            }, {
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                }     
-            })
-            .then(r => {
-                window.location.href = `/rodillos/editar/${rodillo_id}`;
-            })
-            .catch(err => { 
-                alert('NO SE GUARDA LA INSTANCIA, REVISAR');
-                console.log(err);
-            });
-        } else {
-            alert('Por favor selecciona un material.');
-        }
-    }    
+    const ModificarInstancia = () => {
+        axios.patch(BACKEND_SERVER + `/api/rodillos/instancia_nueva/${instancia.id}/`, {
+            material: datos.material,
+            especial: datos.especial,
+            diametro: datos.diametroFG,
+            diametro_ext: datos.diametroEXT,
+            activa_qs: datos.activa_qs,
+            obsoleta: datos.obsoleta,
+        }, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }     
+        })
+        .then(r => {
+            window.location.href = `/rodillos/editar/${instancia.rodillo.id}`;
+        })
+        .catch(err => { 
+            alert('NO SE ACTUALIZA LA INSTANCIA, REVISAR');
+            console.log(err);
+        });
+    }   
 
-    const cerrarInstancia = () => {
-        window.location.href = `/rodillos/editar/${rodillo_id}`;
+    const handleInputChange = (event) => {
+        setDatos({
+            ...datos,
+            [event.target.name] : event.target.value
+        })
     }
 
-    const handleEspecialChange = (event) => {
-        setEspecial(event.target.value);
-    }; 
-    
-    const handleMaterialChange = (event) => {
-        setMaterial(event.target.value);
-    }; 
+    const handleInputChange_qs = (event) => {
+        setDatos({
+            ...datos,
+            activa_qs:!datos.activa_qs
+        })
+    }
 
-    const handleDiametroChange = (event) => {
-        setDiametroFG(event.target.value);
-    }; 
+    const handleInputChange_obsoleta = (event) => {
+        setDatos({
+            ...datos,
+            obsoleta:!datos.obsoleta
+        })
+    }
 
-    const handleDiametroEXTChange = (event) => {
-        setDiametroEXT(event.target.value);
-    }; 
-
-    const handleInputactiva_qs = (event) => {
-        if(instancia_activa){
-            alert('Ya hay una instancia activa para QS, quitar antes de activar otra, gracias');
-        }
-        else{
-            setActivaQS(event.target.value);
-        }
-    }; 
-
-    const handleInputobsoleta = (event) => {
-        setObsoleta(!obsoleta);
-    };
+    const cerrarInstancia = () => {
+        window.location.href = `/rodillos/editar/${instancia.rodillo.id}`;
+    }
 
     return(
         <Modal show={show} onHide={handlerClose} backdrop="static" keyboard={false} animation={false}>
             <Modal.Body>
                 <Row>
                     <Col>
-                        <h5>Agregar instancia al rodillo</h5>
+                        <h5>Modificar instancia al rodillo</h5>
                     </Col>
                 </Row>
                 <Row>
                     <Col>
                         <Form.Group controlId="formSelectTrueFalse">
                             <Form.Label>¿La instancia del rodillo es especial?</Form.Label>
-                            <Form.Control as="select" onChange={handleEspecialChange}>
+                            <Form.Control as="select" onChange={handleInputChange} name='especial'>
                                 <option value="false">No</option>
                                 <option value="true">Si</option>
                             </Form.Control>
@@ -112,7 +102,7 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
                     <Col>
                         <Form.Group controlId="formSelectFromVariable">
                             <Form.Label>Selecciona el material</Form.Label>
-                            <Form.Control as="select" value={material} onChange={handleMaterialChange}>
+                            <Form.Control as="select" value={datos.material} name="material" onChange={handleInputChange}>
                                 <option value="">Selecciona una opción</option> {/* Opción predeterminada */}
                                 {materiales.map((opcion, index) => (
                                     <option key={index} value={opcion.id}>
@@ -128,10 +118,11 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
                         <Form.Group controlId="diametro">
                             <Form.Label>Introduce el diámetro de FG</Form.Label>
                             <Form.Control
+                                name="diametroFG"
                                 type="text"
                                 placeholder="Introduce el Ø FG"
-                                value={diametroFG}
-                                onChange={handleDiametroChange}
+                                value={datos.diametroFG}
+                                onChange={handleInputChange}
                             />
                         </Form.Group>
                     </Col>
@@ -141,10 +132,11 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
                         <Form.Group controlId="diametro_ext">
                             <Form.Label>Introduce el diámetro de EXT</Form.Label>
                             <Form.Control
+                                name="diametroEXT"
                                 type="text"
                                 placeholder="Introduce el Ø EXT"
-                                value={diametroEXT}
-                                onChange={handleDiametroEXTChange}
+                                value={datos.diametroEXT}
+                                onChange={handleInputChange}
                             />
                         </Form.Group>
                     </Col>
@@ -153,9 +145,10 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
                     <Col>
                         <Form.Group className="mb-3" controlId="activa_qs">
                             <Form.Check type="checkbox" 
+                                        name='activa_qs'
                                         label="¿Activa en QS?"
-                                        checked = {activa_qs}
-                                        onChange = {handleInputactiva_qs} />
+                                        checked = {datos.activa_qs}
+                                        onChange = {handleInputChange_qs} />
                         </Form.Group>
                     </Col>
                 </Row>
@@ -164,17 +157,17 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
                         <Form.Group className="mb-3" controlId="obsoleta">
                             <Form.Check type="checkbox" 
                                         label="obsoleta"
-                                        checked = {obsoleta}
-                                        onChange = {handleInputobsoleta} />
+                                        checked = {datos.obsoleta}
+                                        onChange = {handleInputChange_obsoleta} />
                         </Form.Group>
                     </Col>
                 </Row>
             </Modal.Body>
             <Modal.Footer>
-                <Button variant="warning" onClick={GuardarInstancia}>Aceptar</Button>
+                <Button variant="warning" onClick={ModificarInstancia}>Modificar</Button>
                 <Button variant="warning" onClick={cerrarInstancia}>Cancelar</Button>
             </Modal.Footer>
         </Modal>
     );
 }
-export default RodCrearInstancia;
+export default RodModificarInstancia;

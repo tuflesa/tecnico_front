@@ -4,20 +4,24 @@ import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import { Form, Col, Row, Table } from 'react-bootstrap';
-import { PlusCircle, Clipboard, Trash} from 'react-bootstrap-icons';
-import {invertirFecha} from '../utilidades/funciones_fecha';
+import { PlusCircle, PencilFill} from 'react-bootstrap-icons';
+import { Link } from 'react-router-dom';
 import RodCrearInstancia from './rod_crear_instancia';
+import RodModificarInstancia from './rod_modificar_instancia';
 
 const RodInstanciasRodillo = ({rodillo}) => {
     const [token] = useCookies(['tec-token']);
     const [show_instancia, setShowInstancia] = useState(false);
+    const [show_mod_instancia, setShowModInstancia] = useState(false);
     const [rodillo_nuevo, setRodilloNuevo] = useState('');
     const [instancias, setInstancias] = useState(null);
     const [instancias_length, setInstanciasLength] = useState(null);
+    const [instancia_activa, setInstanciaActiva] = useState('');
+    const [modificar_instancia, setModificarInstancia] = useState(null);
 
     useEffect(() => {
         if(rodillo.id){
-            axios.get(BACKEND_SERVER + `/api/rodillos/instancia_listado/?rodillo__id=${rodillo.id}`,{
+            axios.get(BACKEND_SERVER + `/api/rodillos/instancia_listado/?rodillo__id=${rodillo.id}&obsoleta=${false}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                   }
@@ -26,6 +30,13 @@ const RodInstanciasRodillo = ({rodillo}) => {
                 setInstancias(res.data);
                 setRodilloNuevo(rodillo);
                 setInstanciasLength(res.data.length);
+                const instanciaActiva = res.data.filter(instancia => instancia.activa_qs === true);
+                if(Object.keys(instanciaActiva).length > 0){
+                    setInstanciaActiva(true);
+                }
+                else{
+                    setInstanciaActiva(false);
+                }
             })
             .catch( err => {
                 console.log(err);
@@ -39,6 +50,15 @@ const RodInstanciasRodillo = ({rodillo}) => {
 
     const cerrarInstancia = () => {
         setShowInstancia(false);
+    }
+
+    const ModificarInstancia = (instancia) => {
+        setModificarInstancia(instancia);
+        setShowModInstancia(true);
+    }
+
+    const CerrarModificarInstancia = () => {
+        setShowModInstancia(false);
     }
 
     return (
@@ -85,6 +105,10 @@ const RodInstanciasRodillo = ({rodillo}) => {
                                             <td>{'Ø'+instancia.diametro}</td>
                                             <td>{'Ø'+instancia.diametro_ext}</td>
                                             <td>{instancia.activa_qs===false?'NO':'SI'}</td>
+                                            <td><Link title='Modificar'onClick={() => ModificarInstancia(instancia)}>
+                                                    <PencilFill className="mr-3 pencil"/>
+                                                </Link>
+                                            </td>
                                         </tr>
                                     </React.Fragment>
                                 )})
@@ -92,11 +116,18 @@ const RodInstanciasRodillo = ({rodillo}) => {
                         </tbody>
                     </Table>
                 :null:null}
-                <RodCrearInstancia show={show_instancia}
-                                    rodillo_id={rodillo_nuevo.id}
-                                    rodillo={rodillo_nuevo}
-                                    handleClose={cerrarInstancia}
-                                    instancias_length={instancias_length}/>
+                {instancia_activa===true || instancia_activa===false?
+                    <RodCrearInstancia show={show_instancia}
+                                        rodillo_id={rodillo_nuevo.id}
+                                        rodillo={rodillo_nuevo}
+                                        handleClose={cerrarInstancia}
+                                        instancias_length={instancias_length}
+                                        instancia_activa={instancia_activa}/>
+                :''}
+                {modificar_instancia?
+                    <RodModificarInstancia show={show_mod_instancia}
+                                        instancia={modificar_instancia}/>
+                :''}
 
         </Container>
     );
