@@ -234,8 +234,8 @@ const montaje = [
 ]
 
 const fleje = {
-    espesor: 5,
-    ancho: 626,
+    espesor: 3,
+    ancho: 635,
     calidad: 'S350',
     color: 'aqua'
 }
