@@ -18,6 +18,7 @@ const RepNavBar = () => {
                             <Nav className="mr-auto">
                                 <NavDropdown title="Repuestos" id="basic-nav-dropdown">
                                     <NavDropdown.Item href="/repuestos">Página de Inicio</NavDropdown.Item>
+                                    <NavDropdown.Item href="/repuestos/prl">Página de Inicio PRL</NavDropdown.Item>
                                     <NavDropdown.Divider />
                                     <NavDropdown.Item href="/repuestos/listado">Lista de repuestos</NavDropdown.Item>
                                     <NavDropdown.Item href="/repuestos/nuevo">Nuevo repuesto</NavDropdown.Item>

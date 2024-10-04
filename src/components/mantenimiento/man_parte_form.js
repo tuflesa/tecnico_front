@@ -46,8 +46,8 @@ const ParteForm = ({parte, setParte, op}) => {
         tarea: parte?parte.tarea:null,
         estado: parte?parte.estado:null,
         num_parte: parte? parte.num_parte:null,
-        tipo_periodo: parte.tipo===1? parte.tipo_periodo : '',
-        periodo: parte.tipo===1? parte.periodo : 0,
+        tipo_periodo: parte.tipo===1 || parte.tipo===7? parte.tipo_periodo : '',
+        periodo: parte.tipo===1 || parte.tipo===7? parte.periodo : 0,
         finalizar: parte.estado===3?true:false,
     });
 
@@ -70,8 +70,8 @@ const ParteForm = ({parte, setParte, op}) => {
             tarea: parte?parte.tarea:null,
             estado: parte?parte.estado:null,
             num_parte: parte? parte.num_parte:null,
-            tipo_periodo: parte.tipo===1? parte.tipo_periodo : '',
-            periodo: parte.tipo===1? parte.periodo : 0,
+            tipo_periodo: parte.tipo===1 || parte.tipo===7? parte.tipo_periodo : '',
+            periodo: parte.tipo===1 || parte.tipo===7? parte.periodo : 0,
             finalizar: parte.estado===3?true:false,
         });
     },[parte]);
@@ -240,7 +240,7 @@ const ParteForm = ({parte, setParte, op}) => {
             const unique = (value, index, self) => {
                 return self.indexOf(value.tarea) === index.tarea
             }
-            if(parte.tipo_nombre==="Preventivo"){
+            if(parte.tipo_nombre==="Preventivo" || parte.tipo_nombre==="Ins. per. reglamentaria"){
                 let hash = {};
                 var array = [''];
                 const prueba = res.data.filter((r=> r.fecha_fin===null));
@@ -298,7 +298,7 @@ const ParteForm = ({parte, setParte, op}) => {
                     }
             })
             .then( res => {
-                if(parte.tipo_nombre==="Preventivo"){
+                if(parte.tipo_nombre==="Preventivo" || parte.tipo_nombre==="Ins. per. reglamentaria"){
                     const prueba = res.data.filter((r=> r.fecha_fin===null));
                     setLineas(prueba.sort(function(a, b){
                         if(a.tarea.prioridad < b.tarea.prioridad){
@@ -943,14 +943,15 @@ const ParteForm = ({parte, setParte, op}) => {
                                         <th>Nombre</th>
                                         <th>Especialidad</th>
                                         <th>Observaciones Técnico</th>
-                                        {datos.tipo===1? <th>Tipo Periodo</th>:null}
-                                        {datos.tipo===1?<th>Cantidad Periodos</th>:null}
+                                        {datos.tipo===1 || datos.tipo===7?<th>Frecuencia</th>:null}
+                                        {datos.tipo===1 || datos.tipo===7? <th>Periodo/s</th>:null}
                                         {(user['tec-user'].perfil.puesto.nombre !=='Operario')? 
                                         <th style={{width:125}}>Acciones</th>
                                         :null}
                                     </tr>
                                 </thead>                                                                             
                                 <tbody>
+                                    {console.log(datos.tipo)}
                                     {lineas && lineas.map( linea => {
                                         return (
                                             <tr key={linea.tarea.id} className={ linea.fecha_fin?"table-danger":linea.fecha_inicio?"table-success":"" }/* class = {linea.fecha_inicio?"table-danger":" " } */>
@@ -958,11 +959,10 @@ const ParteForm = ({parte, setParte, op}) => {
                                                 <td>{linea.tarea.nombre}</td>
                                                 <td>{linea.tarea.especialidad_nombre}</td>
                                                 <td>{linea.tarea.observaciones}</td>
-                                                {datos.tipo===1? 
+                                                {datos.tipo===1 || datos.tipo===7? 
+                                                    <td>{linea.tarea.periodo?linea.tarea.periodo:'0'}</td>:''}
+                                                {datos.tipo===1 || datos.tipo===7? 
                                                     <td>{linea.tarea.tipo_periodo?linea.tarea.tipo_periodo.nombre:'0'}</td> : ''}
-                                                {datos.tipo===1? 
-                                                    <td>{linea.tarea.periodo?linea.tarea.periodo:'0'}</td>
-                                                :''}
                                                 <td>                                            
                                                     <Receipt className="mr-3 pencil" onClick={event =>{listarLineasTareas(linea.tarea)}}/>
                                                     <a href={`/mantenimiento/linea_tarea/${linea.id}`} target="_blank" rel="noopener noreferrer"><PencilFill className="mr-3 pencil"/></a>

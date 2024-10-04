@@ -24,6 +24,7 @@ const ManNotificacionesFiltro = ({actualizaFiltro}) => {
         fecha_creacion_lte:'',
         fecha_creacion_gte:'',
         numero: '',
+        seguridad: '',
     }); 
 
     useEffect(() => {
@@ -78,7 +79,7 @@ const ManNotificacionesFiltro = ({actualizaFiltro}) => {
 
     /* eslint-disable react-hooks/exhaustive-deps */
     useEffect(()=>{
-        const filtro1 = `?quien=${datos.quien}&finalizado=${datos.finalizado}&revisado=${datos.revisado}&descartado=${datos.descartado}&fecha_creacion__lte=${datos.fecha_creacion_lte}&fecha_creacion__gte=${datos.fecha_creacion_gte}&numero__icontains=${datos.numero}&zona__id=${datos.zona}&empresa__id=${datos.empresa}`;
+        const filtro1 = `?quien=${datos.quien}&finalizado=${datos.finalizado}&revisado=${datos.revisado}&descartado=${datos.descartado}&fecha_creacion__lte=${datos.fecha_creacion_lte}&fecha_creacion__gte=${datos.fecha_creacion_gte}&numero__icontains=${datos.numero}&zona__id=${datos.zona}&empresa__id=${datos.empresa}&seguridad=${datos.seguridad}`;
         //let filtro2 = `&empresa__id=${datos.empresa}`;
         //const filtro = filtro1 + filtro2;
         actualizaFiltro(filtro1);
@@ -173,6 +174,19 @@ const ManNotificacionesFiltro = ({actualizaFiltro}) => {
                             <Form.Control as="select" 
                                             value={datos.descartado}
                                             name='descartado'
+                                            onChange={handleInputChange}>
+                                <option key={0} value={''}>Todos</option>
+                                <option key={1} value={true}>Si</option>
+                                <option key={2} value={false}>No</option>
+                            </Form.Control>
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="seguridad">
+                            <Form.Label>Seguridad</Form.Label>
+                            <Form.Control as="select" 
+                                            value={datos.seguridad}
+                                            name='seguridad'
                                             onChange={handleInputChange}>
                                 <option key={0} value={''}>Todos</option>
                                 <option key={1} value={true}>Si</option>

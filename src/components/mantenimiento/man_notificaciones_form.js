@@ -441,17 +441,7 @@ const NotificacionForm = ({nota, setNota}) => {
                                     />
                                 </Form.Group>
                             </Col>
-                        </Row>
-                        <Row>
-                            <Col style={ { color: 'red' } }>
-                                <Form.Group className="mb-3" controlId="peligro">
-                                    <Form.Check type="checkbox" 
-                                                label="Peligrosidad"
-                                                checked = {datos.peligrosidad}
-                                                onChange = {handlePeligro} />
-                                </Form.Group>
-                            </Col>
-                        </Row>  
+                        </Row> 
                         <Row>
                             <Col style={ { color: 'red' } }>
                                 <Form.Group className="mb-3" controlId="peligro">
