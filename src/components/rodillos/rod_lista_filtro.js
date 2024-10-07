@@ -17,6 +17,7 @@ const RodListaFiltro = ({actualizaFiltro}) => {
         operacion: '',
         tipo_rodillo: '',
         grupo:'',
+        instancias:'all',
     });
 
     const [empresas, setEmpresas] = useState(null);
@@ -131,7 +132,7 @@ const RodListaFiltro = ({actualizaFiltro}) => {
     }, [token, datos.seccion]);
     
     useEffect(()=>{
-        const filtro = `?operacion__seccion__maquina__empresa__id=${datos.empresa}&nombre__icontains=${datos.nombre}&id=${datos.id}&tipo=${datos.tipo_rodillo}&operacion__seccion__maquina=${datos.maquina}&operacion__seccion=${datos.seccion}&operacion__id=${datos.operacion}`
+        const filtro = `?operacion__seccion__maquina__empresa__id=${datos.empresa}&nombre__icontains=${datos.nombre}&id=${datos.id}&tipo=${datos.tipo_rodillo}&operacion__seccion__maquina=${datos.maquina}&operacion__seccion=${datos.seccion}&operacion__id=${datos.operacion}&num_instancias=${datos.instancias==='0'?datos.instancias:''}`
         actualizaFiltro(filtro);
     },[datos]);
 
@@ -249,6 +250,15 @@ const RodListaFiltro = ({actualizaFiltro}) => {
                                     </option>
                                     )
                                 })}
+                            </Form.Control>
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="num_instancias">
+                            <Form.Label>Instancias</Form.Label>
+                            <Form.Control as="select" onChange={handleInputChange} name='instancias' value={datos.instancias}>
+                                <option value='all'>Todos</option>
+                                <option value='0'>0</option>
                             </Form.Control>
                         </Form.Group>
                     </Col>
