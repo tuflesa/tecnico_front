@@ -3,8 +3,9 @@ import { Row, Col, Form, Button, Modal } from 'react-bootstrap';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
+import { useBarcode } from 'react-barcodes';
 
-const RodModificarInstancia = ({show, handlerClose, instancia}) => {
+const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa, instancia_activa_id, rodillo_eje, rodillo}) => {
     const [token] = useCookies(['tec-token']);
     const [materiales, setMateriales] = useState([]);
     const [datos, setDatos] = useState({
@@ -33,25 +34,48 @@ const RodModificarInstancia = ({show, handlerClose, instancia}) => {
     }, [token]);
 
     const ModificarInstancia = () => {
-        axios.patch(BACKEND_SERVER + `/api/rodillos/instancia_nueva/${instancia.id}/`, {
-            material: datos.material,
-            especial: datos.especial,
-            diametro: datos.diametroFG,
-            diametro_ext: datos.diametroEXT,
-            activa_qs: datos.activa_qs,
-            obsoleta: datos.obsoleta,
-        }, {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-            }     
-        })
-        .then(r => {
-            window.location.href = `/rodillos/editar/${instancia.rodillo.id}`;
-        })
-        .catch(err => { 
-            alert('NO SE ACTUALIZA LA INSTANCIA, REVISAR');
-            console.log(err);
-        });
+        if(parseFloat(datos.diametroFG)>parseFloat(datos.diametroEXT)){
+            alert('El diámetro de fondo no puede ser superior al diámetro exterior. Por favor corregir, gracias');
+        }
+        else if(rodillo_eje>parseFloat(datos.diametroFG) || rodillo_eje===parseFloat(datos.diametroFG)){
+            alert('El diámetro de fondo, no puedes ser inferior o igual al eje del rodillo. Por favor corregir, gracias')
+        }
+        else{
+            axios.patch(BACKEND_SERVER + `/api/rodillos/instancia_nueva/${instancia.id}/`, {
+                material: datos.material,
+                especial: datos.especial,
+                diametro: datos.diametroFG,
+                diametro_ext: datos.diametroEXT,
+                activa_qs: datos.activa_qs,
+                obsoleta: datos.obsoleta,
+            }, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }     
+            })
+            .then(r => {
+                if(datos.obsoleta===true){
+                    axios.patch(BACKEND_SERVER + `/api/rodillos/rodillos/${rodillo.id}/`, {
+                        num_instancias: rodillo.num_instancias-1,
+                    }, {
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                        }     
+                    })
+                    .then(r => {
+                        alert('Acaba de ANULAR una instancia de rodillo, gracias.');
+                    })
+                    .catch(err => { 
+                        console.log(err);
+                    });
+                }
+                window.location.href = `/rodillos/editar/${instancia.rodillo.id}`;
+            })
+            .catch(err => { 
+                alert('NO SE ACTUALIZA LA INSTANCIA, REVISAR');
+                console.log(err);
+            });
+        }
     }   
 
     const handleInputChange = (event) => {
@@ -62,11 +86,16 @@ const RodModificarInstancia = ({show, handlerClose, instancia}) => {
     }
 
     const handleInputChange_qs = (event) => {
-        setDatos({
-            ...datos,
-            activa_qs:!datos.activa_qs
-        })
-    }
+        if(event.target.value==='on' && instancia_activa && instancia_activa_id[0].id!==instancia.id){
+            alert('Ya hay una instancia activa para QS, quitar antes de activar otra, gracias');
+        }
+        else{
+            setDatos({
+                ...datos,
+                activa_qs:!datos.activa_qs
+            })
+        }
+    }; 
 
     const handleInputChange_obsoleta = (event) => {
         setDatos({
@@ -76,7 +105,43 @@ const RodModificarInstancia = ({show, handlerClose, instancia}) => {
     }
 
     const cerrarInstancia = () => {
+        setDatos({
+            ...datos,
+            id: null,
+            nombre: '',
+            rodillo: '',
+            material: '',
+            especial: '',
+            diametroFG: '',
+            diametroEXT: '',
+            activa_qs:'',
+            obsoleta: '',
+        })
         window.location.href = `/rodillos/editar/${instancia.rodillo.id}`;
+    }
+
+    function Barcode({datos}) {
+        const {inputRef}  = useBarcode({
+          value: String(datos.id).padStart(12,'0'),
+          options: {
+            format: "ean13",
+            flat: true,
+            height: 60,
+            fontSize: 16,
+          }            
+        }); 
+        return <svg id="barcode-canvas" ref={inputRef}/>;
+    }; 
+
+    const ImprimirBarcode = () => {
+        var container = document.getElementById('barcode');
+        var width = "100%";
+        var height = "100%";
+        var printWindow = window.open('', 'PrintMap','width=' + width + ',height=' + height);
+        printWindow.document.writeln('<center>'+'Grupo Bornay'+'</br>'+container.innerHTML + '</br>' + datos.id + '-' + datos.nombre + '</center>');
+        printWindow.document.close();
+        printWindow.print();
+        printWindow.close();
     }
 
     return(
@@ -150,10 +215,6 @@ const RodModificarInstancia = ({show, handlerClose, instancia}) => {
                                         checked = {datos.activa_qs}
                                         onChange = {handleInputChange_qs} />
                         </Form.Group>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col>
                         <Form.Group className="mb-3" controlId="obsoleta">
                             <Form.Check type="checkbox" 
                                         label="obsoleta"
@@ -161,11 +222,17 @@ const RodModificarInstancia = ({show, handlerClose, instancia}) => {
                                         onChange = {handleInputChange_obsoleta} />
                         </Form.Group>
                     </Col>
+                    <Col>
+                        <div id='barcode'>
+                            {datos.id && <Barcode datos={datos}/>}
+                        </div>
+                    </Col>
                 </Row>
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="warning" onClick={ModificarInstancia}>Modificar</Button>
                 <Button variant="warning" onClick={cerrarInstancia}>Cancelar</Button>
+                {datos.id && <Button variant='info' className={'mx-2'} onClick={ImprimirBarcode}>Imprimir Etiqueta</Button>}
             </Modal.Footer>
         </Modal>
     );

@@ -3,10 +3,8 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
-import { Button, Form, Col, Row, Table, Modal } from 'react-bootstrap';
-import { PlusCircle } from 'react-bootstrap-icons';
+import { Button, Form, Col, Row,} from 'react-bootstrap';
 import RodParametrosEstandar from './rod_parametros_estandar';
-//import RodCrearInstancia from './rod_crear_instancia';
 import logo from '../../assets/logo_bornay.svg';
 import RodPlanosRodillo from './rod_rodillo_planos';
 import RodInstanciasRodillo from './rod_rodillo_instancias';
@@ -27,7 +25,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [showParametros, setShowParametros] = useState(false);
     const [tipos_planos, setTiposPlanos] = useState(null);
     const [formas, setForma] = useState([]);
-    const [no_modificar, setNoModificar] = useState(false);
+    const [, setNoModificar] = useState(false);
     const [no_modificar_tipoplano, setNoModificar_tipoplano] = useState(false);
     const [rodillo_nuevo, setRodilloNuevo] = useState('');
     const [show_instancia, setShowInstancia] = useState(false);
@@ -854,7 +852,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                             rodillo_id={rodillo_nuevo.id}
                             rodillo={rodillo_nuevo}
                             handleClose={cerrarInstancia}
-                            instancias_length={0}/>
+                            instancias_length={1}/>
             
             <RodParametrosEstandar showPa={showParametros}
                            tipo_plano_id={datos.tipo_plano}

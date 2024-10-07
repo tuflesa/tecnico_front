@@ -17,6 +17,7 @@ const RodInstanciasRodillo = ({rodillo}) => {
     const [instancias, setInstancias] = useState(null);
     const [instancias_length, setInstanciasLength] = useState(null);
     const [instancia_activa, setInstanciaActiva] = useState('');
+    const [instancia_activa_id, setInstanciaActiva_id] = useState('');
     const [modificar_instancia, setModificarInstancia] = useState(null);
 
     useEffect(() => {
@@ -29,8 +30,9 @@ const RodInstanciasRodillo = ({rodillo}) => {
             .then( res => {
                 setInstancias(res.data);
                 setRodilloNuevo(rodillo);
-                setInstanciasLength(res.data.length);
+                setInstanciasLength(res.data.length+1);
                 const instanciaActiva = res.data.filter(instancia => instancia.activa_qs === true);
+                setInstanciaActiva_id(instanciaActiva);
                 if(Object.keys(instanciaActiva).length > 0){
                     setInstanciaActiva(true);
                 }
@@ -126,7 +128,11 @@ const RodInstanciasRodillo = ({rodillo}) => {
                 :''}
                 {modificar_instancia?
                     <RodModificarInstancia show={show_mod_instancia}
-                                        instancia={modificar_instancia}/>
+                                        instancia={modificar_instancia}
+                                        instancia_activa={instancia_activa}
+                                        instancia_activa_id={instancia_activa_id}
+                                        rodillo_eje={rodillo.diametro}
+                                        rodillo={rodillo}/>
                 :''}
 
         </Container>

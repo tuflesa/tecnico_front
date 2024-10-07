@@ -4,7 +4,7 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 
-const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_length, instancia_activa, modificar_instancia}) => {
+const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_length, instancia_activa }) => {
     const [token] = useCookies(['tec-token']);
     const [material, setMaterial] = useState('');
     const [especial, setEspecial] = useState(false);
@@ -29,30 +29,51 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
     }, [token]);
 
     const GuardarInstancia = () => {
-        if (material) {
-            axios.post(BACKEND_SERVER + `/api/rodillos/instancia_nueva/`, {
-                nombre: rodillo.nombre + '-' + instancias_length,
-                rodillo: rodillo_id,
-                material: material,
-                especial: especial,
-                diametro: diametroFG,
-                diametro_ext: diametroEXT,
-                activa_qs: activa_qs,
-                obsoleta: obsoleta,
-            }, {
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                }     
-            })
-            .then(r => {
-                window.location.href = `/rodillos/editar/${rodillo_id}`;
-            })
-            .catch(err => { 
-                alert('NO SE GUARDA LA INSTANCIA, REVISAR');
-                console.log(err);
-            });
-        } else {
-            alert('Por favor selecciona un material.');
+        if(parseFloat(diametroFG)>parseFloat(diametroEXT)){
+            alert('El diámetro de fondo no puede ser superior al diámetro exterior. Por favor corregir, gracias');
+        }
+        if(parseFloat(rodillo.diametro)>parseFloat(diametroFG) || parseFloat(rodillo.diametro)===parseFloat(diametroFG)){
+            alert('El diámetro de fondo, no puedes ser inferior o igual al eje del rodillo. Por favor corregir, gracias')
+        }
+        else if(parseFloat(diametroFG)<parseFloat(diametroEXT) && parseFloat(rodillo.diametro)<parseFloat(diametroFG) && parseFloat(rodillo.diametro)!==parseFloat(diametroFG)||parseFloat(diametroFG)===parseFloat(diametroEXT)){
+            if (material) {
+                axios.post(BACKEND_SERVER + `/api/rodillos/instancia_nueva/`, {
+                    nombre: rodillo.nombre + '-' + instancias_length,
+                    rodillo: rodillo_id,
+                    material: material,
+                    especial: especial,
+                    diametro: diametroFG,
+                    diametro_ext: diametroEXT,
+                    activa_qs: activa_qs,
+                    obsoleta: obsoleta,
+                }, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }     
+                })
+                .then(r => {
+                    axios.patch(BACKEND_SERVER + `/api/rodillos/rodillos/${rodillo.id}/`, {
+                        num_instancias: rodillo.num_instancias+1,
+                    }, {
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                        }     
+                    })
+                    .then(r => {
+                        alert('Acaba de CREAR una instancia de rodillo, gracias.');
+                    })
+                    .catch(err => { 
+                        console.log(err);
+                    });
+                    window.location.href = `/rodillos/editar/${rodillo_id}`;
+                })
+                .catch(err => { 
+                    alert('NO SE GUARDA LA INSTANCIA, REVISAR');
+                    console.log(err);
+                });
+            } else {
+                alert('Por favor selecciona un material.');
+            }
         }
     }    
 

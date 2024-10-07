@@ -119,6 +119,7 @@ const RodLista = () => {
                                 <th>Operación</th>
                                 <th>Tipo Rodillo</th>
                                 <th>Grupo</th>
+                                <th>Num Instancias</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -134,6 +135,7 @@ const RodLista = () => {
                                         <td>{lista.operacion.nombre}</td>
                                         <td>{lista.tipo?lista.tipo.nombre:''}</td>
                                         <td>{lista.grupo?lista.grupo.nombre:''}</td>
+                                        <td>{lista.grupo?lista.num_instancias:''}</td>
                                         <td>
                                             <Link to={`/rodillos/editar/${lista.id}`}><PencilFill className="mr-3 pencil"/></Link>
                                         </td>
