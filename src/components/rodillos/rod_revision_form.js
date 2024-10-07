@@ -5,35 +5,20 @@ import { Modal, Button, Form, Col, Row } from 'react-bootstrap';
 import { BACKEND_SERVER } from '../../constantes';
 import { arch } from 'process';
 
-const RodRevisionForm = ({plano_id, show, setShowRevision, show_revision, tipo_plano_id, rodillo_id, rodillo, plano_nombre}) => {
+const RodRevisionForm = ({plano_id, show, setShowRevision, show_revision, tipo_plano_id, rodillo_id, rodillo, plano_nombre, revisiones, revisiones_lenght}) => {
     const [token] = useCookies(['tec-token']);
     const [archivo, setArchivo] = useState(null);
     const hoy = new Date();
     const fechaString = hoy.getFullYear() + '-' + ('0' + (hoy.getMonth()+1)).slice(-2) + '-' + ('0' + hoy.getDate()).slice(-2);
     const [tipo_plano, setTipoPlano] = useState([]);
-    const [revisiones, setRevisiones] = useState('');
+    //const [revisiones, setRevisiones] = useState('');
 
     const [datos, setDatos] = useState({
         tipo_plano: tipo_plano,
-        nombre: '',
+        nombre: plano_nombre+'-'+'R'+revisiones_lenght+'',
         fecha: fechaString,
         motivo: '',
     });
- 
-    useEffect(() => {
-            plano_id && axios.get(BACKEND_SERVER + `/api/rodillos/revision_planos/?plano__id=${plano_id}`,{
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                  }
-            })
-            .then( res => {
-                setRevisiones(res.data);
-                datos.nombre='PL-'+ plano_nombre+'-'+'R'+(res.data.length);
-            })
-            .catch( err => {
-                console.log(err);
-            });
-    }, [plano_id, token]);
 
     useEffect(() => {
         if(tipo_plano_id){

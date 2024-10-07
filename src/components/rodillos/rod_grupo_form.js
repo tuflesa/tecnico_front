@@ -22,6 +22,8 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
         tubo_madre: grupo.id?grupo.tubo_madre:'',
         nombre: grupo.id?grupo.nombre:'',
         bancadas_elegidas:grupo.id?grupo.bancadas:[],
+        espesor_1: grupo.id?grupo.espesor_1:'',
+        espesor_2: grupo.id?grupo.espesor_2:'',
     });
 
     useEffect(() => {
@@ -69,10 +71,25 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
             [event.target.name] : event.target.value
         })
     }
+
+    const handleInputChange_zona = (event) => {
+        const selectedOption = event.target.options[event.target.selectedIndex];
+        const id = event.target.value;
+        const espesor1 = selectedOption.getAttribute('data-espesor1');
+        const espesor2 = selectedOption.getAttribute('data-espesor2');
+    
+        setDatos({
+            ...datos,
+            zona: id,
+            espesor_1: espesor1,
+            espesor_2: espesor2,
+        });
+    };
+    
     
     const GuardarGrupo = (event) => {
         event.preventDefault();
-        axios.get(BACKEND_SERVER + `/api/rodillos/grupo_nuevo/?tubo_madre=${datos.tubo_madre}&maquina=${datos.zona}`,{
+        axios.get(BACKEND_SERVER + `/api/rodillos/grupo_nuevo/?tubo_madre=${datos.tubo_madre}&maquina=${datos.zona}&espesor_1=${datos.espesor_1}&espesor_2=${datos.espesor_2}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -83,9 +100,11 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
             }
             else{
                 axios.post(BACKEND_SERVER + `/api/rodillos/grupo_only/`, {
-                    nombre: 'Grupo-'+'Ø'+datos.tubo_madre,
+                    nombre: 'Grupo-'+'Ø'+datos.tubo_madre+'-'+datos.espesor_1+'÷'+datos.espesor_2,
                     maquina: datos.zona,
                     tubo_madre: datos.tubo_madre,
+                    espesor_1: datos.espesor_1,
+                    espesor_2: datos.espesor_2,
                 }, {
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
@@ -108,24 +127,42 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
 
     const ActualizarGrupo = (event) => {
         event.preventDefault();
-        axios.patch(BACKEND_SERVER + `/api/rodillos/grupo_only/${grupo.id}/`, {
-            nombre: 'Grupo-'+'Ø'+datos.tubo_madre,
-            maquina: datos.zona,
-            tubo_madre: datos.tubo_madre,
-        }, {
+        axios.get(BACKEND_SERVER + `/api/rodillos/grupo_nuevo/?tubo_madre=${datos.tubo_madre}&maquina=${datos.zona}&espesor_1=${datos.espesor_1}&espesor_2=${datos.espesor_2}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            if(res.data.length!==0){
+                alert('Con esta modificación ya existe un grupo');
             }
-        })
-        .then(res => { 
-            window.location.href=`/rodillos/grupo_editar/${res.data.id}`;
-        })
-        .catch(err => { 
-            console.log(err);
-            alert('Falta datos, por favor rellena todos los campos obligatorios.');
+            else{
+                axios.patch(BACKEND_SERVER + `/api/rodillos/grupo_only/${grupo.id}/`, {
+                    nombre: 'Grupo-'+'Ø'+datos.tubo_madre,
+                    maquina: datos.zona,
+                    tubo_madre: datos.tubo_madre,            
+                    espesor_1: datos.espesor_1,
+                    espesor_2: datos.espesor_2,
+                }, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }
+                })
+                .then(res => { 
+                    window.location.href=`/rodillos/grupo_editar/${res.data.id}`;
+                })
+                .catch(err => { 
+                    console.log(err);
+                    alert('Falta datos, por favor rellena todos los campos obligatorios.');
+                });
+            }
         });
-        
     };
+
+    const styles = {
+        textAlign: 'right',
+        color: 'red',
+        fontSize: 'smaller'}
 
     return (
         <Container className='mt-5'>
@@ -154,6 +191,7 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
                                         onChange={handleInputChange} 
                                         placeholder="Ø tubo madre"
                                         autoFocus
+                                        disabled={grupo.length!==0}
                             />
                         </Form.Group>
                     </Col>
@@ -185,12 +223,12 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
                             <Form.Control as="select" 
                                             value={datos.zona}
                                             name='zona'
-                                            onChange={handleInputChange}
+                                            onChange={handleInputChange_zona}
                                             disabled={grupo.length!==0}>
                                 <option key={0} value={''}>Todas</option>
                                 {zonas && zonas.map( zona => {
                                     return (
-                                    <option key={zona.id} value={zona.id}>
+                                    <option key={zona.id} value={zona.id} data-espesor1={zona.espesor_1} data-espesor2 = {zona.espesor_2}>
                                         {zona.siglas}
                                     </option>
                                     )
@@ -198,8 +236,34 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
                             </Form.Control>
                         </Form.Group>
                     </Col>
+                    <Col>
+                        <Form.Group controlId="espesor_1">
+                            <Form.Label>Rango espesor menor *</Form.Label>
+                            <Form.Control type="text" 
+                                            name='espesor_1'
+                                            value={datos.espesor_1}
+                                            onChange={handleInputChange}
+                                            placeholder='Rango espesores'
+                                            disabled={grupo.length!==0}>
+                            </Form.Control>
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="espesor_2">
+                            <Form.Label>Rango espesor mayor *</Form.Label>
+                            <Form.Control type="text" 
+                                            name='espesor_2'
+                                            value={datos.espesor_2}
+                                            onChange={handleInputChange}
+                                            placeholder='Rango espesores'
+                                            disabled={grupo.length!==0}>
+                            </Form.Control>
+                        </Form.Group>
+                    </Col>
                 </Row>
             </Form>
+            <h5 style={styles}>Solo se permite el punto para poner el décimal, no guardará si ponemos coma</h5>
+
             <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
             {grupo.length===0?<Button variant="outline-primary" onClick={GuardarGrupo}>Guardar</Button>:<Button variant="outline-primary" onClick={ActualizarGrupo}>Actualizar</Button>}
             {mostrarRodBancada && <RodBancada visible={mostrarRodBancada} grupo={grupo} setGrupo={setGrupo} />} {/* mostramos en editar las bancadas de la máquina */}

@@ -3,13 +3,12 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
-import { Button, Form, Col, Row, Table } from 'react-bootstrap';
-import { PlusCircle, Clipboard, Trash} from 'react-bootstrap-icons';
-import PlanoForm from './rod_plano_nuevo';
-import {invertirFecha} from '../utilidades/funciones_fecha';
-import RodRevisionForm from './rod_revision_form';
+import { Button, Form, Col, Row,} from 'react-bootstrap';
 import RodParametrosEstandar from './rod_parametros_estandar';
 import logo from '../../assets/logo_bornay.svg';
+import RodPlanosRodillo from './rod_rodillo_planos';
+import RodInstanciasRodillo from './rod_rodillo_instancias';
+import RodCrearInstancia from './rod_crear_instancia';
 
 const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [token] = useCookies(['tec-token']);
@@ -22,22 +21,14 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [operaciones, setOperaciones] = useState([]);
     const [tipo_rodillo, setTipoRodillo] = useState([]);
     const [grupos, setGrupos] = useState([]);
-    const [planos, setPlanos] = useState(null);
-    const [valor_conjuntos, setValorConjuntos] = useState('');
-    const [show, setShow] = useState(false);
-    const [filaSeleccionada, setFilaSeleccionada] = useState(null);
-    const [, setRevisiones] = useState(null);
     const [parametros, setParametros] = useState(null); // PARAMETROS GUARDADOS
-    const [plano_id, setPlano_id] = useState(null);
-    const [plano_nombre, setPlano_nombre] = useState(null);
-    const [showRevision, setShowRevision] = useState(false);
     const [showParametros, setShowParametros] = useState(false);
     const [tipos_planos, setTiposPlanos] = useState(null);
     const [formas, setForma] = useState([]);
-    const [no_modificar, setNoModificar] = useState(false);
+    const [, setNoModificar] = useState(false);
     const [no_modificar_tipoplano, setNoModificar_tipoplano] = useState(false);
-    
-    const [show_plano, setShowPlano] = useState(false);
+    const [rodillo_nuevo, setRodilloNuevo] = useState('');
+    const [show_instancia, setShowInstancia] = useState(false);
 
     const [datos, setDatos] = useState({
         empresa: rodillo.id?rodillo.operacion.seccion.maquina.empresa_id:'',
@@ -60,6 +51,9 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         pertenece_grupo:rodillo.id?rodillo.operacion.seccion.pertenece_grupo:'',
         grupo_tubo_madre: rodillo.grupo?rodillo.grupo.tubo_madre:'',
         tipo_rodillo_siglas: rodillo.id?rodillo.tipo.siglas:'',
+        espesores: rodillo.id?rodillo.espesor:false,
+        espesor_menor: rodillo.id?rodillo.espesor_1:0,
+        espesor_mayor: rodillo.id?rodillo.espesor_2:0,
     });
 
     useEffect(() => { //si hay tipo de plano grabado, no podemos modificarlo, ya tenemos parametros dados de alta
@@ -143,25 +137,6 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             console.log(err);
         });
     }, [token]);
-
-    useEffect(() => {
-        if(rodillo.id){
-            axios.get(BACKEND_SERVER + `/api/rodillos/plano/?rodillos=${rodillo.id}`,{
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                  }
-            })
-            .then( res => {
-                setPlanos(res.data);
-                if(res.data.length!==0){
-                    setNoModificar(true);
-                }
-            })
-            .catch( err => {
-                console.log(err);
-            });
-        }
-    }, [token, rodillo]);
 
     useEffect(() => {
         datos.operacion && axios.get(BACKEND_SERVER + `/api/rodillos/eje_operacion/?operacion__id=${datos.operacion}`,{
@@ -332,31 +307,55 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     useEffect(() => { //montamos el nombre cuando tenemos todos los datos.
         if(datos.pertenece_grupo){
             if(!datos.nombre&&datos.zona&&datos.operacion&&datos.tipo_rodillo&&datos.grupo_tubo_madre){
-                setDatos({
-                    ...datos,
-                    nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-'+'Ø'+datos.grupo_tubo_madre),
-                })
+                if(datos.espesores){
+                    setDatos({
+                        ...datos,
+                        nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-'+'Ø'+datos.grupo_tubo_madre+'-'+datos.espesor_menor+'÷'+datos.espesor_mayor),
+                    }) 
+                }
+                else{
+                    setDatos({
+                        ...datos,
+                        nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-'+'Ø'+datos.grupo_tubo_madre),
+                    })
+                }
             }
         }
         else{
             if(datos.forma_nombre==='Redondo'){
                 if(!datos.nombre&&datos.zona_siglas&&datos.operacion_nombre&&datos.tipo_rodillo_siglas&&datos.dimension_perfil){
-                    setDatos({
-                        ...datos,
-                        nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-'+'Ø'+datos.dimension_perfil),
-                    })
+                    if(datos.espesores){
+                        setDatos({
+                            ...datos,
+                            nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-'+'Ø'+datos.dimension_perfil+'-'+datos.espesor_menor+'÷'+datos.espesor_mayor),
+                        })
+                    }
+                    else{
+                        setDatos({
+                            ...datos,
+                            nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-'+'Ø'+datos.dimension_perfil),
+                        })
+                    }
                 }
             }
             else{
                 if(!datos.nombre&&datos.zona_siglas&&datos.operacion_nombre&&datos.tipo_rodillo_siglas&&datos.descripcion_perfil){
-                    setDatos({
-                        ...datos,
-                        nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-'+datos.descripcion_perfil),
-                    })
+                    if(datos.espesores){
+                        setDatos({
+                            ...datos,
+                            nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-'+datos.descripcion_perfil+'-'+datos.espesor_menor+'÷'+datos.espesor_mayor),
+                        }) 
+                    }
+                    else{
+                        setDatos({
+                            ...datos,
+                            nombre:String(datos.zona_siglas+'-'+datos.operacion_nombre+'-'+datos.tipo_rodillo_siglas+'-'+datos.descripcion_perfil),
+                        })
+                    }
                 }
             }
         }
-    },[datos, datos.tipo_rodillo_siglas]);
+    },[datos, datos.tipo_rodillo_siglas, datos.espesor_menor, datos.espesor_mayor]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -409,13 +408,18 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                     forma: parseInt(datos.forma),
                     descripcion_perfil: datos.descripcion_perfil,
                     dimension_perfil: datos.dimension_perfil,
+                    espesor: datos.espesores,
+                    espesor_1: datos.espesor_menor,
+                    espesor_2: datos.espesor_mayor,
                 }, {
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
                         }     
                 })
                 .then( res => { 
-                    window.location.href = `/rodillos/editar/${res.data.id}`;
+                    setRodilloNuevo(res.data);
+                    añadirInstancia();
+                    //window.location.href = `/rodillos/editar/${res.data.id}`; 
                 })
                 .catch(err => { 
                     console.log(err);
@@ -441,6 +445,9 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             forma: parseInt(datos.forma),
             descripcion_perfil: datos.descripcion_perfil,
             dimension_perfil: datos.dimension_perfil,
+            espesor: datos.espesores,
+            espesor_1: datos.espesor_menor,
+            espesor_2: datos.espesor_mayor,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -489,8 +496,12 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         })
     };
 
-    const añadirPlano = () => {
-        setShowPlano(true);
+    const añadirInstancia = () => {
+        setShowInstancia(true);
+    }
+
+    const cerrarInstancia = () => {
+        setShowInstancia(false);
     }
 
     const añadirParametros = () => {
@@ -499,127 +510,6 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
 
     const cerrarParametros = () => {
         setShowParametros(false);
-    }
-
-    const cerrarPlano = () => {
-        setShowPlano(false);
-    }
-
-    const abrirConjuntos = (plano) => {        
-        axios.get(BACKEND_SERVER + `/api/rodillos/revision_conjuntos/?plano=${plano}`,{ //REVISIONES DE LOS PLANOS
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-                }
-        })
-        .then( res => {
-            setRevisiones(res.data);
-            setShow(!show);                          
-            if(show){
-                const tabla = (
-                    <div>
-                    <h2 style={{textAlign: 'center'}}>Revisiones del plano</h2>
-                    <Table striped bordered hover>
-                        <thead>
-                            <tr>
-                                <th>Motivo</th>
-                                <th>Nombre</th>
-                                <th>Archivo</th>
-                                <th>Fecha</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {res.data && res.data.map( conjunto => {
-                                return (
-                                    <React.Fragment key={conjunto.id}>
-                                        <tr key={conjunto.id}>
-                                            <td>{conjunto.motivo}</td>
-                                            <td>{conjunto.nombre}</td>
-                                            <td>
-                                                <a href={conjunto.archivo}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                title="Haz clic para abrir el PDF">
-                                                {conjunto.archivo}
-                                                </a>
-                                            </td>
-                                            
-                                            <td>{invertirFecha(String(conjunto.fecha))}</td>
-                                        </tr>
-                                        {/* {filaSeleccionadaParametros === conjunto.id && (
-                                            <tr>
-                                                <td colSpan="3">{valor_parametros}</td>
-                                            </tr>
-                                        )} */}
-                                    </React.Fragment>
-                                )})
-                            }
-                        </tbody>
-                    </Table>
-                    </div>
-                );
-                setValorConjuntos(tabla);
-                setFilaSeleccionada(plano);
-            }
-            else{
-                setValorConjuntos('');
-                setFilaSeleccionada('');
-                setRevisiones(null);
-            }
-        })
-        .catch( err => {
-            console.log(err);
-        });
-        
-        
-    };
-
-    const eliminarPlano = (plano) => { 
-        var confirmacion = window.confirm('¿Confirma que desea eliminar este plano, en este rodillo?');
-        if(confirmacion){
-            for(var x=0;x<plano.rodillos.length;x++){
-                if(plano.rodillos[x]===datos.rodillo_id){
-                    plano.rodillos.splice(x,1); //elimina el elemento que cumple la condición.
-                }
-            }
-            if(plano.rodillos.length===0){
-                var eliminacion = window.confirm('Este plano no está en otro rodillo, va a eliminar el plano. ¿Desea continuar?');
-                if(eliminacion){
-                    axios.delete(BACKEND_SERVER + `/api/rodillos/plano/${plano.id}/`,{
-                        headers: {
-                            'Authorization': `token ${token['tec-token']}`
-                            }
-                    })
-                    .then( res => {
-                        window.location.href = `/rodillos/editar/${rodillo.id}`; 
-                    })
-                    .catch( err => {
-                        console.log(err);
-                    });
-                }
-            }
-            else{
-                axios.patch(BACKEND_SERVER + `/api/rodillos/plano/${plano.id}/`, {
-                    rodillos: plano.rodillos,
-                }, {
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`
-                        }     
-                })
-                .then( res => { 
-                    window.location.href = `/rodillos/editar/${rodillo.id}`;
-                })
-                .catch(err => { 
-                    console.log(err);
-                })
-            }
-            
-        }    
-    };
-
-    const NuevaRevision = (plano) => {
-        setPlano_id(plano.id);
-        setPlano_nombre(plano.nombre);
-        setShowRevision(true);
     }
 
     const handleInputChangeGrupo = (event) => {
@@ -662,6 +552,18 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         });
     };
 
+    const handleInputespesores = (event) => {
+        setDatos({
+            ...datos,
+            espesores : !datos.espesores
+        })
+    }
+
+    const styles = {
+        textAlign: 'right',
+        color: 'red',
+        fontSize: 'smaller'}
+
     return (
         <Container className='mt-5 pt-1'>
             <img src ={logo} width="200" height="200"></img>
@@ -673,6 +575,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                     <Form.Group controlId="nombre">
                         <Form.Label>Nombre del rodillo</Form.Label>
                         <Form.Control type="text" 
+                                    className="input-auto-width"
                                     name='nombre' 
                                     value={datos.nombre}
                                     onChange={handleInputChange} 
@@ -864,6 +767,42 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                             />
                             </Form.Group>
                         </Col>
+                    </Row>
+                    <Row>
+                        <Col>
+                            <Form.Group className="mb-3" controlId="espesores">
+                                <Form.Check type="checkbox" 
+                                            label="¿Rango de espesores?"
+                                            checked = {datos.espesores}
+                                            onChange = {handleInputespesores} />
+                            </Form.Group>
+                        </Col>
+                        {datos.espesores?
+                            <Col>
+                                <Form.Group controlId="espesor_menor">
+                                    <Form.Label>Rango espesor menor</Form.Label>
+                                    <Form.Control type="text" 
+                                                    name='espesor_menor'
+                                                    value={datos.espesor_menor}
+                                                    onChange={handleInputChange}
+                                                    placeholder='Rango espesores'>
+                                    </Form.Control>
+                                </Form.Group>
+                            </Col>
+                        : ''}
+                        {datos.espesores?
+                            <Col>
+                                <Form.Group controlId="espesor_mayor">
+                                    <Form.Label>Rango espesor mayor</Form.Label>
+                                    <Form.Control type="text" 
+                                                    name='espesor_mayor'
+                                                    value={datos.espesor_mayor}
+                                                    onChange={handleInputChange}
+                                                    placeholder='Rango espesores'>
+                                    </Form.Control>
+                                </Form.Group>
+                            </Col>
+                        :''}
                         {rodillo.length!==0?
                             <Col>
                                 <Form.Group controlId="tipo_plano" >
@@ -889,6 +828,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                     </Row>
                 </React.Fragment>
                 :''}
+                <h5 style={styles}>Si tenemos espesores, solo se permite el punto para poner el decimal, no guardará si ponemos comas</h5>
                 {rodillo.length!==0?
                     <Row style={{marginBottom:'10px'}}>
                         <Col style={{color:'red'}}>Debemos introducir el tipo de plano y actualizar, si queremos añadir un plano ya creado</Col>
@@ -897,82 +837,28 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
                 {rodillo?rodillo.length===0?<Button variant="outline-primary" onClick={GuardarRodillo}>Guardar</Button>:<Button variant="outline-primary" onClick={ActualizarRodillo}>Actualizar</Button>:''}
                 {rodillo.tipo_plano?parametros?parametros.length===0?<Button className={'mx-2'} onClick={añadirParametros}>Añadir Parámetros</Button>:<Button className={'mx-2'} onClick={añadirParametros}>Editar Parámetros</Button>:'':''}
-                {rodillo.length!==0?
-                    <React.Fragment> 
-                        <Form.Row>
-                        <Col>
-                            <Row>
-                                <Col>
-                                <h5 className="pb-3 pt-1 mt-2">Añadir Plano:</h5>
-                                </Col>
-                                <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
-                                        <PlusCircle className="plus mr-2" size={30} onClick={añadirPlano}/>
-                                </Col>
-                            </Row>
-                        </Col>
-                        </Form.Row>
-                    </React.Fragment>
-                :null}
             </Form>
-            {planos?planos.length!==0?
-                <Table striped bordered hover>
-                    <thead>
-                        <tr>
-                            <th>Revisiones</th>
-                            <th>Nombre</th>
-                            <th>Cod Antiguo</th>
-                            <th>Descripción</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        { planos && planos.map( plano => {
-                            return (
-                                <React.Fragment key={plano.id}>
-                                    <tr key={plano.id}>
-                                        <td>
-                                            <button type="button" className="btn btn-default" value={plano.id} name='prueba' onClick={event => {abrirConjuntos(plano.id)}}>--</button>
-                                        </td>
-                                        <td>{plano.nombre}</td>
-                                        <td>{plano.cod_antiguo}</td>
-                                        <td>{plano.descripcion}</td>
-                                        <td>
-                                            <Clipboard className="mr-3 pencil" onClick={event => {NuevaRevision(plano)}}/>   
-                                            <Trash className="mr-3 pencil" onClick={event => {eliminarPlano(plano)}}/>                                                      
-                                        </td>
-                                    </tr>
-                                    {filaSeleccionada === plano.id && (
-                                        <tr>
-                                            <td colSpan="4">{valor_conjuntos}</td>
-                                        </tr>
-                                        )}
-                                </React.Fragment>
-                            )})
-                        }
-                    </tbody>
-                </Table>
-            :"No hay planos relacionados con este rodillo":null}
-            
-            <PlanoForm show={show_plano}
-                           handleCloseParametros={cerrarPlano}
-                           rodillo_id={rodillo.id}
-                           rodillo={rodillo}
-                           plano_length = {planos?planos.length:0}/>
-            
-            <RodRevisionForm showRev={showRevision}
-                           plano_id={plano_id}
-                           plano_nombre={plano_nombre}
-                           setShowRevision={setShowRevision}
-                           show_revision={showRevision}
-                           tipo_plano_id={datos.tipo_plano}
-                           rodillo_id={rodillo.id}
-                           rodillo={rodillo}/>
+
+            <RodPlanosRodillo
+                    rodillo={rodillo}
+                    rodillo_nuevo={rodillo_nuevo}
+                    tipo_plano_id={datos.tipo_plano}/>
+
+            <RodInstanciasRodillo
+                    rodillo={rodillo}/>
+
+            <RodCrearInstancia show={show_instancia}
+                            setShow={setShowInstancia}
+                            rodillo_id={rodillo_nuevo.id}
+                            rodillo={rodillo_nuevo}
+                            handleClose={cerrarInstancia}
+                            instancias_length={1}/>
             
             <RodParametrosEstandar showPa={showParametros}
                            tipo_plano_id={datos.tipo_plano}
                            rodillo_id={rodillo.id}
                            rodillo_inf={rodillo}
-                           handleClose={cerrarParametros}
+                           handlerClose={cerrarParametros}
                            parametros_intro={parametros}/>
 
         </Container>
