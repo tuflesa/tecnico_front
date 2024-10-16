@@ -858,7 +858,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                            tipo_plano_id={datos.tipo_plano}
                            rodillo_id={rodillo.id}
                            rodillo_inf={rodillo}
-                           handlerClose={cerrarParametros}
+                           handleClose={cerrarParametros}
                            parametros_intro={parametros}/>
 
         </Container>

@@ -11,6 +11,7 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
     const [materiales, setMateriales] = useState([]);
     const [diametroFG, setDiametroFG] = useState([]);
     const [diametroEXT, setDiametroEXT] = useState([]);
+    const [diametroAncho, setDiametroAncho] = useState([]);
     const [activa_qs, setActivaQS] = useState(instancia_activa===true?false:true);
     const [obsoleta, setObsoleta] = useState(false);
 
@@ -46,6 +47,7 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
                     diametro_ext: diametroEXT,
                     activa_qs: activa_qs,
                     obsoleta: obsoleta,
+                    ancho: diametroAncho,
                 }, {
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
@@ -97,6 +99,10 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
         setDiametroEXT(event.target.value);
     }; 
 
+    const handleDiametroAnchoChange = (event) => {
+        setDiametroAncho(event.target.value);
+    }; 
+
     const handleInputactiva_qs = (event) => {
         if(instancia_activa){
             alert('Ya hay una instancia activa para QS, quitar antes de activar otra, gracias');
@@ -118,7 +124,7 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
                         <h5>Agregar instancia al rodillo</h5>
                     </Col>
                 </Row>
-                <Row>
+                {/* <Row>
                     <Col>
                         <Form.Group controlId="formSelectTrueFalse">
                             <Form.Label>¿La instancia del rodillo es especial?</Form.Label>
@@ -128,7 +134,7 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
                             </Form.Control>
                         </Form.Group>
                     </Col>
-                </Row>
+                </Row> */}
                 <Row>
                     <Col>
                         <Form.Group controlId="formSelectFromVariable">
@@ -166,6 +172,19 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
                                 placeholder="Introduce el Ø EXT"
                                 value={diametroEXT}
                                 onChange={handleDiametroEXTChange}
+                            />
+                        </Form.Group>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
+                        <Form.Group controlId="ancho">
+                            <Form.Label>Introduce el ancho</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Introduce el Ø ancho"
+                                value={diametroAncho}
+                                onChange={handleDiametroAnchoChange}
                             />
                         </Form.Group>
                     </Col>
