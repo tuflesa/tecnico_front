@@ -1,15 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Button, Modal, Container } from 'react-bootstrap';
+import { Row, Col, Form, Button, Container } from 'react-bootstrap';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
+import RodRectificacionAñadirInstancia from './rod_rectificacion_añadir_Instancia';
 
 const RodRectificacionForm = ({rectificacion, setRectificacion}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
     const [hoy] = useState(new Date());
+    const [hoy_10] = useState(() => {
+        const fecha = new Date(hoy); // Crea una copia de hoy
+        fecha.setDate(fecha.getDate() + 10); // Suma 10 días
+        return fecha; // Devuelve la nueva fecha
+    });
     const [zonas, setZonas] = useState([]);
     const [empresas, setEmpresas] = useState([]);
+    const [cambioCodigo, setCambioCodigo] = useState(false);
 
     const [datos, setDatos] = useState({
         id: rectificacion? rectificacion.id : '',
@@ -17,16 +24,28 @@ const RodRectificacionForm = ({rectificacion, setRectificacion}) => {
         zona: rectificacion? rectificacion.maquina.id: '',
         numero: rectificacion?rectificacion.numero:'',
         creado_por: rectificacion?rectificacion.creado_por.get_full_name:user['tec-user'].id,
-        fecha: rectificacion?rectificacion.fecha: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
+        fecha: rectificacion?rectificacion.fecha: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()===31?(hoy.getDate()-1):(hoy.getDate())).padStart(2,'0')),
         linea: false,
-    });
+        id_instancia:'',
+        activado: rectificacion?true:false,
+        fecha_estimada: rectificacion 
+            ? (function() {
+                const fechaRectificacion = new Date(rectificacion.fecha);
+                fechaRectificacion.setDate(fechaRectificacion.getDate() + 10); // Sumar 10 días
+                return fechaRectificacion.getFullYear() + '-' + 
+                    String(fechaRectificacion.getMonth() + 1).padStart(2, '0') + '-' + 
+                    String(fechaRectificacion.getDate()).padStart(2, '0');
+            })() 
+            : (hoy_10.getFullYear() + '-' + 
+            String(hoy_10.getMonth() + 1).padStart(2, '0') + '-' + 
+            String(hoy_10.getDate()).padStart(2, '0')),
 
-    const handleInputChange = (event) => {
-        setDatos({
-            ...datos,
-            [event.target.name] : event.target.value
-        })
-    }
+            });
+
+    const [numeroBar, setNumeroBar] = useState({
+        id_instancia: '',
+        idCod: '',
+    });
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
@@ -87,6 +106,7 @@ const RodRectificacionForm = ({rectificacion, setRectificacion}) => {
                 linea : true,
                 numero : res.data.numero,
                 id : res.data.id,
+                activado : true,
             })
         })
         .catch(err => { console.log(err);})
@@ -105,6 +125,40 @@ const RodRectificacionForm = ({rectificacion, setRectificacion}) => {
         .then( res => { 
         })
         .catch(err => { console.log(err);})
+    }
+
+    
+    const handleInputChange = (event) => {
+        setDatos({
+            ...datos,
+            [event.target.name] : event.target.value
+        })
+    }
+
+    const handleInputChange_estimada = (event) => {
+        setDatos({
+            ...datos,
+            [event.target.name] : event.target.value
+        })
+        setCambioCodigo(!cambioCodigo);
+    }
+
+    const handleInputChangeCodBarras = (event) => { 
+        setNumeroBar ({
+            ...numeroBar,
+            [event.target.name] : event.target.value                
+        });
+        if(numeroBar.id_instancia.length===12){
+            setDatos({
+                ...datos,
+                id_instancia: parseInt(numeroBar.id_instancia),
+            });
+            setNumeroBar({
+                ...numeroBar,
+                id_instancia: ''
+            });
+            setCambioCodigo(!cambioCodigo);
+        }
     }
 
     return(
@@ -143,7 +197,8 @@ const RodRectificacionForm = ({rectificacion, setRectificacion}) => {
                             <Form.Control as="select" 
                                             value={datos.empresa}
                                             name='empresa'
-                                            onChange={handleInputChange}>
+                                            onChange={handleInputChange}
+                                            disabled = {datos.activado}>
                                 <option key={0} value={''}>Todas</option>
                                 {empresas && empresas.map( empresa => {
                                     return (
@@ -161,7 +216,8 @@ const RodRectificacionForm = ({rectificacion, setRectificacion}) => {
                             <Form.Control as="select" 
                                             value={datos.zona}
                                             name='zona'
-                                            onChange={handleInputChange}>
+                                            onChange={handleInputChange}
+                                            disabled = {datos.activado}>
                                 <option key={0} value={''}>Todas</option>
                                 {zonas && zonas.map( zona => {
                                     return (
@@ -183,6 +239,16 @@ const RodRectificacionForm = ({rectificacion, setRectificacion}) => {
                                         placeholder="Fecha creación" />
                         </Form.Group>
                     </Col>
+                    <Col>
+                        <Form.Group controlId="fecha_estimada">
+                            <Form.Label>Fecha Estimada*</Form.Label>
+                            <Form.Control type="date" 
+                                        name='fecha_estimada' 
+                                        value={datos.fecha_estimada}
+                                        onChange={handleInputChange_estimada} 
+                                        placeholder="Fecha estimada" />
+                        </Form.Group>
+                    </Col>
                 </Row>
                 <Form.Row className="justify-content-center">
                     {datos.linea || rectificacion ? 
@@ -192,23 +258,31 @@ const RodRectificacionForm = ({rectificacion, setRectificacion}) => {
                     <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
                 </Form.Row> 
             </Form>
-            <Form>
-                {datos.linea ?                            
+            {datos.linea || rectificacion  ?  
+                <Form>                   
                     <Col>
                         <Form.Group>
                             <Form.Label className="mt-2">Codigo Barras (con lector) </Form.Label>
                             <Form.Control
                                         type="text"
-                                        id="prueba"
+                                        id="id_instancia"
                                         tabIndex={2}
-                                        name='id' 
-                                        //value={numeroBar.id}
-                                        onChange={handleInputChange}
+                                        name='id_instancia' 
+                                        value={numeroBar.id_instancia}
+                                        onChange={handleInputChangeCodBarras}
                                         placeholder="Codigo de barras" 
                                         autoFocus/>
                         </Form.Group>
-                    </Col>: null} 
-            </Form>
+                    </Col>
+                </Form>
+            : null}
+
+            <RodRectificacionAñadirInstancia
+                    datos={datos}
+                    rectificacion={rectificacion}
+                    cambioCodigo={cambioCodigo}
+                    numeroBar={numeroBar}
+                    setNumeroBar={setNumeroBar}/>
         </Container>
     );
 }
