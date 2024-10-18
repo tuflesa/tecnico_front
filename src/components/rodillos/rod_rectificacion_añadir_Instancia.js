@@ -10,6 +10,7 @@ const RodRectificacionAñadirInstancia = ({rectificacion, datos, cambioCodigo, n
     const [token] = useCookies(['tec-token']);
     const [lineasInstancias, setLineasInstancias] = useState([]);
     const [instancias_maquina, setInstanciaMaq] = useState([]);
+    const [sumar_ejes, setSumaEjes] = useState();
 
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/rodillos/instancia_listado/?rodillo__operacion__seccion__maquina__id=${datos.zona}`,{
@@ -35,6 +36,13 @@ const RodRectificacionAñadirInstancia = ({rectificacion, datos, cambioCodigo, n
         }
     }, [datos.fecha_estimada]);
 
+    useEffect(() => {
+        if(lineasInstancias){
+            const sumaNumEjes = lineasInstancias.reduce((total, lineasInstancias) => total + lineasInstancias.num_ejes, 0);
+            setSumaEjes(sumaNumEjes);
+        }
+    }, [lineasInstancias]);
+
     useEffect(()=>{
         datos.id_instancia && datos.fecha_estimada && axios.get(BACKEND_SERVER + `/api/rodillos/instancia_listado/${datos.id_instancia}`,{
             headers: {
@@ -59,6 +67,7 @@ const RodRectificacionAñadirInstancia = ({rectificacion, datos, cambioCodigo, n
                     diametro_ext: res.data.diametro_ext,
                     ancho: res.data.ancho,
                     fecha_estimada: datos.fecha_estimada,
+                    num_ejes: res.data.rodillo.num_ejes,
                 }]);
             }
         })
@@ -93,6 +102,7 @@ const RodRectificacionAñadirInstancia = ({rectificacion, datos, cambioCodigo, n
                 <Row>
                     <Col>
                         <h5 className="mb-3 mt-3">Lista de Instancias</h5>
+                        <h5 className="text-right">Numero total de rodillos a rectificar: {sumar_ejes}</h5>
                         <Table striped bordered hover>
                             <thead>
                                 <tr>
@@ -101,6 +111,7 @@ const RodRectificacionAñadirInstancia = ({rectificacion, datos, cambioCodigo, n
                                     <th>Diámetro Fondo</th>                                
                                     <th>Diámetro Exterior</th>
                                     <th>Ancho</th>
+                                    <th>Num Ejes</th>
                                     <th>Fecha estimada</th>
                                     <th>Acciones</th>
                                 </tr>
@@ -114,6 +125,7 @@ const RodRectificacionAñadirInstancia = ({rectificacion, datos, cambioCodigo, n
                                             <td>{linea.diametro}</td>
                                             <td>{linea.diametro_ext}</td> 
                                             <td>{linea.ancho}</td>  
+                                            <td>{linea.num_ejes}</td> 
                                             <td>
                                                 <Form.Group controlId="fecha_estimada">
                                                     <Form.Control type="date" 
@@ -133,6 +145,7 @@ const RodRectificacionAñadirInstancia = ({rectificacion, datos, cambioCodigo, n
                     </Col>                
                 </Row>
             :null}
+            <h5 className="text-right">Numero total de rodillos a rectificar: {sumar_ejes}</h5>
             <Form.Row className="justify-content-center">
                 {datos.linea || rectificacion ? 
                     <Button variant="danger" type="submit" className={'mx-2'} onClick={'GuardarLineas'}>Mandar Ficha</Button>:null                                

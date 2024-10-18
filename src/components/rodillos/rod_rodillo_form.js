@@ -54,6 +54,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         espesores: rodillo.id?rodillo.espesor:false,
         espesor_menor: rodillo.id?rodillo.espesor_1:0,
         espesor_mayor: rodillo.id?rodillo.espesor_2:0,
+        num_ejes: rodillo.id?rodillo.num_ejes:'', //numero de ejes según la operación y el tipo de rodillo
     });
 
     useEffect(() => { //si hay tipo de plano grabado, no podemos modificarlo, ya tenemos parametros dados de alta
@@ -89,6 +90,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             setDatos({
                 ...datos,
                 diametro: res.data[0].diametro,
+                num_ejes: res.data[0].numero_ejes,
             })
         })
         .catch( err => {
@@ -405,6 +407,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                     tipo: datos.tipo_rodillo,
                     tipo_plano: datos.tipo_plano,
                     diametro: datos.diametro,
+                    num_ejes: datos.num_ejes,
                     forma: parseInt(datos.forma),
                     descripcion_perfil: datos.descripcion_perfil,
                     dimension_perfil: datos.dimension_perfil,
@@ -442,6 +445,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             tipo: datos.tipo_rodillo,
             tipo_plano: datos.tipo_plano,
             diametro: datos.diametro,
+            num_ejes: datos.num_ejes,
             forma: parseInt(datos.forma),
             descripcion_perfil: datos.descripcion_perfil,
             dimension_perfil: datos.dimension_perfil,
@@ -763,6 +767,18 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                         value={datos.diametro}
                                         onChange={handleInputChange} 
                                         placeholder="Diametro"
+                                        disabled
+                            />
+                            </Form.Group>
+                        </Col>
+                        <Col>
+                            <Form.Group controlId="num_ejes">
+                            <Form.Label>Numeros de ejes</Form.Label>
+                            <Form.Control type="text" 
+                                        name='num_ejes' 
+                                        value={datos.num_ejes}
+                                        onChange={handleInputChange} 
+                                        placeholder="Numero de ejes"
                                         disabled
                             />
                             </Form.Group>

@@ -122,7 +122,7 @@ const RodListaRectificaciones = () => {
                                     <tr key={lista.id}>
                                         <td>{lista.id}</td>
                                         <td>{lista.numero}</td>
-                                        <td>{lista.empresa.nombre}</td>
+                                        <td>{lista.maquina.empresa.nombre}</td>
                                         <td>{lista.maquina.siglas}</td>
                                         <td>{lista.fecha}</td>
                                         <td>
