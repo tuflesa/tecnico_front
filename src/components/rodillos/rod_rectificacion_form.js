@@ -3,7 +3,8 @@ import { Row, Col, Form, Button, Container } from 'react-bootstrap';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
-import RodRectificacionAñadirInstancia from './rod_rectificacion_añadir_Instancia';
+import RodBuscarInstanciaCodBarras from './rod_buscar_instancia_codbarras';
+import BuscarInstancia from './rod_buscar_instancia';
 
 const RodRectificacionForm = ({rectificacion, setRectificacion}) => {
     const [token] = useCookies(['tec-token']);
@@ -17,6 +18,8 @@ const RodRectificacionForm = ({rectificacion, setRectificacion}) => {
     const [zonas, setZonas] = useState([]);
     const [empresas, setEmpresas] = useState([]);
     const [cambioCodigo, setCambioCodigo] = useState(false);
+    const [show_list_rodillos, setShowListRodillos] = useState(null);
+    const [lineasInstancia, setLineasInstancia] = useState([]);
 
     const [datos, setDatos] = useState({
         id: rectificacion? rectificacion.id : '',
@@ -161,6 +164,14 @@ const RodRectificacionForm = ({rectificacion, setRectificacion}) => {
         }
     }
 
+    const abrirListRodillos = () => {
+        setShowListRodillos(true);
+    }
+
+    const cerrarListRodillos = () => {
+        setShowListRodillos(false);
+    }
+
     return(
         <Container className='mt-5 pt-1'>
             <Form >
@@ -258,31 +269,38 @@ const RodRectificacionForm = ({rectificacion, setRectificacion}) => {
                     <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
                 </Form.Row> 
             </Form>
-            {datos.linea || rectificacion  ?  
-                <Form>                   
-                    <Col>
-                        <Form.Group>
-                            <Form.Label className="mt-2">Codigo Barras (con lector) </Form.Label>
-                            <Form.Control
-                                        type="text"
-                                        id="id_instancia"
-                                        tabIndex={2}
-                                        name='id_instancia' 
-                                        value={numeroBar.id_instancia}
-                                        onChange={handleInputChangeCodBarras}
-                                        placeholder="Codigo de barras" 
-                                        autoFocus/>
-                        </Form.Group>
-                    </Col>
+            {datos.linea || rectificacion  ?
+                <Form>     
+                    <Row>            
+                        <Col xs={6}>
+                            <Form.Group>
+                                <Form.Label className="mt-2">Codigo Barras (con lector) </Form.Label>
+                                <Form.Control
+                                            type="text"
+                                            id="id_instancia"
+                                            tabIndex={2}
+                                            name='id_instancia' 
+                                            value={numeroBar.id_instancia}
+                                            onChange={handleInputChangeCodBarras}
+                                            placeholder="Codigo de barras" 
+                                            autoFocus/>
+                            </Form.Group>
+                        </Col>
+                        <Col xs={6} className="d-flex flex-column">
+                            <Button variant="info" className={'mt-auto mx-2'} onClick={abrirListRodillos}>Buscar Rodillo</Button> 
+                        </Col>
+                    </Row>  
                 </Form>
             : null}
 
-            <RodRectificacionAñadirInstancia
+            <RodBuscarInstanciaCodBarras
                     datos={datos}
                     rectificacion={rectificacion}
-                    cambioCodigo={cambioCodigo}
                     numeroBar={numeroBar}
-                    setNumeroBar={setNumeroBar}/>
+                    setNumeroBar={setNumeroBar}
+                    cambioCodigo={cambioCodigo}
+                    show_list_rodillos={show_list_rodillos}
+                    cerrarListRodillos={cerrarListRodillos}/>
         </Container>
     );
 }

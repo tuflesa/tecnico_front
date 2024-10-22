@@ -4,9 +4,9 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import { Trash } from 'react-bootstrap-icons';
 import axios from 'axios';
-import { constants } from 'buffer';
+import BuscarInstancia from './rod_buscar_instancia';
 
-const RodRectificacionAñadirInstancia = ({rectificacion, datos, cambioCodigo, numeroBar, setNumeroBar}) => {
+const RodBuscarInstanciaCodBarras = ({cerrarListRodillos, show_list_rodillos, rectificacion, datos, cambioCodigo, numeroBar, setNumeroBar}) => {
     const [token] = useCookies(['tec-token']);
     const [lineasInstancias, setLineasInstancias] = useState([]);
     const [instancias_maquina, setInstanciaMaq] = useState([]);
@@ -151,7 +151,16 @@ const RodRectificacionAñadirInstancia = ({rectificacion, datos, cambioCodigo, n
                     <Button variant="danger" type="submit" className={'mx-2'} onClick={'GuardarLineas'}>Mandar Ficha</Button>:null                                
                 }
             </Form.Row>
+            {show_list_rodillos?
+                <BuscarInstancia    
+                        show={show_list_rodillos}
+                        datos_rectificacion={datos}
+                        rectificacion={rectificacion}
+                        cerrarList={cerrarListRodillos}
+                        setLineasInstancias={setLineasInstancias}
+                        lineasInstancias={lineasInstancias}/>
+            :null}
         </Container>
     );
 }
-export default RodRectificacionAñadirInstancia;
+export default RodBuscarInstanciaCodBarras;
