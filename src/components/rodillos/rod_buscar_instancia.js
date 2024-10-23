@@ -11,8 +11,6 @@ const BuscarInstancia = ({rectificacion, datos_rectificacion, show, cerrarList, 
     const [secciones, setSecciones] = useState([]);
     const [operaciones, setOperaciones] = useState([]);
     const [filtro, setFiltro] = useState(`?rodillo__operacion__seccion__maquina__id=${datos_rectificacion.zona}`);
-    const [selectedRows, setSelectedRows] = useState([]);
-    const [enviolistado, setEnvioListado] = useState(false);
     const [lineasInstancias_bot, setLineasInstancias_bot] = useState([]);
 
     const [datos, setDatos] = useState({
@@ -87,17 +85,7 @@ const BuscarInstancia = ({rectificacion, datos_rectificacion, show, cerrarList, 
     } 
 
     const handleCheckboxChange = (e, id) => {
-        const updatedInstancias = instancias_maquina.map(instancia => {
-            if (instancia.id === id) {
-                return {
-                    ...instancia,
-                    seleccionado: e.target.checked // Actualiza el campo 'seleccionado'
-                };
-            }
-            return instancia;
-        });
-        setInstanciaMaq(updatedInstancias); // Actualiza el estado global
-        datos_rectificacion.id_instancia && datos_rectificacion.fecha_estimada && axios.get(BACKEND_SERVER + `/api/rodillos/instancia_listado/${id}`,{
+        id && datos_rectificacion.fecha_estimada && axios.get(BACKEND_SERVER + `/api/rodillos/instancia_listado/${id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
                 }
@@ -123,12 +111,20 @@ const BuscarInstancia = ({rectificacion, datos_rectificacion, show, cerrarList, 
         .catch( err => {
             console.log(err);
         });
+        const updatedInstancias = instancias_maquina.map(instancia => {
+            if (instancia.id === id) {
+                return {
+                    ...instancia,
+                    seleccionado: e.target.checked // Actualiza el campo 'seleccionado'
+                };
+            }
+            return instancia;
+        });
+        setInstanciaMaq(updatedInstancias); // Actualiza el estado global
     };
 
     const cerrarListado = () => {
         setLineasInstancias_bot([]);
-        setSelectedRows([]);
-        setEnvioListado(false);
         cerrarList();
         setDatos({
             ...datos,
@@ -141,7 +137,6 @@ const BuscarInstancia = ({rectificacion, datos_rectificacion, show, cerrarList, 
     } 
 
     const añadirInstancia = () => {
-        setEnvioListado(true);
         setLineasInstancias(prevLineasInstancias => [
             ...prevLineasInstancias, // Mantener las instancias anteriores
             ...lineasInstancias_bot   // Añadir las nuevas instancias

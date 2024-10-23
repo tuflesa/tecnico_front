@@ -4,7 +4,6 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import RodBuscarInstanciaCodBarras from './rod_buscar_instancia_codbarras';
-import BuscarInstancia from './rod_buscar_instancia';
 
 const RodRectificacionForm = ({rectificacion, setRectificacion}) => {
     const [token] = useCookies(['tec-token']);
@@ -19,7 +18,6 @@ const RodRectificacionForm = ({rectificacion, setRectificacion}) => {
     const [empresas, setEmpresas] = useState([]);
     const [cambioCodigo, setCambioCodigo] = useState(false);
     const [show_list_rodillos, setShowListRodillos] = useState(null);
-    const [lineasInstancia, setLineasInstancia] = useState([]);
 
     const [datos, setDatos] = useState({
         id: rectificacion? rectificacion.id : '',
@@ -51,6 +49,21 @@ const RodRectificacionForm = ({rectificacion, setRectificacion}) => {
     });
 
     useEffect(() => {
+        const handleEnterKey = (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Anula el comportamiento por defecto del Enter (submit)
+            }
+        };
+    
+        document.addEventListener('keydown', handleEnterKey);
+    
+        return () => {
+            document.removeEventListener('keydown', handleEnterKey);
+        };
+    }, []);
+    
+
+    useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -63,6 +76,13 @@ const RodRectificacionForm = ({rectificacion, setRectificacion}) => {
             console.log(err);
         });
     }, [token]);
+
+    useEffect(() => {
+        setDatos({
+            ...datos,
+            id_instancia: '',
+        });
+    }, [cambioCodigo]);
 
     useEffect(() => {
         if (datos.empresa === '') {
@@ -151,7 +171,7 @@ const RodRectificacionForm = ({rectificacion, setRectificacion}) => {
             ...numeroBar,
             [event.target.name] : event.target.value                
         });
-        if(numeroBar.id_instancia.length===12){
+        if(numeroBar.id_instancia.length===11){
             setDatos({
                 ...datos,
                 id_instancia: parseInt(numeroBar.id_instancia),

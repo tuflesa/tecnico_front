@@ -53,7 +53,7 @@ const RodBuscarInstanciaCodBarras = ({cerrarListRodillos, show_list_rodillos, re
             const instanciaRepetido = lineasInstancias.filter(l => l.id === datos.id_instancia);
             const instancia_maquina = instancias_maquina.filter(l => l.id === datos.id_instancia);
             if(instancia_maquina.length===0){
-                alert('Esta instancia no corresponde a la máquina/zona señalada, gracias.')
+                alert('Esta instancia no corresponde a la máquina/zona señalada.')
                 setNumeroBar({
                     ...numeroBar,
                     id_instancia: ''
