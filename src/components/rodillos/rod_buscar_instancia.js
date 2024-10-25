@@ -5,7 +5,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import Modal from 'react-bootstrap/Modal'
 import { Button, Row, Form, Col, Table, Container } from 'react-bootstrap';
 
-const BuscarInstancia = ({rectificacion, datos_rectificacion, show, cerrarList, setLineasInstancias, lineasInstancias})=>{
+const BuscarInstancia = ({rectificacion, datos_rectificacion, show, cerrarList, setLineasInstancias, lineasInstancias, rectificados_pendientes})=>{
     const [token] = useCookies(['tec-token']);
     const [instancias_maquina, setInstanciaMaq] = useState([]);
     const [secciones, setSecciones] = useState([]);
@@ -85,7 +85,6 @@ const BuscarInstancia = ({rectificacion, datos_rectificacion, show, cerrarList, 
     } 
 
     const handleCheckboxChange = (e, id) => {
-        console.log('que vale la e: ', e);
         if(e.target.checked && id && datos_rectificacion.fecha_estimada){
             axios.get(BACKEND_SERVER + `/api/rodillos/instancia_listado/${id}`,{
                 headers: {
@@ -150,6 +149,10 @@ const BuscarInstancia = ({rectificacion, datos_rectificacion, show, cerrarList, 
         ]);
         cerrarList();
     } 
+
+    const estaRectificandose = (instancia) => {
+        return rectificados_pendientes.some(rectificado => rectificado.instancia.id === instancia.id);
+    }
    
     return(
         <Modal show={show} backdrop="static" keyboard={ false } animation={false} size="xl">
@@ -254,6 +257,7 @@ const BuscarInstancia = ({rectificacion, datos_rectificacion, show, cerrarList, 
                                                 <input 
                                                     type="checkbox" 
                                                     checked={instancia.seleccionado} // Ligado a 'seleccionado'
+                                                    disabled={estaRectificandose(instancia)}
                                                     onChange={(e) => handleCheckboxChange(e, instancia.id)} 
                                                 />
                                             </td>                                        

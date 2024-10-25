@@ -19,6 +19,7 @@ const RodRectificacionForm = ({rectificacion, setRectificacion}) => {
     const [cambioCodigo, setCambioCodigo] = useState(false);
     const [show_list_rodillos, setShowListRodillos] = useState(null);
     const [rectificacion_nueva, setRectificacion_nueva] = useState([]);
+    const [rectificados_pendientes, setRectificadosPendientes] = useState([]); //ya manadados a rectificar
 
     const [datos, setDatos] = useState({
         id: rectificacion? rectificacion.id : '',
@@ -30,6 +31,7 @@ const RodRectificacionForm = ({rectificacion, setRectificacion}) => {
         linea: false,
         id_instancia:'',
         activado: rectificacion?true:false,
+        finalizado: rectificacion?rectificacion.finalizado:false,
         fecha_estimada: rectificacion 
             ? (function() {
                 const fechaRectificacion = new Date(rectificacion.fecha);
@@ -62,6 +64,20 @@ const RodRectificacionForm = ({rectificacion, setRectificacion}) => {
             document.removeEventListener('keydown', handleEnterKey);
         };
     }, []);
+
+    useEffect(() => {
+        datos.zona && axios.get(BACKEND_SERVER + `/api/rodillos/listado_linea_rectificacion/?instancia__rodillo__operacion__seccion__maquina__id=${datos.zona}&finalizado=${false}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+                }
+        })
+        .then( res => {
+            setRectificadosPendientes(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [datos.zona]);
     
 
     useEffect(() => {
@@ -119,6 +135,7 @@ const RodRectificacionForm = ({rectificacion, setRectificacion}) => {
             fecha: datos.fecha,
             creado_por: datos.creado_por,
             maquina: datos.zona,
+            finalizado: false,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -142,6 +159,7 @@ const RodRectificacionForm = ({rectificacion, setRectificacion}) => {
         axios.patch(BACKEND_SERVER + `/api/rodillos/rectificacion_nueva/${datos.id}/`, {
             fecha: datos.fecha,
             maquina: datos.zona,
+            finalizado: datos.finalizado,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -192,6 +210,13 @@ const RodRectificacionForm = ({rectificacion, setRectificacion}) => {
 
     const cerrarListRodillos = () => {
         setShowListRodillos(false);
+    }
+
+    const handleFinalizado = (event) => {
+        setDatos({
+            ...datos,
+            finalizado : !datos.finalizado
+        })
     }
 
     return(
@@ -282,6 +307,15 @@ const RodRectificacionForm = ({rectificacion, setRectificacion}) => {
                                         placeholder="Fecha estimada" />
                         </Form.Group>
                     </Col>
+                    <Col className="d-flex align-items-end">
+                        <Form.Group className="mb-3" controlId="finalizado">
+                            <Form.Check type="checkbox" 
+                                        label="Finalizado"
+                                        checked = {datos.finalizado}
+                                        onChange = {handleFinalizado} 
+                                        disabled = {rectificacion?false:true}/>
+                        </Form.Group>
+                    </Col>
                 </Row>
                 <Form.Row className="justify-content-center">
                     {datos.linea || rectificacion ? 
@@ -321,7 +355,8 @@ const RodRectificacionForm = ({rectificacion, setRectificacion}) => {
                     setNumeroBar={setNumeroBar}
                     cambioCodigo={cambioCodigo}
                     show_list_rodillos={show_list_rodillos}
-                    cerrarListRodillos={cerrarListRodillos}/>
+                    cerrarListRodillos={cerrarListRodillos}
+                    rectificados_pendientes={rectificados_pendientes}/>
         </Container>
     );
 }

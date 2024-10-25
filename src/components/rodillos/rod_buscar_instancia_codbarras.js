@@ -6,7 +6,7 @@ import { Trash } from 'react-bootstrap-icons';
 import axios from 'axios';
 import BuscarInstancia from './rod_buscar_instancia';
 
-const RodBuscarInstanciaCodBarras = ({cerrarListRodillos, show_list_rodillos, rectificacion, datos, cambioCodigo, numeroBar, setNumeroBar}) => {
+const RodBuscarInstanciaCodBarras = ({cerrarListRodillos, show_list_rodillos, rectificacion, datos, cambioCodigo, numeroBar, setNumeroBar, rectificados_pendientes}) => {
     const [token] = useCookies(['tec-token']);
     const [lineasInstancias, setLineasInstancias] = useState([]);
     const [instancias_maquina, setInstanciaMaq] = useState([]);
@@ -51,10 +51,19 @@ const RodBuscarInstanciaCodBarras = ({cerrarListRodillos, show_list_rodillos, re
                 }
         })
         .then( res => {
+            const yarectificandose = rectificados_pendientes.filter(l => l.instancia.id === datos.id_instancia);
             const instanciaRepetido = lineasInstancias.filter(l => l.id === datos.id_instancia);
             const instancia_maquina = instancias_maquina.filter(l => l.id === datos.id_instancia);
+            
             if(instancia_maquina.length===0){
                 alert('Esta instancia no corresponde a la máquina/zona señalada.')
+                setNumeroBar({
+                    ...numeroBar,
+                    id_instancia: ''
+                });
+            }
+            else if(yarectificandose.length!==0){
+                alert('Esta instancia ya está en otro parte enviado a rectificar.')
                 setNumeroBar({
                     ...numeroBar,
                     id_instancia: ''
@@ -105,6 +114,7 @@ const RodBuscarInstanciaCodBarras = ({cerrarListRodillos, show_list_rodillos, re
     const GuardarLineas = () => {
         if(lineasInstancias.length===0){
             alert('Debes añadir algún rodillo');
+            return;
         }
         else{
             for(var x=0;x<lineasInstancias.length;x++){
@@ -121,6 +131,7 @@ const RodBuscarInstanciaCodBarras = ({cerrarListRodillos, show_list_rodillos, re
                     rectificado_por:'',
                     fecha_rectificado: null,
                     tipo_rectificado:'estandar',
+                    finalizado: false,
                 }, {
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
@@ -128,8 +139,6 @@ const RodBuscarInstanciaCodBarras = ({cerrarListRodillos, show_list_rodillos, re
                 })
                 .then( res => {  
                     if(x===lineasInstancias.length){
-                        console.log('vale x:',x);
-                        console.log('vale :',lineasInstancias.length);
                         axios.get(BACKEND_SERVER + `/api/rodillos/listado_linea_rectificacion/?rectificado=${rectificacion.id}`,{
                             headers: {
                                 'Authorization': `token ${token['tec-token']}`
@@ -250,7 +259,8 @@ const RodBuscarInstanciaCodBarras = ({cerrarListRodillos, show_list_rodillos, re
                         rectificacion={rectificacion}
                         cerrarList={cerrarListRodillos}
                         setLineasInstancias={setLineasInstancias}
-                        lineasInstancias={lineasInstancias}/>
+                        lineasInstancias={lineasInstancias}
+                        rectificados_pendientes={rectificados_pendientes}/>
             :null}
         </Container>
     );

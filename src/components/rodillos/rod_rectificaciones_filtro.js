@@ -14,6 +14,7 @@ const RodRectificacionesFiltro = ({actualizaFiltro}) => {
         empresa: user['tec-user'].perfil.empresa.id,
         maquina: '',
         creado_por: user['tec-user'].get_full_name,
+        finalizado: false,
     });
 
     const [empresas, setEmpresas] = useState(null);
@@ -61,7 +62,7 @@ const RodRectificacionesFiltro = ({actualizaFiltro}) => {
     }, [token, datos.empresa]);
    
     useEffect(()=>{
-        const filtro = `?empresa=${datos.empresa}&numero__icontains=${datos.numero}&maquina__id=${datos.maquina}&full_name=${datos.creado_por?datos.creado_por:user['tec-user'].get_full_name}`
+        const filtro = `?empresa=${datos.empresa}&numero__icontains=${datos.numero}&maquina__id=${datos.maquina}&full_name=${datos.creado_por?datos.creado_por:user['tec-user'].get_full_name}&finalizado=${datos.finalizado}`
         actualizaFiltro(filtro);
     },[datos]);
 
@@ -134,6 +135,19 @@ const RodRectificacionesFiltro = ({actualizaFiltro}) => {
                                         onChange={handleInputChange}                                        
                                         placeholder="Creado_por contiene"
                                         autoFocus/>
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="finalizado">
+                            <Form.Label>Finalizado</Form.Label>
+                            <Form.Control as="select" 
+                                            value={datos.finalizado}
+                                            name='finalizado'
+                                            onChange={handleInputChange}>
+                                <option key={0} value={''}>Todos</option>
+                                <option key={1} value={true}>Si</option>
+                                <option key={2} value={false}>No</option>
+                            </Form.Control>
                         </Form.Group>
                     </Col>
                 </Row>
