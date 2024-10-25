@@ -18,6 +18,7 @@ const RodRectificacionForm = ({rectificacion, setRectificacion}) => {
     const [empresas, setEmpresas] = useState([]);
     const [cambioCodigo, setCambioCodigo] = useState(false);
     const [show_list_rodillos, setShowListRodillos] = useState(null);
+    const [rectificacion_nueva, setRectificacion_nueva] = useState([]);
 
     const [datos, setDatos] = useState({
         id: rectificacion? rectificacion.id : '',
@@ -131,6 +132,7 @@ const RodRectificacionForm = ({rectificacion, setRectificacion}) => {
                 id : res.data.id,
                 activado : true,
             })
+            setRectificacion_nueva(res.data);
         })
         .catch(err => { console.log(err);})
     }
@@ -312,10 +314,9 @@ const RodRectificacionForm = ({rectificacion, setRectificacion}) => {
                     </Row>  
                 </Form>
             : null}
-
             <RodBuscarInstanciaCodBarras
                     datos={datos}
-                    rectificacion={rectificacion}
+                    rectificacion={rectificacion_nueva.length!==0?rectificacion_nueva:rectificacion}
                     numeroBar={numeroBar}
                     setNumeroBar={setNumeroBar}
                     cambioCodigo={cambioCodigo}

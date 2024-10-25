@@ -10,6 +10,7 @@ const RodBuscarInstanciaCodBarras = ({cerrarListRodillos, show_list_rodillos, re
     const [token] = useCookies(['tec-token']);
     const [lineasInstancias, setLineasInstancias] = useState([]);
     const [instancias_maquina, setInstanciaMaq] = useState([]);
+    const [lineas_rectificacion, setLineasRectificacion] = useState([]);
     const [sumar_ejes, setSumaEjes] = useState();
 
     useEffect(()=>{
@@ -86,17 +87,81 @@ const RodBuscarInstanciaCodBarras = ({cerrarListRodillos, show_list_rodillos, re
         );
     };
 
+    const handleInputChange_fecha_rectificado = (linea) => (event) => {
+        const { value } = event.target;
+        // Actualiza el estado de lineasInstancias
+        setLineasRectificacion((prev) =>
+            prev.map((instancia) =>
+                instancia.id === linea.id ? { ...instancia, fecha_estimada: value } : instancia
+            )
+        );
+    };
+
     const borrarLinea = (linea) => {
         const newLineas = lineasInstancias.filter( l => l.id !== linea.id);
         setLineasInstancias(newLineas);
     }
 
+    const GuardarLineas = () => {
+        if(lineasInstancias.length===0){
+            alert('Debes añadir algún rodillo');
+        }
+        else{
+            for(var x=0;x<lineasInstancias.length;x++){
+                axios.post(BACKEND_SERVER + `/api/rodillos/linea_rectificacion/`, { //Grabamos las instancias elegidas
+                    rectificado: rectificacion.id,
+                    instancia: lineasInstancias[x].id,
+                    fecha: lineasInstancias[x].fecha_estimada,
+                    diametro: lineasInstancias[x].diametro,
+                    diametro_ext: lineasInstancias[x].diametro_ext,
+                    ancho: lineasInstancias[x].ancho,
+                    nuevo_diametro:0,
+                    nuevo_diametro_ext:0,
+                    nuevo_ancho:0,
+                    rectificado_por:'',
+                    fecha_rectificado: null,
+                    tipo_rectificado:'estandar',
+                }, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                        }     
+                })
+                .then( res => {  
+                    if(x===lineasInstancias.length){
+                        console.log('vale x:',x);
+                        console.log('vale :',lineasInstancias.length);
+                        axios.get(BACKEND_SERVER + `/api/rodillos/listado_linea_rectificacion/?rectificado=${rectificacion.id}`,{
+                            headers: {
+                                'Authorization': `token ${token['tec-token']}`
+                                }
+                        })
+                        .then( res => {
+                            setLineasRectificacion(res.data);
+                            setLineasRectificacion([]);
+                            setLineasInstancias([]);
+                            window.location.href=`/rodillos/lista_rectificacion/}`;
+                        })
+                        .catch( err => {
+                            console.log(err);
+                        });
+                    }
+                    
+                })
+                .catch(err => { 
+                    console.error(err);
+                })
+            }
+        }
+        alert('FICHA DE RECTIFICADO ENVIADA CORRECTAMENTE.');
+    }
+
     return(
         <Container className='mt-5 pt-1'>
             <Form.Row className="justify-content-center">
-                {datos.linea || rectificacion ? 
-                    <Button variant="danger" type="submit" className={'mx-2'} onClick={'GuardarLineas'}>Mandar Ficha</Button>:null                                
-                }
+                {lineas_rectificacion.length!==0 ? 
+                    <Button variant="danger" type="submit" className={'mx-2'} onClick={'GuardarLineas'}>Actualizar Ficha</Button> :null}                               
+                {datos.linea || rectificacion ?
+                    <Button variant="danger" type="submit" className={'mx-2'} onClick={GuardarLineas}>Mandar Ficha</Button> :null} 
             </Form.Row>
             {datos.linea || rectificacion ?
                 <Row>
@@ -116,31 +181,58 @@ const RodBuscarInstanciaCodBarras = ({cerrarListRodillos, show_list_rodillos, re
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                {lineasInstancias.map(linea => {
-                                    return (
-                                        <tr>
-                                            <td>{linea.id}</td>
-                                            <td>{linea.nombre}</td>
-                                            <td>{linea.diametro}</td>
-                                            <td>{linea.diametro_ext}</td> 
-                                            <td>{linea.ancho}</td>  
-                                            <td>{linea.num_ejes}</td> 
-                                            <td>
-                                                <Form.Group controlId="fecha_estimada">
-                                                    <Form.Control type="date" 
-                                                                name='fecha_estimada' 
-                                                                value={linea.fecha_estimada}
-                                                                onChange={handleInputChange_fecha(linea)} 
-                                                                placeholder="Fecha estimada" />
-                                                </Form.Group>
-                                            </td>
-                                            <td>
-                                                <Trash className="mr-3 pencil"  onClick={event => {borrarLinea(linea)}} />
-                                            </td>                             
-                                        </tr>
-                                )})}
-                            </tbody>
+                            {lineas_rectificacion.length!==0?
+                                <tbody>
+                                    {lineas_rectificacion.map(linea => {
+                                        return (
+                                            <tr>
+                                                <td>{linea.id}</td>
+                                                <td>{linea.instancia.nombre}</td>
+                                                <td>{linea.diametro}</td>
+                                                <td>{linea.diametro_ext}</td> 
+                                                <td>{linea.ancho}</td>  
+                                                <td>{linea.instancia.rodillo.num_ejes}</td> 
+                                                <td>
+                                                    <Form.Group controlId="fecha_estimada">
+                                                        <Form.Control type="date" 
+                                                                    name='fecha_estimada' 
+                                                                    value={linea.fecha}
+                                                                    onChange={handleInputChange_fecha_rectificado(linea)} 
+                                                                    placeholder="Fecha estimada" />
+                                                    </Form.Group>
+                                                </td>
+                                                <td>
+                                                    <Trash className="mr-3 pencil"  onClick={event => {borrarLinea(linea)}} />
+                                                </td>                             
+                                            </tr>
+                                    )})}
+                                </tbody>:
+                                <tbody>
+                                    {lineasInstancias.map(linea => {
+                                        return (
+                                            <tr>
+                                                <td>{linea.id}</td>
+                                                <td>{linea.nombre}</td>
+                                                <td>{linea.diametro}</td>
+                                                <td>{linea.diametro_ext}</td> 
+                                                <td>{linea.ancho}</td>  
+                                                <td>{linea.num_ejes}</td> 
+                                                <td>
+                                                    <Form.Group controlId="fecha_estimada">
+                                                        <Form.Control type="date" 
+                                                                    name='fecha_estimada' 
+                                                                    value={linea.fecha_estimada}
+                                                                    onChange={handleInputChange_fecha(linea)} 
+                                                                    placeholder="Fecha estimada" />
+                                                    </Form.Group>
+                                                </td>
+                                                <td>
+                                                    <Trash className="mr-3 pencil"  onClick={event => {borrarLinea(linea)}} />
+                                                </td>                             
+                                            </tr>
+                                    )})}
+                                </tbody>
+                            }
                         </Table>
                     </Col>                
                 </Row>
@@ -148,7 +240,7 @@ const RodBuscarInstanciaCodBarras = ({cerrarListRodillos, show_list_rodillos, re
             <h5 className="text-right">Numero total de rodillos a rectificar: {sumar_ejes}</h5>
             <Form.Row className="justify-content-center">
                 {datos.linea || rectificacion ? 
-                    <Button variant="danger" type="submit" className={'mx-2'} onClick={'GuardarLineas'}>Mandar Ficha</Button>:null                                
+                    <Button variant="danger" type="submit" className={'mx-2'} onClick={GuardarLineas}>Mandar Ficha</Button>:null                                
                 }
             </Form.Row>
             {show_list_rodillos?

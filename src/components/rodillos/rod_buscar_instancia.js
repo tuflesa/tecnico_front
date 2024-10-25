@@ -85,32 +85,39 @@ const BuscarInstancia = ({rectificacion, datos_rectificacion, show, cerrarList, 
     } 
 
     const handleCheckboxChange = (e, id) => {
-        id && datos_rectificacion.fecha_estimada && axios.get(BACKEND_SERVER + `/api/rodillos/instancia_listado/${id}`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
+        console.log('que vale la e: ', e);
+        if(e.target.checked && id && datos_rectificacion.fecha_estimada){
+            axios.get(BACKEND_SERVER + `/api/rodillos/instancia_listado/${id}`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                    }
+            })
+            .then( res => {
+                const instanciaRepetido = lineasInstancias.filter(l => l.id === id)||lineasInstancias_bot.filter(l => l.id === id);
+                const instancia_maquina = instancias_maquina.filter(l => l.id === id);
+                if(instancia_maquina.length===0){
+                    alert('Esta instancia no corresponde a la máquina/zona señalada, gracias.')
                 }
-        })
-        .then( res => {
-            const instanciaRepetido = lineasInstancias.filter(l => l.id === id)||lineasInstancias_bot.filter(l => l.id === id);
-            const instancia_maquina = instancias_maquina.filter(l => l.id === id);
-            if(instancia_maquina.length===0){
-                alert('Esta instancia no corresponde a la máquina/zona señalada, gracias.')
-            }
-            else if(instanciaRepetido.length===0 && instancia_maquina.length!==0){
-                setLineasInstancias_bot([...lineasInstancias_bot, {
-                    id: res.data.id,
-                    nombre: res.data.nombre,
-                    diametro: res.data.diametro,
-                    diametro_ext: res.data.diametro_ext,
-                    ancho: res.data.ancho,
-                    fecha_estimada: datos_rectificacion.fecha_estimada,
-                    num_ejes: res.data.rodillo.num_ejes,
-                }]);
-            }
-        })
-        .catch( err => {
-            console.log(err);
-        });
+                else if(instanciaRepetido.length===0 && instancia_maquina.length!==0){
+                    setLineasInstancias_bot([...lineasInstancias_bot, {
+                        id: res.data.id,
+                        nombre: res.data.nombre,
+                        diametro: res.data.diametro,
+                        diametro_ext: res.data.diametro_ext,
+                        ancho: res.data.ancho,
+                        fecha_estimada: datos_rectificacion.fecha_estimada,
+                        num_ejes: res.data.rodillo.num_ejes,
+                    }]);
+                }
+            })
+            .catch( err => {
+                console.log(err);
+            });
+        }
+        else if (!e.target.checked) {
+            // Si está desmarcado, elimina el elemento de lineasInstancias_bot
+            setLineasInstancias_bot(lineasInstancias_bot.filter(linea => linea.id !== id));
+        }
         const updatedInstancias = instancias_maquina.map(instancia => {
             if (instancia.id === id) {
                 return {

@@ -31,8 +31,8 @@ const RodNavBar = () => {
                                     <NavDropdown.Item href="/rodillos/montaje">Montaje Bancadas</NavDropdown.Item> 
                                     </NavDropdown>
                                     <NavDropdown title="Rectificados" id="nuevos-dropdown" menualign="right">
-                                    <NavDropdown.Item href="/rodillos/nueva_rectificacion">Nueva Rectificación</NavDropdown.Item> 
-                                    <NavDropdown.Item href="/rodillos/lista_rectificacion">Lista Rectificaciones</NavDropdown.Item> 
+                                    <NavDropdown.Item href="/rodillos/nueva_rectificacion">Nuevo Rectificado</NavDropdown.Item> 
+                                    <NavDropdown.Item href="/rodillos/lista_rectificacion">Lista Rectificados</NavDropdown.Item> 
                                     </NavDropdown>
                                 </NavDropdown>
                             </Nav>

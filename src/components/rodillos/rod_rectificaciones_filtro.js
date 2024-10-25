@@ -13,6 +13,7 @@ const RodRectificacionesFiltro = ({actualizaFiltro}) => {
         numero: '',
         empresa: user['tec-user'].perfil.empresa.id,
         maquina: '',
+        creado_por: user['tec-user'].get_full_name,
     });
 
     const [empresas, setEmpresas] = useState(null);
@@ -60,7 +61,7 @@ const RodRectificacionesFiltro = ({actualizaFiltro}) => {
     }, [token, datos.empresa]);
    
     useEffect(()=>{
-        const filtro = `?empresa=${datos.empresa}&numero__icontains=${datos.numero}&maquina__id=${datos.maquina}`
+        const filtro = `?empresa=${datos.empresa}&numero__icontains=${datos.numero}&maquina__id=${datos.maquina}&full_name=${datos.creado_por?datos.creado_por:user['tec-user'].get_full_name}`
         actualizaFiltro(filtro);
     },[datos]);
 
@@ -122,6 +123,17 @@ const RodRectificacionesFiltro = ({actualizaFiltro}) => {
                                     )
                                 })}
                             </Form.Control>
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="creado_por">
+                            <Form.Label>Creado por</Form.Label>
+                            <Form.Control type="text" 
+                                        name='creado_por' 
+                                        value={datos.creado_por}
+                                        onChange={handleInputChange}                                        
+                                        placeholder="Creado_por contiene"
+                                        autoFocus/>
                         </Form.Group>
                     </Col>
                 </Row>
