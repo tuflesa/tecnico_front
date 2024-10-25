@@ -7,14 +7,12 @@ import { PencilFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import RodRectificacionesFiltro from './rod_rectificaciones_filtro';
 import logo from '../../assets/logo_bornay.svg';
-import RodBuscarInstanciaCodBarras from './rod_buscar_instancia_codbarras';
 
 const RodListaRectificaciones = () => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
     const [count, setCount] = useState(null);
     const [lista_rectificaciones, setListaRectificaciones] = useState(null);
-    const [lineas_rectificacion, setLineasRectificacion] = useState(null);
     const [filtro, setFiltro] = useState(`?empresa=${user['tec-user'].perfil.empresa.id}`);
     const [filtroPag, setFiltroPag] = useState(`&page=${1}`);
 
@@ -80,22 +78,6 @@ const RodListaRectificaciones = () => {
             })
         }
     } 
-
-    const modificar_rectificado = (id) => {
-        console.log('vamos al modificado');
-        axios.get(BACKEND_SERVER + `/api/rodillos/listado_linea_rectificacion/?rectificado=${id}`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-                }
-        })
-        .then( res => {
-            setLineasRectificacion(res.data);
-            console.log('ESTO ES EL RESULTADO DE LA BUSQUEDA: ', res.data);
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    }
 
     const actualizaFiltro = str => {
         datos.pagina=1;
@@ -170,10 +152,6 @@ const RodListaRectificaciones = () => {
                     </tbody>
                 </table>
             </Row>
-            {lineas_rectificacion?
-                <RodBuscarInstanciaCodBarras    
-                        listado_instancias={lineas_rectificacion}/>
-            :null}
         </Container>
     )
 }

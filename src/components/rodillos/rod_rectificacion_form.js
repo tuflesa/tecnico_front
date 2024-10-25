@@ -5,7 +5,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import RodBuscarInstanciaCodBarras from './rod_buscar_instancia_codbarras';
 
-const RodRectificacionForm = ({rectificacion, setRectificacion}) => {
+const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectificandose, setLineasRectificandose}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
     const [hoy] = useState(new Date());
@@ -77,7 +77,7 @@ const RodRectificacionForm = ({rectificacion, setRectificacion}) => {
         .catch( err => {
             console.log(err);
         });
-    }, [datos.zona]);
+    }, [token, datos.zona]);
     
 
     useEffect(() => {
@@ -322,7 +322,9 @@ const RodRectificacionForm = ({rectificacion, setRectificacion}) => {
                         <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button> :
                         <Button variant="info" type="submit" className={'mx-2'} onClick={GuardarRectificacion}>Guardar</Button>                                
                     }
-                    <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
+                    {lineas_rectificandose?
+                        <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>:null
+                    }
                 </Form.Row> 
             </Form>
             {datos.linea || rectificacion  ?
@@ -356,7 +358,8 @@ const RodRectificacionForm = ({rectificacion, setRectificacion}) => {
                     cambioCodigo={cambioCodigo}
                     show_list_rodillos={show_list_rodillos}
                     cerrarListRodillos={cerrarListRodillos}
-                    rectificados_pendientes={rectificados_pendientes}/>
+                    rectificados_pendientes={rectificados_pendientes}
+                    lineas_rectificandose={lineas_rectificandose}/>
         </Container>
     );
 }

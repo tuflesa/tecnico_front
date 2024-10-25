@@ -6,7 +6,7 @@ import { Trash } from 'react-bootstrap-icons';
 import axios from 'axios';
 import BuscarInstancia from './rod_buscar_instancia';
 
-const RodBuscarInstanciaCodBarras = ({cerrarListRodillos, show_list_rodillos, rectificacion, datos, cambioCodigo, numeroBar, setNumeroBar, rectificados_pendientes}) => {
+const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, cerrarListRodillos, show_list_rodillos, rectificacion, datos, cambioCodigo, numeroBar, setNumeroBar, rectificados_pendientes}) => {
     const [token] = useCookies(['tec-token']);
     const [lineasInstancias, setLineasInstancias] = useState([]);
     const [instancias_maquina, setInstanciaMaq] = useState([]);
@@ -14,7 +14,11 @@ const RodBuscarInstanciaCodBarras = ({cerrarListRodillos, show_list_rodillos, re
     const [sumar_ejes, setSumaEjes] = useState();
 
     useEffect(()=>{
-        axios.get(BACKEND_SERVER + `/api/rodillos/instancia_listado/?rodillo__operacion__seccion__maquina__id=${datos.zona}`,{
+        setLineasRectificacion(lineas_rectificandose);
+    }, [token, lineas_rectificandose]);
+
+    useEffect(()=>{
+        datos.zona && axios.get(BACKEND_SERVER + `/api/rodillos/instancia_listado/?rodillo__operacion__seccion__maquina__id=${datos.zona}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
                 }
@@ -35,6 +39,16 @@ const RodBuscarInstanciaCodBarras = ({cerrarListRodillos, show_list_rodillos, re
             }));
             setLineasInstancias(nuevasLineasInstancias);
         }
+        if (lineas_rectificacion && lineas_rectificacion.length > 0) {
+            const nuevasLineasRectificacion = lineas_rectificacion.map(linea => {
+                Actualizo_LineasRectificacion(linea, datos.fecha_estimada);
+                return {
+                    ...linea,
+                    fecha: datos.fecha_estimada
+                };
+            });
+            setLineasRectificacion(nuevasLineasRectificacion);
+        }
     }, [datos.fecha_estimada]);
 
     useEffect(() => {
@@ -42,7 +56,11 @@ const RodBuscarInstanciaCodBarras = ({cerrarListRodillos, show_list_rodillos, re
             const sumaNumEjes = lineasInstancias.reduce((total, lineasInstancias) => total + lineasInstancias.num_ejes, 0);
             setSumaEjes(sumaNumEjes);
         }
-    }, [lineasInstancias]);
+        if(lineas_rectificacion){
+            const sumaNumEjes = lineas_rectificacion.reduce((total, lineas_rectificacion) => total + lineas_rectificacion.instancia.rodillo.num_ejes, 0);
+            setSumaEjes(sumaNumEjes);
+        }
+    }, [lineasInstancias, lineas_rectificacion]);
 
     useEffect(()=>{
         datos.id_instancia && datos.fecha_estimada && axios.get(BACKEND_SERVER + `/api/rodillos/instancia_listado/${datos.id_instancia}`,{
@@ -96,15 +114,93 @@ const RodBuscarInstanciaCodBarras = ({cerrarListRodillos, show_list_rodillos, re
         );
     };
 
+    const Actualizo_LineasRectificacion = (linea, fecha) => {
+        axios.patch(BACKEND_SERVER + `/api/rodillos/linea_rectificacion/${linea.id}/`, { //Actualizamos fecha
+            fecha: fecha,
+        }, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+                }     
+        })
+        .then( res => {  
+            
+        })
+        .catch(err => { 
+            console.error(err);
+        })
+
+    };
+
     const handleInputChange_fecha_rectificado = (linea) => (event) => {
         const { value } = event.target;
         // Actualiza el estado de lineasInstancias
+        Actualizo_LineasRectificacion(linea,value);
         setLineasRectificacion((prev) =>
             prev.map((instancia) =>
-                instancia.id === linea.id ? { ...instancia, fecha_estimada: value } : instancia
+                instancia.id === linea.id ? { ...instancia, fecha: value } : instancia
             )
         );
     };
+
+    const borrarLinea_rectificado = (linea) => {
+        //desactiva el error que da el confirm
+        // eslint-disable-next-line no-restricted-globals
+        var borrar = confirm('Vas a eliminar un rodillo de la ficha de rectificado, ¿deseas continuar?');
+        if(borrar){
+            const newLineas = lineas_rectificacion.filter( l => l.id !== linea.id);
+            setLineasRectificacion(newLineas);
+            axios.delete(BACKEND_SERVER + `/api/rodillos/linea_rectificacion/${linea.id}/`, //eliminamos la linea
+            {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                    }     
+            })
+            .then( res => {  
+                if(newLineas.length===0){
+                    axios.delete(BACKEND_SERVER + `/api/rodillos/rectificacion_nueva/${rectificacion.id}/`, //si no quedan lineas, eliminamos la ficha
+                        {
+                            headers: {
+                                'Authorization': `token ${token['tec-token']}`
+                                }     
+                        })
+                        .then( res => {         
+                            alert('ELIMINADA TAMBIEN LA FICHA') 
+                            window.location.href=`/rodillos/lista_rectificacion/}`;
+
+                        })
+                        .catch(err => { 
+                            console.error(err);
+                        })
+                }
+                
+            })
+            .catch(err => { 
+                console.error(err);
+            })
+        }
+    }
+
+    const borrar_rectificado = (linea) => {
+        //desactiva el error que da el confirm
+        // eslint-disable-next-line no-restricted-globals
+        var borrar = confirm('Vas a eliminar la ficha de rectificado, ¿deseas continuar?');
+        if(borrar){
+            axios.delete(BACKEND_SERVER + `/api/rodillos/rectificacion_nueva/${rectificacion.id}/`,
+                {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                        }     
+                })
+                .then( res => {         
+                    alert('FICHA ELIMINADA') 
+                    window.location.href=`/rodillos/lista_rectificacion/}`;
+
+                })
+                .catch(err => { 
+                    console.error(err);
+                })
+        }
+    }
 
     const borrarLinea = (linea) => {
         const newLineas = lineasInstancias.filter( l => l.id !== linea.id);
@@ -167,10 +263,12 @@ const RodBuscarInstanciaCodBarras = ({cerrarListRodillos, show_list_rodillos, re
     return(
         <Container className='mt-5 pt-1'>
             <Form.Row className="justify-content-center">
-                {lineas_rectificacion.length!==0 ? 
-                    <Button variant="danger" type="submit" className={'mx-2'} onClick={'GuardarLineas'}>Actualizar Ficha</Button> :null}                               
-                {datos.linea || rectificacion ?
+                {lineas_rectificacion? 
+                    <Button variant="danger" type="submit" className={'mx-2'} onClick={'ActualizarLineas'}>Actualizar Ficha</Button> :null}                               
+                {datos.linea || rectificacion && lineas_rectificacion.length===0 ?
                     <Button variant="danger" type="submit" className={'mx-2'} onClick={GuardarLineas}>Mandar Ficha</Button> :null} 
+                {datos.linea || rectificacion && lineas_rectificacion.length===0 ?
+                    <Button variant="danger" type="submit" className={'mx-2'} onClick={borrar_rectificado}>Eliminar Ficha</Button> :null} 
             </Form.Row>
             {datos.linea || rectificacion ?
                 <Row>
@@ -190,11 +288,11 @@ const RodBuscarInstanciaCodBarras = ({cerrarListRodillos, show_list_rodillos, re
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
-                            {lineas_rectificacion.length!==0?
+                            {lineas_rectificacion?
                                 <tbody>
                                     {lineas_rectificacion.map(linea => {
                                         return (
-                                            <tr>
+                                            <tr key={linea.id}>
                                                 <td>{linea.id}</td>
                                                 <td>{linea.instancia.nombre}</td>
                                                 <td>{linea.diametro}</td>
@@ -211,12 +309,13 @@ const RodBuscarInstanciaCodBarras = ({cerrarListRodillos, show_list_rodillos, re
                                                     </Form.Group>
                                                 </td>
                                                 <td>
-                                                    <Trash className="mr-3 pencil"  onClick={event => {borrarLinea(linea)}} />
+                                                    <Trash className="mr-3 pencil"  onClick={event => {borrarLinea_rectificado(linea)}} />
                                                 </td>                             
                                             </tr>
                                     )})}
                                 </tbody>:
-                                <tbody>
+                                // si todavía no he guardado la ficha pinta a partir de aquí
+                                <tbody> 
                                     {lineasInstancias.map(linea => {
                                         return (
                                             <tr>
@@ -248,9 +347,10 @@ const RodBuscarInstanciaCodBarras = ({cerrarListRodillos, show_list_rodillos, re
             :null}
             <h5 className="text-right">Numero total de rodillos a rectificar: {sumar_ejes}</h5>
             <Form.Row className="justify-content-center">
-                {datos.linea || rectificacion ? 
-                    <Button variant="danger" type="submit" className={'mx-2'} onClick={GuardarLineas}>Mandar Ficha</Button>:null                                
-                }
+                {lineas_rectificacion? 
+                    <Button variant="danger" type="submit" className={'mx-2'} onClick={'ActualizarLineas'}>Actualizar Ficha</Button> :null}                               
+                {datos.linea || rectificacion && lineas_rectificacion.length===0 ?
+                    <Button variant="danger" type="submit" className={'mx-2'} onClick={GuardarLineas}>Mandar Ficha</Button> :null} 
             </Form.Row>
             {show_list_rodillos?
                 <BuscarInstancia    
