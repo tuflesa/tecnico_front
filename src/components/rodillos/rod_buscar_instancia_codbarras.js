@@ -263,11 +263,11 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, cerrarListRodillos,
     return(
         <Container className='mt-5 pt-1'>
             <Form.Row className="justify-content-center">
-                {lineas_rectificacion? 
-                    <Button variant="danger" type="submit" className={'mx-2'} onClick={'ActualizarLineas'}>Actualizar Ficha</Button> :null}                               
-                {datos.linea || rectificacion && lineas_rectificacion.length===0 ?
+                {/* {lineas_rectificacion? 
+                    <Button variant="danger" type="submit" className={'mx-2'} onClick={'ActualizarLineas'}>Actualizar Ficha</Button> :null}   */}                             
+                {datos.linea ?
                     <Button variant="danger" type="submit" className={'mx-2'} onClick={GuardarLineas}>Mandar Ficha</Button> :null} 
-                {datos.linea || rectificacion && lineas_rectificacion.length===0 ?
+                {datos.linea || rectificacion  ?
                     <Button variant="danger" type="submit" className={'mx-2'} onClick={borrar_rectificado}>Eliminar Ficha</Button> :null} 
             </Form.Row>
             {datos.linea || rectificacion ?
@@ -347,8 +347,8 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, cerrarListRodillos,
             :null}
             <h5 className="text-right">Numero total de rodillos a rectificar: {sumar_ejes}</h5>
             <Form.Row className="justify-content-center">
-                {lineas_rectificacion? 
-                    <Button variant="danger" type="submit" className={'mx-2'} onClick={'ActualizarLineas'}>Actualizar Ficha</Button> :null}                               
+                {/* {lineas_rectificacion? 
+                    <Button variant="danger" type="submit" className={'mx-2'} onClick={'ActualizarLineas'}>Actualizar Ficha</Button> :null} */}                               
                 {datos.linea || rectificacion && lineas_rectificacion.length===0 ?
                     <Button variant="danger" type="submit" className={'mx-2'} onClick={GuardarLineas}>Mandar Ficha</Button> :null} 
             </Form.Row>

@@ -32,14 +32,14 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
         id_instancia:'',
         activado: rectificacion?true:false,
         finalizado: rectificacion?rectificacion.finalizado:false,
-        fecha_estimada: rectificacion 
-            ? (function() {
+        fecha_estimada: rectificacion?rectificacion.fecha_estimada 
+            /* ? (function() {
                 const fechaRectificacion = new Date(rectificacion.fecha);
                 fechaRectificacion.setDate(fechaRectificacion.getDate() + 10); // Sumar 10 días
                 return fechaRectificacion.getFullYear() + '-' + 
                     String(fechaRectificacion.getMonth() + 1).padStart(2, '0') + '-' + 
                     String(fechaRectificacion.getDate()).padStart(2, '0');
-            })() 
+            })()  */
             : (hoy_10.getFullYear() + '-' + 
             String(hoy_10.getMonth() + 1).padStart(2, '0') + '-' + 
             String(hoy_10.getDate()).padStart(2, '0')),
@@ -136,6 +136,7 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
             creado_por: datos.creado_por,
             maquina: datos.zona,
             finalizado: false,
+            fecha_estimada: datos.fecha_estimada,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -158,7 +159,6 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
         event.preventDefault();
         axios.patch(BACKEND_SERVER + `/api/rodillos/rectificacion_nueva/${datos.id}/`, {
             fecha: datos.fecha,
-            maquina: datos.zona,
             finalizado: datos.finalizado,
         }, {
             headers: {
@@ -166,6 +166,7 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
               }     
         })
         .then( res => { 
+            alert('Ficha actualizada');
         })
         .catch(err => { console.log(err);})
     }
@@ -183,6 +184,19 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
             ...datos,
             [event.target.name] : event.target.value
         })
+        if(rectificacion){
+            axios.patch(BACKEND_SERVER + `/api/rodillos/rectificacion_nueva/${datos.id}/`, {
+                fecha_estimada: event.target.value,
+            }, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                  }     
+            })
+            .then( res => { 
+                alert('Ficha actualizada');
+            })
+            .catch(err => { console.log(err);})
+        }
         setCambioCodigo(!cambioCodigo);
     }
 

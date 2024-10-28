@@ -7,6 +7,7 @@ import { PencilFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import RodRectificacionesFiltro from './rod_rectificaciones_filtro';
 import logo from '../../assets/logo_bornay.svg';
+import {invertirFecha} from '../utilidades/funciones_fecha';
 
 const RodListaRectificaciones = () => {
     const [token] = useCookies(['tec-token']);
@@ -114,6 +115,7 @@ const RodListaRectificaciones = () => {
                                 <th>Creado por</th>
                                 <th>Máquina</th>
                                 <th>Fecha</th>
+                                <th>Fecha estimada</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -126,7 +128,8 @@ const RodListaRectificaciones = () => {
                                         <td>{lista.maquina.empresa.nombre}</td>
                                         <td>{lista.creado_por.get_full_name}</td>
                                         <td>{lista.maquina.siglas}</td>
-                                        <td>{lista.fecha}</td>
+                                        <td>{invertirFecha(String(lista.fecha))}</td>
+                                        <td>{invertirFecha(String(lista.fecha_estimada))}</td>
                                         {/* <td>
                                             <Link onClick={() => modificar_rectificado(lista.id)}><PencilFill className="mr-3 pencil"/></Link>
                                         </td> */}
