@@ -34,6 +34,7 @@ const PedidoForm = ({pedido, setPedido}) => {
     const [listMovimiento, setListMovimiento] = useState(null);
     const [listEntrega, setListEntrega] = useState(null);
     const [hoy] = useState(new Date());
+    const nextMonth = new Date(hoy.getFullYear(), hoy.getMonth() + 1, hoy.getDate());
     const [proveedores, setProveedores]= useState(null);
     const [verPdf, setVerPdf] = useState(false);
     const [verIngPdf, setVerIngPdf] = useState(false);
@@ -50,7 +51,10 @@ const PedidoForm = ({pedido, setPedido}) => {
         fecha_creacion: pedido ? pedido.fecha_creacion : (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
         fecha_entrega: pedido ? pedido.fecha_entrega : null,
         //fecha_prevista_entrega: pedido ? pedido.fecha_prevista_entrega : (hoy.getFullYear() + '-'+String(hoy.getMonth()+2).padStart(2,'0') + '-' + String(hoy.getDate()===31?(hoy.getDate()-1):(hoy.getDate())).padStart(2,'0')),
-        fecha_prevista_entrega: pedido ? pedido.fecha_prevista_entrega : `${hoy.getMonth() === 11 ? hoy.getFullYear() + 1 : hoy.getFullYear()}-${String(hoy.getMonth() === 11 ? 1 : hoy.getMonth() + 2).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`,
+        //fecha_prevista_entrega: pedido ? pedido.fecha_prevista_entrega : `${hoy.getMonth() === 11 ? hoy.getFullYear() + 1 : hoy.getFullYear()}-${String(hoy.getMonth() === 11 ? 1 : hoy.getMonth() + 2).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`,
+        fecha_prevista_entrega: pedido
+        ? pedido.fecha_prevista_entrega
+        : `${nextMonth.getFullYear()}-${String(nextMonth.getMonth() + 1).padStart(2, '0')}-${String(nextMonth.getDate()).padStart(2, '0')}`,
         finalizado: pedido ? pedido.finalizado : false,
         lineas_pedido: pedido ? pedido.lineas_pedido : null,
         lineas_adicionales: pedido ? pedido.lineas_adicionales : null,
