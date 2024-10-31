@@ -193,15 +193,16 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectifican
         }
     };
 
-    const handleInputChange_arch = (linea) => (event) => {
+    const handleInputChange_arch = (linea) => async (event) => {
         const { files } = event.target; // Obtén los archivos del input
         const selectedFile = files[0]; // Obtén el primer archivo seleccionado
-    
-        if (selectedFile) {
-            // Actualiza el estado de lineasInstancias
+
+        if (typeof selectedFile === 'string') {
+            const response = await fetch(selectedFile);
+            const blob = await response.blob();                       
             setLineasInstancias((prev) =>
                 prev.map((instancia) =>
-                    instancia.id === linea.id ? { ...instancia, archivo: selectedFile.name } : instancia // Guarda el nombre del archivo para mostrar
+                    instancia.id === linea.id ? { ...instancia, archivo: blob } : instancia // Guarda el nombre del archivo para mostrar
                 )
             );
         }
