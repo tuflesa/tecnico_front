@@ -62,7 +62,6 @@ const RodRectificacionesFiltro = ({actualizaFiltro}) => {
     }, [token, datos.empresa]);
    
     useEffect(()=>{
-        console.log(datos.creado_por);
         const filtro = `?empresa=${datos.empresa}&numero__icontains=${datos.numero}&maquina__id=${datos.maquina}&full_name=${datos.creado_por?datos.creado_por:''}&finalizado=${datos.finalizado}`
         actualizaFiltro(filtro);
     },[datos]);

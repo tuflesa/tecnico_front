@@ -6,7 +6,7 @@ import { Trash } from 'react-bootstrap-icons';
 import axios from 'axios';
 import BuscarInstancia from './rod_buscar_instancia';
 
-const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, cerrarListRodillos, show_list_rodillos, rectificacion, datos, cambioCodigo, numeroBar, setNumeroBar, rectificados_pendientes}) => {
+const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectificandose, cerrarListRodillos, show_list_rodillos, rectificacion, datos, cambioCodigo, numeroBar, setNumeroBar, rectificados_pendientes}) => {
     const [token] = useCookies(['tec-token']);
     const [lineasInstancias, setLineasInstancias] = useState([]);
     const [instancias_maquina, setInstanciaMaq] = useState([]);
@@ -96,6 +96,7 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, cerrarListRodillos,
                     ancho: res.data.ancho,
                     fecha_estimada: datos.fecha_estimada,
                     num_ejes: res.data.rodillo.num_ejes,
+                    archivo: res.data.archivo,
                 }]);
             }
         })
@@ -131,6 +132,41 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, cerrarListRodillos,
 
     };
 
+    const Actualizo_Archivo = (linea, select_Archivo) => {
+        const formData = new FormData();
+            if (select_Archivo) {
+                formData.append('archivo', select_Archivo); // Solo agrega si existe un archivo
+            }
+            axios.patch(BACKEND_SERVER + `/api/rodillos/instancia_nueva/${linea.instancia.id}/`, formData, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`,
+                    'Content-Type': 'multipart/form-data'
+                }
+            })
+            .then(r => {
+                alert('Archivo actualizado');
+                
+            })
+            .catch(err => { 
+                alert('NO SE ACTUALIZA LA LINEA INSTANCIA, REVISAR');
+                console.log(err);
+            });
+            axios.patch(BACKEND_SERVER + `/api/rodillos/linea_rectificacion/${linea.id}/`, formData, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`,
+                    'Content-Type': 'multipart/form-data'
+                }
+            })
+            .then(r => {
+                
+            })
+            .catch(err => { 
+                alert('NO SE ACTUALIZA ARCHIVO EN LA LINEA A RECTIFICAR, REVISAR');
+                console.log(err);
+            });
+
+    };
+
     const handleInputChange_fecha_rectificado = (linea) => (event) => {
         const { value } = event.target;
         // Actualiza el estado de lineasInstancias
@@ -140,6 +176,35 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, cerrarListRodillos,
                 instancia.id === linea.id ? { ...instancia, fecha: value } : instancia
             )
         );
+    };
+
+    const handleInputChange_archivo = (linea) => (event) => {
+        const { files } = event.target; // Obtén los archivos del input
+        const selectedFile = files[0]; // Obtén el primer archivo seleccionado
+    
+        if (selectedFile) {
+            // Actualiza el estado de lineasInstancias
+            Actualizo_Archivo(linea, selectedFile); // Enviar el archivo en vez del valor
+            setLineasRectificacion((prev) =>
+                prev.map((instancia) =>
+                    instancia.id === linea.id ? { ...instancia, archivo: selectedFile.name } : instancia // Guarda el nombre del archivo para mostrar
+                )
+            );
+        }
+    };
+
+    const handleInputChange_arch = (linea) => (event) => {
+        const { files } = event.target; // Obtén los archivos del input
+        const selectedFile = files[0]; // Obtén el primer archivo seleccionado
+    
+        if (selectedFile) {
+            // Actualiza el estado de lineasInstancias
+            setLineasInstancias((prev) =>
+                prev.map((instancia) =>
+                    instancia.id === linea.id ? { ...instancia, archivo: selectedFile.name } : instancia // Guarda el nombre del archivo para mostrar
+                )
+            );
+        }
     };
 
     const borrarLinea_rectificado = (linea) => {
@@ -207,64 +272,71 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, cerrarListRodillos,
         setLineasInstancias(newLineas);
     }
 
-    const GuardarLineas = () => {
+    const GuardarLineas = async () => {
         if(lineasInstancias.length===0){
             alert('Debes añadir algún rodillo');
             return;
         }
         else{
             for(var x=0;x<lineasInstancias.length;x++){
-                axios.post(BACKEND_SERVER + `/api/rodillos/linea_rectificacion/`, { //Grabamos las instancias elegidas
-                    rectificado: rectificacion.id,
-                    instancia: lineasInstancias[x].id,
-                    fecha: lineasInstancias[x].fecha_estimada,
-                    diametro: lineasInstancias[x].diametro,
-                    diametro_ext: lineasInstancias[x].diametro_ext,
-                    ancho: lineasInstancias[x].ancho,
-                    nuevo_diametro:0,
-                    nuevo_diametro_ext:0,
-                    nuevo_ancho:0,
-                    rectificado_por:'',
-                    fecha_rectificado: null,
-                    tipo_rectificado:'estandar',
-                    finalizado: false,
-                }, {
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`
-                        }     
-                })
-                .then( res => {  
-                    if(x===lineasInstancias.length){
-                        axios.get(BACKEND_SERVER + `/api/rodillos/listado_linea_rectificacion/?rectificado=${rectificacion.id}`,{
+                const formData = new FormData();
+                formData.append('rectificado', rectificacion.id);
+                formData.append('instancia', lineasInstancias[x].id);
+                formData.append('fecha', lineasInstancias[x].fecha_estimada);
+                formData.append('diametro', lineasInstancias[x].diametro);
+                formData.append('diametro_ext', lineasInstancias[x].diametro_ext);
+                formData.append('ancho', lineasInstancias[x].ancho);
+                formData.append('nuevo_diametro', 0);
+                formData.append('nuevo_diametro_ext', 0);
+                formData.append('nuevo_ancho', 0);
+                formData.append('rectificado_por', '');
+                formData.append('tipo_rectificado', 'estandar');
+                formData.append('finalizado', false);
+                if (typeof lineasInstancias[x].archivo === 'string') {
+                    try {
+                        const response = await fetch(lineasInstancias[x].archivo); // Espera el fetch
+                        const blob = await response.blob(); // Espera la conversión a blob para coger el archivo
+                        const filename = lineasInstancias[x].archivo.split('/').pop(); // obtenemos el nombre del archivo
+                        formData.append('archivo', blob, filename); // Añade el archivo al FormData
+                    } catch (error) {
+                        console.error(`Error al obtener el archivo para la instancia ${lineasInstancias[x].id}:`, error);
+                        continue; // Salta esta instancia si hay un error al obtener el archivo
+                    }
+                }
+    
+                try {
+                    const res = await axios.post(BACKEND_SERVER + `/api/rodillos/linea_rectificacion/`,formData, { //Grabamos las instancias elegidas
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                            }     
+                    });
+                //.then( res => {  
+                    alert('FICHA DE RECTIFICADO ENVIADA CORRECTAMENTE.');
+                    if(x===lineasInstancias.length-1){
+                        const response = await axios.get(BACKEND_SERVER + `/api/rodillos/listado_linea_rectificacion/?rectificado=${rectificacion.id}`,{
                             headers: {
                                 'Authorization': `token ${token['tec-token']}`
                                 }
-                        })
-                        .then( res => {
-                            setLineasRectificacion(res.data);
-                            setLineasRectificacion([]);
-                            setLineasInstancias([]);
-                            window.location.href=`/rodillos/lista_rectificacion/}`;
-                        })
-                        .catch( err => {
-                            console.log(err);
                         });
+                        //.then( res => {
+                        setLineasRectificacion(response.data);
+                        setLineasRectificacion([]);
+                        setLineasInstancias([]);
+                        window.location.href=`/rodillos/lista_rectificacion/}`;
+                        //})
                     }
                     
-                })
-                .catch(err => { 
+                }
+                catch(err){ 
                     console.error(err);
-                })
+                }
             }
         }
-        alert('FICHA DE RECTIFICADO ENVIADA CORRECTAMENTE.');
-    }
+    };
 
     return(
         <Container className='mt-5 pt-1'>
-            <Form.Row className="justify-content-center">
-                {/* {lineas_rectificacion? 
-                    <Button variant="danger" type="submit" className={'mx-2'} onClick={'ActualizarLineas'}>Actualizar Ficha</Button> :null}   */}                             
+            <Form.Row className="justify-content-center">                          
                 {datos.linea ?
                     <Button variant="danger" type="submit" className={'mx-2'} onClick={GuardarLineas}>Mandar Ficha</Button> :null} 
                 {datos.linea || rectificacion  ?
@@ -278,13 +350,14 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, cerrarListRodillos,
                         <Table striped bordered hover>
                             <thead>
                                 <tr>
-                                    <th>Id</th>
+                                    {/* <th>Id</th> */}
                                     <th>Nombre</th>
-                                    <th>Diámetro Fondo</th>                                
-                                    <th>Diámetro Exterior</th>
+                                    <th>Ø Fondo</th>                                
+                                    <th>Ø Exterior</th>
                                     <th>Ancho</th>
                                     <th>Num Ejes</th>
                                     <th>Fecha estimada</th>
+                                    <th>Archivo</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
@@ -292,8 +365,8 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, cerrarListRodillos,
                                 <tbody>
                                     {lineas_rectificacion.map(linea => {
                                         return (
-                                            <tr key={linea.id}>
-                                                <td>{linea.id}</td>
+                                            <tr key={linea.instancia.id}>
+                                                {/* <td>{linea.id}</td> */}
                                                 <td>{linea.instancia.nombre}</td>
                                                 <td>{linea.diametro}</td>
                                                 <td>{linea.diametro_ext}</td> 
@@ -309,6 +382,16 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, cerrarListRodillos,
                                                     </Form.Group>
                                                 </td>
                                                 <td>
+                                                    <Form.Group controlId="archivo">
+                                                        {linea.archivo && (
+                                                            <Form.Text className="text-muted d-block">
+                                                                Archivo guardado: <a href={linea.archivo} target="_blank" rel="noopener noreferrer">{linea.archivo}</a>
+                                                            </Form.Text>
+                                                        )}
+                                                        <Form.Control type="file" onChange={handleInputChange_archivo(linea)} />
+                                                    </Form.Group>
+                                                </td>
+                                                <td>
                                                     <Trash className="mr-3 pencil"  onClick={event => {borrarLinea_rectificado(linea)}} />
                                                 </td>                             
                                             </tr>
@@ -319,7 +402,7 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, cerrarListRodillos,
                                     {lineasInstancias.map(linea => {
                                         return (
                                             <tr>
-                                                <td>{linea.id}</td>
+                                                {/* <td>{linea.id}</td> */}
                                                 <td>{linea.nombre}</td>
                                                 <td>{linea.diametro}</td>
                                                 <td>{linea.diametro_ext}</td> 
@@ -335,6 +418,16 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, cerrarListRodillos,
                                                     </Form.Group>
                                                 </td>
                                                 <td>
+                                                    <Form.Group controlId="archivo">
+                                                        {linea.archivo && (
+                                                            <Form.Text className="text-muted d-block">
+                                                                Archivo guardado: <a href={linea.archivo} target="_blank" rel="noopener noreferrer">{linea.archivo}</a>
+                                                            </Form.Text>
+                                                        )}
+                                                        <Form.Control type="file" onChange={handleInputChange_arch(linea)} />
+                                                    </Form.Group>
+                                                </td>
+                                                <td>
                                                     <Trash className="mr-3 pencil"  onClick={event => {borrarLinea(linea)}} />
                                                 </td>                             
                                             </tr>
@@ -346,9 +439,7 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, cerrarListRodillos,
                 </Row>
             :null}
             <h5 className="text-right">Numero total de rodillos a rectificar: {sumar_ejes}</h5>
-            <Form.Row className="justify-content-center">
-                {/* {lineas_rectificacion? 
-                    <Button variant="danger" type="submit" className={'mx-2'} onClick={'ActualizarLineas'}>Actualizar Ficha</Button> :null} */}                               
+            <Form.Row className="justify-content-center">                              
                 {datos.linea || rectificacion && lineas_rectificacion.length===0 ?
                     <Button variant="danger" type="submit" className={'mx-2'} onClick={GuardarLineas}>Mandar Ficha</Button> :null} 
             </Form.Row>
@@ -360,7 +451,9 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, cerrarListRodillos,
                         cerrarList={cerrarListRodillos}
                         setLineasInstancias={setLineasInstancias}
                         lineasInstancias={lineasInstancias}
-                        rectificados_pendientes={rectificados_pendientes}/>
+                        rectificados_pendientes={rectificados_pendientes}
+                        lineas_rectificandose={lineas_rectificandose}
+                        setLineasRectificandose={setLineasRectificandose}/>
             :null}
         </Container>
     );

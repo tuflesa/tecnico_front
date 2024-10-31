@@ -373,7 +373,8 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
                     show_list_rodillos={show_list_rodillos}
                     cerrarListRodillos={cerrarListRodillos}
                     rectificados_pendientes={rectificados_pendientes}
-                    lineas_rectificandose={lineas_rectificandose}/>
+                    lineas_rectificandose={lineas_rectificandose}
+                    setLineasRectificandose={setLineasRectificandose}/>
         </Container>
     );
 }

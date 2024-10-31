@@ -221,8 +221,8 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, gr
                 var rodillo_tubo_madre = EjesRodillos[0].TuboMadreRod;
                 var rodillo_operacion = EjesRodillos[0].operacion;
                 var no_coincide=false;
-                var x=0;
-                for(x=0;x<EjesRodillos.length;x++){
+                //var x=0;
+                for(var x=0;x<EjesRodillos.length;x++){
                     if(EjesRodillos[x].TuboMadreRod!==rodillo_tubo_madre||EjesRodillos[x].operacion!==rodillo_operacion){
                         no_coincide=true;
                         alert('Los rodillos seleccionados no coinciden en su Ø o su operación');

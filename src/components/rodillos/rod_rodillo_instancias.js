@@ -61,6 +61,8 @@ const RodInstanciasRodillo = ({rodillo}) => {
 
     const CerrarModificarInstancia = () => {
         setShowModInstancia(false);
+        setModificarInstancia();
+        //window.location.reload();
     }
 
     return (
@@ -134,7 +136,8 @@ const RodInstanciasRodillo = ({rodillo}) => {
                                         instancia_activa={instancia_activa}
                                         instancia_activa_id={instancia_activa_id}
                                         rodillo_eje={rodillo.diametro}
-                                        rodillo={rodillo}/>
+                                        rodillo={rodillo}
+                                        handlerClose={CerrarModificarInstancia}/>
                 :''}
 
         </Container>

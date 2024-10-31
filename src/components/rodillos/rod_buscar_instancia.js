@@ -5,7 +5,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import Modal from 'react-bootstrap/Modal'
 import { Button, Row, Form, Col, Table, Container } from 'react-bootstrap';
 
-const BuscarInstancia = ({rectificacion, datos_rectificacion, show, cerrarList, setLineasInstancias, lineasInstancias, rectificados_pendientes})=>{
+const BuscarInstancia = ({lineas_rectificandose, rectificacion, datos_rectificacion, show, cerrarList, setLineasInstancias, lineasInstancias, rectificados_pendientes})=>{
     const [token] = useCookies(['tec-token']);
     const [instancias_maquina, setInstanciaMaq] = useState([]);
     const [secciones, setSecciones] = useState([]);
@@ -20,6 +20,12 @@ const BuscarInstancia = ({rectificacion, datos_rectificacion, show, cerrarList, 
         operacion: '',
         grupo: '',
     });
+
+    useEffect(()=>{
+        if(rectificacion && lineas_rectificandose){
+            setLineasInstancias_bot(lineas_rectificandose);
+        }
+    }, [token, lineas_rectificandose]);
 
     useEffect(()=>{
         const filtro1 = `?rodillo__operacion__seccion__maquina__id=${datos_rectificacion.zona}&rodillo__operacion__seccion__id=${datos.seccion}&rodillo__operacion__id=${datos.operacion}&nombre__icontains=${datos.grupo}&nombre__icontains=${datos.nombre}&id=${datos.id_instancia}`;
@@ -91,13 +97,13 @@ const BuscarInstancia = ({rectificacion, datos_rectificacion, show, cerrarList, 
                     'Authorization': `token ${token['tec-token']}`
                     }
             })
-            .then( res => {
+            .then( async (res) => {
                 const instanciaRepetido = lineasInstancias.filter(l => l.id === id)||lineasInstancias_bot.filter(l => l.id === id);
                 const instancia_maquina = instancias_maquina.filter(l => l.id === id);
                 if(instancia_maquina.length===0){
                     alert('Esta instancia no corresponde a la máquina/zona señalada, gracias.')
                 }
-                else if(instanciaRepetido.length===0 && instancia_maquina.length!==0){
+                else if(instanciaRepetido.length===0 && instancia_maquina.length!==0){ //si no está repetido y es de esta máquina...
                     setLineasInstancias_bot([...lineasInstancias_bot, {
                         id: res.data.id,
                         nombre: res.data.nombre,
@@ -106,7 +112,39 @@ const BuscarInstancia = ({rectificacion, datos_rectificacion, show, cerrarList, 
                         ancho: res.data.ancho,
                         fecha_estimada: datos_rectificacion.fecha_estimada,
                         num_ejes: res.data.rodillo.num_ejes,
+                        archivo: res.data.archivo,
                     }]);
+                    if(rectificacion && lineas_rectificandose){ // si estoy añadiendo pero ya tenía cabecera hecha
+                        const formData = new FormData();
+                        formData.append('rectificado', rectificacion.id);
+                        formData.append('instancia', res.data.id);
+                        formData.append('fecha', datos_rectificacion.fecha_estimada);
+                        formData.append('diametro', res.data.diametro);
+                        formData.append('diametro_ext', res.data.diametro_ext);
+                        formData.append('ancho', res.data.ancho);
+                        formData.append('nuevo_diametro', 0);
+                        formData.append('nuevo_diametro_ext', 0);
+                        formData.append('nuevo_ancho', 0);
+                        formData.append('rectificado_por', '');
+                        formData.append('tipo_rectificado', 'estandar');
+                        formData.append('finalizado', false);
+                        if (typeof res.data.archivo === 'string') {
+                            const response = await fetch(res.data.archivo);
+                            const blob = await response.blob();
+                            let filename = res.data.archivo.split('/').pop();                        
+                            formData.append('archivo', blob, filename); // Usa el nombre del archivo extraído o el nombre por defecto
+                        }
+                        axios.post(BACKEND_SERVER + `/api/rodillos/linea_rectificacion/`,formData, { //Grabamos la nueva instancia elegida
+                            headers: {
+                                'Authorization': `token ${token['tec-token']}`
+                                }     
+                        })
+                        .then( res => {  
+                        })
+                        .catch(err => { 
+                            console.error(err);
+                        })
+                    }
                 }
             })
             .catch( err => {
@@ -147,6 +185,9 @@ const BuscarInstancia = ({rectificacion, datos_rectificacion, show, cerrarList, 
             ...prevLineasInstancias, // Mantener las instancias anteriores
             ...lineasInstancias_bot   // Añadir las nuevas instancias
         ]);
+        if(rectificacion && lineas_rectificandose){
+            window.location.reload(); //actualizo página
+        }
         cerrarList();
     } 
 
@@ -177,16 +218,6 @@ const BuscarInstancia = ({rectificacion, datos_rectificacion, show, cerrarList, 
                                             )
                                         })}
                                     </Form.Control>
-                                </Form.Group>
-                            </Col>
-                            <Col>
-                                <Form.Group controlId="grupo">
-                                    <Form.Label>Grupo</Form.Label>
-                                    <Form.Control type="text" 
-                                                name='grupo' 
-                                                value={datos.grupo}
-                                                onChange={handleInputChange}                                        
-                                                placeholder="Grupo contiene"/>
                                 </Form.Group>
                             </Col>
                             <Col>

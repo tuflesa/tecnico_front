@@ -14,6 +14,7 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
     const [diametroAncho, setDiametroAncho] = useState([]);
     const [activa_qs, setActivaQS] = useState(instancia_activa===true?false:true);
     const [obsoleta, setObsoleta] = useState(false);
+    const [select_Archivo, setSelectArchivo] = useState('');
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + `/api/rodillos/materiales/`,{
@@ -38,17 +39,20 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
         }
         else if(parseFloat(diametroFG)<parseFloat(diametroEXT) && parseFloat(rodillo.diametro)<parseFloat(diametroFG) && parseFloat(rodillo.diametro)!==parseFloat(diametroFG)||parseFloat(diametroFG)===parseFloat(diametroEXT)){
             if (material) {
-                axios.post(BACKEND_SERVER + `/api/rodillos/instancia_nueva/`, {
-                    nombre: rodillo.nombre + '-' + instancias_length,
-                    rodillo: rodillo_id,
-                    material: material,
-                    especial: especial,
-                    diametro: diametroFG,
-                    diametro_ext: diametroEXT,
-                    activa_qs: activa_qs,
-                    obsoleta: obsoleta,
-                    ancho: diametroAncho,
-                }, {
+                const formData = new FormData();
+                formData.append('nombre', rodillo.nombre + '-' + instancias_length);
+                formData.append('rodillo', rodillo_id);
+                formData.append('material', material);
+                formData.append('especial', especial);
+                formData.append('diametro', diametroFG);
+                formData.append('diametro_ext', diametroEXT);
+                formData.append('activa_qs', activa_qs);
+                formData.append('obsoleta', obsoleta);
+                formData.append('ancho', diametroAncho);
+                if (select_Archivo) {
+                    formData.append('archivo', select_Archivo); // Solo agrega si existe un archivo
+                }
+                axios.post(BACKEND_SERVER + `/api/rodillos/instancia_nueva/`, formData, {
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
                     }     
@@ -114,6 +118,10 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
 
     const handleInputobsoleta = (event) => {
         setObsoleta(!obsoleta);
+    };
+
+    const handleInputChange_archivo = (event) => {
+        setSelectArchivo(event.target.files[0]);
     };
 
     return(
@@ -191,6 +199,14 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
                 </Row>
                 <Row>
                     <Col>
+                        <Form.Group controlId="archivo">
+                            <Form.Label>Selecciona un archivo</Form.Label>
+                            <Form.Control type="file" onChange={handleInputChange_archivo} />
+                        </Form.Group>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
                         <Form.Group className="mb-3" controlId="activa_qs">
                             <Form.Check type="checkbox" 
                                         label="¿Activa en QS?"
@@ -211,7 +227,7 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
                 </Row>
             </Modal.Body>
             <Modal.Footer>
-                <Button variant="warning" onClick={GuardarInstancia}>Aceptar</Button>
+                <Button variant="warning" onClick={GuardarInstancia}>Guardar</Button>
                 <Button variant="warning" onClick={cerrarInstancia}>Cancelar</Button>
             </Modal.Footer>
         </Modal>
