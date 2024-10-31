@@ -26,6 +26,10 @@ const RodTooling = () => {
     const [secciones, setSecciones] = useState(null);
     const [bancadas, setBancadas] = useState(null);
 
+    useEffect(() => {
+        console.log('ESTO VALE CONJUNTOS_COMPLETADOSCEL____:',conjuntos_completadosCel)
+    }, [conjuntos_completadosCel]);
+    
     useEffect(() => { //SEPARAR DATOS QUE ENTRAN A TRAVES DEL FILTRO
         const params = new URLSearchParams(filtro);
         const maquinaValue = params.get('maquina__id');
@@ -98,6 +102,7 @@ const RodTooling = () => {
 
     useEffect(() => {
         if (celdas) {
+            console.log('tengo celdas!!!!!!!!!!!!!!');
             const datosTablaCel = celdas.flatMap(e => { //en esta operación creamos un array con la información que queremos mostras
                 if (e) {
                     return e.flatMap(c => {
@@ -141,6 +146,7 @@ const RodTooling = () => {
 
     useEffect(() => { //Para tener todas las celdas juntos BD y CT
         if (conjuntosCel && conjuntosCelCT) {
+            console.log('tenemos conjuntosCel y CT');
             const unimos = conjuntosCel.concat(conjuntosCelCT);
             unimos.forEach((element, index) => {
                 element.numCelda = index + 1;
@@ -152,6 +158,7 @@ const RodTooling = () => {
     }, [conjuntosCel, conjuntosCelCT]);
 
     const cogerDatos = async (montajes) => {
+        console.log('estoy cogiendo datos');
         try {
             // Arrays para almacenar la información de todos los montajes
             let todasLasCeldas = [];
@@ -278,7 +285,7 @@ const RodTooling = () => {
                                                     {operaciones && operaciones.map((operacion) => ( //pinta flecha si es de otra formación
                                                         <React.Fragment key={operacion.id}>
                                                             {conjuntos_completadosCel?.filter(celda => 
-                                                                operacion.seccion.id === seccion.id &&
+                                                                celda.seccion === seccion.id &&
                                                                 celda.cel.conjunto.tubo_madre !== null &&
                                                                 celda.cel.bancada.tubo_madre !== celda.cel.conjunto.tubo_madre &&
                                                                 seccion.id === celda.seccion && operacion.id === celda.operacion &&
@@ -290,7 +297,7 @@ const RodTooling = () => {
                                                                     </Col>
                                                                 ))}
                                                             {conjuntos_completadosCel?.filter(celda => //pinta la celda
-                                                                operacion.seccion.id === seccion.id &&
+                                                                celda.seccion === seccion.id &&
                                                                 celda.cel.conjunto.tubo_madre !== null &&
                                                                 celda.cel.bancada.tubo_madre === celda.cel.conjunto.tubo_madre &&
                                                                 seccion.id === celda.seccion && operacion.id === celda.operacion &&
@@ -302,7 +309,7 @@ const RodTooling = () => {
                                                                     </Col>
                                                                 ))}
                                                         {conjuntos_completadosCel?.filter(celda => //pinta celda de C.T
-                                                            operacion.seccion.id === seccion.id &&
+                                                            celda.seccion === seccion.id &&
                                                             celda.cel.conjunto.tubo_madre === null &&
                                                             seccion.id === celda.seccion && operacion.id === celda.operacion &&
                                                             celda.cel.montajeId === montaje.id
