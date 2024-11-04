@@ -193,20 +193,25 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectifican
         }
     };
 
-    const handleInputChange_arch = (linea) => async (event) => {
-        const { files } = event.target; // Obtén los archivos del input
-        const selectedFile = files[0]; // Obtén el primer archivo seleccionado
-
-        if (typeof selectedFile === 'string') {
-            const response = await fetch(selectedFile);
-            const blob = await response.blob();                       
-            setLineasInstancias((prev) =>
-                prev.map((instancia) =>
-                    instancia.id === linea.id ? { ...instancia, archivo: blob } : instancia // Guarda el nombre del archivo para mostrar
-                )
-            );
+    const handleInputChange_arch = (linea, event) => {
+        try {
+            const { files } = event.target; // Obtén los archivos
+            const selectedFile = files[0]; // Obtén el primer archivo seleccionado
+        
+            if (selectedFile) {
+                // Actualiza el estado de lineasInstancias con el archivo seleccionado
+                setLineasInstancias((prev) =>
+                    prev.map((instancia) =>
+                        instancia.id === linea.id ? { ...instancia, archivo: selectedFile } : instancia
+                    )
+                );
+            }
+        } catch (error) {
+            console.error("Error en handleInputChange_arch:", error);
+            alert("Ocurrió un error al seleccionar el archivo. Revisa la consola para más detalles.");
         }
     };
+    
 
     const borrarLinea_rectificado = (linea) => {
         //desactiva el error que da el confirm
@@ -274,12 +279,11 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectifican
     }
 
     const GuardarLineas = async () => {
-        if(lineasInstancias.length===0){
+        if (lineasInstancias.length === 0) {
             alert('Debes añadir algún rodillo');
             return;
-        }
-        else{
-            for(var x=0;x<lineasInstancias.length;x++){
+        } else {
+            for (var x = 0; x < lineasInstancias.length; x++) {
                 const formData = new FormData();
                 formData.append('rectificado', rectificacion.id);
                 formData.append('instancia', lineasInstancias[x].id);
@@ -293,47 +297,41 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectifican
                 formData.append('rectificado_por', '');
                 formData.append('tipo_rectificado', 'estandar');
                 formData.append('finalizado', false);
-                if (typeof lineasInstancias[x].archivo === 'string') {
-                    try {
-                        const response = await fetch(lineasInstancias[x].archivo); // Espera el fetch
-                        const blob = await response.blob(); // Espera la conversión a blob para coger el archivo
-                        const filename = lineasInstancias[x].archivo.split('/').pop(); // obtenemos el nombre del archivo
-                        formData.append('archivo', blob, filename); // Añade el archivo al FormData
-                    } catch (error) {
-                        console.error(`Error al obtener el archivo para la instancia ${lineasInstancias[x].id}:`, error);
-                        continue; // Salta esta instancia si hay un error al obtener el archivo
-                    }
+    
+                // Comprobar si el archivo es una instancia de File
+                if (lineasInstancias[x].archivo instanceof File) {
+                    const filename = lineasInstancias[x].archivo.name; // Usa el nombre del archivo
+                    formData.append('archivo', lineasInstancias[x].archivo, filename);
                 }
     
                 try {
-                    const res = await axios.post(BACKEND_SERVER + `/api/rodillos/linea_rectificacion/`,formData, { //Grabamos las instancias elegidas
+                    const res = await axios.post(BACKEND_SERVER + `/api/rodillos/linea_rectificacion/`, formData, {
                         headers: {
                             'Authorization': `token ${token['tec-token']}`
-                            }     
+                        }
                     });
-                //.then( res => {  
-                    alert('FICHA DE RECTIFICADO ENVIADA CORRECTAMENTE.');
-                    if(x===lineasInstancias.length-1){
-                        const response = await axios.get(BACKEND_SERVER + `/api/rodillos/listado_linea_rectificacion/?rectificado=${rectificacion.id}`,{
+    
+                    if (x === lineasInstancias.length - 1) {
+                        const response = await axios.get(BACKEND_SERVER + `/api/rodillos/listado_linea_rectificacion/?rectificado=${rectificacion.id}`, {
                             headers: {
                                 'Authorization': `token ${token['tec-token']}`
-                                }
+                            }
                         });
-                        //.then( res => {
                         setLineasRectificacion(response.data);
-                        setLineasRectificacion([]);
-                        setLineasInstancias([]);
-                        window.location.href=`/rodillos/lista_rectificacion/}`;
-                        //})
+                        setLineasRectificacion([]); // Este estado parece redundante
+                        setLineasInstancias([]); // Reinicia el estado de instancias
+                        window.location.href = `/rodillos/lista_rectificacion/`;
                     }
-                    
-                }
-                catch(err){ 
-                    console.error(err);
+    
+                } catch (err) {
+                    console.error('Error al guardar la línea:', err);
+                    alert('Error al guardar la línea, por favor revisa la consola para más detalles.');
                 }
             }
+            alert('FICHA DE RECTIFICADO ENVIADA CORRECTAMENTE.');
         }
     };
+    
 
     return(
         <Container className='mt-5 pt-1'>
@@ -422,12 +420,23 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectifican
                                                     <Form.Group controlId="archivo">
                                                         {linea.archivo && (
                                                             <Form.Text className="text-muted d-block">
-                                                                Archivo guardado: <a href={linea.archivo} target="_blank" rel="noopener noreferrer">{linea.archivo}</a>
+                                                                Archivo guardado: 
+                                                                <a
+                                                                    href={typeof linea.archivo === 'string' ? linea.archivo : '#'}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                >
+                                                                    {typeof linea.archivo === 'string' ? linea.archivo : linea.archivo.name}
+                                                                </a>
                                                             </Form.Text>
                                                         )}
-                                                        <Form.Control type="file" onChange={handleInputChange_arch(linea)} />
+                                                        <Form.Control
+                                                            type="file"
+                                                            onChange={(event) => handleInputChange_arch(linea, event)}
+                                                        />
                                                     </Form.Group>
                                                 </td>
+
                                                 <td>
                                                     <Trash className="mr-3 pencil"  onClick={event => {borrarLinea(linea)}} />
                                                 </td>                             
