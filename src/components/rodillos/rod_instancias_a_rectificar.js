@@ -44,34 +44,6 @@ const RodInstanciasRectificar = () => {
         });
     }, [token, filtro]);
 
-    const Actualizo_LineasRectificacion = (linea, fecha) => {
-        axios.patch(BACKEND_SERVER + `/api/rodillos/listado_linea_rectificacion/${linea.id}/`, { //Actualizamos fecha
-            fecha: fecha,
-        }, {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-                }     
-        })
-        .then( res => {  
-            window.location.reload(); //actualizo página
-        })
-        .catch(err => { 
-            console.error(err);
-        })
-
-    };
-
-    const handleInputChange_fecha_rectificado = (linea) => (event) => {
-        const { value } = event.target;
-        // Actualiza el estado de lineasInstancias
-        Actualizo_LineasRectificacion(linea,value);
-        setLineasRectificacion((prev) =>
-            prev.map((instancia) =>
-                instancia.id === linea.id ? { ...instancia, fecha: value } : instancia
-            )
-        );
-    };
-
     useEffect(()=>{
         const filtro = `?finalizado=${datos.finalizado}&instancia__rodillo__operacion__seccion__maquina__empresa__id=${datos.empresa}&instancia__rodillo__operacion__seccion__maquina__id=${datos.maquina}&instancia__rodillo__operacion__seccion__id=${datos.seccion}&instancia__rodillo__operacion__id=${datos.operacion}&instancia__nombre__icontains=${datos.nombre}&full_name=${datos.rectificado_por?datos.rectificado_por:''}`
         actualizaFiltro(filtro);
@@ -174,6 +146,34 @@ const RodInstanciasRectificar = () => {
         }
     }, [token, datos.seccion]);
 
+    const Actualizo_LineasRectificacion = (linea, fecha) => {
+        axios.patch(BACKEND_SERVER + `/api/rodillos/listado_linea_rectificacion/${linea.id}/`, { //Actualizamos fecha
+            fecha: fecha,
+        }, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+                }     
+        })
+        .then( res => {  
+            window.location.reload(); //actualizo página
+        })
+        .catch(err => { 
+            console.error(err);
+        })
+
+    };
+
+    const handleInputChange_fecha_rectificado = (linea) => (event) => {
+        const { value } = event.target;
+        // Actualiza el estado de lineasInstancias
+        Actualizo_LineasRectificacion(linea,value);
+        setLineasRectificacion((prev) =>
+            prev.map((instancia) =>
+                instancia.id === linea.id ? { ...instancia, fecha: value } : instancia
+            )
+        );
+    };
+
     const handleInputChange = (event) => {
         setDatos({
             ...datos,
@@ -190,14 +190,76 @@ const RodInstanciasRectificar = () => {
         }));
     };
     
-    const handleInputChange_archivo = (event) => {
+    /* const handleInputChange_archivo = (event) => {
         const file = event.target.files[0];
         if (file) {
             setSelectedFile(file.name);
         } else {
             setSelectedFile('');
         }
+    }; */
+    const handleInputChange_archivo = (linea) => async (event) => {
+        const { files } = event.target;
+        const selectedFile = files[0];
+    
+        if (selectedFile) {
+            // Actualiza la base de datos y espera la URL completa
+            const archivoUrl = await Actualizo_Archivo(linea, selectedFile); // Recibe la URL completa
+    
+            if (archivoUrl) {
+                setLineasRectificacion((prev) =>
+                    prev.map((instancia) =>
+                        instancia.id === linea.id ? { ...instancia, archivo: archivoUrl } : instancia // Guarda la URL completa en lugar del nombre
+                    )
+                );
+            }
+        }
     };
+    
+
+    const Actualizo_Archivo = async (linea, select_Archivo) => {
+        const formData = new FormData();
+        formData.append('archivo', select_Archivo);
+    
+        try {
+            // Actualiza en instancia_nueva
+            const responseInstancia = await axios.patch(
+                `${BACKEND_SERVER}/api/rodillos/instancia_nueva/${linea.instancia.id}/`,
+                formData,
+                {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`,
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }
+            );
+    
+            // Luego, actualiza en linea_rectificacion
+            const responseLinea = await axios.patch(
+                `${BACKEND_SERVER}/api/rodillos/linea_rectificacion/${linea.id}/`,
+                formData,
+                {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`,
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }
+            );
+    
+            // Verifica si ambas respuestas contienen la URL correcta
+            const archivoUrl = responseInstancia.data.archivo || responseLinea.data.archivo;
+            
+            alert('Archivo actualizado correctamente');
+            
+            return archivoUrl; // Devuelve la URL completa para actualizar el estado en el frontend
+        } catch (err) {
+            alert('Error al actualizar el archivo, revisa los logs del servidor');
+            console.error(err);
+        }
+    
+        return null; // Retorna null si hubo error
+    };   
+    
 
     return(
         <Container className='mt-5 pt-1'>
@@ -336,6 +398,7 @@ const RodInstanciasRectificar = () => {
                         </thead>
                         <tbody>
                             {lineas_rectificacion.map(linea => {
+                                {console.log('linea de x: ',linea)}
                                 return (
                                     <tr key={linea.id}>
                                         <td>{linea.instancia.id}</td>
@@ -359,28 +422,21 @@ const RodInstanciasRectificar = () => {
                                             </Form.Group>
                                         </td>
                                         {datos.finalizado !== false && <td style={{ backgroundColor: '#DBFAC9' }}>{linea.fecha_rectificado?invertirFecha(String(linea.fecha_rectificado)):''}</td>} 
-                                        <td>{linea.archivo}</td> 
+                                        {/* <td>
+                                            <Form.Text className="text-muted d-block">
+                                                Archivo guardado: <a href={linea.archivo} target="_blank" rel="noopener noreferrer">{linea.archivo}</a>
+                                            </Form.Text>
+                                        </td> */}
                                         <td>
-                                            <Col>
-                                                <form encType='multipart/form-data'>
-                                                    <Form.Group controlId="archivo">
-                                                        <input 
-                                                            type="file" 
-                                                            name='archivo' 
-                                                            onChange={handleInputChange_archivo} 
-                                                            style={{ display: 'none' }} 
-                                                            id="file-upload" 
-                                                        />
-                                                        <Form.Control 
-                                                            as="button" 
-                                                            onClick={() => document.getElementById('file-upload').click()}
-                                                        >
-                                                            {selectedFile || 'Selec archivo'}
-                                                        </Form.Control>
-                                                    </Form.Group>
-                                                </form>
-                                            </Col>
-                                        </td>                             
+                                            <Form.Group controlId="archivo">
+                                                {linea.archivo && (
+                                                    <Form.Text className="text-muted d-block">
+                                                        Archivo guardado: <a href={linea.archivo} target="_blank" rel="noopener noreferrer">{linea.archivo}</a>
+                                                    </Form.Text>
+                                                )}
+                                                <Form.Control type="file" onChange={handleInputChange_archivo(linea)} />
+                                            </Form.Group>
+                                        </td>                            
                                     </tr>
                             )})}
                         </tbody>

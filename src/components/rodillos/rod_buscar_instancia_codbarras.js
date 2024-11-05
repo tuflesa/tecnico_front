@@ -132,40 +132,48 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectifican
 
     };
 
-    const Actualizo_Archivo = (linea, select_Archivo) => {
+    const Actualizo_Archivo = async (linea, select_Archivo) => {
         const formData = new FormData();
-            if (select_Archivo) {
-                formData.append('archivo', select_Archivo); // Solo agrega si existe un archivo
-            }
-            axios.patch(BACKEND_SERVER + `/api/rodillos/instancia_nueva/${linea.instancia.id}/`, formData, {
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`,
-                    'Content-Type': 'multipart/form-data'
+        formData.append('archivo', select_Archivo);
+    
+        try {
+            // Actualiza en instancia_nueva
+            const responseInstancia = await axios.patch(
+                `${BACKEND_SERVER}/api/rodillos/instancia_nueva/${linea.instancia.id}/`,
+                formData,
+                {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`,
+                        'Content-Type': 'multipart/form-data'
+                    }
                 }
-            })
-            .then(r => {
-                alert('Archivo actualizado');
-                
-            })
-            .catch(err => { 
-                alert('NO SE ACTUALIZA LA LINEA INSTANCIA, REVISAR');
-                console.log(err);
-            });
-            axios.patch(BACKEND_SERVER + `/api/rodillos/linea_rectificacion/${linea.id}/`, formData, {
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`,
-                    'Content-Type': 'multipart/form-data'
+            );
+    
+            // Luego, actualiza en linea_rectificacion
+            const responseLinea = await axios.patch(
+                `${BACKEND_SERVER}/api/rodillos/linea_rectificacion/${linea.id}/`,
+                formData,
+                {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`,
+                        'Content-Type': 'multipart/form-data'
+                    }
                 }
-            })
-            .then(r => {
-                
-            })
-            .catch(err => { 
-                alert('NO SE ACTUALIZA ARCHIVO EN LA LINEA A RECTIFICAR, REVISAR');
-                console.log(err);
-            });
-
-    };
+            );
+    
+            // Verifica si ambas respuestas contienen la URL correcta
+            const archivoUrl = responseInstancia.data.archivo || responseLinea.data.archivo;
+            
+            alert('Archivo actualizado correctamente');
+            
+            return archivoUrl; // Devuelve la URL completa para actualizar el estado en el frontend
+        } catch (err) {
+            alert('Error al actualizar el archivo, revisa los logs del servidor');
+            console.error(err);
+        }
+    
+        return null; // Retorna null si hubo error
+    };        
 
     const handleInputChange_fecha_rectificado = (linea) => (event) => {
         const { value } = event.target;
@@ -178,20 +186,24 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectifican
         );
     };
 
-    const handleInputChange_archivo = (linea) => (event) => {
-        const { files } = event.target; // Obtén los archivos del input
-        const selectedFile = files[0]; // Obtén el primer archivo seleccionado
+    const handleInputChange_archivo = (linea) => async (event) => {
+        const { files } = event.target;
+        const selectedFile = files[0];
     
         if (selectedFile) {
-            // Actualiza el estado de lineasInstancias
-            Actualizo_Archivo(linea, selectedFile); // Enviar el archivo en vez del valor
-            setLineasRectificacion((prev) =>
-                prev.map((instancia) =>
-                    instancia.id === linea.id ? { ...instancia, archivo: selectedFile.name } : instancia // Guarda el nombre del archivo para mostrar
-                )
-            );
+            // Actualiza la base de datos y espera la URL completa
+            const archivoUrl = await Actualizo_Archivo(linea, selectedFile); // Recibe la URL completa
+    
+            if (archivoUrl) {
+                setLineasRectificacion((prev) =>
+                    prev.map((instancia) =>
+                        instancia.id === linea.id ? { ...instancia, archivo: archivoUrl } : instancia // Guarda la URL completa en lugar del nombre
+                    )
+                );
+            }
         }
     };
+    
 
     const handleInputChange_arch = (linea, event) => {
         try {
