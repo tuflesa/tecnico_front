@@ -189,15 +189,7 @@ const RodInstanciasRectificar = () => {
             [name]: name === 'finalizado' ? (value === '' ? undefined : value === 'true') : value  // Convert value to boolean or undefined for finalizado
         }));
     };
-    
-    /* const handleInputChange_archivo = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            setSelectedFile(file.name);
-        } else {
-            setSelectedFile('');
-        }
-    }; */
+
     const handleInputChange_archivo = (linea) => async (event) => {
         const { files } = event.target;
         const selectedFile = files[0];
@@ -434,7 +426,8 @@ const RodInstanciasRectificar = () => {
                                                         Archivo guardado: <a href={linea.archivo} target="_blank" rel="noopener noreferrer">{linea.archivo}</a>
                                                     </Form.Text>
                                                 )}
-                                                <Form.Control type="file" onChange={handleInputChange_archivo(linea)} />
+                                                <Form.Control type="file" onChange={handleInputChange_archivo(linea)}
+                                                disabled={linea.finalizado===true?true:false} />
                                             </Form.Group>
                                         </td>                            
                                     </tr>
