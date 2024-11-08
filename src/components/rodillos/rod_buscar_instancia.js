@@ -112,7 +112,8 @@ const BuscarInstancia = ({lineas_rectificandose, rectificacion, datos_rectificac
                         ancho: res.data.ancho,
                         fecha_estimada: datos_rectificacion.fecha_estimada,
                         num_ejes: res.data.rodillo.num_ejes,
-                        archivo: res.data.archivo,
+                        archivo: res.data.rodillo.archivo,
+                        rodillo_id: res.data.rodillo.id,
                     }]);
                     if(rectificacion && lineas_rectificandose){ // si estoy añadiendo pero ya tenía cabecera hecha
                         const formData = new FormData();
@@ -128,10 +129,10 @@ const BuscarInstancia = ({lineas_rectificandose, rectificacion, datos_rectificac
                         formData.append('rectificado_por', '');
                         formData.append('tipo_rectificado', 'estandar');
                         formData.append('finalizado', false);
-                        if (typeof res.data.archivo === 'string') {
-                            const response = await fetch(res.data.archivo);
+                        if (typeof res.data.rodillo.archivo === 'string') {
+                            const response = await fetch(res.data.rodillo.archivo);
                             const blob = await response.blob();
-                            let filename = res.data.archivo.split('/').pop();                        
+                            let filename = res.data.rodillo.archivo.split('/').pop();                        
                             formData.append('archivo', blob, filename); // Usa el nombre del archivo extraído o el nombre por defecto
                         }
                         axios.post(BACKEND_SERVER + `/api/rodillos/linea_rectificacion/`,formData, { //Grabamos la nueva instancia elegida

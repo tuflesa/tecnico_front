@@ -20,6 +20,9 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
     const [show_list_rodillos, setShowListRodillos] = useState(null);
     const [rectificacion_nueva, setRectificacion_nueva] = useState([]);
     const [rectificados_pendientes, setRectificadosPendientes] = useState([]); //ya manadados a rectificar
+    const soyTecnico = user['tec-user'].perfil.puesto.nombre==='Técnico'||user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:false;
+    const soySuperTecnico = user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:false;
+    const visible = user['tec-user'].perfil.puesto.nombre==='Técnico'||user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:rectificacion?false:true;
 
     const [datos, setDatos] = useState({
         id: rectificacion? rectificacion.id : '',
@@ -33,13 +36,6 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
         activado: rectificacion?true:false,
         finalizado: rectificacion?rectificacion.finalizado:false,
         fecha_estimada: rectificacion?rectificacion.fecha_estimada 
-            /* ? (function() {
-                const fechaRectificacion = new Date(rectificacion.fecha);
-                fechaRectificacion.setDate(fechaRectificacion.getDate() + 10); // Sumar 10 días
-                return fechaRectificacion.getFullYear() + '-' + 
-                    String(fechaRectificacion.getMonth() + 1).padStart(2, '0') + '-' + 
-                    String(fechaRectificacion.getDate()).padStart(2, '0');
-            })()  */
             : (hoy_10.getFullYear() + '-' + 
             String(hoy_10.getMonth() + 1).padStart(2, '0') + '-' + 
             String(hoy_10.getDate()).padStart(2, '0')),
@@ -154,23 +150,6 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
         })
         .catch(err => { console.log(err);})
     }
-
-    const actualizarDatos = (event) => {
-        event.preventDefault();
-        axios.patch(BACKEND_SERVER + `/api/rodillos/rectificacion_nueva/${datos.id}/`, {
-            fecha: datos.fecha,
-            finalizado: datos.finalizado,
-        }, {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }     
-        })
-        .then( res => { 
-            alert('Ficha actualizada');
-        })
-        .catch(err => { console.log(err);})
-    }
-
     
     const handleInputChange = (event) => {
         setDatos({
@@ -184,7 +163,7 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
             ...datos,
             [event.target.name] : event.target.value
         })
-        if(rectificacion){
+        if(datos.activado){
             axios.patch(BACKEND_SERVER + `/api/rodillos/rectificacion_nueva/${datos.id}/`, {
                 fecha_estimada: event.target.value,
             }, {
@@ -308,7 +287,8 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
                                         name='fecha' 
                                         value={datos.fecha}
                                         onChange={handleInputChange} 
-                                        placeholder="Fecha creación" />
+                                        placeholder="Fecha creación" 
+                                        disabled={soySuperTecnico?false:true}/>
                         </Form.Group>
                     </Col>
                     <Col>
@@ -318,23 +298,24 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
                                         name='fecha_estimada' 
                                         value={datos.fecha_estimada}
                                         onChange={handleInputChange_estimada} 
-                                        placeholder="Fecha estimada" />
+                                        placeholder="Fecha estimada"
+                                        disabled={soyTecnico?false:rectificacion?true:false} />
                         </Form.Group>
                     </Col>
-                    <Col className="d-flex align-items-end">
-                        <Form.Group className="mb-3" controlId="finalizado">
-                            <Form.Check type="checkbox" 
-                                        label="Finalizado"
-                                        checked = {datos.finalizado}
-                                        onChange = {handleFinalizado} 
-                                        disabled = {rectificacion?false:true}/>
-                        </Form.Group>
-                    </Col>
+                    {datos.finalizado?
+                        <Col className="d-flex align-items-end">
+                            <Form.Group className="mb-3" controlId="finalizado">
+                                <Form.Check type="checkbox" 
+                                            label="Finalizado"
+                                            checked = {datos.finalizado}
+                                            onChange = {handleFinalizado} />
+                            </Form.Group>
+                        </Col>
+                    :''}
                 </Row>
                 <Form.Row className="justify-content-center">
-                    {datos.linea || rectificacion ? 
-                        <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button> :
-                        <Button variant="info" type="submit" className={'mx-2'} onClick={GuardarRectificacion}>Guardar</Button>                                
+                    {datos.activado===false? 
+                        <Button variant="info" type="submit" className={'mx-2'} onClick={GuardarRectificacion}>Guardar</Button>:''
                     }
                     {lineas_rectificandose?
                         <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>:null
@@ -343,24 +324,28 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
             </Form>
             {datos.linea || rectificacion  ?
                 <Form>     
-                    <Row>            
-                        <Col xs={6}>
-                            <Form.Group>
-                                <Form.Label className="mt-2">Codigo Barras (con lector) </Form.Label>
-                                <Form.Control
-                                            type="text"
-                                            id="id_instancia"
-                                            tabIndex={2}
-                                            name='id_instancia' 
-                                            value={numeroBar.id_instancia}
-                                            onChange={handleInputChangeCodBarras}
-                                            placeholder="Codigo de barras" 
-                                            autoFocus/>
-                            </Form.Group>
-                        </Col>
-                        <Col xs={6} className="d-flex flex-column">
-                            <Button variant="info" className={'mt-auto mx-2'} onClick={abrirListRodillos}>Buscar Rodillo</Button> 
-                        </Col>
+                    <Row>   
+                        {visible?         
+                            <Col xs={6}>
+                                <Form.Group>
+                                    <Form.Label className="mt-2">Codigo Barras (con lector) </Form.Label>
+                                    <Form.Control
+                                                type="text"
+                                                id="id_instancia"
+                                                tabIndex={2}
+                                                name='id_instancia' 
+                                                value={numeroBar.id_instancia}
+                                                onChange={handleInputChangeCodBarras}
+                                                placeholder="Codigo de barras" 
+                                                autoFocus/>
+                                </Form.Group>
+                            </Col>
+                        :''}
+                        {visible?
+                            <Col xs={6} className="d-flex flex-column">
+                                <Button variant="info" className={'mt-auto mx-2'} onClick={abrirListRodillos}>Buscar Rodillo</Button> 
+                            </Col>
+                        :''}
                     </Row>  
                 </Form>
             : null}

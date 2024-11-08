@@ -16,7 +16,6 @@ const RodInstanciasRectificar = () => {
     const [empresas, setEmpresas] = useState([user['tec-user'].perfil.empresa.id]);
     const [secciones, setSecciones] = useState([]);
     const [zonas, setZonas] = useState([]);
-    const [selectedFile, setSelectedFile] = useState('');
     const [filtro, setFiltro] = useState(`?finalizado=${false}&instancia__rodillo__operacion__seccion__maquina__empresa__id=${[user['tec-user'].perfil.empresa.id]}`);
 
     const [datos, setDatos] = useState({
@@ -28,6 +27,7 @@ const RodInstanciasRectificar = () => {
         operacion: '',
         finalizado: false,
         rectificado_por: '',
+        id_instancia:'',
     });
 
     useEffect(()=>{
@@ -45,7 +45,7 @@ const RodInstanciasRectificar = () => {
     }, [token, filtro]);
 
     useEffect(()=>{
-        const filtro = `?finalizado=${datos.finalizado}&instancia__rodillo__operacion__seccion__maquina__empresa__id=${datos.empresa}&instancia__rodillo__operacion__seccion__maquina__id=${datos.maquina}&instancia__rodillo__operacion__seccion__id=${datos.seccion}&instancia__rodillo__operacion__id=${datos.operacion}&instancia__nombre__icontains=${datos.nombre}&full_name=${datos.rectificado_por?datos.rectificado_por:''}`
+        const filtro = `?finalizado=${datos.finalizado}&instancia__id=${datos.id_instancia}&instancia__rodillo__operacion__seccion__maquina__empresa__id=${datos.empresa}&instancia__rodillo__operacion__seccion__maquina__id=${datos.maquina}&instancia__rodillo__operacion__seccion__id=${datos.seccion}&instancia__rodillo__operacion__id=${datos.operacion}&instancia__nombre__icontains=${datos.nombre}&full_name=${datos.rectificado_por?datos.rectificado_por:''}`
         actualizaFiltro(filtro);
     },[datos]);
 
@@ -212,11 +212,10 @@ const RodInstanciasRectificar = () => {
     const Actualizo_Archivo = async (linea, select_Archivo) => {
         const formData = new FormData();
         formData.append('archivo', select_Archivo);
-    
         try {
-            // Actualiza en instancia_nueva
+            // Actualiza en el rodillo el nuevo archivo
             const responseInstancia = await axios.patch(
-                `${BACKEND_SERVER}/api/rodillos/instancia_nueva/${linea.instancia.id}/`,
+                `${BACKEND_SERVER}/api/rodillos/rodillo_nuevo/${linea.instancia.rodillo.id}/`,
                 formData,
                 {
                     headers: {
@@ -227,23 +226,27 @@ const RodInstanciasRectificar = () => {
             );
     
             // Luego, actualiza en linea_rectificacion
-            const responseLinea = await axios.patch(
-                `${BACKEND_SERVER}/api/rodillos/linea_rectificacion/${linea.id}/`,
-                formData,
-                {
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`,
-                        'Content-Type': 'multipart/form-data'
+            for(var x=0; x<lineas_rectificacion.length; x++){
+                if(lineas_rectificacion[x].instancia.rodillo.id===linea.instancia.rodillo.id){
+                    const responseLinea = await axios.patch(`${BACKEND_SERVER}/api/rodillos/linea_rectificacion/${lineas_rectificacion[x].id}/`,formData,{
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`,
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    });
+                    // Verifica si ambas respuestas contienen la URL correcta
+                    const archivoUrl = responseInstancia.data.archivo || responseLinea.data.archivo;
+                    if (archivoUrl) {
+                        setLineasRectificacion((prev) =>
+                            prev.map((instancia) =>
+                                instancia.instancia.rodillo.id === linea.instancia.rodillo.id ? { ...instancia, archivo: archivoUrl } : instancia // Guarda la URL completa en lugar del nombre
+                            )
+                        );
                     }
+                    //return archivoUrl; // Devuelve la URL completa para actualizar el estado en el frontend
                 }
-            );
-    
-            // Verifica si ambas respuestas contienen la URL correcta
-            const archivoUrl = responseInstancia.data.archivo || responseLinea.data.archivo;
-            
+            }
             alert('Archivo actualizado correctamente');
-            
-            return archivoUrl; // Devuelve la URL completa para actualizar el estado en el frontend
         } catch (err) {
             alert('Error al actualizar el archivo, revisa los logs del servidor');
             console.error(err);
@@ -251,10 +254,47 @@ const RodInstanciasRectificar = () => {
     
         return null; // Retorna null si hubo error
     };   
+
+    const [numeroBar, setNumeroBar] = useState({
+        id_instancia: '',
+        idCod: '',
+    });
     
+    const handleInputChangeCodBarras = (event) => { 
+        setNumeroBar ({
+            ...numeroBar,
+            [event.target.name] : event.target.value                
+        });
+        if(numeroBar.id_instancia.length===11){
+            setDatos({
+                ...datos,
+                id_instancia: parseInt(numeroBar.id_instancia),
+            });
+            setNumeroBar({
+                ...numeroBar,
+                id_instancia: ''
+            });
+        }
+    }
 
     return(
         <Container className='mt-5 pt-1'>
+            <Row>
+                <Col xs={6}>
+                    <Form.Group>
+                        <Form.Label className="mt-2">Codigo Barras (con lector) </Form.Label>
+                        <Form.Control
+                                    type="text"
+                                    id="id_instancia"
+                                    tabIndex={2}
+                                    name='id_instancia' 
+                                    value={numeroBar.id_instancia}
+                                    onChange={handleInputChangeCodBarras}
+                                    placeholder="Codigo de barras" 
+                                    autoFocus/>
+                    </Form.Group>
+                </Col>
+            </Row>
             <Row className="mb-3">                  
                 <Col>
                     <Form.Group controlId="formNombre">
@@ -263,8 +303,7 @@ const RodInstanciasRectificar = () => {
                                     name='nombre' 
                                     value={datos.nombre}
                                     onChange={handleInputChange}                                        
-                                    placeholder="Nombre contiene"
-                                    autoFocus/>
+                                    placeholder="Nombre contiene"/>
                     </Form.Group>
                 </Col>
                 <Col>
@@ -274,8 +313,7 @@ const RodInstanciasRectificar = () => {
                                     name='rectificado_por' 
                                     value={datos.rectificado_por}
                                     onChange={handleInputChange}                                        
-                                    placeholder="Rectificado_por contiene"
-                                    autoFocus/>
+                                    placeholder="Rectificado_por contiene"/>
                     </Form.Group>
                 </Col>
                 <Col>
@@ -369,7 +407,7 @@ const RodInstanciasRectificar = () => {
             </Row>
             <Row>
                 <Col>
-                    <h5 className="mb-3 mt-3">Lista de Instancias a rectificar</h5>
+                    <h5 className="mb-3 mt-3">Lista de Rodillos a rectificar</h5>
                     <Table striped bordered hover>
                         <thead>
                             <tr>
@@ -381,16 +419,15 @@ const RodInstanciasRectificar = () => {
                                 {datos.finalizado !== false && <th style={{ backgroundColor: '#DBFAC9' }}>Nuevo Diámetro Exterior</th>}
                                 <th>Ancho</th>
                                 {datos.finalizado !== false && <th style={{ backgroundColor: '#DBFAC9' }}>Nuevo Ancho</th>}
-                                <th>Num Ejes</th>
+                                <th>Num rodillos</th>
                                 {datos.finalizado !== false && <th style={{ backgroundColor: '#DBFAC9' }}>Rectificado por</th>}
                                 <th>Fecha estimada</th>
                                 {datos.finalizado !== false && <th style={{ backgroundColor: '#DBFAC9' }}>Fecha Rectificado</th>}
-                                <th>Acciones</th>
+                                <th>Archivo rectificado</th>
                             </tr>
                         </thead>
                         <tbody>
                             {lineas_rectificacion.map(linea => {
-                                {console.log('linea de x: ',linea)}
                                 return (
                                     <tr key={linea.id}>
                                         <td>{linea.instancia.id}</td>
@@ -414,20 +451,16 @@ const RodInstanciasRectificar = () => {
                                             </Form.Group>
                                         </td>
                                         {datos.finalizado !== false && <td style={{ backgroundColor: '#DBFAC9' }}>{linea.fecha_rectificado?invertirFecha(String(linea.fecha_rectificado)):''}</td>} 
-                                        {/* <td>
-                                            <Form.Text className="text-muted d-block">
-                                                Archivo guardado: <a href={linea.archivo} target="_blank" rel="noopener noreferrer">{linea.archivo}</a>
-                                            </Form.Text>
-                                        </td> */}
                                         <td>
                                             <Form.Group controlId="archivo">
                                                 {linea.archivo && (
                                                     <Form.Text className="text-muted d-block">
-                                                        Archivo guardado: <a href={linea.archivo} target="_blank" rel="noopener noreferrer">{linea.archivo}</a>
+                                                        Archivo guardado: 
+                                                        <a href={linea.archivo} target="_blank" rel="noopener noreferrer">{linea.archivo}</a>
                                                     </Form.Text>
                                                 )}
-                                                <Form.Control type="file" onChange={handleInputChange_archivo(linea)}
-                                                disabled={linea.finalizado===true?true:false} />
+                                                {linea.finalizado===false?<Form.Control type="file" onChange={handleInputChange_archivo(linea)}
+                                                disabled={linea.finalizado===true?true:false} />:''}
                                             </Form.Group>
                                         </td>                            
                                     </tr>

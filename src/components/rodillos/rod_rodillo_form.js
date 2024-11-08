@@ -29,6 +29,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [no_modificar_tipoplano, setNoModificar_tipoplano] = useState(false);
     const [rodillo_nuevo, setRodilloNuevo] = useState('');
     const [show_instancia, setShowInstancia] = useState(false);
+    const [select_Archivo, setSelectArchivo] = useState('');
 
     const [datos, setDatos] = useState({
         empresa: rodillo.id?rodillo.operacion.seccion.maquina.empresa_id:'',
@@ -55,6 +56,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         espesor_menor: rodillo.id?rodillo.espesor_1:0,
         espesor_mayor: rodillo.id?rodillo.espesor_2:0,
         num_ejes: rodillo.id?rodillo.num_ejes:'', //numero de ejes según la operación y el tipo de rodillo
+        archivo: rodillo.id?rodillo.archivo:'',
     });
 
     useEffect(() => { //si hay tipo de plano grabado, no podemos modificarlo, ya tenemos parametros dados de alta
@@ -400,21 +402,24 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 alert('Este rodillo ya existe');
             }
             else{
-                axios.post(BACKEND_SERVER + `/api/rodillos/rodillo_nuevo/`, {
-                    nombre: datos.nombre,
-                    operacion: datos.operacion,
-                    grupo: datos.grupo,
-                    tipo: datos.tipo_rodillo,
-                    tipo_plano: datos.tipo_plano,
-                    diametro: datos.diametro,
-                    num_ejes: datos.num_ejes,
-                    forma: parseInt(datos.forma),
-                    descripcion_perfil: datos.descripcion_perfil,
-                    dimension_perfil: datos.dimension_perfil,
-                    espesor: datos.espesores,
-                    espesor_1: datos.espesor_menor,
-                    espesor_2: datos.espesor_mayor,
-                }, {
+                const formData = new FormData();
+                formData.append('nombre', datos.nombre);
+                formData.append('operacion', datos.operacion);
+                formData.append('grupo', datos.grupo);
+                formData.append('tipo', datos.tipo_rodillo);
+                formData.append('tipo_plano', datos.tipo_plano);
+                formData.append('diametro', datos.diametro);
+                formData.append('num_ejes', datos.num_ejes);
+                formData.append('forma', datos.forma?parseInt(datos.forma):'');
+                formData.append('descripcion_perfil', datos.descripcion_perfil);
+                formData.append('dimension_perfil', datos.dimension_perfil);
+                formData.append('espesor', datos.espesores);
+                formData.append('espesor_1', datos.espesor_menor);
+                formData.append('espesor_2', datos.espesor_mayor);
+                if (select_Archivo) {
+                    formData.append('archivo', select_Archivo); // Solo agrega si existe un archivo
+                }
+                axios.post(BACKEND_SERVER + `/api/rodillos/rodillo_nuevo/`, formData,{
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
                         }     
@@ -567,6 +572,10 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         textAlign: 'right',
         color: 'red',
         fontSize: 'smaller'}
+    
+    const handleInputChange_archivo = (event) => {
+        setSelectArchivo(event.target.files[0]);
+    };
 
     return (
         <Container className='mt-5 pt-1'>
@@ -781,6 +790,19 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                         placeholder="Numero de ejes"
                                         disabled
                             />
+                            </Form.Group>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col>
+                            <Form.Group controlId="archivo">
+                                <Form.Label>Selecciona archivo de rectificado</Form.Label>
+                                {datos.archivo && (
+                                    <Form.Text className="text-muted d-block">
+                                        Archivo guardado: <a href={datos.archivo} target="_blank" rel="noopener noreferrer">{datos.archivo}</a>
+                                    </Form.Text>
+                                )}
+                                <Form.Control type="file" onChange={handleInputChange_archivo} />
                             </Form.Group>
                         </Col>
                     </Row>

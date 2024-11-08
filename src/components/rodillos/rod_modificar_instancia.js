@@ -8,7 +8,6 @@ import { useBarcode } from 'react-barcodes';
 const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa, instancia_activa_id, rodillo_eje, rodillo}) => {
     const [token] = useCookies(['tec-token']);
     const [materiales, setMateriales] = useState([]);
-    const [select_Archivo, setSelectArchivo] = useState(instancia?instancia.archivo:'');
     const [datos, setDatos] = useState({
         id: instancia.id? instancia.id:null,
         nombre: instancia.id?instancia.nombre:'',
@@ -19,8 +18,9 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
         diametroEXT: instancia.id?instancia.diametro_ext:'',
         activa_qs:instancia.id?instancia.activa_qs:'',
         obsoleta: instancia.id?instancia.obsoleta:'',
-        archivo: instancia.id?instancia.archivo:'',
+        ancho: instancia.id?instancia.ancho:'',
     });
+    
     useEffect(() => {
         axios.get(BACKEND_SERVER + `/api/rodillos/materiales/`,{
             headers: {
@@ -43,17 +43,15 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
             alert('El diámetro de fondo, no puedes ser inferior o igual al eje del rodillo. Por favor corregir, gracias')
         }
         else{
-            const formData = new FormData();
-            formData.append('material', datos.material);
-            formData.append('especial', datos.especial);
-            formData.append('diametro', datos.diametroFG);
-            formData.append('diametro_ext', datos.diametroEXT);
-            formData.append('activa_qs', datos.activa_qs);
-            formData.append('obsoleta', datos.obsoleta);
-            if (select_Archivo) {
-                formData.append('archivo', select_Archivo); // Solo agrega si existe un archivo
-            }
-            axios.patch(BACKEND_SERVER + `/api/rodillos/instancia_nueva/${instancia.id}/`, formData, {
+            axios.patch(BACKEND_SERVER + `/api/rodillos/instancia_nueva/${instancia.id}/`, {
+                material: datos.material,
+                especial: datos.especial,
+                diametro: datos.diametroFG,
+                diametro_ext: datos.diametroEXT,
+                activa_qs: datos.activa_qs,
+                obsoleta: datos.obsoleta,
+                ancho: datos.ancho,
+                }, {
                 headers: {
                     'Authorization': `token ${token['tec-token']}`,
                     'Content-Type': 'multipart/form-data'
@@ -123,9 +121,7 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
             activa_qs:'',
             obsoleta: '',
         })
-        setSelectArchivo(null);
         handlerClose();
-        //window.location.href = `/rodillos/editar/${instancia.rodillo.id}`;
     }
 
     function Barcode({datos}) {
@@ -151,10 +147,6 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
         printWindow.print();
         printWindow.close();
     }
-    
-    const handleInputChange_archivo = (event) => {
-        setSelectArchivo(event.target.files[0]);
-    };
 
     return(
         <Modal show={show} onHide={handlerClose} backdrop="static" keyboard={false} animation={false}>
@@ -215,19 +207,6 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
                                 value={datos.diametroEXT}
                                 onChange={handleInputChange}
                             />
-                        </Form.Group>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col>
-                        <Form.Group controlId="archivo">
-                            <Form.Label>Selecciona un archivo</Form.Label>
-                            {datos.archivo && (
-                                <Form.Text className="text-muted d-block">
-                                    Archivo guardado: <a href={datos.archivo} target="_blank" rel="noopener noreferrer">{datos.archivo}</a>
-                                </Form.Text>
-                            )}
-                            <Form.Control type="file" onChange={handleInputChange_archivo} />
                         </Form.Group>
                     </Col>
                 </Row>

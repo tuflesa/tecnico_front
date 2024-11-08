@@ -5,6 +5,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import { Trash } from 'react-bootstrap-icons';
 import axios from 'axios';
 import BuscarInstancia from './rod_buscar_instancia';
+import {invertirFecha} from '../utilidades/funciones_fecha';
 
 const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectificandose, cerrarListRodillos, show_list_rodillos, rectificacion, datos, cambioCodigo, numeroBar, setNumeroBar, rectificados_pendientes}) => {
     const [token] = useCookies(['tec-token']);
@@ -12,6 +13,9 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectifican
     const [instancias_maquina, setInstanciaMaq] = useState([]);
     const [lineas_rectificacion, setLineasRectificacion] = useState([]);
     const [sumar_ejes, setSumaEjes] = useState();
+    const [user] = useCookies(['tec-user']);
+    const soyTecnico = user['tec-user'].perfil.puesto.nombre==='Técnico'||user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:false;
+    const soySuperTecnico = user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:false;
 
     useEffect(()=>{
         setLineasRectificacion(lineas_rectificandose);
@@ -72,7 +76,6 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectifican
             const yarectificandose = rectificados_pendientes.filter(l => l.instancia.id === datos.id_instancia);
             const instanciaRepetido = lineasInstancias.filter(l => l.id === datos.id_instancia);
             const instancia_maquina = instancias_maquina.filter(l => l.id === datos.id_instancia);
-            
             if(instancia_maquina.length===0){
                 alert('Esta instancia no corresponde a la máquina/zona señalada.')
                 setNumeroBar({
@@ -96,7 +99,8 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectifican
                     ancho: res.data.ancho,
                     fecha_estimada: datos.fecha_estimada,
                     num_ejes: res.data.rodillo.num_ejes,
-                    archivo: res.data.archivo,
+                    archivo: res.data.rodillo.archivo,
+                    rodillo_id: res.data.rodillo.id,
                 }]);
             }
         })
@@ -186,80 +190,46 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectifican
         );
     };
 
-    const handleInputChange_archivo = (linea) => async (event) => {
-        const { files } = event.target;
-        const selectedFile = files[0];
-    
-        if (selectedFile) {
-            // Actualiza la base de datos y espera la URL completa
-            const archivoUrl = await Actualizo_Archivo(linea, selectedFile); // Recibe la URL completa
-    
-            if (archivoUrl) {
-                setLineasRectificacion((prev) =>
-                    prev.map((instancia) =>
-                        instancia.id === linea.id ? { ...instancia, archivo: archivoUrl } : instancia // Guarda la URL completa en lugar del nombre
-                    )
-                );
-            }
-        }
-    };
-    
-
-    const handleInputChange_arch = (linea, event) => {
-        try {
-            const { files } = event.target; // Obtén los archivos
-            const selectedFile = files[0]; // Obtén el primer archivo seleccionado
-        
-            if (selectedFile) {
-                // Actualiza el estado de lineasInstancias con el archivo seleccionado
-                setLineasInstancias((prev) =>
-                    prev.map((instancia) =>
-                        instancia.id === linea.id ? { ...instancia, archivo: selectedFile } : instancia
-                    )
-                );
-            }
-        } catch (error) {
-            console.error("Error en handleInputChange_arch:", error);
-            alert("Ocurrió un error al seleccionar el archivo. Revisa la consola para más detalles.");
-        }
-    };
-    
-
     const borrarLinea_rectificado = (linea) => {
-        //desactiva el error que da el confirm
-        // eslint-disable-next-line no-restricted-globals
-        var borrar = confirm('Vas a eliminar un rodillo de la ficha de rectificado, ¿deseas continuar?');
-        if(borrar){
-            const newLineas = lineas_rectificacion.filter( l => l.id !== linea.id);
-            setLineasRectificacion(newLineas);
-            axios.delete(BACKEND_SERVER + `/api/rodillos/linea_rectificacion/${linea.id}/`, //eliminamos la linea
-            {
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                    }     
-            })
-            .then( res => {  
-                if(newLineas.length===0){
-                    axios.delete(BACKEND_SERVER + `/api/rodillos/rectificacion_nueva/${rectificacion.id}/`, //si no quedan lineas, eliminamos la ficha
-                        {
-                            headers: {
-                                'Authorization': `token ${token['tec-token']}`
-                                }     
-                        })
-                        .then( res => {         
-                            alert('ELIMINADA TAMBIEN LA FICHA') 
-                            window.location.href=`/rodillos/lista_rectificacion/}`;
+        if(linea.finalizado){
+            alert('Este rodillo ya está rectificado, no se puede eliminar');
+        }
+        else{
+            //desactiva el error que da el confirm
+            // eslint-disable-next-line no-restricted-globals
+            var borrar = confirm('Vas a eliminar un rodillo de la ficha de rectificado, ¿deseas continuar?');
+            if(borrar){
+                const newLineas = lineas_rectificacion.filter( l => l.id !== linea.id);
+                setLineasRectificacion(newLineas);
+                axios.delete(BACKEND_SERVER + `/api/rodillos/linea_rectificacion/${linea.id}/`, //eliminamos la linea
+                {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                        }     
+                })
+                .then( res => {  
+                    if(newLineas.length===0){
+                        axios.delete(BACKEND_SERVER + `/api/rodillos/rectificacion_nueva/${rectificacion.id}/`, //si no quedan lineas, eliminamos la ficha
+                            {
+                                headers: {
+                                    'Authorization': `token ${token['tec-token']}`
+                                    }     
+                            })
+                            .then( res => {         
+                                alert('ELIMINADA TAMBIEN LA FICHA') 
+                                window.location.href=`/rodillos/lista_rectificacion/}`;
 
-                        })
-                        .catch(err => { 
-                            console.error(err);
-                        })
-                }
-                
-            })
-            .catch(err => { 
-                console.error(err);
-            })
+                            })
+                            .catch(err => { 
+                                console.error(err);
+                            })
+                    }
+                    
+                })
+                .catch(err => { 
+                    console.error(err);
+                })
+            }
         }
     }
 
@@ -309,11 +279,13 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectifican
                 formData.append('rectificado_por', '');
                 formData.append('tipo_rectificado', 'estandar');
                 formData.append('finalizado', false);
-    
-                // Comprobar si el archivo es una instancia de File
-                if (lineasInstancias[x].archivo instanceof File) {
-                    const filename = lineasInstancias[x].archivo.name; // Usa el nombre del archivo
-                    formData.append('archivo', lineasInstancias[x].archivo, filename);
+                // Agrega el archivo solo si existe y es un objeto File
+               
+                if (typeof lineasInstancias[x].archivo === 'string') {
+                    const response = await fetch(lineasInstancias[x].archivo);
+                    const blob = await response.blob();
+                    let filename = lineasInstancias[x].archivo.split('/').pop();                        
+                    formData.append('archivo', blob, filename); // Usa el nombre del archivo extraído o el nombre por defecto
                 }
     
                 try {
@@ -322,7 +294,6 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectifican
                             'Authorization': `token ${token['tec-token']}`
                         }
                     });
-    
                     if (x === lineasInstancias.length - 1) {
                         const response = await axios.get(BACKEND_SERVER + `/api/rodillos/listado_linea_rectificacion/?rectificado=${rectificacion.id}`, {
                             headers: {
@@ -330,7 +301,7 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectifican
                             }
                         });
                         setLineasRectificacion(response.data);
-                        setLineasRectificacion([]); // Este estado parece redundante
+                        setLineasRectificacion([]);
                         setLineasInstancias([]); // Reinicia el estado de instancias
                         window.location.href = `/rodillos/lista_rectificacion/`;
                     }
@@ -343,33 +314,32 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectifican
             alert('FICHA DE RECTIFICADO ENVIADA CORRECTAMENTE.');
         }
     };
-    
 
     return(
         <Container className='mt-5 pt-1'>
             <Form.Row className="justify-content-center">                          
                 {datos.linea ?
                     <Button variant="danger" type="submit" className={'mx-2'} onClick={GuardarLineas}>Mandar Ficha</Button> :null} 
-                {datos.linea || rectificacion  ?
-                    <Button variant="danger" type="submit" className={'mx-2'} onClick={borrar_rectificado}>Eliminar Ficha</Button> :null} 
+                {datos.linea ?
+                    <Button variant="danger" type="submit" className={'mx-2'} onClick={borrar_rectificado}>Eliminar Ficha</Button> :
+                    datos.activado===true && soySuperTecnico? <Button variant="danger" type="submit" className={'mx-2'} onClick={borrar_rectificado}>Eliminar Ficha</Button>: null} 
             </Form.Row>
             {datos.linea || rectificacion ?
                 <Row>
                     <Col>
-                        <h5 className="mb-3 mt-3">Lista de Instancias</h5>
+                        <h5 className="mb-3 mt-3">Lista de Rodillos</h5>
                         <h5 className="text-right">Numero total de rodillos a rectificar: {sumar_ejes}</h5>
                         <Table striped bordered hover>
                             <thead>
                                 <tr>
-                                    {/* <th>Id</th> */}
                                     <th>Nombre</th>
                                     <th>Ø Fondo</th>                                
                                     <th>Ø Exterior</th>
                                     <th>Ancho</th>
-                                    <th>Num Ejes</th>
+                                    <th>Num Rodillos</th>
                                     <th>Fecha estimada</th>
-                                    <th>Archivo</th>
-                                    <th>Acciones</th>
+                                    {lineas_rectificacion?<th>Fecha rectificado</th>:''}
+                                    {soySuperTecnico?<th>Acciones</th>:''}
                                 </tr>
                             </thead>
                             {lineas_rectificacion?
@@ -377,7 +347,6 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectifican
                                     {lineas_rectificacion.map(linea => {
                                         return (
                                             <tr key={linea.instancia.id}>
-                                                {/* <td>{linea.id}</td> */}
                                                 <td>{linea.instancia.nombre}</td>
                                                 <td>{linea.diametro}</td>
                                                 <td>{linea.diametro_ext}</td> 
@@ -389,31 +358,25 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectifican
                                                                     name='fecha_estimada' 
                                                                     value={linea.fecha}
                                                                     onChange={handleInputChange_fecha_rectificado(linea)} 
-                                                                    placeholder="Fecha estimada" />
+                                                                    placeholder="Fecha estimada" 
+                                                                    disabled={soyTecnico?false:true}/>
                                                     </Form.Group>
                                                 </td>
-                                                <td>
-                                                    <Form.Group controlId="archivo">
-                                                        {linea.archivo && (
-                                                            <Form.Text className="text-muted d-block">
-                                                                Archivo guardado: <a href={linea.archivo} target="_blank" rel="noopener noreferrer">{linea.archivo}</a>
-                                                            </Form.Text>
-                                                        )}
-                                                        <Form.Control type="file" onChange={handleInputChange_archivo(linea)} />
-                                                    </Form.Group>
-                                                </td>
-                                                <td>
-                                                    <Trash className="mr-3 pencil"  onClick={event => {borrarLinea_rectificado(linea)}} />
-                                                </td>                             
+                                                <td>{linea.fecha_rectificado?invertirFecha(String(linea.fecha_rectificado)):''}</td>
+                                                {soySuperTecnico?  
+                                                    <td>
+                                                        <Trash className="mr-3 pencil"  onClick={event => {borrarLinea_rectificado(linea)}} />
+                                                    </td>:''}                             
                                             </tr>
                                     )})}
                                 </tbody>:
+
+
                                 // si todavía no he guardado la ficha pinta a partir de aquí
                                 <tbody> 
                                     {lineasInstancias.map(linea => {
                                         return (
                                             <tr>
-                                                {/* <td>{linea.id}</td> */}
                                                 <td>{linea.nombre}</td>
                                                 <td>{linea.diametro}</td>
                                                 <td>{linea.diametro_ext}</td> 
@@ -428,27 +391,7 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectifican
                                                                     placeholder="Fecha estimada" />
                                                     </Form.Group>
                                                 </td>
-                                                <td>
-                                                    <Form.Group controlId="archivo">
-                                                        {linea.archivo && (
-                                                            <Form.Text className="text-muted d-block">
-                                                                Archivo guardado: 
-                                                                <a
-                                                                    href={typeof linea.archivo === 'string' ? linea.archivo : '#'}
-                                                                    target="_blank"
-                                                                    rel="noopener noreferrer"
-                                                                >
-                                                                    {typeof linea.archivo === 'string' ? linea.archivo : linea.archivo.name}
-                                                                </a>
-                                                            </Form.Text>
-                                                        )}
-                                                        <Form.Control
-                                                            type="file"
-                                                            onChange={(event) => handleInputChange_arch(linea, event)}
-                                                        />
-                                                    </Form.Group>
-                                                </td>
-
+                                                {lineas_rectificacion?<td>{invertirFecha(String(linea.fecha_rectificado))}</td>:''}
                                                 <td>
                                                     <Trash className="mr-3 pencil"  onClick={event => {borrarLinea(linea)}} />
                                                 </td>                             

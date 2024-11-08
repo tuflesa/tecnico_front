@@ -95,7 +95,7 @@ const RodListaRectificaciones = () => {
             </ Row>
             <Row>
                 <Col>
-                    <h5 className="mb-3 mt-3">Lista de Rectificaciones</h5>
+                    <h5 className="mb-3 mt-3">Listado de solicitudes de rectificado</h5>
                     <table>
                         <tbody>
                             <tr>
@@ -130,9 +130,6 @@ const RodListaRectificaciones = () => {
                                         <td>{lista.maquina.siglas}</td>
                                         <td>{invertirFecha(String(lista.fecha))}</td>
                                         <td>{invertirFecha(String(lista.fecha_estimada))}</td>
-                                        {/* <td>
-                                            <Link onClick={() => modificar_rectificado(lista.id)}><PencilFill className="mr-3 pencil"/></Link>
-                                        </td> */}
                                         <td>
                                             <Link to={`/rodillos/editar_rectificacion/${lista.id}`}><PencilFill className="mr-3 pencil"/></Link>
                                         </td>
