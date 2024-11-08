@@ -14,14 +14,13 @@ const RodListaRectificaciones = () => {
     const [user] = useCookies(['tec-user']);
     const [count, setCount] = useState(null);
     const [lista_rectificaciones, setListaRectificaciones] = useState(null);
-    const [filtro, setFiltro] = useState(`?empresa=${user['tec-user'].perfil.empresa.id}`);
+    const [filtro, setFiltro] = useState(`?empresa=${user['tec-user'].perfil.empresa.id}&maquina__id=${user['tec-user'].perfil.zona?user['tec-user'].perfil.zona.id:''}`);
     const [filtroPag, setFiltroPag] = useState(`&page=${1}`);
 
     const [datos, setDatos] = useState({
         pagina: 1,
         total_pag:0,
     });
-
     useEffect(()=>{
         setFiltroPag(`&page=${datos.pagina}`);
     },[datos.pagina]);

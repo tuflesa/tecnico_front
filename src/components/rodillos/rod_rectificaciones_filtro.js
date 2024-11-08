@@ -7,12 +7,13 @@ import { useCookies } from 'react-cookie';
 const RodRectificacionesFiltro = ({actualizaFiltro}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
+    const soyTecnico = user['tec-user'].perfil.puesto.nombre==='Técnico'||user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:false;
 
     const [datos, setDatos] = useState({
         id:'',
         numero: '',
         empresa: user['tec-user'].perfil.empresa.id,
-        maquina: '',
+        maquina: user['tec-user'].perfil.zona?user['tec-user'].perfil.zona.id:'',
         creado_por: '',
         finalizado: false,
     });
@@ -62,7 +63,7 @@ const RodRectificacionesFiltro = ({actualizaFiltro}) => {
     }, [token, datos.empresa]);
    
     useEffect(()=>{
-        const filtro = `?empresa=${datos.empresa}&numero__icontains=${datos.numero}&maquina__id=${datos.maquina}&full_name=${datos.creado_por?datos.creado_por:''}&finalizado=${datos.finalizado}`
+        const filtro = `?empresa=${datos.empresa}&numero__icontains=${datos.numero}&maquina__id=${user['tec-user'].perfil.zona?user['tec-user'].perfil.zona.id:datos.maquina}&full_name=${datos.creado_por?datos.creado_por:''}&finalizado=${datos.finalizado}`
         actualizaFiltro(filtro);
     },[datos]);
 
@@ -96,7 +97,8 @@ const RodRectificacionesFiltro = ({actualizaFiltro}) => {
                                         name='empresa' 
                                         value={datos.empresa}
                                         onChange={handleInputChange}
-                                        placeholder="Empresa">
+                                        placeholder="Empresa"
+                                        disabled={user['tec-user'].perfil.zona?true:false}>
                                         <option key={0} value={''}>Todas</option>    
                                         {empresas && empresas.map( empresa => {
                                             return (
@@ -112,9 +114,10 @@ const RodRectificacionesFiltro = ({actualizaFiltro}) => {
                         <Form.Group controlId="maquina">
                             <Form.Label>Máquina</Form.Label>
                             <Form.Control as="select" 
-                                            value={datos.maquina}
+                                            value={user['tec-user'].perfil.zona?user['tec-user'].perfil.zona.id:datos.maquina}
                                             name='maquina'
-                                            onChange={handleInputChange}>
+                                            onChange={handleInputChange}
+                                            disabled={user['tec-user'].perfil.zona?true:false}>
                                 <option key={0} value={''}>Todas</option>
                                 {zonas && zonas.map( zona => {
                                     return (
