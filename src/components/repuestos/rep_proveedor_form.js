@@ -50,7 +50,7 @@ const RepProveedorForm = ({proveedor}) => {
               }     
         })
         .then( res => { 
-            window.location.href = "/repuestos/proveedores/";
+            alert('Proveedor actualizado.');
         })
         .catch(err => { console.log(err);})
         
@@ -217,7 +217,8 @@ const RepProveedorForm = ({proveedor}) => {
                             <Col>
                                 <Form.Group controlId="condicion_pago">
                                     <Form.Label>Condición de Pago: </Form.Label>
-                                    <Form.Control type="text" 
+                                    <Form.Control as="textarea"
+                                                rows={1}
                                                 name='condicion_pago' 
                                                 value={datos.condicion_pago}
                                                 onChange={handleInputChange} 
