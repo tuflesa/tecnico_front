@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Container, Table } from 'react-bootstrap';
+import { Row, Col, Form, Container, Table, Modal, Button } from 'react-bootstrap';
+import { Tools } from 'react-bootstrap-icons';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
@@ -15,6 +16,9 @@ const RodInstanciasXaRectificar = () => {
     const [secciones, setSecciones] = useState([]);
     const [zonas, setZonas] = useState([]);
     const [filtro, setFiltro] = useState(`?finalizado=${false}&instancia__rodillo__operacion__seccion__maquina__empresa__id=${[user['tec-user'].perfil.empresa.id]}`);
+    const [abrirFiltro, setabrirFiltro] = useState(false);
+    const [show_datos_nuevos, setShowDatosNuevos] = useState(false);
+    const [hoy] = useState(new Date());
 
     const [datos, setDatos] = useState({
         id:'',
@@ -26,6 +30,18 @@ const RodInstanciasXaRectificar = () => {
         finalizado: false,
         rectificado_por: '',
         id_instancia:'',
+    });
+
+    const [datos_nuevos, setDatosNuevos] = useState({
+        id_linea:'',
+        diametroF_antiguo: '',
+        rectificado_por: user['tec-user'],
+        diametroExt_antiguo: '',
+        diametroAncho_antiguo: '',
+        diametroF_nuevo: '',
+        diametroExt_nuevo: '',
+        diametroAncho_nuevo: '',
+        fecha_rectificado: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
     });
 
     useEffect(()=>{
@@ -179,6 +195,13 @@ const RodInstanciasXaRectificar = () => {
         })
     }
 
+    const handleInputChange_nuevo = (event) => {
+        setDatosNuevos({
+            ...datos_nuevos,
+            [event.target.name] : event.target.value
+        })
+    }
+
     const handleInputChange_finalizado = (event) => {
         const { name, value } = event.target;
     
@@ -249,26 +272,57 @@ const RodInstanciasXaRectificar = () => {
             console.error('Error en la eliminación:', error);
             throw error;
         }
-    }    
+    }   
+    
+    const FinalizoRodillo = (linea) => { 
+        setDatosNuevos({
+            ...datos_nuevos,
+            id_linea:linea.id,
+            diametroF_antiguo: linea.diametro,
+            rectificado_por: user['tec-user'],
+            diametroExt_antiguo: linea.diametro_ext,
+            diametroAncho_antiguo: linea.ancho,
+            diametroF_nuevo: '',
+            diametroExt_nuevo: '',
+            diametroAncho_nuevo: linea.ancho,
+        });
+        setShowDatosNuevos(true);
+    }
+
+    const abroFiltro = () => {
+        setabrirFiltro(!abrirFiltro);
+    }
+
+    const handleCloseDatos = () => {
+        setShowDatosNuevos(false);
+    }
+
+    const GuardarDatos = () => { 
+        axios.patch(BACKEND_SERVER + `/api/rodillos/linea_rectificacion/${datos_nuevos.id_linea}/`, { //Actualizamos fecha
+            nuevo_diametro: datos_nuevos.diametroF_nuevo,
+            nuevo_diametro_ext:datos_nuevos.diametroExt_nuevo,
+            nuevo_ancho: datos_nuevos.diametroAncho_nuevo,
+            rectificado_por: datos_nuevos.rectificado_por.id,
+            fecha_rectificado: datos_nuevos.fecha_rectificado,
+            finalizado: true,
+        }, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+                }     
+        })
+        .then( res => {  
+            window.location.reload(); //actualizo página
+        })
+        .catch(err => { 
+            console.error(err);
+        })
+        setShowDatosNuevos(false);
+    }
 
     return(
         <Container className='mt-5 pt-1'>
-            <Row>
-                <Col xs={6}>
-                    <Form.Group>
-                        <Form.Label className="mt-2">Codigo Barras (con lector) </Form.Label>
-                        <Form.Control
-                                    type="text"
-                                    id="id_instancia"
-                                    tabIndex={2}
-                                    name='id_instancia' 
-                                    value={numeroBar.id_instancia}
-                                    onChange={handleInputChangeCodBarras}
-                                    placeholder="Codigo de barras" 
-                                    autoFocus/>
-                    </Form.Group>
-                </Col>
-            </Row>
+            <button type="button" className='mt-5' onClick={event => {abroFiltro()}}>Ver Filtros</button>
+            {abrirFiltro? 
             <Row className="mb-3">                  
                 <Col>
                     <Form.Group controlId="formNombre">
@@ -304,6 +358,8 @@ const RodInstanciasXaRectificar = () => {
                     </Form.Group>
                 </Col>
             </Row>
+            :''}
+            {abrirFiltro? 
             <Row>
                 <Col>
                     <Form.Group controlId="empresa">
@@ -379,6 +435,23 @@ const RodInstanciasXaRectificar = () => {
                     </Form.Group>
                 </Col>
             </Row>
+            :''}
+            <Row>
+                <Col xs={6}>
+                    <Form.Group>
+                        <Form.Label className="mt-2">Codigo Barras (con lector) </Form.Label>
+                        <Form.Control
+                                    type="text"
+                                    id="id_instancia"
+                                    tabIndex={2}
+                                    name='id_instancia' 
+                                    value={numeroBar.id_instancia}
+                                    onChange={handleInputChangeCodBarras}
+                                    placeholder="Codigo de barras" 
+                                    autoFocus/>
+                    </Form.Group>
+                </Col>
+            </Row>
             <Row>
                 <Col>
                     <h5 className="mb-3 mt-3">Lista de Rodillos a rectificar</h5>
@@ -398,6 +471,7 @@ const RodInstanciasXaRectificar = () => {
                                 <th>Fecha estimada</th>
                                 {datos.finalizado !== false && <th style={{ backgroundColor: '#DBFAC9' }}>Fecha Rectificado</th>}
                                 <th>Archivo rectificado</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -441,7 +515,8 @@ const RodInstanciasXaRectificar = () => {
                                                     </>
                                                 )}
                                             </Form.Group>
-                                        </td>  
+                                        </td> 
+                                        <td><Tools className="mr-3 pencil"  onClick={event =>{FinalizoRodillo(linea)}}/></td>
                                     </tr>
                                 );
                             })}
@@ -449,6 +524,102 @@ const RodInstanciasXaRectificar = () => {
                     </Table>
                 </Col>                
             </Row>
+            <Modal show={show_datos_nuevos} onHide={handleCloseDatos} backdrop="static" keyboard={ false } animation={false}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Medidas nuevas del rodillo</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Container>
+                        <Row>
+                            <Col>
+                                <Form.Group controlId="rectificado_por">
+                                    <Form.Label>Rectificado por:</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='rectificado_por' 
+                                                value={datos_nuevos.rectificado_por.get_full_name}
+                                                disabled/>
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <Form.Group controlId="diametroFG">
+                                    <Form.Label>Diámetro Fondo Anterior</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='diametroFG' 
+                                                value={datos_nuevos.diametroF_antiguo}
+                                                disabled/>
+                                </Form.Group>
+                            </Col>
+                            <Col>
+                                <Form.Group controlId="nuevo_diametro">
+                                    <Form.Label>Diámetro Fondo Nuevo</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='diametroF_nuevo' 
+                                                onChange={handleInputChange_nuevo} 
+                                                value={datos_nuevos.diametroF_nuevo}
+                                                autoFocus/>
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <Form.Group controlId="diametroFG">
+                                    <Form.Label>Diámetro Exterior Anterior</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='diametroExt_antiguo' 
+                                                value={datos_nuevos.diametroExt_antiguo}
+                                                disabled/>
+                                </Form.Group>
+                            </Col>
+                            <Col>
+                                <Form.Group controlId="diametroExt_nuevo">
+                                    <Form.Label>Diámetro Exterior Nuevo</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='diametroExt_nuevo' 
+                                                onChange={handleInputChange_nuevo} 
+                                                value={datos_nuevos.diametroExt_nuevo}/>
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <Form.Group controlId="diametroAncho_antiguo">
+                                    <Form.Label>Ancho Anterior</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='diametroAncho_antiguo' 
+                                                value={datos_nuevos.diametroAncho_antiguo}
+                                                disabled/>
+                                </Form.Group>
+                            </Col>
+                            <Col>
+                                <Form.Group controlId="diametroAncho_nuevo">
+                                    <Form.Label>Ancho Nuevo</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='diametroAncho_nuevo' 
+                                                onChange={handleInputChange_nuevo} 
+                                                value={datos_nuevos.diametroAncho_nuevo}/>
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <Form.Group controlId="fecha_rectificado">
+                                    <Form.Label>Fecha Rectificado</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='fecha_rectificado' 
+                                                value={invertirFecha(String(datos_nuevos.fecha_rectificado))}
+                                                disabled/>
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                    </Container>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={GuardarDatos}>Grabar</Button>
+                    <Button variant="secondary" onClick={handleCloseDatos}>Cancelar</Button>
+                </Modal.Footer>
+            </Modal>
         </Container>
     )
 }
