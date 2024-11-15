@@ -32,10 +32,6 @@ const BuscarInstancia = ({lineas_rectificandose, rectificacion, datos_rectificac
         actualizaFiltro(filtro1);
     },[datos, token]);
 
-    const actualizaFiltro = str => {
-        setFiltro(str);
-    }
-
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/rodillos/instancia_listado/`+ filtro,{
             headers: {
@@ -83,6 +79,10 @@ const BuscarInstancia = ({lineas_rectificandose, rectificacion, datos_rectificac
         });
     }, [datos.seccion]);
 
+    const actualizaFiltro = str => {
+        setFiltro(str);
+    }
+
     const handleInputChange = (event) => {
         setDatos({
             ...datos,
@@ -114,6 +114,7 @@ const BuscarInstancia = ({lineas_rectificandose, rectificacion, datos_rectificac
                         num_ejes: res.data.rodillo.num_ejes,
                         archivo: res.data.rodillo.archivo,
                         rodillo_id: res.data.rodillo.id,
+                        obsreviaciones:res.data.obsreviaciones,
                     }]);
                     if(rectificacion && lineas_rectificandose){ // si estoy añadiendo pero ya tenía cabecera hecha
                         const formData = new FormData();
@@ -129,6 +130,7 @@ const BuscarInstancia = ({lineas_rectificandose, rectificacion, datos_rectificac
                         formData.append('rectificado_por', '');
                         formData.append('tipo_rectificado', 'estandar');
                         formData.append('finalizado', false);
+                        formData.append('observaciones','');
                         if (typeof res.data.rodillo.archivo === 'string') {
                             const response = await fetch(res.data.rodillo.archivo);
                             const blob = await response.blob();

@@ -20,6 +20,7 @@ import RodRectificacionForm from './rod_rectificacion_form';
 import RodListaRectificaciones from './rod_rectificaciones_listado';
 import RodEditarRectificado from './rod_rectificar_editar';
 import RodInstanciasRectificar from './rod_instancias_a_rectificar';
+import RodInstanciasXaRectificar from './rod_instancias_xa_rectificar';
 
 const Rodillos = () => {
     
@@ -29,6 +30,7 @@ const Rodillos = () => {
             <Switch>
                 <Route path='/rodillos/montaje' component={RodMontaje} />
                 <Route path='/rodillos/instancias_rectificar' component={RodInstanciasRectificar} />
+                <Route path='/rodillos/instancias_xa_rectificar' component={RodInstanciasXaRectificar} />
                 <Route path='/rodillos/montaje_lista' component={RodMontajeListado} />
                 <Route path='/rodillos/montaje_editar/:id' component={RodMontajeEditar} />
                 <Route path='/rodillos/lista' component={RodLista} />

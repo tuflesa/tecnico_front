@@ -22,6 +22,9 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectifican
     }, [token, lineas_rectificandose]);
 
     useEffect(()=>{
+    }, [token, lineasInstancias]);
+
+    useEffect(()=>{
         datos.zona && axios.get(BACKEND_SERVER + `/api/rodillos/instancia_listado/?rodillo__operacion__seccion__maquina__id=${datos.zona}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -39,7 +42,7 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectifican
         if (lineasInstancias) {
             const nuevasLineasInstancias = lineasInstancias.map(linea => ({
                 ...linea,
-                fecha_estimada: datos.fecha_estimada
+                fecha_estimada: datos.fecha_estimada,
             }));
             setLineasInstancias(nuevasLineasInstancias);
         }
@@ -101,6 +104,7 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectifican
                     num_ejes: res.data.rodillo.num_ejes,
                     archivo: res.data.rodillo.archivo,
                     rodillo_id: res.data.rodillo.id,
+                    observaciones:'',
                 }]);
             }
         })
@@ -135,8 +139,47 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectifican
         })
 
     };
+    
+    const handleInputChange_obs = (linea, event) => {
+        const { value } = event.target;
+        // Actualiza el estado de lineasInstancias
+        setLineasInstancias((prev) =>
+            prev.map((item) =>
+                item.id === linea.id ? { ...item, observaciones: value } : item
+            )
+        );
+    };
+    
+    const handleInputChange_observaciones = (linea, event) => {
+        const { value } = event.target; // Valor del campo
+        Actualizo_LineasRectificacion_obs(linea,value);
+        setLineasRectificacion((prevLineas) =>
+            prevLineas.map((item) =>
+                item.instancia.id === linea.instancia.id
+                    ? { ...item, observaciones: value } // Actualizar solo la línea modificada
+                    : item
+            )
+        );
+    };
 
-    const Actualizo_Archivo = async (linea, select_Archivo) => {
+    const Actualizo_LineasRectificacion_obs = (linea, observaciones) => {
+        axios.patch(BACKEND_SERVER + `/api/rodillos/linea_rectificacion/${linea.id}/`, { //Actualizamos observaciones
+            observaciones: observaciones,
+        }, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+                }     
+        })
+        .then( res => {  
+            
+        })
+        .catch(err => { 
+            console.error(err);
+        })
+
+    };
+
+    /* const Actualizo_Archivo = async (linea, select_Archivo) => {
         const formData = new FormData();
         formData.append('archivo', select_Archivo);
     
@@ -177,7 +220,7 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectifican
         }
     
         return null; // Retorna null si hubo error
-    };        
+    }; */        
 
     const handleInputChange_fecha_rectificado = (linea) => (event) => {
         const { value } = event.target;
@@ -279,6 +322,7 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectifican
                 formData.append('rectificado_por', '');
                 formData.append('tipo_rectificado', 'estandar');
                 formData.append('finalizado', false);
+                formData.append('observaciones', lineasInstancias[x].observaciones?lineasInstancias[x].observaciones:'');
                 // Agrega el archivo solo si existe y es un objeto File
                
                 if (typeof lineasInstancias[x].archivo === 'string') {
@@ -339,6 +383,7 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectifican
                                     <th>Num Rodillos</th>
                                     <th>Fecha estimada</th>
                                     {lineas_rectificacion?<th>Fecha rectificado</th>:''}
+                                    <th>Observaciones</th>
                                     {soySuperTecnico?<th>Acciones</th>:''}
                                 </tr>
                             </thead>
@@ -363,6 +408,23 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectifican
                                                     </Form.Group>
                                                 </td>
                                                 <td>{linea.fecha_rectificado?invertirFecha(String(linea.fecha_rectificado)):''}</td>
+                                                <td>
+                                                    <Form.Group controlId="observaciones">
+                                                        <Form.Control
+                                                            as="textarea"
+                                                            rows={2} // Establece una altura inicial
+                                                            name="observaciones"
+                                                            value={linea.observaciones}
+                                                            onChange={(e) => handleInputChange_observaciones(linea, e)}
+                                                            onInput={(e) => {
+                                                                e.target.style.height = "auto"; // Restablece la altura para calcular la nueva
+                                                                e.target.style.height = `${e.target.scrollHeight}px`; // Ajusta según el contenido
+                                                            }}
+                                                            placeholder="Observaciones"
+                                                            //style={{ resize: "none" }} // Opcional: impide que el usuario cambie el tamaño manualmente
+                                                        />
+                                                    </Form.Group>
+                                                </td>
                                                 {soySuperTecnico?  
                                                     <td>
                                                         <Trash className="mr-3 pencil"  onClick={event => {borrarLinea_rectificado(linea)}} />
@@ -392,6 +454,23 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectifican
                                                     </Form.Group>
                                                 </td>
                                                 {lineas_rectificacion?<td>{invertirFecha(String(linea.fecha_rectificado))}</td>:''}
+                                                <td>
+                                                    <Form.Group controlId="observaciones">
+                                                        <Form.Control
+                                                            as="textarea"
+                                                            rows={2} // Establece una altura inicial
+                                                            name="observaciones"
+                                                            value={linea.observaciones}
+                                                            onChange={(e) => handleInputChange_obs(linea, e)}
+                                                            onInput={(e) => {
+                                                                e.target.style.height = "auto"; // Restablece la altura para calcular la nueva
+                                                                e.target.style.height = `${e.target.scrollHeight}px`; // Ajusta según el contenido
+                                                            }}
+                                                            placeholder="Observaciones"
+                                                            //style={{ resize: "none" }} // Opcional: impide que el usuario cambie el tamaño manualmente
+                                                        />
+                                                    </Form.Group>
+                                                </td>
                                                 <td>
                                                     <Trash className="mr-3 pencil"  onClick={event => {borrarLinea(linea)}} />
                                                 </td>                             
