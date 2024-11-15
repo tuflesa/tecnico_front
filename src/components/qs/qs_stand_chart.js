@@ -17,6 +17,8 @@ const StandChart = ({montaje, ejes, posiciones, simulador, gap, fleje}) => {
 
     useEffect(()=>{
         if (!dimensions) return;
+        console.log('montaje:');
+        console.log(montaje);
         const width = dimensions.width
             , height = dimensions.height
         const margin = {top: 20, right: 20, bottom: 20, left: 20};
