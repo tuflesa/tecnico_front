@@ -4,7 +4,7 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 
-const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, maquina, tubomadre, elementos_formacion, grupo_bancadas, colorAzul, colorAzulB, colorVerde, bancada_id, bancada_otraformacion}) => {
+const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, grupoEspesor, empresa_id, maquina, tubomadre, elementos_formacion, grupo_bancadas, colorAzul, colorAzulB, colorVerde, bancada_id, bancada_otraformacion}) => {
     const [token] = useCookies(['tec-token']);
     const [bancadaId, setBancadaId] = useState(bancada_id); // Estado para bancada_id
 
@@ -25,6 +25,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
     const [operaciones_filtro, setOperaciones_filtro] = useState([]);
     const [tuboMadre_unicos, setTuboMadre_unicos] = useState([]);
     const [filtro, setFiltro] = useState(``);
+    const [espesores_unidos, setEspesores_unidos] = useState(``);
     
     var bancadas_nuevas=[''];
     var bancadas_nuevas2=[''];
@@ -68,7 +69,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
         }
     }, [token, elementos_formacion]);
 
-    useEffect(() => { //BUSCAMOS, LAS OPERACIONES DE LA SECCIÓN MARCADA.
+    useEffect(() => { //BUSCAMOS, LAS OPERACIONES PARA EL FILTRO DE CONJUNTOS DE OTRAS FORMACIONES.
         if(operacion_marcada!==null){ 
             axios.get(BACKEND_SERVER + `/api/rodillos/operacion/?seccion=${operacion_marcada.seccion.id}`,{
                 headers: {
@@ -100,7 +101,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
     }, [token, operacion_marcada]);
 
     useEffect(() => { //RODILLOS QUE PODEMOS USAR EN ESTA OPERACIÓN CON ESTE GRUPO
-        operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/rodillos/?operacion__id=${operacion_marcada.id}&grupo__id=${grupoId}`,{
+        operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/rodillos/?operacion__id=${operacion_marcada.id}&grupo__tubo_madre=${tubomadre}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -142,7 +143,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
     }, [filtro]);
 
     useEffect(() => { //PARA OBTENER LOS Ø DE TUBO MADRE UNICOS
-        axios.get(BACKEND_SERVER + `/api/rodillos/grupo_only/?tubo_madre__gte=${tubomadre-10}&tubo_madre__lte=${tubomadre+10}`,{
+        axios.get(BACKEND_SERVER + `/api/rodillos/grupo_only/?tubo_madre__gte=${tubomadre-10}&tubo_madre__lte=${tubomadre+10}&maquina__empresa=${empresa_id}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                   }
@@ -162,7 +163,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
     }, [rod_id, selectedEje, operacion_rod, tubo_madre_rod]);
     
     useEffect(() => { //BUSCAMOS LAS BANCADAS QUE PRECISAMOS PARA ESTA OPERACIÓN
-        operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/bancada/?seccion=${operacion_marcada.seccion.id}&tubo_madre__gte=${tubomadre-10}&tubo_madre__lte=${tubomadre+10}`,{
+        operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/bancada_grupos/?seccion=${operacion_marcada.seccion.id}&tubo_madre__gte=${tubomadre-10}&tubo_madre__lte=${tubomadre+10}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -213,6 +214,10 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
                 }
             }
             else{ //rodillos nuestros
+                if(EjesRodillos.length===0){
+                    alert('Introduce algún dato');
+                    return;
+                }
                 var rodillo_tubo_madre = EjesRodillos[0].TuboMadreRod;
                 var rodillo_operacion = EjesRodillos[0].operacion;
                 var no_coincide=false;
@@ -263,6 +268,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
             axios.post(BACKEND_SERVER + `/api/rodillos/conjunto/`, { //creamos conjunto, (Operación y Tubo_madre del rodillo).
                 operacion: operacion_rod,
                 tubo_madre:tubo_madre_rod,
+                espesores: espesores_unidos!=='÷'?espesores_unidos:'',
             }, {
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
@@ -341,6 +347,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
         axios.post(BACKEND_SERVER + `/api/rodillos/bancada/`, { //creamos la bancada
             seccion: operacion_marcada.seccion.id,
             tubo_madre: tubomadre,
+            espesores: grupoEspesor,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -407,15 +414,17 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
 
     const handleInputChange = (event) => {
         const selectedValue = event.target.options[event.target.selectedIndex].value;
-        const [rodilloId, operacion, grupo, eje] = selectedValue.split(',');
+        const [rodilloId, operacion, grupo, eje, espesor_1, espesor_2] = selectedValue.split(',');
         const grupoID = grupo;
         const operacion_rodillo = operacion;
         const valores_rodillo = selectedValue;
         const rodillo_id = rodilloId;
         const ejeId_posicion = eje;
+        const espesores = espesor_1 + '÷' + espesor_2;
         setRod_Id(rodillo_id);
         setGrupoId_Rod(grupoID);
         setOperacionRod(operacion_rodillo);
+        setEspesores_unidos(espesores)
         const nuevaSeleccionRodilloId = {...selectRodilloId};
         nuevaSeleccionRodilloId[ejeId_posicion] = valores_rodillo;
         setSelectedEje(ejeId_posicion);
@@ -498,7 +507,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
                                             {rodillos && rodillos.map(rodillo => {
                                                 if (rodillo.tipo === eje.tipo.id && rodillo.diametro === eje.diametro) {
                                                     return (
-                                                        <option key={rodillo.id} value={`${rodillo.id},${rodillo.operacion},${rodillo.grupo.id},${eje.id}`}>
+                                                        <option key={rodillo.id} value={`${rodillo.id},${rodillo.operacion},${rodillo.grupo.id},${eje.id},${rodillo.espesor_1},${rodillo.espesor_2}`}>
                                                             {rodillo.nombre}
                                                         </option>
                                                     )
@@ -544,7 +553,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
                                             <option key={0} value={``}>Todas</option>
                                             {tuboMadre_unicos && tuboMadre_unicos.map(conjunto => (
                                                 <option key={conjunto.id} value={conjunto.tubo_madre}>
-                                                    {conjunto.tubo_madre}
+                                                    {conjunto.tubo_madre + ' - ' + conjunto.espesor_1 + '÷' + conjunto.espesor_2}
                                                 </option>
                                             ))}
                                         </Form.Control>
@@ -567,7 +576,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
                                             {conjuntos_exist && conjuntos_exist.map(conjunto => {
                                                 return (
                                                     <option key={conjunto.id} value={conjunto.id}>
-                                                        {conjunto.operacion.nombre + '- Ø'+ conjunto.tubo_madre}
+                                                        {conjunto.espesores!==''?conjunto.operacion.nombre + '- Ø'+ conjunto.tubo_madre + '-' + conjunto.espesores : conjunto.operacion.nombre + '- Ø'+ conjunto.tubo_madre}
                                                     </option>
                                                 )
                                             })}
@@ -587,7 +596,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
                                             <Form.Check
                                                 key={bancada.id}
                                                 type="checkbox"
-                                                label={bancada.nombre}
+                                                label={bancada.seccion.nombre==='Formadora'?bancada.nombre +'  -  ('+ bancada.espesores+')':bancada.nombre}
                                                 value = {datos.bancada_elegida}
                                                 checked={(bancada_id && bancada_id === bancada.id) || (bancada_otraformacion.id && bancada_otraformacion.id === bancada.id) || (datos.bancada_elegida === bancada.id)}
                                                 onChange={()=>handleInputChangeBancada(bancada.id)}
@@ -602,9 +611,8 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, ma
                 </Tabs>
             </Modal.Body>
             <Modal.Footer>
-                {console.log('bancada_otraformacion.id', bancada_otraformacion.id,'datos.conjunto_elegido',datos.conjunto_elegido, 'selectRodilloId', selectRodilloId )}
                 {bancada_otraformacion.id?<Button variant="info" onClick={ElimniarBancada}>Eliminar Bancada</Button>:''}
-                <Button disabled={datos.bancada_elegida ===undefined  && bancada_otraformacion.id ===undefined  && datos.conjunto_elegido===''  && selectRodilloId && Object.keys(selectRodilloId).length===0 ?true:false} variant="info" onClick={Guardar}>Guardar</Button>
+                <Button variant="info" onClick={Guardar}>Guardar</Button>
                 <Button variant="waring" onClick={handlerCancelar}>Cancelar</Button>
             </Modal.Footer>
         </Modal>

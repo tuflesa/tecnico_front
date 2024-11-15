@@ -7,7 +7,6 @@ import RodRodilloForm from './rod_rodillo_form';
 const RodEditar = ({ match }) => {
     const [token] = useCookies(['tec-token']);
     const [rodillo, setRodillo] = useState(null)
-
     useEffect(() => {
         axios.get(BACKEND_SERVER + `/api/rodillos/lista_rodillos/${match.params.id}`,{
             headers: {

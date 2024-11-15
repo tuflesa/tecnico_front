@@ -199,6 +199,7 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                     operacion_marcada={operacion_marcada}
                     handleClose={CerrarConjunto}
                     grupoId={grupo.id}
+                    grupoEspesor={grupo.espesor_1 +'÷'+grupo.espesor_2}
                     grupo_bancadas={grupo.bancadas}
                     maquina={maquina}
                     tubomadre={tubo_madre}
@@ -207,7 +208,8 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                     colorAzulB={colorAzulB}
                     colorVerde={colorVerde}
                     bancada_id={bancada_id}
-                    bancada_otraformacion={bancada_otraformacion}/>
+                    bancada_otraformacion={bancada_otraformacion}
+                    empresa_id={empresa}/>
             :''}
         </Container>
     )
