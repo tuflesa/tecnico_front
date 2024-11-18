@@ -7,7 +7,7 @@ import axios from 'axios';
 import BuscarInstancia from './rod_buscar_instancia';
 import {invertirFecha} from '../utilidades/funciones_fecha';
 
-const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectificandose, cerrarListRodillos, show_list_rodillos, rectificacion, datos, cambioCodigo, numeroBar, setNumeroBar, rectificados_pendientes}) => {
+const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineasRectificandose, cerrarListRodillos, show_list_rodillos, rectificacion, datos, cambioCodigo, numeroBar, setNumeroBar, rectificados_pendientes}) => {
     const [token] = useCookies(['tec-token']);
     const [lineasInstancias, setLineasInstancias] = useState([]);
     const [instancias_maquina, setInstanciaMaq] = useState([]);
@@ -276,25 +276,31 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectifican
         }
     }
 
-    const borrar_rectificado = (linea) => {
-        //desactiva el error que da el confirm
-        // eslint-disable-next-line no-restricted-globals
-        var borrar = confirm('Vas a eliminar la ficha de rectificado, ¿deseas continuar?');
-        if(borrar){
-            axios.delete(BACKEND_SERVER + `/api/rodillos/rectificacion_nueva/${rectificacion.id}/`,
-                {
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`
-                        }     
-                })
-                .then( res => {         
-                    alert('FICHA ELIMINADA') 
-                    window.location.href=`/rodillos/lista_rectificacion/}`;
+    const borrar_rectificado = () => {
+        const borrar_ficha = lineas_rectificacion.filter(linea => linea.finalizado === true);
+        if(borrar_ficha.length===0){
+            //desactiva el error que da el confirm
+            // eslint-disable-next-line no-restricted-globals
+            var borrar = confirm('Vas a eliminar la ficha de rectificado, ¿deseas continuar?');
+            if(borrar){
+                axios.delete(BACKEND_SERVER + `/api/rodillos/rectificacion_nueva/${rectificacion.id}/`,
+                    {
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                            }     
+                    })
+                    .then( res => {         
+                        alert('FICHA ELIMINADA') 
+                        window.location.href=`/rodillos/lista_rectificacion/}`;
 
-                })
-                .catch(err => { 
-                    console.error(err);
-                })
+                    })
+                    .catch(err => { 
+                        console.error(err);
+                    })
+            }
+        }
+        else{
+            alert('No se puede borrar ya se han rectificado rodillos');
         }
     }
 
@@ -404,7 +410,7 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectifican
                                                                     value={linea.fecha}
                                                                     onChange={handleInputChange_fecha_rectificado(linea)} 
                                                                     placeholder="Fecha estimada" 
-                                                                    disabled={soyTecnico?false:true}/>
+                                                                    disabled={!soySuperTecnico || datos.disabled}/>
                                                     </Form.Group>
                                                 </td>
                                                 <td>{linea.fecha_rectificado?invertirFecha(String(linea.fecha_rectificado)):''}</td>
@@ -421,6 +427,7 @@ const RodBuscarInstanciaCodBarras = ({lineas_rectificandose, setLineasRectifican
                                                                 e.target.style.height = `${e.target.scrollHeight}px`; // Ajusta según el contenido
                                                             }}
                                                             placeholder="Observaciones"
+                                                            disabled={disabled}
                                                             //style={{ resize: "none" }} // Opcional: impide que el usuario cambie el tamaño manualmente
                                                         />
                                                     </Form.Group>

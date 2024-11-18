@@ -27,13 +27,14 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
     const [datos, setDatos] = useState({
         id: rectificacion? rectificacion.id : '',
         empresa: rectificacion? rectificacion.empresa: user['tec-user'].perfil.empresa.id,
-        zona: rectificacion? rectificacion.maquina.id: '',
+        zona: rectificacion? rectificacion.maquina.id: user['tec-user'].perfil.zona?user['tec-user'].perfil.zona.id:'',
         numero: rectificacion?rectificacion.numero:'',
         creado_por: rectificacion?rectificacion.creado_por.get_full_name:user['tec-user'].id,
         fecha: rectificacion?rectificacion.fecha: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()===31?(hoy.getDate()-1):(hoy.getDate())).padStart(2,'0')),
         linea: false,
         id_instancia:'',
         activado: rectificacion?true:false,
+        disabled: rectificacion?rectificacion.finalizado?true:false:false,
         finalizado: rectificacion?rectificacion.finalizado:false,
         fecha_estimada: rectificacion?rectificacion.fecha_estimada 
             : (hoy_10.getFullYear() + '-' + 
@@ -288,7 +289,7 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
                                         value={datos.fecha}
                                         onChange={handleInputChange} 
                                         placeholder="Fecha creación" 
-                                        disabled={soySuperTecnico?false:true}/>
+                                        disabled={!soySuperTecnico || datos.disabled}/>
                         </Form.Group>
                     </Col>
                     <Col>
@@ -299,7 +300,9 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
                                         value={datos.fecha_estimada}
                                         onChange={handleInputChange_estimada} 
                                         placeholder="Fecha estimada"
-                                        disabled={soyTecnico?false:rectificacion?true:false} />
+                                        disabled={!soySuperTecnico || datos.disabled || !rectificacion}
+                                        //disabled={soyTecnico?false:rectificacion?true:false}
+                                         />
                         </Form.Group>
                     </Col>
                     {datos.finalizado?
@@ -359,7 +362,8 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
                     cerrarListRodillos={cerrarListRodillos}
                     rectificados_pendientes={rectificados_pendientes}
                     lineas_rectificandose={lineas_rectificandose}
-                    setLineasRectificandose={setLineasRectificandose}/>
+                    setLineasRectificandose={setLineasRectificandose}
+                    disabled={datos.disabled}/>
         </Container>
     );
 }

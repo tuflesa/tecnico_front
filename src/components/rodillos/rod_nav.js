@@ -8,6 +8,7 @@ const RodNavBar = () => {
     const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Director Técnico'?false:true;
     const soyTecnico = user['tec-user'].perfil.puesto.nombre==='Técnico'?true:false;
     const soySuperTecnico = user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:false;
+    const soyMantenimiento = user['tec-user'].perfil.puesto.nombre==='Mantenimiento'?true:false;
 
     return (
             <React.Fragment>
@@ -41,7 +42,7 @@ const RodNavBar = () => {
                                 </NavDropdown>
                             </Nav>
                             : 
-                                soyTecnico?
+                                soyTecnico || soyMantenimiento?
                                 <Nav className="mr-auto">
                                     <NavDropdown title="Rodillos" id="basic-nav-dropdown">
                                         <NavDropdown.Item href="/rodillos/tooling">Tooling Chart</NavDropdown.Item>

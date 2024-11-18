@@ -5,6 +5,7 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import {invertirFecha} from '../utilidades/funciones_fecha';
+import { constants } from 'buffer';
 
 const RodInstanciasXaRectificar = () => {
     const [token] = useCookies(['tec-token']);
@@ -19,6 +20,7 @@ const RodInstanciasXaRectificar = () => {
     const [abrirFiltro, setabrirFiltro] = useState(false);
     const [show_datos_nuevos, setShowDatosNuevos] = useState(false);
     const [hoy] = useState(new Date());
+    const soyMantenimiento = user['tec-user'].perfil.puesto.nombre==='Mantenimiento'?true:false;
 
     const [datos, setDatos] = useState({
         id:'',
@@ -41,6 +43,7 @@ const RodInstanciasXaRectificar = () => {
         diametroF_nuevo: '',
         diametroExt_nuevo: '',
         diametroAncho_nuevo: '',
+        rectificacion_id: '',
         fecha_rectificado: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
     });
 
@@ -278,6 +281,8 @@ const RodInstanciasXaRectificar = () => {
         setDatosNuevos({
             ...datos_nuevos,
             id_linea:linea.id,
+            rodillo_eje: linea.instancia.rodillo.diametro,
+            rectificacion_id: linea.rectificado,
             diametroF_antiguo: linea.diametro,
             rectificado_por: user['tec-user'],
             diametroExt_antiguo: linea.diametro_ext,
@@ -298,24 +303,47 @@ const RodInstanciasXaRectificar = () => {
     }
 
     const GuardarDatos = () => { 
-        axios.patch(BACKEND_SERVER + `/api/rodillos/linea_rectificacion/${datos_nuevos.id_linea}/`, { //Actualizamos fecha
-            nuevo_diametro: datos_nuevos.diametroF_nuevo,
-            nuevo_diametro_ext:datos_nuevos.diametroExt_nuevo,
-            nuevo_ancho: datos_nuevos.diametroAncho_nuevo,
-            rectificado_por: datos_nuevos.rectificado_por.id,
-            fecha_rectificado: datos_nuevos.fecha_rectificado,
-            finalizado: true,
-        }, {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-                }     
-        })
-        .then( res => {  
-            window.location.reload(); //actualizo página
-        })
-        .catch(err => { 
-            console.error(err);
-        })
+        if(parseFloat(datos_nuevos.diametroF_nuevo)>parseFloat(datos_nuevos.diametroExt_nuevo)){
+            alert('Diámetro fondo no puede ser mayor que el diámetro exterior. Por favor, corregir.');
+        }
+        else if(datos_nuevos.rodillo_eje>parseFloat(datos_nuevos.diametroF_nuevo) || datos_nuevos.rodillo_eje===parseFloat(datos_nuevos.diametroF_nuevo)){
+            alert('El diámetro de fondo, no puedes ser inferior o igual al eje del rodillo. Por favor corregir.');
+        }
+        else{
+            axios.patch(BACKEND_SERVER + `/api/rodillos/linea_rectificacion/${datos_nuevos.id_linea}/`, { //Actualizamos fecha
+                nuevo_diametro: datos_nuevos.diametroF_nuevo,
+                nuevo_diametro_ext:datos_nuevos.diametroExt_nuevo,
+                nuevo_ancho: datos_nuevos.diametroAncho_nuevo,
+                rectificado_por: datos_nuevos.rectificado_por.id,
+                fecha_rectificado: datos_nuevos.fecha_rectificado,
+                finalizado: true,
+            }, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                    }     
+            })
+            .then( res => {  
+                const cerrar_ficha = lineas_rectificacion.filter(linea => linea.rectificado === res.data.rectificado && linea.id !== res.data.id);
+                if(cerrar_ficha.length===0){
+                    axios.patch(BACKEND_SERVER + `/api/rodillos/rectificacion_nueva/${datos_nuevos.rectificacion_id}/`, { //Cerramos la ficha
+                        finalizado: true,
+                    }, {
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                            }     
+                    })
+                    .then( res => {  
+                    })
+                    .catch(err => { 
+                        console.error(err);
+                    })
+                }
+                window.location.reload(); //actualizo página
+            })
+            .catch(err => { 
+                console.error(err);
+            })
+        }
         setShowDatosNuevos(false);
     }
 
@@ -495,7 +523,7 @@ const RodInstanciasXaRectificar = () => {
                                                             value={linea.fecha}
                                                             onChange={handleInputChange_fecha_rectificado(linea)} 
                                                             placeholder="Fecha estimada" 
-                                                            disabled={linea.finalizado === true ? true : false}/>
+                                                            disabled={linea.finalizado === true ? true : soyMantenimiento?true:false}/>
                                             </Form.Group>
                                         </td>
                                         {datos.finalizado !== false && <td style={{ backgroundColor: '#DBFAC9' }}>{linea.fecha_rectificado ? invertirFecha(String(linea.fecha_rectificado)) : ''}</td>} 
