@@ -305,9 +305,19 @@ const RodInstanciasXaRectificar = () => {
     const GuardarDatos = () => { 
         if(parseFloat(datos_nuevos.diametroF_nuevo)>parseFloat(datos_nuevos.diametroExt_nuevo)){
             alert('Diámetro fondo no puede ser mayor que el diámetro exterior. Por favor, corregir.');
+            return;
+        }
+        else if(parseFloat(datos_nuevos.diametroExt_nuevo)>=parseFloat(datos_nuevos.diametroExt_antiguo) || parseFloat(datos_nuevos.diametroF_nuevo)>=parseFloat(datos_nuevos.diametroF_antiguo)){
+            alert('Diámetro nuevo no puede ser superior o igual al diámetro antiguo. Por favor, corregir.');
+            return;
+        }
+        else if(parseFloat(datos_nuevos.diametroAncho_nuevo)>parseFloat(datos_nuevos.diametroAncho_antiguo)){
+            alert('El ancho nuevo no puede ser superior al ancho antiguo. Por favor, corregir.');
+            return;
         }
         else if(datos_nuevos.rodillo_eje>parseFloat(datos_nuevos.diametroF_nuevo) || datos_nuevos.rodillo_eje===parseFloat(datos_nuevos.diametroF_nuevo)){
             alert('El diámetro de fondo, no puedes ser inferior o igual al eje del rodillo. Por favor corregir.');
+            return;
         }
         else{
             axios.patch(BACKEND_SERVER + `/api/rodillos/linea_rectificacion/${datos_nuevos.id_linea}/`, { //Actualizamos fecha
@@ -323,6 +333,20 @@ const RodInstanciasXaRectificar = () => {
                     }     
             })
             .then( res => {  
+                axios.patch(BACKEND_SERVER + `/api/rodillos/instancia_nueva/${res.data.instancia}/`, { //Actualizamos los datos de la instancia
+                    diametro: datos_nuevos.diametroF_nuevo,
+                    diametro_ext:datos_nuevos.diametroExt_nuevo,
+                    ancho: datos_nuevos.diametroAncho_nuevo,
+                }, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                        }     
+                })
+                .then( res => { 
+                })
+                .catch(err => { 
+                    console.error(err);
+                })
                 const cerrar_ficha = lineas_rectificacion.filter(linea => linea.rectificado === res.data.rectificado && linea.id !== res.data.id);
                 if(cerrar_ficha.length===0){
                     axios.patch(BACKEND_SERVER + `/api/rodillos/rectificacion_nueva/${datos_nuevos.rectificacion_id}/`, { //Cerramos la ficha

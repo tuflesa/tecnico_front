@@ -130,6 +130,7 @@ const BuscarInstancia = ({lineas_rectificandose, rectificacion, datos_rectificac
                         formData.append('rectificado_por', '');
                         formData.append('tipo_rectificado', 'estandar');
                         formData.append('finalizado', false);
+                        formData.append('proveedor', '');
                         formData.append('observaciones','');
                         if (typeof res.data.rodillo.archivo === 'string') {
                             const response = await fetch(res.data.rodillo.archivo);

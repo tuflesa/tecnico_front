@@ -16,7 +16,9 @@ const RodInstanciasRectificar = () => {
     const [empresas, setEmpresas] = useState([user['tec-user'].perfil.empresa.id]);
     const [secciones, setSecciones] = useState([]);
     const [zonas, setZonas] = useState([]);
+    const [proveedores, setProveedores] = useState([]);
     const [filtro, setFiltro] = useState(`?finalizado=${false}&instancia__rodillo__operacion__seccion__maquina__empresa__id=${[user['tec-user'].perfil.empresa.id]}`);
+    const [proveedorSeleccionado, setProveedorSeleccionado] = useState(false);
 
     const [datos, setDatos] = useState({
         id:'',
@@ -28,26 +30,50 @@ const RodInstanciasRectificar = () => {
         finalizado: false,
         rectificado_por: '',
         id_instancia:'',
+        fuera: false,
+        proveedor:'',
     });
 
-    useEffect(()=>{
-        axios.get(BACKEND_SERVER + `/api/rodillos/listado_linea_rectificacion`+filtro,{
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + `/api/rodillos/listado_linea_rectificacion` + filtro, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
-                }
+            }
         })
-        .then( res => {
-            setLineasRectificacion(res.data);
+        .then(res => {
+            const updatedLineas = res.data.map(linea => {
+                return {
+                    ...linea,      
+                    fuera: linea.proveedor !== null // Si `proveedor` es null, fuera: será false, de lo contrario true
+                };
+            });
+            setLineasRectificacion(updatedLineas);
         })
-        .catch( err => {
+        .catch(err => {
             console.log(err);
         });
     }, [token, filtro]);
 
     useEffect(()=>{
-        const filtro = `?finalizado=${datos.finalizado}&instancia__id=${datos.id_instancia}&instancia__rodillo__operacion__seccion__maquina__empresa__id=${datos.empresa}&instancia__rodillo__operacion__seccion__maquina__id=${datos.maquina}&instancia__rodillo__operacion__seccion__id=${datos.seccion}&instancia__rodillo__operacion__id=${datos.operacion}&instancia__nombre__icontains=${datos.nombre}&full_name=${datos.rectificado_por?datos.rectificado_por:''}`
+        axios.get(BACKEND_SERVER + `/api/repuestos/proveedor/?de_rectificado=${true}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+                }
+        })
+        .then( res => {
+            setProveedores(res.data);
+            console.log('proveedores: ',res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
+
+    useEffect(() => {
+        let filtro = `?finalizado=${datos.finalizado}&instancia__id=${datos.id_instancia}&proveedor=${datos.proveedor}&instancia__rodillo__operacion__seccion__maquina__empresa__id=${datos.empresa}&instancia__rodillo__operacion__seccion__maquina__id=${datos.maquina}&instancia__rodillo__operacion__seccion__id=${datos.seccion}&instancia__rodillo__operacion__id=${datos.operacion}&instancia__nombre__icontains=${datos.nombre}&full_name=${datos.rectificado_por ? datos.rectificado_por : ''}`;   
         actualizaFiltro(filtro);
-    },[datos]);
+    }, [datos]);
+    
 
     const actualizaFiltro = str => {
         setFiltro(str);
@@ -163,6 +189,23 @@ const RodInstanciasRectificar = () => {
 
     };
 
+    const Actualizo_Proveedor = (linea, proveedor) => {
+        axios.patch(BACKEND_SERVER + `/api/rodillos/listado_linea_rectificacion/${linea.id}/`, { //Actualizamos fecha
+            proveedor: proveedor,
+        }, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+                }     
+        })
+        .then( res => {  
+            window.location.reload(); //actualizo página
+        })
+        .catch(err => { 
+            console.error(err);
+        })
+
+    };
+
     const handleInputChange_fecha_rectificado = (linea) => (event) => {
         const { value } = event.target;
         // Actualiza el estado de lineasInstancias
@@ -183,21 +226,50 @@ const RodInstanciasRectificar = () => {
 
     const handleInputChange_finalizado = (event) => {
         const { name, value } = event.target;
-    
         setDatos((prevDatos) => ({
             ...prevDatos,
-            [name]: name === 'finalizado' ? (value === '' ? undefined : value === 'true') : value  // Convert value to boolean or undefined for finalizado
+            [name]: name === 'finalizado' ? (value === '' ? undefined : value === 'true') : value 
         }));
+    };
+
+    const handleInputChange_fuera = (linea) => (event) => {
+        const { value } = event.target;
+        // Convertimos el valor a booleano
+        const booleanValue = value === 'true'; // 'true' se convierte en true, 'false' en false
+
+        // Actualizamos el estado de `fuera` de la línea
+        setLineasRectificacion((prev) =>
+            prev.map((instancia) =>
+                instancia.id === linea.id ? { ...instancia, fuera: booleanValue } : instancia
+            )
+        );
+
+        // Si el valor de `fuera` es 'true', habilitamos la opción de elegir proveedor
+        if (booleanValue === true) {
+            setProveedorSeleccionado(true);
+        } else {
+            setProveedorSeleccionado(false);
+        }
+    };
+
+    const handleInputChange_proveedor = (linea) => (event) => {
+        const { value } = event.target;
+        setLineasRectificacion((prev) =>
+            prev.map((instancia) =>
+                instancia.id === linea.id ? { ...instancia, proveedor: value } : instancia
+            )
+        );
+        if (value !== '') {
+            Actualizo_Proveedor(linea,value);
+        }
     };
 
     const handleInputChange_archivo = (linea) => async (event) => {
         const { files } = event.target;
         const selectedFile = files[0];
-    
         if (selectedFile) {
             // Actualiza la base de datos y espera la URL completa
             const archivoUrl = await Actualizo_Archivo(linea, selectedFile); // Recibe la URL completa
-    
             if (archivoUrl) {
                 setLineasRectificacion((prev) =>
                     prev.map((instancia) =>
@@ -207,7 +279,6 @@ const RodInstanciasRectificar = () => {
             }
         }
     };
-    
 
     const Actualizo_Archivo = async (linea, select_Archivo) => {
         const formData = new FormData();
@@ -224,7 +295,6 @@ const RodInstanciasRectificar = () => {
                     }
                 }
             );
-    
             // Luego, actualiza en linea_rectificacion
             for(var x=0; x<lineas_rectificacion.length; x++){
                 if(lineas_rectificacion[x].instancia.rodillo.id===linea.instancia.rodillo.id){
@@ -251,7 +321,6 @@ const RodInstanciasRectificar = () => {
             alert('Error al actualizar el archivo, revisa los logs del servidor');
             console.error(err);
         }
-    
         return null; // Retorna null si hubo error
     };   
 
@@ -327,6 +396,24 @@ const RodInstanciasRectificar = () => {
                             <option key={1} value={true}>Si</option>
                             <option key={2} value={false}>No</option>
                         </Form.Control>
+                    </Form.Group>
+                </Col>
+                <Col>
+                    <Form.Group controlId="proveedor">
+                        <Form.Label>Proveedor</Form.Label>
+                        <Form.Control as="select" 
+                                        value={datos.proveedor}
+                                        name='proveedor'
+                                        onChange={handleInputChange}>
+                            <option key={0} value={''}>Todos</option>
+                            {proveedores && proveedores.map(proveedor => {
+                                return (
+                                    <option key={proveedor.id} value={proveedor.id}>
+                                        {proveedor.nombre}
+                                    </option>
+                                )
+                            })}
+                        </Form.Control> 
                     </Form.Group>
                 </Col>
             </Row>
@@ -424,6 +511,7 @@ const RodInstanciasRectificar = () => {
                                 <th>Fecha estimada</th>
                                 {datos.finalizado !== false && <th style={{ backgroundColor: '#DBFAC9' }}>Fecha Rectificado</th>}
                                 <th>Archivo rectificado</th>
+                                <th>Rectificado fuera</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -462,7 +550,38 @@ const RodInstanciasRectificar = () => {
                                                 {linea.finalizado===false?<Form.Control type="file" onChange={handleInputChange_archivo(linea)}
                                                 disabled={linea.finalizado===true?true:false} />:''}
                                             </Form.Group>
-                                        </td>                            
+                                            {linea.fuera === true && 
+                                                <Form.Group controlId="proveedor">
+                                                    <Form.Label>Proveedor</Form.Label>
+                                                    <Form.Control as="select" 
+                                                                    value={linea.proveedor || ""}
+                                                                    name='proveedor'
+                                                                    onChange={handleInputChange_proveedor(linea)}
+                                                                    className="dropdown-green">
+                                                        <option key={0} value={''}>Todos</option>
+                                                        {proveedores && proveedores.map(proveedor => {
+                                                            return (
+                                                                <option key={proveedor.id} value={proveedor.id}>
+                                                                    {proveedor.nombre}
+                                                                </option>
+                                                            )
+                                                        })}
+                                                    </Form.Control>
+                                                </Form.Group>
+                                            }
+                                        </td>  
+                                        <td>
+                                            <Form.Group controlId="fuera">
+                                                <Form.Control as="select" 
+                                                            value={linea.fuera}
+                                                            name='fuera'
+                                                            onChange={handleInputChange_fuera(linea)}>
+                                                    <option key={1} value={true}>Si</option>
+                                                    <option key={2} value={false}>No</option>
+                                                </Form.Control>
+                                            </Form.Group>
+                                            
+                                        </td>                       
                                     </tr>
                             )})}
                         </tbody>

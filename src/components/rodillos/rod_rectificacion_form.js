@@ -22,6 +22,7 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
     const [rectificados_pendientes, setRectificadosPendientes] = useState([]); //ya manadados a rectificar
     const soyTecnico = user['tec-user'].perfil.puesto.nombre==='Técnico'||user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:false;
     const soySuperTecnico = user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:false;
+    const soyMantenimiento = user['tec-user'].perfil.puesto.nombre==='Mantenimiento'?true:false;
     const visible = user['tec-user'].perfil.puesto.nombre==='Técnico'||user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:rectificacion?false:true;
 
     const [datos, setDatos] = useState({
@@ -300,8 +301,8 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
                                         value={datos.fecha_estimada}
                                         onChange={handleInputChange_estimada} 
                                         placeholder="Fecha estimada"
-                                        disabled={!soySuperTecnico || datos.disabled || !rectificacion}
-                                        //disabled={soyTecnico?false:rectificacion?true:false}
+                                        //disabled={soyMantenimiento || datos.disabled || !rectificacion}
+                                        disabled={soyTecnico?false:rectificacion?true:false}
                                          />
                         </Form.Group>
                     </Col>

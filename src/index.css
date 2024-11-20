@@ -83,3 +83,13 @@ code {
   overflow: hidden;
   resize: none;
 }
+
+.dropdown-green {
+  background-color: green !important;
+  color: white; /* Cambia el color del texto si lo necesitas */
+}
+
+.dropdown-green option {
+  background-color: white; /* Asegura que las opciones se vean bien */
+  color: black;
+}

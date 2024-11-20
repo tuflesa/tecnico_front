@@ -277,7 +277,7 @@ const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineas
     }
 
     const borrar_rectificado = () => {
-        const borrar_ficha = lineas_rectificacion.filter(linea => linea.finalizado === true);
+        const borrar_ficha = lineas_rectificacion?lineas_rectificacion.filter(linea => linea.finalizado === true):'';
         if(borrar_ficha.length===0){
             //desactiva el error que da el confirm
             // eslint-disable-next-line no-restricted-globals
@@ -328,6 +328,7 @@ const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineas
                 formData.append('rectificado_por', '');
                 formData.append('tipo_rectificado', 'estandar');
                 formData.append('finalizado', false);
+                formData.append('proveedor', '');
                 formData.append('observaciones', lineasInstancias[x].observaciones?lineasInstancias[x].observaciones:'');
                 // Agrega el archivo solo si existe y es un objeto File
                
@@ -410,7 +411,7 @@ const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineas
                                                                     value={linea.fecha}
                                                                     onChange={handleInputChange_fecha_rectificado(linea)} 
                                                                     placeholder="Fecha estimada" 
-                                                                    disabled={!soySuperTecnico || datos.disabled}/>
+                                                                    disabled={!soyTecnico || datos.disabled}/>
                                                     </Form.Group>
                                                 </td>
                                                 <td>{linea.fecha_rectificado?invertirFecha(String(linea.fecha_rectificado)):''}</td>
