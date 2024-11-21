@@ -218,7 +218,7 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
         <Container className='mt-5 pt-1'>
             <Form >
                 <Row>
-                    {rectificacion? <h5>Rectificado</h5> : <h5>Nuevo Rectificado</h5>}
+                    {rectificacion? <h5>Rectificado</h5> : <h5>Nueva orden de Rectificado</h5>}
                 </Row>
                 <Row>
                     <Col>

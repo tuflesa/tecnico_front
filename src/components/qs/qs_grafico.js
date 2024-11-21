@@ -7,7 +7,7 @@ import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
 import QSNavBar from "./qs_nav";
-import {montaje, fleje} from './Grupo_164FF_W';
+import {montaje, fleje} from './Grupo_70';
 
 // const ejes = [{op:1, pos: [174, 343.57]},
 //               {op:2, pos: [177.91, 340.49]},
@@ -44,6 +44,8 @@ const QS_Grafico = () => {
         })
         .then( res => {
                 setEjes(res.data);
+                // console.log('ejes:');
+                // console.log(res.data);
         })
     }
 
@@ -56,7 +58,7 @@ const QS_Grafico = () => {
         })
         .then( res => {
                 console.log(res.data);
-                console.log(ejesSim);
+                //console.log(ejesSim);
         })
     }
 

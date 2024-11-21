@@ -228,14 +228,21 @@ const montaje = [
                     alfa2: 7,
                     C: 5
                 }
+            },
+            {
+                tipo_plano: 'NONE',
+                eje: 'CAB',
+                parametros: {
+                    Df: 600
+                }
             }
         ]
     }
 ]
 
 const fleje = {
-    espesor: 3,
-    ancho: 442,
+    espesor: 4,
+    ancho: 428,
     calidad: 'S350',
     color: 'aqua'
 }

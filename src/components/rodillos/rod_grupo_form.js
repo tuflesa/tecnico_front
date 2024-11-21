@@ -51,7 +51,7 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
             });
         }
         else {
-            axios.get(BACKEND_SERVER + `/api/estructura/zona/?empresa=${datos.empresa}`,{
+            axios.get(BACKEND_SERVER + `/api/estructura/zona/?empresa=${datos.empresa}&es_maquina_tubo=${true}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
@@ -127,20 +127,18 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
 
     const ActualizarGrupo = (event) => {
         event.preventDefault();
-        axios.get(BACKEND_SERVER + `/api/rodillos/grupo_nuevo/?tubo_madre=${datos.tubo_madre}&maquina=${datos.zona}&espesor_1=${datos.espesor_1}&espesor_2=${datos.espesor_2}`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            if(res.data.length!==0){
-                alert('Con esta modificación ya existe un grupo');
-            }
-            else{
+        // axios.get(BACKEND_SERVER + `/api/rodillos/grupo_nuevo/?tubo_madre=${datos.tubo_madre}&maquina=${datos.zona}&espesor_1=${datos.espesor_1}&espesor_2=${datos.espesor_2}`,{
+        //     headers: {
+        //         'Authorization': `token ${token['tec-token']}`
+        //       }
+        // })
+        // .then( res => {
+            // if(res.data.length!==0){
+            //     alert('Con esta modificación ya existe un grupo');
+            // }
+            // else{
                 axios.patch(BACKEND_SERVER + `/api/rodillos/grupo_only/${grupo.id}/`, {
-                    nombre: 'Grupo-'+'Ø'+datos.tubo_madre,
-                    maquina: datos.zona,
-                    tubo_madre: datos.tubo_madre,            
+                    nombre: datos.nombre,            
                     espesor_1: datos.espesor_1,
                     espesor_2: datos.espesor_2,
                 }, {
@@ -155,8 +153,8 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
                     console.log(err);
                     alert('Falta datos, por favor rellena todos los campos obligatorios.');
                 });
-            }
-        });
+        //     }
+        // });
     };
 
     const styles = {
@@ -178,7 +176,7 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
                                         value={datos.nombre}
                                         onChange={handleInputChange} 
                                         placeholder="Nombre grupo"
-                                        disabled
+                                        disabled = {false}
                             />
                         </Form.Group>
                     </Col>

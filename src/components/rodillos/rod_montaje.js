@@ -156,6 +156,8 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
     }
 
     const handlerGuardar = () => { //Guardamos el montaje, primero comprobamos si ya existe.
+        console.log('datos del montaje: ', datos)
+        console.log('filtro del montaje: ', filtro)
         if(datos.nombre===''||datos.maquina===''||datos.grupo===''||datos.bancada_ct===''){
             alert('Revisa los datos obligatorios');
         }
@@ -170,6 +172,7 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
                     alert('Este montaje ya está creado');
                 }
                 else{
+                    
                     axios.post(BACKEND_SERVER + `/api/rodillos/montaje/`, { //creamos el montaje
                         nombre: datos.nombre,
                         maquina: datos.maquina,
@@ -207,6 +210,13 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
     const actualizaFiltro = str => {
         setFiltro(str);
         datos.nombre='';
+    }
+
+    const handleInputChange = (event) => {
+        setDatos({
+            ...datos,
+            [event.target.name] : event.target.value
+        })
     }
 
     return (
@@ -280,8 +290,8 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
                         <Form.Control type="text" 
                                     name='nombre' 
                                     value={datos.nombre}
+                                    onChange={handleInputChange}
                                     placeholder="Montaje"
-                                    disabled
                         />
                     </Form.Group>
                 </Col>

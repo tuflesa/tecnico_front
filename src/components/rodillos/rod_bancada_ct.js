@@ -76,6 +76,7 @@ const RodBancadaCT = ({bancada}) => {
             })
             .then( r => {
                 setOperaciones(r.data);
+                console.log('ESTAS SON LAS OPERACIONES: ', r.data);
             })
             .catch( err => {
                 console.log(err);
@@ -134,7 +135,7 @@ const RodBancadaCT = ({bancada}) => {
                     </Col>
                     <Col>
                         <Form.Group controlId="dimensiones">
-                            <Form.Label>Dimensiones *</Form.Label>
+                            <Form.Label>Descripción *</Form.Label>
                             <Form.Control type="text" 
                                         name='dimensiones' 
                                         value={bancada.dimensiones}

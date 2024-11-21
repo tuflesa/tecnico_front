@@ -63,7 +63,7 @@ const RodListaFiltro = ({actualizaFiltro}) => {
             });
         }
         else {
-            axios.get(BACKEND_SERVER + `/api/estructura/zona/?empresa=${datos.empresa}`,{
+            axios.get(BACKEND_SERVER + `/api/estructura/zona/?empresa=${datos.empresa}&es_maquina_tubo=${true}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }

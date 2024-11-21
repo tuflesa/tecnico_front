@@ -11,6 +11,7 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
     const [materiales, setMateriales] = useState([]);
     const [diametroFG, setDiametroFG] = useState([]);
     const [diametroEXT, setDiametroEXT] = useState([]);
+    const [diametroCentro, setDiametroCentro] = useState([]);
     const [diametroAncho, setDiametroAncho] = useState([]);
     const [activa_qs, setActivaQS] = useState(instancia_activa===true?false:true);
     const [obsoleta, setObsoleta] = useState(false);
@@ -45,6 +46,7 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
                     especial: especial,
                     diametro: diametroFG,
                     diametro_ext: diametroEXT,
+                    diametro_centro: diametroCentro,
                     activa_qs: activa_qs,
                     obsoleta: obsoleta,
                     ancho: diametroAncho,
@@ -99,6 +101,10 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
         setDiametroEXT(event.target.value);
     }; 
 
+    const handleDiametroCentroChange = (event) => {
+        setDiametroCentro(event.target.value);
+    };
+
     const handleDiametroAnchoChange = (event) => {
         setDiametroAncho(event.target.value);
     }; 
@@ -142,10 +148,10 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
                 <Row>
                     <Col>
                         <Form.Group controlId="diametro">
-                            <Form.Label>Introduce el diámetro de FG</Form.Label>
+                            <Form.Label>Introduce el diámetro de fondo</Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Introduce el Ø FG"
+                                placeholder="Ø fondo"
                                 value={diametroFG}
                                 onChange={handleDiametroChange}
                             />
@@ -158,9 +164,22 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
                             <Form.Label>Introduce el diámetro de EXT</Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Introduce el Ø EXT"
+                                placeholder="Ø ext"
                                 value={diametroEXT}
                                 onChange={handleDiametroEXTChange}
+                            />
+                        </Form.Group>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
+                        <Form.Group controlId="diametro_centro">
+                            <Form.Label>Introduce el diámetro de centro</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Ø centro"
+                                value={diametroCentro}
+                                onChange={handleDiametroCentroChange}
                             />
                         </Form.Group>
                     </Col>

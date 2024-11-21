@@ -16,6 +16,7 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
         especial: instancia.id?instancia.especial:'',
         diametroFG: instancia.id?instancia.diametro:'',
         diametroEXT: instancia.id?instancia.diametro_ext:'',
+        diametroCentro: instancia.id?instancia.diametro_centro:'',
         activa_qs:instancia.id?instancia.activa_qs:'',
         obsoleta: instancia.id?instancia.obsoleta:'',
         ancho: instancia.id?instancia.ancho:'',
@@ -45,16 +46,15 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
         else{
             axios.patch(BACKEND_SERVER + `/api/rodillos/instancia_nueva/${instancia.id}/`, {
                 material: datos.material,
-                especial: datos.especial,
                 diametro: datos.diametroFG,
                 diametro_ext: datos.diametroEXT,
+                diametro_centro: datos.diametroCentro,
                 activa_qs: datos.activa_qs,
                 obsoleta: datos.obsoleta,
                 ancho: datos.ancho,
                 }, {
                 headers: {
                     'Authorization': `token ${token['tec-token']}`,
-                    'Content-Type': 'multipart/form-data'
                 }
             })
             .then(r => {
@@ -158,17 +158,6 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
                 </Row>
                 <Row>
                     <Col>
-                        <Form.Group controlId="formSelectTrueFalse">
-                            <Form.Label>¿La instancia del rodillo es especial?</Form.Label>
-                            <Form.Control as="select" onChange={handleInputChange} name='especial'>
-                                <option value="false">No</option>
-                                <option value="true">Si</option>
-                            </Form.Control>
-                        </Form.Group>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col>
                         <Form.Group controlId="formSelectFromVariable">
                             <Form.Label>Selecciona el material</Form.Label>
                             <Form.Control as="select" value={datos.material} name="material" onChange={handleInputChange}>
@@ -185,11 +174,11 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
                 <Row>
                     <Col>
                         <Form.Group controlId="diametro">
-                            <Form.Label>Introduce el diámetro de FG</Form.Label>
+                            <Form.Label>Introduce el diámetro de fondo</Form.Label>
                             <Form.Control
                                 name="diametroFG"
                                 type="text"
-                                placeholder="Introduce el Ø FG"
+                                placeholder="Ø fondo"
                                 value={datos.diametroFG}
                                 onChange={handleInputChange}
                             />
@@ -199,12 +188,26 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
                 <Row>
                     <Col>
                         <Form.Group controlId="diametro_ext">
-                            <Form.Label>Introduce el diámetro de EXT</Form.Label>
+                            <Form.Label>Introduce el diámetro de exterior</Form.Label>
                             <Form.Control
                                 name="diametroEXT"
                                 type="text"
-                                placeholder="Introduce el Ø EXT"
+                                placeholder="Ø ext"
                                 value={datos.diametroEXT}
+                                onChange={handleInputChange}
+                            />
+                        </Form.Group>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
+                        <Form.Group controlId="diametroCentro">
+                            <Form.Label>Introduce el diámetro de centro</Form.Label>
+                            <Form.Control
+                                name="diametroCentro"
+                                type="text"
+                                placeholder="Ø centro"
+                                value={datos.diametroCentro}
                                 onChange={handleInputChange}
                             />
                         </Form.Group>

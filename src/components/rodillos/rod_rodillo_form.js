@@ -168,7 +168,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             });
         }
         else {
-            axios.get(BACKEND_SERVER + `/api/estructura/zona/?empresa=${datos.empresa}`,{
+            axios.get(BACKEND_SERVER + `/api/estructura/zona/?empresa=${datos.empresa}&es_maquina_tubo=${true}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
@@ -398,13 +398,16 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 }
         })
         .then(res => {
+            console.log('res data del rodillo que encuentra',res.data)
+            console.log('datos',datos);
             if(res.data.length!==0){
                 alert('Este rodillo ya existe');
             }
             else{
+                
                 const formData = new FormData();
                 formData.append('nombre', datos.nombre);
-                formData.append('operacion', datos.operacion);
+                formData.append('operacion', parseInt(datos.operacion));
                 formData.append('grupo', datos.grupo);
                 formData.append('tipo', datos.tipo_rodillo);
                 formData.append('tipo_plano', datos.tipo_plano);

@@ -92,9 +92,10 @@ const RodInstanciasRodillo = ({rodillo}) => {
                                 <th>Nombre</th>
                                 <th>Material</th>
                                 <th>Especial</th>
-                                <th>Diámetro FG</th>
-                                <th>Diámetro EXT</th>
-                                <th>Ancho</th>
+                                <th>Diámetro fondo</th>
+                                <th>Diámetro exterior</th>
+                                <th>Diámetro centro</th>
+                                <th>Ancho (mm)</th>
                                 <th>Activa QS</th>
                                 <th>Acciones</th>
                             </tr>
@@ -109,7 +110,8 @@ const RodInstanciasRodillo = ({rodillo}) => {
                                             <td>{instancia.especial===false?'NO':'SI'}</td>
                                             <td>{'Ø'+instancia.diametro}</td>
                                             <td>{'Ø'+instancia.diametro_ext}</td>
-                                            <td>{instancia.ancho +' mm'}</td>
+                                            <td>{'Ø'+instancia.diametro_centro}</td>
+                                            <td>{instancia.ancho}</td>
                                             <td>{instancia.activa_qs===false?'NO':'SI'}</td>
                                             <td><Link title='Modificar'onClick={() => ModificarInstancia(instancia)}>
                                                     <PencilFill className="mr-3 pencil"/>

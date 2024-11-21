@@ -113,16 +113,6 @@ const RodRevisionForm = ({plano_id, show, setShowRevision, show_revision, tipo_p
                 </Row>
                 <Row>
                     <Col>
-                        <Form.Group controlId="motivo">
-                            <Form.Label>Motivo *</Form.Label>
-                            <Form.Control type="text"  
-                                        name='motivo' 
-                                        value={datos.motivo}
-                                        onChange={handleInputChange}> 
-                            </Form.Control>
-                        </Form.Group>
-                    </Col>
-                    <Col>
                         <Form.Group controlId="fecha">
                             <Form.Label>Fecha *</Form.Label>
                             <Form.Control type="date"  
@@ -143,6 +133,19 @@ const RodRevisionForm = ({plano_id, show, setShowRevision, show_revision, tipo_p
                             </Form.Group>
                         </form>
                     </Col>                       
+                </Row>
+                <Row>
+                    <Col>
+                        <Form.Group controlId="motivo">
+                            <Form.Label>Motivo *</Form.Label>
+                            <Form.Control as="textarea"  
+                                        rows={1}
+                                        name='motivo' 
+                                        value={datos.motivo}
+                                        onChange={handleInputChange}> 
+                            </Form.Control>
+                        </Form.Group>
+                    </Col>
                 </Row>
             </Modal.Body>
             <Modal.Footer>

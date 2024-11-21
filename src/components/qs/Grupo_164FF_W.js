@@ -241,6 +241,51 @@ const montaje = [
                     alfa2: 7,
                     C: 3
                 }
+            },
+            {
+                tipo_plano: 'W_Sup',
+                eje: 'SUP_ALTO_OP',
+                parametros: {
+                    Ancho: 90,
+                    Df: 410,
+                    R1: 115.22,
+                    C1: 6.3,
+                    C2: 4,
+                    L1: 32.92
+                }
+            },
+            {
+                tipo_plano: 'NONE',
+                eje: 'SUP_ANCHO_OP',
+                parametros: {
+                    Df: 0
+                }
+            },
+            {
+                tipo_plano: 'W_Sup',
+                eje: 'SUP_ALTO_MO',
+                parametros: {
+                    Ancho: 90,
+                    Df: 410,
+                    R1: 115.22,
+                    C1: 6.3,
+                    C2: 4,
+                    L1: 32.92
+                }
+            },
+            {
+                tipo_plano: 'NONE',
+                eje: 'SUP_ANCHO_MO',
+                parametros: {
+                    Df: 0
+                }
+            },
+            {
+                tipo_plano: 'NONE',
+                eje: 'CAB',
+                parametros: {
+                    Df: 600
+                }
             }
         ]
     }

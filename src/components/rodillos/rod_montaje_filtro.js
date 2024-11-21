@@ -16,6 +16,7 @@ const RodMontajeFiltro = ({actualizaFiltro}) => {
     const [grupoId, setGrupoId] = useState(null);
     const [dimensionesID, setDimensionesId] = useState(null);
     const [dimensiones, setDimensiones] = useState(null);
+    const [grupo_nombre, setGrupoNombre] = useState(null);
 
     const [datos, setDatos] = useState({
         id:'',
@@ -128,7 +129,8 @@ const RodMontajeFiltro = ({actualizaFiltro}) => {
     }, [token, datos.maquina]);
 
     useEffect(()=>{
-        const filtro = `?maquina__empresa__id=${datos.empresa}&tubo_madre=${tubo_madre}&grupo=${grupoId}&maquina=${datos.maquina}&bancada=${dimensionesID}&nombre=${'M-Ø'+tubo_madre + '-' + dimensiones}`
+        console.log('que vale datos.grupo: ',datos.grupo)
+        const filtro = `?maquina__empresa__id=${datos.empresa}&tubo_madre=${tubo_madre}&grupo=${grupoId}&maquina=${datos.maquina}&bancada=${dimensionesID}&nombre=${'M-'+ grupo_nombre + '-' + dimensiones}`
         actualizaFiltro(filtro);
     },[datos]);
 
@@ -140,9 +142,10 @@ const RodMontajeFiltro = ({actualizaFiltro}) => {
     }
 
     const handleInputChangeGrupo = (event) => {
-        const [id, madre] = event.target.value.split(',');
+        const [id, madre, nombre] = event.target.value.split(',');
         setGrupoId(id);
         setTuboMadre(madre);
+        setGrupoNombre(nombre);
         setDatos({
             ...datos,
             grupo : event.target.value
@@ -213,7 +216,7 @@ const RodMontajeFiltro = ({actualizaFiltro}) => {
                                 onChange={handleInputChangeGrupo} >
                                 <option key={0} value={''}>Todas</option>
                                 {grupos && grupos.map(grupo => (
-                                    <option key={grupo.id} value={`${grupo.id},${grupo.tubo_madre}`}>
+                                    <option key={grupo.id} value={`${grupo.id},${grupo.tubo_madre},${grupo.nombre}`}>
                                         {grupo.nombre}
                                     </option>
                                 ))}
@@ -222,7 +225,7 @@ const RodMontajeFiltro = ({actualizaFiltro}) => {
                     </Col>
                     <Col>
                         <Form.Group controlId="dimensiones">
-                            <Form.Label>Cabeza de turco *</Form.Label>
+                            <Form.Label>Cabeza de turco / calibradora *</Form.Label>
                             <Form.Control 
                                 as="select" 
                                 value={datos.dimensiones}

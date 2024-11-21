@@ -526,10 +526,13 @@ const StandChart = ({montaje, ejes, posiciones, simulador, gap, fleje}) => {
             const AxisPos0_Lat_Operador = ejes['LAT_OP'];
             const AxisPos0_Lat_Motor = ejes['LAT_MO'];
             const AxisPos0_Inf = ejes['INF'];
+            const h_cab = ejes['CAB'] - 300;
+
+            console.log('Axis cab:' + h_cab);
 
             // Variables
             let xc, yc;
-            let x1, y1, x2, y2, x3, y3, x4, y4, m1, m2, B1, B2;
+            let x1, y1, x2, y2, x3, y3, x4, y4, y5, y6, y7, m1, m2, B1, B2;
             let Ancho, Df, C;
             let R1, alfa1, R2, alfa2;
             let pos;
@@ -547,29 +550,32 @@ const StandChart = ({montaje, ejes, posiciones, simulador, gap, fleje}) => {
             // Calculos
             pos = -AxisPos0_Lat_Operador + Df/2;
             xc = pos+R1;
-            yc = 0;
+            yc = h_cab;
             x1 = xc - R1 * Math.cos((alfa1/2)-alfa2);
-            y1 = R1 * Math.sin((alfa1/2)-alfa2);
+            y1 = R1 * Math.sin((alfa1/2)-alfa2) + yc ;
             m1 = 1/Math.tan(alfa1/2-alfa2);
             m2 = Math.tan(alfa1/2);
             B1 = y1 - m1 * x1;
-            B2 = m2 * (C/Math.sin(alfa1/2) - xc);
+            B2 = -yc + m2 * (C/Math.sin(alfa1/2) - xc);
             x2 = -(B1+B2)/(m1+m2);
             y2 = m1 * x2 + B1;
-            y3 = Ancho/2;
+            y3 = Ancho/2 + yc;
             x3 = -(y3+B2)/m2; 
             x4 = x3 - 50;
             y4 = y3;
+            y5 = yc - R1 * Math.sin((alfa1/2)-alfa2);
+            y6 = -y2 + 2*yc;
+            y7 = -y3+2*yc;
 
             // Dibujo lado operador
             r.arc(xScale(xc), yScale(yc), rScale(R1), Math.PI - alfa1/2 + alfa2, Math.PI + alfa1/2 - alfa2);
             r.arcTo(xScale(x2), yScale(y2), xScale(x3), yScale(y3), rScale(R2));
             r.lineTo(xScale(x3), yScale(y3));
             r.lineTo(xScale(x4), yScale(y4));
-            r.moveTo(xScale(x1), yScale(-y1));
-            r.arcTo(xScale(x2), yScale(-y2), xScale(x3), yScale(-y3), rScale(R2));
-            r.lineTo(xScale(x3), yScale(-y3));
-            r.lineTo(xScale(x4), yScale(-y4));
+            r.moveTo(xScale(x1), yScale(y5));
+            r.arcTo(xScale(x2), yScale(y6), xScale(x3), yScale(y7), rScale(R2));
+            r.lineTo(xScale(x3), yScale(y7));
+            r.lineTo(xScale(x4), yScale(y7));
 
             // Lado motor
             // Parametros
@@ -584,32 +590,35 @@ const StandChart = ({montaje, ejes, posiciones, simulador, gap, fleje}) => {
             // Calculos
             pos = AxisPos0_Lat_Motor - Df/2;
             xc = pos-R1;
-            yc = 0;
+            yc = h_cab;
             x1 = xc + R1 * Math.cos((alfa1/2)-alfa2);
-            y1 = R1 * Math.sin((alfa1/2)-alfa2);
+            y1 = R1 * Math.sin((alfa1/2)-alfa2) + yc;
              
             m1 = -1/Math.tan(alfa1/2-alfa2);
             m2 = Math.tan(alfa1/2);
             B1 = y1 - m1 * x1;
-            B2 = -m2 * (C/Math.sin(alfa1/2) + xc);
+            B2 = yc - m2 * (C/Math.sin(alfa1/2) + xc);
 
             x2 = (B2-B1)/(m1-m2);
             y2 = m1 * x2 + B1;
-            y3 = Ancho/2;
+            y3 = Ancho/2 + yc;
             x3 = (1/m2)*(y3-B2); 
             x4 = x3 + 50;
             y4 = y3;
+            y5 = yc - R1 * Math.sin((alfa1/2)-alfa2);
+            y6 = -y2 + 2*yc;
+            y7 = -y3+2*yc;
 
             // Dibujo
-            r.moveTo(xScale(x1), yScale(-y1));
+            r.moveTo(xScale(x1), yScale(y5));
             r.arc(xScale(xc), yScale(yc), rScale(R1), alfa1/2 - alfa2, alfa2 -alfa1/2, true);
             r.arcTo(xScale(x2), yScale(y2), xScale(x3), yScale(y3), rScale(R2));
             r.lineTo(xScale(x3), yScale(y3));
             r.lineTo(xScale(x4), yScale(y4));
-            r.moveTo(xScale(x1), yScale(-y1));
-            r.arcTo(xScale(x2), yScale(-y2), xScale(x3), yScale(-y3), rScale(R2));
-            r.lineTo(xScale(x3), yScale(-y3));
-            r.lineTo(xScale(x4), yScale(-y4));
+            r.moveTo(xScale(x1), yScale(y5));
+            r.arcTo(xScale(x2), yScale(y6), xScale(x3), yScale(y7), rScale(R2));
+            r.lineTo(xScale(x3), yScale(y7));
+            r.lineTo(xScale(x4), yScale(y7));
 
             // Inferior
             // Parametros
@@ -811,9 +820,11 @@ const StandChart = ({montaje, ejes, posiciones, simulador, gap, fleje}) => {
                     case 'SUP':
                         return xScale(limite*0.6);
                     case 'LAT_OP':
-                        return xScale(-limite*0.8);
+                        return xScale(-limite*0.9);
                     case 'LAT_MO':
                         return xScale(limite*0.6);
+                    case 'CAB':
+                        return xScale(-limite*0.9);
                 }
             })
             .attr('y', p => {
@@ -823,8 +834,10 @@ const StandChart = ({montaje, ejes, posiciones, simulador, gap, fleje}) => {
                     case 'SUP':
                         return yScale(limite*0.9);
                     case 'LAT_OP':
-                        return yScale(limite*0.8);
+                        return yScale(limite*0.0);
                     case 'LAT_MO':
+                        return yScale(limite*0.0);
+                    case 'CAB':
                         return yScale(limite*0.8);
                 }
             })

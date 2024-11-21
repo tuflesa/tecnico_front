@@ -228,6 +228,13 @@ const montaje = [
                     alfa2: 7,
                     C: 5
                 }
+            },
+            {
+                tipo_plano: 'NONE',
+                eje: 'CAB',
+                parametros: {
+                    Df: 600
+                }
             }
         ]
     }
