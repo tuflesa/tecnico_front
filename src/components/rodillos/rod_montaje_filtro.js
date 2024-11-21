@@ -214,7 +214,7 @@ const RodMontajeFiltro = ({actualizaFiltro}) => {
                                 <option key={0} value={''}>Todas</option>
                                 {grupos && grupos.map(grupo => (
                                     <option key={grupo.id} value={`${grupo.id},${grupo.tubo_madre}`}>
-                                        {grupo.tubo_madre}
+                                        {grupo.nombre}
                                     </option>
                                 ))}
                             </Form.Control>

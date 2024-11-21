@@ -6,6 +6,9 @@ import { useCookies } from 'react-cookie';
 const RodNavBar = () => {
     const [user] = useCookies(['tec-user']);
     const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Director Técnico'?false:true;
+    const soyTecnico = user['tec-user'].perfil.puesto.nombre==='Técnico'?true:false;
+    const soySuperTecnico = user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:false;
+    const soyMantenimiento = user['tec-user'].perfil.puesto.nombre==='Mantenimiento'?true:false;
 
     return (
             <React.Fragment>
@@ -13,10 +16,10 @@ const RodNavBar = () => {
                         <Navbar.Brand href="/home">Dep.Técnico</Navbar.Brand>
                         <Navbar.Toggle aria-controls="basic-navbar-nav"/>
                         <Navbar.Collapse id="basic-navbar-nav">
-                            {nosoyTecnico?
+                            {soySuperTecnico?
                             <Nav className="mr-auto">
                                 <NavDropdown title="Rodillos" id="basic-nav-dropdown">
-                                    {/* <NavDropdown.Item href="/rodillos/tooling">Tooling Chart</NavDropdown.Item> */}
+                                    <NavDropdown.Item href="/rodillos/tooling">Tooling Chart</NavDropdown.Item>
                                     <NavDropdown title="Listados" id="listados-dropdown" menualign="right">
                                     <NavDropdown.Item href="/rodillos/lista">Rodillos</NavDropdown.Item>
                                     <NavDropdown.Item href="/rodillos/grupos">Bancadas RD</NavDropdown.Item> 
@@ -30,15 +33,42 @@ const RodNavBar = () => {
                                     <NavDropdown.Item href="/rodillos/bacada_ct">Bancada CT</NavDropdown.Item> 
                                     <NavDropdown.Item href="/rodillos/montaje">Montaje Bancadas</NavDropdown.Item> 
                                     </NavDropdown>
+                                    <NavDropdown title="Rectificados" id="nuevos-dropdown" menualign="right">
+                                    <NavDropdown.Item href="/rodillos/nueva_rectificacion">Nueva Ficha Rectificado</NavDropdown.Item> 
+                                    <NavDropdown.Item href="/rodillos/lista_rectificacion">Lista Fichas Rectificados</NavDropdown.Item> 
+                                    <NavDropdown.Item href="/rodillos/instancias_rectificar">Lista Rodillos a Rectificar</NavDropdown.Item>
+                                    <NavDropdown.Item href="/rodillos/instancias_xa_rectificar">Lista Rodillos para Rectificar</NavDropdown.Item>
+                                    </NavDropdown>
                                 </NavDropdown>
                             </Nav>
-                            :
-                            <Nav className="mr-auto">
-                                <NavDropdown title="Rodillos" id="basic-nav-dropdown">
-                                    {/* <NavDropdown.Item href="/rodillos/tooling">Tooling Chart</NavDropdown.Item> */}
-                                    <NavDropdown.Item href="/rodillos/montaje_lista">Montajes</NavDropdown.Item>
-                                </NavDropdown>
-                            </Nav>
+                            : 
+                                soyTecnico || soyMantenimiento?
+                                <Nav className="mr-auto">
+                                    <NavDropdown title="Rodillos" id="basic-nav-dropdown">
+                                        <NavDropdown.Item href="/rodillos/tooling">Tooling Chart</NavDropdown.Item>
+                                        <NavDropdown title="Listados" id="listados-dropdown" menualign="right">
+                                        <NavDropdown.Item href="/rodillos/lista">Rodillos</NavDropdown.Item>
+                                        </NavDropdown>
+                                        <NavDropdown title="Rectificados" id="nuevos-dropdown" menualign="right">
+                                        <NavDropdown.Item href="/rodillos/nueva_rectificacion">Nueva Ficha Rectificado</NavDropdown.Item> 
+                                        <NavDropdown.Item href="/rodillos/lista_rectificacion">Lista Fichas Rectificados</NavDropdown.Item> 
+                                        <NavDropdown.Item href="/rodillos/instancias_xa_rectificar">Lista Rodillos para Rectificar</NavDropdown.Item>
+                                        </NavDropdown>
+                                    </NavDropdown>
+                                </Nav>
+                                :
+                                <Nav className="mr-auto">
+                                    <NavDropdown title="Rodillos" id="basic-nav-dropdown">
+                                        <NavDropdown.Item href="/rodillos/tooling">Tooling Chart</NavDropdown.Item>
+                                        <NavDropdown title="Listados" id="listados-dropdown" menualign="right">
+                                        <NavDropdown.Item href="/rodillos/lista">Rodillos</NavDropdown.Item>
+                                        </NavDropdown>
+                                        <NavDropdown title="Rectificados" id="nuevos-dropdown" menualign="right">
+                                        <NavDropdown.Item href="/rodillos/nueva_rectificacion">Nueva Ficha Rectificado</NavDropdown.Item> 
+                                        <NavDropdown.Item href="/rodillos/lista_rectificacion">Lista Fichas Rectificados</NavDropdown.Item> 
+                                        </NavDropdown>
+                                    </NavDropdown>
+                                </Nav>
                             }
                             <Navbar.Text className="mr-4" >
                                 Usuario: {user['tec-user'].get_full_name}

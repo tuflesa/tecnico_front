@@ -61,6 +61,8 @@ const RodInstanciasRodillo = ({rodillo}) => {
 
     const CerrarModificarInstancia = () => {
         setShowModInstancia(false);
+        setModificarInstancia();
+        //window.location.reload();
     }
 
     return (
@@ -92,6 +94,7 @@ const RodInstanciasRodillo = ({rodillo}) => {
                                 <th>Especial</th>
                                 <th>Diámetro FG</th>
                                 <th>Diámetro EXT</th>
+                                <th>Ancho</th>
                                 <th>Activa QS</th>
                                 <th>Acciones</th>
                             </tr>
@@ -106,6 +109,7 @@ const RodInstanciasRodillo = ({rodillo}) => {
                                             <td>{instancia.especial===false?'NO':'SI'}</td>
                                             <td>{'Ø'+instancia.diametro}</td>
                                             <td>{'Ø'+instancia.diametro_ext}</td>
+                                            <td>{instancia.ancho +' mm'}</td>
                                             <td>{instancia.activa_qs===false?'NO':'SI'}</td>
                                             <td><Link title='Modificar'onClick={() => ModificarInstancia(instancia)}>
                                                     <PencilFill className="mr-3 pencil"/>
@@ -132,7 +136,8 @@ const RodInstanciasRodillo = ({rodillo}) => {
                                         instancia_activa={instancia_activa}
                                         instancia_activa_id={instancia_activa_id}
                                         rodillo_eje={rodillo.diametro}
-                                        rodillo={rodillo}/>
+                                        rodillo={rodillo}
+                                        handlerClose={CerrarModificarInstancia}/>
                 :''}
 
         </Container>

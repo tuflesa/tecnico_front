@@ -16,6 +16,11 @@ import RodBancadaCT_Editar from './rod_bancada_ct_editar';
 import RodMontaje from './rod_montaje';
 import RodMontajeListado from './rod_montaje_listado';
 import RodMontajeEditar from './rod_montaje_editar';
+import RodRectificacionForm from './rod_rectificacion_form';
+import RodListaRectificaciones from './rod_rectificaciones_listado';
+import RodEditarRectificado from './rod_rectificar_editar';
+import RodInstanciasRectificar from './rod_instancias_a_rectificar';
+import RodInstanciasXaRectificar from './rod_instancias_xa_rectificar';
 
 const Rodillos = () => {
     
@@ -24,6 +29,8 @@ const Rodillos = () => {
             <RodNavBar />
             <Switch>
                 <Route path='/rodillos/montaje' component={RodMontaje} />
+                <Route path='/rodillos/instancias_rectificar' component={RodInstanciasRectificar} />
+                <Route path='/rodillos/instancias_xa_rectificar' component={RodInstanciasXaRectificar} />
                 <Route path='/rodillos/montaje_lista' component={RodMontajeListado} />
                 <Route path='/rodillos/montaje_editar/:id' component={RodMontajeEditar} />
                 <Route path='/rodillos/lista' component={RodLista} />
@@ -38,6 +45,9 @@ const Rodillos = () => {
                 <Route path='/rodillos/grupo_editar/:id' component={RodGrupoEditar} />
                 <Route path='/rodillos/editar/:id' component={RodEditar} />
                 <Route path='/rodillos/grupo/nuevo' component={RodGrupoNuevo} />
+                <Route path='/rodillos/nueva_rectificacion' component={RodRectificacionForm} />
+                <Route path='/rodillos/editar_rectificacion/:id' component={RodEditarRectificado} />
+                <Route path='/rodillos/lista_rectificacion' component={RodListaRectificaciones} />
                 {/* <Route path='/mantenimiento/tareas_trabajador' component={TareasTrabajador} /> */}
             </Switch>
         </React.Fragment>

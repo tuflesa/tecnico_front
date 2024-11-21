@@ -18,7 +18,9 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
         diametroEXT: instancia.id?instancia.diametro_ext:'',
         activa_qs:instancia.id?instancia.activa_qs:'',
         obsoleta: instancia.id?instancia.obsoleta:'',
+        ancho: instancia.id?instancia.ancho:'',
     });
+    
     useEffect(() => {
         axios.get(BACKEND_SERVER + `/api/rodillos/materiales/`,{
             headers: {
@@ -48,10 +50,12 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
                 diametro_ext: datos.diametroEXT,
                 activa_qs: datos.activa_qs,
                 obsoleta: datos.obsoleta,
-            }, {
+                ancho: datos.ancho,
+                }, {
                 headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                }     
+                    'Authorization': `token ${token['tec-token']}`,
+                    'Content-Type': 'multipart/form-data'
+                }
             })
             .then(r => {
                 if(datos.obsoleta===true){
@@ -117,7 +121,7 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
             activa_qs:'',
             obsoleta: '',
         })
-        window.location.href = `/rodillos/editar/${instancia.rodillo.id}`;
+        handlerClose();
     }
 
     function Barcode({datos}) {
