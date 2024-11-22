@@ -33,6 +33,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
 
     const [datos, setDatos] = useState({
         empresa: rodillo.id?rodillo.operacion.seccion.maquina.empresa_id:'',
+        empresa_nombre: rodillo.id?rodillo.operacion.seccion.maquina.empresa.nombre:'',
         zona: rodillo.id?rodillo.operacion.seccion.maquina.id:'',
         zona_siglas: rodillo.id?rodillo.operacion.seccion.maquina.siglas:'',
         seccion: rodillo.id?rodillo.operacion.seccion.id: '',
@@ -390,6 +391,15 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         }));
     };
 
+    const handleInputChangeEmpresa = (event) => {
+        const [Id, nombre] = event.target.value.split(',');      
+        setDatos((prevDatos)=>({
+            ...prevDatos,
+            empresa : parseInt(Id),
+            nombre_empresa: nombre,
+        }));
+    };
+
     const GuardarRodillo = (event) => {
         event.preventDefault();
         axios.get(BACKEND_SERVER + `/api/rodillos/rodillos/?nombre=${datos.nombre}`,{
@@ -398,8 +408,6 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 }
         })
         .then(res => {
-            console.log('res data del rodillo que encuentra',res.data)
-            console.log('datos',datos);
             if(res.data.length!==0){
                 alert('Este rodillo ya existe');
             }
@@ -572,7 +580,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     }
 
     const styles = {
-        textAlign: 'right',
+        textAlign: 'left',
         color: 'red',
         fontSize: 'smaller'}
     
@@ -606,15 +614,15 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                             <Form.Label>Empresa *</Form.Label>
                             <Form.Control as="select"  
                                         name='empresa' 
-                                        value={datos.empresa}
-                                        onChange={handleInputChange}
+                                        value={`${datos.empresa},${datos.empresa_nombre}`}
+                                        onChange={handleInputChangeEmpresa}
                                         disabled={rodillo.id?true:false}
                                         placeholder="Empresa"
                                         autoFocus>
                                         <option key={0} value={''}>Todas</option>    
                                         {empresas && empresas.map( empresa => {
                                             return (
-                                            <option key={empresa.id} value={empresa.id}>
+                                            <option key={empresa.id} value={`${empresa.id},${empresa.nombre}`}>
                                                 {empresa.nombre}
                                             </option>
                                             )
@@ -728,7 +736,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                 </Form.Group>
                             </Col>                    
                         </Row>
-                        :''}
+                    :''}
                     <Row>
                         {datos.pertenece_grupo?
                             <Col>
@@ -796,29 +804,31 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                             </Form.Group>
                         </Col>
                     </Row>
-                    <Row>
-                        <Col>
-                            <Form.Group controlId="archivo">
-                                <Form.Label>Selecciona archivo de rectificado</Form.Label>
-                                {datos.archivo && (
-                                    <Form.Text className="text-muted d-block">
-                                        Archivo guardado: <a href={datos.archivo} target="_blank" rel="noopener noreferrer">{datos.archivo}</a>
-                                    </Form.Text>
-                                )}
-                                <Form.Control type="file" onChange={handleInputChange_archivo} />
-                            </Form.Group>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col>
-                            <Form.Group className="mb-3" controlId="espesores">
-                                <Form.Check type="checkbox" 
-                                            label="¿Rango de espesores?"
-                                            checked = {datos.espesores}
-                                            onChange = {handleInputespesores} />
-                            </Form.Group>
-                        </Col>
-                        {datos.espesores?
+                    {datos.empresa_nombre==='Bornay'?
+                        <Row>
+                            <Col>
+                                <Form.Group controlId="archivo">
+                                    <Form.Label>Selecciona archivo de rectificado</Form.Label>
+                                    {datos.archivo && (
+                                        <Form.Text className="text-muted d-block">
+                                            Archivo guardado: <a href={datos.archivo} target="_blank" rel="noopener noreferrer">{datos.archivo}</a>
+                                        </Form.Text>
+                                    )}
+                                    <Form.Control type="file" onChange={handleInputChange_archivo} />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                    :''}
+                    {datos.espesores && datos.empresa_nombre==='Bornay'?
+                        <Row>
+                            <Col>
+                                <Form.Group className="mb-3" controlId="espesores">
+                                    <Form.Check type="checkbox" 
+                                                label="¿Rango de espesores?"
+                                                checked = {datos.espesores}
+                                                onChange = {handleInputespesores} />
+                                </Form.Group>
+                            </Col>
                             <Col>
                                 <Form.Group controlId="espesor_menor">
                                     <Form.Label>Rango espesor menor</Form.Label>
@@ -830,8 +840,6 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                     </Form.Control>
                                 </Form.Group>
                             </Col>
-                        : ''}
-                        {datos.espesores?
                             <Col>
                                 <Form.Group controlId="espesor_mayor">
                                     <Form.Label>Rango espesor mayor</Form.Label>
@@ -843,36 +851,38 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                     </Form.Control>
                                 </Form.Group>
                             </Col>
+                        </Row>
                         :''}
+                        {datos.empresa_nombre==='Bornay'?<h5 style={styles}>**Si tenemos espesores, solo se permite el punto para poner el decimal, no guardará si ponemos comas</h5>:''}
                         {rodillo.length!==0?
-                            <Col>
-                                <Form.Group controlId="tipo_plano" >
-                                    <Form.Label style={{color:'red'}}>Tipo de plano</Form.Label>
-                                    <Form.Control as="select" 
-                                                    style={{color:'red'}}
-                                                    value={datos.tipo_plano}
-                                                    name='tipo_plano'
-                                                    onChange={handleInputChange}
-                                                    disabled={no_modificar_tipoplano?true:false}>
-                                        <option key={0} value={0}>Ninguno</option>
-                                        {tipos_planos && tipos_planos.map( tipo => {
-                                            return (
-                                            <option key={tipo.id} value={tipo.id}>
-                                                {tipo.nombre}
-                                            </option>
-                                            )
-                                        })}
-                                    </Form.Control>
-                                </Form.Group>
-                            </Col>
+                            <Row>
+                                <Col>
+                                    <Form.Group controlId="tipo_plano" >
+                                        <Form.Label /* style={{color:'red'}} */>Tipo de plano</Form.Label>
+                                        <Form.Control as="select" 
+                                                        //style={{color:'red'}}
+                                                        value={datos.tipo_plano}
+                                                        name='tipo_plano'
+                                                        onChange={handleInputChange}
+                                                        disabled={no_modificar_tipoplano?true:false}>
+                                            <option key={0} value={0}>Ninguno</option>
+                                            {tipos_planos && tipos_planos.map( tipo => {
+                                                return (
+                                                <option key={tipo.id} value={tipo.id}>
+                                                    {tipo.nombre}
+                                                </option>
+                                                )
+                                            })}
+                                        </Form.Control>
+                                    </Form.Group>
+                                </Col>
+                            </Row>
                         :''}
-                    </Row>
                 </React.Fragment>
                 :''}
-                <h5 style={styles}>Si tenemos espesores, solo se permite el punto para poner el decimal, no guardará si ponemos comas</h5>
                 {rodillo.length!==0?
                     <Row style={{marginBottom:'10px'}}>
-                        <Col style={{color:'red'}}>Debemos introducir el tipo de plano y actualizar, si queremos añadir un plano ya creado</Col>
+                        <Col style={{color:'red'}}>**Debemos introducir el tipo de plano y actualizar, si queremos añadir un plano ya creado</Col>
                     </Row>
                 :''}
                 <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>

@@ -42,11 +42,11 @@ const RodInstanciasRectificar = () => {
         })
         .then(res => {
             const updatedLineas = res.data.map(linea => {
-                return {
-                    ...linea,      
-                    fuera: linea.proveedor !== null // Si `proveedor` es null, fuera: será false, de lo contrario true
-                };
-            });
+                    return {
+                        ...linea,      
+                        fuera: linea.proveedor !== null // Si `proveedor` es null, fuera: será false, de lo contrario true
+                    };
+                })
             setLineasRectificacion(updatedLineas);
         })
         .catch(err => {
@@ -62,7 +62,6 @@ const RodInstanciasRectificar = () => {
         })
         .then( res => {
             setProveedores(res.data);
-            console.log('proveedores: ',res.data);
         })
         .catch( err => {
             console.log(err);
