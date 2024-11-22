@@ -25,10 +25,6 @@ const RodTooling = () => {
     const [operaciones, setOperaciones] = useState(null);
     const [secciones, setSecciones] = useState(null);
     const [bancadas, setBancadas] = useState(null);
-
-    useEffect(() => {
-        console.log('ESTO VALE CONJUNTOS_COMPLETADOSCEL____:',conjuntos_completadosCel)
-    }, [conjuntos_completadosCel]);
     
     useEffect(() => { //SEPARAR DATOS QUE ENTRAN A TRAVES DEL FILTRO
         const params = new URLSearchParams(filtro);
@@ -102,7 +98,6 @@ const RodTooling = () => {
 
     useEffect(() => {
         if (celdas) {
-            console.log('tengo celdas!!!!!!!!!!!!!!');
             const datosTablaCel = celdas.flatMap(e => { //en esta operación creamos un array con la información que queremos mostras
                 if (e) {
                     return e.flatMap(c => {
@@ -146,7 +141,6 @@ const RodTooling = () => {
 
     useEffect(() => { //Para tener todas las celdas juntos BD y CT
         if (conjuntosCel && conjuntosCelCT) {
-            console.log('tenemos conjuntosCel y CT');
             const unimos = conjuntosCel.concat(conjuntosCelCT);
             unimos.forEach((element, index) => {
                 element.numCelda = index + 1;
@@ -158,7 +152,6 @@ const RodTooling = () => {
     }, [conjuntosCel, conjuntosCelCT]);
 
     const cogerDatos = async (montajes) => {
-        console.log('estoy cogiendo datos');
         try {
             // Arrays para almacenar la información de todos los montajes
             let todasLasCeldas = [];

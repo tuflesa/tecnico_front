@@ -76,7 +76,6 @@ const RodBancadaCT = ({bancada}) => {
             })
             .then( r => {
                 setOperaciones(r.data);
-                console.log('ESTAS SON LAS OPERACIONES: ', r.data);
             })
             .catch( err => {
                 console.log(err);

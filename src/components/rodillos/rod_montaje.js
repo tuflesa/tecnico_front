@@ -156,8 +156,6 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
     }
 
     const handlerGuardar = () => { //Guardamos el montaje, primero comprobamos si ya existe.
-        console.log('datos del montaje: ', datos)
-        console.log('filtro del montaje: ', filtro)
         if(datos.nombre===''||datos.maquina===''||datos.grupo===''||datos.bancada_ct===''){
             alert('Revisa los datos obligatorios');
         }

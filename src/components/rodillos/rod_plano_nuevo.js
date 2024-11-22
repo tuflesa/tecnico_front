@@ -139,7 +139,6 @@ const PlanoForm = ({show, handleCloseParametros,rodillo_id, rodillo, plano_lengt
                         window.location.href = `/rodillos/editar/${rodillo_id}`;
                     })
                     .catch(err => { 
-                        console.log('DATOS: ',datos);
                         alert('Error al guardar la revisión')
                         console.error(err);
                     });
