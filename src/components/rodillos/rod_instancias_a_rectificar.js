@@ -188,7 +188,7 @@ const RodInstanciasRectificar = () => {
     };
 
     const Actualizo_Proveedor = (linea, proveedor) => {
-        axios.patch(BACKEND_SERVER + `/api/rodillos/listado_linea_rectificacion/${linea.id}/`, { //Actualizamos fecha
+        axios.patch(BACKEND_SERVER + `/api/rodillos/linea_rectificacion/${linea.id}/`, { //Actualizamos proveedor
             proveedor: proveedor,
         }, {
             headers: {
@@ -263,7 +263,6 @@ const RodInstanciasRectificar = () => {
     };
 
     const handleInputChange_archivo = (linea) => async (event) => {
-        alert('estamos en el imput');
         const { files } = event.target;
         const selectedFile = files[0];
         if (selectedFile) {
@@ -570,7 +569,7 @@ const RodInstanciasRectificar = () => {
                                                 <Form.Group controlId="proveedor">
                                                     <Form.Label>Proveedor</Form.Label>
                                                     <Form.Control as="select" 
-                                                                    value={linea.proveedor.id || ""}
+                                                                    value={linea.proveedor?linea.proveedor.id || linea.proveedor:'' || ""}
                                                                     name='proveedor'
                                                                     onChange={handleInputChange_proveedor(linea)}
                                                                     className="dropdown-green">
@@ -592,7 +591,8 @@ const RodInstanciasRectificar = () => {
                                                     <Form.Control as="select" 
                                                                 value={linea.fuera}
                                                                 name='fuera'
-                                                                onChange={handleInputChange_fuera(linea)}>
+                                                                onChange={handleInputChange_fuera(linea)}
+                                                                disabled={linea.fuera}>
                                                         <option key={1} value={true}>Si</option>
                                                         <option key={2} value={false}>No</option>
                                                     </Form.Control>
