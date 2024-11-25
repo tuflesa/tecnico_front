@@ -398,7 +398,7 @@ const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineas
                                 <tbody>
                                     {lineas_rectificacion.map(linea => {
                                         return (
-                                            <tr key={linea.instancia.id}>
+                                            <tr key={linea.instancia.id} style={linea?.proveedor !== null ? { backgroundColor: '#DBFAC9' } : undefined}>
                                                 <td>{linea.instancia.nombre}</td>
                                                 <td>{linea.diametro}</td>
                                                 <td>{linea.diametro_ext}</td> 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Row, Col, Form, Container, Table, Modal, Button } from 'react-bootstrap';
-import { Tools } from 'react-bootstrap-icons';
+import { Tools, CloudDownload } from 'react-bootstrap-icons';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
@@ -21,6 +21,7 @@ const RodInstanciasXaRectificar = () => {
     const [show_datos_nuevos, setShowDatosNuevos] = useState(false);
     const [hoy] = useState(new Date());
     const soyMantenimiento = user['tec-user'].perfil.puesto.nombre==='Mantenimiento'?true:false;
+    const [proveedores, setProveedores] = useState([]);
 
     const [datos, setDatos] = useState({
         id:'',
@@ -32,6 +33,7 @@ const RodInstanciasXaRectificar = () => {
         finalizado: false,
         rectificado_por: '',
         id_instancia:'',
+        proveedor: '',
     });
 
     const [datos_nuevos, setDatosNuevos] = useState({
@@ -62,7 +64,21 @@ const RodInstanciasXaRectificar = () => {
     }, [token, filtro]);
 
     useEffect(()=>{
-        const filtro = `?finalizado=${datos.finalizado}&instancia__id=${datos.id_instancia}&instancia__rodillo__operacion__seccion__maquina__empresa__id=${datos.empresa}&instancia__rodillo__operacion__seccion__maquina__id=${datos.maquina}&instancia__rodillo__operacion__seccion__id=${datos.seccion}&instancia__rodillo__operacion__id=${datos.operacion}&instancia__nombre__icontains=${datos.nombre}&full_name=${datos.rectificado_por?datos.rectificado_por:''}`
+        axios.get(BACKEND_SERVER + `/api/repuestos/proveedor/?de_rectificado=${true}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+                }
+        })
+        .then( res => {
+            setProveedores(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
+
+    useEffect(()=>{
+        const filtro = `?finalizado=${datos.finalizado}&instancia__id=${datos.id_instancia}&proveedor=${datos.proveedor}&instancia__rodillo__operacion__seccion__maquina__empresa__id=${datos.empresa}&instancia__rodillo__operacion__seccion__maquina__id=${datos.maquina}&instancia__rodillo__operacion__seccion__id=${datos.seccion}&instancia__rodillo__operacion__id=${datos.operacion}&instancia__nombre__icontains=${datos.nombre}&full_name=${datos.rectificado_por?datos.rectificado_por:''}`
         actualizaFiltro(filtro);
     },[datos]);
 
@@ -409,6 +425,24 @@ const RodInstanciasXaRectificar = () => {
                         </Form.Control>
                     </Form.Group>
                 </Col>
+                <Col>
+                    <Form.Group controlId="proveedor">
+                        <Form.Label>Proveedor</Form.Label>
+                        <Form.Control as="select" 
+                                        value={datos.proveedor}
+                                        name='proveedor'
+                                        onChange={handleInputChange}>
+                            <option key={0} value={''}>Todos</option>
+                            {proveedores && proveedores.map(proveedor => {
+                                return (
+                                    <option key={proveedor.id} value={proveedor.id}>
+                                        {proveedor.nombre}
+                                    </option>
+                                )
+                            })}
+                        </Form.Control> 
+                    </Form.Group>
+                </Col>
             </Row>
             :''}
             {abrirFiltro? 
@@ -554,20 +588,24 @@ const RodInstanciasXaRectificar = () => {
                                         <td>
                                             <Form.Group controlId="archivo">
                                                 {linea.archivo && (
-                                                    <>
-                                                        <Form.Text className="text-muted d-block">
-                                                            Archivo guardado: 
-                                                            <a href={linea.archivo} target="_blank" rel="noopener noreferrer">
-                                                                {linea.archivo}
-                                                            </a>
-                                                        </Form.Text>
-                                                        <button onClick={() => descargarArchivo(linea.archivo)}>
-                                                            Descargar Archivo
-                                                        </button>
-                                                    </>
+                                                    <Form.Text >
+                                                        Archivo guardado: 
+                                                        <a href={linea.archivo} target="_blank" rel="noopener noreferrer">
+                                                            {linea.archivo.split('/').pop()}
+                                                        </a>
+                                                    </Form.Text>
                                                 )}
+                                                <>
+                                                    <input
+                                                        type="file"
+                                                        id={`file-input-${linea.id}`}
+                                                        style={{ display: "none" }}
+                                                        />
+                                                    <CloudDownload className="mr-3 pencil"  onClick={() => descargarArchivo(linea.archivo)}/>
+                                                    {linea.proveedor?<tr style={{ color: 'red' }}>Proveedor: {linea.proveedor.nombre}</tr>:''}
+                                                </>
                                             </Form.Group>
-                                        </td> 
+                                        </td>
                                         <td><Tools className="mr-3 pencil"  onClick={event =>{FinalizoRodillo(linea)}}/></td>
                                     </tr>
                                 );

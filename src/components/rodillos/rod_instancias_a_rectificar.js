@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Row, Col, Form, Button, Container, Table } from 'react-bootstrap';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
-import { Trash } from 'react-bootstrap-icons';
+import { Trash, CloudDownload, CloudArrowUp} from 'react-bootstrap-icons';
 import axios from 'axios';
 import {invertirFecha} from '../utilidades/funciones_fecha';
 import { line } from 'd3';
@@ -264,17 +264,21 @@ const RodInstanciasRectificar = () => {
     };
 
     const handleInputChange_archivo = (linea) => async (event) => {
+        alert('estamos en el imput');
         const { files } = event.target;
         const selectedFile = files[0];
         if (selectedFile) {
-            // Actualiza la base de datos y espera la URL completa
-            const archivoUrl = await Actualizo_Archivo(linea, selectedFile); // Recibe la URL completa
-            if (archivoUrl) {
-                setLineasRectificacion((prev) =>
-                    prev.map((instancia) =>
-                        instancia.id === linea.id ? { ...instancia, archivo: archivoUrl } : instancia // Guarda la URL completa en lugar del nombre
-                    )
-                );
+            try {
+                const archivoUrl = await Actualizo_Archivo(linea, selectedFile);
+                if (archivoUrl) {
+                    setLineasRectificacion((prev) =>
+                        prev.map((instancia) =>
+                            instancia.id === linea.id ? { ...instancia, archivo: archivoUrl } : instancia
+                        )
+                    );
+                }
+            } catch (error) {
+                console.error('Error al actualizar el archivo:', error);
             }
         }
     };
@@ -510,7 +514,7 @@ const RodInstanciasRectificar = () => {
                                 <th>Fecha estimada</th>
                                 {datos.finalizado !== false && <th style={{ backgroundColor: '#DBFAC9' }}>Fecha Rectificado</th>}
                                 <th>Archivo rectificado</th>
-                                <th>Rectificado fuera</th>
+                                {datos.finalizado === false? <th>Rectificado fuera</th> :''}
                             </tr>
                         </thead>
                         <tbody>
@@ -541,19 +545,33 @@ const RodInstanciasRectificar = () => {
                                         <td>
                                             <Form.Group controlId="archivo">
                                                 {linea.archivo && (
-                                                    <Form.Text className="text-muted d-block">
+                                                    <Form.Text >
                                                         Archivo guardado: 
-                                                        <a href={linea.archivo} target="_blank" rel="noopener noreferrer">{linea.archivo}</a>
+                                                        <a href={linea.archivo} target="_blank" rel="noopener noreferrer">
+                                                            {linea.archivo.split('/').pop()}
+                                                        </a>
                                                     </Form.Text>
                                                 )}
-                                                {linea.finalizado===false?<Form.Control type="file" onChange={handleInputChange_archivo(linea)}
-                                                disabled={linea.finalizado===true?true:false} />:''}
+                                                {linea.finalizado === false ?
+                                                    <>
+                                                        <input
+                                                        type="file"
+                                                        id={`file-input-${linea.id}`}
+                                                        style={{ display: "none" }}
+                                                        onChange={handleInputChange_archivo(linea)}
+                                                        />
+                                                        <CloudArrowUp
+                                                        className="mr-3 pencil"
+                                                        onClick={() => document.getElementById(`file-input-${linea.id}`).click()}
+                                                        />
+                                                    </>
+                                                :''}
                                             </Form.Group>
                                             {linea.fuera === true && 
                                                 <Form.Group controlId="proveedor">
                                                     <Form.Label>Proveedor</Form.Label>
                                                     <Form.Control as="select" 
-                                                                    value={linea.proveedor || ""}
+                                                                    value={linea.proveedor.id || ""}
                                                                     name='proveedor'
                                                                     onChange={handleInputChange_proveedor(linea)}
                                                                     className="dropdown-green">
@@ -569,18 +587,19 @@ const RodInstanciasRectificar = () => {
                                                 </Form.Group>
                                             }
                                         </td>  
-                                        <td>
-                                            <Form.Group controlId="fuera">
-                                                <Form.Control as="select" 
-                                                            value={linea.fuera}
-                                                            name='fuera'
-                                                            onChange={handleInputChange_fuera(linea)}>
-                                                    <option key={1} value={true}>Si</option>
-                                                    <option key={2} value={false}>No</option>
-                                                </Form.Control>
-                                            </Form.Group>
-                                            
-                                        </td>                       
+                                        {datos.finalizado === false?
+                                            <td>
+                                                <Form.Group controlId="fuera">
+                                                    <Form.Control as="select" 
+                                                                value={linea.fuera}
+                                                                name='fuera'
+                                                                onChange={handleInputChange_fuera(linea)}>
+                                                        <option key={1} value={true}>Si</option>
+                                                        <option key={2} value={false}>No</option>
+                                                    </Form.Control>
+                                                </Form.Group>
+                                            </td>
+                                        :''}                       
                                     </tr>
                             )})}
                         </tbody>
