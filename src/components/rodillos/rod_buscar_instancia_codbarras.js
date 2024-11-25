@@ -177,50 +177,7 @@ const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineas
             console.error(err);
         })
 
-    };
-
-    /* const Actualizo_Archivo = async (linea, select_Archivo) => {
-        const formData = new FormData();
-        formData.append('archivo', select_Archivo);
-    
-        try {
-            // Actualiza en instancia_nueva
-            const responseInstancia = await axios.patch(
-                `${BACKEND_SERVER}/api/rodillos/instancia_nueva/${linea.instancia.id}/`,
-                formData,
-                {
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`,
-                        'Content-Type': 'multipart/form-data'
-                    }
-                }
-            );
-    
-            // Luego, actualiza en linea_rectificacion
-            const responseLinea = await axios.patch(
-                `${BACKEND_SERVER}/api/rodillos/linea_rectificacion/${linea.id}/`,
-                formData,
-                {
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`,
-                        'Content-Type': 'multipart/form-data'
-                    }
-                }
-            );
-    
-            // Verifica si ambas respuestas contienen la URL correcta
-            const archivoUrl = responseInstancia.data.archivo || responseLinea.data.archivo;
-            
-            alert('Archivo actualizado correctamente');
-            
-            return archivoUrl; // Devuelve la URL completa para actualizar el estado en el frontend
-        } catch (err) {
-            alert('Error al actualizar el archivo, revisa los logs del servidor');
-            console.error(err);
-        }
-    
-        return null; // Retorna null si hubo error
-    }; */        
+    };    
 
     const handleInputChange_fecha_rectificado = (linea) => (event) => {
         const { value } = event.target;

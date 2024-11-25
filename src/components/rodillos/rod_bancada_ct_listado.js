@@ -219,26 +219,6 @@ const RodBancadaCTListado = () => {
                                             <td>{bancada.seccion.maquina.siglas}</td>
                                             <td><Link title='Detalle/Modificar'to={`/rodillos/bacada_ct_editar/${bancada.id}`}><PencilFill className="mr-3 pencil"/></Link></td>
                                         </tr>}
-                                        {/* {filaSeleccionada === linea.id && show === true && (
-                                            <tr>
-                                                <td colSpan="4">
-                                                        <Table striped bordered hover>
-                                                            <thead>
-                                                                <tr>
-                                                                    <th>Rodillo</th>
-                                                                    <th>Operación</th>
-                                                                    <th>Descripción perfil</th>
-                                                                    <th>Dimensión</th>
-                                                                    <th>Eje</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                {conjuntos}
-                                                            </tbody>
-                                                        </Table>
-                                                </td>
-                                            </tr>
-                                        )} */}
                                     </React.Fragment>
                                 )
                             })}

@@ -127,16 +127,6 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
 
     const ActualizarGrupo = (event) => {
         event.preventDefault();
-        // axios.get(BACKEND_SERVER + `/api/rodillos/grupo_nuevo/?tubo_madre=${datos.tubo_madre}&maquina=${datos.zona}&espesor_1=${datos.espesor_1}&espesor_2=${datos.espesor_2}`,{
-        //     headers: {
-        //         'Authorization': `token ${token['tec-token']}`
-        //       }
-        // })
-        // .then( res => {
-            // if(res.data.length!==0){
-            //     alert('Con esta modificación ya existe un grupo');
-            // }
-            // else{
                 axios.patch(BACKEND_SERVER + `/api/rodillos/grupo_only/${grupo.id}/`, {
                     nombre: datos.nombre,            
                     espesor_1: datos.espesor_1,

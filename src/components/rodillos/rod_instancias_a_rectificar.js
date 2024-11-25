@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Button, Container, Table } from 'react-bootstrap';
+import { Row, Col, Form, Container, Table } from 'react-bootstrap';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
-import { Trash, CloudDownload, CloudArrowUp} from 'react-bootstrap-icons';
+import { CloudArrowUp} from 'react-bootstrap-icons';
 import axios from 'axios';
 import {invertirFecha} from '../utilidades/funciones_fecha';
-import { line } from 'd3';
 
 const RodInstanciasRectificar = () => {
     const [token] = useCookies(['tec-token']);
