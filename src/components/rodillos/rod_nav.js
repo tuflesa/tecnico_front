@@ -33,11 +33,16 @@ const RodNavBar = () => {
                                     <NavDropdown.Item href="/rodillos/bacada_ct">Bancada CT</NavDropdown.Item> 
                                     <NavDropdown.Item href="/rodillos/montaje">Montaje Bancadas</NavDropdown.Item> 
                                     </NavDropdown>
-                                    <NavDropdown title="Rectificados" id="nuevos-dropdown" menualign="right">
+                                    <NavDropdown title="Rectificados Bornay" id="nuevos-dropdown" menualign="right">
                                     <NavDropdown.Item href="/rodillos/nueva_rectificacion">Nueva Orden de Rectificado</NavDropdown.Item> 
                                     <NavDropdown.Item href="/rodillos/lista_rectificacion">Lista Ordenes de Rectificados</NavDropdown.Item> 
                                     <NavDropdown.Item href="/rodillos/instancias_rectificar">Lista Rodillos a Rectificar</NavDropdown.Item>
                                     <NavDropdown.Item href="/rodillos/instancias_xa_rectificar">Lista Rodillos para Rectificar</NavDropdown.Item>
+                                    </NavDropdown>
+                                    <NavDropdown title="Rectificados Tuflesa" id="nuevos-dropdown" menualign="right">
+                                    <NavDropdown.Item href="/rodillos/nueva_rectificacion_tuflesa">Nueva Orden de Rectificado</NavDropdown.Item> 
+                                    <NavDropdown.Item href="/rodillos/lista_rectificacion">Lista Ordenes de Rectificados</NavDropdown.Item> 
+                                    <NavDropdown.Item href="/rodillos/instancias_rectificar">Lista Rodillos a Rectificar</NavDropdown.Item>
                                     </NavDropdown>
                                 </NavDropdown>
                             </Nav>

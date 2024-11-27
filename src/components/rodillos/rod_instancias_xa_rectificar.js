@@ -6,6 +6,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import {invertirFecha} from '../utilidades/funciones_fecha';
 import { constants } from 'buffer';
+import RodCerrarRectificado from './rod_rectificado_cerrar';
 
 const RodInstanciasXaRectificar = () => {
     const [token] = useCookies(['tec-token']);
@@ -22,6 +23,7 @@ const RodInstanciasXaRectificar = () => {
     const [hoy] = useState(new Date());
     const soyMantenimiento = user['tec-user'].perfil.puesto.nombre==='Mantenimiento'?true:false;
     const [proveedores, setProveedores] = useState([]);
+    const [datos_finalizar, setDatosFinalizar] = useState([]);
 
     const [datos, setDatos] = useState({
         id:'',
@@ -34,19 +36,6 @@ const RodInstanciasXaRectificar = () => {
         rectificado_por: '',
         id_instancia:'',
         proveedor: '',
-    });
-
-    const [datos_nuevos, setDatosNuevos] = useState({
-        id_linea:'',
-        diametroF_antiguo: '',
-        rectificado_por: user['tec-user'],
-        diametroExt_antiguo: '',
-        diametroAncho_antiguo: '',
-        diametroF_nuevo: '',
-        diametroExt_nuevo: '',
-        diametroAncho_nuevo: '',
-        rectificacion_id: '',
-        fecha_rectificado: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
     });
 
     useEffect(()=>{
@@ -214,19 +203,12 @@ const RodInstanciasXaRectificar = () => {
         })
     }
 
-    const handleInputChange_nuevo = (event) => {
-        setDatosNuevos({
-            ...datos_nuevos,
-            [event.target.name] : event.target.value
-        })
-    }
-
     const handleInputChange_finalizado = (event) => {
         const { name, value } = event.target;
     
         setDatos((prevDatos) => ({
             ...prevDatos,
-            [name]: name === 'finalizado' ? (value === '' ? undefined : value === 'true') : value  // Convert value to boolean or undefined for finalizado
+            [name]: name === 'finalizado' ? (value === '' ? undefined : value === 'true') : value  // Convierte el valor en booleano o undefined para finalizado
         }));
     };
 
@@ -294,19 +276,7 @@ const RodInstanciasXaRectificar = () => {
     }   
     
     const FinalizoRodillo = (linea) => { 
-        setDatosNuevos({
-            ...datos_nuevos,
-            id_linea:linea.id,
-            rodillo_eje: linea.instancia.rodillo.diametro,
-            rectificacion_id: linea.rectificado,
-            diametroF_antiguo: linea.diametro,
-            rectificado_por: user['tec-user'],
-            diametroExt_antiguo: linea.diametro_ext,
-            diametroAncho_antiguo: linea.ancho,
-            diametroF_nuevo: '',
-            diametroExt_nuevo: '',
-            diametroAncho_nuevo: linea.ancho,
-        });
+        setDatosFinalizar(linea);
         setShowDatosNuevos(true);
     }
 
@@ -314,76 +284,7 @@ const RodInstanciasXaRectificar = () => {
         setabrirFiltro(!abrirFiltro);
     }
 
-    const handleCloseDatos = () => {
-        setShowDatosNuevos(false);
-    }
-
-    const GuardarDatos = () => { 
-        if(parseFloat(datos_nuevos.diametroF_nuevo)>parseFloat(datos_nuevos.diametroExt_nuevo)){
-            alert('Diámetro fondo no puede ser mayor que el diámetro exterior. Por favor, corregir.');
-            return;
-        }
-        else if(parseFloat(datos_nuevos.diametroExt_nuevo)>=parseFloat(datos_nuevos.diametroExt_antiguo) || parseFloat(datos_nuevos.diametroF_nuevo)>=parseFloat(datos_nuevos.diametroF_antiguo)){
-            alert('Diámetro nuevo no puede ser superior o igual al diámetro antiguo. Por favor, corregir.');
-            return;
-        }
-        else if(parseFloat(datos_nuevos.diametroAncho_nuevo)>parseFloat(datos_nuevos.diametroAncho_antiguo)){
-            alert('El ancho nuevo no puede ser superior al ancho antiguo. Por favor, corregir.');
-            return;
-        }
-        else if(datos_nuevos.rodillo_eje>parseFloat(datos_nuevos.diametroF_nuevo) || datos_nuevos.rodillo_eje===parseFloat(datos_nuevos.diametroF_nuevo)){
-            alert('El diámetro de fondo, no puedes ser inferior o igual al eje del rodillo. Por favor corregir.');
-            return;
-        }
-        else{
-            axios.patch(BACKEND_SERVER + `/api/rodillos/linea_rectificacion/${datos_nuevos.id_linea}/`, { //Actualizamos fecha
-                nuevo_diametro: datos_nuevos.diametroF_nuevo,
-                nuevo_diametro_ext:datos_nuevos.diametroExt_nuevo,
-                nuevo_ancho: datos_nuevos.diametroAncho_nuevo,
-                rectificado_por: datos_nuevos.rectificado_por.id,
-                fecha_rectificado: datos_nuevos.fecha_rectificado,
-                finalizado: true,
-            }, {
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                    }     
-            })
-            .then( res => {  
-                axios.patch(BACKEND_SERVER + `/api/rodillos/instancia_nueva/${res.data.instancia}/`, { //Actualizamos los datos de la instancia
-                    diametro: datos_nuevos.diametroF_nuevo,
-                    diametro_ext:datos_nuevos.diametroExt_nuevo,
-                    ancho: datos_nuevos.diametroAncho_nuevo,
-                }, {
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`
-                        }     
-                })
-                .then( res => { 
-                })
-                .catch(err => { 
-                    console.error(err);
-                })
-                const cerrar_ficha = lineas_rectificacion.filter(linea => linea.rectificado === res.data.rectificado && linea.id !== res.data.id);
-                if(cerrar_ficha.length===0){
-                    axios.patch(BACKEND_SERVER + `/api/rodillos/rectificacion_nueva/${datos_nuevos.rectificacion_id}/`, { //Cerramos la ficha
-                        finalizado: true,
-                    }, {
-                        headers: {
-                            'Authorization': `token ${token['tec-token']}`
-                            }     
-                    })
-                    .then( res => {  
-                    })
-                    .catch(err => { 
-                        console.error(err);
-                    })
-                }
-                window.location.reload(); //actualizo página
-            })
-            .catch(err => { 
-                console.error(err);
-            })
-        }
+    const CerrarModal = () => {
         setShowDatosNuevos(false);
     }
 
@@ -557,7 +458,7 @@ const RodInstanciasXaRectificar = () => {
                                 <th>Fecha estimada</th>
                                 {datos.finalizado !== false && <th style={{ backgroundColor: '#DBFAC9' }}>Fecha Rectificado</th>}
                                 <th>Archivo rectificado</th>
-                                <th>Acciones</th>
+                                {datos.finalizado === false && <th>Acciones</th>}
                             </tr>
                         </thead>
                         <tbody>
@@ -606,7 +507,7 @@ const RodInstanciasXaRectificar = () => {
                                                 </>
                                             </Form.Group>
                                         </td>
-                                        <td><Tools className="mr-3 pencil"  onClick={event =>{FinalizoRodillo(linea)}}/></td>
+                                        {datos.finalizado === false && <td><Tools className="mr-3 pencil"  onClick={event =>{FinalizoRodillo(linea)}}/></td>}
                                     </tr>
                                 );
                             })}
@@ -614,102 +515,14 @@ const RodInstanciasXaRectificar = () => {
                     </Table>
                 </Col>                
             </Row>
-            <Modal show={show_datos_nuevos} onHide={handleCloseDatos} backdrop="static" keyboard={ false } animation={false}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Medidas nuevas del rodillo</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Container>
-                        <Row>
-                            <Col>
-                                <Form.Group controlId="rectificado_por">
-                                    <Form.Label>Rectificado por:</Form.Label>
-                                    <Form.Control type="text" 
-                                                name='rectificado_por' 
-                                                value={datos_nuevos.rectificado_por.get_full_name}
-                                                disabled/>
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col>
-                                <Form.Group controlId="diametroFG">
-                                    <Form.Label>Diámetro Fondo Anterior</Form.Label>
-                                    <Form.Control type="text" 
-                                                name='diametroFG' 
-                                                value={datos_nuevos.diametroF_antiguo}
-                                                disabled/>
-                                </Form.Group>
-                            </Col>
-                            <Col>
-                                <Form.Group controlId="nuevo_diametro">
-                                    <Form.Label>Diámetro Fondo Nuevo</Form.Label>
-                                    <Form.Control type="text" 
-                                                name='diametroF_nuevo' 
-                                                onChange={handleInputChange_nuevo} 
-                                                value={datos_nuevos.diametroF_nuevo}
-                                                autoFocus/>
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col>
-                                <Form.Group controlId="diametroFG">
-                                    <Form.Label>Diámetro Exterior Anterior</Form.Label>
-                                    <Form.Control type="text" 
-                                                name='diametroExt_antiguo' 
-                                                value={datos_nuevos.diametroExt_antiguo}
-                                                disabled/>
-                                </Form.Group>
-                            </Col>
-                            <Col>
-                                <Form.Group controlId="diametroExt_nuevo">
-                                    <Form.Label>Diámetro Exterior Nuevo</Form.Label>
-                                    <Form.Control type="text" 
-                                                name='diametroExt_nuevo' 
-                                                onChange={handleInputChange_nuevo} 
-                                                value={datos_nuevos.diametroExt_nuevo}/>
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col>
-                                <Form.Group controlId="diametroAncho_antiguo">
-                                    <Form.Label>Ancho Anterior</Form.Label>
-                                    <Form.Control type="text" 
-                                                name='diametroAncho_antiguo' 
-                                                value={datos_nuevos.diametroAncho_antiguo}
-                                                disabled/>
-                                </Form.Group>
-                            </Col>
-                            <Col>
-                                <Form.Group controlId="diametroAncho_nuevo">
-                                    <Form.Label>Ancho Nuevo</Form.Label>
-                                    <Form.Control type="text" 
-                                                name='diametroAncho_nuevo' 
-                                                onChange={handleInputChange_nuevo} 
-                                                value={datos_nuevos.diametroAncho_nuevo}/>
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col>
-                                <Form.Group controlId="fecha_rectificado">
-                                    <Form.Label>Fecha Rectificado</Form.Label>
-                                    <Form.Control type="text" 
-                                                name='fecha_rectificado' 
-                                                value={invertirFecha(String(datos_nuevos.fecha_rectificado))}
-                                                disabled/>
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                    </Container>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={GuardarDatos}>Grabar</Button>
-                    <Button variant="secondary" onClick={handleCloseDatos}>Cancelar</Button>
-                </Modal.Footer>
-            </Modal>
+            {show_datos_nuevos?
+                <RodCerrarRectificado    
+                        show={show_datos_nuevos}
+                        datos_finalizar={datos_finalizar}
+                        CerrarModal={CerrarModal}
+                        donde={'vengo de xa rectificar'}
+                        lineas_rectificacion={lineas_rectificacion}/>
+            :null}
         </Container>
     )
 }

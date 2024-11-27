@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Row, Col, Form, Button, Container, Table } from 'react-bootstrap';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
-import { Trash } from 'react-bootstrap-icons';
+import { Trash, Tools } from 'react-bootstrap-icons';
 import axios from 'axios';
 import BuscarInstancia from './rod_buscar_instancia';
 import {invertirFecha} from '../utilidades/funciones_fecha';
+import RodCerrarRectificado from './rod_rectificado_cerrar';
 
-const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineasRectificandose, cerrarListRodillos, show_list_rodillos, rectificacion, datos, cambioCodigo, numeroBar, setNumeroBar, rectificados_pendientes}) => {
+const RodBuscarInstanciaCodBarras = ({proveedor, lineas_rectificandose, setLineasRectificandose, cerrarListRodillos, show_list_rodillos, rectificacion, datos, cambioCodigo, numeroBar, setNumeroBar, rectificados_pendientes}) => {
     const [token] = useCookies(['tec-token']);
     const [lineasInstancias, setLineasInstancias] = useState([]);
     const [instancias_maquina, setInstanciaMaq] = useState([]);
@@ -16,13 +17,12 @@ const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineas
     const [user] = useCookies(['tec-user']);
     const soyTecnico = user['tec-user'].perfil.puesto.nombre==='Técnico'||user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:false;
     const soySuperTecnico = user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:false;
+    const [show_datos_nuevos, setShowDatosNuevos] = useState(false);
+    const [linea_a_finalizar, setLineaFinalizar] = useState([]);
 
     useEffect(()=>{
         setLineasRectificacion(lineas_rectificandose);
     }, [token, lineas_rectificandose]);
-
-    useEffect(()=>{
-    }, [token, lineasInstancias]);
 
     useEffect(()=>{
         datos.zona && axios.get(BACKEND_SERVER + `/api/rodillos/instancia_listado/?rodillo__operacion__seccion__maquina__id=${datos.zona}`,{
@@ -100,6 +100,7 @@ const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineas
                     diametro: res.data.diametro,
                     diametro_ext: res.data.diametro_ext,
                     ancho: res.data.ancho,
+                    diametro_centro: res.data.diametro_centro,
                     fecha_estimada: datos.fecha_estimada,
                     num_ejes: res.data.rodillo.num_ejes,
                     archivo: res.data.rodillo.archivo,
@@ -216,7 +217,6 @@ const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineas
                                     }     
                             })
                             .then( res => {         
-                                alert('ELIMINADA TAMBIEN LA FICHA') 
                                 window.location.href=`/rodillos/lista_rectificacion/}`;
 
                             })
@@ -247,7 +247,6 @@ const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineas
                             }     
                     })
                     .then( res => {         
-                        alert('FICHA ELIMINADA') 
                         window.location.href=`/rodillos/lista_rectificacion/}`;
 
                     })
@@ -279,13 +278,15 @@ const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineas
                 formData.append('diametro', lineasInstancias[x].diametro);
                 formData.append('diametro_ext', lineasInstancias[x].diametro_ext);
                 formData.append('ancho', lineasInstancias[x].ancho);
+                formData.append('diametro_centro', lineasInstancias[x].diametro_centro);
                 formData.append('nuevo_diametro', 0);
                 formData.append('nuevo_diametro_ext', 0);
                 formData.append('nuevo_ancho', 0);
+                formData.append('nuevo_diametro_centro', 0);
                 formData.append('rectificado_por', '');
                 formData.append('tipo_rectificado', 'estandar');
                 formData.append('finalizado', false);
-                formData.append('proveedor', '');
+                formData.append('proveedor', proveedor?proveedor:'');
                 formData.append('observaciones', lineasInstancias[x].observaciones?lineasInstancias[x].observaciones:'');
                 // Agrega el archivo solo si existe y es un objeto File
                
@@ -323,14 +324,23 @@ const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineas
         }
     };
 
+    const FinalizoRodillo = (linea) => { 
+        setLineaFinalizar(linea);
+        setShowDatosNuevos(true);
+    }
+
+    const CerrarModal = () => {
+        setShowDatosNuevos(false);
+    }
+
     return(
         <Container className='mt-5 pt-1'>
             <Form.Row className="justify-content-center">                          
                 {datos.linea ?
-                    <Button variant="danger" type="submit" className={'mx-2'} onClick={GuardarLineas}>Mandar Ficha</Button> :null} 
+                    <Button variant="danger" type="submit" className={'mx-2'} onClick={GuardarLineas}>Mandar Orden</Button> :null} 
                 {datos.linea ?
-                    <Button variant="danger" type="submit" className={'mx-2'} onClick={borrar_rectificado}>Eliminar Ficha</Button> :
-                    datos.activado===true && soySuperTecnico? <Button variant="danger" type="submit" className={'mx-2'} onClick={borrar_rectificado}>Eliminar Ficha</Button>: null} 
+                    <Button variant="danger" type="submit" className={'mx-2'} onClick={borrar_rectificado}>Eliminar Orden</Button> :
+                    datos.activado===true && soySuperTecnico && !datos.disabled? <Button variant="danger" type="submit" className={'mx-2'} onClick={borrar_rectificado}>Eliminar Orden</Button>: null} 
             </Form.Row>
             {datos.linea || rectificacion ?
                 <Row>
@@ -341,9 +351,10 @@ const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineas
                             <thead>
                                 <tr>
                                     <th>Nombre</th>
-                                    <th>Ø Fondo</th>                                
-                                    <th>Ø Exterior</th>
-                                    <th>Ancho</th>
+                                    <th colSpan= {2}>Ø Fondo</th>                                
+                                    <th colSpan= {2} >Ø Exterior</th>
+                                    <th colSpan= {2} >Ancho</th>
+                                    <th colSpan= {2} >Ø Centro</th>
                                     <th>Num Rodillos</th>
                                     <th>Fecha estimada</th>
                                     {lineas_rectificacion?<th>Fecha rectificado</th>:''}
@@ -358,8 +369,13 @@ const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineas
                                             <tr key={linea.instancia.id} style={linea?.proveedor !== null ? { backgroundColor: '#DBFAC9' } : undefined}>
                                                 <td>{linea.instancia.nombre}</td>
                                                 <td>{linea.diametro}</td>
+                                                <td style={{ color: 'blue' }}>{linea.nuevo_diametro}</td>
                                                 <td>{linea.diametro_ext}</td> 
-                                                <td>{linea.ancho}</td>  
+                                                <td style={{ color: 'blue' }}>{linea.nuevo_diametro_ext}</td>
+                                                <td>{linea.ancho}</td> 
+                                                <td style={{ color: 'blue' }}>{linea.nuevo_ancho}</td>
+                                                <td>{linea.diametro_centro}</td> 
+                                                <td style={{ color: 'blue' }}>{linea.nuevo_diametro_centro}</td>
                                                 <td>{linea.instancia.rodillo.num_ejes}</td> 
                                                 <td>
                                                     <Form.Group controlId="fecha_estimada">
@@ -385,13 +401,16 @@ const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineas
                                                                 e.target.style.height = `${e.target.scrollHeight}px`; // Ajusta según el contenido
                                                             }}
                                                             placeholder="Observaciones"
-                                                            disabled={disabled}
+                                                            disabled={datos.disabled}
                                                             //style={{ resize: "none" }} // Opcional: impide que el usuario cambie el tamaño manualmente
                                                         />
                                                     </Form.Group>
                                                 </td>
                                                 {soySuperTecnico?  
                                                     <td>
+                                                        {rectificacion.empresa===2 || soySuperTecnico?
+                                                            <Tools className="mr-3 pencil"  onClick={event =>{FinalizoRodillo(linea)}}/>
+                                                        :''}
                                                         <Trash className="mr-3 pencil"  onClick={event => {borrarLinea_rectificado(linea)}} />
                                                     </td>:''}                             
                                             </tr>
@@ -406,8 +425,13 @@ const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineas
                                             <tr>
                                                 <td>{linea.nombre}</td>
                                                 <td>{linea.diametro}</td>
+                                                <td style={{ color: 'blue' }}>{0}</td>
                                                 <td>{linea.diametro_ext}</td> 
-                                                <td>{linea.ancho}</td>  
+                                                <td style={{ color: 'blue' }}>{0}</td>
+                                                <td>{linea.ancho}</td> 
+                                                <td style={{ color: 'blue' }}>{0}</td>
+                                                <td>{linea.diametro_centro}</td>  
+                                                <td style={{ color: 'blue' }}>{0}</td>
                                                 <td>{linea.num_ejes}</td> 
                                                 <td>
                                                     <Form.Group controlId="fecha_estimada">
@@ -463,6 +487,14 @@ const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineas
                         rectificados_pendientes={rectificados_pendientes}
                         lineas_rectificandose={lineas_rectificandose}
                         setLineasRectificandose={setLineasRectificandose}/>
+            :null}
+            {show_datos_nuevos?
+                <RodCerrarRectificado    
+                        show={show_datos_nuevos}
+                        datos_finalizar={linea_a_finalizar}
+                        CerrarModal={CerrarModal}
+                        donde={'vengo de codbarras'}
+                        lineas_rectificacion={lineas_rectificacion}/>
             :null}
         </Container>
     );

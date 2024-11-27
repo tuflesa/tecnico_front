@@ -32,10 +32,10 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
 
     const GuardarInstancia = () => {
         if(parseFloat(diametroFG)>parseFloat(diametroEXT)){
-            alert('El diámetro de fondo no puede ser superior al diámetro exterior. Por favor corregir, gracias');
+            alert('El diámetro de fondo no puede ser superior al diámetro exterior. Por favor corregir.');
         }
         if(parseFloat(rodillo.diametro)>parseFloat(diametroFG) || parseFloat(rodillo.diametro)===parseFloat(diametroFG)){
-            alert('El diámetro de fondo, no puedes ser inferior o igual al eje del rodillo. Por favor corregir, gracias')
+            alert('El diámetro de fondo, no puedes ser inferior o igual al eje del rodillo. Por favor corregir.')
         }
         else if(parseFloat(diametroFG)<parseFloat(diametroEXT) && parseFloat(rodillo.diametro)<parseFloat(diametroFG) && parseFloat(rodillo.diametro)!==parseFloat(diametroFG)||parseFloat(diametroFG)===parseFloat(diametroEXT)){
             if (material) {
@@ -64,7 +64,6 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
                         }     
                     })
                     .then(r => {
-                        alert('Acaba de CREAR una instancia de rodillo, gracias.');
                     })
                     .catch(err => { 
                         console.log(err);
@@ -111,7 +110,7 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
 
     const handleInputactiva_qs = (event) => {
         if(instancia_activa){
-            alert('Ya hay una instancia activa para QS, quitar antes de activar otra, gracias');
+            alert('Ya hay una instancia activa para QS, quitar antes de activar otra.');
         }
         else{
             setActivaQS(event.target.value);
@@ -161,7 +160,7 @@ const RodCrearInstancia = ({show, handlerClose, rodillo_id, rodillo, instancias_
                 <Row>
                     <Col>
                         <Form.Group controlId="diametro_ext">
-                            <Form.Label>Introduce el diámetro de EXT</Form.Label>
+                            <Form.Label>Introduce el diámetro de exterior</Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Ø ext"

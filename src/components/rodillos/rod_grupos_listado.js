@@ -201,7 +201,7 @@ const RodGruposListado = () => {
 
     const BorrarGrupo = (grupo)=>{
         if(grupo.bancadas.length!==0){
-            alert('Ya existen datos relacionados con este grupo, por favor contacte con el administrador. Gracias');
+            alert('Ya existen datos relacionados con este grupo, por favor contacte con el administrador.');
         }
         else{
             axios.delete(BACKEND_SERVER + `/api/rodillos/grupo_only/${grupo.id}/`,{
@@ -210,7 +210,7 @@ const RodGruposListado = () => {
                 }
             })
             .then( res => {
-                alert(grupo.nombre + ', borrado correctamente. Gracias');
+                alert(grupo.nombre + ', borrado correctamente.');
                 window.location.href=`/rodillos/grupos/`;
             })
             .catch( err => {

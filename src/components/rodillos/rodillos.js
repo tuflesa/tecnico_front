@@ -21,6 +21,7 @@ import RodListaRectificaciones from './rod_rectificaciones_listado';
 import RodEditarRectificado from './rod_rectificar_editar';
 import RodInstanciasRectificar from './rod_instancias_a_rectificar';
 import RodInstanciasXaRectificar from './rod_instancias_xa_rectificar';
+import RodRectificacion_TuflesaForm from './Rod_rectificacion_tuflesa_form';
 
 const Rodillos = () => {
     
@@ -46,6 +47,7 @@ const Rodillos = () => {
                 <Route path='/rodillos/editar/:id' component={RodEditar} />
                 <Route path='/rodillos/grupo/nuevo' component={RodGrupoNuevo} />
                 <Route path='/rodillos/nueva_rectificacion' component={RodRectificacionForm} />
+                <Route path='/rodillos/nueva_rectificacion_tuflesa' component={RodRectificacion_TuflesaForm} />
                 <Route path='/rodillos/editar_rectificacion/:id' component={RodEditarRectificado} />
                 <Route path='/rodillos/lista_rectificacion' component={RodListaRectificaciones} />
                 {/* <Route path='/mantenimiento/tareas_trabajador' component={TareasTrabajador} /> */}

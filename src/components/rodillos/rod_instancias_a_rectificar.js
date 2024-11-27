@@ -507,6 +507,8 @@ const RodInstanciasRectificar = () => {
                                 {datos.finalizado !== false && <th style={{ backgroundColor: '#DBFAC9' }}>Nuevo Diámetro Exterior</th>}
                                 <th>Ancho</th>
                                 {datos.finalizado !== false && <th style={{ backgroundColor: '#DBFAC9' }}>Nuevo Ancho</th>}
+                                <th>Centro</th>
+                                {datos.finalizado !== false && <th style={{ backgroundColor: '#DBFAC9' }}>Nuevo Centro</th>}
                                 <th>Num rodillos</th>
                                 {datos.finalizado !== false && <th style={{ backgroundColor: '#DBFAC9' }}>Rectificado por</th>}
                                 <th>Fecha estimada</th>
@@ -527,6 +529,8 @@ const RodInstanciasRectificar = () => {
                                         {datos.finalizado !== false && <td style={{ backgroundColor: '#DBFAC9' }}>{linea.nuevo_diametro_ext}</td>}
                                         <td>{linea.ancho}</td>
                                         {datos.finalizado !== false && <td style={{ backgroundColor: '#DBFAC9' }}>{linea.nuevo_ancho}</td>} 
+                                        <td>{linea.centro}</td>
+                                        {datos.finalizado !== false && <td style={{ backgroundColor: '#DBFAC9' }}>{linea.nuevo_centro}</td>}
                                         <td>{linea.instancia.rodillo.num_ejes}</td> 
                                         {datos.finalizado !== false && <td style={{ backgroundColor: '#DBFAC9' }}>{linea.rectificado_por?linea.rectificado_por.get_full_name:''}</td>} 
                                         <td>

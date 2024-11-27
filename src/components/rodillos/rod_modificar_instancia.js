@@ -38,10 +38,10 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
 
     const ModificarInstancia = () => {
         if(parseFloat(datos.diametroFG)>parseFloat(datos.diametroEXT)){
-            alert('El diámetro de fondo no puede ser superior al diámetro exterior. Por favor corregir, gracias');
+            alert('El diámetro de fondo no puede ser superior al diámetro exterior. Por favor corregir.');
         }
         else if(rodillo_eje>parseFloat(datos.diametroFG) || rodillo_eje===parseFloat(datos.diametroFG)){
-            alert('El diámetro de fondo, no puedes ser inferior o igual al eje del rodillo. Por favor corregir, gracias')
+            alert('El diámetro de fondo, no puedes ser inferior o igual al eje del rodillo. Por favor corregir.')
         }
         else{
             axios.patch(BACKEND_SERVER + `/api/rodillos/instancia_nueva/${instancia.id}/`, {
@@ -67,7 +67,7 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
                         }     
                     })
                     .then(r => {
-                        alert('Acaba de ANULAR una instancia de rodillo, gracias.');
+                        alert('Acaba de ANULAR una instancia de rodillo.');
                     })
                     .catch(err => { 
                         console.log(err);
@@ -91,7 +91,7 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
 
     const handleInputChange_qs = (event) => {
         if(event.target.value==='on' && instancia_activa && instancia_activa_id[0].id!==instancia.id){
-            alert('Ya hay una instancia activa para QS, quitar antes de activar otra, gracias');
+            alert('Ya hay una instancia activa para QS, quitar antes de activar otra.');
         }
         else{
             setDatos({
@@ -208,6 +208,20 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
                                 type="text"
                                 placeholder="Ø centro"
                                 value={datos.diametroCentro}
+                                onChange={handleInputChange}
+                            />
+                        </Form.Group>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
+                        <Form.Group controlId="ancho">
+                            <Form.Label>Introduce el ancho</Form.Label>
+                            <Form.Control
+                                name="ancho"
+                                type="text"
+                                placeholder="Introduce el Ø ancho"
+                                value={datos.ancho}
                                 onChange={handleInputChange}
                             />
                         </Form.Group>
