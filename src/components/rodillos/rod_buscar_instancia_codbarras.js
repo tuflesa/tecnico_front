@@ -7,6 +7,7 @@ import axios from 'axios';
 import BuscarInstancia from './rod_buscar_instancia';
 import {invertirFecha} from '../utilidades/funciones_fecha';
 import RodCerrarRectificado from './rod_rectificado_cerrar';
+import JSZip from 'jszip';
 
 const RodBuscarInstanciaCodBarras = ({proveedor, lineas_rectificandose, setLineasRectificandose, cerrarListRodillos, show_list_rodillos, rectificacion, datos, cambioCodigo, numeroBar, setNumeroBar, rectificados_pendientes}) => {
     const [token] = useCookies(['tec-token']);
@@ -324,6 +325,72 @@ const RodBuscarInstanciaCodBarras = ({proveedor, lineas_rectificandose, setLinea
         }
     };
 
+    const DescargarPlanos = async () => { 
+        let archivos = []; 
+        // Paso 1: Acumulando las URLs de los archivos
+        for (let x = 0; x < lineas_rectificandose.length; x++) {
+            const rodilloId = lineas_rectificandose[x].instancia.rodillo.id;
+            const rodilloNombre = lineas_rectificandose[x].instancia.rodillo.nombre;
+            try {
+                const res = await axios.get(BACKEND_SERVER + `/api/rodillos/revision_planos_reciente/?plano__rodillos=${rodilloId}&plano__xa_rectificado=true`, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }
+                });
+                if (res.data && res.data.length > 0) { // Verificamos si hay archivo
+                    const archivo = res.data[0].archivo; // Recoge la URL
+                    archivos.push(`${BACKEND_SERVER}${archivo}`); // Agregar la URL
+                } else { //Si no hay archivo.
+                    alert(`El rodillo con Nombre:  ${rodilloNombre} no tiene archivo asociado. Revisa el registro.`);
+                    break;
+                }
+
+            } catch (err) {
+                console.log('Error al obtener los planos:', err);
+            }
+        }
+        // Paso 2: Descargar los archivos y agregarlos al zip
+        if (archivos.length === lineas_rectificandose.length) {
+            const zip = new JSZip();  // Crear el objeto zip
+            let archivosDescargados = 0; // Contador de archivos descargados
+            for (let i = 0; i < archivos.length; i++) {
+                const archivoUrl = archivos[i];
+                try {
+                    const response = await axios.get(archivoUrl, { responseType: 'blob' }); // Descargar el archivo
+                    const fileName = archivoUrl.split('/').pop(); // Obtener el nombre del archivo
+                    zip.file(fileName, response.data); // Agregar el archivo al zip
+                    archivosDescargados++; // Incrementar contador
+                } catch (err) {
+                    console.log('Error al descargar el archivo:', err);
+                }
+            }
+            // Paso 3: Crear el archivo zip y permitir la descarga automática
+            if (archivosDescargados > 0) {
+                zip.generateAsync({ type: 'blob' })
+                    .then(function(content) {
+                        // El Blob es necesario para la descarga automáticamente
+                        const blob = content;
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement("a"); // Crear un enlace invisible para la descarga automática
+                        a.style.display = "none"; // Escondemos el enlace
+                        a.href = url;
+                        a.download = 'planos.zip'; // Nombre del archivo zip
+                        document.body.appendChild(a);// Agregar el enlace al DOM
+                        a.click();
+                        window.URL.revokeObjectURL(url); // Liberar el objeto URL
+                        document.body.removeChild(a); // Eliminar el enlace del DOM
+                    })
+                    .catch(function(err) {
+                        console.log('Error al generar el archivo zip:', err);
+                    });
+            } else {
+                console.log('No se han encontrado archivos para agregar al zip.');
+            }
+        } else {
+            console.log('No se encontraron archivos en la respuesta del get.');
+        }
+    };
+
     const FinalizoRodillo = (linea) => { 
         setLineaFinalizar(linea);
         setShowDatosNuevos(true);
@@ -341,6 +408,8 @@ const RodBuscarInstanciaCodBarras = ({proveedor, lineas_rectificandose, setLinea
                 {datos.linea ?
                     <Button variant="danger" type="submit" className={'mx-2'} onClick={borrar_rectificado}>Eliminar Orden</Button> :
                     datos.activado===true && soySuperTecnico && !datos.disabled? <Button variant="danger" type="submit" className={'mx-2'} onClick={borrar_rectificado}>Eliminar Orden</Button>: null} 
+                {datos.activado ?
+                    <Button variant="primary" type="submit" className={'mx-2'} onClick={DescargarPlanos}>Descargar planos</Button> :null} 
             </Form.Row>
             {datos.linea || rectificacion ?
                 <Row>
@@ -402,7 +471,7 @@ const RodBuscarInstanciaCodBarras = ({proveedor, lineas_rectificandose, setLinea
                                                             }}
                                                             placeholder="Observaciones"
                                                             disabled={datos.disabled}
-                                                            //style={{ resize: "none" }} // Opcional: impide que el usuario cambie el tamaño manualmente
+                                                            //style={{ resize: "none" }} // impide que el usuario cambie el tamaño manualmente
                                                         />
                                                     </Form.Group>
                                                 </td>
@@ -456,7 +525,6 @@ const RodBuscarInstanciaCodBarras = ({proveedor, lineas_rectificandose, setLinea
                                                                 e.target.style.height = `${e.target.scrollHeight}px`; // Ajusta según el contenido
                                                             }}
                                                             placeholder="Observaciones"
-                                                            //style={{ resize: "none" }} // Opcional: impide que el usuario cambie el tamaño manualmente
                                                         />
                                                     </Form.Group>
                                                 </td>
