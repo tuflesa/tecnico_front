@@ -55,8 +55,8 @@ const RodNavBar = () => {
                                         <NavDropdown.Item href="/rodillos/lista">Rodillos</NavDropdown.Item>
                                         </NavDropdown>
                                         <NavDropdown title="Rectificados" id="nuevos-dropdown" menualign="right">
-                                        <NavDropdown.Item href="/rodillos/nueva_rectificacion">Nueva Ficha Rectificado</NavDropdown.Item> 
-                                        <NavDropdown.Item href="/rodillos/lista_rectificacion">Lista Fichas Rectificados</NavDropdown.Item> 
+                                        <NavDropdown.Item href="/rodillos/nueva_rectificacion">Nueva Orden Rectificado</NavDropdown.Item> 
+                                        <NavDropdown.Item href="/rodillos/lista_rectificacion">Lista Ordenes Rectificados</NavDropdown.Item> 
                                         <NavDropdown.Item href="/rodillos/instancias_xa_rectificar">Lista Rodillos para Rectificar</NavDropdown.Item>
                                         </NavDropdown>
                                     </NavDropdown>
@@ -69,8 +69,8 @@ const RodNavBar = () => {
                                         <NavDropdown.Item href="/rodillos/lista">Rodillos</NavDropdown.Item>
                                         </NavDropdown>
                                         <NavDropdown title="Rectificados" id="nuevos-dropdown" menualign="right">
-                                        <NavDropdown.Item href="/rodillos/nueva_rectificacion">Nueva Ficha Rectificado</NavDropdown.Item> 
-                                        <NavDropdown.Item href="/rodillos/lista_rectificacion">Lista Fichas Rectificados</NavDropdown.Item> 
+                                        <NavDropdown.Item href="/rodillos/nueva_rectificacion">Nueva orden rectificado</NavDropdown.Item> 
+                                        <NavDropdown.Item href="/rodillos/lista_rectificacion">Lista ordenes rectificados</NavDropdown.Item> 
                                         </NavDropdown>
                                     </NavDropdown>
                                 </Nav>

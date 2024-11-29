@@ -804,7 +804,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                             </Form.Group>
                         </Col>
                     </Row>
-                    {datos.empresa_nombre==='Bornay'?
+                    {datos.empresa_nombre==='Bornay S.L'?
                         <Row>
                             <Col>
                                 <Form.Group controlId="archivo">
@@ -819,7 +819,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                             </Col>
                         </Row>
                     :''}
-                    {datos.empresa_nombre==='Bornay'?
+                    {datos.empresa_nombre==='Bornay S.L'?
                         <Row>
                             <Col>
                                 <Form.Group className="mb-3" controlId="espesores">
@@ -857,7 +857,8 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                             </Col>
                         </Row>
                         :''}
-                        {datos.empresa_nombre==='Bornay'?<h5 style={styles}>**Si tenemos espesores, solo se permite el punto para poner el decimal, no guardará si ponemos comas</h5>:''}
+                        {console.log(datos.empresa_nombre)}
+                        {datos.empresa_nombre==='Bornay S.L'?<h5 style={styles}>**Si tenemos espesores, solo se permite el punto para poner el decimal, no guardará si ponemos comas</h5>:''}
                         {rodillo.length!==0?
                             <Row>
                                 <Col>

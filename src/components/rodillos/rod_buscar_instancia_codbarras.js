@@ -408,7 +408,7 @@ const RodBuscarInstanciaCodBarras = ({proveedor, lineas_rectificandose, setLinea
                 {datos.linea ?
                     <Button variant="danger" type="submit" className={'mx-2'} onClick={borrar_rectificado}>Eliminar Orden</Button> :
                     datos.activado===true && soySuperTecnico && !datos.disabled? <Button variant="danger" type="submit" className={'mx-2'} onClick={borrar_rectificado}>Eliminar Orden</Button>: null} 
-                {datos.activado ?
+                {datos.activado && soySuperTecnico?
                     <Button variant="primary" type="submit" className={'mx-2'} onClick={DescargarPlanos}>Descargar planos</Button> :null} 
             </Form.Row>
             {datos.linea || rectificacion ?
@@ -542,7 +542,7 @@ const RodBuscarInstanciaCodBarras = ({proveedor, lineas_rectificandose, setLinea
             <h5 className="text-right">Numero total de rodillos a rectificar: {sumar_ejes}</h5>
             <Form.Row className="justify-content-center">                              
                 {datos.linea || rectificacion && lineas_rectificacion.length===0 ?
-                    <Button variant="danger" type="submit" className={'mx-2'} onClick={GuardarLineas}>Mandar Ficha</Button> :null} 
+                    <Button variant="danger" type="submit" className={'mx-2'} onClick={GuardarLineas}>Mandar Orden</Button> :null} 
             </Form.Row>
             {show_list_rodillos?
                 <BuscarInstancia    
