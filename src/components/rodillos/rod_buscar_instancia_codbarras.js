@@ -408,7 +408,7 @@ const RodBuscarInstanciaCodBarras = ({proveedor, lineas_rectificandose, setLinea
                 {datos.linea ?
                     <Button variant="danger" type="submit" className={'mx-2'} onClick={borrar_rectificado}>Eliminar Orden</Button> :
                     datos.activado===true && soySuperTecnico && !datos.disabled? <Button variant="danger" type="submit" className={'mx-2'} onClick={borrar_rectificado}>Eliminar Orden</Button>: null} 
-                {datos.activado && soySuperTecnico?
+                {datos.activado && soySuperTecnico && lineas_rectificacion?
                     <Button variant="primary" type="submit" className={'mx-2'} onClick={DescargarPlanos}>Descargar planos</Button> :null} 
             </Form.Row>
             {datos.linea || rectificacion ?
