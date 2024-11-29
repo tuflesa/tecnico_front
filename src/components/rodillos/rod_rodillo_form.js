@@ -392,11 +392,12 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     };
 
     const handleInputChangeEmpresa = (event) => {
-        const [Id, nombre] = event.target.value.split(',');      
-        setDatos((prevDatos)=>({
+        const selectedValue = event.target.value;
+        const selectedEmpresa = empresas.find((empresa) => empresa.id.toString() === selectedValue);
+        setDatos((prevDatos) => ({
             ...prevDatos,
-            empresa : parseInt(Id),
-            nombre_empresa: nombre,
+            empresa: selectedValue,
+            empresa_nombre: selectedEmpresa ? selectedEmpresa.nombre : "",
         }));
     };
 
@@ -438,7 +439,6 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 .then( res => { 
                     setRodilloNuevo(res.data);
                     añadirInstancia();
-                    //window.location.href = `/rodillos/editar/${res.data.id}`; 
                 })
                 .catch(err => { 
                     console.log(err);
@@ -614,7 +614,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                             <Form.Label>Empresa *</Form.Label>
                             <Form.Control as="select"  
                                         name='empresa' 
-                                        value={`${datos.empresa},${datos.empresa_nombre}`}
+                                        value={datos.empresa}
                                         onChange={handleInputChangeEmpresa}
                                         disabled={rodillo.id?true:false}
                                         placeholder="Empresa"
@@ -622,9 +622,9 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                         <option key={0} value={''}>Todas</option>    
                                         {empresas && empresas.map( empresa => {
                                             return (
-                                            <option key={empresa.id} value={`${empresa.id},${empresa.nombre}`}>
+                                            <option key={empresa.id} value={empresa.id}>
                                                 {empresa.nombre}
-                                            </option>
+                                             </option>
                                             )
                                         })}
                             </Form.Control>
@@ -819,7 +819,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                             </Col>
                         </Row>
                     :''}
-                    {datos.espesores && datos.empresa_nombre==='Bornay'?
+                    {datos.empresa_nombre==='Bornay'?
                         <Row>
                             <Col>
                                 <Form.Group className="mb-3" controlId="espesores">
@@ -829,7 +829,11 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                                 onChange = {handleInputespesores} />
                                 </Form.Group>
                             </Col>
-                            <Col>
+                        </Row>
+                    :''}
+                    {datos.espesores?
+                        <Row>
+                            <Col style={{ maxWidth: '200px' }}>
                                 <Form.Group controlId="espesor_menor">
                                     <Form.Label>Rango espesor menor</Form.Label>
                                     <Form.Control type="text" 
@@ -840,7 +844,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                     </Form.Control>
                                 </Form.Group>
                             </Col>
-                            <Col>
+                            <Col style={{ maxWidth: '200px' }}>
                                 <Form.Group controlId="espesor_mayor">
                                     <Form.Label>Rango espesor mayor</Form.Label>
                                     <Form.Control type="text" 
