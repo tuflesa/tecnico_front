@@ -114,7 +114,7 @@ const RodPlanosRodillo = ({rodillo, rodillo_nuevo, tipo_plano_id}) => {
         var confirmacion = window.confirm('¿Confirma que desea eliminar este plano, en este rodillo?');
         if(confirmacion){
             for(var x=0;x<plano.rodillos.length;x++){
-                if(plano.rodillos[x]===rodillo_nuevo.id){
+                if(plano.rodillos[x]===rodillo.id){
                     plano.rodillos.splice(x,1); //elimina el elemento que cumple la condición.
                 }
             }
