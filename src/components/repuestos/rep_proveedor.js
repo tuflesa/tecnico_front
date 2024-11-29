@@ -174,7 +174,8 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
                             <Col>
                                 <Form.Group id="descripcion_proveedor">
                                     <Form.Label>Descripción Proveedor</Form.Label>
-                                    <Form.Control type="text" 
+                                    <Form.Control as="textarea"
+                                                rows={2}
                                                 name='descripcion_proveedor' 
                                                 value={datos.descripcion_proveedor}
                                                 onChange={handleInputChange} 
@@ -182,6 +183,8 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
                                     />
                                 </Form.Group>
                             </Col>
+                        </Row>
+                        <Row>
                             <Col>
                                 <Form.Group id="modelo_proveedor">
                                     <Form.Label>Modelo Proveedor</Form.Label>

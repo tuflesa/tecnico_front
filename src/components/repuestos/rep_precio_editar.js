@@ -123,7 +123,8 @@ const RepPrecioEdit = ({show_modificar, updateRepuesto, setShowModificarProveedo
                             <Col>
                                 <Form.Group id="descripcion_proveedor">
                                     <Form.Label>Descirpción Proveedor</Form.Label>
-                                    <Form.Control type="text" 
+                                    <Form.Control as="textarea"
+                                                rows={2}
                                                 name='descripcion_proveedor' 
                                                 value={datos.descripcion_proveedor}
                                                 onChange={handleInputChange} 
@@ -131,6 +132,8 @@ const RepPrecioEdit = ({show_modificar, updateRepuesto, setShowModificarProveedo
                                     />
                                 </Form.Group>
                             </Col>
+                        </Row>
+                        <Row>
                             <Col>
                                 <Form.Group id="modelo_proveedor">
                                     <Form.Label>Modelo Proveedor</Form.Label>
