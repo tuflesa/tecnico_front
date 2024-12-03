@@ -445,7 +445,7 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicional
                             </View>
                             <View style={styles.section4}>
                                 <Text style={{color: 'grey', marginTop: 15}}>Billing address: </Text>
-                                <Text>{pedido.empresa.id===2?'TUBOS Y FLEJES SLU.':pedido.empresa.nombre}</Text>
+                                <Text>{pedido.empresa.id===2?'TUBOS Y FLEJES SLU.':pedido.empresa.id===3?'Comercial Alicantina Siderúrgica S.L.':pedido.empresa.nombre}</Text>
                                 <Text>{pedido.empresa.cif}</Text>
                                 <Text>{pedido.empresa.direccion}</Text>
                                 <Text>{pedido.empresa.poblacion}</Text>
@@ -455,7 +455,7 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicional
                             </View>
                             <View style={styles.section4}>
                                 <Text style={{color: 'grey', marginTop: 15}}>Shipping address: </Text>
-                                <Text>{pedido.empresa.id===2?'TUBOS Y FLEJES SLU.':pedido.empresa.nombre}</Text>
+                                <Text>{pedido.empresa.id===2?'TUBOS Y FLEJES SLU.':pedido.empresa.id===3?'Comercial Alicantina Siderúrgica S.L.':pedido.empresa.nombre}</Text>
                                 {/* <Text>{direccion_envio.cif}</Text> */}
                                 <Text>{direccion_envio.direccion}</Text>
                                 <Text>{direccion_envio.poblacion}</Text>
