@@ -366,7 +366,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         setDatos({
             ...datos,
             [event.target.name] : event.target.value,
-            nombre: '',
+            //nombre: '',
         })
     }
 
@@ -599,12 +599,11 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                     <Form.Group controlId="nombre">
                         <Form.Label>Nombre del rodillo</Form.Label>
                         <Form.Control type="text" 
-                                    className="input-auto-width"
+                                    //className="input-auto-width"
                                     name='nombre' 
                                     value={datos.nombre}
                                     onChange={handleInputChange} 
                                     placeholder="Nombre Rodillo"
-                                    disabled
                         />
                     </Form.Group>
                 </Row>

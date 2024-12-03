@@ -225,6 +225,9 @@ const RodBuscarInstanciaCodBarras = ({proveedor, lineas_rectificandose, setLinea
                                 console.error(err);
                             })
                     }
+                    else{
+                        window.location.reload();
+                    }
                     
                 })
                 .catch(err => { 
@@ -264,6 +267,7 @@ const RodBuscarInstanciaCodBarras = ({proveedor, lineas_rectificandose, setLinea
     const borrarLinea = (linea) => {
         const newLineas = lineasInstancias.filter( l => l.id !== linea.id);
         setLineasInstancias(newLineas);
+        window.location.reload();
     }
 
     const GuardarLineas = async () => {
@@ -338,10 +342,13 @@ const RodBuscarInstanciaCodBarras = ({proveedor, lineas_rectificandose, setLinea
                     }
                 });
                 if (res.data && res.data.length > 0) { // Verificamos si hay archivo
-                    const archivo = res.data[0].archivo; // Recoge la URL
-                    archivos.push(`${BACKEND_SERVER}${archivo}`); // Agregar la URL
+                    for(let y = 0; y< res.data.length; y++){
+                        const archivo = res.data[y].archivo; // Recoge la URL
+                        archivos.push(`${BACKEND_SERVER}${archivo}`); // Agregar la URL
+                    }
                 } else { //Si no hay archivo.
                     alert(`El rodillo con Nombre:  ${rodilloNombre} no tiene archivo asociado. Revisa el registro.`);
+                    archivos=[];
                     break;
                 }
 
@@ -350,7 +357,7 @@ const RodBuscarInstanciaCodBarras = ({proveedor, lineas_rectificandose, setLinea
             }
         }
         // Paso 2: Descargar los archivos y agregarlos al zip
-        if (archivos.length === lineas_rectificandose.length) {
+        if (archivos.length >0) {
             const zip = new JSZip();  // Crear el objeto zip
             let archivosDescargados = 0; // Contador de archivos descargados
             for (let i = 0; i < archivos.length; i++) {
@@ -387,7 +394,7 @@ const RodBuscarInstanciaCodBarras = ({proveedor, lineas_rectificandose, setLinea
                 console.log('No se han encontrado archivos para agregar al zip.');
             }
         } else {
-            console.log('No se encontraron archivos en la respuesta del get.');
+            console.log('No hay archivos, revisar el get.');
         }
     };
 
