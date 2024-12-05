@@ -11,7 +11,6 @@ import logo from '../../assets/logo_bornay.svg';
 const RodLista = () => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
-    //const [show, setShow] = useState(false);
     const [count, setCount] = useState(null);
     const [lista_rodillos, setListaRodillos] = useState(null);
     const [filtro, setFiltro] = useState(`?operacion__seccion__maquina__empresa__id=${user['tec-user'].perfil.empresa.id}`);
@@ -85,8 +84,6 @@ const RodLista = () => {
         setFiltro(str);
     }
 
-    //const handleClose = () => setShow(false);
-
     return (
         <Container className='mt-5'>
             <img src ={logo} width="200" height="200"></img>
@@ -125,6 +122,7 @@ const RodLista = () => {
                         </thead>
                         <tbody>
                             { lista_rodillos && lista_rodillos.map( lista => {
+                                {console.log('No sé que mando aquí: ',lista)}
                                 return (
                                     <tr key={lista.id}>
                                         <td>{lista.id}</td>

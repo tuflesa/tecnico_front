@@ -8,7 +8,6 @@ import RodParametrosEstandar from './rod_parametros_estandar';
 import logo from '../../assets/logo_bornay.svg';
 import RodPlanosRodillo from './rod_rodillo_planos';
 import RodInstanciasRodillo from './rod_rodillo_instancias';
-import RodCrearInstancia from './rod_crear_instancia';
 
 const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [token] = useCookies(['tec-token']);
@@ -596,7 +595,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 <h5 className='mt-5'>Editar Rodillo</h5>}
             <Form >
                 <Row>
-                    <Form.Group controlId="nombre">
+                    <Form.Group as={Col} md={6} controlId="nombre">
                         <Form.Label>Nombre del rodillo</Form.Label>
                         <Form.Control type="text" 
                                     //className="input-auto-width"
@@ -818,7 +817,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                             </Col>
                         </Row>
                     :''}
-                    {datos.empresa_nombre==='Bornay S.L'?
+                    {/* {datos.empresa_nombre==='Bornay S.L'? */}
                         <Row>
                             <Col>
                                 <Form.Group className="mb-3" controlId="espesores">
@@ -829,7 +828,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                 </Form.Group>
                             </Col>
                         </Row>
-                    :''}
+                    {/* :''} */}
                     {datos.espesores?
                         <Row>
                             <Col style={{ maxWidth: '200px' }}>
@@ -901,13 +900,6 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
 
             <RodInstanciasRodillo
                     rodillo={rodillo}/>
-
-            <RodCrearInstancia show={show_instancia}
-                            setShow={setShowInstancia}
-                            rodillo_id={rodillo_nuevo.id}
-                            rodillo={rodillo_nuevo}
-                            handleClose={cerrarInstancia}
-                            instancias_length={1}/>
             
             <RodParametrosEstandar showPa={showParametros}
                            tipo_plano_id={datos.tipo_plano}
