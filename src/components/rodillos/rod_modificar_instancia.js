@@ -10,6 +10,7 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
     const [token] = useCookies(['tec-token']);
     const [materiales, setMateriales] = useState([]);
     const [posiciones, setPosiciones] = useState([]);
+    const [posiciones_filtradas, setPosiciones_filtradas] = useState([]);
     const [datos, setDatos] = useState({
         id: instancia? instancia.id:null,
         nombre: instancia?instancia.nombre:'',
@@ -46,13 +47,32 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
                 'Authorization': `token ${token['tec-token']}`
                 }
         })
-        .then( res => {
+        .then((res) => {
+            let posicionesFiltradas = [];
+            if (instancias_activas) {
+                // Filtramos las posiciones excluyendo las ya activas
+                posicionesFiltradas = res.data.filter(
+                    (posicion) =>
+                        !instancias_activas.some(
+                            (instancia) => instancia.posicion === posicion.id
+                        )
+                );
+
+                // Agregamos explícitamente la posición que coincida con datos.posicion si existe
+                const posicionDatos = res.data.find(
+                    (posicion) => posicion.id === datos.posicion
+                );
+                if (posicionDatos && !posicionesFiltradas.some((p) => p.id === datos.posicion)) {
+                    posicionesFiltradas.push(posicionDatos);
+                }
+            }
+            setPosiciones_filtradas(posicionesFiltradas);
             setPosiciones(res.data);
         })
-        .catch( err => {
+        .catch((err) => {
             console.log(err);
         });
-    }, [token]);
+    }, [token, show, datos.posicion]);
 
     const GuardarInstancia = () => {
         if(parseFloat(datos.diametroFG)>parseFloat(datos.diametroEXT)){
@@ -72,7 +92,7 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
                     diametro_ext: datos.diametroEXT,
                     diametro_centro: datos.diametroCentro,
                     activa_qs: datos.activa_qs,
-                    obsoleta: datos.obsoleta,
+                    obsoleta: false,
                     ancho: datos.ancho,
                     posicion: datos.posicion,
                 }, {
@@ -195,7 +215,9 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
             diametroEXT: '',
             activa_qs:'',
             obsoleta: '',
+            posicion: '',
         })
+        instancia=[];
         handlerClose();
     }
 
@@ -311,14 +333,18 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
                                         checked = {datos.activa_qs}
                                         onChange = {handleInputChange_qs} />
                         </Form.Group>
-                        
                         {datos.activa_qs && <Form.Group controlId="posicion">
                             <Form.Label>Selecciona posición</Form.Label>
-                            <Form.Control as="select" value={datos.posicion} name="posicion" onChange={handleInputChange}>
+                            <Form.Control 
+                                        as="select" 
+                                        value={datos.posicion} 
+                                        name="posicion" 
+                                        onChange={handleInputChange}>
                                 <option value="">Selecciona una opción</option> {/* Opción predeterminada */}
-                                {posiciones.map((posicion, index) => (
+                                {posiciones_filtradas.map((posicion, index) => (
+                               //{(datos.posicion ? posiciones : instancias_activas ? posiciones_filtradas: posiciones).map((posicion, index) => (
                                     <option key={index} value={posicion.id}>
-                                        {posicion.nombre}
+                                    {posicion.nombre}
                                     </option>
                                 ))}
                             </Form.Control>

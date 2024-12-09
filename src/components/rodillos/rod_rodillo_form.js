@@ -8,6 +8,7 @@ import RodParametrosEstandar from './rod_parametros_estandar';
 import logo from '../../assets/logo_bornay.svg';
 import RodPlanosRodillo from './rod_rodillo_planos';
 import RodInstanciasRodillo from './rod_rodillo_instancias';
+import RodModificarInstancia from './rod_modificar_instancia';
 
 const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [token] = useCookies(['tec-token']);
@@ -412,7 +413,6 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 alert('Este rodillo ya existe');
             }
             else{
-                
                 const formData = new FormData();
                 formData.append('nombre', datos.nombre);
                 formData.append('operacion', parseInt(datos.operacion));
@@ -521,6 +521,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
 
     const cerrarInstancia = () => {
         setShowInstancia(false);
+        window.location.href = `/rodillos/editar/${rodillo_nuevo.id}`;
     }
 
     const añadirParametros = () => {
@@ -855,7 +856,6 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                             </Col>
                         </Row>
                         :''}
-                        {console.log(datos.empresa_nombre)}
                         {datos.empresa_nombre==='Bornay S.L'?<h5 style={styles}>**Si tenemos espesores, solo se permite el punto para poner el decimal, no guardará si ponemos comas</h5>:''}
                         {rodillo.length!==0?
                             <Row>
@@ -900,6 +900,10 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
 
             <RodInstanciasRodillo
                     rodillo={rodillo}/>
+
+            <RodModificarInstancia show={show_instancia}
+                        rodillo={rodillo_nuevo}
+                        handlerClose={cerrarInstancia}/>
             
             <RodParametrosEstandar showPa={showParametros}
                            tipo_plano_id={datos.tipo_plano}
