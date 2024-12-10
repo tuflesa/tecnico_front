@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Table, Button, Form } from 'react-bootstrap';
-import logo from '../../assets/logo_bornay.svg';
+import logo from '../../assets/Bornay.svg';
+import logoTuf from '../../assets/logo_tuflesa.svg';
 import { useCookies } from 'react-cookie';
 import RodMontajeListadoFiltro from './Rod_montaje_listado_filtro';
 import { BACKEND_SERVER } from '../../constantes';
@@ -233,7 +234,7 @@ const RodTooling = () => {
 
     return (
         <Container>
-            <img src ={logo} width="200" height="200"></img>
+            <img src ={user['tec-user'].perfil.empresa.id===1?logo:logoTuf} width="200" height="200"></img>
             <Row>
                 <Col>
                     <RodMontajeListadoFiltro actualizaFiltro={actualizaFiltro}/>

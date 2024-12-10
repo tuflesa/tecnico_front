@@ -6,7 +6,8 @@ import { Container, Row, Col, Table, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { Trash, Eye } from 'react-bootstrap-icons';
 import RodMontajeListadoFiltro from './Rod_montaje_listado_filtro';
-import logo from '../../assets/logo_bornay.svg';
+import logo from '../../assets/Bornay.svg';
+import logoTuf from '../../assets/logo_tuflesa.svg';
 
 const RodMontajeListado = () => {
     const [user] = useCookies(['tec-user']);
@@ -217,7 +218,7 @@ const RodMontajeListado = () => {
 
     return ( 
         <Container>
-            <img src ={logo} width="200" height="200"></img>
+            <img src ={user['tec-user'].perfil.empresa.id===1?logo:logoTuf} width="200" height="200"></img>
             <Row>
                 <Col>
                     <RodMontajeListadoFiltro actualizaFiltro={actualizaFiltro}/>

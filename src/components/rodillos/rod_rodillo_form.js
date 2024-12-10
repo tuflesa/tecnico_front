@@ -5,7 +5,8 @@ import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
 import { Button, Form, Col, Row,} from 'react-bootstrap';
 import RodParametrosEstandar from './rod_parametros_estandar';
-import logo from '../../assets/logo_bornay.svg';
+import logo from '../../assets/Bornay.svg';
+import logoTuf from '../../assets/logo_tuflesa.svg';
 import RodPlanosRodillo from './rod_rodillo_planos';
 import RodInstanciasRodillo from './rod_rodillo_instancias';
 import RodModificarInstancia from './rod_modificar_instancia';
@@ -590,7 +591,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
 
     return (
         <Container className='mt-5 pt-1'>
-            <img src ={logo} width="200" height="200"></img>
+            <img src ={user['tec-user'].perfil.empresa.id===1?logo:logoTuf} width="200" height="200"></img>
             {rodillo.length===0?
                 <h5 className='mt-5'>Nuevo Rodillo</h5>:
                 <h5 className='mt-5'>Editar Rodillo</h5>}

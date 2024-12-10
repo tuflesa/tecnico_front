@@ -5,7 +5,8 @@ import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
 import { Button, Form, Col, Row } from 'react-bootstrap';
 import RodBancada from './rod_bancada_form';
-import logo from '../../assets/logo_bornay.svg';
+import logo from '../../assets/Bornay.svg';
+import logoTuf from '../../assets/logo_tuflesa.svg';
 
 const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
     const [token] = useCookies(['tec-token']);
@@ -154,7 +155,7 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
 
     return (
         <Container className='mt-5'>
-            <img src ={logo} width="200" height="200"></img>
+            <img src ={user['tec-user'].perfil.empresa.id===1?logo:logoTuf} width="200" height="200"></img>
             {grupo.id?<h5 className='mt-5'>Editar Grupo</h5>:<h5 className='mt-5'>Nuevo Grupo</h5>}
             <Form >
                 <Row>

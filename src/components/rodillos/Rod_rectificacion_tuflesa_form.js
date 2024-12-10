@@ -4,6 +4,8 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import RodBuscarInstanciaCodBarras from './rod_buscar_instancia_codbarras';
+import logo from '../../assets/Bornay.svg';
+import logoTuf from '../../assets/logo_tuflesa.svg';
 
 const RodRectificacion_TuflesaForm = ({rectificacion, setRectificacion, lineas_rectificandose, setLineasRectificandose}) => {
     const [token] = useCookies(['tec-token']);
@@ -234,6 +236,7 @@ const RodRectificacion_TuflesaForm = ({rectificacion, setRectificacion, lineas_r
 
     return(
         <Container className='mt-5 pt-1'>
+            <img src ={user['tec-user'].perfil.empresa.id===1?logo:logoTuf} width="200" height="200"></img>
             <Form >
                 <Row>
                     {rectificacion? <h5>Rectificado</h5> : <h5>Nueva orden de Rectificado</h5>}

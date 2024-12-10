@@ -7,6 +7,8 @@ import axios from 'axios';
 import {invertirFecha} from '../utilidades/funciones_fecha';
 import { constants } from 'buffer';
 import RodCerrarRectificado from './rod_rectificado_cerrar';
+import logo from '../../assets/Bornay.svg';
+import logoTuf from '../../assets/logo_tuflesa.svg';
 
 const RodInstanciasXaRectificar = () => {
     const [token] = useCookies(['tec-token']);
@@ -290,6 +292,7 @@ const RodInstanciasXaRectificar = () => {
 
     return(
         <Container className='mt-5 pt-1'>
+            <img src ={user['tec-user'].perfil.empresa.id===1?logo:logoTuf} width="200" height="200"></img><br></br>
             <button type="button" className='mt-5' onClick={event => {abroFiltro()}}>Ver Filtros</button>
             {abrirFiltro? 
             <Row className="mb-3">                  

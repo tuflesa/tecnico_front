@@ -5,6 +5,8 @@ import { BACKEND_SERVER } from '../../constantes';
 import { CloudArrowUp} from 'react-bootstrap-icons';
 import axios from 'axios';
 import {invertirFecha} from '../utilidades/funciones_fecha';
+import logo from '../../assets/Bornay.svg';
+import logoTuf from '../../assets/logo_tuflesa.svg';
 
 const RodInstanciasRectificar = () => {
     const [token] = useCookies(['tec-token']);
@@ -349,6 +351,7 @@ const RodInstanciasRectificar = () => {
 
     return(
         <Container className='mt-5 pt-1'>
+            <img src ={user['tec-user'].perfil.empresa.id===1?logo:logoTuf} width="200" height="200"></img>
             <Row>
                 <Col xs={6}>
                     <Form.Group>
