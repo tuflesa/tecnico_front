@@ -10,7 +10,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, gr
 
     const [ejes, setEjes] = useState(null);
     const [rodillos, setRodillos] = useState(null);
-    const [conjuntos_exist, seConjuntos_exist] = useState([]);
+    const [conjuntos_exist, setConjuntos_exist] = useState([]);
     const [selectedEje, setSelectedEje] = useState(null);
     const [selectRodilloId, setSelectRodilloId] = useState({});
     const [operacion_rod, setOperacionRod] = useState('');
@@ -26,6 +26,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, gr
     const [tuboMadre_unicos, setTuboMadre_unicos] = useState([]);
     const [filtro, setFiltro] = useState(``);
     const [espesores_unidos, setEspesores_unidos] = useState(``);
+    const [nombreGrupo, setNombreGrupo] = useState(``);
     
     var bancadas_nuevas=[''];
     var bancadas_nuevas2=[''];
@@ -135,7 +136,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, gr
               }
         })
         .then( res => {
-            seConjuntos_exist(res.data);
+            setConjuntos_exist(res.data);
         })
         .catch( err => {
             console.log(err);
@@ -348,6 +349,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, gr
             seccion: operacion_marcada.seccion.id,
             tubo_madre: tubomadre,
             espesores: grupoEspesor,
+            nombre_grupo: operacion_marcada.seccion.nombre + '-' + nombreGrupo,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -414,13 +416,14 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, gr
 
     const handleInputChange = (event) => {
         const selectedValue = event.target.options[event.target.selectedIndex].value;
-        const [rodilloId, operacion, grupo, eje, espesor_1, espesor_2] = selectedValue.split(',');
+        const [rodilloId, operacion, grupo, eje, espesor_1, espesor_2, grupo_nombre] = selectedValue.split(',');
         const grupoID = grupo;
         const operacion_rodillo = operacion;
         const valores_rodillo = selectedValue;
         const rodillo_id = rodilloId;
         const ejeId_posicion = eje;
         const espesores = espesor_1 + '÷' + espesor_2;
+        const nombre_grupo = grupo_nombre;
         setRod_Id(rodillo_id);
         setGrupoId_Rod(grupoID);
         setOperacionRod(operacion_rodillo);
@@ -429,6 +432,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, gr
         nuevaSeleccionRodilloId[ejeId_posicion] = valores_rodillo;
         setSelectedEje(ejeId_posicion);
         setSelectRodilloId(nuevaSeleccionRodilloId); //solo lo uso para la posición del rodillo en el conjunto
+        setNombreGrupo(nombre_grupo.split('-').slice(1).join('-'))
     }
 
     const handleInputChange_conjunto = (event) => {
@@ -507,7 +511,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, gr
                                             {rodillos && rodillos.map(rodillo => {
                                                 if (rodillo.tipo === eje.tipo.id && rodillo.diametro === eje.diametro) {
                                                     return (
-                                                        <option key={rodillo.id} value={`${rodillo.id},${rodillo.operacion},${rodillo.grupo.id},${eje.id},${rodillo.espesor_1},${rodillo.espesor_2}`}>
+                                                        <option key={rodillo.id} value={`${rodillo.id},${rodillo.operacion},${rodillo.grupo.id},${eje.id},${rodillo.espesor_1},${rodillo.espesor_2},${rodillo.grupo.nombre}`}>
                                                             {rodillo.nombre}
                                                         </option>
                                                     )
@@ -596,7 +600,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, gr
                                             <Form.Check
                                                 key={bancada.id}
                                                 type="checkbox"
-                                                label={bancada.seccion.nombre==='Formadora'?bancada.nombre +'  -  ('+ bancada.espesores+')':bancada.nombre}
+                                                label={bancada.nombre_grupo}
                                                 value = {datos.bancada_elegida}
                                                 checked={(bancada_id && bancada_id === bancada.id) || (bancada_otraformacion.id && bancada_otraformacion.id === bancada.id) || (datos.bancada_elegida === bancada.id)}
                                                 onChange={()=>handleInputChangeBancada(bancada.id)}

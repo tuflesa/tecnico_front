@@ -441,7 +441,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 })
                 .catch(err => { 
                     console.log(err);
-                    alert('Falta datos, por favor rellena todo los datos que tengan *');
+                    alert('Faltan datos, por favor rellena todo los datos que tengan *');
                 })
             }
         })

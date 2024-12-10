@@ -66,6 +66,9 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
                     posicionesFiltradas.push(posicionDatos);
                 }
             }
+            else{
+                posicionesFiltradas = res.data;
+            }
             setPosiciones_filtradas(posicionesFiltradas);
             setPosiciones(res.data);
         })
