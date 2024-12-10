@@ -23,14 +23,14 @@ const RodNavBar = () => {
                                     <NavDropdown title="Listados" id="listados-dropdown" menualign="right">
                                     <NavDropdown.Item href="/rodillos/lista">Rodillos</NavDropdown.Item>
                                     <NavDropdown.Item href="/rodillos/grupos">Bancadas RD</NavDropdown.Item> 
-                                    <NavDropdown.Item href="/rodillos/lista_bancadas_ct">Bancadas CT</NavDropdown.Item>
+                                    <NavDropdown.Item href="/rodillos/lista_bancadas_ct">CT/Calibradora</NavDropdown.Item>
                                     <NavDropdown.Item href="/rodillos/montaje_lista">Montajes</NavDropdown.Item>
                                     </NavDropdown>
                                     <NavDropdown title="Nuevos" id="nuevos-dropdown" menualign="right">
                                     <NavDropdown.Item href="/rodillos/grupo/nuevo">Grupo</NavDropdown.Item> 
                                     <NavDropdown.Item href="/rodillos/nuevo">Rodillo</NavDropdown.Item> 
                                     <NavDropdown.Item href="/rodillos/grupos">Bancadas RD</NavDropdown.Item> 
-                                    <NavDropdown.Item href="/rodillos/bacada_ct">Bancada CT</NavDropdown.Item> 
+                                    <NavDropdown.Item href="/rodillos/bacada_ct">CT/Calibradora</NavDropdown.Item> 
                                     <NavDropdown.Item href="/rodillos/montaje">Montaje Bancadas</NavDropdown.Item> 
                                     </NavDropdown>
                                     <NavDropdown title="Rectificados Bornay" id="nuevos-dropdown" menualign="right">
