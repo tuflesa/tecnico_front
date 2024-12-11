@@ -15,7 +15,7 @@ const RodBancadaCTListado = () => {
     const [empresas, setEmpresas] = useState(null);
     const [zonas, setZonas] = useState(null);
     const [bancadas, setBancadas] = useState(null);
-    const [filtro, setFiltro] = useState(`?dimensiones__icontains=${''}&seccion__maquina__id=${''}&seccion__maquina__empresa=${''}&seccion__pertenece_grupo=${false}`);//BUSCANDO LAS BANCADAS CT
+    const [filtro, setFiltro] = useState(`?dimensiones__icontains=${''}&seccion__maquina__id=${''}&seccion__maquina__empresa__id=${user['tec-user'].perfil.empresa.id}&seccion__pertenece_grupo=${false}`);//BUSCANDO LAS BANCADAS CT
     const [count, setCount] = useState(null);
 
     const [datos, setDatos] = useState({
@@ -28,7 +28,7 @@ const RodBancadaCTListado = () => {
     });
 
     useEffect(()=>{
-        setFiltro(`?dimensiones__icontains=${datos.dimensiones}&seccion__maquina__id=${datos.maquina}&seccion__maquina__empresa=${datos.empresa}&seccion__pertenece_grupo=${false}`);
+        setFiltro(`?dimensiones__icontains=${datos.dimensiones}&seccion__maquina__id=${datos.maquina}&seccion__maquina__empresa__id=${datos.empresa}&seccion__pertenece_grupo=${false}`);
     },[datos]);
 
     useEffect(() => {
@@ -38,6 +38,7 @@ const RodBancadaCTListado = () => {
               }
         })
         .then( res => {
+            console.log(res.data.results)
             setBancadas(res.data.results);
             setCount(res.data.count);
         })

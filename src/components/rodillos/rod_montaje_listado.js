@@ -14,7 +14,7 @@ const RodMontajeListado = () => {
     const [token] = useCookies(['tec-token']);
 
     const [montajes, setMontajes] = useState(null)
-    const [filtro, setFiltro] = useState(``);
+    const [filtro, setFiltro] = useState(`?maquina__empresa__id=${user['tec-user'].perfil.empresa.id}`);
     const [refrescar, setRefrescar] = useState(false);
     const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Director Técnico'?false:true;
     const [filaSeleccionada, setFilaSeleccionada] = useState(null);
@@ -34,6 +34,7 @@ const RodMontajeListado = () => {
     });
 
     useEffect(() => {
+        console.log('que vale empresa: ', filtro)
         axios.get(BACKEND_SERVER + `/api/rodillos/montaje_listado/`+filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
