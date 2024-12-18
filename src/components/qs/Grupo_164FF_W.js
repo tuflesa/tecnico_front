@@ -71,7 +71,44 @@ const montaje = [
         ]   
     },
     {
+        operacion: 3,
+        color: 'steelblue',
+        tipo: 'IS1',
+        nombre: 'IS1',
+        rodillos: [
+            {
+                tipo_plano: 'IS1',
+                eje: 'ANCHO_S1',
+                parametros: {
+                    Ancho: 310,
+                    Dext: 275,
+                    Dsup: 180,
+                    Df: 105,
+                    Dc: 838.212,
+                    R1: 400,
+                    alfa1: 24,
+                    R2: 50,
+                    Hc: 365
+                }
+            },
+            {
+                tipo_plano: 'NONE',
+                eje: 'ALTO_S1',
+                parametros: {
+                    Df: 0
+                }
+            }
+        ]
+    },
+    {
         operacion: 4,
+        color: 'magenta',
+        tipo: 'LINEAL',
+        nombre: 'Lineal',
+        rodillos: []
+    },
+    {
+        operacion: 5,
         color: 'red',
         tipo: 'FP',
         nombre: 'FP-I',
@@ -113,7 +150,36 @@ const montaje = [
         ]   
     },
     {
-        operacion: 5,
+        operacion: 6,
+        color: 'coral',
+        tipo: 'IS2-3',
+        nombre: 'IS2',
+        rodillos: [
+            {
+                tipo_plano: 'IS2-3',
+                eje: 'ANCHO',
+                parametros: {
+                    Ancho: 330,
+                    Dext: 270,
+                    Dsup: 255,
+                    Df: 115,
+                    Dc: 348.4,
+                    R1: 78.7,
+                    alfa1: 60,
+                    R2: 116.7
+                }
+            },
+            {
+                tipo_plano: 'NONE',
+                eje: 'ALTO',
+                parametros: {
+                    Df: 0
+                }
+            }
+        ]
+    },
+    {
+        operacion: 7,
         color: 'green',
         tipo: 'FP',
         nombre: 'FP-II',
@@ -156,7 +222,36 @@ const montaje = [
         ]   
     },
     {
-        operacion: 6,
+        operacion: 8,
+        color: 'brown',
+        tipo: 'IS2-3',
+        nombre: 'IS3',
+        rodillos: [
+            {
+                tipo_plano: 'IS2-3',
+                eje: 'ANCHO',
+                parametros: {
+                    Ancho: 330,
+                    Dext: 265,
+                    Dsup: 260,
+                    Df: 100,
+                    Dc: 299.8,
+                    R1: 82.5,
+                    alfa1: 60,
+                    R2: 99.9
+                }
+            },
+            {
+                tipo_plano: 'NONE',
+                eje: 'ALTO',
+                parametros: {
+                    Df: 0
+                }
+            }
+        ]
+    },
+    {
+        operacion: 9,
         color: 'orange',
         tipo: 'FP',
         nombre: 'FP-III',
@@ -198,13 +293,13 @@ const montaje = [
         ]   
     },
     {
-        operacion: 7,
+        operacion: 10,
         color: 'lime',
         tipo: 'W', 
         nombre: 'Welding',
         rodillos: [
             {
-                tipo_plano: 'W_Lat',
+                tipo_plano: 'W_Lat_5',
                 eje: 'LAT_OP',
                 parametros: {
                     Ancho: 200,
@@ -217,7 +312,7 @@ const montaje = [
                 }
             },
             {
-                tipo_plano: 'W_Lat',
+                tipo_plano: 'W_Lat_5',
                 eje: 'LAT_MO',
                 parametros: {
                     Ancho: 200,
@@ -231,7 +326,7 @@ const montaje = [
             },
             {
                 tipo_plano: 'W_Inf',
-                eje: 'INF',
+                eje: 'INF_W',
                 parametros: {
                     Ancho: 130,
                     Df: 360,
@@ -243,51 +338,309 @@ const montaje = [
                 }
             },
             {
-                tipo_plano: 'W_Sup',
-                eje: 'SUP_ALTO_OP',
-                parametros: {
-                    Ancho: 90,
-                    Df: 410,
-                    R1: 115.22,
-                    C1: 6.3,
-                    C2: 4,
-                    L1: 32.92
-                }
-            },
-            {
-                tipo_plano: 'NONE',
-                eje: 'SUP_ANCHO_OP',
-                parametros: {
-                    Df: 0
-                }
-            },
-            {
-                tipo_plano: 'W_Sup',
-                eje: 'SUP_ALTO_MO',
-                parametros: {
-                    Ancho: 90,
-                    Df: 410,
-                    R1: 115.22,
-                    C1: 6.3,
-                    C2: 4,
-                    L1: 32.92
-                }
-            },
-            {
-                tipo_plano: 'NONE',
-                eje: 'SUP_ANCHO_MO',
-                parametros: {
-                    Df: 0
-                }
-            },
-            {
                 tipo_plano: 'NONE',
                 eje: 'CAB',
                 parametros: {
                     Df: 600
                 }
+            },
+            {
+                tipo_plano: 'W_Sup',
+                eje: 'SUP_V_OP',
+                parametros: {
+                    Ancho: 90,
+                    Df: 410.71,
+                    Dc: 576.92,
+                    R1: 115.22,
+                    C1: 6.3,
+                    C2: 4,
+                    L1: 32.92
+                }
+            },
+            {
+                tipo_plano: 'NONE',
+                eje: 'SUP_H_OP',
+                parametros: {
+                    Df: 410.71
+                }
+            },
+            {
+                tipo_plano: 'W_Sup',
+                eje: 'SUP_V_MO',
+                parametros: {
+                    Ancho: 90,
+                    Df: 410.71,
+                    Dc: 576.92,
+                    R1: 115.22,
+                    C1: 6.3,
+                    C2: 4,
+                    L1: 32.92
+                }
+            },
+            {
+                tipo_plano: 'NONE',
+                eje: 'SUP_H_MO',
+                parametros: {
+                    Df: 410.71
+                }
             }
         ]
+    },
+    {
+        operacion: 11,
+        color: 'orange',
+        tipo: 'CB',
+        nombre: 'CB-I',
+        rodillos: [
+            {
+                tipo_plano: 'CB-CR-123',
+                eje: 'SUP',
+                parametros: {
+                    Ancho: 145,
+                    Dext: 396,
+                    Df: 372.9,
+                    R1: 166.6667,
+                    L1: 122
+                }
+            },
+            {
+                tipo_plano: 'CB-CR-123',
+                eje: 'INF',
+                parametros: {
+                    Ancho: 145,
+                    Dext: 396,
+                    Df: 372.9,
+                    R1: 166.6667,
+                    L1: 122
+                }
+            },
+            {
+                tipo_plano: 'CB-CR-123',
+                eje: 'LAT_OP',
+                parametros: {
+                    Ancho: 140,
+                    Dext: 352.2,
+                    Df: 330,
+                    R1: 166.6667,
+                    L1: 122
+                }
+            },
+            {
+                tipo_plano: 'CB-CR-123',
+                eje: 'LAT_MO',
+                parametros: {
+                    Ancho: 140,
+                    Dext: 352.2,
+                    Df: 330,
+                    R1: 166.6667,
+                    L1: 122
+                }
+            }
+        ]   
+    },
+    {
+        operacion: 12,
+        color: 'blue',
+        tipo: 'CB',
+        nombre: 'CB-II',
+        rodillos: [
+            {
+                tipo_plano: 'CB-R-4',
+                eje: 'SUP',
+                parametros: {
+                    Ancho: 140,
+                    Dext: 419.057,
+                    Df: 373,
+                    R1: 63.69,
+                    R2: 3,
+                    C : 2,
+                    alfa1: 105,
+                    alfa2: 8
+                }
+            },
+            {
+                tipo_plano: 'CB-R-4',
+                eje: 'INF',
+                parametros: {
+                    Ancho: 140,
+                    Dext: 419.057,
+                    Df: 373,
+                    R1: 63.69,
+                    R2: 3,
+                    C : 2,
+                    alfa1: 105,
+                    alfa2: 8
+                }
+            },
+            {
+                tipo_plano: 'CB-R-4',
+                eje: 'LAT_OP',
+                parametros: {
+                    Ancho: 120,
+                    Dext: 351.52,
+                    Df: 328,
+                    R1: 63.69,
+                    R2: 3,
+                    C : 2,
+                    alfa1: 75,
+                    alfa2: 8
+                }
+            },
+            {
+                tipo_plano: 'CB-R-4',
+                eje: 'LAT_MO',
+                parametros: {
+                    Ancho: 120,
+                    Dext: 351.52,
+                    Df: 328,
+                    R1: 63.69,
+                    R2: 3,
+                    C : 2,
+                    alfa1: 75,
+                    alfa2: 8
+                }
+            }
+        ]   
+    },
+    {
+        operacion: 13,
+        color: 'teal',
+        tipo: 'CB',
+        nombre: 'CB-III',
+        rodillos: [
+            {
+                tipo_plano: 'CB-CONVEX',
+                eje: 'SUP',
+                parametros: {
+                    Ancho: 270,
+                    Df: 465,
+                    R1: 800
+                }
+            },
+            {
+                tipo_plano: 'CB-CONVEX',
+                eje: 'INF',
+                parametros: {
+                    Ancho: 270,
+                    Df: 465,
+                    R1: 800
+                }
+            },
+            {
+                tipo_plano: 'CB-CONVEX',
+                eje: 'LAT_OP',
+                parametros: {
+                    Ancho: 178,
+                    Df: 330,
+                    R1: 800
+                }
+            },
+            {
+                tipo_plano: 'CB-CONVEX',
+                eje: 'LAT_MO',
+                parametros: {
+                    Ancho: 178,
+                    Df: 330,
+                    R1: 800
+                }
+            }
+        ]   
+    },
+    {
+        operacion: 14,
+        color: 'olivedrab',
+        tipo: 'CB',
+        nombre: 'CB-IV',
+        rodillos: [
+            {
+                tipo_plano: 'CB-CR-4',
+                eje: 'SUP',
+                parametros: {
+                    Ancho: 145,
+                    Df: 396,
+                    L1: 122
+                }
+            },
+            {
+                tipo_plano: 'CB-CR-4',
+                eje: 'INF',
+                parametros: {
+                    Ancho: 145,
+                    Df: 396,
+                    L1: 122
+                }
+            },
+            // {
+            //     tipo_plano: 'CB-R-2',
+            //     eje: 'SUP',
+            //     parametros: {
+            //         Ancho: 270,
+            //         Df: 340,
+            //         Dext: 496.4,
+            //         Dc: 500.4,
+            //         R1: 80.2,
+            //         R2:3,
+            //         alfa1: 10
+            //     }
+            // },
+            // {
+            //     tipo_plano: 'CB-R-2',
+            //     eje: 'INF',
+            //     parametros: {
+            //         Ancho: 270,
+            //         Df: 340,
+            //         Dext: 496.4,
+            //         Dc: 500.4,
+            //         R1: 80.2,
+            //         R2:3,
+            //         alfa1: 10
+            //     }
+            // },
+            {
+                tipo_plano: 'CB-CR-4',
+                eje: 'LAT_OP',
+                parametros: {
+                    Ancho: 140,
+                    Df: 330,
+                    L1: 122
+                }
+            },
+            {
+                tipo_plano: 'CB-CR-4',
+                eje: 'LAT_MO',
+                parametros: {
+                    Ancho: 140,
+                    Df: 330,
+                    L1: 122
+                }
+            }
+            // {
+            //     tipo_plano: 'CB-R-2',
+            //     eje: 'LAT_OP',
+            //     parametros: {
+            //         Ancho: 186,
+            //         Df: 211,
+            //         Dext: 365,
+            //         Dc: 371,
+            //         R1: 80,
+            //         R2: 3,
+            //         alfa1: 8
+            //     }
+            // },
+            // {
+            //     tipo_plano: 'CB-R-2',
+            //     eje: 'LAT_MO',
+            //     parametros: {
+            //         Ancho: 186,
+            //         Df: 211,
+            //         Dext: 365,
+            //         Dc: 371,
+            //         R1: 80,
+            //         R2: 3,
+            //         alfa1: 8
+            //     }
+            // }
+        ]   
     }
 ]
 

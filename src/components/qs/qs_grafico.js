@@ -7,7 +7,7 @@ import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
 import QSNavBar from "./qs_nav";
-import {montaje, fleje} from './Grupo_70';
+import {montaje, fleje} from './Grupo_164FF_W';
 
 // const ejes = [{op:1, pos: [174, 343.57]},
 //               {op:2, pos: [177.91, 340.49]},
@@ -147,11 +147,11 @@ const QS_Grafico = () => {
         const gap_list = [];
         const H =[{nombre: 'MIN',
                    color:'red', 
-                   puntos:[{x: 0, y:0, OP: 0, nombre: 'ET'}, {x:1590, y:10, OP:1, nombre: 'BD1'}, {x:2760, y:20, OP:2, nombre: 'BD2'}, {x:6320, y:30, OP:4, nombre: 'FP1'},{x:7570, y:40, OP:5, nombre: 'FP2'},{x:8820, y:50, OP:6, nombre: 'FP3'}, {x:10070, y:40, OP:7, nombre: 'W'}]
+                   puntos:[{x: 0, y:0, OP: 0, nombre: 'ET'}, {x:1590, y:10, OP:1, nombre: 'BD1'}, {x:2760, y:20, OP:2, nombre: 'BD2'}, {x:6320, y:30, OP:5, nombre: 'FP1'},{x:7570, y:40, OP:7, nombre: 'FP2'},{x:8820, y:50, OP:9, nombre: 'FP3'}, {x:10070, y:40, OP:10, nombre: 'W'}]
                   }, 
                   {nombre: 'MAX',
                    color: 'blue',
-                   puntos:[{x: 0, y:0, OP: 0, nombre: 'ET'}, {x:1590, y:-10, OP:1, nombre: 'BD1'}, {x:2760, y:-20, OP:2, nombre: 'BD2'}, {x:6320, y:-30, OP:4, nombre: 'FP1'},{x:7570, y:-40, OP:5, nombre: 'FP2'},{x:8820, y:-50, OP:6, nombre: 'FP3'}]
+                   puntos:[{x: 0, y:0, OP: 0, nombre: 'ET'}, {x:1590, y:-10, OP:1, nombre: 'BD1'}, {x:2760, y:-20, OP:2, nombre: 'BD2'}, {x:6320, y:-30, OP:5, nombre: 'FP1'},{x:7570, y:-40, OP:7, nombre: 'FP2'},{x:8820, y:-50, OP:9, nombre: 'FP3'}]
                 }];
 
         if (ejes && ejesSim && montaje){
@@ -159,11 +159,72 @@ const QS_Grafico = () => {
             montaje.map(m => {
                 const line = [];
                 m.rodillos.map((r,i) =>{
-                    line.push({
-                        eje: r.eje,
-                        pos: -r.parametros.Df/2 + ejes[m.operacion-1].pos[r.eje],
-                        pos_sim: -r.parametros.Df/2 + ejesSim[m.operacion-1].pos[r.eje]
-                    });
+                    switch (r.eje){
+                        // case 'LAT_MO':
+                        // case 'LAT_OP':
+                        //     line.push({
+                        //         eje: r.eje,
+                        //         pos: 492 -r.parametros.Df/2 - ejes[m.operacion-1].pos[r.eje],
+                        //         pos_sim: 492 -r.parametros.Df/2 - ejesSim[m.operacion-1].pos[r.eje]
+                        //     });
+                        //     break;
+                        case 'SUP_V_MO':
+                        case 'SUP_V_OP':
+                            line.push({
+                                eje: r.eje,
+                                pos: -r.parametros.Df/2 + (465 - ejes[m.operacion-1].pos[r.eje])/Math.cos(15*Math.PI/180),
+                                pos_sim: -r.parametros.Df/2 + (465 - ejesSim[m.operacion-1].pos[r.eje])/Math.cos(15*Math.PI/180)
+                            });
+                            console.log(r.eje);
+                            console.log('Df: ', r.parametros.Df/2);
+                            console.log('Eje: ', ejes[m.operacion-1].pos[r.eje]);
+                            console.log('sup: ', -r.parametros.Df/2 + (465 - ejes[m.operacion-1].pos[r.eje])/Math.cos(15*Math.PI/180));
+                            break;
+                        case 'SUP_H_MO':
+                        case 'SUP_H_OP':
+                            line.push({
+                                eje: r.eje,
+                                pos: 138.183 - ejes[m.operacion-1].pos[r.eje] - Math.sin(15*Math.PI/180)*r.parametros.Df/2,
+                                pos_sim: 138.183 - ejesSim[m.operacion-1].pos[r.eje] - Math.sin(15*Math.PI/180)*r.parametros.Df/2
+                            });
+                            break;
+                        case 'INF_W':
+                            console.log('Ejes Sim: ', ejesSim);
+                            line.push({
+                                eje: r.eje,
+                                pos: -r.parametros.Df/2 + ejes[m.operacion-1].pos[r.eje] + ejes[m.operacion-1].pos['CAB'] - 300,
+                                pos_sim: -r.parametros.Df/2 + ejesSim[m.operacion-1].pos[r.eje] + ejesSim[m.operacion-1].pos['CAB'] - 300
+                            });
+                            break;
+                        case 'ANCHO_S1':
+                        case 'ANCHO':
+                            line.push({
+                                eje: r.eje,
+                                pos: 170 + ejes[m.operacion-1].pos[r.eje] -r.parametros.Df,
+                                pos_sim: 170 + ejesSim[m.operacion-1].pos[r.eje] -r.parametros.Df
+                            });
+                            break;
+                        case 'ALTO':
+                            line.push({
+                                eje: r.eje,
+                                pos: -270 + ejes[m.operacion-1].pos[r.eje],
+                                pos_sim: -270 + ejesSim[m.operacion-1].pos[r.eje]
+                            });
+                        break;
+                        case 'ALTO_S1':
+                            line.push({
+                                eje: r.eje,
+                                pos: -40 + ejes[m.operacion-1].pos[r.eje],
+                                pos_sim: -40 + ejesSim[m.operacion-1].pos[r.eje]
+                            });
+                        break;  
+                        default: 
+                            line.push({
+                                eje: r.eje,
+                                pos: -r.parametros.Df/2 + ejes[m.operacion-1].pos[r.eje],
+                                pos_sim: -r.parametros.Df/2 + ejesSim[m.operacion-1].pos[r.eje]
+                            });
+                    }
                 });
                 pos.push({
                     op: m.operacion,
@@ -335,8 +396,8 @@ const QS_Grafico = () => {
                         break;    
                     case 'W':
                         let y;
-                        if (simulador) y = -pos.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'INF')[0].pos_sim;
-                        else y = -pos.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'INF')[0].pos;
+                        if (simulador) y = -pos.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'INF_W')[0].pos_sim;
+                        else y = -pos.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'INF_W')[0].pos;
 
                         H.filter( h => h.nombre == 'MIN')[0].puntos.filter(q => q.OP == m.operacion)[0].y = y;
                         break;
@@ -390,7 +451,35 @@ const QS_Grafico = () => {
         const temp = [...ejesSim];
         montaje.filter(m => m.operacion == OP)[0].rodillos.map( r => {
             const Df = r.parametros['Df'];
-            temp[OP-1].pos[r.eje] = parseFloat(datos[r.eje]) + Df/2; 
+            switch (r.eje){
+                // case 'LAT_MO':
+                // case 'LAT_OP':
+                //     temp[OP-1].pos[r.eje] = 492 - parseFloat(datos[r.eje]) - Df/2;
+                //     break;
+                case 'SUP_V_MO':
+                case 'SUP_V_OP':
+                    temp[OP-1].pos[r.eje] = 465 - (parseFloat(datos[r.eje]) + Df/2)*Math.cos(15*Math.PI/180);
+                    break;
+                case 'SUP_H_MO':
+                case 'SUP_H_OP':
+                    temp[OP-1].pos[r.eje] = 138.183 - parseFloat(datos[r.eje]) - (Df/2)*Math.sin(15*Math.PI/180);
+                    break;
+                case 'ANCHO_S1':
+                case 'ANCHO':
+                    temp[OP-1].pos[r.eje] = Df - 170 + parseFloat(datos[r.eje]);
+                    break;
+                case 'ALTO':
+                    temp[OP-1].pos[r.eje] = 270 + parseFloat(datos[r.eje]);
+                    break;
+                case 'ALTO_S1':
+                    temp[OP-1].pos[r.eje] = 40 + parseFloat(datos[r.eje]);
+                    break;
+                case 'INF_W':
+                    temp[OP-1].pos[r.eje] = parseFloat(datos[r.eje]) + Df/2 - datos['CAB'];
+                    break;
+                default:
+                    temp[OP-1].pos[r.eje] = parseFloat(datos[r.eje]) + Df/2; 
+            }
         });
         setEjesSim(temp);
     }

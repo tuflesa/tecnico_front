@@ -403,12 +403,12 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
             return r.toString()
         }
 
-        function draw_W(m,i) { //Soldadura de 5 rodillos
+        function draw_W(m,i) { //Soldadura
             // Rodillos y ejes
             const roll_l = m.rodillos[0]; // Lateral OP
             const roll_i = m.rodillos[2]; // Inferior
             const AxisPos0_l = ejes.filter(e => e.op == m.operacion)[0].pos['LAT_OP'];
-            const AxisPos0_i = ejes.filter(e => e.op == m.operacion)[0].pos['INF'];
+            const AxisPos0_i = ejes.filter(e => e.op == m.operacion)[0].pos['INF_W'];
 
             // Parametros
             const R1 = roll_l.parametros.R1;
@@ -421,8 +421,8 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
             const xc1 = R1 - pos_l;
             const yc2 = R1 - pos_i;
             const Beta = Math.atan(xc1/yc2);
-
-            // console.log('Beta: ', Beta);
+            
+            console.log('Beta: ', Beta);
 
             const r = path();
             return r.toString()

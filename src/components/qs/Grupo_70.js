@@ -197,8 +197,10 @@ const montaje = [
                     Df: 430,
                     R1: 35.5,
                     R2: 2,
+                    alfa1: 30,
                     alfa2: 10,
-                    C: 2
+                    C1: 3,
+                    C2: 2
                 }
             },
             {
@@ -209,8 +211,17 @@ const montaje = [
                     Df: 430,
                     R1: 35.5,
                     R2: 2,
+                    alfa1: 30,
                     alfa2: 10,
-                    C: 2
+                    C1: 3,
+                    C2: 2
+                }
+            },
+            {
+                tipo_plano: 'NONE',
+                eje: 'CAB',
+                parametros: {
+                    Df: 600
                 }
             }
         ]
