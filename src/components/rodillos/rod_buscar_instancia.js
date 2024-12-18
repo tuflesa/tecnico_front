@@ -101,7 +101,7 @@ const BuscarInstancia = ({lineas_rectificandose, rectificacion, datos_rectificac
                 const instanciaRepetido = lineasInstancias.filter(l => l.id === id)||lineasInstancias_bot.filter(l => l.id === id);
                 const instancia_maquina = instancias_maquina.filter(l => l.id === id);
                 if(instancia_maquina.length===0){
-                    alert('Esta instancia no corresponde a la máquina/zona señalada, gracias.')
+                    alert('Esta instancia no corresponde a la máquina/zona señalada.')
                 }
                 else if(instanciaRepetido.length===0 && instancia_maquina.length!==0){ //si no está repetido y es de esta máquina...
                     setLineasInstancias_bot([...lineasInstancias_bot, {
@@ -110,6 +110,7 @@ const BuscarInstancia = ({lineas_rectificandose, rectificacion, datos_rectificac
                         diametro: res.data.diametro,
                         diametro_ext: res.data.diametro_ext,
                         ancho: res.data.ancho,
+                        diametro_centro: res.data.diametro_centro,
                         fecha_estimada: datos_rectificacion.fecha_estimada,
                         num_ejes: res.data.rodillo.num_ejes,
                         archivo: res.data.rodillo.archivo,
@@ -124,9 +125,11 @@ const BuscarInstancia = ({lineas_rectificandose, rectificacion, datos_rectificac
                         formData.append('diametro', res.data.diametro);
                         formData.append('diametro_ext', res.data.diametro_ext);
                         formData.append('ancho', res.data.ancho);
+                        formData.append('diametro_centro', res.data.diametro_centro);
                         formData.append('nuevo_diametro', 0);
                         formData.append('nuevo_diametro_ext', 0);
                         formData.append('nuevo_ancho', 0);
+                        formData.append('nuevo_diametro_centro', 0);
                         formData.append('rectificado_por', '');
                         formData.append('tipo_rectificado', 'estandar');
                         formData.append('finalizado', false);

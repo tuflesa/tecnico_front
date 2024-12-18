@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Button, Container, Table } from 'react-bootstrap';
+import { Row, Col, Form, Container, Table } from 'react-bootstrap';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
-import { Trash } from 'react-bootstrap-icons';
+import { CloudArrowUp} from 'react-bootstrap-icons';
 import axios from 'axios';
 import {invertirFecha} from '../utilidades/funciones_fecha';
-import { line } from 'd3';
+import logo from '../../assets/Bornay.svg';
+import logoTuf from '../../assets/logo_tuflesa.svg';
 
 const RodInstanciasRectificar = () => {
     const [token] = useCookies(['tec-token']);
@@ -42,11 +43,11 @@ const RodInstanciasRectificar = () => {
         })
         .then(res => {
             const updatedLineas = res.data.map(linea => {
-                return {
-                    ...linea,      
-                    fuera: linea.proveedor !== null // Si `proveedor` es null, fuera: será false, de lo contrario true
-                };
-            });
+                    return {
+                        ...linea,      
+                        fuera: linea.proveedor !== null // Si `proveedor` es null, fuera: será false, de lo contrario true
+                    };
+                })
             setLineasRectificacion(updatedLineas);
         })
         .catch(err => {
@@ -62,7 +63,6 @@ const RodInstanciasRectificar = () => {
         })
         .then( res => {
             setProveedores(res.data);
-            console.log('proveedores: ',res.data);
         })
         .catch( err => {
             console.log(err);
@@ -190,7 +190,7 @@ const RodInstanciasRectificar = () => {
     };
 
     const Actualizo_Proveedor = (linea, proveedor) => {
-        axios.patch(BACKEND_SERVER + `/api/rodillos/listado_linea_rectificacion/${linea.id}/`, { //Actualizamos fecha
+        axios.patch(BACKEND_SERVER + `/api/rodillos/linea_rectificacion/${linea.id}/`, { //Actualizamos proveedor
             proveedor: proveedor,
         }, {
             headers: {
@@ -268,14 +268,17 @@ const RodInstanciasRectificar = () => {
         const { files } = event.target;
         const selectedFile = files[0];
         if (selectedFile) {
-            // Actualiza la base de datos y espera la URL completa
-            const archivoUrl = await Actualizo_Archivo(linea, selectedFile); // Recibe la URL completa
-            if (archivoUrl) {
-                setLineasRectificacion((prev) =>
-                    prev.map((instancia) =>
-                        instancia.id === linea.id ? { ...instancia, archivo: archivoUrl } : instancia // Guarda la URL completa en lugar del nombre
-                    )
-                );
+            try {
+                const archivoUrl = await Actualizo_Archivo(linea, selectedFile);
+                if (archivoUrl) {
+                    setLineasRectificacion((prev) =>
+                        prev.map((instancia) =>
+                            instancia.id === linea.id ? { ...instancia, archivo: archivoUrl } : instancia
+                        )
+                    );
+                }
+            } catch (error) {
+                console.error('Error al actualizar el archivo:', error);
             }
         }
     };
@@ -348,6 +351,7 @@ const RodInstanciasRectificar = () => {
 
     return(
         <Container className='mt-5 pt-1'>
+            <img src ={user['tec-user'].perfil.empresa.id===1?logo:logoTuf} width="200" height="200"></img>
             <Row>
                 <Col xs={6}>
                     <Form.Group>
@@ -506,12 +510,14 @@ const RodInstanciasRectificar = () => {
                                 {datos.finalizado !== false && <th style={{ backgroundColor: '#DBFAC9' }}>Nuevo Diámetro Exterior</th>}
                                 <th>Ancho</th>
                                 {datos.finalizado !== false && <th style={{ backgroundColor: '#DBFAC9' }}>Nuevo Ancho</th>}
+                                <th>Centro</th>
+                                {datos.finalizado !== false && <th style={{ backgroundColor: '#DBFAC9' }}>Nuevo Centro</th>}
                                 <th>Num rodillos</th>
                                 {datos.finalizado !== false && <th style={{ backgroundColor: '#DBFAC9' }}>Rectificado por</th>}
                                 <th>Fecha estimada</th>
                                 {datos.finalizado !== false && <th style={{ backgroundColor: '#DBFAC9' }}>Fecha Rectificado</th>}
                                 <th>Archivo rectificado</th>
-                                <th>Rectificado fuera</th>
+                                {datos.finalizado === false? <th>Rectificado fuera</th> :''}
                             </tr>
                         </thead>
                         <tbody>
@@ -526,6 +532,8 @@ const RodInstanciasRectificar = () => {
                                         {datos.finalizado !== false && <td style={{ backgroundColor: '#DBFAC9' }}>{linea.nuevo_diametro_ext}</td>}
                                         <td>{linea.ancho}</td>
                                         {datos.finalizado !== false && <td style={{ backgroundColor: '#DBFAC9' }}>{linea.nuevo_ancho}</td>} 
+                                        <td>{linea.centro}</td>
+                                        {datos.finalizado !== false && <td style={{ backgroundColor: '#DBFAC9' }}>{linea.nuevo_centro}</td>}
                                         <td>{linea.instancia.rodillo.num_ejes}</td> 
                                         {datos.finalizado !== false && <td style={{ backgroundColor: '#DBFAC9' }}>{linea.rectificado_por?linea.rectificado_por.get_full_name:''}</td>} 
                                         <td>
@@ -542,19 +550,33 @@ const RodInstanciasRectificar = () => {
                                         <td>
                                             <Form.Group controlId="archivo">
                                                 {linea.archivo && (
-                                                    <Form.Text className="text-muted d-block">
+                                                    <Form.Text >
                                                         Archivo guardado: 
-                                                        <a href={linea.archivo} target="_blank" rel="noopener noreferrer">{linea.archivo}</a>
+                                                        <a href={linea.archivo} target="_blank" rel="noopener noreferrer">
+                                                            {linea.archivo.split('/').pop()}
+                                                        </a>
                                                     </Form.Text>
                                                 )}
-                                                {linea.finalizado===false?<Form.Control type="file" onChange={handleInputChange_archivo(linea)}
-                                                disabled={linea.finalizado===true?true:false} />:''}
+                                                {linea.finalizado === false ?
+                                                    <>
+                                                        <input
+                                                        type="file"
+                                                        id={`file-input-${linea.id}`}
+                                                        style={{ display: "none" }}
+                                                        onChange={handleInputChange_archivo(linea)}
+                                                        />
+                                                        <CloudArrowUp
+                                                        className="mr-3 pencil"
+                                                        onClick={() => document.getElementById(`file-input-${linea.id}`).click()}
+                                                        />
+                                                    </>
+                                                :''}
                                             </Form.Group>
                                             {linea.fuera === true && 
                                                 <Form.Group controlId="proveedor">
                                                     <Form.Label>Proveedor</Form.Label>
                                                     <Form.Control as="select" 
-                                                                    value={linea.proveedor || ""}
+                                                                    value={linea.proveedor?linea.proveedor.id || linea.proveedor:'' || ""}
                                                                     name='proveedor'
                                                                     onChange={handleInputChange_proveedor(linea)}
                                                                     className="dropdown-green">
@@ -570,18 +592,20 @@ const RodInstanciasRectificar = () => {
                                                 </Form.Group>
                                             }
                                         </td>  
-                                        <td>
-                                            <Form.Group controlId="fuera">
-                                                <Form.Control as="select" 
-                                                            value={linea.fuera}
-                                                            name='fuera'
-                                                            onChange={handleInputChange_fuera(linea)}>
-                                                    <option key={1} value={true}>Si</option>
-                                                    <option key={2} value={false}>No</option>
-                                                </Form.Control>
-                                            </Form.Group>
-                                            
-                                        </td>                       
+                                        {datos.finalizado === false?
+                                            <td>
+                                                <Form.Group controlId="fuera">
+                                                    <Form.Control as="select" 
+                                                                value={linea.fuera}
+                                                                name='fuera'
+                                                                onChange={handleInputChange_fuera(linea)}
+                                                                disabled={linea.fuera}>
+                                                        <option key={1} value={true}>Si</option>
+                                                        <option key={2} value={false}>No</option>
+                                                    </Form.Control>
+                                                </Form.Group>
+                                            </td>
+                                        :''}                       
                                     </tr>
                             )})}
                         </tbody>

@@ -6,14 +6,15 @@ import { Container, Row, Col, Table, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { Trash, Eye } from 'react-bootstrap-icons';
 import RodMontajeListadoFiltro from './Rod_montaje_listado_filtro';
-import logo from '../../assets/logo_bornay.svg';
+import logo from '../../assets/Bornay.svg';
+import logoTuf from '../../assets/logo_tuflesa.svg';
 
 const RodMontajeListado = () => {
     const [user] = useCookies(['tec-user']);
     const [token] = useCookies(['tec-token']);
 
     const [montajes, setMontajes] = useState(null)
-    const [filtro, setFiltro] = useState(``);
+    const [filtro, setFiltro] = useState(`?maquina__empresa__id=${user['tec-user'].perfil.empresa.id}`);
     const [refrescar, setRefrescar] = useState(false);
     const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Director Técnico'?false:true;
     const [filaSeleccionada, setFilaSeleccionada] = useState(null);
@@ -33,6 +34,7 @@ const RodMontajeListado = () => {
     });
 
     useEffect(() => {
+        console.log('que vale empresa: ', filtro)
         axios.get(BACKEND_SERVER + `/api/rodillos/montaje_listado/`+filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -217,7 +219,7 @@ const RodMontajeListado = () => {
 
     return ( 
         <Container>
-            <img src ={logo} width="200" height="200"></img>
+            <img src ={user['tec-user'].perfil.empresa.id===1?logo:logoTuf} width="200" height="200"></img>
             <Row>
                 <Col>
                     <RodMontajeListadoFiltro actualizaFiltro={actualizaFiltro}/>

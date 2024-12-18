@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Table, Button, Form } from 'react-bootstrap';
-import logo from '../../assets/logo_bornay.svg';
+import logo from '../../assets/Bornay.svg';
+import logoTuf from '../../assets/logo_tuflesa.svg';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
@@ -156,8 +157,6 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
     }
 
     const handlerGuardar = () => { //Guardamos el montaje, primero comprobamos si ya existe.
-        console.log('datos del montaje: ', datos)
-        console.log('filtro del montaje: ', filtro)
         if(datos.nombre===''||datos.maquina===''||datos.grupo===''||datos.bancada_ct===''){
             alert('Revisa los datos obligatorios');
         }
@@ -221,7 +220,7 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
 
     return (
         <Container>
-            <img src ={logo} width="200" height="200"></img>
+            <img src ={user['tec-user'].perfil.empresa.id===1?logo:logoTuf} width="200" height="200"></img>
             {montaje_edi?
                 <Form>
                     <Row>

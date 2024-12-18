@@ -5,7 +5,8 @@ import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table, Form, Button } from 'react-bootstrap';
 import { PencilFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
-import logo from '../../assets/logo_bornay.svg';
+import logo from '../../assets/Bornay.svg';
+import logoTuf from '../../assets/logo_tuflesa.svg';
 
 const RodBancadaCTListado = () => {
     const [token] = useCookies(['tec-token']);
@@ -14,7 +15,7 @@ const RodBancadaCTListado = () => {
     const [empresas, setEmpresas] = useState(null);
     const [zonas, setZonas] = useState(null);
     const [bancadas, setBancadas] = useState(null);
-    const [filtro, setFiltro] = useState(`?dimensiones__icontains=${''}&seccion__maquina__id=${''}&seccion__maquina__empresa=${''}&seccion__pertenece_grupo=${false}`);//BUSCANDO LAS BANCADAS CT
+    const [filtro, setFiltro] = useState(`?dimensiones__icontains=${''}&seccion__maquina__id=${''}&seccion__maquina__empresa__id=${user['tec-user'].perfil.empresa.id}&seccion__pertenece_grupo=${false}`);//BUSCANDO LAS BANCADAS CT
     const [count, setCount] = useState(null);
 
     const [datos, setDatos] = useState({
@@ -27,7 +28,7 @@ const RodBancadaCTListado = () => {
     });
 
     useEffect(()=>{
-        setFiltro(`?dimensiones__icontains=${datos.dimensiones}&seccion__maquina__id=${datos.maquina}&seccion__maquina__empresa=${datos.empresa}&seccion__pertenece_grupo=${false}`);
+        setFiltro(`?dimensiones__icontains=${datos.dimensiones}&seccion__maquina__id=${datos.maquina}&seccion__maquina__empresa__id=${datos.empresa}&seccion__pertenece_grupo=${false}`);
     },[datos]);
 
     useEffect(() => {
@@ -37,6 +38,7 @@ const RodBancadaCTListado = () => {
               }
         })
         .then( res => {
+            console.log(res.data.results)
             setBancadas(res.data.results);
             setCount(res.data.count);
         })
@@ -130,7 +132,7 @@ const RodBancadaCTListado = () => {
 
     return (
         <Container className='mt-5'>
-            <img src ={logo} width="200" height="200"></img>
+            <img src ={user['tec-user'].perfil.empresa.id===1?logo:logoTuf} width="200" height="200"></img>
             <Row>
                 <Col>
                     <Form.Group controlId="nombre">
@@ -219,26 +221,6 @@ const RodBancadaCTListado = () => {
                                             <td>{bancada.seccion.maquina.siglas}</td>
                                             <td><Link title='Detalle/Modificar'to={`/rodillos/bacada_ct_editar/${bancada.id}`}><PencilFill className="mr-3 pencil"/></Link></td>
                                         </tr>}
-                                        {/* {filaSeleccionada === linea.id && show === true && (
-                                            <tr>
-                                                <td colSpan="4">
-                                                        <Table striped bordered hover>
-                                                            <thead>
-                                                                <tr>
-                                                                    <th>Rodillo</th>
-                                                                    <th>Operación</th>
-                                                                    <th>Descripción perfil</th>
-                                                                    <th>Dimensión</th>
-                                                                    <th>Eje</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                {conjuntos}
-                                                            </tbody>
-                                                        </Table>
-                                                </td>
-                                            </tr>
-                                        )} */}
                                     </React.Fragment>
                                 )
                             })}

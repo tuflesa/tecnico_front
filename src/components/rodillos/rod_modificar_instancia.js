@@ -1,3 +1,4 @@
+//Modificar y crear una instancia
 import React, { useEffect, useState } from 'react';
 import { Row, Col, Form, Button, Modal } from 'react-bootstrap';
 import { useCookies } from 'react-cookie';
@@ -5,21 +6,24 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useBarcode } from 'react-barcodes';
 
-const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa, instancia_activa_id, rodillo_eje, rodillo}) => {
+const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa, instancias_activas, diametro_eje, rodillo}) => {
     const [token] = useCookies(['tec-token']);
     const [materiales, setMateriales] = useState([]);
+    const [posiciones, setPosiciones] = useState([]);
+    const [posiciones_filtradas, setPosiciones_filtradas] = useState([]);
     const [datos, setDatos] = useState({
-        id: instancia.id? instancia.id:null,
-        nombre: instancia.id?instancia.nombre:'',
-        rodillo: instancia.id?instancia.rodillo.id:'',
-        material: instancia.id?instancia.material.id:'',
-        especial: instancia.id?instancia.especial:'',
-        diametroFG: instancia.id?instancia.diametro:'',
-        diametroEXT: instancia.id?instancia.diametro_ext:'',
-        diametroCentro: instancia.id?instancia.diametro_centro:'',
-        activa_qs:instancia.id?instancia.activa_qs:'',
-        obsoleta: instancia.id?instancia.obsoleta:'',
-        ancho: instancia.id?instancia.ancho:'',
+        id: instancia? instancia.id:null,
+        nombre: instancia?instancia.nombre:'',
+        rodillo: instancia?instancia.rodillo.id:'',
+        material: instancia?instancia.material.id:'',
+        especial: instancia?instancia.especial:'',
+        diametroFG: instancia?instancia.diametro:'',
+        diametroEXT: instancia?instancia.diametro_ext:'',
+        diametroCentro: instancia?instancia.diametro_centro:'',
+        activa_qs:instancia?instancia.activa_qs:false,
+        obsoleta: instancia?instancia.obsoleta:false,
+        ancho: instancia?instancia.ancho:'',
+        posicion: instancia?instancia.posicion:'',
     });
     
     useEffect(() => {
@@ -36,12 +40,100 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
         });
     }, [token]);
 
+    // Leer posiciones
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + `/api/rodillos/posicion/`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+                }
+        })
+        .then((res) => {
+            let posicionesFiltradas = [];
+            if (instancias_activas) {
+                // Filtramos las posiciones excluyendo las ya activas
+                posicionesFiltradas = res.data.filter(
+                    (posicion) =>
+                        !instancias_activas.some(
+                            (instancia) => instancia.posicion === posicion.id
+                        )
+                );
+
+                // Agregamos explícitamente la posición que coincida con datos.posicion si existe
+                const posicionDatos = res.data.find(
+                    (posicion) => posicion.id === datos.posicion
+                );
+                if (posicionDatos && !posicionesFiltradas.some((p) => p.id === datos.posicion)) {
+                    posicionesFiltradas.push(posicionDatos);
+                }
+            }
+            else{
+                posicionesFiltradas = res.data;
+            }
+            setPosiciones_filtradas(posicionesFiltradas);
+            setPosiciones(res.data);
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+    }, [token, show, datos.posicion]);
+
+    const GuardarInstancia = () => {
+        if(parseFloat(datos.diametroFG)>parseFloat(datos.diametroEXT)){
+            alert('El diámetro de fondo no puede ser superior al diámetro exterior. Por favor corregir.');
+        }
+        if(parseFloat(rodillo.diametro)>parseFloat(datos.diametroFG) || parseFloat(rodillo.diametro)===parseFloat(datos.diametroFG)){
+            alert('El diámetro de fondo, no puedes ser inferior o igual al eje del rodillo. Por favor corregir.')
+        }
+        else if(parseFloat(datos.diametroFG)<parseFloat(datos.diametroEXT) && parseFloat(rodillo.diametro)<parseFloat(datos.diametroFG) && parseFloat(rodillo.diametro)!==parseFloat(datos.diametroFG)||parseFloat(datos.diametroFG)===parseFloat(datos.diametroEXT)){
+            if (datos.material) {
+                axios.post(BACKEND_SERVER + `/api/rodillos/instancia_nueva/`, {
+                    nombre: rodillo.nombre + '-' + (rodillo.num_instancias+1),
+                    rodillo: rodillo.id,
+                    especial: false,
+                    material: datos.material,
+                    diametro: datos.diametroFG,
+                    diametro_ext: datos.diametroEXT,
+                    diametro_centro: datos.diametroCentro,
+                    activa_qs: datos.activa_qs,
+                    obsoleta: false,
+                    ancho: datos.ancho,
+                    posicion: datos.posicion,
+                }, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }     
+                })
+                .then(r => {
+                    axios.patch(BACKEND_SERVER + `/api/rodillos/rodillos/${rodillo.id}/`, {
+                        num_instancias: rodillo.num_instancias+1,
+                    }, {
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                        }     
+                    })
+                    .then(r => {
+                    })
+                    .catch(err => { 
+                        console.log(err);
+                    });
+                    window.location.href = `/rodillos/editar/${rodillo.id}`;
+                })
+                .catch(err => { 
+                    alert('NO SE GUARDA LA INSTANCIA, REVISAR');
+                    console.log(err);
+                });
+            } else {
+                alert('Por favor selecciona un material.');
+            }
+        }
+    }
+
     const ModificarInstancia = () => {
         if(parseFloat(datos.diametroFG)>parseFloat(datos.diametroEXT)){
-            alert('El diámetro de fondo no puede ser superior al diámetro exterior. Por favor corregir, gracias');
+            alert('El diámetro de fondo no puede ser superior al diámetro exterior. Por favor corregir.');
         }
-        else if(rodillo_eje>parseFloat(datos.diametroFG) || rodillo_eje===parseFloat(datos.diametroFG)){
-            alert('El diámetro de fondo, no puedes ser inferior o igual al eje del rodillo. Por favor corregir, gracias')
+        else if(rodillo.diametro>parseFloat(datos.diametroFG) || rodillo.diametro===parseFloat(datos.diametroFG)){
+            alert('El diámetro de fondo, no puedes ser inferior o igual al eje del rodillo. Por favor corregir.')
         }
         else{
             axios.patch(BACKEND_SERVER + `/api/rodillos/instancia_nueva/${instancia.id}/`, {
@@ -49,30 +141,16 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
                 diametro: datos.diametroFG,
                 diametro_ext: datos.diametroEXT,
                 diametro_centro: datos.diametroCentro,
-                activa_qs: datos.activa_qs,
+                activa_qs: datos.obsoleta?false:datos.activa_qs,
                 obsoleta: datos.obsoleta,
                 ancho: datos.ancho,
+                posicion: datos.posicion,
                 }, {
                 headers: {
                     'Authorization': `token ${token['tec-token']}`,
                 }
             })
             .then(r => {
-                if(datos.obsoleta===true){
-                    axios.patch(BACKEND_SERVER + `/api/rodillos/rodillos/${rodillo.id}/`, {
-                        num_instancias: rodillo.num_instancias-1,
-                    }, {
-                        headers: {
-                            'Authorization': `token ${token['tec-token']}`
-                        }     
-                    })
-                    .then(r => {
-                        alert('Acaba de ANULAR una instancia de rodillo, gracias.');
-                    })
-                    .catch(err => { 
-                        console.log(err);
-                    });
-                }
                 window.location.href = `/rodillos/editar/${instancia.rodillo.id}`;
             })
             .catch(err => { 
@@ -90,8 +168,28 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
     }
 
     const handleInputChange_qs = (event) => {
-        if(event.target.value==='on' && instancia_activa && instancia_activa_id[0].id!==instancia.id){
-            alert('Ya hay una instancia activa para QS, quitar antes de activar otra, gracias');
+        if(instancias_activas){
+            if(instancias_activas.length < rodillo.num_ejes){
+                setDatos({
+                    ...datos,
+                    activa_qs:!datos.activa_qs
+                })
+            }
+            else{
+                if(datos.activa_qs===true){
+                    setDatos({
+                        ...datos,
+                        activa_qs:!datos.activa_qs
+                    }) 
+                }
+                else{
+                    alert('No se pueden poner más instancia activa para QS, desactiva alguna antes. Numero de ejes: '+ rodillo.num_ejes + ' Numero de instancias activas: ' + instancias_activas.length);
+                    setDatos({
+                        ...datos,
+                        activa_qs:false
+                    })
+                }
+            }
         }
         else{
             setDatos({
@@ -120,7 +218,9 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
             diametroEXT: '',
             activa_qs:'',
             obsoleta: '',
+            posicion: '',
         })
+        instancia=[];
         handlerClose();
     }
 
@@ -153,7 +253,7 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
             <Modal.Body>
                 <Row>
                     <Col>
-                        <h5>Modificar instancia al rodillo</h5>
+                        {datos.id?<h5>Modificar instancia al rodillo</h5>:<h5>Agregar instancia al rodillo</h5>}
                     </Col>
                 </Row>
                 <Row>
@@ -174,7 +274,7 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
                 <Row>
                     <Col>
                         <Form.Group controlId="diametro">
-                            <Form.Label>Introduce el diámetro de fondo</Form.Label>
+                            <Form.Label>Introduce el diámetro de fondo (mm)</Form.Label>
                             <Form.Control
                                 name="diametroFG"
                                 type="text"
@@ -188,7 +288,7 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
                 <Row>
                     <Col>
                         <Form.Group controlId="diametro_ext">
-                            <Form.Label>Introduce el diámetro de exterior</Form.Label>
+                            <Form.Label>Introduce el diámetro de exterior (mm)</Form.Label>
                             <Form.Control
                                 name="diametroEXT"
                                 type="text"
@@ -202,12 +302,26 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
                 <Row>
                     <Col>
                         <Form.Group controlId="diametroCentro">
-                            <Form.Label>Introduce el diámetro de centro</Form.Label>
+                            <Form.Label>Introduce el diámetro de centro (mm)</Form.Label>
                             <Form.Control
                                 name="diametroCentro"
                                 type="text"
                                 placeholder="Ø centro"
                                 value={datos.diametroCentro}
+                                onChange={handleInputChange}
+                            />
+                        </Form.Group>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
+                        <Form.Group controlId="ancho">
+                            <Form.Label>Introduce el ancho (mm)</Form.Label>
+                            <Form.Control
+                                name="ancho"
+                                type="text"
+                                placeholder="Introduce ancho"
+                                value={datos.ancho}
                                 onChange={handleInputChange}
                             />
                         </Form.Group>
@@ -222,6 +336,23 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
                                         checked = {datos.activa_qs}
                                         onChange = {handleInputChange_qs} />
                         </Form.Group>
+                        {datos.activa_qs && <Form.Group controlId="posicion">
+                            <Form.Label>Selecciona posición</Form.Label>
+                            <Form.Control 
+                                        as="select" 
+                                        value={datos.posicion} 
+                                        name="posicion" 
+                                        onChange={handleInputChange}>
+                                <option value="">Selecciona una opción</option> {/* Opción predeterminada */}
+                                {posiciones_filtradas.map((posicion, index) => (
+                               //{(datos.posicion ? posiciones : instancias_activas ? posiciones_filtradas: posiciones).map((posicion, index) => (
+                                    <option key={index} value={posicion.id}>
+                                    {posicion.nombre}
+                                    </option>
+                                ))}
+                            </Form.Control>
+                        </Form.Group>}
+                    
                         <Form.Group className="mb-3" controlId="obsoleta">
                             <Form.Check type="checkbox" 
                                         label="obsoleta"
@@ -237,7 +368,7 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
                 </Row>
             </Modal.Body>
             <Modal.Footer>
-                <Button variant="warning" onClick={ModificarInstancia}>Modificar</Button>
+                {datos.id?<Button variant="warning" onClick={ModificarInstancia}>Modificar</Button>:<Button variant="warning" onClick={GuardarInstancia}>Guardar</Button>}
                 <Button variant="warning" onClick={cerrarInstancia}>Cancelar</Button>
                 {datos.id && <Button variant='info' className={'mx-2'} onClick={ImprimirBarcode}>Imprimir Etiqueta</Button>}
             </Modal.Footer>

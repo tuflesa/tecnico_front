@@ -10,6 +10,7 @@ import {invertirFecha} from '../utilidades/funciones_fecha';
 import RodRevisionForm from './rod_revision_form';
 
 const RodPlanosRodillo = ({rodillo, rodillo_nuevo, tipo_plano_id}) => {
+    const [user] = useCookies(['tec-user']);
     const [token] = useCookies(['tec-token']);
     const [planos, setPlanos] = useState(null);
     const [show_plano, setShowPlano] = useState(false);
@@ -22,6 +23,7 @@ const RodPlanosRodillo = ({rodillo, rodillo_nuevo, tipo_plano_id}) => {
     const [pulsamos_revision, setPulsamosRevision] = useState(false);
     const [revisiones, setRevisiones] = useState('');
     const [revisiones_lenght, setRevisionesLenght] = useState('');
+    const soySuperTecnico = user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:false;
 
     useEffect(() => {
         if(plano_nombre!=='' && plano_id!==''){
@@ -112,7 +114,7 @@ const RodPlanosRodillo = ({rodillo, rodillo_nuevo, tipo_plano_id}) => {
         var confirmacion = window.confirm('¿Confirma que desea eliminar este plano, en este rodillo?');
         if(confirmacion){
             for(var x=0;x<plano.rodillos.length;x++){
-                if(plano.rodillos[x]===rodillo_nuevo.id){
+                if(plano.rodillos[x]===rodillo.id){
                     plano.rodillos.splice(x,1); //elimina el elemento que cumple la condición.
                 }
             }
@@ -178,6 +180,30 @@ const RodPlanosRodillo = ({rodillo, rodillo_nuevo, tipo_plano_id}) => {
         setShowPlano(false);
     }
 
+    const handleInputChange = (planoId, newValue) => {
+        axios.patch(`${BACKEND_SERVER}/api/rodillos/plano/${planoId}/`, {
+                xa_rectificado: newValue }, 
+                {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }
+                }
+            )
+            .then(response => {
+                // Actualizar el estado de 'planos' localmente
+                setPlanos(prevPlanos =>
+                    prevPlanos.map(plano =>
+                        plano.id === planoId 
+                            ? { ...plano, xa_rectificado: newValue } 
+                            : plano
+                    )
+                );
+            })
+            .catch(error => {
+                console.error('Error al actualizar xa_rectificado:', error);
+            });
+    };    
+
     return (
         <Container className='mt-5 pt-1'>
             <Form>
@@ -206,6 +232,7 @@ const RodPlanosRodillo = ({rodillo, rodillo_nuevo, tipo_plano_id}) => {
                             <th>Nombre</th>
                             <th>Cod Antiguo</th>
                             <th>Descripción</th>
+                            <th>Para rectificado</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -220,6 +247,15 @@ const RodPlanosRodillo = ({rodillo, rodillo_nuevo, tipo_plano_id}) => {
                                         <td>{plano.nombre}</td>
                                         <td>{plano.cod_antiguo}</td>
                                         <td>{plano.descripcion}</td>
+                                        <td>
+                                            <input 
+                                                type="checkbox" 
+                                                checked={plano.xa_rectificado} 
+                                                readOnly 
+                                                onChange={(e) => handleInputChange(plano.id, e.target.checked)} 
+                                                disabled={!soySuperTecnico}
+                                            />
+                                        </td>
                                         <td>
                                             <Clipboard className="mr-3 pencil" onClick={event => {NuevaRevision(plano)}}/>   
                                             <Trash className="mr-3 pencil" onClick={event => {eliminarPlano(plano)}}/>                                                      

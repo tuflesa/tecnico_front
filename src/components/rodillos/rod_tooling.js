@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Table, Button, Form } from 'react-bootstrap';
-import logo from '../../assets/logo_bornay.svg';
+import logo from '../../assets/Bornay.svg';
+import logoTuf from '../../assets/logo_tuflesa.svg';
 import { useCookies } from 'react-cookie';
 import RodMontajeListadoFiltro from './Rod_montaje_listado_filtro';
 import { BACKEND_SERVER } from '../../constantes';
@@ -25,10 +26,6 @@ const RodTooling = () => {
     const [operaciones, setOperaciones] = useState(null);
     const [secciones, setSecciones] = useState(null);
     const [bancadas, setBancadas] = useState(null);
-
-    useEffect(() => {
-        console.log('ESTO VALE CONJUNTOS_COMPLETADOSCEL____:',conjuntos_completadosCel)
-    }, [conjuntos_completadosCel]);
     
     useEffect(() => { //SEPARAR DATOS QUE ENTRAN A TRAVES DEL FILTRO
         const params = new URLSearchParams(filtro);
@@ -102,7 +99,6 @@ const RodTooling = () => {
 
     useEffect(() => {
         if (celdas) {
-            console.log('tengo celdas!!!!!!!!!!!!!!');
             const datosTablaCel = celdas.flatMap(e => { //en esta operación creamos un array con la información que queremos mostras
                 if (e) {
                     return e.flatMap(c => {
@@ -146,7 +142,6 @@ const RodTooling = () => {
 
     useEffect(() => { //Para tener todas las celdas juntos BD y CT
         if (conjuntosCel && conjuntosCelCT) {
-            console.log('tenemos conjuntosCel y CT');
             const unimos = conjuntosCel.concat(conjuntosCelCT);
             unimos.forEach((element, index) => {
                 element.numCelda = index + 1;
@@ -158,7 +153,6 @@ const RodTooling = () => {
     }, [conjuntosCel, conjuntosCelCT]);
 
     const cogerDatos = async (montajes) => {
-        console.log('estoy cogiendo datos');
         try {
             // Arrays para almacenar la información de todos los montajes
             let todasLasCeldas = [];
@@ -240,7 +234,7 @@ const RodTooling = () => {
 
     return (
         <Container>
-            <img src ={logo} width="200" height="200"></img>
+            <img src ={user['tec-user'].perfil.empresa.id===1?logo:logoTuf} width="200" height="200"></img>
             <Row>
                 <Col>
                     <RodMontajeListadoFiltro actualizaFiltro={actualizaFiltro}/>

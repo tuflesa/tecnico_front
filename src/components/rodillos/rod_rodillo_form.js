@@ -5,10 +5,11 @@ import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
 import { Button, Form, Col, Row,} from 'react-bootstrap';
 import RodParametrosEstandar from './rod_parametros_estandar';
-import logo from '../../assets/logo_bornay.svg';
+import logo from '../../assets/Bornay.svg';
+import logoTuf from '../../assets/logo_tuflesa.svg';
 import RodPlanosRodillo from './rod_rodillo_planos';
 import RodInstanciasRodillo from './rod_rodillo_instancias';
-import RodCrearInstancia from './rod_crear_instancia';
+import RodModificarInstancia from './rod_modificar_instancia';
 
 const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [token] = useCookies(['tec-token']);
@@ -33,6 +34,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
 
     const [datos, setDatos] = useState({
         empresa: rodillo.id?rodillo.operacion.seccion.maquina.empresa_id:'',
+        empresa_nombre: rodillo.id?rodillo.operacion.seccion.maquina.empresa.nombre:'',
         zona: rodillo.id?rodillo.operacion.seccion.maquina.id:'',
         zona_siglas: rodillo.id?rodillo.operacion.seccion.maquina.siglas:'',
         seccion: rodillo.id?rodillo.operacion.seccion.id: '',
@@ -365,7 +367,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         setDatos({
             ...datos,
             [event.target.name] : event.target.value,
-            nombre: '',
+            //nombre: '',
         })
     }
 
@@ -390,6 +392,16 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         }));
     };
 
+    const handleInputChangeEmpresa = (event) => {
+        const selectedValue = event.target.value;
+        const selectedEmpresa = empresas.find((empresa) => empresa.id.toString() === selectedValue);
+        setDatos((prevDatos) => ({
+            ...prevDatos,
+            empresa: selectedValue,
+            empresa_nombre: selectedEmpresa ? selectedEmpresa.nombre : "",
+        }));
+    };
+
     const GuardarRodillo = (event) => {
         event.preventDefault();
         axios.get(BACKEND_SERVER + `/api/rodillos/rodillos/?nombre=${datos.nombre}`,{
@@ -398,13 +410,10 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 }
         })
         .then(res => {
-            console.log('res data del rodillo que encuentra',res.data)
-            console.log('datos',datos);
             if(res.data.length!==0){
                 alert('Este rodillo ya existe');
             }
             else{
-                
                 const formData = new FormData();
                 formData.append('nombre', datos.nombre);
                 formData.append('operacion', parseInt(datos.operacion));
@@ -430,11 +439,10 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 .then( res => { 
                     setRodilloNuevo(res.data);
                     añadirInstancia();
-                    //window.location.href = `/rodillos/editar/${res.data.id}`; 
                 })
                 .catch(err => { 
                     console.log(err);
-                    alert('Falta datos, por favor rellena todo los datos que tengan *');
+                    alert('Faltan datos, por favor rellena todo los datos que tengan *');
                 })
             }
         })
@@ -514,6 +522,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
 
     const cerrarInstancia = () => {
         setShowInstancia(false);
+        window.location.href = `/rodillos/editar/${rodillo_nuevo.id}`;
     }
 
     const añadirParametros = () => {
@@ -572,7 +581,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     }
 
     const styles = {
-        textAlign: 'right',
+        textAlign: 'left',
         color: 'red',
         fontSize: 'smaller'}
     
@@ -582,21 +591,20 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
 
     return (
         <Container className='mt-5 pt-1'>
-            <img src ={logo} width="200" height="200"></img>
+            <img src ={user['tec-user'].perfil.empresa.id===1?logo:logoTuf} width="200" height="200"></img>
             {rodillo.length===0?
                 <h5 className='mt-5'>Nuevo Rodillo</h5>:
                 <h5 className='mt-5'>Editar Rodillo</h5>}
             <Form >
                 <Row>
-                    <Form.Group controlId="nombre">
+                    <Form.Group as={Col} md={6} controlId="nombre">
                         <Form.Label>Nombre del rodillo</Form.Label>
                         <Form.Control type="text" 
-                                    className="input-auto-width"
+                                    //className="input-auto-width"
                                     name='nombre' 
                                     value={datos.nombre}
                                     onChange={handleInputChange} 
                                     placeholder="Nombre Rodillo"
-                                    disabled
                         />
                     </Form.Group>
                 </Row>
@@ -607,7 +615,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                             <Form.Control as="select"  
                                         name='empresa' 
                                         value={datos.empresa}
-                                        onChange={handleInputChange}
+                                        onChange={handleInputChangeEmpresa}
                                         disabled={rodillo.id?true:false}
                                         placeholder="Empresa"
                                         autoFocus>
@@ -616,7 +624,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                             return (
                                             <option key={empresa.id} value={empresa.id}>
                                                 {empresa.nombre}
-                                            </option>
+                                             </option>
                                             )
                                         })}
                             </Form.Control>
@@ -728,7 +736,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                 </Form.Group>
                             </Col>                    
                         </Row>
-                        :''}
+                    :''}
                     <Row>
                         {datos.pertenece_grupo?
                             <Col>
@@ -796,30 +804,36 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                             </Form.Group>
                         </Col>
                     </Row>
-                    <Row>
-                        <Col>
-                            <Form.Group controlId="archivo">
-                                <Form.Label>Selecciona archivo de rectificado</Form.Label>
-                                {datos.archivo && (
-                                    <Form.Text className="text-muted d-block">
-                                        Archivo guardado: <a href={datos.archivo} target="_blank" rel="noopener noreferrer">{datos.archivo}</a>
-                                    </Form.Text>
-                                )}
-                                <Form.Control type="file" onChange={handleInputChange_archivo} />
-                            </Form.Group>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col>
-                            <Form.Group className="mb-3" controlId="espesores">
-                                <Form.Check type="checkbox" 
-                                            label="¿Rango de espesores?"
-                                            checked = {datos.espesores}
-                                            onChange = {handleInputespesores} />
-                            </Form.Group>
-                        </Col>
-                        {datos.espesores?
+                    {datos.empresa_nombre==='Bornay S.L'?
+                        <Row>
                             <Col>
+                                <Form.Group controlId="archivo">
+                                    <Form.Label>Selecciona archivo de rectificado</Form.Label>
+                                    {datos.archivo && (
+                                        <Form.Text className="text-muted d-block">
+                                            Archivo guardado: <a href={datos.archivo} target="_blank" rel="noopener noreferrer">{datos.archivo}</a>
+                                        </Form.Text>
+                                    )}
+                                    <Form.Control type="file" onChange={handleInputChange_archivo} />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                    :''}
+                    {/* {datos.empresa_nombre==='Bornay S.L'? */}
+                        <Row>
+                            <Col>
+                                <Form.Group className="mb-3" controlId="espesores">
+                                    <Form.Check type="checkbox" 
+                                                label="¿Rango de espesores?"
+                                                checked = {datos.espesores}
+                                                onChange = {handleInputespesores} />
+                                </Form.Group>
+                            </Col>
+                        </Row>
+                    {/* :''} */}
+                    {datos.espesores?
+                        <Row>
+                            <Col style={{ maxWidth: '200px' }}>
                                 <Form.Group controlId="espesor_menor">
                                     <Form.Label>Rango espesor menor</Form.Label>
                                     <Form.Control type="text" 
@@ -830,9 +844,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                     </Form.Control>
                                 </Form.Group>
                             </Col>
-                        : ''}
-                        {datos.espesores?
-                            <Col>
+                            <Col style={{ maxWidth: '200px' }}>
                                 <Form.Group controlId="espesor_mayor">
                                     <Form.Label>Rango espesor mayor</Form.Label>
                                     <Form.Control type="text" 
@@ -843,36 +855,38 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                     </Form.Control>
                                 </Form.Group>
                             </Col>
+                        </Row>
                         :''}
+                        {datos.empresa_nombre==='Bornay S.L'?<h5 style={styles}>**Si tenemos espesores, solo se permite el punto para poner el decimal, no guardará si ponemos comas</h5>:''}
                         {rodillo.length!==0?
-                            <Col>
-                                <Form.Group controlId="tipo_plano" >
-                                    <Form.Label style={{color:'red'}}>Tipo de plano</Form.Label>
-                                    <Form.Control as="select" 
-                                                    style={{color:'red'}}
-                                                    value={datos.tipo_plano}
-                                                    name='tipo_plano'
-                                                    onChange={handleInputChange}
-                                                    disabled={no_modificar_tipoplano?true:false}>
-                                        <option key={0} value={0}>Ninguno</option>
-                                        {tipos_planos && tipos_planos.map( tipo => {
-                                            return (
-                                            <option key={tipo.id} value={tipo.id}>
-                                                {tipo.nombre}
-                                            </option>
-                                            )
-                                        })}
-                                    </Form.Control>
-                                </Form.Group>
-                            </Col>
+                            <Row>
+                                <Col>
+                                    <Form.Group controlId="tipo_plano" >
+                                        <Form.Label /* style={{color:'red'}} */>Tipo de plano</Form.Label>
+                                        <Form.Control as="select" 
+                                                        //style={{color:'red'}}
+                                                        value={datos.tipo_plano}
+                                                        name='tipo_plano'
+                                                        onChange={handleInputChange}
+                                                        disabled={no_modificar_tipoplano?true:false}>
+                                            <option key={0} value={0}>Ninguno</option>
+                                            {tipos_planos && tipos_planos.map( tipo => {
+                                                return (
+                                                <option key={tipo.id} value={tipo.id}>
+                                                    {tipo.nombre}
+                                                </option>
+                                                )
+                                            })}
+                                        </Form.Control>
+                                    </Form.Group>
+                                </Col>
+                            </Row>
                         :''}
-                    </Row>
                 </React.Fragment>
                 :''}
-                <h5 style={styles}>Si tenemos espesores, solo se permite el punto para poner el decimal, no guardará si ponemos comas</h5>
                 {rodillo.length!==0?
                     <Row style={{marginBottom:'10px'}}>
-                        <Col style={{color:'red'}}>Debemos introducir el tipo de plano y actualizar, si queremos añadir un plano ya creado</Col>
+                        <Col style={{color:'red'}}>**Debemos introducir el tipo de plano y actualizar, si queremos añadir un plano ya creado</Col>
                     </Row>
                 :''}
                 <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
@@ -888,12 +902,9 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
             <RodInstanciasRodillo
                     rodillo={rodillo}/>
 
-            <RodCrearInstancia show={show_instancia}
-                            setShow={setShowInstancia}
-                            rodillo_id={rodillo_nuevo.id}
-                            rodillo={rodillo_nuevo}
-                            handleClose={cerrarInstancia}
-                            instancias_length={1}/>
+            <RodModificarInstancia show={show_instancia}
+                        rodillo={rodillo_nuevo}
+                        handlerClose={cerrarInstancia}/>
             
             <RodParametrosEstandar showPa={showParametros}
                            tipo_plano_id={datos.tipo_plano}

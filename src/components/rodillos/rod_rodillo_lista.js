@@ -6,12 +6,12 @@ import { Container, Row, Col, Table, Button } from 'react-bootstrap';
 import { PencilFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import RodListaFiltro from './rod_lista_filtro';
-import logo from '../../assets/logo_bornay.svg';
+import logo from '../../assets/Bornay.svg';
+import logoTuf from '../../assets/logo_tuflesa.svg';
 
 const RodLista = () => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
-    //const [show, setShow] = useState(false);
     const [count, setCount] = useState(null);
     const [lista_rodillos, setListaRodillos] = useState(null);
     const [filtro, setFiltro] = useState(`?operacion__seccion__maquina__empresa__id=${user['tec-user'].perfil.empresa.id}`);
@@ -85,11 +85,9 @@ const RodLista = () => {
         setFiltro(str);
     }
 
-    //const handleClose = () => setShow(false);
-
     return (
         <Container className='mt-5'>
-            <img src ={logo} width="200" height="200"></img>
+            <img src ={user['tec-user'].perfil.empresa.id===1?logo:logoTuf} width="200" height="200"></img>
             <Row>
                 <Col>
                     <RodListaFiltro actualizaFiltro={actualizaFiltro}/>

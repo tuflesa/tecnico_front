@@ -5,7 +5,8 @@ import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
 import { Button, Form, Col, Row } from 'react-bootstrap';
 import RodBancada from './rod_bancada_form';
-import logo from '../../assets/logo_bornay.svg';
+import logo from '../../assets/Bornay.svg';
+import logoTuf from '../../assets/logo_tuflesa.svg';
 
 const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
     const [token] = useCookies(['tec-token']);
@@ -127,16 +128,6 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
 
     const ActualizarGrupo = (event) => {
         event.preventDefault();
-        // axios.get(BACKEND_SERVER + `/api/rodillos/grupo_nuevo/?tubo_madre=${datos.tubo_madre}&maquina=${datos.zona}&espesor_1=${datos.espesor_1}&espesor_2=${datos.espesor_2}`,{
-        //     headers: {
-        //         'Authorization': `token ${token['tec-token']}`
-        //       }
-        // })
-        // .then( res => {
-            // if(res.data.length!==0){
-            //     alert('Con esta modificación ya existe un grupo');
-            // }
-            // else{
                 axios.patch(BACKEND_SERVER + `/api/rodillos/grupo_only/${grupo.id}/`, {
                     nombre: datos.nombre,            
                     espesor_1: datos.espesor_1,
@@ -164,7 +155,7 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
 
     return (
         <Container className='mt-5'>
-            <img src ={logo} width="200" height="200"></img>
+            <img src ={user['tec-user'].perfil.empresa.id===1?logo:logoTuf} width="200" height="200"></img>
             {grupo.id?<h5 className='mt-5'>Editar Grupo</h5>:<h5 className='mt-5'>Nuevo Grupo</h5>}
             <Form >
                 <Row>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Table, Button, Form } from 'react-bootstrap';
-import logo from '../../assets/logo_bornay.svg';
+import logo from '../../assets/Bornay.svg';
+import logoTuf from '../../assets/logo_tuflesa.svg';
 import { useCookies } from 'react-cookie';
 import RodBancadaCTFiltro from './rod_bancada_ct_filtro';
 import { BACKEND_SERVER } from '../../constantes';
@@ -76,7 +77,6 @@ const RodBancadaCT = ({bancada}) => {
             })
             .then( r => {
                 setOperaciones(r.data);
-                console.log('ESTAS SON LAS OPERACIONES: ', r.data);
             })
             .catch( err => {
                 console.log(err);
@@ -104,7 +104,7 @@ const RodBancadaCT = ({bancada}) => {
 
     return (
         <Container>
-            <img src ={logo} width="200" height="200"></img>
+            <img src ={user['tec-user'].perfil.empresa.id===1?logo:logoTuf} width="200" height="200"></img>
             {!bancada?
                 <Row>
                     <Col>

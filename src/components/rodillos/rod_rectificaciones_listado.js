@@ -6,7 +6,8 @@ import { Container, Row, Col, Table, Button } from 'react-bootstrap';
 import { PencilFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import RodRectificacionesFiltro from './rod_rectificaciones_filtro';
-import logo from '../../assets/logo_bornay.svg';
+import logo from '../../assets/Bornay.svg';
+import logoTuf from '../../assets/logo_tuflesa.svg';
 import {invertirFecha} from '../utilidades/funciones_fecha';
 
 const RodListaRectificaciones = () => {
@@ -86,7 +87,7 @@ const RodListaRectificaciones = () => {
 
     return (
         <Container className='mt-5'>
-            <img src ={logo} width="200" height="200"></img>
+            <img src ={user['tec-user'].perfil.empresa.id===1?logo:logoTuf} width="200" height="200"></img>
             <Row>
                 <Col>
                     <RodRectificacionesFiltro actualizaFiltro={actualizaFiltro}/>

@@ -22,6 +22,7 @@ const PlanoForm = ({show, handleCloseParametros,rodillo_id, rodillo, plano_lengt
         cod_antiguo: '',
         descripcion: '',
         nombre_revision: rodillo?'PL' + '-' + rodillo.nombre + '-' + (plano_length+1)+'-'+'R'+(0) : null,
+        xa_rectificado: false,
     });
 
     useEffect(() => {
@@ -63,6 +64,14 @@ const PlanoForm = ({show, handleCloseParametros,rodillo_id, rodillo, plano_lengt
             [event.target.name] : event.target.value
         })
     }
+
+    const handleInputChange_xa_rectificado = (event) => {
+        setDatos({
+            ...datos,
+            xa_rectificado : !datos.xa_rectificado
+        })
+    }
+    
 
     const GuardarPlano = async () => {
         if (checkboxSeleccionados.length !== 0) {
@@ -115,6 +124,7 @@ const PlanoForm = ({show, handleCloseParametros,rodillo_id, rodillo, plano_lengt
                     rodillos: newRodillos,
                     cod_antiguo: datos.cod_antiguo,
                     descripcion: datos.descripcion,
+                    xa_rectificado: datos.xa_rectificado,
                 }, {
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
@@ -139,7 +149,6 @@ const PlanoForm = ({show, handleCloseParametros,rodillo_id, rodillo, plano_lengt
                         window.location.href = `/rodillos/editar/${rodillo_id}`;
                     })
                     .catch(err => { 
-                        console.log('DATOS: ',datos);
                         alert('Error al guardar la revisión')
                         console.error(err);
                     });
@@ -259,7 +268,16 @@ const PlanoForm = ({show, handleCloseParametros,rodillo_id, rodillo, plano_lengt
                                         </Form.Control>
                                     </Form.Group>
                                 </form>
-                            </Col>                       
+                            </Col> 
+                            <Col>
+                                <Form.Group className="mb-3" controlId="xa_rectificado">
+                                    <Form.Check type="checkbox" 
+                                                name="xa_rectificado"
+                                                label="Para rectificado"
+                                                checked = {datos.xa_rectificado}
+                                                onChange = {handleInputChange_xa_rectificado} />
+                                </Form.Group>
+                            </Col>                      
                         </Row>
                     </Tab>
                 </Tabs>

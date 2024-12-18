@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { Row, Col, Form, Button, Container, Table } from 'react-bootstrap';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
-import { Trash } from 'react-bootstrap-icons';
+import { Trash, Tools } from 'react-bootstrap-icons';
 import axios from 'axios';
 import BuscarInstancia from './rod_buscar_instancia';
 import {invertirFecha} from '../utilidades/funciones_fecha';
+import RodCerrarRectificado from './rod_rectificado_cerrar';
+import JSZip from 'jszip';
 
-const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineasRectificandose, cerrarListRodillos, show_list_rodillos, rectificacion, datos, cambioCodigo, numeroBar, setNumeroBar, rectificados_pendientes}) => {
+const RodBuscarInstanciaCodBarras = ({proveedor, lineas_rectificandose, setLineasRectificandose, cerrarListRodillos, show_list_rodillos, rectificacion, datos, cambioCodigo, numeroBar, setNumeroBar, rectificados_pendientes}) => {
     const [token] = useCookies(['tec-token']);
     const [lineasInstancias, setLineasInstancias] = useState([]);
     const [instancias_maquina, setInstanciaMaq] = useState([]);
@@ -16,13 +18,12 @@ const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineas
     const [user] = useCookies(['tec-user']);
     const soyTecnico = user['tec-user'].perfil.puesto.nombre==='Técnico'||user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:false;
     const soySuperTecnico = user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:false;
+    const [show_datos_nuevos, setShowDatosNuevos] = useState(false);
+    const [linea_a_finalizar, setLineaFinalizar] = useState([]);
 
     useEffect(()=>{
         setLineasRectificacion(lineas_rectificandose);
     }, [token, lineas_rectificandose]);
-
-    useEffect(()=>{
-    }, [token, lineasInstancias]);
 
     useEffect(()=>{
         datos.zona && axios.get(BACKEND_SERVER + `/api/rodillos/instancia_listado/?rodillo__operacion__seccion__maquina__id=${datos.zona}`,{
@@ -100,6 +101,7 @@ const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineas
                     diametro: res.data.diametro,
                     diametro_ext: res.data.diametro_ext,
                     ancho: res.data.ancho,
+                    diametro_centro: res.data.diametro_centro,
                     fecha_estimada: datos.fecha_estimada,
                     num_ejes: res.data.rodillo.num_ejes,
                     archivo: res.data.rodillo.archivo,
@@ -177,50 +179,7 @@ const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineas
             console.error(err);
         })
 
-    };
-
-    /* const Actualizo_Archivo = async (linea, select_Archivo) => {
-        const formData = new FormData();
-        formData.append('archivo', select_Archivo);
-    
-        try {
-            // Actualiza en instancia_nueva
-            const responseInstancia = await axios.patch(
-                `${BACKEND_SERVER}/api/rodillos/instancia_nueva/${linea.instancia.id}/`,
-                formData,
-                {
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`,
-                        'Content-Type': 'multipart/form-data'
-                    }
-                }
-            );
-    
-            // Luego, actualiza en linea_rectificacion
-            const responseLinea = await axios.patch(
-                `${BACKEND_SERVER}/api/rodillos/linea_rectificacion/${linea.id}/`,
-                formData,
-                {
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`,
-                        'Content-Type': 'multipart/form-data'
-                    }
-                }
-            );
-    
-            // Verifica si ambas respuestas contienen la URL correcta
-            const archivoUrl = responseInstancia.data.archivo || responseLinea.data.archivo;
-            
-            alert('Archivo actualizado correctamente');
-            
-            return archivoUrl; // Devuelve la URL completa para actualizar el estado en el frontend
-        } catch (err) {
-            alert('Error al actualizar el archivo, revisa los logs del servidor');
-            console.error(err);
-        }
-    
-        return null; // Retorna null si hubo error
-    }; */        
+    };    
 
     const handleInputChange_fecha_rectificado = (linea) => (event) => {
         const { value } = event.target;
@@ -259,13 +218,15 @@ const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineas
                                     }     
                             })
                             .then( res => {         
-                                alert('ELIMINADA TAMBIEN LA FICHA') 
                                 window.location.href=`/rodillos/lista_rectificacion/}`;
 
                             })
                             .catch(err => { 
                                 console.error(err);
                             })
+                    }
+                    else{
+                        window.location.reload();
                     }
                     
                 })
@@ -290,7 +251,6 @@ const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineas
                             }     
                     })
                     .then( res => {         
-                        alert('FICHA ELIMINADA') 
                         window.location.href=`/rodillos/lista_rectificacion/}`;
 
                     })
@@ -307,6 +267,7 @@ const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineas
     const borrarLinea = (linea) => {
         const newLineas = lineasInstancias.filter( l => l.id !== linea.id);
         setLineasInstancias(newLineas);
+        window.location.reload();
     }
 
     const GuardarLineas = async () => {
@@ -322,13 +283,15 @@ const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineas
                 formData.append('diametro', lineasInstancias[x].diametro);
                 formData.append('diametro_ext', lineasInstancias[x].diametro_ext);
                 formData.append('ancho', lineasInstancias[x].ancho);
+                formData.append('diametro_centro', lineasInstancias[x].diametro_centro);
                 formData.append('nuevo_diametro', 0);
                 formData.append('nuevo_diametro_ext', 0);
                 formData.append('nuevo_ancho', 0);
+                formData.append('nuevo_diametro_centro', 0);
                 formData.append('rectificado_por', '');
                 formData.append('tipo_rectificado', 'estandar');
                 formData.append('finalizado', false);
-                formData.append('proveedor', '');
+                formData.append('proveedor', proveedor?proveedor:'');
                 formData.append('observaciones', lineasInstancias[x].observaciones?lineasInstancias[x].observaciones:'');
                 // Agrega el archivo solo si existe y es un objeto File
                
@@ -366,14 +329,94 @@ const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineas
         }
     };
 
+    const DescargarPlanos = async () => { 
+        let archivos = []; 
+        // Paso 1: Acumulando las URLs de los archivos
+        for (let x = 0; x < lineas_rectificandose.length; x++) {
+            const rodilloId = lineas_rectificandose[x].instancia.rodillo.id;
+            const rodilloNombre = lineas_rectificandose[x].instancia.rodillo.nombre;
+            try {
+                const res = await axios.get(BACKEND_SERVER + `/api/rodillos/revision_planos_reciente/?plano__rodillos=${rodilloId}&plano__xa_rectificado=true`, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }
+                });
+                if (res.data && res.data.length > 0) { // Verificamos si hay archivo
+                    for(let y = 0; y< res.data.length; y++){
+                        const archivo = res.data[y].archivo; // Recoge la URL
+                        archivos.push(`${BACKEND_SERVER}${archivo}`); // Agregar la URL
+                    }
+                } else { //Si no hay archivo.
+                    alert(`El rodillo con Nombre:  ${rodilloNombre} no tiene archivo asociado. Revisa el registro.`);
+                    archivos=[];
+                    break;
+                }
+
+            } catch (err) {
+                console.log('Error al obtener los planos:', err);
+            }
+        }
+        // Paso 2: Descargar los archivos y agregarlos al zip
+        if (archivos.length >0) {
+            const zip = new JSZip();  // Crear el objeto zip
+            let archivosDescargados = 0; // Contador de archivos descargados
+            for (let i = 0; i < archivos.length; i++) {
+                const archivoUrl = archivos[i];
+                try {
+                    const response = await axios.get(archivoUrl, { responseType: 'blob' }); // Descargar el archivo
+                    const fileName = archivoUrl.split('/').pop(); // Obtener el nombre del archivo
+                    zip.file(fileName, response.data); // Agregar el archivo al zip
+                    archivosDescargados++; // Incrementar contador
+                } catch (err) {
+                    console.log('Error al descargar el archivo:', err);
+                }
+            }
+            // Paso 3: Crear el archivo zip y permitir la descarga automática
+            if (archivosDescargados > 0) {
+                zip.generateAsync({ type: 'blob' })
+                    .then(function(content) {
+                        // El Blob es necesario para la descarga automáticamente
+                        const blob = content;
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement("a"); // Crear un enlace invisible para la descarga automática
+                        a.style.display = "none"; // Escondemos el enlace
+                        a.href = url;
+                        a.download = 'planos.zip'; // Nombre del archivo zip
+                        document.body.appendChild(a);// Agregar el enlace al DOM
+                        a.click();
+                        window.URL.revokeObjectURL(url); // Liberar el objeto URL
+                        document.body.removeChild(a); // Eliminar el enlace del DOM
+                    })
+                    .catch(function(err) {
+                        console.log('Error al generar el archivo zip:', err);
+                    });
+            } else {
+                console.log('No se han encontrado archivos para agregar al zip.');
+            }
+        } else {
+            console.log('No hay archivos, revisar el get.');
+        }
+    };
+
+    const FinalizoRodillo = (linea) => { 
+        setLineaFinalizar(linea);
+        setShowDatosNuevos(true);
+    }
+
+    const CerrarModal = () => {
+        setShowDatosNuevos(false);
+    }
+
     return(
         <Container className='mt-5 pt-1'>
             <Form.Row className="justify-content-center">                          
                 {datos.linea ?
-                    <Button variant="danger" type="submit" className={'mx-2'} onClick={GuardarLineas}>Mandar Ficha</Button> :null} 
+                    <Button variant="danger" type="submit" className={'mx-2'} onClick={GuardarLineas}>Mandar Orden</Button> :null} 
                 {datos.linea ?
-                    <Button variant="danger" type="submit" className={'mx-2'} onClick={borrar_rectificado}>Eliminar Ficha</Button> :
-                    datos.activado===true && soySuperTecnico? <Button variant="danger" type="submit" className={'mx-2'} onClick={borrar_rectificado}>Eliminar Ficha</Button>: null} 
+                    <Button variant="danger" type="submit" className={'mx-2'} onClick={borrar_rectificado}>Eliminar Orden</Button> :
+                    datos.activado===true && soySuperTecnico && !datos.disabled? <Button variant="danger" type="submit" className={'mx-2'} onClick={borrar_rectificado}>Eliminar Orden</Button>: null} 
+                {datos.activado && soySuperTecnico && lineas_rectificacion?
+                    <Button variant="primary" type="submit" className={'mx-2'} onClick={DescargarPlanos}>Descargar planos</Button> :null} 
             </Form.Row>
             {datos.linea || rectificacion ?
                 <Row>
@@ -384,9 +427,10 @@ const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineas
                             <thead>
                                 <tr>
                                     <th>Nombre</th>
-                                    <th>Ø Fondo</th>                                
-                                    <th>Ø Exterior</th>
-                                    <th>Ancho</th>
+                                    <th colSpan= {2}>Ø Fondo</th>                                
+                                    <th colSpan= {2} >Ø Exterior</th>
+                                    <th colSpan= {2} >Ancho</th>
+                                    <th colSpan= {2} >Ø Centro</th>
                                     <th>Num Rodillos</th>
                                     <th>Fecha estimada</th>
                                     {lineas_rectificacion?<th>Fecha rectificado</th>:''}
@@ -398,11 +442,16 @@ const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineas
                                 <tbody>
                                     {lineas_rectificacion.map(linea => {
                                         return (
-                                            <tr key={linea.instancia.id}>
+                                            <tr key={linea.instancia.id} style={linea?.proveedor !== null ? { backgroundColor: '#DBFAC9' } : undefined}>
                                                 <td>{linea.instancia.nombre}</td>
                                                 <td>{linea.diametro}</td>
+                                                <td style={{ color: 'blue' }}>{linea.nuevo_diametro}</td>
                                                 <td>{linea.diametro_ext}</td> 
-                                                <td>{linea.ancho}</td>  
+                                                <td style={{ color: 'blue' }}>{linea.nuevo_diametro_ext}</td>
+                                                <td>{linea.ancho}</td> 
+                                                <td style={{ color: 'blue' }}>{linea.nuevo_ancho}</td>
+                                                <td>{linea.diametro_centro}</td> 
+                                                <td style={{ color: 'blue' }}>{linea.nuevo_diametro_centro}</td>
                                                 <td>{linea.instancia.rodillo.num_ejes}</td> 
                                                 <td>
                                                     <Form.Group controlId="fecha_estimada">
@@ -428,13 +477,16 @@ const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineas
                                                                 e.target.style.height = `${e.target.scrollHeight}px`; // Ajusta según el contenido
                                                             }}
                                                             placeholder="Observaciones"
-                                                            disabled={disabled}
-                                                            //style={{ resize: "none" }} // Opcional: impide que el usuario cambie el tamaño manualmente
+                                                            disabled={datos.disabled}
+                                                            //style={{ resize: "none" }} // impide que el usuario cambie el tamaño manualmente
                                                         />
                                                     </Form.Group>
                                                 </td>
                                                 {soySuperTecnico?  
                                                     <td>
+                                                        {rectificacion.empresa===2 || soySuperTecnico?
+                                                            <Tools className="mr-3 pencil"  onClick={event =>{FinalizoRodillo(linea)}}/>
+                                                        :''}
                                                         <Trash className="mr-3 pencil"  onClick={event => {borrarLinea_rectificado(linea)}} />
                                                     </td>:''}                             
                                             </tr>
@@ -449,8 +501,13 @@ const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineas
                                             <tr>
                                                 <td>{linea.nombre}</td>
                                                 <td>{linea.diametro}</td>
+                                                <td style={{ color: 'blue' }}>{0}</td>
                                                 <td>{linea.diametro_ext}</td> 
-                                                <td>{linea.ancho}</td>  
+                                                <td style={{ color: 'blue' }}>{0}</td>
+                                                <td>{linea.ancho}</td> 
+                                                <td style={{ color: 'blue' }}>{0}</td>
+                                                <td>{linea.diametro_centro}</td>  
+                                                <td style={{ color: 'blue' }}>{0}</td>
                                                 <td>{linea.num_ejes}</td> 
                                                 <td>
                                                     <Form.Group controlId="fecha_estimada">
@@ -475,7 +532,6 @@ const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineas
                                                                 e.target.style.height = `${e.target.scrollHeight}px`; // Ajusta según el contenido
                                                             }}
                                                             placeholder="Observaciones"
-                                                            //style={{ resize: "none" }} // Opcional: impide que el usuario cambie el tamaño manualmente
                                                         />
                                                     </Form.Group>
                                                 </td>
@@ -493,7 +549,7 @@ const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineas
             <h5 className="text-right">Numero total de rodillos a rectificar: {sumar_ejes}</h5>
             <Form.Row className="justify-content-center">                              
                 {datos.linea || rectificacion && lineas_rectificacion.length===0 ?
-                    <Button variant="danger" type="submit" className={'mx-2'} onClick={GuardarLineas}>Mandar Ficha</Button> :null} 
+                    <Button variant="danger" type="submit" className={'mx-2'} onClick={GuardarLineas}>Mandar Orden</Button> :null} 
             </Form.Row>
             {show_list_rodillos?
                 <BuscarInstancia    
@@ -506,6 +562,14 @@ const RodBuscarInstanciaCodBarras = ({disabled, lineas_rectificandose, setLineas
                         rectificados_pendientes={rectificados_pendientes}
                         lineas_rectificandose={lineas_rectificandose}
                         setLineasRectificandose={setLineasRectificandose}/>
+            :null}
+            {show_datos_nuevos?
+                <RodCerrarRectificado    
+                        show={show_datos_nuevos}
+                        datos_finalizar={linea_a_finalizar}
+                        CerrarModal={CerrarModal}
+                        donde={'vengo de codbarras'}
+                        lineas_rectificacion={lineas_rectificacion}/>
             :null}
         </Container>
     );

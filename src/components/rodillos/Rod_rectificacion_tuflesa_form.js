@@ -7,7 +7,7 @@ import RodBuscarInstanciaCodBarras from './rod_buscar_instancia_codbarras';
 import logo from '../../assets/Bornay.svg';
 import logoTuf from '../../assets/logo_tuflesa.svg';
 
-const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectificandose, setLineasRectificandose}) => {
+const RodRectificacion_TuflesaForm = ({rectificacion, setRectificacion, lineas_rectificandose, setLineasRectificandose}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
     const [hoy] = useState(new Date());
@@ -22,10 +22,8 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
     const [show_list_rodillos, setShowListRodillos] = useState(null);
     const [rectificacion_nueva, setRectificacion_nueva] = useState([]);
     const [rectificados_pendientes, setRectificadosPendientes] = useState([]); //ya manadados a rectificar
-    const soyTecnico = user['tec-user'].perfil.puesto.nombre==='Técnico'||user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:false;
-    const soySuperTecnico = user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:false;
-    const soyMantenimiento = user['tec-user'].perfil.puesto.nombre==='Mantenimiento'?true:false;
     const visible = user['tec-user'].perfil.puesto.nombre==='Técnico'||user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:rectificacion?false:true;
+    const [proveedores, setProveedores] = useState([]);
 
     const [datos, setDatos] = useState({
         id: rectificacion? rectificacion.id : '',
@@ -39,6 +37,7 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
         activado: rectificacion?true:false,
         disabled: rectificacion?rectificacion.finalizado?true:false:false,
         finalizado: rectificacion?rectificacion.finalizado:false,
+        proveedor: lineas_rectificandose?lineas_rectificandose[0].proveedor.id:'',
         fecha_estimada: rectificacion?rectificacion.fecha_estimada 
             : (hoy_10.getFullYear() + '-' + 
             String(hoy_10.getMonth() + 1).padStart(2, '0') + '-' + 
@@ -50,6 +49,20 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
         id_instancia: '',
         idCod: '',
     });
+
+    useEffect(()=>{
+        axios.get(BACKEND_SERVER + `/api/repuestos/proveedor/?de_rectificado=${true}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+                }
+        })
+        .then( res => {
+            setProveedores(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
 
     useEffect(() => {
         const handleEnterKey = (event) => {
@@ -130,29 +143,34 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
 
     const GuardarRectificacion = (event) => {
         event.preventDefault();
-        axios.post(BACKEND_SERVER + `/api/rodillos/rectificacion_nueva/`, {
-            empresa: datos.empresa,
-            fecha: datos.fecha,
-            creado_por: user['tec-user'].id,
-            maquina: datos.zona,
-            finalizado: false,
-            fecha_estimada: datos.fecha_estimada,
-        }, {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }     
-        })
-        .then( res => { 
-            setDatos({
-                ...datos,
-                linea : true,
-                numero : res.data.numero,
-                id : res.data.id,
-                activado : true,
+        if((datos.empresa === "2" && datos.proveedor.trim() !== '') || datos.empresa!=="2"){
+            axios.post(BACKEND_SERVER + `/api/rodillos/rectificacion_nueva/`, {
+                empresa: datos.empresa,
+                fecha: datos.fecha,
+                creado_por: user['tec-user'].id,
+                maquina: datos.zona,
+                finalizado: false,
+                fecha_estimada: datos.fecha_estimada,
+            }, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }     
             })
-            setRectificacion_nueva(res.data);
-        })
-        .catch(err => { console.log(err);})
+            .then( res => { 
+                setDatos({
+                    ...datos,
+                    linea : true,
+                    numero : res.data.numero,
+                    id : res.data.id,
+                    activado : true,
+                })
+                setRectificacion_nueva(res.data);
+            })
+            .catch(err => { console.log(err);})
+        }
+        else{
+            alert('Debes de indicar un proveedor.');
+        }
     }
     
     const handleInputChange = (event) => {
@@ -238,10 +256,29 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
                             <Form.Label>Creado por:</Form.Label>
                             <Form.Control type="text" 
                                         name='nombre' 
-                                        value={datos.creado_por}
+                                        value={datos.creado_por} 
                                         placeholder="Creado por"
                                         disabled
                             />
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="proveedor">
+                            <Form.Label>Proveedor *</Form.Label>
+                            <Form.Control as="select" 
+                                            value={datos.proveedor}
+                                            name='proveedor'
+                                            onChange={handleInputChange}
+                                            disabled = {datos.activado}>
+                                <option key={0} value={''}>Todas</option>
+                                {proveedores && proveedores.map( proveedor => {
+                                    return (
+                                    <option key={proveedor.id} value={proveedor.id}>
+                                        {proveedor.nombre}
+                                    </option>
+                                    )
+                                })}
+                            </Form.Control>
                         </Form.Group>
                     </Col>
                 </Row>
@@ -292,7 +329,7 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
                                         value={datos.fecha}
                                         onChange={handleInputChange} 
                                         placeholder="Fecha creación" 
-                                        disabled={!soySuperTecnico || datos.disabled}/>
+                                        disabled={datos.disabled}/>
                         </Form.Group>
                     </Col>
                     <Col>
@@ -302,10 +339,7 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
                                         name='fecha_estimada' 
                                         value={datos.fecha_estimada}
                                         onChange={handleInputChange_estimada} 
-                                        placeholder="Fecha estimada"
-                                        //disabled={soyMantenimiento || datos.disabled || !rectificacion}
-                                        disabled={soyTecnico?false:rectificacion?true:false}
-                                         />
+                                        placeholder="Fecha estimada"/>
                         </Form.Group>
                     </Col>
                     {datos.finalizado?
@@ -366,8 +400,9 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
                     cerrarListRodillos={cerrarListRodillos}
                     rectificados_pendientes={rectificados_pendientes}
                     lineas_rectificandose={lineas_rectificandose}
-                    setLineasRectificandose={setLineasRectificandose}/>
+                    setLineasRectificandose={setLineasRectificandose}
+                    proveedor={datos.proveedor}/>
         </Container>
     );
 }
-export default RodRectificacionForm;
+export default RodRectificacion_TuflesaForm;

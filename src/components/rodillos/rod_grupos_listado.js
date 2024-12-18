@@ -5,7 +5,8 @@ import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table, Form, Button, Alert } from 'react-bootstrap';
 import { PencilFill, Trash } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
-import logo from '../../assets/logo_bornay.svg';
+import logo from '../../assets/Bornay.svg';
+import logoTuf from '../../assets/logo_tuflesa.svg';
 
 const RodGruposListado = () => {
     const [token] = useCookies(['tec-token']);
@@ -201,7 +202,7 @@ const RodGruposListado = () => {
 
     const BorrarGrupo = (grupo)=>{
         if(grupo.bancadas.length!==0){
-            alert('Ya existen datos relacionados con este grupo, por favor contacte con el administrador. Gracias');
+            alert('Ya existen datos relacionados con este grupo, por favor contacte con el administrador.');
         }
         else{
             axios.delete(BACKEND_SERVER + `/api/rodillos/grupo_only/${grupo.id}/`,{
@@ -210,7 +211,7 @@ const RodGruposListado = () => {
                 }
             })
             .then( res => {
-                alert(grupo.nombre + ', borrado correctamente. Gracias');
+                alert(grupo.nombre + ', borrado correctamente.');
                 window.location.href=`/rodillos/grupos/`;
             })
             .catch( err => {
@@ -222,7 +223,7 @@ const RodGruposListado = () => {
 
     return (
         <Container className='mt-5'>
-            <img src ={logo} width="200" height="200"></img>
+            <img src ={user['tec-user'].perfil.empresa.id===1?logo:logoTuf} width="200" height="200"></img>
             <Row>
                 <Col>
                     <Form.Group controlId="nombre">
