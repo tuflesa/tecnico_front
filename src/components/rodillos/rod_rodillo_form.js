@@ -59,6 +59,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         espesor_mayor: rodillo.id?rodillo.espesor_2:0,
         num_ejes: rodillo.id?rodillo.num_ejes:'', //numero de ejes según la operación y el tipo de rodillo
         archivo: rodillo.id?rodillo.archivo:'',
+        parejas: rodillo.id?rodillo.rectificado_por_parejas:true,
     });
 
     useEffect(() => { //si hay tipo de plano grabado, no podemos modificarlo, ya tenemos parametros dados de alta
@@ -428,6 +429,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 formData.append('espesor', datos.espesores);
                 formData.append('espesor_1', datos.espesor_menor);
                 formData.append('espesor_2', datos.espesor_mayor);
+                formData.append('rectificado_por_parejas', datos.parejas);
                 if (select_Archivo) {
                     formData.append('archivo', select_Archivo); // Solo agrega si existe un archivo
                 }
@@ -456,18 +458,11 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         event.preventDefault();
         axios.patch(BACKEND_SERVER + `/api/rodillos/rodillo_editar/${rodillo.id}/`, {
             nombre: datos.nombre,
-            operacion: datos.operacion,
-            grupo: datos.grupo,
-            tipo: datos.tipo_rodillo,
             tipo_plano: datos.tipo_plano,
-            diametro: datos.diametro,
-            num_ejes: datos.num_ejes,
-            forma: parseInt(datos.forma),
-            descripcion_perfil: datos.descripcion_perfil,
-            dimension_perfil: datos.dimension_perfil,
             espesor: datos.espesores,
             espesor_1: datos.espesor_menor,
             espesor_2: datos.espesor_mayor,
+            rectificado_por_parejas: datos.parejas,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -504,6 +499,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 });
             }
             alert('Actualizado correctamente');
+            window.location.href = `/rodillos/editar/${rodillo.id}`; 
         })
         .catch(err => { 
             console.log(err);
@@ -577,6 +573,13 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         setDatos({
             ...datos,
             espesores : !datos.espesores
+        })
+    }
+
+    const handleInputparejas = (event) => {
+        setDatos({
+            ...datos,
+            parejas : !datos.parejas
         })
     }
 
@@ -801,6 +804,15 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                                         placeholder="Numero de ejes"
                                         disabled
                             />
+                            </Form.Group>
+                        </Col>
+                        <Col>
+                            <Form.Group controlId="parejas">
+                            <Form.Label>Trabaja por parejas</Form.Label>
+                                <Form.Check type="checkbox" 
+                                            checked = {datos.parejas}
+                                            onChange = {handleInputparejas} 
+                                            disabled = {datos.num_ejes===1?true:false}/>
                             </Form.Group>
                         </Col>
                     </Row>

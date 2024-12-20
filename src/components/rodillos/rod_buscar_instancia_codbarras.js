@@ -338,13 +338,13 @@ const RodBuscarInstanciaCodBarras = ({proveedor, lineas_rectificandose, setLinea
             try {
                 const res = await axios.get(BACKEND_SERVER + `/api/rodillos/revision_planos_reciente/?plano__rodillos=${rodilloId}&plano__xa_rectificado=true`, {
                     headers: {
-                        'Authorization': `token ${token['tec-token']}`
+                        'Authorization': `token ${token['tec-token']}`,
                     }
                 });
                 if (res.data && res.data.length > 0) { // Verificamos si hay archivo
                     for(let y = 0; y< res.data.length; y++){
-                        const archivo = res.data[y].archivo; // Recoge la URL
-                        archivos.push(`${BACKEND_SERVER}${archivo}`); // Agregar la URL
+                        const archivo = res.data[y].archivo; // Recoge el archivo
+                        archivos.push(`${BACKEND_SERVER}${archivo}`); // Agregar el archivo
                     }
                 } else { //Si no hay archivo.
                     alert(`El rodillo con Nombre:  ${rodilloNombre} no tiene archivo asociado. Revisa el registro.`);
@@ -363,7 +363,9 @@ const RodBuscarInstanciaCodBarras = ({proveedor, lineas_rectificandose, setLinea
             for (let i = 0; i < archivos.length; i++) {
                 const archivoUrl = archivos[i];
                 try {
-                    const response = await axios.get(archivoUrl, { responseType: 'blob' }); // Descargar el archivo
+                    const response = await axios.get(archivoUrl, { 
+                        responseType: 'blob',
+                    }); // Descargar el archivo
                     const fileName = archivoUrl.split('/').pop(); // Obtener el nombre del archivo
                     zip.file(fileName, response.data); // Agregar el archivo al zip
                     archivosDescargados++; // Incrementar contador

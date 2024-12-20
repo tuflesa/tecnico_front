@@ -22,24 +22,24 @@ const RodNavBar = () => {
                                     <NavDropdown.Item href="/rodillos/tooling">Tooling Chart</NavDropdown.Item>
                                     <NavDropdown title="Listados" id="listados-dropdown" menualign="right">
                                     <NavDropdown.Item href="/rodillos/lista">Rodillos</NavDropdown.Item>
-                                    <NavDropdown.Item href="/rodillos/grupos">Bancadas RD</NavDropdown.Item> 
-                                    <NavDropdown.Item href="/rodillos/lista_bancadas_ct">CT/Calibradora</NavDropdown.Item>
+                                    <NavDropdown.Item href="/rodillos/grupos">Bancadas de grupo</NavDropdown.Item> 
+                                    <NavDropdown.Item href="/rodillos/lista_bancadas_ct">Bancadas CT/Calibradora</NavDropdown.Item>
                                     <NavDropdown.Item href="/rodillos/montaje_lista">Montajes</NavDropdown.Item>
                                     </NavDropdown>
                                     <NavDropdown title="Nuevos" id="nuevos-dropdown" menualign="right">
                                     <NavDropdown.Item href="/rodillos/grupo/nuevo">Grupo</NavDropdown.Item> 
                                     <NavDropdown.Item href="/rodillos/nuevo">Rodillo</NavDropdown.Item> 
-                                    <NavDropdown.Item href="/rodillos/grupos">Bancadas RD</NavDropdown.Item> 
-                                    <NavDropdown.Item href="/rodillos/bacada_ct">CT/Calibradora</NavDropdown.Item> 
-                                    <NavDropdown.Item href="/rodillos/montaje">Montaje Bancadas</NavDropdown.Item> 
+                                    <NavDropdown.Item href="/rodillos/grupos">Bancadas de grupo</NavDropdown.Item> 
+                                    <NavDropdown.Item href="/rodillos/bacada_ct">Bancadas CT/Calibradora</NavDropdown.Item> 
+                                    <NavDropdown.Item href="/rodillos/montaje">Montajes</NavDropdown.Item> 
                                     </NavDropdown>
-                                    <NavDropdown title="Rectificados Bornay" id="nuevos-dropdown" menualign="right">
+                                    <NavDropdown title="Rectificados Internos" id="nuevos-dropdown" menualign="right">
                                     <NavDropdown.Item href="/rodillos/nueva_rectificacion">Nueva Orden de Rectificado</NavDropdown.Item> 
                                     <NavDropdown.Item href="/rodillos/lista_rectificacion">Lista Ordenes de Rectificados</NavDropdown.Item> 
                                     <NavDropdown.Item href="/rodillos/instancias_rectificar">Lista Rodillos a Rectificar</NavDropdown.Item>
                                     <NavDropdown.Item href="/rodillos/instancias_xa_rectificar">Lista Rodillos para Rectificar</NavDropdown.Item>
                                     </NavDropdown>
-                                    <NavDropdown title="Rectificados Tuflesa" id="nuevos-dropdown" menualign="right">
+                                    <NavDropdown title="Rectificados Externos" id="nuevos-dropdown" menualign="right">
                                     <NavDropdown.Item href="/rodillos/nueva_rectificacion_tuflesa">Nueva Orden de Rectificado</NavDropdown.Item> 
                                     <NavDropdown.Item href="/rodillos/lista_rectificacion">Lista Ordenes de Rectificados</NavDropdown.Item> 
                                     <NavDropdown.Item href="/rodillos/instancias_rectificar">Lista Rodillos a Rectificar</NavDropdown.Item>

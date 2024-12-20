@@ -169,7 +169,7 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
 
     const handleInputChange_qs = (event) => {
         if(instancias_activas){
-            if(instancias_activas.length < rodillo.num_ejes){
+            if(instancias_activas.length < rodillo.num_ejes && !rodillo.rectificado_por_parejas){
                 setDatos({
                     ...datos,
                     activa_qs:!datos.activa_qs
@@ -183,7 +183,12 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
                     }) 
                 }
                 else{
-                    alert('No se pueden poner más instancia activa para QS, desactiva alguna antes. Numero de ejes: '+ rodillo.num_ejes + ' Numero de instancias activas: ' + instancias_activas.length);
+                    if(rodillo.rectificado_por_parejas){
+                        alert('Estamos trabajando por parejas. No se pueden poner más instancia activa para QS, desactiva antes la señalada.');
+                    }
+                    else{
+                        alert('No se pueden poner más instancia activa para QS, desactiva alguna antes. Numero de ejes: '+ rodillo.num_ejes + ' Numero de instancias activas: ' + instancias_activas.length);
+                    }                    
                     setDatos({
                         ...datos,
                         activa_qs:false
