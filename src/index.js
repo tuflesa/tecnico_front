@@ -19,6 +19,12 @@ import Mantenimiento from './components/mantenimiento/mantenimiento';
 import Rodillos from './components/rodillos/rodillos';
 import { CookiesProvider, useCookies } from 'react-cookie';
 import QS from './components/qs/qs';
+<<<<<<< HEAD
+=======
+import CargasLista from './components/cargas/cargas_carga_lista';
+import LlamadasLista from './components/cargas/cargas_llamadas_lista';
+import { App } from 'react-bootstrap-icons';
+>>>>>>> 1e6198b868dedaeb75106f3250c0418b99363b53
 
 const Render = () => {
   const [token] = useCookies(['tec-token']);

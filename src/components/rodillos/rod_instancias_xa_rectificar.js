@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Container, Table, Modal, Button } from 'react-bootstrap';
+import { Row, Col, Form, Container, Table } from 'react-bootstrap';
 import { Tools, CloudDownload } from 'react-bootstrap-icons';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import {invertirFecha} from '../utilidades/funciones_fecha';
-import { constants } from 'buffer';
 import RodCerrarRectificado from './rod_rectificado_cerrar';
 import logo from '../../assets/Bornay.svg';
 import logoTuf from '../../assets/logo_tuflesa.svg';
@@ -239,10 +238,10 @@ const RodInstanciasXaRectificar = () => {
     async function descargarArchivo(url) {
         try {
             // Primero eliminar el contenido de la carpeta
-            await eliminarContenido();
+            //await eliminarContenido();
     
             // Luego, proceder a descargar el archivo
-            const response = await fetch(url, { mode: 'cors' });
+            const response = await fetch(url, { mode: 'no-cors' });
             const blob = await response.blob();
             const urlBlob = window.URL.createObjectURL(blob);
     
