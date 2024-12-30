@@ -192,8 +192,8 @@ const QS_Grafico = () => {
                             console.log('Ejes Sim: ', ejesSim);
                             line.push({
                                 eje: r.eje,
-                                pos: -r.parametros.Df/2 + ejes[m.operacion-1].pos[r.eje] + ejes[m.operacion-1].pos['CAB'] - 300,
-                                pos_sim: -r.parametros.Df/2 + ejesSim[m.operacion-1].pos[r.eje] + ejesSim[m.operacion-1].pos['CAB'] - 300
+                                pos: -r.parametros.Df/2 + ejes[m.operacion-1].pos[r.eje] + ejes[m.operacion-1].pos['CAB'] - 298.5,
+                                pos_sim: -r.parametros.Df/2 + ejesSim[m.operacion-1].pos[r.eje] + ejesSim[m.operacion-1].pos['CAB'] - 298.5
                             });
                             break;
                         case 'ANCHO_S1':

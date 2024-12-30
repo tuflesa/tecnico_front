@@ -341,7 +341,7 @@ const montaje = [
                 tipo_plano: 'NONE',
                 eje: 'CAB',
                 parametros: {
-                    Df: 600
+                    Df: 597
                 }
             },
             {
