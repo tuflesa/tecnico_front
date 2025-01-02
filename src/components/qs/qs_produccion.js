@@ -41,23 +41,82 @@ const QS_Produccion = () => {
         // console.log(formadora);
         bancadas.map(b => {
             b.celdas.map(c => {
-                const tipo = c.operacion.nombre.substr(0,2)=='BD'?'BD':c.operacion.nombre;
-                const rod = c.conjunto.elementos.map(e => {
-                    const instancia = e.rodillo.instancias.filter(i => i.activa_qs==true)[0] // Instancia activa
-                    // Parametros de la instancia
-                    const param = {
-                        Ancho: instancia.ancho,
-                        Df: instancia.diametro,
-                        Dext: instancia.diametro_ext,
-                        Dc: instancia.diametro_centro
-                    }
-                    // Añadimos parametros del rodillo
-                    e.rodillo.parametros.map(p => param[p.nombre]=p.valor);
-                    return ({
-                    tipo_plano: e.rodillo.tipo_plano?e.rodillo.tipo_plano.nombre:'NONE',
-                    eje: e.eje.tipo.siglas,
-                    parametros: param
-                })
+                const tipo = c.operacion.nombre.substring(0,2);
+                const rod = []
+                c.conjunto.elementos.map(e => {
+                    const num_instancias = e.rodillo.instancias.length;
+                    e.rodillo.instancias.filter(i => i.activa_qs==true).map((instancia,i) => { // Instancias activas
+                        // Parametros de la instancia
+                        const param = {
+                            Ancho: instancia.ancho,
+                            Df: instancia.diametro,
+                            Dext: instancia.diametro_ext,
+                            Dc: instancia.diametro_centro
+                        }
+                        // Añadimos parametros del rodillo
+                        e.rodillo.parametros.map(p => param[p.nombre]=p.valor);
+                        //Posición del rodillo LAT_OP, SUP, INF etc ...
+                        let eje = e.eje.tipo.siglas
+                        if (e.eje.numero_ejes > 1) { // más de un eje
+                            if (num_instancias === 1) { //rodillos iguales
+                                console.log('Rodillos iguales');
+                                switch (eje) {
+                                    case 'LAT':
+                                        rod.push({
+                                            tipo_plano: e.rodillo.tipo_plano?e.rodillo.tipo_plano.nombre:'NONE',
+                                            eje: 'LAT_OP',
+                                            parametros: param
+                                        });
+                                        rod.push({
+                                            tipo_plano: e.rodillo.tipo_plano?e.rodillo.tipo_plano.nombre:'NONE',
+                                            eje: 'LAT_MO',
+                                            parametros: param
+                                        });
+                                        break;
+                                    case 'SUP/INF':
+                                        rod.push({
+                                            tipo_plano: e.rodillo.tipo_plano?e.rodillo.tipo_plano.nombre:'NONE',
+                                            eje: 'SUP',
+                                            parametros: param
+                                        });
+                                        rod.push({
+                                            tipo_plano: e.rodillo.tipo_plano?e.rodillo.tipo_plano.nombre:'NONE',
+                                            eje: 'INF',
+                                            parametros: param
+                                        });
+                                        break;
+                                        case 'SUP':
+                                        rod.push({
+                                            tipo_plano: e.rodillo.tipo_plano?e.rodillo.tipo_plano.nombre:'NONE',
+                                            eje: 'SUP_OP',
+                                            parametros: param
+                                        });
+                                        rod.push({
+                                            tipo_plano: e.rodillo.tipo_plano?e.rodillo.tipo_plano.nombre:'NONE',
+                                            eje: 'SUP_MO',
+                                            parametros: param
+                                        });
+                                        break;
+                                }
+                            }
+                            else { //Rodillos diferentes
+                                console.log('Rodillos diferentes');
+                                eje = instancia.posicion;
+                                rod.push({
+                                    tipo_plano: e.rodillo.tipo_plano?e.rodillo.tipo_plano.nombre:'NONE',
+                                    eje: eje,
+                                    parametros: param
+                                });
+                            }
+                        }
+                        else {
+                            rod.push({
+                                tipo_plano: e.rodillo.tipo_plano?e.rodillo.tipo_plano.nombre:'NONE',
+                                eje: eje,
+                                parametros: param
+                            });
+                        }
+                    });
                 });
                 temp.push({
                     operacion: c.operacion.orden,
@@ -68,7 +127,7 @@ const QS_Produccion = () => {
                 });
             });
         });
-        setMontaje(temp.sort((a,b) => a.operacion - b.operacion))
+        setMontaje(temp.sort((a,b) => a.operacion - b.operacion).filter(o => o.nombre !=='ET'));
     }
     
     const handleGrupoChange = (event) => {
@@ -123,7 +182,7 @@ const QS_Produccion = () => {
         });
     }, [token, grupo]);
 
-    // useEffect(()=>{
+    useEffect(()=>{
     //     const pos = [];
     //     let eje_sup;
     //     let eje_inf;
@@ -139,14 +198,6 @@ const QS_Produccion = () => {
     //             const line = [];
     //             m.rodillos.map((r,i) =>{
     //                 switch (r.eje){
-    //                     // case 'LAT_MO':
-    //                     // case 'LAT_OP':
-    //                     //     line.push({
-    //                     //         eje: r.eje,
-    //                     //         pos: 492 -r.parametros.Df/2 - ejes[m.operacion-1].pos[r.eje],
-    //                     //         pos_sim: 492 -r.parametros.Df/2 - ejesSim[m.operacion-1].pos[r.eje]
-    //                     //     });
-    //                     //     break;
     //                     case 'SUP_V_MO':
     //                     case 'SUP_V_OP':
     //                         line.push({
@@ -203,8 +254,10 @@ const QS_Produccion = () => {
     //             });
     //         });
     //         SetPosiciones(pos);
-    //     }
-    // },[montaje, ejes]);
+        // }
+        console.log(montaje);
+        console.log(ejes);
+    },[montaje, ejes]);
 
     return (
         <React.Fragment>
