@@ -13,6 +13,8 @@ const QS_Produccion = () => {
     const [montajes, setMontajes] = useState(null);
     const [montaje, setMontaje] = useState(null);
     const [montajeActivo, setMontajeActivo] = useState(0);
+    const [articulos, setArticulos] = useState(null);
+    const [articulo, setArticulo] = useState(null);
     const [OP, setOP] = useState(1);
     const [ejes, setEjes] = useState(null);
     const [posiciones, SetPosiciones] = useState(null);
@@ -32,13 +34,19 @@ const QS_Produccion = () => {
     }
 
     const LeeMontaje = (dato) => {
+        // Si no hay dato no hacemos nada
+        if (!dato) {
+            setMontajeActivo(0);
+            setMontaje(null);
+            setArticulos(null);
+            return
+        }
+        // Si hay dato continuamos
         const temp = []; // Aqui guardo el montaje temporal
-        const bancadas = dato.grupo.bancadas;
-        bancadas.push(dato.bancadas);
-        console.log(bancadas);
-        // Seccion formadora
-        // const formadora = dato.grupo.bancadas.filter(b => b.seccion.nombre=='Formadora')[0];
-        // console.log(formadora);
+        const bancadas = dato.grupo.bancadas; // Bancadas del grupo
+        bancadas.push(dato.bancadas); // Añadimos la calibradora que viene como bancada sin grupo
+        // Guardamos los articulos de montaje
+        setArticulos(dato.articulos);
         bancadas.map(b => {
             b.celdas.map(c => {
                 const tipo = c.operacion.nombre.substring(0,2);
@@ -85,7 +93,7 @@ const QS_Produccion = () => {
                                             parametros: param
                                         });
                                         break;
-                                        case 'SUP':
+                                    case 'SUP':
                                         rod.push({
                                             tipo_plano: e.rodillo.tipo_plano?e.rodillo.tipo_plano.nombre:'NONE',
                                             eje: 'SUP_OP',
@@ -97,6 +105,18 @@ const QS_Produccion = () => {
                                             parametros: param
                                         });
                                         break;
+                                    case 'L_IS':
+                                            rod.push({
+                                                tipo_plano: e.rodillo.tipo_plano?e.rodillo.tipo_plano.nombre:'NONE',
+                                                eje: 'ANCHO',
+                                                parametros: param
+                                            });
+                                            rod.push({
+                                                tipo_plano: e.rodillo.tipo_plano?e.rodillo.tipo_plano.nombre:'NONE',
+                                                eje: 'ALTO',
+                                                parametros: {Df: 0}
+                                            });
+                                            break;
                                 }
                             }
                             else { //Rodillos diferentes
@@ -135,6 +155,8 @@ const QS_Produccion = () => {
         setGrupo(event.target.value);
         setMontajeActivo(0);
         setMontaje(null);
+        setArticulos(null);
+        setArticulo(null);
     }
 
     const handleMontajeChange = (event) => {
@@ -145,12 +167,18 @@ const QS_Produccion = () => {
         LeeMontaje(montajes.filter(m => m.id==montaje_id)[0]);
     }
 
+    const handleArticuloChange = (event) => {
+        event.preventDefault();
+        // console.log('cambio de articulo');
+        setArticulo(event.target.value);
+    }
+
     const handleInputChange = (event) => {
         event.preventDefault();
         setOP(event.target.value);
     }
 
-    // Lectura de grupos
+    // Al cargar la página: Lectura de grupos, Lectura de los ejes
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/rodillos/grupo_only/?maquina=${4}`,{ // 4 es el id de la mtt2
             headers: {
@@ -267,42 +295,69 @@ const QS_Produccion = () => {
                     <Form>
                         <Row>
                             <Col>
-                                <Form.Group controlId="grupo">
-                                    <Form.Label>Grupo</Form.Label>
-                                    <Form.Control   size="lg"
-                                                    as="select" 
-                                                    value={grupo}
-                                                    name='grupo'
-                                                    onChange={handleGrupoChange}>
-                                                        <option key={0} value={0}>Ninguno</option>
-                                                        {grupos && grupos.map( g => {
-                                                            return (
-                                                            <option key={g.id} value={g.id}>
-                                                                {g.nombre}
-                                                            </option>
-                                                            )
-                                                        })}
-                                    </Form.Control>
-                                </Form.Group>
+                                <Row>
+                                    <Col>
+                                        <Form.Group controlId="grupo">
+                                            <Form.Label>Grupo</Form.Label>
+                                            <Form.Control   size="lg"
+                                                            as="select" 
+                                                            value={grupo}
+                                                            name='grupo'
+                                                            onChange={handleGrupoChange}>
+                                                                <option key={0} value={0}>Ninguno</option>
+                                                                {grupos && grupos.map( g => {
+                                                                    return (
+                                                                    <option key={g.id} value={g.id}>
+                                                                        {g.nombre}
+                                                                    </option>
+                                                                    )
+                                                                })}
+                                            </Form.Control>
+                                        </Form.Group>
+                                    </Col>
+                                    <Col>
+                                        <Form.Group controlId="montaje">
+                                            <Form.Label>Calibradora</Form.Label>
+                                            <Form.Control   size="lg"
+                                                            as="select" 
+                                                            value={montajeActivo}
+                                                            name='montaje'
+                                                            onChange={handleMontajeChange}>
+                                                <option key={0} value={0}>Ninguno</option>                
+                                                {montajes && montajes.map( m => {
+                                                    return (
+                                                    <option key={m.id} value={m.id}>
+                                                        {m.bancadas.dimensiones}
+                                                    </option>
+                                                    )
+                                                })}
+                                            </Form.Control>
+                                        </Form.Group>
+                                    </Col>
+                                </Row>
                             </Col>
                             <Col>
-                                <Form.Group controlId="montaje">
-                                    <Form.Label>Montaje</Form.Label>
-                                    <Form.Control   size="lg"
-                                                    as="select" 
-                                                    value={montajeActivo}
-                                                    name='montaje'
-                                                    onChange={handleMontajeChange}>
-                                        <option key={0} value={0}>Ninguno</option>                
-                                        {montajes && montajes.map( m => {
-                                            return (
-                                            <option key={m.id} value={m.id}>
-                                                {m.bancadas.dimensiones}
-                                            </option>
-                                            )
-                                        })}
-                                    </Form.Control>
-                                </Form.Group>
+                                <Row>
+                                    <Col>
+                                        <Form.Group controlId="Articulo">
+                                            <Form.Label>Artículo</Form.Label>
+                                            <Form.Control   size="lg"
+                                                            as="select" 
+                                                            value={articulo}
+                                                            name='articulo'
+                                                            onChange={handleArticuloChange}>
+                                                <option key={0} value={0}>Ninguno</option>                
+                                                {articulos && articulos.map( a => {
+                                                    return (
+                                                    <option key={a.id} value={a.id}>
+                                                        {a.nombre}
+                                                    </option>
+                                                    )
+                                                })}
+                                            </Form.Control>
+                                        </Form.Group>
+                                    </Col>
+                                </Row>
                             </Col>
                         </Row>
                         <Row>
