@@ -4,7 +4,6 @@ import { Container, Row, Col, Form} from 'react-bootstrap';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import QSNavBar from "./qs_nav";
-import StandChart from "./qs_stand_chart";
 
 const QS_Produccion = () => {
     const [token] = useCookies(['tec-token']);
@@ -14,23 +13,42 @@ const QS_Produccion = () => {
     const [montaje, setMontaje] = useState(null);
     const [montajeActivo, setMontajeActivo] = useState(0);
     const [articulos, setArticulos] = useState(null);
-    const [articulo, setArticulo] = useState(null);
-    const [OP, setOP] = useState(1);
-    const [ejes, setEjes] = useState(null);
-    const [posiciones, SetPosiciones] = useState(null);
+    const [articulo, setArticulo] = useState(0);
+    const [diametrosPLC, setDiametrosPLC] = useState(null);
+    const [fleje, setFleje] = useState(null);
 
-    const leerEjes = (event) => {
+    const leeDiametrosPLC = (event) => {
         // event.preventDefault();
-        axios.get(BACKEND_SERVER + '/api/qs/ejes/',{
+        axios.get(BACKEND_SERVER + '/api/qs/diametros_actuales_PLC/',{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
                 }
         })
         .then( res => {
-                setEjes(res.data);
+                setDiametrosPLC(res.data);
                 // console.log('ejes:');
-                // console.log(res.data);
+                console.log(res.data);
         })
+    }
+
+    const compara_diametros_PLC_montaje = () => {
+        console.log('Montaje ...');
+        console.log(montaje);
+        console.log('leyendo diametros de PLC ...');
+        console.log(diametrosPLC);
+        montaje.forEach(o => {
+            o.rodillos.forEach(r =>{
+                const Df_PC = r.parametros.Df;
+                const PLC = diametrosPLC[o.nombre];
+                const Df_PLC = PLC[r.eje];
+                if (Math.abs(Df_PC-Df_PLC) > 0.1) {
+                    console.log('Operacion ', o.nombre);
+                    console.log('Eje: ', r.eje);
+                    console.log('Df_PC ', Df_PC);
+                    console.log('Df_PLC ', Df_PLC);
+                }
+            });
+        });
     }
 
     const LeeMontaje = (dato) => {
@@ -67,7 +85,6 @@ const QS_Produccion = () => {
                         let eje = e.eje.tipo.siglas
                         if (e.eje.numero_ejes > 1) { // más de un eje
                             if (num_instancias === 1) { //rodillos iguales
-                                console.log('Rodillos iguales');
                                 switch (eje) {
                                     case 'LAT':
                                         rod.push({
@@ -156,15 +173,15 @@ const QS_Produccion = () => {
         setMontajeActivo(0);
         setMontaje(null);
         setArticulos(null);
-        setArticulo(null);
+        setArticulo(0);
     }
 
     const handleMontajeChange = (event) => {
         event.preventDefault();
-        console.log('montaje activo');
         setMontajeActivo(event.target.value);
         const montaje_id = event.target.value;
         LeeMontaje(montajes.filter(m => m.id==montaje_id)[0]);
+        setArticulo(0);
     }
 
     const handleArticuloChange = (event) => {
@@ -173,12 +190,7 @@ const QS_Produccion = () => {
         setArticulo(event.target.value);
     }
 
-    const handleInputChange = (event) => {
-        event.preventDefault();
-        setOP(event.target.value);
-    }
-
-    // Al cargar la página: Lectura de grupos, Lectura de los ejes
+    // Al inicio: Lectura de grupos
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/rodillos/grupo_only/?maquina=${4}`,{ // 4 es el id de la mtt2
             headers: {
@@ -191,7 +203,6 @@ const QS_Produccion = () => {
         .catch( err => {
             console.log(err);
         });
-        leerEjes();
     }, [token]);
 
     // Lectura de montajes del grupo
@@ -202,7 +213,7 @@ const QS_Produccion = () => {
               }
         })
         .then( res => {
-            console.log(res.data);
+            //console.log(res.data);
             setMontajes(res.data);
         })
         .catch( err => {
@@ -210,82 +221,33 @@ const QS_Produccion = () => {
         });
     }, [token, grupo]);
 
+    // Si cambia el montaje leemos los diametros activos en el PLC para ver si coinciden con el montaje actual
     useEffect(()=>{
-    //     const pos = [];
-    //     let eje_sup;
-    //     let eje_inf;
-    //     let Ds;
-    //     let Di;
-    //     let gap;
-    //     let piston;
-    //     const gap_list = [];
+        leeDiametrosPLC();
+    },[montaje]);
 
-    //     if (ejes && montaje){
-    //         // Calculo de posiciones
-    //         montaje.map(m => {
-    //             const line = [];
-    //             m.rodillos.map((r,i) =>{
-    //                 switch (r.eje){
-    //                     case 'SUP_V_MO':
-    //                     case 'SUP_V_OP':
-    //                         line.push({
-    //                             eje: r.eje,
-    //                             pos: -r.parametros.Df/2 + (465 - ejes[m.operacion-1].pos[r.eje])/Math.cos(15*Math.PI/180),
-    //                         });
-    //                         console.log(r.eje);
-    //                         console.log('Df: ', r.parametros.Df/2);
-    //                         console.log('Eje: ', ejes[m.operacion-1].pos[r.eje]);
-    //                         console.log('sup: ', -r.parametros.Df/2 + (465 - ejes[m.operacion-1].pos[r.eje])/Math.cos(15*Math.PI/180));
-    //                         break;
-    //                     case 'SUP_H_MO':
-    //                     case 'SUP_H_OP':
-    //                         line.push({
-    //                             eje: r.eje,
-    //                             pos: 138.183 - ejes[m.operacion-1].pos[r.eje] - Math.sin(15*Math.PI/180)*r.parametros.Df/2,
-    //                         });
-    //                         break;
-    //                     case 'INF_W':
-    //                         line.push({
-    //                             eje: r.eje,
-    //                             pos: -r.parametros.Df/2 + ejes[m.operacion-1].pos[r.eje] + ejes[m.operacion-1].pos['CAB'] - 298.5,
-    //                         });
-    //                         break;
-    //                     case 'ANCHO_S1':
-    //                     case 'ANCHO':
-    //                         line.push({
-    //                             eje: r.eje,
-    //                             pos: 170 + ejes[m.operacion-1].pos[r.eje] -r.parametros.Df,
-    //                         });
-    //                         break;
-    //                     case 'ALTO':
-    //                         line.push({
-    //                             eje: r.eje,
-    //                             pos: -270 + ejes[m.operacion-1].pos[r.eje],
-    //                         });
-    //                     break;
-    //                     case 'ALTO_S1':
-    //                         line.push({
-    //                             eje: r.eje,
-    //                             pos: -40 + ejes[m.operacion-1].pos[r.eje],
-    //                         });
-    //                     break;  
-    //                     default: 
-    //                         line.push({
-    //                             eje: r.eje,
-    //                             pos: -r.parametros.Df/2 + ejes[m.operacion-1].pos[r.eje],
-    //                         });
-    //                 }
-    //             });
-    //             pos.push({
-    //                 op: m.operacion,
-    //                 posiciones: line
-    //             });
-    //         });
-    //         SetPosiciones(pos);
-        // }
-        console.log(montaje);
-        console.log(ejes);
-    },[montaje, ejes]);
+    // Cuando tenemos nuevos diametros del PLC y montaje comparamos si los diametros coinciden
+    useEffect(()=>{
+        diametrosPLC&&montaje&&compara_diametros_PLC_montaje();
+    },[diametrosPLC, montaje]);
+
+    // Actualizar Fleje al cambiar de articulo
+    useEffect(() => {
+        if (articulo==0) {
+            setFleje(null);
+        }
+        else {
+            console.log('montaje ...');
+            console.log(montaje);
+            const art = articulos.filter(a => a.id == articulo)[0];
+            setFleje({
+                espesor: art.espesor,
+                ancho: art.desarrollo,
+                calidad: 'S350',
+                color: 'aqua'
+            });
+        }
+    },[articulo]);
 
     return (
         <React.Fragment>
@@ -360,34 +322,6 @@ const QS_Produccion = () => {
                                 </Row>
                             </Col>
                         </Row>
-                        <Row>
-                            <Col>
-                                <Form.Group controlId="operacion">
-                                    <Form.Control as="select" 
-                                                    value={OP}
-                                                    name='operacion'
-                                                    onChange={handleInputChange}>
-                                        {montaje && montaje.map( m => {
-                                            return (
-                                            <option key={m.operacion} value={m.operacion}>
-                                                {m.nombre}
-                                            </option>
-                                            )
-                                        })}
-                                    </Form.Control>
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                        {/* <Row>
-                            <Col className="col-6">
-                                {montaje&&posiciones&&ejes&&<StandChart montaje={montaje&&montaje.filter(m => m.operacion == OP)}
-                                            ejes={ejes&&ejes.filter(e => e.op == OP)[0].pos}
-                                            posiciones={null}//posiciones&&posiciones.filter(p => p.op==OP)[0].posiciones}
-                                            simulador={false}
-                                            gap = {null}
-                                            fleje={null}/>  }
-                            </Col>
-                        </Row> */}
                     </Form>
                 </Row>
             </Container>
