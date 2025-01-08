@@ -25,8 +25,6 @@ const RodInstanciasRodillo = ({rodillo}) => {
                   }
             })
             .then( res => {
-                console.log('RODILLO: ',rodillo)
-                console.log('RES.DATA, INSTANCIAS LISTADO: ',res.data)
                 setInstancias(res.data); //todas las instancias del rodillo
                 const instanciaActiva = res.data.filter(instancia => instancia.activa_qs === true);
                 setInstanciasActivas(instanciaActiva);//instancias activas

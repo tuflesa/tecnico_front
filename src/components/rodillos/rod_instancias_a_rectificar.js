@@ -289,8 +289,7 @@ const RodInstanciasRectificar = () => {
         try {
             // Actualiza en el rodillo el nuevo archivo
             const responseInstancia = await axios.patch(
-                `${BACKEND_SERVER}/api/rodillos/rodillo_nuevo/${linea.instancia.rodillo.id}/`,
-                formData,
+                `${BACKEND_SERVER}/api/rodillos/rodillo_nuevo/${linea.instancia.rodillo.id}/`,formData,
                 {
                     headers: {
                         'Authorization': `token ${token['tec-token']}`,
@@ -321,7 +320,12 @@ const RodInstanciasRectificar = () => {
             }
             alert('Archivo actualizado correctamente');
         } catch (err) {
-            alert('Error al actualizar el archivo, revisa los logs del servidor');
+            if (select_Archivo.size === 0) {
+                alert("El archivo está vacío. Seleccione un archivo válido.");
+            }
+            else{
+                alert('Error al actualizar el archivo, revisa el patch');
+            }
             console.error(err);
         }
         return null; // Retorna null si hubo error
@@ -532,8 +536,8 @@ const RodInstanciasRectificar = () => {
                                         {datos.finalizado !== false && <td style={{ backgroundColor: '#DBFAC9' }}>{linea.nuevo_diametro_ext}</td>}
                                         <td>{linea.ancho}</td>
                                         {datos.finalizado !== false && <td style={{ backgroundColor: '#DBFAC9' }}>{linea.nuevo_ancho}</td>} 
-                                        <td>{linea.centro}</td>
-                                        {datos.finalizado !== false && <td style={{ backgroundColor: '#DBFAC9' }}>{linea.nuevo_centro}</td>}
+                                        <td>{linea.diametro_centro}</td>
+                                        {datos.finalizado !== false && <td style={{ backgroundColor: '#DBFAC9' }}>{linea.nuevo_diametro_centro}</td>}
                                         <td>{linea.instancia.rodillo.num_ejes}</td> 
                                         {datos.finalizado !== false && <td style={{ backgroundColor: '#DBFAC9' }}>{linea.rectificado_por?linea.rectificado_por.get_full_name:''}</td>} 
                                         <td>
@@ -579,7 +583,8 @@ const RodInstanciasRectificar = () => {
                                                                     value={linea.proveedor?linea.proveedor.id || linea.proveedor:'' || ""}
                                                                     name='proveedor'
                                                                     onChange={handleInputChange_proveedor(linea)}
-                                                                    className="dropdown-green">
+                                                                    className="dropdown-green"
+                                                                    disabled={linea.finalizado===true?true:false}>
                                                         <option key={0} value={''}>Todos</option>
                                                         {proveedores && proveedores.map(proveedor => {
                                                             return (
