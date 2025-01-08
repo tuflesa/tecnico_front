@@ -443,7 +443,7 @@ const RodInstanciasXaRectificar = () => {
             </Row>
             <Row>
                 <Col>
-                    <h5 className="mb-3 mt-3">Lista de Rodillos a rectificar</h5>
+                    <h5 className="mb-3 mt-3">Lista de Rodillos xa rectificar</h5>
                     <Table striped bordered hover>
                         <thead>
                             <tr>
