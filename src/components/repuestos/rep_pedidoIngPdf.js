@@ -1,5 +1,6 @@
 import React from 'react';
 import { Document, Page, Image, View, Text, StyleSheet, Svg, Path, G, Rect, Polygon} from "@react-pdf/renderer";
+import {invertirFecha} from '../utilidades/funciones_fecha';
 
 const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicionales, proveedor, contacto, direccion_envio}) =>{
     var total_pedido= 0;
@@ -452,6 +453,7 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicional
                                 <Text>{pedido.empresa.codpostal}</Text>
                                 <Text>Spain</Text>
                                 <Text>Telf: {pedido.empresa.telefono}</Text>
+                                <Text style={{marginTop: 20}}>Delivery Date: {invertirFecha(String(pedido.fecha_prevista_entrega))}</Text>
                             </View>
                             <View style={styles.section4}>
                                 <Text style={{color: 'grey', marginTop: 15}}>Shipping address: </Text>
