@@ -175,6 +175,12 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
                     activa_qs:!datos.activa_qs
                 })
             }
+            else if(rodillo.rectificado_por_parejas && instancias_activas.length===0){
+                setDatos({
+                    ...datos,
+                    activa_qs:!datos.activa_qs
+                })
+            }
             else{
                 if(datos.activa_qs===true){
                     setDatos({

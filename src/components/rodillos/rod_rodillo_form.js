@@ -282,7 +282,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     }, [token, datos.seccion]);
 
     useEffect(() => {
-        datos.tipo_seccion!=='' && datos.tipo_rodillo!=='' && axios.get(BACKEND_SERVER + `/api/rodillos/tipo_plano/?tipo_seccion=${datos.tipo_seccion}&tipo_rodillo=${datos.tipo_rodillo}`,{
+        datos.tipo_seccion!=='' && datos.tipo_rodillo!=='' && axios.get(BACKEND_SERVER + `/api/rodillos/tipo_plano/?tipo=${datos.tipo_seccion}&tipo_rodillo=${datos.tipo_rodillo}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -454,63 +454,57 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
         
     };
 
-    const ActualizarRodillo = (event) => {
+    const ActualizarRodillo = async (event) => {
         event.preventDefault();
-        axios.patch(BACKEND_SERVER + `/api/rodillos/rodillo_editar/${rodillo.id}/`, {
-            nombre: datos.nombre,
-            tipo_plano: datos.tipo_plano,
-            espesor: datos.espesores,
-            espesor_1: datos.espesor_menor,
-            espesor_2: datos.espesor_mayor,
-            rectificado_por_parejas: datos.parejas,
-        }, {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-                }     
-        })
-        .then( res => { 
-            if(rodillo.tipo_plano===null && res.data.tipo_plano!==null){//si estamos actualizando el tipo de plano, ponemos los parámentros.
-                axios.get(BACKEND_SERVER + `/api/rodillos/plano_parametros/${res.data.tipo_plano}`,{
+        try {
+            const res = await axios.patch(BACKEND_SERVER + `/api/rodillos/rodillo_editar/${rodillo.id}/`, {
+                nombre: datos.nombre,
+                tipo_plano: datos.tipo_plano,
+                espesor: datos.espesores,
+                espesor_1: datos.espesor_menor,
+                espesor_2: datos.espesor_mayor,
+                rectificado_por_parejas: datos.parejas,
+            }, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }
+            });
+            if (rodillo.tipo_plano === null && res.data.tipo_plano !== null) {
+                const re = await axios.get(BACKEND_SERVER + `/api/rodillos/plano_parametros/${res.data.tipo_plano}`, {
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
-                        }
-                })
-                .then( re => { //tenemos los nombres de los parametros con re.data.nombres
-                    for(var x=0;x<re.data.nombres.length;x++){ //damos de alta los parámetros con valor 0
-                        axios.post(BACKEND_SERVER + `/api/rodillos/parametros_estandar/`, {
-                            nombre: re.data.nombres[x].nombre,
-                            rodillo: rodillo.id,
-                            valor: 0,
-                        }, {
-                            headers: {
-                                'Authorization': `token ${token['tec-token']}`
-                                }     
-                        })
-                        .then( r => { 
-                            window.location.href = `/rodillos/editar/${rodillo.id}`; 
-                        })
-                        .catch(err => { 
-                            console.error(err);
-                        });
                     }
-                })
-                .catch( err => {
-                    console.log(err);
                 });
+                const promises = re.data.nombres.map(param =>
+                    axios.post(BACKEND_SERVER + `/api/rodillos/parametros_estandar/`, {
+                        nombre: param.nombre,
+                        rodillo: rodillo.id,
+                        valor: 0,
+                    }, {
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                        }
+                    })
+                    .then(r => {
+                    })
+                    .catch(err => {
+                        console.error(err);
+                    })
+                );
+                await Promise.all(promises);
             }
             alert('Actualizado correctamente');
-            window.location.href = `/rodillos/editar/${rodillo.id}`; 
-        })
-        .catch(err => { 
+            window.location.href = `/rodillos/editar/${rodillo.id}`;
+        } catch (err) {
             console.log(err);
-            if(datos.dimension_perfil.length>2){
+            if (datos.dimension_perfil.length > 2) {
                 alert('La longitud del campo Dimensión de perfil, no es correcta');
-            }
-            else{
+            } else {
                 alert('Falta datos, por favor rellena todo los datos que tengan *');
             }
-        })
+        }
     };
+    
 
     const añadirInstancia = () => {
         setShowInstancia(true);

@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useCookies } from 'react-cookie';
 import { Document, Page, Image, View, Text, StyleSheet, Svg, Path, G, Rect, Polygon } from "@react-pdf/renderer";
 import logo_bornay from '../../assets/logo_bornay.svg'
+import {invertirFecha} from '../utilidades/funciones_fecha';
 
 const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, proveedor, contacto, direccion_envio}) =>{
     //borro empresa y lo sustituyo por pedido.empresa... la variable empresa entraba sin datos
@@ -439,6 +440,7 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
                                 <Text>{pedido.empresa.codpostal}</Text>
                                 <Text>España</Text>
                                 <Text>Telf: {pedido.empresa.telefono}</Text>
+                                <Text style={{marginTop: 20}}>Fecha de Entrega: {invertirFecha(String(pedido.fecha_prevista_entrega))}</Text>
                             </View>
                             <View style={styles.section4}>
                                 <Text style={{color: 'grey', marginTop: 15}}>Dirección de Envío:</Text>
