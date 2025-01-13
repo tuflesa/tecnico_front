@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Fragment } from "react";
 import axios from 'axios';
 import { Container, Row, Col, Form} from 'react-bootstrap';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import QSNavBar from "./qs_nav";
+import StandChart2 from "./qs_stand_chart _2";
 
 const QS_Produccion = () => {
     const [token] = useCookies(['tec-token']);
@@ -15,7 +16,9 @@ const QS_Produccion = () => {
     const [articulos, setArticulos] = useState(null);
     const [articulo, setArticulo] = useState(0);
     const [diametrosPLC, setDiametrosPLC] = useState(null);
+    const [posiciones, setPosiciones] = useState(null);
     const [fleje, setFleje] = useState(null);
+    const [OP, setOP] = useState(1);
 
     const leeDiametrosPLC = (event) => {
         // event.preventDefault();
@@ -26,8 +29,20 @@ const QS_Produccion = () => {
         })
         .then( res => {
                 setDiametrosPLC(res.data);
-                // console.log('ejes:');
+                //console.log(res.data);
+        })
+    }
+    const leePosicionesPLC = (event) => {
+        // event.preventDefault();
+        axios.get(BACKEND_SERVER + '/api/qs/posiciones_actuales_PLC/',{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+                }
+        })
+        .then( res => {
+                console.log('Posiciones PLC ...');
                 console.log(res.data);
+                setPosiciones(res.data);
         })
     }
 
@@ -41,12 +56,12 @@ const QS_Produccion = () => {
                 const Df_PC = r.parametros.Df;
                 const PLC = diametrosPLC[o.nombre];
                 const Df_PLC = PLC[r.eje];
-                if (Math.abs(Df_PC-Df_PLC) > 0.1) {
-                    console.log('Operacion ', o.nombre);
-                    console.log('Eje: ', r.eje);
-                    console.log('Df_PC ', Df_PC);
-                    console.log('Df_PLC ', Df_PLC);
-                }
+                // if (Math.abs(Df_PC-Df_PLC) > 0.1) {
+                //     console.log('Operacion ', o.nombre);
+                //     console.log('Eje: ', r.eje);
+                //     console.log('Df_PC ', Df_PC);
+                //     console.log('Df_PLC ', Df_PLC);
+                // }
             });
         });
     }
@@ -61,7 +76,8 @@ const QS_Produccion = () => {
         }
         // Si hay dato continuamos
         const temp = []; // Aqui guardo el montaje temporal
-        const bancadas = dato.grupo.bancadas; // Bancadas del grupo
+        const bancadas = [];
+        dato.grupo.bancadas.forEach(b => bancadas.push(b)); // Bancadas del grupo
         bancadas.push(dato.bancadas); // Añadimos la calibradora que viene como bancada sin grupo
         // Guardamos los articulos de montaje
         setArticulos(dato.articulos);
@@ -190,6 +206,11 @@ const QS_Produccion = () => {
         setArticulo(event.target.value);
     }
 
+    const handleOPChange = (event) => {
+        event.preventDefault();
+        setOP(event.target.value);
+    }
+
     // Al inicio: Lectura de grupos
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/rodillos/grupo_only/?maquina=${4}`,{ // 4 es el id de la mtt2
@@ -224,6 +245,7 @@ const QS_Produccion = () => {
     // Si cambia el montaje leemos los diametros activos en el PLC para ver si coinciden con el montaje actual
     useEffect(()=>{
         leeDiametrosPLC();
+        leePosicionesPLC();
     },[montaje]);
 
     // Cuando tenemos nuevos diametros del PLC y montaje comparamos si los diametros coinciden
@@ -241,7 +263,7 @@ const QS_Produccion = () => {
             console.log(montaje);
             const art = articulos.filter(a => a.id == articulo)[0];
             setFleje({
-                espesor: art.espesor,
+                espesor: parseFloat(art.espesor),
                 ancho: art.desarrollo,
                 calidad: 'S350',
                 color: 'aqua'
@@ -252,78 +274,108 @@ const QS_Produccion = () => {
     return (
         <React.Fragment>
             <QSNavBar/>
-            <Container>
-                <Row>
-                    <Form>
-                        <Row>
-                            <Col>
-                                <Row>
-                                    <Col>
-                                        <Form.Group controlId="grupo">
-                                            <Form.Label>Grupo</Form.Label>
-                                            <Form.Control   size="lg"
-                                                            as="select" 
-                                                            value={grupo}
-                                                            name='grupo'
-                                                            onChange={handleGrupoChange}>
-                                                                <option key={0} value={0}>Ninguno</option>
-                                                                {grupos && grupos.map( g => {
-                                                                    return (
-                                                                    <option key={g.id} value={g.id}>
-                                                                        {g.nombre}
-                                                                    </option>
-                                                                    )
-                                                                })}
-                                            </Form.Control>
-                                        </Form.Group>
-                                    </Col>
-                                    <Col>
-                                        <Form.Group controlId="montaje">
-                                            <Form.Label>Calibradora</Form.Label>
-                                            <Form.Control   size="lg"
-                                                            as="select" 
-                                                            value={montajeActivo}
-                                                            name='montaje'
-                                                            onChange={handleMontajeChange}>
-                                                <option key={0} value={0}>Ninguno</option>                
-                                                {montajes && montajes.map( m => {
-                                                    return (
-                                                    <option key={m.id} value={m.id}>
-                                                        {m.bancadas.dimensiones}
-                                                    </option>
-                                                    )
-                                                })}
-                                            </Form.Control>
-                                        </Form.Group>
-                                    </Col>
-                                </Row>
-                            </Col>
-                            <Col>
-                                <Row>
-                                    <Col>
-                                        <Form.Group controlId="Articulo">
-                                            <Form.Label>Artículo</Form.Label>
-                                            <Form.Control   size="lg"
-                                                            as="select" 
-                                                            value={articulo}
-                                                            name='articulo'
-                                                            onChange={handleArticuloChange}>
-                                                <option key={0} value={0}>Ninguno</option>                
-                                                {articulos && articulos.map( a => {
-                                                    return (
-                                                    <option key={a.id} value={a.id}>
-                                                        {a.nombre}
-                                                    </option>
-                                                    )
-                                                })}
-                                            </Form.Control>
-                                        </Form.Group>
-                                    </Col>
-                                </Row>
-                            </Col>
-                        </Row>
-                    </Form>
-                </Row>
+            <Container fluid>
+                <Form>
+                    <Row>
+                        <Col lg={6}>
+                            <Row>
+                                <Col lg={6}>
+                                    <Form.Group controlId="grupo">
+                                        <Form.Label>Grupo</Form.Label>
+                                        <Form.Control   size="lg"
+                                                        as="select" 
+                                                        value={grupo}
+                                                        name='grupo'
+                                                        onChange={handleGrupoChange}>
+                                                            <option key={0} value={0}>Ninguno</option>
+                                                            {grupos && grupos.map( g => {
+                                                                return (
+                                                                <option key={g.id} value={g.id}>
+                                                                    {g.nombre}
+                                                                </option>
+                                                                )
+                                                            })}
+                                        </Form.Control>
+                                    </Form.Group>
+                                </Col>
+                                <Col>
+                                    <Form.Group controlId="montaje">
+                                        <Form.Label>Calibradora</Form.Label>
+                                        <Form.Control   size="lg"
+                                                        as="select" 
+                                                        value={montajeActivo}
+                                                        name='montaje'
+                                                        onChange={handleMontajeChange}>
+                                            <option key={0} value={0}>Ninguno</option>                
+                                            {montajes && montajes.map( m => {
+                                                return (
+                                                <option key={m.id} value={m.id}>
+                                                    {m.bancadas.dimensiones}
+                                                </option>
+                                                )
+                                            })}
+                                        </Form.Control>
+                                    </Form.Group>
+                                </Col>
+                            </Row>
+                        </Col>
+                        <Col lg={6}>
+                            <Row>
+                                <Col>
+                                    <Form.Group controlId="Articulo">
+                                        <Form.Label>Artículo</Form.Label>
+                                        <Form.Control   size="lg"
+                                                        as="select" 
+                                                        value={articulo}
+                                                        name='articulo'
+                                                        onChange={handleArticuloChange}>
+                                            <option key={0} value={0}>Ninguno</option>                
+                                            {articulos && articulos.map( a => {
+                                                return (
+                                                <option key={a.id} value={a.id}>
+                                                    {a.nombre}
+                                                </option>
+                                                )
+                                            })}
+                                        </Form.Control>
+                                    </Form.Group>
+                                </Col>
+                            </Row>
+                        </Col>
+                    </Row>
+                    {
+                    montaje&&articulo&&fleje&&posiciones&&<React.Fragment>
+                    <Row>
+                        <Col lg={6}>
+                            <Form.Group controlId="operacion">
+                                <Form.Control as="select" 
+                                                value={OP}
+                                                name='operacion'
+                                                onChange={handleOPChange}>
+                                    {montaje && montaje.map( m => {
+                                        return (
+                                        <option key={m.operacion} value={m.operacion}>
+                                            {m.nombre}
+                                        </option>
+                                        )
+                                    })}
+                                </Form.Control>
+                            </Form.Group>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col lg={6}>
+                            <StandChart2 
+                                montaje={montaje.filter(m => m.operacion == OP)}
+                                posiciones={posiciones}
+                                simulador={false}
+                                gap = {[]}
+                                fleje={fleje}/> 
+                        </Col>
+                    </Row> 
+                    </React.Fragment>
+                    }
+                </Form>
             </Container>
         </React.Fragment>
     )
