@@ -16,6 +16,7 @@ const StandChart = ({montaje, ejes, posiciones, simulador, gap, fleje}) => {
     const dimensions = useResizeObserver(wrapperRef);
 
     useEffect(()=>{
+        console.log(posiciones);
         if (!dimensions) return;
         const width = dimensions.width
             , height = dimensions.height

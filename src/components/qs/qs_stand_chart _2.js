@@ -76,8 +76,8 @@ const StandChart2 = ({montaje, posiciones, simulador, gap, fleje}) => {
 
             // Rodillo inferior
             // Definición del rodillo
-            const pos_inf = -posiciones[stand.nombre].INF;
-            const pos_sup = posiciones[stand.nombre].SUP;
+            const pos_inf = -posiciones.filter(p => p.eje=='INF')[0].pos;
+            const pos_sup = posiciones.filter(p => p.eje=='SUP')[0].pos;
 
             // Variables
             let R, R1, R2, R3, R4;
@@ -335,8 +335,8 @@ const StandChart2 = ({montaje, posiciones, simulador, gap, fleje}) => {
     
                 // Rodillos y ejes
                 const roll_Lat= stand.rodillos.filter(r => r.eje=='ANCHO')[0]//stand.rodillos[0];
-                const pos_ancho = posiciones[stand.nombre].ANCHO;
-                const pos_alto = posiciones[stand.nombre].ALTO;
+                const pos_ancho = posiciones.filter(p => p.eje=='ANCHO')[0].pos;
+                const pos_alto = posiciones.filter(p => p.eje=='ALTO')[0].pos;
     
                 // Variables
                 let pos_h, pos_v;
@@ -469,8 +469,8 @@ const StandChart2 = ({montaje, posiciones, simulador, gap, fleje}) => {
             // Rodillos y ejes
             const roll_i = stand.rodillos.filter(r => r.eje=='INF')[0];
             const roll_s = stand.rodillos.filter(r => r.eje=='SUP')[0];
-            const pos_inf = -posiciones[stand.nombre].INF;
-            const pos_sup = posiciones[stand.nombre].SUP;
+            const pos_inf = -posiciones.filter(p => p.eje=='INF')[0].pos;;
+            const pos_sup = posiciones.filter(p => p.eje=='SUP')[0].pos;;
 
             // Dibujo rodillo inferior
             // Variables
@@ -612,14 +612,14 @@ const StandChart2 = ({montaje, posiciones, simulador, gap, fleje}) => {
             const roll_Sup_Operador = stand.rodillos.filter(r => r.eje=='SUP_OP')[0]; //stand.rodillos[4];
             const roll_Sup_Motor = stand.rodillos.filter(r => r.eje=='SUP_MO')[0];  //stand.rodillos[6];
             //Posiciones
-            const pos_inf = -posiciones[stand.nombre].INF;
-            const pos_lat_op = -posiciones[stand.nombre].LAT_OP;
-            const pos_lat_mo = posiciones[stand.nombre].LAT_MO;
-            const pos_sup_op_alto = posiciones[stand.nombre].SUP_OP_ALTO;
-            const pos_sup_op_ancho = -posiciones[stand.nombre].SUP_OP_ANCHO;
-            const pos_sup_mo_alto = posiciones[stand.nombre].SUP_MO_ALTO;
-            const pos_sup_mo_ancho = -posiciones[stand.nombre].SUP_MO_ANCHO;
-            const h_cab = posiciones[stand.nombre].CAB;
+            const pos_inf = -posiciones.filter(p => p.eje=='INF')[0].pos;
+            const pos_lat_op = -posiciones.filter(p => p.eje=='LAT_OP')[0].pos;
+            const pos_lat_mo = posiciones.filter(p => p.eje=='LAT_MO')[0].pos;
+            const pos_sup_op_alto = posiciones.filter(p => p.eje=='SUP_V_OP')[0].pos;
+            const pos_sup_op_ancho = -posiciones.filter(p => p.eje=='SUP_H_OP')[0].pos;
+            const pos_sup_mo_alto = posiciones.filter(p => p.eje=='SUP_V_MO')[0].pos;
+            const pos_sup_mo_ancho = posiciones.filter(p => p.eje=='SUP_H_MO')[0].pos;
+            const h_cab = posiciones.filter(p => p.eje=='CAB')[0].pos;;
 
             // Variables
             let xc, yc;
@@ -815,7 +815,7 @@ const StandChart2 = ({montaje, posiciones, simulador, gap, fleje}) => {
             C = roll_Inf.parametros.C;
 
             // Calculos
-            pos = pos_inf - h_cab; //-AxisPos0_Inf + Df/2;// + h_cab;
+            pos = pos_inf + h_cab; //-AxisPos0_Inf + Df/2;// + h_cab;
             xc = 0;
             yc = pos + R1;
             x1 = xc + R1 * Math.sin((alfa1/2)-alfa2);
@@ -855,7 +855,7 @@ const StandChart2 = ({montaje, posiciones, simulador, gap, fleje}) => {
             L1 = roll_Sup_Motor.parametros.L1;
 
             // Calculos
-            y0 = h_cab + pos_sup_mo_alto + (Df/2) *Math.cos(15*Math.PI/180); //h_cab + 465 - AxisPos0_Sup_Alto_Motor;
+            y0 = h_cab + (pos_sup_mo_alto + Df/2) *Math.cos(15*Math.PI/180); //h_cab + 465 - AxisPos0_Sup_Alto_Motor;
             x0 = pos_sup_mo_ancho + (Df/2) *Math.sin(15*Math.PI/180);//71.05 + 69 - AxisPos0_Sup_Ancho_Motor;
             x1 = x0 - Dc * Math.cos(75*Math.PI/180)/2;
             y1 = y0 - Dc * Math.sin(75*Math.PI/180)/2;
@@ -893,8 +893,8 @@ const StandChart2 = ({montaje, posiciones, simulador, gap, fleje}) => {
             L1 = roll_Sup_Operador.parametros.L1;
 
             // Calculos
-            y0 = h_cab + pos_sup_op_alto + (Df/2) *Math.cos(15*Math.PI/180);//h_cab + 465 - AxisPos0_Sup_Alto_Operador;
-            x0 = pos_sup_op_ancho + (Df/2) *Math.sin(15*Math.PI/180);//-72.95 - 68 + AxisPos0_Sup_Ancho_Operador;
+            y0 = h_cab + (pos_sup_op_alto + Df/2) *Math.cos(15*Math.PI/180);//h_cab + 465 - AxisPos0_Sup_Alto_Operador;
+            x0 = pos_sup_op_ancho - (Df/2) *Math.sin(15*Math.PI/180);//-72.95 - 68 + AxisPos0_Sup_Ancho_Operador;
             x1 = x0 + Dc * Math.cos(75*Math.PI/180)/2;
             y1 = y0 - Dc * Math.sin(75*Math.PI/180)/2;
             xc = x1;
@@ -931,10 +931,10 @@ const StandChart2 = ({montaje, posiciones, simulador, gap, fleje}) => {
             const roll_Inferior = stand.rodillos.filter(r => r.eje=='INF')[0];
             const roll_Lat_Operador= stand.rodillos.filter(r => r.eje=='LAT_OP')[0];
             const roll_Lat_Motor = stand.rodillos.filter(r => r.eje=='LAT_MO')[0];
-            const pos_inf = -posiciones[stand.nombre].INF;
-            const pos_sup = posiciones[stand.nombre].SUP;
-            const pos_lat_op = -posiciones[stand.nombre].LAT_OP;
-            const pos_lat_mo = posiciones[stand.nombre].LAT_MO;
+            const pos_inf = -posiciones.filter(p => p.eje=='INF')[0].pos;
+            const pos_sup = posiciones.filter(p => p.eje=='SUP')[0].pos;
+            const pos_lat_op = -posiciones.filter(p => p.eje=='LAT_OP')[0].pos;
+            const pos_lat_mo = posiciones.filter(p => p.eje=='LAT_MO')[0].pos;
 
             // Variables
             let xc, yc;
@@ -1623,7 +1623,7 @@ const StandChart2 = ({montaje, posiciones, simulador, gap, fleje}) => {
             .style("stroke-width", 2)
             .attr('d', (m, i) => draw_stand(m, i));
 
-        posiciones&&select(svg).select('.pos')
+            posiciones&&select(svg).select('.pos')
             .selectAll('text')
             .data(posiciones)
             .join('text')
@@ -1631,7 +1631,6 @@ const StandChart2 = ({montaje, posiciones, simulador, gap, fleje}) => {
             .attr('x', p => {
                 switch(p.eje) {
                     case 'INF':
-                    case 'INF_W':
                         return xScale(limite*0.6);
                     case 'SUP':
                         return xScale(limite*0.6);
@@ -1651,15 +1650,12 @@ const StandChart2 = ({montaje, posiciones, simulador, gap, fleje}) => {
                         return xScale(limite*0.5);
                     case 'ANCHO':
                     case 'ALTO':
-                    case 'ANCHO_S1':
-                    case 'ALTO_S1':
                         return xScale(-limite*0.9);
                 }
             })
             .attr('y', p => {
                 switch(p.eje) {
                     case 'INF':
-                    case 'INF_W':
                         return yScale(-limite*0.9);
                     case 'SUP':
                         return yScale(limite*0.9);
@@ -1677,15 +1673,13 @@ const StandChart2 = ({montaje, posiciones, simulador, gap, fleje}) => {
                         return yScale(limite*0.7);
                     case 'SUP_H_MO':
                         return yScale(limite*0.6);
-                    case 'ANCHO_S1':
                     case 'ANCHO':
                         return yScale(limite*0.9);
-                    case 'ALTO_S1':
                     case 'ALTO':
                         return yScale(limite*0.8);
                 }
             })
-            .text(p => simulador ? (p.eje + ': ' + p.pos_sim.toFixed(2)) : (p.eje + ': ' + p.pos.toFixed(2)));
+            .text(p => p.eje + ': ' + p.pos.toFixed(2));
 
         gap&&select(svg).select('.gap')
             .selectAll('text')
@@ -1703,7 +1697,7 @@ const StandChart2 = ({montaje, posiciones, simulador, gap, fleje}) => {
             .attr("y", yScale(limite*0.9))
             .text(g => g.piston&&('Piston: ' + g.piston.toFixed(2)));
                
-    },[dimensions, montaje, fleje]);
+    },[dimensions, montaje, fleje, posiciones]);
 
     return (
         <div ref={wrapperRef}>
