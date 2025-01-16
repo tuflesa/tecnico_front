@@ -42,6 +42,15 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
     }, [token]);
 
     useEffect(() => {
+        if (datos.tubo_madre && datos.espesor_1 && datos.espesor_2 && datos.nombre==="") {
+            setDatos({
+                ...datos,
+                nombre: 'Grupo-'+'Ø'+datos.tubo_madre+'-'+datos.espesor_1+'÷'+datos.espesor_2
+            });
+        }
+    }, [datos.tubo_madre, datos.espesor_1, datos.espesor_2, !datos.nombre]);
+
+    useEffect(() => {
         if (datos.empresa === '') {
             setZonas([]);
             setDatos({
@@ -90,7 +99,7 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
     
     const GuardarGrupo = (event) => {
         event.preventDefault();
-        axios.get(BACKEND_SERVER + `/api/rodillos/grupo_nuevo/?tubo_madre=${datos.tubo_madre}&maquina=${datos.zona}&espesor_1=${datos.espesor_1}&espesor_2=${datos.espesor_2}`,{
+        axios.get(BACKEND_SERVER + `/api/rodillos/grupo_nuevo/?tubo_madre=${datos.tubo_madre}&maquina=${datos.zona}&espesor_1=${datos.espesor_1}&espesor_2=${datos.espesor_2}&nombre=${datos.nombre}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -101,7 +110,7 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
             }
             else{
                 axios.post(BACKEND_SERVER + `/api/rodillos/grupo_only/`, {
-                    nombre: 'Grupo-'+'Ø'+datos.tubo_madre+'-'+datos.espesor_1+'÷'+datos.espesor_2,
+                    nombre: datos.nombre,
                     maquina: datos.zona,
                     tubo_madre: datos.tubo_madre,
                     espesor_1: datos.espesor_1,
@@ -167,7 +176,6 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
                                         value={datos.nombre}
                                         onChange={handleInputChange} 
                                         placeholder="Nombre grupo"
-                                        disabled = {false}
                             />
                         </Form.Group>
                     </Col>
