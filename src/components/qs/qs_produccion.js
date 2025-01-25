@@ -5,6 +5,7 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import QSNavBar from "./qs_nav";
 import StandChart2 from "./qs_stand_chart _2";
+import FlowerChart2 from "./qs_flor_chart_2";
 import HeightChart from "./qs_height_chart";
 
 const QS_Produccion = () => {
@@ -366,14 +367,14 @@ const QS_Produccion = () => {
            }, 
            {nombre: 'MAX',
             color: 'blue',
-            puntos:[{x: 0, y:0, OP: 0, nombre: 'PR'}, {x:1590, y:-10, OP:1, nombre: 'BD1'}, {x:2760, y:-20, OP:2, nombre: 'BD2'}, {x:6320, y:-30, OP:5, nombre: 'FP1'},{x:7570, y:-40, OP:7, nombre: 'FP2'},{x:8820, y:-50, OP:9, nombre: 'FP3'}]
+            puntos:[{x: 0, y:0, OP: 0, nombre: 'PR'}, {x:1590, y:-10, OP:1, nombre: 'BD1'}, {x:2760, y:-20, OP:2, nombre: 'BD2'}, {x:6320, y:-30, OP:5, nombre: 'FP1'},{x:7570, y:-40, OP:7, nombre: 'FP2'},{x:8820, y:-50, OP:9, nombre: 'FP3'}, {x:10070, y:40, OP:10, nombre: 'W'}]
          }];
          console.log('Fleje ...');
         fleje&&console.log(fleje);
         fleje&&posiciones&&posicionesSim&&montaje&&montaje.map(m => {
             switch (m.tipo) {
                 case 'BD':
-                    switch (m.rodillos[0].tipo_plano.slice(0,4)) {
+                    switch (m.rodillos.filter(r => r.eje=='INF')[0].tipo_plano.slice(0,4)) {
                         case 'BD_I':
                             console.log('Alturas: BD Standar ...');
                             H.map(h => {
@@ -525,11 +526,43 @@ const QS_Produccion = () => {
                     });
                     break;
                 case 'W':
-                    let y;
-                    if (simulador) y = -posicionesSim.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'INF')[0].pos;
-                    else y = -posiciones.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'INF')[0].pos;
+                    console.log('Alturas: W ...');
+                    H.map( h => {
+                        let y;
+                        if (h.nombre == 'MIN'){
+                            if (simulador) y = -posicionesSim.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'INF')[0].pos;
+                            else y = -posiciones.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'INF')[0].pos;
+                        }
+                        else {
+                            let p_v_op, p_h_op, h_cab;
+                            if (simulador) {
+                                p_v_op = posicionesSim.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'SUP_V_OP')[0].pos;
+                                p_h_op = -posicionesSim.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'SUP_H_OP')[0].pos;
+                                h_cab = posicionesSim.filter(p => p.op == m.operacion)[0].posiciones.filter(p => p.eje=='CAB')[0].pos;
+                            } 
+                            else {
+                                p_v_op = posiciones.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'SUP_V_OP')[0].pos;
+                                p_h_op = -posiciones.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'SUP_H_OP')[0].pos;
+                                h_cab = posiciones.filter(p => p.op == m.operacion)[0].posiciones.filter(p => p.eje=='CAB')[0].pos;
+                            }
+                            const roll_sop = m.rodillos.filter(r => r.eje=='SUP_OP')[0]; // Rodillo superior
+                            const R1_s = roll_sop.parametros.R1;
 
-                    H.filter( h => h.nombre == 'MIN')[0].puntos.filter(q => q.OP == m.operacion)[0].y = y;
+                            const x1 = p_h_op;
+                            const y1 = p_v_op * Math.cos(15*Math.PI/180) + h_cab;
+                            const x2 =  p_h_op + p_v_op * Math.sin(15*Math.PI/180);
+                            const y2 = h_cab;
+                            const x3 = x2;
+                            const y3 = y1 - Math.sqrt(R1_s**2 - (x1-x3)**2);
+                            let a,b,c; // Parametros para resolver ec de 2 grado
+                            a = 1;
+                            b = -2*y3;
+                            c = y3**2 + x3**2 - R1_s**2
+                            y = (-b + Math.sqrt(b**2 - 4*a*c))/(2*a); //Punto de corte con la vertical de radio del rodillo superior
+                        }
+
+                        h.puntos.filter(p => p.OP == m.operacion)[0].y = y;
+                    });
                     break;
             }
          });
@@ -673,6 +706,11 @@ const QS_Produccion = () => {
                                 simulador={simulador}
                                 gap = {gap&&gap.filter(g => g.op == OP)}
                                 fleje={fleje}/> 
+                        </Col>
+                        <Col className="col-6">
+                            <FlowerChart2 montaje={montaje}
+                                        posiciones={simulador ? posicionesSim : posiciones}
+                                        fleje={fleje}/>
                         </Col>
                     </Row>
                     <Row>
