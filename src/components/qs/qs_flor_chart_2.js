@@ -474,7 +474,7 @@ const FlowerChart2 = ({montaje, posiciones, fleje}) => {
                 R2m = (R1_l**2 - (R1_l - pos_lmo)**2 - pos_inf**2)/(2*(R1_l - pos_inf));
                 alfa4m = Math.atan((pos_inf-R2)/(R1_l-pos_lmo));
                 x6m = 0;
-                y6m = R2 - pos_inf + h_cab;
+                y6m = R2m - pos_inf + h_cab;
             }
             else {
                 if (pos_lmo == pos_inf){
@@ -545,7 +545,7 @@ const FlowerChart2 = ({montaje, posiciones, fleje}) => {
                 }
                 else {
                     r.arc(xScale(x7m), yScale(y7m), rScale(R1_l), Math.PI/2, alfa4m, true);
-                    r.arc(xScale(x6m), yScale(y6m), rScale(R2), alfa4m, 0, true);
+                    r.arc(xScale(x6m), yScale(y6m), rScale(R2m), alfa4m, 0, true);
                 }
                 // Superior MO
                 r.arc(xScale(x4m), yScale(y4m), rScale(R1_l), 0, -alfa1m, true);
@@ -561,8 +561,9 @@ const FlowerChart2 = ({montaje, posiciones, fleje}) => {
                     r.arc(xScale(x6m), yScale(y6m), rScale(R2m - e), alfa4m, Math.PI/2);
                 }
                 else {
-                    r.arc(xScale(x6m), yScale(y6m), rScale(R2 - e), 0, alfa4m);
-                    r.arc(xScale(x7m), yScale(y7m), rScale(R1_l - e), Math.PI/2, alfa4m, true);
+                    
+                    r.arc(xScale(x6m), yScale(y6m), rScale(R2m - e), 0, alfa4m);
+                    r.arc(xScale(x7m), yScale(y7m), rScale(R1_l - e), alfa4m, Math.PI/2);
                 }
                 // Inferior OP   
                 if (pos_lop<pos_inf){
