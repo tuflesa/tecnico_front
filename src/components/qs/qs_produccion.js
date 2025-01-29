@@ -1,10 +1,12 @@
-import React, { useState, useEffect, Fragment } from "react";
+import React, { useState, useEffect } from "react";
 import axios from 'axios';
-import { Container, Row, Col, Form} from 'react-bootstrap';
+import { Container, Button, Row, Col, Form} from 'react-bootstrap';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import QSNavBar from "./qs_nav";
 import StandChart2 from "./qs_stand_chart _2";
+import FlowerChart2 from "./qs_flor_chart_2";
+import HeightChart from "./qs_height_chart";
 
 const QS_Produccion = () => {
     const [token] = useCookies(['tec-token']);
@@ -17,8 +19,13 @@ const QS_Produccion = () => {
     const [articulo, setArticulo] = useState(0);
     const [diametrosPLC, setDiametrosPLC] = useState(null);
     const [posiciones, setPosiciones] = useState(null);
+    const [posicionesSim, setPosicionesSim] = useState(null);
     const [fleje, setFleje] = useState(null);
     const [OP, setOP] = useState(1);
+    const [simulador, setSimulador] = useState(false);
+    const [datos, setDatos] = useState(null);
+    const [gap, setGap] = useState(null);
+    const [alturas, setAlturas] = useState(null);
 
     const leeDiametrosPLC = (event) => {
         // event.preventDefault();
@@ -32,6 +39,7 @@ const QS_Produccion = () => {
                 //console.log(res.data);
         })
     }
+
     const leePosicionesPLC = (event) => {
         // event.preventDefault();
         axios.get(BACKEND_SERVER + '/api/qs/posiciones_actuales_PLC/',{
@@ -47,10 +55,6 @@ const QS_Produccion = () => {
     }
 
     const compara_diametros_PLC_montaje = () => {
-        console.log('Montaje ...');
-        console.log(montaje);
-        console.log('leyendo diametros de PLC ...');
-        console.log(diametrosPLC);
         montaje.forEach(o => {
             o.rodillos.forEach(r =>{
                 const Df_PC = r.parametros.Df;
@@ -182,6 +186,17 @@ const QS_Produccion = () => {
         });
         setMontaje(temp.sort((a,b) => a.operacion - b.operacion).filter(o => o.nombre !=='ET'));
     }
+
+    const simular = (event) => {
+        event.preventDefault();
+        const temp = [...posicionesSim];
+
+        temp.filter(t => t.op ==OP)[0].posiciones.map(p => {
+            p.pos = parseFloat(datos[p.eje]);
+        });
+
+        setPosicionesSim(temp);
+    }
     
     const handleGrupoChange = (event) => {
         event.preventDefault();
@@ -209,6 +224,14 @@ const QS_Produccion = () => {
     const handleOPChange = (event) => {
         event.preventDefault();
         setOP(event.target.value);
+    }
+
+    const handleDataChange = (event) => {
+        event.preventDefault();
+        setDatos({
+            ...datos,
+            [event.target.name] : event.target.value
+        });
     }
 
     // Al inicio: Lectura de grupos
@@ -270,6 +293,301 @@ const QS_Produccion = () => {
             });
         }
     },[articulo]);
+
+    // Calculo del gap y amortiguación entre rodillos
+    useEffect(()=>{
+        let piston, gap, pos_i, pos_s, dext_i, dext_s, df_i, df_s;
+        const gap_list = [];
+        // console.log('Calculo de gap ...');
+        fleje&&montaje&&montaje.map(m => {
+            // console.log(m);
+            switch (m.tipo) {
+                case 'BD':
+                    // console.log('Gap: Break down');
+                    piston = 60;
+                    // eje_inf = simulador ? ejesSim[m.operacion-1].pos['INF'] : ejes[m.operacion-1].pos['INF'];
+                    // eje_sup = simulador ? ejesSim[m.operacion-1].pos['SUP'] : ejes[m.operacion-1].pos['SUP'];
+                    // Di = m.rodillos.filter(r => r.eje == 'INF')[0].parametros['Df'];
+                    // Ds = m.rodillos.filter(r => r.eje == 'SUP')[0].parametros['Df'];
+                    if (!simulador){
+                        pos_i = posiciones.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='INF')[0].pos;
+                        pos_s = posiciones.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='SUP')[0].pos;
+                    }
+                    else {
+                        pos_i = posicionesSim.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='INF')[0].pos;
+                        pos_s = posicionesSim.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='SUP')[0].pos;
+                    }
+                    gap = pos_s + pos_i;
+                    // console.log(gap);
+                    if (gap < fleje.espesor) {
+                        piston = 60 - fleje.espesor + gap;
+                        gap = fleje.espesor;
+                    }
+                    break;
+                case 'FP':
+                    // console.log('Gap: Fin pass');
+                    piston = null;
+                    if (!simulador){
+                        pos_i = posiciones.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='INF')[0].pos;
+                        pos_s = posiciones.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='SUP')[0].pos;
+                    }
+                    else {
+                        pos_i = posicionesSim.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='INF')[0].pos;
+                        pos_s = posicionesSim.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='SUP')[0].pos;
+                    }
+                    dext_i = m.rodillos.filter(r => r.eje=='INF')[0].parametros.Dext;
+                    dext_s = m.rodillos.filter(r => r.eje=='SUP')[0].parametros.Dext;
+                    df_i = m.rodillos.filter(r => r.eje=='INF')[0].parametros.Df;
+                    df_s = m.rodillos.filter(r => r.eje=='SUP')[0].parametros.Df;
+                    gap = pos_i + pos_s - (dext_i-df_i)/2 - (dext_s-df_s)/2;
+                    break;
+                default:
+                    gap = null;
+                    piston = null;
+                    break;
+            }
+            gap_list.push({
+                op: m.operacion,
+                gap: gap,
+                piston: piston
+            });
+        });
+        // console.log('gap_list');
+        // console.log(gap_list);
+        setGap(gap_list);
+    
+    },[montaje, posiciones, posicionesSim, simulador, fleje]);
+
+    // Calculo de alturas
+    useEffect(()=>{
+        // H contiene las distancias de las distintas operaciones de la sección formadora
+        const H =[{nombre: 'MIN',
+            color:'red', 
+            puntos:[{x: 0, y:0, OP: 0, nombre: 'PR'}, {x:1590, y:10, OP:1, nombre: 'BD1'}, {x:2760, y:20, OP:2, nombre: 'BD2'}, {x:6320, y:30, OP:5, nombre: 'FP1'},{x:7570, y:40, OP:7, nombre: 'FP2'},{x:8820, y:50, OP:9, nombre: 'FP3'}, {x:10070, y:40, OP:10, nombre: 'W'}]
+           }, 
+           {nombre: 'MAX',
+            color: 'blue',
+            puntos:[{x: 0, y:0, OP: 0, nombre: 'PR'}, {x:1590, y:-10, OP:1, nombre: 'BD1'}, {x:2760, y:-20, OP:2, nombre: 'BD2'}, {x:6320, y:-30, OP:5, nombre: 'FP1'},{x:7570, y:-40, OP:7, nombre: 'FP2'},{x:8820, y:-50, OP:9, nombre: 'FP3'}, {x:10070, y:40, OP:10, nombre: 'W'}]
+         }];
+         console.log('Fleje ...');
+        fleje&&console.log(fleje);
+        fleje&&posiciones&&posicionesSim&&montaje&&montaje.map(m => {
+            switch (m.tipo) {
+                case 'BD':
+                    switch (m.rodillos.filter(r => r.eje=='INF')[0].tipo_plano.slice(0,4)) {
+                        case 'BD_I':
+                            console.log('Alturas: BD Standar ...');
+                            H.map(h => {
+                                let y,q;
+                                if (h.nombre == 'MIN'){
+                                    if (simulador) y = -posicionesSim.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'INF')[0].pos;
+                                    else y = -posiciones.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'INF')[0].pos;
+        
+                                    h.puntos.filter(p => p.OP == m.operacion)[0].y = y;
+                                }
+                                else {
+                                    const roll = m.rodillos.filter(r => r.eje=='INF')[0]; // Rodillo interior
+                                    const Df = roll.parametros.Df;
+                                    const R = roll.parametros.R;
+                                    let alfa = roll.parametros.alfa * Math.PI / 180;
+                                    let L; // longitud de fleje fuera del radio (tramo recto)
+                                    if (R * alfa > fleje.ancho) {
+                                        alfa = fleje.ancho / R;
+                                        L = 0;
+                                        
+                                    }
+                                    else {
+                                        L = fleje.ancho - R * alfa;
+                                    }
+                                    
+                                    if (simulador) q = posicionesSim.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'INF')[0].pos;
+                                    else q = posiciones.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'INF')[0].pos;
+        
+                                    y = R * (1 - Math.cos(alfa/2)) + (L/2) * Math.sin(alfa/2) - q;
+                                    h.puntos.filter(p => p.OP == m.operacion)[0].y = y;
+                                }
+                            });
+                            break;
+                        case 'BD_W':
+                            console.log('Alturas: BD W ...');
+                            H.map( h => {
+                                let y;
+                                if (h.nombre == 'MIN'){
+                                    if (simulador) y = -posicionesSim.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'INF')[0].pos;
+                                    else y = -posiciones.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'INF')[0].pos;
+    
+                                    h.puntos.filter(p => p.OP == m.operacion)[0].y = y;
+                                }
+                                else {
+                                    const roll = m.rodillos.filter(r => r.eje=='INF')[0]; // Rodillo interior
+                                    const R1 = roll.parametros.R1;
+                                    let alfa1 = roll.parametros.alfa1 * Math.PI / 180;
+                                    const R2 = roll.parametros.R2;
+                                    let alfa2 = roll.parametros.alfa2 * Math.PI / 180;
+                                    const Df = roll.parametros.Df;
+                                    const Dc = roll.parametros.Dc;
+                                    // Calculos
+                                    let q; // Posición del rodillo inferior
+                                    if (simulador) q = -posicionesSim.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'INF')[0].pos;
+                                    else q = -posiciones.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'INF')[0].pos;
+                                    const xc1 = - roll.parametros.XC1;
+                                    const yc1 = q + R1;
+                                    const xc2 = 0;
+                                    const yc2 = (Dc-Df)/2 - R2 + q;
+                                    const x0 = xc1 + R1 * Math.sin(alfa2);
+                                    const y0 = yc1 - R1 * Math.cos(alfa2);
+                                    const x1 = xc2 - R2 * Math.sin(alfa2);
+                                    const y1 = yc2 + R2 * Math.cos(alfa2);
+    
+                                    // longitud de fleje fuera del radio (tramo recto)
+                                    const d1 = 2* Math.sqrt(Math.pow((x0-x1),2)+Math.pow((y0-y1),2)); // Tramo recto entre radios
+                                    const d2 = R2 * 2 * alfa2; // Longitud tramo central
+                                    const d3 = 2 * R1 * alfa2; 
+                                    const d4 = 2 * R1 * alfa1;
+                                    const d5 = d1 + d2 + d3 + d4;
+    
+                                    let L; 
+                                    if (d5 > fleje.ancho) {
+                                        alfa1 = alfa1 - (d5 - fleje.ancho)/(2*R1);
+                                        L = 0;
+                                        
+                                    }
+                                    else {
+                                        L = fleje.ancho - d5;
+                                    }
+                                    y = yc1 - R1*Math.cos(alfa1);
+                                    
+                                    h.puntos.filter(p => p.OP == m.operacion)[0].y = y;
+                                }
+                            });
+                            break;
+                        case 'BD_2':
+                            console.log('Alturas: BD 2R ...');
+                            H.map( h => {
+                                let y;
+                                if (h.nombre == 'MIN'){
+                                    if (simulador) y = -posicionesSim.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'INF')[0].pos;
+                                    else y = -posiciones.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'INF')[0].pos;
+    
+                                    h.puntos.filter(p => p.OP == m.operacion)[0].y = y;
+                                }
+                                else {
+                                    const roll = m.rodillos.filter(r => r.eje=='INF')[0]; // Solo usamos el rodillo interior
+                                    const R1 = roll.parametros.R1;
+                                    let alfa1 = roll.parametros.alfa1 * Math.PI / 180;
+                                    const R2 = roll.parametros.R2;
+                                    let alfa2 = roll.parametros.alfa2 * Math.PI / 180;
+                                    const R3 = roll.parametros.R3;
+                                    const Df = roll.parametros.Df;
+                                    // Calculos
+                                    const xc1 = 0;
+                                    let q;
+                                    if (simulador) q = -posicionesSim.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'INF')[0].pos;
+                                    else q = -posiciones.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'INF')[0].pos;
+                                    const yc1 = q + R1;
+                                    const xc2 = (R1-R2) * Math.sin(alfa1/2);
+                                    const yc2 = yc1 - (R1-R2) * Math.cos(alfa1/2);
+                                    const xc3 = xc2 - (R3-R2) * Math.sin(alfa2);
+                                    const yc3 = yc2 + (R3-R2) * Math.cos(alfa2);
+    
+                                    // longitud de fleje fuera del radio (tramo recto)
+                                    const d1 = R1 * alfa1; // Longitud tramo central
+                                    const d2 = 2 * R2 * alfa2;
+                                    const d3 = d1 + d2;
+    
+                                    let alfa3 = 0;
+                                    if (d3 > fleje.ancho) {
+                                        alfa2 = (d3 - fleje.ancho)/(2*R2);
+                                    }
+                                    else {
+                                        alfa3 = (fleje.ancho - d3)/(2*R3);
+                                    }
+                                    
+                                    y = yc3 - R3 * Math.cos(alfa2+alfa3);
+                                    h.puntos.filter(p => p.OP == m.operacion)[0].y = y;
+                                }
+                            });
+                            break;
+                    }
+                    break;
+                case 'FP':
+                    console.log('Alturas: FP ...');
+                    H.map( h => {
+                        let y;
+                        if (h.nombre == 'MIN'){
+                            if (simulador) y = -posicionesSim.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'INF')[0].pos;
+                            else y = -posiciones.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'INF')[0].pos;
+                        }
+                        else {
+                            if (simulador) y = posicionesSim.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'SUP')[0].pos;
+                            else y = posiciones.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'SUP')[0].pos;
+                        }
+                        h.puntos.filter(p => p.OP == m.operacion)[0].y = y;
+                    });
+                    break;
+                case 'W':
+                    console.log('Alturas: W ...');
+                    H.map( h => {
+                        let y;
+                        if (h.nombre == 'MIN'){
+                            if (simulador) y = -posicionesSim.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'INF')[0].pos;
+                            else y = -posiciones.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'INF')[0].pos;
+                        }
+                        else {
+                            let p_v_op, p_h_op, h_cab;
+                            if (simulador) {
+                                p_v_op = posicionesSim.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'SUP_V_OP')[0].pos;
+                                p_h_op = -posicionesSim.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'SUP_H_OP')[0].pos;
+                                h_cab = posicionesSim.filter(p => p.op == m.operacion)[0].posiciones.filter(p => p.eje=='CAB')[0].pos;
+                            } 
+                            else {
+                                p_v_op = posiciones.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'SUP_V_OP')[0].pos;
+                                p_h_op = -posiciones.filter( p => p.op == m.operacion)[0].posiciones.filter(p => p.eje == 'SUP_H_OP')[0].pos;
+                                h_cab = posiciones.filter(p => p.op == m.operacion)[0].posiciones.filter(p => p.eje=='CAB')[0].pos;
+                            }
+                            const roll_sop = m.rodillos.filter(r => r.eje=='SUP_OP')[0]; // Rodillo superior
+                            const R1_s = roll_sop.parametros.R1;
+
+                            const x1 = p_h_op;
+                            const y1 = p_v_op * Math.cos(15*Math.PI/180) + h_cab;
+                            const x2 =  p_h_op + p_v_op * Math.sin(15*Math.PI/180);
+                            const y2 = h_cab;
+                            const x3 = x2;
+                            const y3 = y1 - Math.sqrt(R1_s**2 - (x1-x3)**2);
+                            let a,b,c; // Parametros para resolver ec de 2 grado
+                            a = 1;
+                            b = -2*y3;
+                            c = y3**2 + x3**2 - R1_s**2
+                            y = (-b + Math.sqrt(b**2 - 4*a*c))/(2*a); //Punto de corte con la vertical de radio del rodillo superior
+                        }
+
+                        h.puntos.filter(p => p.OP == m.operacion)[0].y = y;
+                    });
+                    break;
+            }
+         });
+         console.log('alturas ...');
+         console.log(H);
+         setAlturas(H);
+    },[montaje, posiciones, posicionesSim, simulador, fleje]);
+
+    // Paso de posiciones sim a datos
+    useEffect(()=>{
+        // console.log('Pasamos posiciones sim a datos ...')
+            if (!posicionesSim) {
+                // console.log('No hay posiciones sim');
+                setPosicionesSim(posiciones);
+            } 
+            if (simulador) {
+                const dat = {};
+                posicionesSim.filter(p => p.op == OP)[0].posiciones.map(p => {
+                    dat[p.eje] =  parseFloat(p.pos).toFixed(2);
+                });
+                console.log('dat ...');
+                console.log(dat);
+                setDatos(dat);
+            }
+        }, [simulador, OP, posiciones]);
 
     return (
         <React.Fragment>
@@ -344,9 +662,9 @@ const QS_Produccion = () => {
                         </Col>
                     </Row>
                     {
-                    montaje&&articulo&&fleje&&posiciones&&<React.Fragment>
+                    montaje&&articulo&&fleje&&posiciones&&posicionesSim&&<React.Fragment>
                     <Row>
-                        <Col lg={6}>
+                        <Col lg={3}>
                             <Form.Group controlId="operacion">
                                 <Form.Control as="select" 
                                                 value={OP}
@@ -362,17 +680,66 @@ const QS_Produccion = () => {
                                 </Form.Control>
                             </Form.Group>
                         </Col>
+                        <Col lg={2}>            
+                            <Form.Check // prettier-ignore
+                                    type="switch"
+                                    id="custom-switch"
+                                    label="Simulador"
+                                    onClick={(event) => {
+                                        // event.preventDefault();
+                                        setSimulador(event.target.checked);
+                                    }}
+                            />
+                        </Col>
+                        {simulador && 
+                        <React.Fragment>
+                            <Col lg={1}>
+                                <Button variant="info" type="submit" className={'mx-2'} onClick={simular}>Simular</Button>
+                            </Col>
+                        </React.Fragment>}  
                     </Row>
                     <Row>
                         <Col lg={6}>
                             <StandChart2 
                                 montaje={montaje.filter(m => m.operacion == OP)}
-                                posiciones={posiciones}
-                                simulador={false}
-                                gap = {[]}
+                                posiciones={simulador ? posicionesSim&&posicionesSim.filter(p => p.op==OP)[0].posiciones:posiciones&&posiciones.filter(p => p.op==OP)[0].posiciones}
+                                simulador={simulador}
+                                gap = {gap&&gap.filter(g => g.op == OP)}
                                 fleje={fleje}/> 
                         </Col>
+                        <Col className="col-6">
+                            <FlowerChart2 montaje={montaje}
+                                        posiciones={simulador ? posicionesSim : posiciones}
+                                        fleje={fleje}/>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col lg={6}>
+                            <Row>
+                                {simulador&&posicionesSim&&posicionesSim.filter(p => p.op==OP)[0].posiciones.map((p,i) => {
+                                    return (
+                                        <Col  key={i} className="col-3">
+                                            <Form.Group controlId={p.eje}>
+                                                <Form.Label>{p.eje}</Form.Label>
+                                                <Form.Control type="number" 
+                                                            name={p.eje} 
+                                                            value={datos&&datos[p.eje]}
+                                                            onChange={handleDataChange} 
+                                                            placeholder= {p.eje}
+                                                            autoFocus
+                                                    />
+                                            </Form.Group>
+                                        </Col>
+                                    )
+                                })}
+                            </Row>
+                        </Col>
                     </Row> 
+                    <Row>
+                        <Col className="col-12">
+                            <HeightChart alturas={alturas}/>
+                        </Col>
+                    </Row>
                     </React.Fragment>
                     }
                 </Form>
