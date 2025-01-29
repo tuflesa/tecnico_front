@@ -10,7 +10,7 @@ import './qs.css';
 import useResizeObserver from '../utilidades/use_resizeObserver';
 
 
-const StandChart2 = ({montaje, posiciones, simulador, gap, fleje}) => {
+const StandChart2 = ({montaje, posiciones, gap, fleje}) => {
     const svgRef = useRef();
     const wrapperRef = useRef();
     const dimensions = useResizeObserver(wrapperRef);
@@ -598,7 +598,7 @@ const StandChart2 = ({montaje, posiciones, simulador, gap, fleje}) => {
 
             // const gap = AxisPos0_i + AxisPos0_s - roll_i.parametros.Dext /2 - roll_s.parametros.Dext / 2;
             // console.log(stand.nombre + ' gap: ', gap);
-
+           
             return r.toString()
         }
   

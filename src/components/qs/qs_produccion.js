@@ -26,6 +26,7 @@ const QS_Produccion = () => {
     const [datos, setDatos] = useState(null);
     const [gap, setGap] = useState(null);
     const [alturas, setAlturas] = useState(null);
+    const [desarrollosModelo, setDesarrollosModelo] = useState(null); // Desarrollos del fleje en cada paso basados en el modelo
 
     const leeDiametrosPLC = (event) => {
         // event.preventDefault();
@@ -566,8 +567,7 @@ const QS_Produccion = () => {
                     break;
             }
          });
-         console.log('alturas ...');
-         console.log(H);
+
          setAlturas(H);
     },[montaje, posiciones, posicionesSim, simulador, fleje]);
 
@@ -588,6 +588,11 @@ const QS_Produccion = () => {
                 setDatos(dat);
             }
         }, [simulador, OP, posiciones]);
+
+    // Desarrollos modelo
+    useEffect(()=>{
+        desarrollosModelo&&console.log(desarrollosModelo);
+    },[desarrollosModelo]);
 
     return (
         <React.Fragment>
@@ -703,14 +708,14 @@ const QS_Produccion = () => {
                             <StandChart2 
                                 montaje={montaje.filter(m => m.operacion == OP)}
                                 posiciones={simulador ? posicionesSim&&posicionesSim.filter(p => p.op==OP)[0].posiciones:posiciones&&posiciones.filter(p => p.op==OP)[0].posiciones}
-                                simulador={simulador}
                                 gap = {gap&&gap.filter(g => g.op == OP)}
                                 fleje={fleje}/> 
                         </Col>
                         <Col className="col-6">
                             <FlowerChart2 montaje={montaje}
                                         posiciones={simulador ? posicionesSim : posiciones}
-                                        fleje={fleje}/>
+                                        fleje={fleje}
+                                        setDesarrollosModelo={setDesarrollosModelo}/>
                         </Col>
                     </Row>
                     <Row>

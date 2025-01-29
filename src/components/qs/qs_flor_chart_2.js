@@ -1,4 +1,4 @@
-import React, { useEffect, useRef} from 'react';
+import React, { useEffect, useState, useRef} from 'react';
 import {
     select,
     scaleLinear,
@@ -9,11 +9,13 @@ import {
 import './qs.css';
 import useResizeObserver from '../utilidades/use_resizeObserver';
 
-const FlowerChart2 = ({montaje, posiciones, fleje}) => {
+const FlowerChart2 = ({montaje, posiciones, fleje, setDesarrollosModelo}) => {
 
     const svgRef = useRef();
     const wrapperRef = useRef();
     const dimensions = useResizeObserver(wrapperRef);
+
+    let des_FP1, des_FP2, des_FP3, des_W;
 
     useEffect(()=>{
         if (!dimensions) return;
@@ -319,7 +321,6 @@ const FlowerChart2 = ({montaje, posiciones, fleje}) => {
                 alfa_c = Math.asin(C/(2*R1_s));
              }
             
-            // pos_s = AxisPos0_s - Df_s / 2;
             x1 = -C/2;
             y1 = pos_s;
             
@@ -339,8 +340,20 @@ const FlowerChart2 = ({montaje, posiciones, fleje}) => {
                 y2 = y1 - fleje.espesor*Math.cos(alfa_c);
             }
 
+            // Desarrollo
             const Desarrollo = R1*alfa1 + 2*R2*((Math.PI-alfa1)/2 - alfa3) + 2*R4*(2*alfa3) + 2*R2_s*(alfa2_s-alfa3_s) + 2*R1_s*(alfa1_s/2-alfa_c);
-            // console.log(m.nombre + ' desarrollo: ', Desarrollo); 
+            switch (m.nombre) {
+                case 'FP1':
+                    des_FP1 = Desarrollo;
+                    break;
+                case 'FP2':
+                    des_FP2 = Desarrollo;
+                    break;
+                case 'FP3':
+                    des_FP3 = Desarrollo;
+                    break;
+            }
+            console.log(m.nombre + ' desarrollo: ', Desarrollo); 
 
             // Solo dibujamos si los rodillos no se tocan
             let gap = pos_s - pos_i - (Dext_i-Df_i)/2 - (Dext_s-Df_s)/2;
@@ -409,7 +422,7 @@ const FlowerChart2 = ({montaje, posiciones, fleje}) => {
             const R1_s = roll_sop.parametros.R1;
 
             // Calculos
-            let dibujar = true;
+            let dibujar = true; 
             //Superior OP
             const x1 = -pos_h_op;
             const y1 = pos_v_op * Math.cos(15*Math.PI/180) + h_cab;
@@ -422,7 +435,7 @@ const FlowerChart2 = ({montaje, posiciones, fleje}) => {
             b = -2*y3;
             c = y3**2 + x3**2 - R1_s**2;
             const x0 = 0;
-            const y0 = (-b + Math.sqrt(b**2 - 4*a*c))/(2*a); //Punto de corte con la vertical de radio del rodillo superior
+            const y0 = (-b + Math.sqrt(b**2 - 4*a*c))/(2*a); //Punto de corte superior con la vertical de radio del rodillo superior
 
             const x4 = R1_l - pos_lop;
             const y4 = h_cab;
@@ -435,7 +448,20 @@ const FlowerChart2 = ({montaje, posiciones, fleje}) => {
             const y5 = m1*x5 + b1;
             const alfa1 = Math.atan((y5-y4)/(x4-x5));
             const alfa2 = Math.atan((y5-y3)/(x3-x5));
-            const alfa3 = Math.atan((y0-y3)/(x3-x0));
+            let alfa3 = Math.atan((y0-y3)/(x3-x0));
+            if (alfa3<0) alfa3 = alfa3 - Math.PI;
+
+            // Condiciones para dibujar
+            // Punto de corte del radio del rodillo lateral con x=0
+            a = 1;
+            b = -2*y4;
+            c = x4**2 + y4**2 - R1_l**2;
+            const y02 = (-b + Math.sqrt(b**2 - 4*a*c))/(2*a); // corte superior
+            const y02i = Math.abs((-b - Math.sqrt(b**2 - 4*a*c))/(2*a)); // corte inferior
+            if (y0 > y02) {
+                dibujar = false;
+                console.log('No dibuja porque y0 =', y0, ' es mayor que y02 = ', y02);
+            }
             
             // Inferior OP
             let R2, alfa4;
@@ -457,13 +483,19 @@ const FlowerChart2 = ({montaje, posiciones, fleje}) => {
                     R2 = (R1_l**2 - (R1_l - pos_inf)**2 - pos_lop**2)/(2*(R1_l - pos_lop));
                     alfa4 = Math.atan((R1_l-pos_inf)/(pos_lop-R2));
                     x6 = -(pos_lop - R2);
-                    console.log('x6: ', x6);
                     y6 = h_cab;
                 }
             }
             const x7 = 0;
             const y7 = R1_l - pos_inf + h_cab;
-            if (alfa4 < 0) dibujar=false;
+            if (alfa4 < 0) {
+                dibujar=false;
+                console.log('No dibuja porque alfa4 <0 ', alfa4);
+            }
+            if (y02i < (pos_inf-h_cab)){
+                dibujar = false;
+                console.log('No dibuja porque y02i<pos_inf ', y02i);
+            } 
 
             // Inferior motor
             let R2m, alfa4m;
@@ -493,19 +525,41 @@ const FlowerChart2 = ({montaje, posiciones, fleje}) => {
             const x7m = 0;
             const y7m = R1_l - pos_inf + h_cab;
 
+            // Condiciones para dibujar
+            if(R2<0) {
+                dibujar=false;
+                console.log('No dibuja porque R2<0 ', R2);
+            }
+
             // Superior MO
             const x1m = pos_h_mo;
             const y1m = pos_v_mo * Math.cos(15*Math.PI/180) + h_cab;
-            const x2m =  pos_h_op - pos_v_op * Math.sin(15*Math.PI/180);
+            const x2m =  pos_h_mo - pos_v_mo * Math.sin(15*Math.PI/180);
             const y2m = h_cab;
             const x3m = x2m;
             const y3m = y1m - Math.sqrt(R1_s**2 - (x1m-x3m)**2);
             // Parametros para resolver ec de 2 grado
             a = 1;
-            b = -2*y3;
-            c = y3**2 + x3**2 - R1_s**2;
+            b = -2*y3m;
+            c = y3m**2 + x3m**2 - R1_s**2;
             const x0m = 0;
             const y0m = (-b + Math.sqrt(b**2 - 4*a*c))/(2*a); //Punto de corte con la vertical de radio del rodillo superior
+
+            // Condiciones para dibujar
+            // Punto de corte del radio del rodillo lateral con x=0
+            a = 1;
+            b = -2*y4m;
+            c = x4m**2 + y4m**2 - R1_l**2;
+            const y02m = (-b + Math.sqrt(b**2 - 4*a*c))/(2*a);
+            const y02mi = Math.abs((-b - Math.sqrt(b**2 - 4*a*c))/(2*a));
+            if (y0m > y02m) {
+                dibujar = false;
+                console.log('No dibuja porque y0m > y02m ', y0m, y02m);
+            }
+            if (y02mi < (pos_inf-h_cab)) {
+                dibujar = false;
+                console.log('No dibuja porque y02mi < pos_inf ', y02mi);
+            }
 
             const m1m = (x4m-x3m)/(y3m-y4m);
             const b1m = (R1_s**2 - R1_l**2 + x4m**2 + y4m**2 - x3m**2 - y3m**2)/(2*(y4m-y3m));
@@ -516,16 +570,30 @@ const FlowerChart2 = ({montaje, posiciones, fleje}) => {
             const y5m = m1m*x5m + b1m;
             const alfa1m = Math.atan((y5m-y4m)/(x5m-x4m));
             const alfa2m = Math.atan((y5m-y3m)/(x5m-x3m));
-            const alfa3m = Math.atan((y0m-y3m)/(x0m-x3m));
+            let alfa3m = Math.atan((y0m-y3m)/(x0m-x3m));
+            if (alfa3m<0) alfa3m = alfa3m - Math.PI;
 
-            // Condiciones para dibujar
-            // if (y0 < Math.abs(pos_lop) || y0 > y02) dibujar = false;
+            // Desarrollo
+            if (dibujar) {
+                let Desarrollo = R1_s*(alfa3-alfa2) + R1_l*alfa1;
+                if (pos_lop<pos_inf) {
+                    Desarrollo = Desarrollo + R1_l*alfa4 + R2*(Math.PI/2 - alfa4);
+                }
+                else {
+                    Desarrollo = Desarrollo + R2*alfa4 + R1_l*(Math.PI/2 - alfa4);
+                }
+                if (pos_lmo<pos_inf) {
+                    Desarrollo = Desarrollo + R1_l*alfa4m + R2m*(Math.PI/2 - alfa4m);
+                }
+                else {
+                    Desarrollo = Desarrollo + R2m*alfa4m + R1_l*(Math.PI/2 - alfa4m);
+                }
+                des_W = Desarrollo + R1_l*alfa1m + R1_s*(alfa3m-alfa2m);
+                console.log(m.nombre + ' desarrollo: ', Desarrollo);
+            }
 
             // Dibujo
             if (dibujar){
-                // r.moveTo(xScale(x1), yScale(y1));
-                // r.lineTo(xScale(x2), yScale(y2));
-                // r.lineTo(xScale(x3), yScale(y3));
                 // Superior OP
                 r.arc(xScale(x3), yScale(y3), rScale(R1_s), Math.PI + alfa3, Math.PI + alfa2, true);
                 r.arc(xScale(x4), yScale(y4), rScale(R1_l), Math.PI + alfa1, Math.PI, true);   
@@ -579,23 +647,6 @@ const FlowerChart2 = ({montaje, posiciones, fleje}) => {
                 r.arc(xScale(x3), yScale(y3), rScale(R1_s - e), Math.PI + alfa2, Math.PI + alfa3);
 
             }
-
-            // Debug
-            console.log('Draw W ...');
-            // console.log('y1: ', y1);
-            // console.log('alfa1: ', alfa1*180/Math.PI);
-            // console.log('alfa2: ', alfa2*180/Math.PI);
-            // console.log('alfa3: ', alfa3*180/Math.PI);
-            // console.log('alfa1m: ', alfa1m*180/Math.PI);
-            // console.log('alfa2m: ', alfa2m*180/Math.PI);
-            // console.log('alfa3m: ', alfa3m*180/Math.PI);
-            // console.log('superior op: ');
-            // console.log('x5, y5 ',x5,y5);
-            // console.log('superior mo: ');
-            // console.log('x5m, y5m ',x5m,y5m);
-            // console.log('x5 ', x5);
-            // console.log(roll_lop, roll_i, roll_lmo, roll_sop, roll_smo)
-            // console.log(pos_inf, pos_lop, pos_lmo, pos_h_mo, pos_v_mo, pos_h_op, pos_v_op);
 
             return r.toString()
         }
@@ -661,6 +712,21 @@ const FlowerChart2 = ({montaje, posiciones, fleje}) => {
             .attr('height', f => rScale(f.espesor));
                
     },[dimensions, montaje, posiciones, fleje]);
+
+    // Calculo del desarrollo y crecimiento hasta final del lineal
+    useEffect(()=>{
+        fleje&&des_FP1&&des_FP2&&des_FP3&&des_W&&setDesarrollosModelo({
+            'D' : fleje.ancho,
+            'Lineal': fleje.ancho + 0.863428+2.255361*fleje.espesor,
+            'FP1' : des_FP1,
+            'FP2' : des_FP2,
+            'FP3' : des_FP3,
+            'W' : des_W
+        });
+    },[fleje, des_FP1, des_FP2, des_FP3, des_W]);
+
+    // Resto del modelo de desarrollos del modelo
+
 
     return (
         <div ref={wrapperRef}>

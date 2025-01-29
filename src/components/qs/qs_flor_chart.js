@@ -9,7 +9,7 @@ import {
 import './qs.css';
 import useResizeObserver from '../utilidades/use_resizeObserver';
 
-const FlowerChart = ({montaje, ejes, fleje}) => {
+const FlowerChart = ({montaje, ejes, fleje, setDesarrollosModelo}) => {
 
     const svgRef = useRef();
     const wrapperRef = useRef();
@@ -399,7 +399,7 @@ const FlowerChart = ({montaje, ejes, fleje}) => {
                 r.arc(xScale(-xc2_s), yScale(yc2_s), rScale(R2_s), -alfa2_s, -alfa3_s,);
                 r.arc(xScale(-xcr), yScale(ycr), rScale(R4), -alfa3 ,  alfa3);
                 r.arc(xScale(-xc2), yScale(yc2), rScale(R2), alfa3, (Math.PI-alfa1)/2);
-            }
+            } 
             return r.toString()
         }
 
