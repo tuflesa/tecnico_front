@@ -289,6 +289,35 @@ const RodInstanciasXaRectificar = () => {
         setShowDatosNuevos(false);
     }
 
+    const Actualizo_LineasRectificacion_obs = (linea, observaciones) => {
+        axios.patch(BACKEND_SERVER + `/api/rodillos/linea_rectificacion/${linea.id}/`, { //Actualizamos observaciones
+            observaciones: observaciones,
+        }, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+                }     
+        })
+        .then( res => {  
+            
+        })
+        .catch(err => { 
+            console.error(err);
+        })
+
+    };
+
+    const handleInputChange_observaciones = (linea, event) => {
+        const { value } = event.target; // Valor del campo
+        Actualizo_LineasRectificacion_obs(linea,value);
+        setLineasRectificacion((prevLineas) =>
+            prevLineas.map((item) =>
+                item.instancia.id === linea.instancia.id
+                    ? { ...item, observaciones: value } // Actualizar solo la línea modificada
+                    : item
+            )
+        );
+    };
+
     return(
         <Container className='mt-5 pt-1'>
             <img src ={user['tec-user'].perfil.empresa.id===1?logo:logoTuf} width="200" height="200"></img><br></br>
@@ -459,6 +488,7 @@ const RodInstanciasXaRectificar = () => {
                                 {datos.finalizado !== false && <th style={{ backgroundColor: '#DBFAC9' }}>Rectificado por</th>}
                                 <th>Fecha estimada</th>
                                 {datos.finalizado !== false && <th style={{ backgroundColor: '#DBFAC9' }}>Fecha Rectificado</th>}
+                                <th>Observaciones</th>
                                 <th>Archivo rectificado</th>
                                 {datos.finalizado === false && <th>Acciones</th>}
                             </tr>
@@ -488,6 +518,24 @@ const RodInstanciasXaRectificar = () => {
                                             </Form.Group>
                                         </td>
                                         {datos.finalizado !== false && <td style={{ backgroundColor: '#DBFAC9' }}>{linea.fecha_rectificado ? invertirFecha(String(linea.fecha_rectificado)) : ''}</td>} 
+                                        <td>
+                                            <Form.Group controlId="observaciones">
+                                                <Form.Control
+                                                    as="textarea"
+                                                    rows={2} // Establece una altura inicial
+                                                    name="observaciones"
+                                                    value={linea.observaciones}
+                                                    onChange={(e) => handleInputChange_observaciones(linea, e)}
+                                                    onInput={(e) => {
+                                                        e.target.style.height = "auto"; // Restablece la altura para calcular la nueva
+                                                        e.target.style.height = `${e.target.scrollHeight}px`; // Ajusta según el contenido
+                                                    }}
+                                                    placeholder="Observaciones"
+                                                    disabled={linea.finalizado === true ? true : soyMantenimiento?true:false}
+                                                    //style={{ resize: "none" }} // impide que el usuario cambie el tamaño manualmente
+                                                />
+                                            </Form.Group>
+                                        </td>
                                         <td>
                                             <Form.Group controlId="archivo">
                                                 {linea.archivo && (

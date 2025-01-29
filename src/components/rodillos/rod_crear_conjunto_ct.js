@@ -139,39 +139,47 @@ const RodConjuntoCT = ({show, handleClose, operacion_marcada, elementos_formacio
                 console.error(err);
             }); 
         }
+        else{
+            alert('Faltan ejes por rellenar.')
+        }
     }
 
     const GuardarConjunto_Elemento = (bancadaId) => {
-        axios.post(BACKEND_SERVER + `/api/rodillos/conjunto/`, { //creamos conjunto
-            operacion: operacion_id,
-        }, {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-                }     
-        })
-        .then( r => {   
-            GuardarCelda(bancadaId,r.data.id);//mandamos los 2 id para crear la celda
-            for(var x=0;x<EjesRodillos.length;x++){
-                axios.post(BACKEND_SERVER + `/api/rodillos/elemento/`, { //creamos con id de conjunto el elemento
-                    conjunto: r.data.id,
-                    eje: EjesRodillos[x].eje,
-                    rodillo: EjesRodillos[x].rodillo,
-                }, {
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`
-                        }     
-                })
-                .then( res => {  
-                })
-                .catch(err => { 
-                    console.error(err);
-                })
-            }
-            window.location.href=`/rodillos/bacada_ct_editar/${bancadaId}`;
-        })
-        .catch(err => { 
-            console.error(err);
-        })
+        if(EjesRodillos.length===ejes.length){
+            axios.post(BACKEND_SERVER + `/api/rodillos/conjunto/`, { //creamos conjunto
+                operacion: operacion_id,
+            }, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                    }     
+            })
+            .then( r => {   
+                GuardarCelda(bancadaId,r.data.id);//mandamos los 2 id para crear la celda
+                for(var x=0;x<EjesRodillos.length;x++){
+                    axios.post(BACKEND_SERVER + `/api/rodillos/elemento/`, { //creamos con id de conjunto el elemento
+                        conjunto: r.data.id,
+                        eje: EjesRodillos[x].eje,
+                        rodillo: EjesRodillos[x].rodillo,
+                    }, {
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                            }     
+                    })
+                    .then( res => {  
+                    })
+                    .catch(err => { 
+                        console.error(err);
+                    })
+                }
+                window.location.href=`/rodillos/bacada_ct_editar/${bancadaId}`;
+            })
+            .catch(err => { 
+                console.error(err);
+            })
+        }
+        else{
+            alert('Faltan ejes por rellenar')
+        }
     }
 
     const GuardarCelda = (bancadaId, conjuntoId) => {
