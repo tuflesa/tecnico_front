@@ -233,7 +233,7 @@ const RodTooling = () => {
     }
 
     return (
-        <Container>
+        <Container fluid>
             <img src ={user['tec-user'].perfil.empresa.id===1?logo:logoTuf} width="200" height="200"></img>
             <Row>
                 <Col>
@@ -248,74 +248,104 @@ const RodTooling = () => {
                         <Table striped bordered hover>
                             <thead>
                                 <tr>
-                                    <th>{'Nombre'}</th> 
+                                    {/* Encabezado fijo para las columnas comunes */}
+                                    <th>Nombre</th>
+                                    <th>Espesor</th>
+                                    <th>Tubo madre</th>
+                                    <th>CT</th>
+                                    {/* Encabezado dinámico para las secciones */}
                                     {secciones && secciones.map(seccion => (
-                                        <th key={seccion.id}>
+                                        <th key={seccion.id} colSpan={operaciones.filter(op => op.seccion.id === seccion.id).length}>
                                             {seccion.nombre}
-                                            <Row>
-                                                {operaciones && operaciones.map((operacion) => (
-                                                    operacion.seccion.id === seccion.id && (
-                                                        <Col key={operacion.id}>
-                                                            <img 
-                                                                src={operacion.icono.icono} 
-                                                                alt="" // Sin texto alternativo 
-                                                                style={{ width: '30px', height: '30px' }} 
-                                                            />
-                                                        </Col>
-                                                    )
-                                                ))}
-                                            </Row>
                                         </th>
+                                    ))}
+                                </tr>
+                                <tr>
+                                    <th></th>
+                                    <th></th>
+                                    <th>{'Ø'}</th>
+                                    <th>{'mm'}</th>
+                                    {/* Encabezado para las operaciones bajo cada sección */}
+                                    {secciones && secciones.map(seccion => (
+                                        operaciones
+                                            .filter(op => op.seccion.id === seccion.id)
+                                            .map(operacion => (
+                                                <th key={operacion.id}>
+                                                    <img 
+                                                        src={operacion.icono.icono} 
+                                                        alt="" 
+                                                        style={{ width: '30px', height: '30px' }} 
+                                                    />
+                                                    <p>{operacion.nombre}</p>
+                                                </th>
+                                            ))
                                     ))}
                                 </tr>
                             </thead>
                             <tbody>
                                 {montajes && montajes.map(montaje => (
                                     <tr key={montaje.id}>
+                                        {/* Columnas principales */}
                                         <td>{montaje.nombre}</td>
+                                        <td>{montaje.grupo.espesor_1 + '÷' + montaje.grupo.espesor_2}</td>
+                                        <td>{'Ø' + montaje.grupo.tubo_madre}</td>
+                                        <td>{montaje.bancadas.dimensiones}</td>
+
+                                        {/* Iteración por secciones */}
                                         {secciones && secciones.map(seccion => (
-                                            <td key={seccion.id}>
-                                                <Row>
-                                                    {operaciones && operaciones.map((operacion) => ( //pinta flecha si es de otra formación
-                                                        <React.Fragment key={operacion.id}>
-                                                            {conjuntos_completadosCel?.filter(celda => 
-                                                                celda.seccion === seccion.id &&
-                                                                celda.cel.conjunto.tubo_madre !== null &&
-                                                                celda.cel.bancada.tubo_madre !== celda.cel.conjunto.tubo_madre &&
-                                                                seccion.id === celda.seccion && operacion.id === celda.operacion &&
-                                                                montaje.grupo.tubo_madre === celda.cel.bancada.tubo_madre &&
-                                                                celda.cel.montajeId === montaje.id
-                                                            ).map(celda => (
-                                                                    <Col key={celda.id}style={{ color: 'red'}}>
-                                                                        {'-->'}
-                                                                    </Col>
-                                                                ))}
-                                                            {conjuntos_completadosCel?.filter(celda => //pinta la celda
-                                                                celda.seccion === seccion.id &&
-                                                                celda.cel.conjunto.tubo_madre !== null &&
-                                                                celda.cel.bancada.tubo_madre === celda.cel.conjunto.tubo_madre &&
-                                                                seccion.id === celda.seccion && operacion.id === celda.operacion &&
-                                                                montaje.grupo.tubo_madre === celda.cel.conjunto.tubo_madre &&
-                                                                celda.cel.montajeId === montaje.id
-                                                            ).map(celda => (
-                                                                    <Col key={celda.id}>
-                                                                        {celda.cel.id}
-                                                                    </Col>
-                                                                ))}
-                                                        {conjuntos_completadosCel?.filter(celda => //pinta celda de C.T
+                                            operaciones
+                                                .filter(op => op.seccion.id === seccion.id)
+                                                .map(operacion => (
+                                                    <td key={`${seccion.id}-${operacion.id}`}>
+                                                        {/* Pinta flecha si es de otra formación */}
+                                                        {conjuntos_completadosCel?.filter(celda =>
                                                             celda.seccion === seccion.id &&
-                                                            celda.cel.conjunto.tubo_madre === null &&
-                                                            seccion.id === celda.seccion && operacion.id === celda.operacion &&
+                                                            celda.cel.conjunto.tubo_madre !== null &&
+                                                            celda.cel.bancada.tubo_madre !== celda.cel.conjunto.tubo_madre &&
+                                                            operacion.id === celda.operacion &&
+                                                            montaje.grupo.tubo_madre === celda.cel.bancada.tubo_madre &&
                                                             celda.cel.montajeId === montaje.id
                                                         ).map(celda => (
-                                                                <Col key={celda.id}>
-                                                                    {celda.cel.id}
-                                                                </Col>
-                                                            ))}
-                                                    </React.Fragment>
-                                                    ))}
-                                                </Row>
-                                            </td>
+                                                            <div key={celda.id} style={{ color: 'red' }}>
+                                                                {'-->'}
+                                                            </div>
+                                                        ))}
+
+                                                        {/* Pinta la celda con imagen */}
+                                                        {conjuntos_completadosCel?.filter(celda =>
+                                                            celda.seccion === seccion.id &&
+                                                            celda.cel.conjunto.tubo_madre !== null &&
+                                                            celda.cel.bancada.tubo_madre === celda.cel.conjunto.tubo_madre &&
+                                                            operacion.id === celda.operacion &&
+                                                            montaje.grupo.tubo_madre === celda.cel.conjunto.tubo_madre &&
+                                                            celda.cel.montajeId === montaje.id
+                                                        ).map(celda => (
+                                                            <div key={celda.id}>
+                                                                <img 
+                                                                    src={celda.cel.icono} 
+                                                                    alt="" 
+                                                                    style={{ width: '30px', height: '30px' }} 
+                                                                />
+                                                            </div>
+                                                        ))}
+
+                                                        {/* Pinta celda de C.T */}
+                                                        {conjuntos_completadosCel?.filter(celda =>
+                                                            celda.seccion === seccion.id &&
+                                                            celda.cel.conjunto.tubo_madre === null &&
+                                                            operacion.id === celda.operacion &&
+                                                            celda.cel.montajeId === montaje.id
+                                                        ).map(celda => (
+                                                            <div key={celda.id}>
+                                                                <img 
+                                                                    src={celda.cel.icono} 
+                                                                    alt="" 
+                                                                    style={{ width: '30px', height: '30px' }} 
+                                                                />
+                                                            </div>
+                                                        ))}
+                                                    </td>
+                                                ))
                                         ))}
                                     </tr>
                                 ))}
