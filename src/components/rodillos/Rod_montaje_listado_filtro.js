@@ -50,7 +50,7 @@ const RodMontajeListadoFiltro = ({actualizaFiltro}) => {
             });
         }
         else {
-            axios.get(BACKEND_SERVER + `/api/estructura/zona/?empresa=${datos.empresa}`,{
+            axios.get(BACKEND_SERVER + `/api/estructura/zona/?empresa=${datos.empresa}&es_maquina_tubo=${true}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
@@ -125,9 +125,9 @@ const RodMontajeListadoFiltro = ({actualizaFiltro}) => {
     }, [datos.maquina]);
 
     useEffect(()=>{
-        const filtro = `?maquina__empresa__id=${datos.empresa}&maquina__id=${datos.maquina}&grupo__id=${grupoId===null?'':grupoId}&bancadas__id=${dimensionesID===null?'':dimensionesID}&nombre__icontains=${datos.nombre}`
+        const filtro = `?maquina__empresa__id=${datos.empresa}&maquina__id=${datos.maquina}&nombre__icontains=${datos.nombre}&grupo__id=${grupoId===null?'':grupoId}&bancadas__id=${dimensionesID===null?'':dimensionesID}`
         actualizaFiltro(filtro);
-    },[datos]);
+    },[datos, grupoId!==null, dimensionesID!==null]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -159,19 +159,9 @@ const RodMontajeListadoFiltro = ({actualizaFiltro}) => {
     return ( 
         <Container>
             <h5 className="mb-3 mt-3">Filtros Montaje</h5>
+            <h5 className="mb-3 mt-3">Elija la máquina que desea mostrar:</h5>
             <Form>
                 <Row>
-                    <Col>
-                        <Form.Group controlId="nombre">
-                            <Form.Label>Nombre Montaje</Form.Label>
-                            <Form.Control type="text" 
-                                        name='nombre' 
-                                        value={datos.nombre}
-                                        onChange={handleInputChange} 
-                                        placeholder="Nombre contiene" 
-                                        autoFocus />
-                        </Form.Group>
-                    </Col>
                     <Col>
                         <Form.Group controlId="empresa">
                             <Form.Label>Empresa *</Form.Label>
@@ -211,6 +201,17 @@ const RodMontajeListadoFiltro = ({actualizaFiltro}) => {
                     </Col>
                 </Row>
                 <Row>
+                    <Col>
+                        <Form.Group controlId="nombre">
+                            <Form.Label>Nombre Montaje</Form.Label>
+                            <Form.Control type="text" 
+                                        name='nombre' 
+                                        value={datos.nombre}
+                                        onChange={handleInputChange} 
+                                        placeholder="Nombre contiene" 
+                                        autoFocus />
+                        </Form.Group>
+                    </Col>
                     <Col>
                         <Form.Group controlId="grupo">
                             <Form.Label>Grupo Ø *</Form.Label>

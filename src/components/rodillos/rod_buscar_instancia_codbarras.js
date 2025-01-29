@@ -462,7 +462,7 @@ const RodBuscarInstanciaCodBarras = ({proveedor, lineas_rectificandose, setLinea
                                                                     value={linea.fecha}
                                                                     onChange={handleInputChange_fecha_rectificado(linea)} 
                                                                     placeholder="Fecha estimada" 
-                                                                    disabled={!soyTecnico || datos.disabled}/>
+                                                                    disabled={!soyTecnico || linea.nuevo_diametro!==0}/>
                                                     </Form.Group>
                                                 </td>
                                                 <td>{linea.fecha_rectificado?invertirFecha(String(linea.fecha_rectificado)):''}</td>
@@ -479,7 +479,7 @@ const RodBuscarInstanciaCodBarras = ({proveedor, lineas_rectificandose, setLinea
                                                                 e.target.style.height = `${e.target.scrollHeight}px`; // Ajusta según el contenido
                                                             }}
                                                             placeholder="Observaciones"
-                                                            disabled={datos.disabled}
+                                                            disabled={linea.nuevo_diametro!==0}
                                                             //style={{ resize: "none" }} // impide que el usuario cambie el tamaño manualmente
                                                         />
                                                     </Form.Group>
