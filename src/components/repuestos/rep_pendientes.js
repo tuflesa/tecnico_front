@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
-import { Container, Row, Col, Table } from 'react-bootstrap';
+import { Container, Row, Col, Table, Button, Tabs, Tab } from 'react-bootstrap';
 import {invertirFecha} from '../utilidades/funciones_fecha';
 import { PencilFill, Receipt } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
@@ -13,6 +13,8 @@ const RepPendientes = () => {
     const [user] = useCookies(['tec-user']);
     const [pendientes, setPendientes] = useState(null);
     const [lineasPendientes, setLineasPendientes] = useState(null);
+    const [consumiblesPendientes, setConsumiblesPendientes] = useState(null);
+    const [repuestosPendientes, setRepuestosPendientes] = useState(null);
     const [pedfueradefecha, setPedFueradeFecha] = useState(null);
     const [show, setShow] = useState(false);
     const [repuesto_id, setRepuesto_id] = useState(null);
@@ -52,6 +54,7 @@ const RepPendientes = () => {
             setCount2(res.data.count);
             for(var x=0;x<res.data.results.length; x++){
                 let repuesto_nombre = res.data.results[x].repuesto.nombre_comun?res.data.results[x].repuesto.nombre_comun:res.data.results[x].repuesto.nombre;
+                let repuesto_tipo = res.data.results[x].repuesto.tipo_repuesto;
                 let repuesto_critico = res.data.results[x].repuesto.es_critico;
                 let id = res.data.results[x].repuesto.id;
                 axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimo_detalle/?repuesto=${res.data.results[x].repuesto.id}&almacen__empresa__id=${datos.empresa}`, {
@@ -64,7 +67,7 @@ const RepPendientes = () => {
                     const stock_minimo_empresa = r.data.reduce((a, b) => a + b.cantidad, 0);
                     if(stock_empresa<stock_minimo_empresa){
                         if(res.data.results.length>0){
-                            stock_por_empresa.push({id: id, articulo: repuesto_nombre, critico: repuesto_critico, stock: stock_empresa, stock_minimo: stock_minimo_empresa});            
+                            stock_por_empresa.push({id: id, articulo: repuesto_nombre, tipo:repuesto_tipo, critico: repuesto_critico, stock: stock_empresa, stock_minimo: stock_minimo_empresa});            
                         }
                         if(stock_por_empresa){
                             let hash = {};
@@ -161,7 +164,7 @@ const RepPendientes = () => {
     const comparar = (x) => {
         if(lineasPendientes){
             for(var y=0;y<lineasPendientes.length;y++){
-                if(lineasPendientes[y].repuesto === x.id){                                      ;
+                if(lineasPendientes[y].repuesto.id === x.id){                                      ;
                     return( "table-success");
                 }
             }
@@ -172,7 +175,7 @@ const RepPendientes = () => {
         if(lineasPendientes){
             if(x.critico){
                 for(var y=0;y<lineasPendientes.length;y++){
-                    if(lineasPendientes[y].repuesto===x.id){
+                    if(lineasPendientes[y].repuesto.id===x.id){
                         if(pedfueradefecha){
                             for(var z=0;z<pedfueradefecha.length;z++){
                                 if(pedfueradefecha[z].id===lineasPendientes[y].pedido.id){
@@ -227,109 +230,180 @@ const RepPendientes = () => {
     } 
 
     return (
-        <Container className="mt-5">
-            <Row>
-                <Col>
-                    <h5 className="mb-3 mt-3">Repuestos por debajo del stock mínimo</h5>     
-                    <table>
-                        <th><button type="button" className="btn btn-default" value={datos.pagina2} name='pagina_anterior' onClick={event => {cambioPagina2(datos.pagina2=datos.pagina2-1)}}>Pág Anterior</button></th> 
-                        <th><button type="button" className="btn btn-default" value={datos.pagina2} name='pagina_posterior' onClick={event => {cambioPagina2(datos.pagina2=datos.pagina2+1)}}>Pág Siguiente</button></th> 
-                        <th>Número páginas: {datos.pagina2} / {datos.total_pag2} - Registros: {count2}</th>
-                    </table>               
-                    <Table striped bordered hover>
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Crítico</th>
-                                <th>Stock Actual</th>
-                                <th>Stock Mínimo</th>
-                                <th>Cant. por recibir</th>
-                                <th style={{width:90}}>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {pendientes && pendientes.map( pendiente => {
-                                return (
-                                    <tr key={pendiente.id} className = {comparar2(pendiente)? "table-warning" : (comparar(pendiente))? "table-success" : pendiente.critico? "table-danger": ""}>
-                                        <td>{pendiente.articulo}</td>
-                                        <td>{pendiente.critico?'Si':'No'}</td>
-                                        <td>{pendiente.stock}</td>
-                                        <td>{pendiente.stock_minimo}</td> 
-                                        <td>{lineasPendientes && lineasPendientes.map( linea => {
-                                            let suma = 0;
-                                            if(linea.repuesto === pendiente.id){                                        
-                                                suma = suma + parseInt(linea.por_recibir);
-                                            }
-                                            return suma;
-                                        }).reduce((partialSum, a) => partialSum + a, 0)}                                            
-                                        </td>
-                                        <td>
-                                        <Receipt className="mr-3 pencil" onClick={event =>{listarPedidos(pendiente.id)}}/>
-                                        <Link to={`/repuestos/${pendiente.id}`}>
-                                                <PencilFill className="mr-3 pencil"/>
-                                        </Link>
-                                        </td>
+        <Container className="mt-5 pt-4">
+            <Tabs defaultActiveKey="repuestos" id="tab-control" className="mb-3">
+                {/* TAB 1: Repuestos por debajo del stock mínimo */}
+                <Tab eventKey="repuestos" title="Repuestos Bajo Stock Mínimo">
+                    <Row>
+                        <Col>
+                            <h5 className="mb-3 mt-3">Repuestos por debajo del stock mínimo</h5>     
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <th><button type="button" className="btn btn-default" onClick={() => cambioPagina2(datos.pagina2=datos.pagina2-1)}>Pág Anterior</button></th> 
+                                        <th><button type="button" className="btn btn-default" onClick={() => cambioPagina2(datos.pagina2=datos.pagina2+1)}>Pág Siguiente</button></th> 
+                                        <th>Número páginas: {datos.pagina2} / {datos.total_pag2} - Registros: {count2}</th>
                                     </tr>
-                                )
-                            })
-                            }
-                        </tbody>
-                    </Table>
-                </Col>
-            </Row>
-            <Row>
-                <Col>
-                    <h5 className="mb-3 mt-3">Pedidos con fecha prevista vencida</h5> 
-                    <table>
-                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
-                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
-                        <th>Número páginas: {datos.pagina} / {datos.total_pag} - Registros: {count}</th>
-                    </table>                    
-                    <Table striped bordered hover>
-                        <thead>
-                            <tr>
-                                <th style={{width:130}}>Num-Pedido</th>
-                                <th>Empresa</th>
-                                <th>Proveedor</th>
-                                <th>Descripción</th>
-                                <th style={{width:110}}>Fecha Pedido</th>
-                                <th style={{width:110}}>Fecha Entrega</th>
-                                <th style={{width:150}}>Fecha Prevista Entrega</th>
-                                <th>Creado por</th>
-                                {/* <th><Button variant="info" onClick={event =>{OrdenarPorNombre(pedfueradefecha)}}>Creado Por</Button></th> */}
-                                <th>Ir al pedido</th>
-                            </tr>
-                        </thead>
-                        <tbody>                        
-                            {pedfueradefecha && pedfueradefecha.map( pedido => {
-                                return (
-                                    <tr key={pedido.id}>
-                                        <td>{pedido.numero}</td>
-                                        <td>{pedido.empresa.nombre}</td>
-                                        <td>{pedido.proveedor.nombre}</td>
-                                        <td>{pedido.descripcion}</td>
-                                        <td>{invertirFecha(String(pedido.fecha_creacion))}</td>
-                                        <td>{pedido.fecha_entrega && invertirFecha(String(pedido.fecha_entrega))}</td>                                        
-                                        <td>{pedido.fecha_prevista_entrega && invertirFecha(String(pedido.fecha_prevista_entrega))}</td> 
-                                        <td>{pedido.creado_por.get_full_name}</td>
-                                        <td>
-                                            <Link to={`/repuestos/pedido_detalle/${pedido.id}`}>
-                                                <PencilFill className="mr-3 pencil"/>
-                                            </Link>
-                                        </td>
+                                </tbody>
+                            </table>               
+                            <Table striped bordered hover>
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Crítico</th>
+                                        <th>Stock Actual</th>
+                                        <th>Stock Mínimo</th>
+                                        <th>Cant. por recibir</th>
+                                        <th style={{ width: 90 }}>Acciones</th>
                                     </tr>
-                                )})
-                            }
-                        </tbody>
-                    </Table>
-                </Col>
-            </Row>
-            <ListaPedidos   show={show}
-                            repuesto_id ={repuesto_id}
-                            lineasPendientes={lineasPendientes}
-                            handlerListCancelar={handlerListCancelar}
+                                </thead>
+                                <tbody>
+                                    {pendientes && pendientes
+                                        .filter(pendiente => pendiente.tipo === 1) //primero filtro solo los que sean REPUESTOS
+                                        .map(pendiente => (
+                                            <tr key={pendiente.id} className={comparar2(pendiente) ? "table-warning" : (comparar(pendiente)) ? "table-success" : pendiente.critico ? "table-danger" : ""}>
+                                                <td>{pendiente.articulo}</td>
+                                                <td>{pendiente.critico ? 'Si' : 'No'}</td>
+                                                <td>{pendiente.stock}</td>
+                                                <td>{pendiente.stock_minimo}</td> 
+                                                <td>{lineasPendientes && lineasPendientes.map(linea => {
+                                                    let suma = 0;
+                                                    if (linea.repuesto.id === pendiente.id) {                                        
+                                                        suma += parseInt(linea.por_recibir);
+                                                    }
+                                                    return suma;
+                                                }).reduce((partialSum, a) => partialSum + a, 0)}
+                                                </td>
+                                                <td>
+                                                    <Receipt className="mr-3 pencil" onClick={() => listarPedidos(pendiente.id)} />
+                                                    <Link to={`/repuestos/${pendiente.id}`}>
+                                                        <PencilFill className="mr-3 pencil" />
+                                                    </Link>
+                                                </td>
+                                            </tr>
+                                    ))}
+                                </tbody>
+                            </Table>
+                        </Col>
+                    </Row>
+                </Tab>
+    
+                {/* TAB 2: Consumibles por debajo del stock mínimo */}
+                <Tab eventKey="consumibles" title="Consumibles Bajo Stock Mínimo">
+                    <Row>
+                        <Col>
+                            <h5 className="mb-3 mt-3">Consumibles por debajo del stock mínimo</h5>     
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <th><button type="button" className="btn btn-default" onClick={() => cambioPagina2(datos.pagina2=datos.pagina2-1)}>Pág Anterior</button></th> 
+                                        <th><button type="button" className="btn btn-default" onClick={() => cambioPagina2(datos.pagina2=datos.pagina2+1)}>Pág Siguiente</button></th> 
+                                        <th>Número páginas: {datos.pagina2} / {datos.total_pag2} - Registros: {count2}</th>
+                                    </tr>
+                                </tbody>
+                            </table>               
+                            <Table striped bordered hover>
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Crítico</th>
+                                        <th>Stock Actual</th>
+                                        <th>Stock Mínimo</th>
+                                        <th>Cant. por recibir</th>
+                                        <th style={{ width: 90 }}>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {pendientes && pendientes
+                                        .filter(pendiente => pendiente.tipo === 2) //primero filtro solo los que sean CONSUMIBLES
+                                        .map(pendiente => (
+                                            <tr key={pendiente.id} className={comparar2(pendiente) ? "table-warning" : (comparar(pendiente)) ? "table-success" : pendiente.critico ? "table-danger" : ""}>
+                                                <td>{pendiente.articulo}</td>
+                                                <td>{pendiente.critico ? 'Si' : 'No'}</td>
+                                                <td>{pendiente.stock}</td>
+                                                <td>{pendiente.stock_minimo}</td> 
+                                                <td>{lineasPendientes && lineasPendientes.map(linea => {
+                                                    let suma = 0;
+                                                    if (linea.repuesto.id === pendiente.id) {                                        
+                                                        suma += parseInt(linea.por_recibir);
+                                                    }
+                                                    return suma;
+                                                }).reduce((partialSum, a) => partialSum + a, 0)}
+                                                </td>
+                                                <td>
+                                                    <Receipt className="mr-3 pencil" onClick={() => listarPedidos(pendiente.id)} />
+                                                    <Link to={`/repuestos/${pendiente.id}`}>
+                                                        <PencilFill className="mr-3 pencil" />
+                                                    </Link>
+                                                </td>
+                                            </tr>
+                                    ))}
+                                </tbody>
+                            </Table>
+                        </Col>
+                    </Row>
+                </Tab>
+
+                {/* TAB 3: Pedidos con fecha prevista vencida */}
+                <Tab eventKey="pedidos" title="Pedidos Vencidos">
+                    <Row>
+                        <Col>
+                            <h5 className="mb-3 mt-3">Pedidos con fecha prevista vencida</h5> 
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <th><button type="button" className="btn btn-default" onClick={() => cambioPagina(datos.pagina=datos.pagina-1)}>Pág Anterior</button></th> 
+                                        <th><button type="button" className="btn btn-default" onClick={() => cambioPagina(datos.pagina=datos.pagina+1)}>Pág Siguiente</button></th> 
+                                        <th>Número páginas: {datos.pagina} / {datos.total_pag} - Registros: {count}</th>
+                                    </tr>
+                                </tbody>
+                            </table>                    
+                            <Table striped bordered hover>
+                                <thead>
+                                    <tr>
+                                        <th style={{ width: 130 }}>Num-Pedido</th>
+                                        <th>Empresa</th>
+                                        <th>Proveedor</th>
+                                        <th>Descripción</th>
+                                        <th style={{ width: 110 }}>Fecha Pedido</th>
+                                        <th style={{ width: 110 }}>Fecha Entrega</th>
+                                        <th style={{ width: 150 }}>Fecha Prevista Entrega</th>
+                                        <th>Creado por</th>
+                                        <th>Ir al pedido</th>
+                                    </tr>
+                                </thead>
+                                <tbody>                        
+                                    {pedfueradefecha && pedfueradefecha.map(pedido => (
+                                        <tr key={pedido.id}>
+                                            <td>{pedido.numero}</td>
+                                            <td>{pedido.empresa.nombre}</td>
+                                            <td>{pedido.proveedor.nombre}</td>
+                                            <td>{pedido.descripcion}</td>
+                                            <td>{invertirFecha(String(pedido.fecha_creacion))}</td>
+                                            <td>{pedido.fecha_entrega && invertirFecha(String(pedido.fecha_entrega))}</td>                                        
+                                            <td>{pedido.fecha_prevista_entrega && invertirFecha(String(pedido.fecha_prevista_entrega))}</td> 
+                                            <td>{pedido.creado_por.get_full_name}</td>
+                                            <td>
+                                                <Link to={`/repuestos/pedido_detalle/${pedido.id}`}>
+                                                    <PencilFill className="mr-3 pencil" />
+                                                </Link>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </Table>
+                        </Col>
+                    </Row>
+                </Tab>
+            </Tabs>
+    
+            <ListaPedidos 
+                show={show}
+                repuesto_id={repuesto_id}
+                lineasPendientes={lineasPendientes}
+                handlerListCancelar={handlerListCancelar}
             />
         </Container>
-    )
+    );
 }
 export default RepPendientes;
