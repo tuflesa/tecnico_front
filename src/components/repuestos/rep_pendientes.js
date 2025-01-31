@@ -80,15 +80,7 @@ const RepPendientes = () => {
         });
     }, [token, filtro3]); 
 
-    const repuestos_consumibles = (res_data_count, res_data_results, tipo_rep)=>{
-        //si es repuesto count2 si es consumible count3
-        if(tipo_rep===1){
-            setCount2(res_data_count);
-        }
-        if(tipo_rep===2){
-            setCount3(res_data_count);
-        }
-        
+    const repuestos_consumibles = (res_data_count, res_data_results, tipo_rep)=>{        
         for(var x=0;x<res_data_results.length; x++){
             let repuesto_nombre = res_data_results[x].repuesto.nombre_comun?res_data_results[x].repuesto.nombre_comun:res_data_results[x].repuesto.nombre;
             let repuesto_tipo = res_data_results[x].repuesto.tipo_repuesto;
@@ -109,7 +101,10 @@ const RepPendientes = () => {
                     if(stock_por_empresa){
                         let hash = {};
                         let sinduplicados = stock_por_empresa;
-                        sinduplicados = sinduplicados.filter(o => hash[o.id] ? false : hash[o.id] = true);
+                        let sinduplicadosRep = stock_por_empresa;
+                        let sinduplicadosCon = stock_por_empresa;
+                        sinduplicadosRep = sinduplicadosRep.filter(o => o.tipo === 1 && (hash[o.id] ? false : hash[o.id] = true));
+                        sinduplicadosCon = sinduplicadosCon.filter(o => o.tipo === 2 && (hash[o.id] ? false : hash[o.id] = true));
                         setPendientes(sinduplicados.sort(function(a, b){
                             if(a.articulo > b.articulo){
                                 return 1;
@@ -120,7 +115,7 @@ const RepPendientes = () => {
                             return 0;
                         }));
                         if(tipo_rep===1){
-                            setRepuestosPendientes(sinduplicados.sort(function(a, b){
+                            setRepuestosPendientes(sinduplicadosRep.sort(function(a, b){
                                 if(a.articulo > b.articulo){
                                     return 1;
                                 }
@@ -129,9 +124,16 @@ const RepPendientes = () => {
                                 }
                                 return 0;
                             }));
+                            if(res_data_count>=20 && count2===null){
+                                setCount2(res_data_count-(20-sinduplicadosRep.length));
+                            }
+                            else if(count2===null && res_data_count<20){
+                                setCount2(res_data_count-(res_data_count-sinduplicadosRep.length));
+                            }
+                            
                         }
                         if(tipo_rep===2){
-                            setConsumiblesPendientes(sinduplicados.sort(function(a, b){
+                            setConsumiblesPendientes(sinduplicadosCon.sort(function(a, b){
                                 if(a.articulo > b.articulo){
                                     return 1;
                                 }
@@ -140,6 +142,12 @@ const RepPendientes = () => {
                                 }
                                 return 0;
                             }));
+                            if(res_data_count>=20 && count3===null){
+                                setCount3(res_data_count-(20-sinduplicadosCon.length));
+                            }
+                            else if(res_data_count<20 && count3===null){
+                                setCount3(res_data_count-(res_data_count-sinduplicadosCon.length));
+                            }
                         }
                     }
                 }
