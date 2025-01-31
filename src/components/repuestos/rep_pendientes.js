@@ -23,21 +23,29 @@ const RepPendientes = () => {
     const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Técnico'?false:true;
     const [count, setCount] = useState(null);
     const [count2, setCount2] = useState(null);
+    const [count3, setCount3] = useState(null);
     
     const [datos, setDatos] = useState({
         empresa: user['tec-user'].perfil.empresa.id,
         hoy: (fecha.getFullYear() + "-" + (fecha.getMonth()+1) + "-" + fecha.getDate()),
         pagina: 1,
         pagina2: 1,
+        pagina3: 1,
         total_pag:0,
         total_pag2:0,
+        total_pag3:0,
     });
 
     const [filtro, setFiltro] = useState(`?empresa=${datos.empresa}&page=${datos.pagina}&finalizado=${false}&fecha_prevista_entrega__lte=${datos.hoy}&creado_por=${nosoyTecnico?user['tec-user'].perfil.usuario:''}`);
-    const [filtro2, setFiltro2] = useState(`?almacen__empresa__id=${datos.empresa}&repuesto__descatalogado=${false}&page=${datos.pagina}`);
+    const [filtro2, setFiltro2] = useState(`?almacen__empresa__id=${datos.empresa}&repuesto__descatalogado=${false}&page=${datos.pagina}&repuesto__tipo_repuesto=${1}`);
+    const [filtro3, setFiltro3] = useState(`?almacen__empresa__id=${datos.empresa}&repuesto__descatalogado=${false}&page=${datos.pagina}&repuesto__tipo_repuesto=${2}`);
 
     useEffect(() => {
-        setFiltro2(`?almacen__empresa__id=${datos.empresa}&repuesto__descatalogado=${false}&page=${datos.pagina2}`);
+        setFiltro3(`?almacen__empresa__id=${datos.empresa}&repuesto__descatalogado=${false}&page=${datos.pagina2}&repuesto__tipo_repuesto=${2}`);
+    },[datos.pagina3, token]);
+
+    useEffect(() => {
+        setFiltro2(`?almacen__empresa__id=${datos.empresa}&repuesto__descatalogado=${false}&page=${datos.pagina2}&repuesto__tipo_repuesto=${1}`);
     },[datos.pagina2, token]);
 
     useEffect(() => {
@@ -51,29 +59,68 @@ const RepPendientes = () => {
               }
         })
         .then( res => { 
-            setCount2(res.data.count);
-            for(var x=0;x<res.data.results.length; x++){
-                let repuesto_nombre = res.data.results[x].repuesto.nombre_comun?res.data.results[x].repuesto.nombre_comun:res.data.results[x].repuesto.nombre;
-                let repuesto_tipo = res.data.results[x].repuesto.tipo_repuesto;
-                let repuesto_critico = res.data.results[x].repuesto.es_critico;
-                let id = res.data.results[x].repuesto.id;
-                axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimo_detalle/?repuesto=${res.data.results[x].repuesto.id}&almacen__empresa__id=${datos.empresa}`, {
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`
-                    }     
-                })
-                .then( r => {
-                    const stock_empresa = r.data.reduce((a, b) => a + b.stock_act, 0);
-                    const stock_minimo_empresa = r.data.reduce((a, b) => a + b.cantidad, 0);
-                    if(stock_empresa<stock_minimo_empresa){
-                        if(res.data.results.length>0){
-                            stock_por_empresa.push({id: id, articulo: repuesto_nombre, tipo:repuesto_tipo, critico: repuesto_critico, stock: stock_empresa, stock_minimo: stock_minimo_empresa});            
-                        }
-                        if(stock_por_empresa){
-                            let hash = {};
-                            let sinduplicados = stock_por_empresa;
-                            sinduplicados = sinduplicados.filter(o => hash[o.id] ? false : hash[o.id] = true);
-                            setPendientes(sinduplicados.sort(function(a, b){
+            repuestos_consumibles(res.data.count, res.data.results, res.data.results[0].repuesto.tipo_repuesto);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token, filtro2]);  
+
+    useEffect(() => { //buscamos articulos con stock por debajo del stock mínimo
+        axios.get(BACKEND_SERVER + `/api/repuestos/articulos_fuera_stock/` + filtro3,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => { 
+            repuestos_consumibles(res.data.count, res.data.results, res.data.results[0].repuesto.tipo_repuesto);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token, filtro3]); 
+
+    const repuestos_consumibles = (res_data_count, res_data_results, tipo_rep)=>{
+        //si es repuesto count2 si es consumible count3
+        if(tipo_rep===1){
+            setCount2(res_data_count);
+        }
+        if(tipo_rep===2){
+            setCount3(res_data_count);
+        }
+        
+        for(var x=0;x<res_data_results.length; x++){
+            let repuesto_nombre = res_data_results[x].repuesto.nombre_comun?res_data_results[x].repuesto.nombre_comun:res_data_results[x].repuesto.nombre;
+            let repuesto_tipo = res_data_results[x].repuesto.tipo_repuesto;
+            let repuesto_critico = res_data_results[x].repuesto.es_critico;
+            let id = res_data_results[x].repuesto.id;
+            axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimo_detalle/?repuesto=${res_data_results[x].repuesto.id}&almacen__empresa__id=${datos.empresa}`, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }     
+            })
+            .then( r => {
+                const stock_empresa = r.data.reduce((a, b) => a + b.stock_act, 0);
+                const stock_minimo_empresa = r.data.reduce((a, b) => a + b.cantidad, 0);
+                if(stock_empresa<stock_minimo_empresa){
+                    if(res_data_results.length>0){
+                        stock_por_empresa.push({id: id, articulo: repuesto_nombre, tipo:repuesto_tipo, critico: repuesto_critico, stock: stock_empresa, stock_minimo: stock_minimo_empresa});            
+                    }
+                    if(stock_por_empresa){
+                        let hash = {};
+                        let sinduplicados = stock_por_empresa;
+                        sinduplicados = sinduplicados.filter(o => hash[o.id] ? false : hash[o.id] = true);
+                        setPendientes(sinduplicados.sort(function(a, b){
+                            if(a.articulo > b.articulo){
+                                return 1;
+                            }
+                            if(a.articulo < b.articulo){
+                                return -1;
+                            }
+                            return 0;
+                        }));
+                        if(tipo_rep===1){
+                            setRepuestosPendientes(sinduplicados.sort(function(a, b){
                                 if(a.articulo > b.articulo){
                                     return 1;
                                 }
@@ -81,17 +128,25 @@ const RepPendientes = () => {
                                     return -1;
                                 }
                                 return 0;
-                            }));;
+                            }));
+                        }
+                        if(tipo_rep===2){
+                            setConsumiblesPendientes(sinduplicados.sort(function(a, b){
+                                if(a.articulo > b.articulo){
+                                    return 1;
+                                }
+                                if(a.articulo < b.articulo){
+                                    return -1;
+                                }
+                                return 0;
+                            }));
                         }
                     }
-                })
-                .catch(err => { console.log(err);})
-            }
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    }, [token, filtro2]);  
+                }
+            })
+            .catch(err => { console.log(err);})
+        }
+    }
 
     useEffect(()=>{
         if(count % 20 === 0){
@@ -122,6 +177,21 @@ const RepPendientes = () => {
             })
         }
     }, [count2, filtro2]);
+
+    useEffect(()=>{
+        if(count3 % 20 === 0){
+            setDatos({
+                ...datos,
+                total_pag3:Math.trunc(count3/20),
+            })
+        }
+        else if(count3 % 20 !== 0){
+            setDatos({
+                ...datos,
+                total_pag3:Math.trunc(count3/20)+1,
+            })
+        }
+    }, [count3, filtro3]);
      
     useEffect(()=>{ //buscamos pedidos pasados de fecha de entrega
         axios.get(BACKEND_SERVER + `/api/repuestos/lista_pedidos_fuera_fecha/` + filtro,{
@@ -229,6 +299,26 @@ const RepPendientes = () => {
         }
     } 
 
+    const cambioPagina3 = (pag) => {
+        if(pag<=0){
+            pag=1;
+        }
+        if(pag>count3/20){
+            if(count3 % 20 === 0){
+                pag=Math.trunc(count3/20);
+            }
+            if(count3 % 20 !== 0){
+                pag=Math.trunc(count3/20)+1;
+            }
+        }
+        if(pag>0){
+            setDatos({
+                ...datos,
+                pagina3: pag,
+            })
+        }
+    }
+
     return (
         <Container className="mt-5 pt-4">
             <Tabs defaultActiveKey="repuestos" id="tab-control" className="mb-3">
@@ -258,7 +348,7 @@ const RepPendientes = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {pendientes && pendientes
+                                    {repuestosPendientes && repuestosPendientes
                                         .filter(pendiente => pendiente.tipo === 1) //primero filtro solo los que sean REPUESTOS
                                         .map(pendiente => (
                                             <tr key={pendiente.id} className={comparar2(pendiente) ? "table-warning" : (comparar(pendiente)) ? "table-success" : pendiente.critico ? "table-danger" : ""}>
@@ -296,9 +386,9 @@ const RepPendientes = () => {
                             <table>
                                 <tbody>
                                     <tr>
-                                        <th><button type="button" className="btn btn-default" onClick={() => cambioPagina2(datos.pagina2=datos.pagina2-1)}>Pág Anterior</button></th> 
-                                        <th><button type="button" className="btn btn-default" onClick={() => cambioPagina2(datos.pagina2=datos.pagina2+1)}>Pág Siguiente</button></th> 
-                                        <th>Número páginas: {datos.pagina2} / {datos.total_pag2} - Registros: {count2}</th>
+                                        <th><button type="button" className="btn btn-default" onClick={() => cambioPagina3(datos.pagina3=datos.pagina3-1)}>Pág Anterior</button></th> 
+                                        <th><button type="button" className="btn btn-default" onClick={() => cambioPagina3(datos.pagina3=datos.pagina3+1)}>Pág Siguiente</button></th> 
+                                        <th>Número páginas: {datos.pagina3} / {datos.total_pag3} - Registros: {count3}</th>
                                     </tr>
                                 </tbody>
                             </table>               
@@ -314,7 +404,7 @@ const RepPendientes = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {pendientes && pendientes
+                                    {consumiblesPendientes && consumiblesPendientes
                                         .filter(pendiente => pendiente.tipo === 2) //primero filtro solo los que sean CONSUMIBLES
                                         .map(pendiente => (
                                             <tr key={pendiente.id} className={comparar2(pendiente) ? "table-warning" : (comparar(pendiente)) ? "table-success" : pendiente.critico ? "table-danger" : ""}>
