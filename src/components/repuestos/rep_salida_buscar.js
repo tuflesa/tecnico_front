@@ -157,12 +157,11 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
                                     return (                                                
                                         <tr key={rep.id}>
                                             <th>{rep.nombre}</th>  
-                                            {/* <td>{localizaciones && localizaciones.map(localizacion =>{
-                                                if(localizacion.repuesto=== rep.id){return(localizacion.localizacion)}
-                                            })} </td> */}
                                             <th>{rep.stocks_minimos && rep.stocks_minimos.map(localizacion =>{
-                                                if(localizacion.repuesto.id=== rep.id){return(localizacion.localizacion)}
-                                            })} </th>
+                                                if(localizacion.repuesto.id=== rep.id && localizacion.almacen.id===parseInt(almacen)){
+                                                    return(localizacion.localizacion)
+                                                }})} 
+                                            </th>
                                             <th>
                                             <ArrowDownCircle className="mr-3 pencil" onClick={event => {elegirRepuesto(rep.id)}}/>
                                             </th>                                                
