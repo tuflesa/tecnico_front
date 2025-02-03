@@ -34,6 +34,8 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
         nombre:'',
         tubo_madre:'',
         grupo_tubomadre: '',
+        titular: montaje_edi?montaje_edi.titular_grupo:false,
+        actualizar: montaje_edi?montaje_edi.id?true:false:false,
     });
 
     useEffect(() => { //SEPARAR DATOS QUE ENTRAN A TRAVES DEL FILTRO
@@ -156,6 +158,22 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
         AbrirConjunto();
     }
 
+    const handlerActualizar = () => {
+        axios.patch(BACKEND_SERVER + `/api/rodillos/montaje/${montaje_edi.id}/`, { 
+            titular_grupo: datos.titular,
+        }, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+                }     
+        })
+        .then( res => { 
+            alert('Actualizado con exito');
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }
+
     const handlerGuardar = () => { //Guardamos el montaje, primero comprobamos si ya existe.
         if(datos.nombre===''||datos.maquina===''||datos.grupo===''||datos.bancada_ct===''){
             alert('Revisa los datos obligatorios');
@@ -177,6 +195,7 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
                         maquina: datos.maquina,
                         grupo:datos.grupo,
                         bancadas:datos.bancada_ct,
+                        titular_grupo: datos.titular,
                     }, {
                         headers: {
                             'Authorization': `token ${token['tec-token']}`
@@ -215,6 +234,13 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
         setDatos({
             ...datos,
             [event.target.name] : event.target.value
+        })
+    }
+
+    const handleInputChange_titular = (event) => {
+        setDatos({
+            ...datos,
+            titular:!datos.titular
         })
     }
 
@@ -272,6 +298,17 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
                             </Form.Group>
                         </Col>
                     </Row>
+                    <Row>
+                        <Col>
+                            <Form.Group className="mb-3" controlId="titular">
+                                <Form.Check type="checkbox" 
+                                            name='titular'
+                                            label="¿Titular de grupo?"
+                                            checked = {datos.titular}
+                                            onChange = {handleInputChange_titular} />
+                            </Form.Group>
+                        </Col>
+                    </Row>
                 </Form>
                 :
                 <Row>
@@ -280,8 +317,8 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
                     </Col>
                 </ Row>
             }
+            {bancadas && operaciones && formaciones_completadas?grabado|| datos.actualizar?<Button variant="outline-primary" onClick={handlerActualizar}>Actualizar</Button>:<Button variant="outline-primary" onClick={handlerGuardar}>Guardar</Button>:''}
             <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
-            {bancadas && operaciones && formaciones_completadas?grabado?<Button variant="outline-primary" disabled={grabado?true:false} onClick={handlerGuardar}>Guardar</Button>:<Button variant="outline-primary" onClick={handlerGuardar}>Guardar</Button>:''}
             <Row>
                 <Col>
                     <Form.Group controlId="nombre">
