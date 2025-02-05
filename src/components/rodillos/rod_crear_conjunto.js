@@ -27,6 +27,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, gr
     const [filtro, setFiltro] = useState(``);
     const [espesores_unidos, setEspesores_unidos] = useState(``);
     const [nombreGrupo, setNombreGrupo] = useState(``);
+    const [icono_celda, setIcono_celda] = useState([]);
     
     var bancadas_nuevas=[''];
     var bancadas_nuevas2=[''];
@@ -38,8 +39,8 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, gr
         operacion_filtro: '',
         tubo_madre_filtro: '',
         conjunto_elegido: '',
+        icono_celda: operacion_marcada? operacion_marcada.icono_celda:'',
     });
-
     useEffect(() => {
         if (grupoId_rod!==null && rodillos) {
             for(var y=0;y<rodillos.length;y++){
@@ -69,6 +70,20 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, gr
             setRodillo_elegido([]);
         }
     }, [token, elementos_formacion]);
+
+    useEffect(() => { //recogemos todos los iconos posibles para la operación
+        axios.get(BACKEND_SERVER + `/api/rodillos/icono_celda/`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( res => {
+            setIcono_celda(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
 
     useEffect(() => { //BUSCAMOS, LAS OPERACIONES PARA EL FILTRO DE CONJUNTOS DE OTRAS FORMACIONES.
         if(operacion_marcada!==null){ 
@@ -325,7 +340,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, gr
         id_bancada && axios.post(BACKEND_SERVER + `/api/rodillos/celda/`, { //creamos celda
             bancada: id_bancada,
             conjunto: conjunto_id,
-            icono:null,
+            icono: operacion_marcada.icono_celda?operacion_marcada.icono_celda:'',
             operacion: operacion_id,
         }, {
             headers: {
@@ -442,6 +457,13 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, gr
         }));
     }
 
+    const handleInputChange_icono = (event) => {
+        setDatos(prevDatos => ({
+            ...prevDatos,
+            icono_celda: event.target.value
+        }));
+    }
+
     const handleInputChangeBancada = (bancadaId) => {
         setDatos(prevDatos => ({
             ...prevDatos,
@@ -520,6 +542,29 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, gr
                                         </Form.Control>
                                     </Form.Group>
                                 ))}
+                                <Form.Group controlId="icono_celda">
+                                        <Form.Label>Icono Celda</Form.Label>
+                                        <Form.Control
+                                            as="select"
+                                            name='icono_celda'
+                                            value={datos.icono_celda}
+                                            onChange={handleInputChange_icono}
+                                        >
+                                            <option key={0} value={''}>Elegir icono</option>
+                                            {icono_celda && icono_celda.map(icono => {
+                                                return (
+                                                    <option key={icono.id} value={icono.id}>
+                                                        {icono.nombre + '-   ' + icono.icono}
+                                                    </option>
+                                                    /* <img 
+                                                        src={icono.icono} 
+                                                        alt="" 
+                                                        style={{ width: '30px', height: '30px' }} 
+                                                    /> */
+                                                )
+                                            })}
+                                        </Form.Control>
+                                    </Form.Group>
                                 </Col>
                             </Row>
                         </Form>

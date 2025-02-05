@@ -26,6 +26,7 @@ const RodTooling = () => {
     const [operaciones, setOperaciones] = useState(null);
     const [secciones, setSecciones] = useState(null);
     const [bancadas, setBancadas] = useState(null);
+    const [icono_celda, setIcono_celda] = useState([]);
     
     useEffect(() => { //SEPARAR DATOS QUE ENTRAN A TRAVES DEL FILTRO
         const params = new URLSearchParams(filtro);
@@ -145,12 +146,26 @@ const RodTooling = () => {
             const unimos = conjuntosCel.concat(conjuntosCelCT);
             unimos.forEach((element, index) => {
                 element.numCelda = index + 1;
-            });           
+            });          
            setConjuntosCompletadosCel(unimos);
         } else {
             setConjuntosCompletadosCel(null);
         }
     }, [conjuntosCel, conjuntosCelCT]);
+
+    useEffect(() => { //recogemos todos los iconos posibles para la operación
+        axios.get(BACKEND_SERVER + `/api/rodillos/icono_celda/`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( res => {
+            setIcono_celda(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
 
     const cogerDatos = async (montajes) => {
         try {
@@ -228,6 +243,7 @@ const RodTooling = () => {
             console.log(err);
         }
     }; 
+    
     const actualizaFiltro = str => {
         setFiltro(str);
     }
@@ -299,33 +315,49 @@ const RodTooling = () => {
                                                     <td key={`${seccion.id}-${operacion.id}`}>
                                                         {/* Pinta flecha si es de otra formación */}
                                                         {conjuntos_completadosCel?.filter(celda =>
+                                                            montaje.titular_grupo === false &&
                                                             celda.seccion === seccion.id &&
-                                                            celda.cel.conjunto.tubo_madre !== null &&
-                                                            celda.cel.bancada.tubo_madre !== celda.cel.conjunto.tubo_madre &&
                                                             operacion.id === celda.operacion &&
-                                                            montaje.grupo.tubo_madre === celda.cel.bancada.tubo_madre &&
+                                                            celda.cel.conjunto.tubo_madre !== null &&
                                                             celda.cel.montajeId === montaje.id
+                                                            /* celda.cel.bancada.tubo_madre !== celda.cel.conjunto.tubo_madre &&
+                                                            montaje.grupo.tubo_madre === celda.cel.bancada.tubo_madre */
+                                                            
                                                         ).map(celda => (
-                                                            <div key={celda.id} style={{ color: 'red' }}>
-                                                                {'-->'}
+                                                            // backgroundColor: 'inherit -----> Hereda el fondo del padre
+                                                            <div key={celda.id} style={{backgroundColor: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px'}}>
+                                                                <img 
+                                                                    src={icono_celda[3].icono} 
+                                                                    alt="" 
+                                                                    style={{ width: '30px', height: '30px' }} 
+                                                                />
                                                             </div>
                                                         ))}
 
                                                         {/* Pinta la celda con imagen */}
                                                         {conjuntos_completadosCel?.filter(celda =>
+                                                            montaje.titular_grupo === true &&
                                                             celda.seccion === seccion.id &&
                                                             celda.cel.conjunto.tubo_madre !== null &&
                                                             celda.cel.bancada.tubo_madre === celda.cel.conjunto.tubo_madre &&
                                                             operacion.id === celda.operacion &&
-                                                            montaje.grupo.tubo_madre === celda.cel.conjunto.tubo_madre &&
+                                                            //montaje.grupo.tubo_madre === celda.cel.conjunto.tubo_madre &&
                                                             celda.cel.montajeId === montaje.id
                                                         ).map(celda => (
-                                                            <div key={celda.id}>
-                                                                <img 
-                                                                    src={celda.cel.icono} 
-                                                                    alt="" 
-                                                                    style={{ width: '30px', height: '30px' }} 
-                                                                />
+                                                            <div key={celda.id} style={{backgroundColor: 'inherit'}}>
+                                                                {montaje.grupo.tubo_madre === celda.cel.conjunto.tubo_madre?
+                                                                    <img 
+                                                                        src={celda.cel.icono?celda.cel.icono.icono:''} 
+                                                                        alt="" 
+                                                                        style={{ width: '30px', height: '30px' }} 
+                                                                    />
+                                                                    :
+                                                                    <img 
+                                                                        src={icono_celda[3].icono} 
+                                                                        alt="" 
+                                                                        style={{ width: '30px', height: '30px' }} 
+                                                                    />
+                                                                }
                                                             </div>
                                                         ))}
 
@@ -336,9 +368,9 @@ const RodTooling = () => {
                                                             operacion.id === celda.operacion &&
                                                             celda.cel.montajeId === montaje.id
                                                         ).map(celda => (
-                                                            <div key={celda.id}>
+                                                            <div key={celda.id} style={{backgroundColor: 'inherit'}}>
                                                                 <img 
-                                                                    src={celda.cel.icono} 
+                                                                    src={celda.cel.icono?celda.cel.icono.icono:''}  
                                                                     alt="" 
                                                                     style={{ width: '30px', height: '30px' }} 
                                                                 />
