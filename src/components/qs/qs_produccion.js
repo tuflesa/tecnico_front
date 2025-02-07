@@ -26,7 +26,9 @@ const QS_Produccion = () => {
     const [datos, setDatos] = useState(null);
     const [gap, setGap] = useState(null);
     const [alturas, setAlturas] = useState(null);
+    const [Dst, setDst] = useState(null);
     const [desarrollosModelo, setDesarrollosModelo] = useState(null); // Desarrollos del fleje en cada paso basados en el modelo
+    const [desarrollosTeorico, setDesarrollosTeorico] = useState(null); // Desarrollos teoricos segun el calculo de desarrollos
 
     const leeDiametrosPLC = (event) => {
         // event.preventDefault();
@@ -80,6 +82,8 @@ const QS_Produccion = () => {
             return
         }
         // Si hay dato continuamos
+        console.log('dato ...');
+        console.log(dato);
         const temp = []; // Aqui guardo el montaje temporal
         const bancadas = [];
         dato.grupo.bancadas.forEach(b => bancadas.push(b)); // Bancadas del grupo
@@ -188,6 +192,252 @@ const QS_Produccion = () => {
         setMontaje(temp.sort((a,b) => a.operacion - b.operacion).filter(o => o.nombre !=='ET'));
     }
 
+    // Calculo de posiciones estándar
+    const CalculaPosicionEstandar = ()=>{
+        console.log('Calculo de posiciones estandar ...');
+        if (!desarrollosTeorico || !fleje || !montaje || !alturas) {
+            return;
+        }
+        let R, R1, R2, R3, R1_s, R2_s, R3_s, R4;
+        let Df, Dc, Df_s, Df_i, Dext_s, Dext_i;
+        let alfa, alfa1, alfa2, alfa3, alfa1_s, alfa2_s, alfa3_s;
+        let C, C1, Hc;
+        let x0, y, x1, y1, yc, xc1, yc1, xc2, yc2, xc3, yc3, x3, y3, xcr, x_i;
+        let gap;
+        let pos_i, pos_s, ancho, alto;
+        let Dt; // Desarrollo teorico de una operacion
+        let roll_s, roll_i, roll_lat;
+        let anchoFP1, anchoFP2, anchoFP3;
+
+        console.log('desarrollos teorico ...');
+        console.log(desarrollosTeorico);
+        console.log('posiciones...');
+        console.log(posicionesSim);
+        console.log('fleje ...');
+        console.log(fleje);
+        const pos_STD = [];
+        // Soldadura
+        Dt = desarrollosTeorico['W']/Math.PI; // Desarrollo en soldadura teorico
+        const T = fleje.espesor;
+        gap = 6 + 9*(T-2)/8; // Establece el gap deseado en función del espesor
+        // Rodillos
+        const rod_sup = montaje.filter(m => m.nombre=='W')[0].rodillos.filter(r => r.eje == 'SUP_OP')[0];
+        // Parametros
+        C1 = rod_sup.parametros.C1;
+        Dc = rod_sup.parametros.Dc;
+        Df = rod_sup.parametros.Df;
+        // Calculos
+        x1 = gap/2 - C1;
+        x0 = x1 + Dc * Math.cos(75*Math.PI/180)/2;
+        const pos_h = x0 - Df*Math.sin(15*Math.PI/180)/2;
+
+        pos_STD.push({
+            op: 10,
+            nombre: 'W',
+            posiciones: [
+                {eje: 'CAB', pos: 0},
+                {eje: 'LAT_OP', pos: Dt/2},
+                {eje: 'LAT_MO', pos: Dt/2},
+                {eje: 'INF', pos: Dt/2},
+                {eje: 'SUP_V_OP', pos: Dt/2},
+                {eje: 'SUP_V_MO', pos: Dt/2},
+                {eje: 'SUP_H_OP', pos: pos_h},
+                {eje: 'SUP_H_MO', pos: pos_h}
+            ]
+        });
+
+        // Cuchillas
+        montaje.filter(m => m.tipo=='FP').map(fp => {
+            // console.log(fp);
+            Dt = desarrollosTeorico[fp.nombre]; // Desarrollo teorico
+
+            // Rodillos
+            roll_i = fp.rodillos.filter(r => r.eje == 'INF')[0];
+            roll_s = fp.rodillos.filter(r => r.eje == 'SUP')[0];
+
+            // Parametros
+            R1 = roll_i.parametros.R1;
+            R2 = roll_i.parametros.R2;
+            R3 = roll_i.parametros.R3;
+            alfa1 = roll_i.parametros.alfa1 * Math.PI / 180;
+            alfa2 = roll_i.parametros.alfa2 * Math.PI / 180;
+            alfa3 = roll_i.parametros.alfa3 * Math.PI / 180;
+            Df_i = roll_i.parametros.Df;
+            Dext_i = roll_i.parametros.Dext;
+            
+            R1_s = roll_s.parametros.R1;
+            R2_s = roll_s.parametros.R2;
+            R3_s = roll_s.parametros.R3;
+            alfa1_s = roll_s.parametros.alfa1 * Math.PI / 180;
+            alfa2_s = roll_s.parametros.alfa2 * Math.PI / 180;
+            alfa3_s = roll_s.parametros.alfa3 * Math.PI / 180;
+            Df_s = roll_s.parametros.Df;
+            Dext_s = roll_s.parametros.Dext;
+            C = roll_s.parametros.cuchilla;
+
+            // Calulos
+            let alfa_c = 0;
+            if (R1_s != 0) {
+            alfa_c = Math.asin(C/(2*R1_s));
+            }
+            const L0 = R1*alfa1 + 2*R2*((Math.PI-alfa1)/2 - alfa3) + 2*R2_s*(alfa2_s-alfa3_s) + 2*R1_s*(alfa1_s/2-alfa_c); // Parte fija del desarrollo
+            const L = Dt - L0;
+            R4 = L/(4*alfa3);
+            y3 = -R4 * Math.sin(alfa3);
+            yc2 = y3 + R2 * Math.sin(alfa3);
+            xc2 = (R2-R1) * Math.sin(alfa1/2);
+            x3 = xc2 - R2 * Math.cos(alfa3);
+            xcr = x3 - (1/Math.tan(alfa3)) * y3;
+            yc = yc2 - (R2-R1) * Math.cos(alfa1/2);
+            pos_i = -(yc - R1);
+            gap = pos_i - (Dext_i-Df_i)/2; // Es la mitad del gap en realidad
+            pos_s = gap + (Dext_s-Df_s)/2;
+            switch (fp.nombre) { // Ancho en el centro de máquina de cada cuchilla para posicionar IS2 e IS3
+                case 'FP1':
+                    anchoFP1 = 2*(R4-xcr);
+                    console.log('Ancho FP1: ', anchoFP1);
+                    break;
+                case 'FP2':
+                    anchoFP2 = 2*(R4-xcr);
+                    console.log('Ancho FP2: ', anchoFP2);
+                    break;
+                case 'FP3':
+                    anchoFP3 = 2*(R4-xcr);
+                    console.log('Ancho FP3: ', anchoFP3);
+                    break;
+            }
+            console.log('gap_i: ', gap);
+            console.log('pos_s: ', pos_s);
+            pos_STD.push({
+                op: fp.operacion,
+                nombre: fp.nombre,
+                posiciones: [
+                    {eje: 'INF', pos: pos_i},
+                    {eje: 'SUP', pos: pos_s}
+                ]
+            });
+        });
+
+        // Pendiente de la recta con origen en PR y final en la posición inferior de FP1
+        const pos_fp1_inf = pos_STD.filter(p => p.nombre=='FP1')[0].posiciones.filter(p => p.eje=='INF')[0].pos;
+        const x_fp1 = alturas.filter(a => a.nombre=='MIN')[0].puntos.filter(p => p.nombre=='FP1')[0].x;
+        const m = pos_fp1_inf/x_fp1;
+        console.log('pendiente: ', m);
+
+        // Break Down
+        montaje.filter(m => m.tipo=='BD').map(bd => {
+            console.log(bd);
+            // Calculos
+            x_i = alturas.filter(a => a.nombre=='MIN')[0].puntos.filter(p => p.nombre==bd.nombre)[0].x;
+            pos_i = m * x_i;
+            pos_s = -(pos_i + 10) + T;
+
+            pos_STD.push({
+                op: bd.operacion,
+                nombre: bd.nombre,
+                posiciones: [
+                    {eje: 'INF', pos: pos_i},
+                    {eje: 'SUP', pos: pos_s}
+                ]
+            });
+        });
+
+        // ISs
+        console.log(montaje);
+        const tipo_bd2 = montaje.filter(m => m.nombre=='BD2')[0].rodillos.filter(r => r.eje=='INF')[0].tipo_plano.slice(0,4);
+        montaje.filter(m => m.tipo=='IS').map(is => {
+            console.log(is);
+            switch (is.nombre) {
+                case 'IS1':
+                    roll_i = montaje.filter(m=>m.nombre=='BD2')[0].rodillos.filter(r => r.eje=='INF')[0]; // Rodillo interior
+                    const pos_bd2_inf = -pos_STD.filter(p => p.nombre=='BD2')[0].posiciones.filter(p => p.eje=='INF')[0].pos;
+                    switch (tipo_bd2) {
+                        case 'BD_I': 
+                            Df = roll_i.parametros.Df;
+                            R = roll_i.parametros.R;
+                            alfa = roll_i.parametros.alfa * Math.PI / 180;
+                            let L; // longitud de fleje fuera del radio (tramo recto)
+                            if (R * alfa > fleje.ancho) {
+                                alfa = fleje.ancho / R;
+                                L = 0;
+                            }
+                            else {
+                                L = fleje.ancho - R * alfa;
+                            }
+                            y = R * (1 - Math.cos(alfa/2)) + (L/2) * Math.sin(alfa/2) - pos_bd2_inf;
+                            x0 = R * Math.sin(alfa/2) + (L/2) * Math.cos(alfa/2);
+                            break;
+                        case 'BD_2':
+                            R1 = roll_i.parametros.R1;
+                            alfa1 = roll_i.parametros.alfa1 * Math.PI / 180;
+                            R2 = roll_i.parametros.R2;
+                            alfa2 = roll_i.parametros.alfa2 * Math.PI / 180;
+                            alfa3 = roll_i.parametros.alfa3 * Math.PI / 180;
+                            R3 = roll_i.parametros.R3;
+                            Df = roll_i.parametros.Df;
+                            // Calculos
+                            xc1 = 0;
+                            yc1 = pos_bd2_inf + R1;
+                            xc2 = (R1-R2) * Math.sin(alfa1/2);
+                            yc2 = yc1 - (R1-R2) * Math.cos(alfa1/2);
+                            xc3 = xc2 - (R3-R2) * Math.sin(alfa2);
+                            yc3 = yc2 + (R3-R2) * Math.cos(alfa2);
+
+                            // longitud de fleje fuera del radio (tramo recto)
+                            const d1 = R1 * alfa1; // Longitud tramo central
+                            const d2 = 2 * R2 * alfa2;
+                            const d3 = d1 + d2;
+
+                            alfa3 = 0;
+                            if (d3 > fleje.ancho) {
+                                alfa2 = (d3 - fleje.ancho)/(2*R2);
+                            }
+                            else {
+                                alfa3 = (fleje.ancho - d3)/(2*R3);
+                            }
+                            
+                            y = yc3 - R3 * Math.cos(alfa2+alfa3);
+
+                            xc2 = (R1-R2) * Math.sin(alfa1/2);
+                            xc3 = xc2 - (R3-R2) * Math.sin(alfa2);
+                            x0 = xc3 + R3 * Math.sin(alfa2+alfa3);
+                            break;
+                    }
+                    roll_lat = montaje.filter(m=>m.nombre=='IS1')[0].rodillos.filter(r => r.eje=='ANCHO')[0]; // Rodillo lateral
+                    Hc = roll_lat.parametros.Hc;
+                    alfa1 = roll_lat.parametros.alfa1 * Math.PI / 180;
+                    R1 = roll_lat.parametros.R1;
+                    R2 = roll_lat.parametros.R2;
+                    console.log(roll_lat);
+                    console.log('parametros lat ... ', Hc, alfa2, R1, R2);
+                    y1 = y - Hc + (R1+R2)*Math.sin(alfa1);
+
+                    ancho = 2*x0;
+                    alto = y1 + 310 + 10; // +10 es la ditancia que debe quedar entre el angulo del rodillo y el fleje
+                    break;
+                case 'IS2':
+                    alto = 0;
+                    ancho = anchoFP2;
+                    break;
+                case 'IS3':
+                    alto = 0;
+                    ancho = anchoFP3;
+                    break;
+            }
+            pos_STD.push({
+                op: is.operacion,
+                nombre: is.nombre,
+                posiciones: [
+                    {eje: 'ANCHO', pos: ancho},
+                    {eje: 'ALTO', pos: alto}
+                ]
+            });
+        });
+        
+        console.log('posiciones calculadas ...');
+        console.log(pos_STD);
+    }
+
     const simular = (event) => {
         event.preventDefault();
         const temp = [...posicionesSim];
@@ -281,6 +531,7 @@ const QS_Produccion = () => {
     useEffect(() => {
         if (articulo==0) {
             setFleje(null);
+            setDst(null);
         }
         else {
             console.log('montaje ...');
@@ -292,12 +543,19 @@ const QS_Produccion = () => {
                 calidad: 'S350',
                 color: 'aqua'
             });
+            setDst(art.Dst);
         }
     },[articulo]);
 
     // Calculo del gap y amortiguación entre rodillos
     useEffect(()=>{
         let piston, gap, pos_i, pos_s, dext_i, dext_s, df_i, df_s;
+        let pos_v_op, pos_h_op, pos_v_mo, pos_h_mo, pos_ancho;
+        let h_cab;
+        let xc, yc, x0, y0, x1, y1;
+        let L1_mo, C1_mo, R1_mo, Dc_mo, Df_mo, L1_op, C1_op, R1_op, Dc_op, Df_op, Df, Dext;
+        let gap_mo, gap_op;
+
         const gap_list = [];
         // console.log('Calculo de gap ...');
         fleje&&montaje&&montaje.map(m => {
@@ -342,6 +600,77 @@ const QS_Produccion = () => {
                     df_s = m.rodillos.filter(r => r.eje=='SUP')[0].parametros.Df;
                     gap = pos_i + pos_s - (dext_i-df_i)/2 - (dext_s-df_s)/2;
                     break;
+                case 'W':
+                    // Posiciones
+                    if (!simulador){
+                        pos_v_mo = posiciones.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='SUP_V_MO')[0].pos;
+                        pos_h_mo = posiciones.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='SUP_H_MO')[0].pos;
+                        pos_v_op = posiciones.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='SUP_V_OP')[0].pos;
+                        pos_h_op = posiciones.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='SUP_H_OP')[0].pos;
+                        h_cab = posiciones.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='CAB')[0].pos;
+                    }
+                    else {
+                        pos_v_mo = posicionesSim.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='SUP_V_MO')[0].pos;
+                        pos_h_mo = posicionesSim.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='SUP_H_MO')[0].pos;
+                        pos_v_op = posicionesSim.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='SUP_V_OP')[0].pos;
+                        pos_h_op = posicionesSim.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='SUP_H_OP')[0].pos;
+                        h_cab = posicionesSim.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='CAB')[0].pos;
+                    }
+                    
+                    // Lado Motor
+                    // Parametros
+                    Df_mo = m.rodillos.filter(r => r.eje=='SUP_MO')[0].parametros.Df;
+                    Dc_mo = m.rodillos.filter(r => r.eje=='SUP_MO')[0].parametros.Dc;
+                    L1_mo = m.rodillos.filter(r => r.eje=='SUP_MO')[0].parametros.L1;
+                    C1_mo = m.rodillos.filter(r => r.eje=='SUP_MO')[0].parametros.C1;
+                    R1_mo = m.rodillos.filter(r => r.eje=='SUP_MO')[0].parametros.R1;
+
+                    // Calculos
+                    y0 = h_cab + (pos_v_mo + Df_mo/2) *Math.cos(15*Math.PI/180);
+                    x0 = pos_h_mo + (Df_mo/2) *Math.sin(15*Math.PI/180);
+                    x1 = x0 - Dc_mo * Math.cos(75*Math.PI/180)/2;
+                    y1 = y0 - Dc_mo * Math.sin(75*Math.PI/180)/2;
+                    xc = x1;
+                    yc = y1 - L1_mo;
+                    gap_mo = x1 + C1_mo;
+
+                    // Lado Operador
+                    // Parametros
+                    Df_op = m.rodillos.filter(r => r.eje=='SUP_OP')[0].parametros.Df;
+                    Dc_op = m.rodillos.filter(r => r.eje=='SUP_OP')[0].parametros.Dc;
+                    L1_op = m.rodillos.filter(r => r.eje=='SUP_OP')[0].parametros.L1;
+                    C1_op = m.rodillos.filter(r => r.eje=='SUP_OP')[0].parametros.C1;
+                    R1_op = m.rodillos.filter(r => r.eje=='SUP_OP')[0].parametros.R1;
+
+                    y0 = h_cab + (pos_v_op + Df_op/2) *Math.cos(15*Math.PI/180);
+                    x0 = -pos_h_op - (Df_op/2) *Math.sin(15*Math.PI/180);
+                    x1 = x0 + Dc_op * Math.cos(75*Math.PI/180)/2;
+                    y1 = y0 - Dc_op * Math.sin(75*Math.PI/180)/2;
+                    xc = x1;
+                    yc = y1 - L1_op;
+                    gap_op = -(x1 - C1_op);
+
+                    gap = gap_op + gap_mo;
+                    piston = null;
+                    break;
+                case 'IS':
+                    console.log('IS calculo de gap');
+                    // Posiciones
+                    if (!simulador){
+                        pos_ancho = posiciones.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='ANCHO')[0].pos;
+                    }
+                    else {
+                        pos_ancho = posicionesSim.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='ANCHO')[0].pos;
+                    }
+
+                    // Parametros
+                    Df = m.rodillos.filter(r => r.eje=='ANCHO')[0].parametros.Df;
+                    Dext = m.rodillos.filter(r => r.eje=='ANCHO')[0].parametros.Dext;
+
+                    // Calculo
+                    gap = pos_ancho + Df - Dext;
+                    piston = null;
+                    break;
                 default:
                     gap = null;
                     piston = null;
@@ -349,11 +678,12 @@ const QS_Produccion = () => {
             }
             gap_list.push({
                 op: m.operacion,
+                nombre: m.nombre,
                 gap: gap,
                 piston: piston
             });
         });
-        // console.log('gap_list');
+        console.log('gap_list', gap_list);
         // console.log(gap_list);
         setGap(gap_list);
     
@@ -505,6 +835,7 @@ const QS_Produccion = () => {
                                     }
                                     
                                     y = yc3 - R3 * Math.cos(alfa2+alfa3);
+                                    console.log('Calculo alturas BD2R y:', y);
                                     h.puntos.filter(p => p.OP == m.operacion)[0].y = y;
                                 }
                             });
@@ -588,6 +919,27 @@ const QS_Produccion = () => {
                 setDatos(dat);
             }
         }, [simulador, OP, posiciones]);
+
+     // Calculo de desarrollo teoricos:
+     useEffect(()=>{
+        if (!Dst || !fleje){
+            setDesarrollosTeorico(null);
+            return;
+        } 
+        const des_W = Dst*Math.PI;
+        const des_lineal = fleje.ancho + 0.863428+2.255361*fleje.espesor;
+        const red_W = 1;
+        const red_FP = (des_lineal - (des_W+1))/3;
+        const dT = {
+            'W': Dst*Math.PI,
+            'FP3': des_lineal - 3*red_FP,
+            'FP2': des_lineal - 2*red_FP,
+            'FP1': des_lineal - 1*red_FP,
+            'Lineal': des_lineal,
+            'Fleje': fleje.ancho,
+        }
+        setDesarrollosTeorico(dT);
+    },[Dst, fleje]);
 
     // Desarrollos modelo
     useEffect(()=>{
@@ -700,6 +1052,9 @@ const QS_Produccion = () => {
                         <React.Fragment>
                             <Col lg={1}>
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={simular}>Simular</Button>
+                            </Col>
+                            <Col lg={2}>
+                                <Button variant="info" className={'mx-2'} onClick={CalculaPosicionEstandar}>Calcula PE</Button>
                             </Col>
                         </React.Fragment>}  
                     </Row>
