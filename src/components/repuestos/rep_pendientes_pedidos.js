@@ -33,7 +33,7 @@ const ListaPedidos = ({lineasPendientes, repuesto_id, show, handlerListCancelar}
                             <tbody>                                    
                                 {lineasPendientes && lineasPendientes.map(lineas =>{
                                     if(lineas.por_recibir>0){
-                                        if(repuesto_id===lineas.repuesto){
+                                        if(repuesto_id===lineas.repuesto.id){
                                             return(
                                                 <tr key={lineas.id}>
                                                     <td>{lineas.pedido.numero}</td>
