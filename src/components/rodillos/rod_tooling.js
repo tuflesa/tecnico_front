@@ -342,7 +342,6 @@ const RodTooling = () => {
                                                         (montaje.titular_grupo === false && celda.conjunto?.tubo_madre !== null) ||
                                                         (montaje.titular_grupo === true && celda.conjunto?.tubo_madre !== null && celda.conjunto?.tubo_madre !== montaje.grupo.tubo_madre)
                                                         ) ? (
-                                                        //<img src={icono_celda[3].icono} alt="" style={{ width: '30px', height: '30px' }} />
                                                         <button
                                                             onClick={() =>
                                                                 handleOpenModal(celda)
@@ -352,7 +351,14 @@ const RodTooling = () => {
                                                             <img src={celda.conjunto?.operacion !== celda.operacion.id? icono_celda[4].icono: icono_celda[3].icono} alt="" style={{ width: "30px", height: "30px" }}/>
                                                         </button>
                                                         ) : (
-                                                        <img src={celda.icono ? icono_celda[celda.icono].icono : ''} alt="" style={{ width: '30px', height: '30px' }} />
+                                                            <button
+                                                            onClick={() =>
+                                                                handleOpenModal(celda)
+                                                            }
+                                                            style={{border: "none",background: "none",padding: 0,cursor: "pointer",}}
+                                                            >
+                                                            <img src={celda.icono ? icono_celda[celda.icono].icono : ''} alt="" style={{ width: '30px', height: '30px' }} />
+                                                        </button>
                                                         )}
                                                     </div>
                                                 ) : (
