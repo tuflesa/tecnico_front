@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Table, Button, Form } from 'react-bootstrap';
+import { Container, Row, Col, Table, Button, Modal } from 'react-bootstrap';
 import logo from '../../assets/Bornay.svg';
 import logoTuf from '../../assets/logo_tuflesa.svg';
 import { useCookies } from 'react-cookie';
@@ -27,6 +27,8 @@ const RodTooling = () => {
     const [secciones, setSecciones] = useState(null);
     const [bancadas, setBancadas] = useState(null);
     const [icono_celda, setIcono_celda] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [celdaSeleccionada, setCeldaSeleccionada] = useState(null);
     
     useEffect(() => { //SEPARAR DATOS QUE ENTRAN A TRAVES DEL FILTRO
         const params = new URLSearchParams(filtro);
@@ -42,7 +44,14 @@ const RodTooling = () => {
               }
         })
         .then( res => {
-            setMontajes(res.data);
+            const nuevosMontajes = res.data.map(m => ({
+                ...m,
+                grupo: {
+                    ...m.grupo,
+                    bancadas: (m.grupo?.bancadas ?? []).concat(m.bancadas ?? [])
+                }
+            }));
+            setMontajes(nuevosMontajes);
             let newBancadas = []; // Crear un nuevo array para almacenar los nuevos elementos
             for (var x = 0; x < res.data.length; x++) {
                 var Idmontaje = {
@@ -66,7 +75,7 @@ const RodTooling = () => {
         .catch( err => {
             console.log(err);
         });
-    }, [filtro, maquina]);
+    }, [filtro, maquina]);    
 
     useEffect(() => { //recogemos las secciones de la máquina elegida
         axios.get(BACKEND_SERVER + `/api/rodillos/seccion/` + filtro,{
@@ -248,6 +257,16 @@ const RodTooling = () => {
         setFiltro(str);
     }
 
+    const handleOpenModal = (celda) => {
+        setCeldaSeleccionada(celda);
+        setShowModal(true);
+    };
+    
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setCeldaSeleccionada(null);
+    };
+
     return (
         <Container fluid>
             <img src ={user['tec-user'].perfil.empresa.id===1?logo:logoTuf} width="200" height="200"></img>
@@ -299,93 +318,85 @@ const RodTooling = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {montajes && montajes.map(montaje => (
+                                {montajes.map(montaje => {
+                                    return (
                                     <tr key={montaje.id}>
                                         {/* Columnas principales */}
                                         <td>{montaje.nombre}</td>
                                         <td>{montaje.grupo.espesor_1 + '÷' + montaje.grupo.espesor_2}</td>
                                         <td>{'Ø' + montaje.grupo.tubo_madre}</td>
-                                        <td>{montaje.bancadas.dimensiones}</td>
-
-                                        {/* Iteración por secciones */}
-                                        {secciones && secciones.map(seccion => (
-                                            operaciones
-                                                .filter(op => op.seccion.id === seccion.id)
-                                                .map(operacion => (
-                                                    <td key={`${seccion.id}-${operacion.id}`}>
-                                                        {/* Pinta flecha si es de otra formación */}
-                                                        {conjuntos_completadosCel?.filter(celda =>
-                                                            montaje.titular_grupo === false &&
-                                                            celda.seccion === seccion.id &&
-                                                            operacion.id === celda.operacion &&
-                                                            celda.cel.conjunto.tubo_madre !== null &&
-                                                            celda.cel.montajeId === montaje.id
-                                                            /* celda.cel.bancada.tubo_madre !== celda.cel.conjunto.tubo_madre &&
-                                                            montaje.grupo.tubo_madre === celda.cel.bancada.tubo_madre */
-                                                            
-                                                        ).map(celda => (
-                                                            // backgroundColor: 'inherit -----> Hereda el fondo del padre
-                                                            <div key={celda.id} style={{backgroundColor: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px'}}>
-                                                                <img 
-                                                                    src={icono_celda[3].icono} 
-                                                                    alt="" 
-                                                                    style={{ width: '30px', height: '30px' }} 
-                                                                />
-                                                            </div>
-                                                        ))}
-
-                                                        {/* Pinta la celda con imagen */}
-                                                        {conjuntos_completadosCel?.filter(celda =>
-                                                            montaje.titular_grupo === true &&
-                                                            celda.seccion === seccion.id &&
-                                                            celda.cel.conjunto.tubo_madre !== null &&
-                                                            celda.cel.bancada.tubo_madre === celda.cel.conjunto.tubo_madre &&
-                                                            operacion.id === celda.operacion &&
-                                                            //montaje.grupo.tubo_madre === celda.cel.conjunto.tubo_madre &&
-                                                            celda.cel.montajeId === montaje.id
-                                                        ).map(celda => (
-                                                            <div key={celda.id} style={{backgroundColor: 'inherit'}}>
-                                                                {montaje.grupo.tubo_madre === celda.cel.conjunto.tubo_madre?
-                                                                    <img 
-                                                                        src={celda.cel.icono?celda.cel.icono.icono:''} 
-                                                                        alt="" 
-                                                                        style={{ width: '30px', height: '30px' }} 
-                                                                    />
-                                                                    :
-                                                                    <img 
-                                                                        src={icono_celda[3].icono} 
-                                                                        alt="" 
-                                                                        style={{ width: '30px', height: '30px' }} 
-                                                                    />
-                                                                }
-                                                            </div>
-                                                        ))}
-
-                                                        {/* Pinta celda de C.T */}
-                                                        {conjuntos_completadosCel?.filter(celda =>
-                                                            celda.seccion === seccion.id &&
-                                                            celda.cel.conjunto.tubo_madre === null &&
-                                                            operacion.id === celda.operacion &&
-                                                            celda.cel.montajeId === montaje.id
-                                                        ).map(celda => (
-                                                            <div key={celda.id} style={{backgroundColor: 'inherit'}}>
-                                                                <img 
-                                                                    src={celda.cel.icono?celda.cel.icono.icono:''}  
-                                                                    alt="" 
-                                                                    style={{ width: '30px', height: '30px' }} 
-                                                                />
-                                                            </div>
-                                                        ))}
-                                                    </td>
-                                                ))
-                                        ))}
+                                        <td>{montaje.bancadas?.dimensiones || '-'}</td>
+                                        {secciones.map(seccion => {
+                                        // Buscamos la bancada que corresponde a esta sección
+                                        const bancada = montaje.grupo.bancadas.find(b => b.seccion.id === seccion.id);
+                                        return operaciones
+                                            .filter(op => op.seccion.id === seccion.id)
+                                            .map(operacion => {
+                                            // Buscamos la celda dentro de esta bancada
+                                            const celda = bancada?.celdas.find(c => c.operacion.id === operacion.id);
+                                            return (
+                                                <td key={`${montaje.id}-${seccion.id}-${operacion.id}`} style={{ textAlign: 'center', backgroundColor: celda?.conjunto?.operacion && celda?.operacion?.id && celda.conjunto.operacion !== celda.operacion.id ? 'orange' : 'transparent', }}>
+                                                {celda ? (
+                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px',}}>
+                                                        {(
+                                                        (montaje.titular_grupo === false && celda.conjunto?.tubo_madre !== null) ||
+                                                        (montaje.titular_grupo === true && celda.conjunto?.tubo_madre !== null && celda.conjunto?.tubo_madre !== montaje.grupo.tubo_madre)
+                                                        ) ? (
+                                                        //<img src={icono_celda[3].icono} alt="" style={{ width: '30px', height: '30px' }} />
+                                                        <button
+                                                            onClick={() =>
+                                                                handleOpenModal(celda)
+                                                            }
+                                                            style={{border: "none",background: "none",padding: 0,cursor: "pointer",}}
+                                                            >
+                                                            <img src={celda.conjunto?.operacion !== celda.operacion.id? icono_celda[4].icono: icono_celda[3].icono} alt="" style={{ width: "30px", height: "30px" }}/>
+                                                        </button>
+                                                        ) : (
+                                                        <img src={celda.icono ? icono_celda[celda.icono].icono : ''} alt="" style={{ width: '30px', height: '30px' }} />
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <div style={{ width: '30px', height: '30px' }}></div>
+                                                )}
+                                                </td>
+                                            );
+                                            });
+                                        })}
                                     </tr>
-                                ))}
-                            </tbody>
+                                    );
+                                })}
+                                </tbody>
+
                         </Table>
                     </Col>
                 </Row> 
             )}
+             {/* Modal */}
+             <Modal show={showModal} onHide={handleCloseModal} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Rodillos</Modal.Title>
+                </Modal.Header>
+                <Modal.Body style={{ textAlign: "center" }}>
+                    {celdaSeleccionada && (
+                    <div style={{ textAlign: "left" }}>
+                        {celdaSeleccionada?.conjunto?.elementos?.map((elemento, index) => (
+                        <div key={index} style={{ marginBottom: "5px" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", padding: "5px 0" }}>
+                            <span>{elemento.eje.tipo.nombre}</span>
+                            <span>{elemento.rodillo.nombre}</span>
+                            </div>
+                            {index < celdaSeleccionada.conjunto.elementos.length - 1 && <hr style={{ margin: "5px 0", borderTop: "1px solid #ccc" }} />}
+                        </div>
+                        ))}
+                    </div>
+                    )}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseModal}>
+                    Cerrar
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </Container>
     )
 }
