@@ -36,6 +36,8 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
         grupo_tubomadre: '',
         titular: montaje_edi?montaje_edi.titular_grupo:false,
         actualizar: montaje_edi?montaje_edi.id?true:false:false,
+        anotaciones_montaje: montaje_edi?montaje_edi.anotciones_montaje:'',
+        archivo: montaje_edi?montaje_edi.archivo:'',
     });
 
     useEffect(() => { //SEPARAR DATOS QUE ENTRAN A TRAVES DEL FILTRO
@@ -158,9 +160,11 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
         AbrirConjunto();
     }
 
-    const handlerActualizar = () => {
+    const ActualizarMontaje = () => {
         axios.patch(BACKEND_SERVER + `/api/rodillos/montaje/${montaje_edi.id}/`, { 
             titular_grupo: datos.titular,
+            anotciones_montaje: datos.anotaciones_montaje,
+            archivo: datos.archivo,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -174,7 +178,7 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
         });
     }
 
-    const handlerGuardar = () => { //Guardamos el montaje, primero comprobamos si ya existe.
+    const GuardarMontaje = () => { //Guardamos el montaje, primero comprobamos si ya existe.
         if(datos.nombre===''||datos.maquina===''||datos.grupo===''||datos.bancada_ct===''){
             alert('Revisa los datos obligatorios');
         }
@@ -196,6 +200,8 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
                         grupo:datos.grupo,
                         bancadas:datos.bancada_ct,
                         titular_grupo: datos.titular,
+                        anotciones_montaje: datos.anotaciones_montaje,
+                        archivo: datos.archivo,
                     }, {
                         headers: {
                             'Authorization': `token ${token['tec-token']}`
@@ -317,8 +323,19 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
                     </Col>
                 </ Row>
             }
-            {bancadas && operaciones && formaciones_completadas?grabado|| datos.actualizar?<Button variant="outline-primary" onClick={handlerActualizar}>Actualizar</Button>:<Button variant="outline-primary" onClick={handlerGuardar}>Guardar</Button>:''}
-            <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
+            <Row>
+                <Col>
+                    <Form.Group controlId="anotaciones_montaje">
+                        <Form.Label>Anotaciones del montaje</Form.Label>
+                        <Form.Control as="textarea" rows={2}
+                                    name='anotaciones_montaje' 
+                                    value={datos.anotaciones_montaje}
+                                    onChange={handleInputChange}
+                                    placeholder="antotaciones"
+                        />
+                    </Form.Group>
+                </Col>
+            </Row>
             <Row>
                 <Col>
                     <Form.Group controlId="nombre">
@@ -332,6 +349,9 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
                     </Form.Group>
                 </Col>
             </Row>
+            {bancadas && operaciones && formaciones_completadas?grabado|| datos.actualizar?<Button variant="outline-primary" onClick={ActualizarMontaje}>Actualizar</Button>:<Button variant="outline-primary" onClick={GuardarMontaje}>Guardar</Button>:''}
+            <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
+            
             {bancadas && operaciones && formaciones_completadas?
                 <Row>
                     <Col>
