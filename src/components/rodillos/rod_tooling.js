@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Table, Button, Modal } from 'react-bootstrap';
+import { Receipt, Paperclip } from 'react-bootstrap-icons';
 import logo from '../../assets/Bornay.svg';
 import logoTuf from '../../assets/logo_tuflesa.svg';
 import { useCookies } from 'react-cookie';
@@ -29,6 +30,9 @@ const RodTooling = () => {
     const [icono_celda, setIcono_celda] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [celdaSeleccionada, setCeldaSeleccionada] = useState(null);
+    const [setModalComentarios, setShowModalComentarios] = useState(false);
+    const [montajeSeleccionado, setMontajeSeleccionado] = useState(null);
+    const [comentariosMontaje, setComentariosMontaje] = useState('');
     
     useEffect(() => { //SEPARAR DATOS QUE ENTRAN A TRAVES DEL FILTRO
         const params = new URLSearchParams(filtro);
@@ -267,6 +271,17 @@ const RodTooling = () => {
         setCeldaSeleccionada(null);
     };
 
+    const handleOpenModalComentarios = (montaje) => {
+        setMontajeSeleccionado(montaje);
+        setComentariosMontaje(montaje.anotciones_montaje || 'No hay comentarios.');
+        setShowModalComentarios(true);
+    };
+    
+    const handleCloseModalComentarios = () => {
+        setShowModalComentarios(false);
+        setMontajeSeleccionado(null);
+    };
+
     return (
         <Container fluid>
             <img src ={user['tec-user'].perfil.empresa.id===1?logo:logoTuf} width="200" height="200"></img>
@@ -294,6 +309,7 @@ const RodTooling = () => {
                                             {seccion.nombre}
                                         </th>
                                     ))}
+                                    <th>Acciones</th>
                                 </tr>
                                 <tr>
                                     <th></th>
@@ -315,6 +331,7 @@ const RodTooling = () => {
                                                 </th>
                                             ))
                                     ))}
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -368,6 +385,14 @@ const RodTooling = () => {
                                             );
                                             });
                                         })}
+                                        <td>
+                                            <Receipt className="mr-3 pencil" onClick={() => handleOpenModalComentarios(montaje)} 
+                                                style={{cursor: montaje.anotciones_montaje ? 'pointer' : 'not-allowed', opacity: montaje.anotciones_montaje ? 1 : 0.5}}     
+                                            />
+                                            <Paperclip className="mr-3 pencil" onClick={() => window.open(montaje.archivo)} 
+                                                style={{cursor: montaje.archivo ? 'pointer' : 'not-allowed', opacity: montaje.archivo ? 1 : 0.5}} 
+                                            />
+                                        </td>
                                     </tr>
                                     );
                                 })}
@@ -403,6 +428,20 @@ const RodTooling = () => {
                     </Button>
                 </Modal.Footer>
             </Modal>
+            {/* Modal Comenarios de montaje */}
+            <Modal show={setModalComentarios} onHide={handleCloseModalComentarios} size='xl'>
+                <Modal.Header closeButton>
+                    <Modal.Title>Comentarios de {montajeSeleccionado?.nombre}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>{comentariosMontaje}</p>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseModalComentarios}>
+                        Cerrar
+                    </Button>
+                </Modal.Footer>
+            </Modal>;
         </Container>
     )
 }
