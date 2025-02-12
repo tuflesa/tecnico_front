@@ -23,8 +23,9 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
     const [formaciones_filtradas, setFormacionesFiltradas] = useState('');
     const [operacion_marcada, setOperacionMarcada] = useState(null);
     const [show_conjunto, setShowConjunto] = useState(false);
-    const [grabado, setGrabar] = useState(false);
+    const [grabado, setGrabar] = useState(true);
     const [color_cel, setColor] = useState(0);
+    const [select_Archivo, setSelectArchivo] = useState(montaje_edi?.id?montaje_edi.archivo:'');
 
 
     const [datos, setDatos] = useState({
@@ -34,6 +35,10 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
         nombre:'',
         tubo_madre:'',
         grupo_tubomadre: '',
+        titular: montaje_edi?montaje_edi.titular_grupo:false,
+        actualizar: montaje_edi?montaje_edi.id?true:false:false,
+        anotaciones_montaje: montaje_edi?montaje_edi.anotciones_montaje:'',
+        archivo: montaje_edi?.id?montaje_edi.archivo:'',
     });
 
     useEffect(() => { //SEPARAR DATOS QUE ENTRAN A TRAVES DEL FILTRO
@@ -156,7 +161,32 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
         AbrirConjunto();
     }
 
-    const handlerGuardar = () => { //Guardamos el montaje, primero comprobamos si ya existe.
+    const ActualizarMontaje = () => {
+
+        const formData = new FormData();
+        formData.append("titular_grupo", datos.titular);
+        formData.append("anotciones_montaje", datos.anotaciones_montaje);
+        
+        // Solo agregar el archivo si existe y es un objeto `File`
+        if (select_Archivo instanceof File) {
+            formData.append("archivo", select_Archivo);
+        }
+        
+        axios.patch(BACKEND_SERVER + `/api/rodillos/montaje/${montaje_edi.id}/`, formData, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`,
+            }
+        })
+        .then(res => {
+            alert('Actualizado con éxito');
+        })
+        .catch(err => {
+            console.log(err);
+        });
+        
+    }
+
+    const GuardarMontaje = () => { //Guardamos el montaje, primero comprobamos si ya existe.
         if(datos.nombre===''||datos.maquina===''||datos.grupo===''||datos.bancada_ct===''){
             alert('Revisa los datos obligatorios');
         }
@@ -171,13 +201,20 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
                     alert('Este montaje ya está creado');
                 }
                 else{
+                    const formData = new FormData();
+                    formData.append("nombre", datos.nombre);
+                    formData.append("maquina", datos.maquina);
+                    formData.append("grupo", datos.grupo);
+                    formData.append("bancadas", datos.bancada_ct);
+                    formData.append("titular_grupo", datos.titular);
+                    formData.append("anotciones_montaje", datos.anotaciones_montaje);
+
+                    // Solo agregar el archivo si existe
+                    if (select_Archivo instanceof File) {
+                        formData.append("archivo", select_Archivo);
+                    }
                     
-                    axios.post(BACKEND_SERVER + `/api/rodillos/montaje/`, { //creamos el montaje
-                        nombre: datos.nombre,
-                        maquina: datos.maquina,
-                        grupo:datos.grupo,
-                        bancadas:datos.bancada_ct,
-                    }, {
+                    axios.post(BACKEND_SERVER + `/api/rodillos/montaje/`, formData, { //creamos el montaje
                         headers: {
                             'Authorization': `token ${token['tec-token']}`
                             }     
@@ -217,6 +254,22 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
             [event.target.name] : event.target.value
         })
     }
+
+    const handleInputChange_titular = (event) => {
+        setDatos(prevDatos => ({
+            ...prevDatos,
+            titular: !prevDatos.titular
+        }));
+    }
+
+    const handleInputChange_archivo = (event) => {
+        const file = event.target.files[0];
+        setSelectArchivo(file);
+        setDatos({
+            ...datos,
+            archivo: file ? file.name : '',  // Actualiza el nombre del archivo en `datos`
+        });
+    };
 
     return (
         <Container>
@@ -272,6 +325,7 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
                             </Form.Group>
                         </Col>
                     </Row>
+                    
                 </Form>
                 :
                 <Row>
@@ -280,8 +334,50 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
                     </Col>
                 </ Row>
             }
-            <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
-            {bancadas && operaciones && formaciones_completadas?grabado?<Button variant="outline-primary" disabled={grabado?true:false} onClick={handlerGuardar}>Guardar</Button>:<Button variant="outline-primary" onClick={handlerGuardar}>Guardar</Button>:''}
+            <Row>
+                <Col>
+                    <Form.Group className="mb-3" controlId="titular">
+                        <Form.Check type="checkbox" 
+                                    name='titular'
+                                    label="¿Titular de grupo?"
+                                    checked = {datos.titular}
+                                    onChange = {handleInputChange_titular} />
+                    </Form.Group>
+                </Col>
+            </Row>
+            <Row>
+                <Col>
+                    <Form.Group controlId="anotaciones_montaje">
+                        <Form.Label>Anotaciones del montaje</Form.Label>
+                        <Form.Control as="textarea" rows={2}
+                                    name='anotaciones_montaje' 
+                                    value={datos.anotaciones_montaje}
+                                    onChange={handleInputChange}
+                                    placeholder="antotaciones"
+                        />
+                    </Form.Group>
+                </Col>
+            </Row>
+            <Row>
+                <Col>
+                    <form encType='multipart/form-data'>
+                        <Form.Group controlId="archivo">
+                            <Form.Label>Archivo: </Form.Label>
+                            <Form.Control type="file" 
+                                        name='archivo' 
+                                        onChange={handleInputChange_archivo} />
+                        </Form.Group>
+                    </form>
+                    {select_Archivo && (
+                        <Form.Text className="text-muted d-block mb-3">
+                            Archivo guardado:  
+                            <a href={select_Archivo} target="_blank" rel="noopener noreferrer">
+                                <strong> {datos.archivo.split('/').pop()} </strong>
+                            </a>
+                        </Form.Text>
+                    )}
+                </Col>
+            </Row>
             <Row>
                 <Col>
                     <Form.Group controlId="nombre">
@@ -295,6 +391,13 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
                     </Form.Group>
                 </Col>
             </Row>
+            {(bancadas && operaciones && formaciones_completadas) && (
+                grabado || datos.actualizar ? 
+                    <Button variant="outline-primary" onClick={ActualizarMontaje}>Actualizar</Button> :
+                    <Button variant="outline-primary" onClick={GuardarMontaje}>Guardar</Button>
+            )}
+            <Button variant="outline-primary" type="submit" className={'mx-2'} onClick={() => window.history.back()}>Cancelar / Volver</Button>
+
             {bancadas && operaciones && formaciones_completadas?
                 <Row>
                     <Col>

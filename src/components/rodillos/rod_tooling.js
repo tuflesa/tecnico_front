@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Table, Button, Form } from 'react-bootstrap';
+import { Container, Row, Col, Table, Button, Modal } from 'react-bootstrap';
+import { Receipt, Paperclip } from 'react-bootstrap-icons';
 import logo from '../../assets/Bornay.svg';
 import logoTuf from '../../assets/logo_tuflesa.svg';
 import { useCookies } from 'react-cookie';
@@ -26,6 +27,12 @@ const RodTooling = () => {
     const [operaciones, setOperaciones] = useState(null);
     const [secciones, setSecciones] = useState(null);
     const [bancadas, setBancadas] = useState(null);
+    const [icono_celda, setIcono_celda] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [celdaSeleccionada, setCeldaSeleccionada] = useState(null);
+    const [setModalComentarios, setShowModalComentarios] = useState(false);
+    const [montajeSeleccionado, setMontajeSeleccionado] = useState(null);
+    const [comentariosMontaje, setComentariosMontaje] = useState('');
     
     useEffect(() => { //SEPARAR DATOS QUE ENTRAN A TRAVES DEL FILTRO
         const params = new URLSearchParams(filtro);
@@ -41,7 +48,14 @@ const RodTooling = () => {
               }
         })
         .then( res => {
-            setMontajes(res.data);
+            const nuevosMontajes = res.data.map(m => ({
+                ...m,
+                grupo: {
+                    ...m.grupo,
+                    bancadas: (m.grupo?.bancadas ?? []).concat(m.bancadas ?? [])
+                }
+            }));
+            setMontajes(nuevosMontajes);
             let newBancadas = []; // Crear un nuevo array para almacenar los nuevos elementos
             for (var x = 0; x < res.data.length; x++) {
                 var Idmontaje = {
@@ -65,7 +79,7 @@ const RodTooling = () => {
         .catch( err => {
             console.log(err);
         });
-    }, [filtro, maquina]);
+    }, [filtro, maquina]);    
 
     useEffect(() => { //recogemos las secciones de la máquina elegida
         axios.get(BACKEND_SERVER + `/api/rodillos/seccion/` + filtro,{
@@ -145,12 +159,26 @@ const RodTooling = () => {
             const unimos = conjuntosCel.concat(conjuntosCelCT);
             unimos.forEach((element, index) => {
                 element.numCelda = index + 1;
-            });           
+            });          
            setConjuntosCompletadosCel(unimos);
         } else {
             setConjuntosCompletadosCel(null);
         }
     }, [conjuntosCel, conjuntosCelCT]);
+
+    useEffect(() => { //recogemos todos los iconos posibles para la operación
+        axios.get(BACKEND_SERVER + `/api/rodillos/icono_celda/`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( res => {
+            setIcono_celda(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
 
     const cogerDatos = async (montajes) => {
         try {
@@ -228,9 +256,31 @@ const RodTooling = () => {
             console.log(err);
         }
     }; 
+    
     const actualizaFiltro = str => {
         setFiltro(str);
     }
+
+    const handleOpenModal = (celda) => {
+        setCeldaSeleccionada(celda);
+        setShowModal(true);
+    };
+    
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setCeldaSeleccionada(null);
+    };
+
+    const handleOpenModalComentarios = (montaje) => {
+        setMontajeSeleccionado(montaje);
+        setComentariosMontaje(montaje.anotciones_montaje || 'No hay comentarios.');
+        setShowModalComentarios(true);
+    };
+    
+    const handleCloseModalComentarios = () => {
+        setShowModalComentarios(false);
+        setMontajeSeleccionado(null);
+    };
 
     return (
         <Container fluid>
@@ -259,6 +309,7 @@ const RodTooling = () => {
                                             {seccion.nombre}
                                         </th>
                                     ))}
+                                    <th>Acciones</th>
                                 </tr>
                                 <tr>
                                     <th></th>
@@ -280,80 +331,117 @@ const RodTooling = () => {
                                                 </th>
                                             ))
                                     ))}
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {montajes && montajes.map(montaje => (
+                                {montajes.map(montaje => {
+                                    return (
                                     <tr key={montaje.id}>
                                         {/* Columnas principales */}
                                         <td>{montaje.nombre}</td>
                                         <td>{montaje.grupo.espesor_1 + '÷' + montaje.grupo.espesor_2}</td>
                                         <td>{'Ø' + montaje.grupo.tubo_madre}</td>
-                                        <td>{montaje.bancadas.dimensiones}</td>
-
-                                        {/* Iteración por secciones */}
-                                        {secciones && secciones.map(seccion => (
-                                            operaciones
-                                                .filter(op => op.seccion.id === seccion.id)
-                                                .map(operacion => (
-                                                    <td key={`${seccion.id}-${operacion.id}`}>
-                                                        {/* Pinta flecha si es de otra formación */}
-                                                        {conjuntos_completadosCel?.filter(celda =>
-                                                            celda.seccion === seccion.id &&
-                                                            celda.cel.conjunto.tubo_madre !== null &&
-                                                            celda.cel.bancada.tubo_madre !== celda.cel.conjunto.tubo_madre &&
-                                                            operacion.id === celda.operacion &&
-                                                            montaje.grupo.tubo_madre === celda.cel.bancada.tubo_madre &&
-                                                            celda.cel.montajeId === montaje.id
-                                                        ).map(celda => (
-                                                            <div key={celda.id} style={{ color: 'red' }}>
-                                                                {'-->'}
-                                                            </div>
-                                                        ))}
-
-                                                        {/* Pinta la celda con imagen */}
-                                                        {conjuntos_completadosCel?.filter(celda =>
-                                                            celda.seccion === seccion.id &&
-                                                            celda.cel.conjunto.tubo_madre !== null &&
-                                                            celda.cel.bancada.tubo_madre === celda.cel.conjunto.tubo_madre &&
-                                                            operacion.id === celda.operacion &&
-                                                            montaje.grupo.tubo_madre === celda.cel.conjunto.tubo_madre &&
-                                                            celda.cel.montajeId === montaje.id
-                                                        ).map(celda => (
-                                                            <div key={celda.id}>
-                                                                <img 
-                                                                    src={celda.cel.icono} 
-                                                                    alt="" 
-                                                                    style={{ width: '30px', height: '30px' }} 
-                                                                />
-                                                            </div>
-                                                        ))}
-
-                                                        {/* Pinta celda de C.T */}
-                                                        {conjuntos_completadosCel?.filter(celda =>
-                                                            celda.seccion === seccion.id &&
-                                                            celda.cel.conjunto.tubo_madre === null &&
-                                                            operacion.id === celda.operacion &&
-                                                            celda.cel.montajeId === montaje.id
-                                                        ).map(celda => (
-                                                            <div key={celda.id}>
-                                                                <img 
-                                                                    src={celda.cel.icono} 
-                                                                    alt="" 
-                                                                    style={{ width: '30px', height: '30px' }} 
-                                                                />
-                                                            </div>
-                                                        ))}
-                                                    </td>
-                                                ))
-                                        ))}
+                                        <td>{montaje.bancadas?.dimensiones || '-'}</td>
+                                        {secciones.map(seccion => {
+                                        // Buscamos la bancada que corresponde a esta sección
+                                        const bancada = montaje.grupo.bancadas.find(b => b.seccion.id === seccion.id);
+                                        return operaciones
+                                            .filter(op => op.seccion.id === seccion.id)
+                                            .map(operacion => {
+                                            // Buscamos la celda dentro de esta bancada
+                                            const celda = bancada?.celdas.find(c => c.operacion.id === operacion.id);
+                                            return (
+                                                <td key={`${montaje.id}-${seccion.id}-${operacion.id}`} style={{ textAlign: 'center', backgroundColor: celda?.conjunto?.operacion && celda?.operacion?.id && celda.conjunto.operacion !== celda.operacion.id ? 'orange' : 'transparent', }}>
+                                                {celda ? (
+                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px',}}>
+                                                        {(
+                                                        (montaje.titular_grupo === false && celda.conjunto?.tubo_madre !== null) ||
+                                                        (montaje.titular_grupo === true && celda.conjunto?.tubo_madre !== null && celda.conjunto?.tubo_madre !== montaje.grupo.tubo_madre)
+                                                        ) ? (
+                                                        <button
+                                                            onClick={() =>
+                                                                handleOpenModal(celda)
+                                                            }
+                                                            style={{border: "none",background: "none",padding: 0,cursor: "pointer",}}
+                                                            >
+                                                            <img src={celda.conjunto?.operacion !== celda.operacion.id? icono_celda[4].icono: icono_celda[3].icono} alt="" style={{ width: "30px", height: "30px" }}/>
+                                                        </button>
+                                                        ) : (
+                                                            <button
+                                                            onClick={() =>
+                                                                handleOpenModal(celda)
+                                                            }
+                                                            style={{border: "none",background: "none",padding: 0,cursor: "pointer",}}
+                                                            >
+                                                            <img src={celda.icono ? icono_celda[celda.icono].icono : ''} alt="" style={{ width: '30px', height: '30px' }} />
+                                                        </button>
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <div style={{ width: '30px', height: '30px' }}></div>
+                                                )}
+                                                </td>
+                                            );
+                                            });
+                                        })}
+                                        <td>
+                                            <Receipt className="mr-3 pencil" onClick={() => handleOpenModalComentarios(montaje)} 
+                                                style={{cursor: montaje.anotciones_montaje ? 'pointer' : 'not-allowed', opacity: montaje.anotciones_montaje ? 1 : 0.5}}     
+                                            />
+                                            <Paperclip className="mr-3 pencil" onClick={() => window.open(montaje.archivo)} 
+                                                style={{cursor: montaje.archivo ? 'pointer' : 'not-allowed', opacity: montaje.archivo ? 1 : 0.5}} 
+                                            />
+                                        </td>
                                     </tr>
-                                ))}
-                            </tbody>
+                                    );
+                                })}
+                                </tbody>
+
                         </Table>
                     </Col>
                 </Row> 
             )}
+             {/* Modal */}
+             <Modal show={showModal} onHide={handleCloseModal} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Rodillos</Modal.Title>
+                </Modal.Header>
+                <Modal.Body style={{ textAlign: "center" }}>
+                    {celdaSeleccionada && (
+                    <div style={{ textAlign: "left" }}>
+                        {celdaSeleccionada?.conjunto?.elementos?.map((elemento, index) => (
+                        <div key={index} style={{ marginBottom: "5px" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", padding: "5px 0" }}>
+                            <span>{elemento.eje.tipo.nombre}</span>
+                            <span>{elemento.rodillo.nombre}</span>
+                            </div>
+                            {index < celdaSeleccionada.conjunto.elementos.length - 1 && <hr style={{ margin: "5px 0", borderTop: "1px solid #ccc" }} />}
+                        </div>
+                        ))}
+                    </div>
+                    )}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseModal}>
+                    Cerrar
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+            {/* Modal Comenarios de montaje */}
+            <Modal show={setModalComentarios} onHide={handleCloseModalComentarios} size='xl'>
+                <Modal.Header closeButton>
+                    <Modal.Title>Comentarios de {montajeSeleccionado?.nombre}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>{comentariosMontaje}</p>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseModalComentarios}>
+                        Cerrar
+                    </Button>
+                </Modal.Footer>
+            </Modal>;
         </Container>
     )
 }
