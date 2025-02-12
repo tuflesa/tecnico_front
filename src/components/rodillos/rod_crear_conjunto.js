@@ -131,11 +131,11 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, gr
     }, [token, operacion_marcada, grupoId]);
 
     useEffect(() => {
-        var valormenos=tubomadre -10;
-        var valormayor=tubomadre +10;
+        var valormenos=tubomadre -50;
+        var valormayor=tubomadre +50;
         if(!datos.tubo_madre_filtro){
-            valormenos = tubomadre -10;
-            valormayor = tubomadre +10;
+            valormenos = tubomadre -50;
+            valormayor = tubomadre +50;
         }
         else{
             valormenos = datos.tubo_madre_filtro;
@@ -159,7 +159,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, gr
     }, [filtro]);
 
     useEffect(() => { //PARA OBTENER LOS Ø DE TUBO MADRE UNICOS
-        axios.get(BACKEND_SERVER + `/api/rodillos/grupo_only/?tubo_madre__gte=${tubomadre-10}&tubo_madre__lte=${tubomadre+10}&maquina__empresa=${empresa_id}`,{
+        axios.get(BACKEND_SERVER + `/api/rodillos/grupo_only/?tubo_madre__gte=${tubomadre-50}&tubo_madre__lte=${tubomadre+10}&maquina__empresa=${empresa_id}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                   }
@@ -179,7 +179,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, gr
     }, [rod_id, selectedEje, operacion_rod, tubo_madre_rod]);
     
     useEffect(() => { //BUSCAMOS LAS BANCADAS QUE PRECISAMOS PARA ESTA OPERACIÓN
-        operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/bancada_grupos/?seccion=${operacion_marcada.seccion.id}&tubo_madre__gte=${tubomadre-10}&tubo_madre__lte=${tubomadre+10}`,{
+        operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/bancada_grupos/?seccion=${operacion_marcada.seccion.id}&tubo_madre__gte=${tubomadre-50}&tubo_madre__lte=${tubomadre+10}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
