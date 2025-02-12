@@ -619,7 +619,7 @@ const StandChart2 = ({montaje, posiciones, gap, fleje}) => {
             const pos_sup_op_ancho = -posiciones.filter(p => p.eje=='SUP_H_OP')[0].pos;
             const pos_sup_mo_alto = posiciones.filter(p => p.eje=='SUP_V_MO')[0].pos;
             const pos_sup_mo_ancho = posiciones.filter(p => p.eje=='SUP_H_MO')[0].pos;
-            const h_cab = posiciones.filter(p => p.eje=='CAB')[0].pos;;
+            const h_cab = posiciones.filter(p => p.eje=='CAB')[0].pos;
 
             // Variables
             let xc, yc;
@@ -1685,8 +1685,24 @@ const StandChart2 = ({montaje, posiciones, gap, fleje}) => {
             .selectAll('text')
             .data(gap)
             .join('text')
-            .attr("x", xScale(-limite*0.8))
-            .attr("y", yScale(-limite*0.9))
+            .attr("x", g => {
+                switch (g.nombre){
+                    case 'W':
+                        return xScale(-limite*0.3);
+                    case 'IS1':
+                        return xScale(-limite*0.8);
+                    default:
+                        return xScale(-limite*0.8);
+                }
+            })
+            .attr("y", g => {
+                switch (g.nombre){
+                    case 'W':
+                        return yScale(limite*0.8);
+                    default:
+                        return yScale(-limite*0.9); 
+                }
+            })
             .text(g => g.gap&&('Gap: ' + g.gap.toFixed(2)));
 
         gap&&select(svg).select('.piston')

@@ -188,7 +188,7 @@ const FlowerChart2 = ({montaje, posiciones, fleje, setDesarrollosModelo}) => {
                     r.closePath();
 
                     break;
-                    case 'BD_2':
+                case 'BD_2':
                         R1 = roll.parametros.R1;
                         alfa1 = roll.parametros.alfa1 * Math.PI / 180;
                         R2 = roll.parametros.R2;
@@ -575,21 +575,37 @@ const FlowerChart2 = ({montaje, posiciones, fleje, setDesarrollosModelo}) => {
 
             // Desarrollo
             if (dibujar) {
-                let Desarrollo = R1_s*(alfa3-alfa2) + R1_l*alfa1;
+                let Desarrollo = 0;
+                console.log('Calculo desarrollo W ...');
+                if (alfa3 > 0){
+                    Desarrollo = R1_s*(alfa3-alfa2) + R1_l*alfa1;
+                }
+                else {
+                    Desarrollo = R1_s*(alfa3-alfa2+2*Math.PI) + R1_l*alfa1;
+                }
+                console.log('alfa3, alfa2 ', alfa3, alfa2);
+                console.log('sup OP: ', Desarrollo);
                 if (pos_lop<pos_inf) {
                     Desarrollo = Desarrollo + R1_l*alfa4 + R2*(Math.PI/2 - alfa4);
                 }
                 else {
                     Desarrollo = Desarrollo + R2*alfa4 + R1_l*(Math.PI/2 - alfa4);
                 }
+                console.log('LAT OP: ', Desarrollo);
                 if (pos_lmo<pos_inf) {
                     Desarrollo = Desarrollo + R1_l*alfa4m + R2m*(Math.PI/2 - alfa4m);
                 }
                 else {
                     Desarrollo = Desarrollo + R2m*alfa4m + R1_l*(Math.PI/2 - alfa4m);
                 }
-                des_W = Desarrollo + R1_l*alfa1m + R1_s*(alfa3m-alfa2m);
-                console.log(m.nombre + ' desarrollo: ', Desarrollo);
+                console.log('LAT MO: ', Desarrollo);
+                if (alfa3m>0) {
+                    des_W = Desarrollo + R1_l*alfa1m + R1_s*(alfa3m-alfa2m);
+                }
+                else {
+                    des_W = Desarrollo + R1_l*alfa1m + R1_s*(alfa3m-alfa2m+2*Math.PI);
+                }
+                console.log(m.nombre + ' desarrollo: ', des_W);
             }
 
             // Dibujo
@@ -716,7 +732,7 @@ const FlowerChart2 = ({montaje, posiciones, fleje, setDesarrollosModelo}) => {
     // Calculo del desarrollo y crecimiento hasta final del lineal
     useEffect(()=>{
         fleje&&des_FP1&&des_FP2&&des_FP3&&des_W&&setDesarrollosModelo({
-            'D' : fleje.ancho,
+            'Fleje' : fleje.ancho,
             'Lineal': fleje.ancho + 0.863428+2.255361*fleje.espesor,
             'FP1' : des_FP1,
             'FP2' : des_FP2,
