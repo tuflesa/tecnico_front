@@ -4,7 +4,7 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 
-const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, grupoEspesor, empresa_id, maquina, tubomadre, elementos_formacion, grupo_bancadas, colorAzul, colorAzulB, colorVerde, bancada_id, bancada_otraformacion}) => {
+const RodConjunto = ({show, setShow, elementos_formacion, handleClose, operacion_marcada, grupoId, grupoEspesor, empresa_id, maquina, tubomadre, grupo_bancadas, colorAzul, colorAzulB, colorVerde, bancada_id, bancada_otraformacion}) => {
     const [token] = useCookies(['tec-token']);
     const [bancadaId, setBancadaId] = useState(bancada_id); // Estado para bancada_id
 
@@ -39,8 +39,15 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, gr
         operacion_filtro: '',
         tubo_madre_filtro: '',
         conjunto_elegido: '',
-        icono_celda: operacion_marcada? operacion_marcada.icono_celda:'',
+        icono_celda:colorVerde?(elementos_formacion[0]?.icono?elementos_formacion[0].icono.id:operacion_marcada?operacion_marcada.icono_celda:''):'',
     });
+    useEffect(() => {
+        setDatos(prevDatos => ({
+            ...prevDatos,
+            icono_celda: colorVerde?(elementos_formacion[0]?.icono?elementos_formacion[0].icono.id:operacion_marcada.icono_celda):''
+        }));
+    }, [operacion_marcada]);
+
     useEffect(() => {
         if (grupoId_rod!==null && rodillos) {
             for(var y=0;y<rodillos.length;y++){
@@ -340,7 +347,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, gr
         id_bancada && axios.post(BACKEND_SERVER + `/api/rodillos/celda/`, { //creamos celda
             bancada: id_bancada,
             conjunto: conjunto_id,
-            icono: operacion_marcada.icono_celda?operacion_marcada.icono_celda:'',
+            icono: datos.icono_celda,
             operacion: operacion_id,
         }, {
             headers: {
@@ -348,6 +355,25 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, gr
                 }     
         })
         .then( res => { 
+            handleClose();
+            setShow(false);
+            window.location.href=`/rodillos/grupo_editar/${grupoId}`;
+        })
+        .catch(err => { 
+            console.error(err);
+        })
+    }
+
+    const ActualizarIcono = (id_bancada) => {
+        axios.patch(BACKEND_SERVER + `/api/rodillos/celda/${elementos_formacion[0].id}/`, { //modificamos id imagen
+            icono: parseInt(datos.icono_celda),
+        }, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+                }     
+        })
+        .then( res => { 
+            console.log('res.data de la celda despues del patch',res.data);
             handleClose();
             setShow(false);
             window.location.href=`/rodillos/grupo_editar/${grupoId}`;
@@ -458,9 +484,10 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, gr
     }
 
     const handleInputChange_icono = (event) => {
+        const { value } = event.target;
         setDatos(prevDatos => ({
             ...prevDatos,
-            icono_celda: event.target.value
+            icono_celda: value
         }));
     }
 
@@ -500,71 +527,79 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, gr
                         <Form>
                             <Row>
                                 <Col>
-                                {ejes && ejes.map(eje => (
-                                    <Form.Group controlId={eje.id} key={eje.id}>
-                                        <Form.Label>{eje.tipo.nombre}</Form.Label>
-                                        <Form.Control
-                                            as="text"
-                                            name={eje.id}
-                                            value={rodillo_elegido[eje.id] || ''}
-                                            //onChange={handleInputChange}
-                                            placeholder={eje.tipo.nombre}
-                                            style={{fontWeight: 'bold', color: 'red'}}
-                                        >
-                                            {rodillo_elegido && rodillo_elegido.map(rod => {
-                                                if (rod.eje.tipo.id === eje.tipo.id && rod.rodillo.diametro === eje.diametro) {
-                                                    return (
-                                                        <option key={rod.rodillo.id} value={rod.rodillo.id}>
-                                                            {rod.rodillo.nombre}
-                                                        </option>
-                                                    )
-                                                }
-                                            })}
-                                        </Form.Control>
-                                        <Form.Control
-                                            as="select"
-                                            name={eje.id}
-                                            value={selectRodilloId[eje.id] || ''}
-                                            onChange={handleInputChange}
-                                            placeholder={eje.tipo.nombre}
-                                            disabled={bancada_otraformacion.id?true:false}
-                                        >
-                                            <option key={0} value={''}>Elegir rodillo</option>
-                                            {rodillos && rodillos.map(rodillo => {
-                                                if (rodillo.tipo === eje.tipo.id && rodillo.diametro === eje.diametro) {
-                                                    return (
-                                                        <option key={rodillo.id} value={`${rodillo.id},${rodillo.operacion},${rodillo.grupo.id},${eje.id},${rodillo.espesor_1},${rodillo.espesor_2},${rodillo.grupo.nombre}`}>
-                                                            {rodillo.nombre}
-                                                        </option>
-                                                    )
-                                                }
-                                            })}
-                                        </Form.Control>
-                                    </Form.Group>
-                                ))}
-                                <Form.Group controlId="icono_celda">
-                                        <Form.Label>Icono Celda</Form.Label>
-                                        <Form.Control
-                                            as="select"
-                                            name='icono_celda'
-                                            value={datos.icono_celda}
-                                            onChange={handleInputChange_icono}
-                                        >
-                                            <option key={0} value={''}>Elegir icono</option>
-                                            {icono_celda && icono_celda.map(icono => {
-                                                return (
-                                                    <option key={icono.id} value={icono.id}>
-                                                        {icono.nombre + '-   ' + icono.icono}
-                                                    </option>
-                                                    /* <img 
-                                                        src={icono.icono} 
-                                                        alt="" 
-                                                        style={{ width: '30px', height: '30px' }} 
-                                                    /> */
-                                                )
-                                            })}
-                                        </Form.Control>
-                                    </Form.Group>
+                                    {ejes && ejes.map(eje => (
+                                        <Form.Group controlId={eje.id} key={eje.id}>
+                                            <Form.Label>{eje.tipo.nombre}</Form.Label>
+                                            <Form.Control
+                                                as="text"
+                                                name={eje.id}
+                                                value={rodillo_elegido[eje.id] || ''}
+                                                //onChange={handleInputChange}
+                                                placeholder={eje.tipo.nombre}
+                                                style={{fontWeight: 'bold', color: 'red'}}
+                                            >
+                                                {rodillo_elegido && rodillo_elegido.map(rod => {
+                                                    if (rod.eje.tipo.id === eje.tipo.id && rod.rodillo.diametro === eje.diametro) {
+                                                        return (
+                                                            <option key={rod.rodillo.id} value={rod.rodillo.id}>
+                                                                {rod.rodillo.nombre}
+                                                            </option>
+                                                        )
+                                                    }
+                                                })}
+                                            </Form.Control>
+                                            <Form.Control
+                                                as="select"
+                                                name={eje.id}
+                                                value={selectRodilloId[eje.id] || ''}
+                                                onChange={handleInputChange}
+                                                placeholder={eje.tipo.nombre}
+                                                disabled={bancada_otraformacion.id?true:false}
+                                            >
+                                                <option key={0} value={''}>Elegir rodillo</option>
+                                                {rodillos && rodillos.map(rodillo => {
+                                                    if (rodillo.tipo === eje.tipo.id && rodillo.diametro === eje.diametro) {
+                                                        return (
+                                                            <option key={rodillo.id} value={`${rodillo.id},${rodillo.operacion},${rodillo.grupo.id},${eje.id},${rodillo.espesor_1},${rodillo.espesor_2},${rodillo.grupo.nombre}`}>
+                                                                {rodillo.nombre}
+                                                            </option>
+                                                        )
+                                                    }
+                                                })}
+                                            </Form.Control>
+                                        </Form.Group>
+                                    ))}
+                                    {colorVerde?
+                                        <Form.Group controlId="icono_celda">
+                                            <Form.Label>Icono Celda</Form.Label>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                <Form.Control
+                                                    as="select"
+                                                    name='icono_celda'
+                                                    value={datos.icono_celda}
+                                                    onChange={handleInputChange_icono}
+                                                >
+                                                    <option key={0} value={''}>Elegir icono</option>
+                                                    {icono_celda && icono_celda.map(icono => (
+                                                            <option key={icono.id} value={parseInt(icono.id)}>
+                                                                {icono.nombre}
+                                                            </option>
+                                                    ))}
+                                                </Form.Control>
+                                                {/* Muestra la imagen del icono seleccionado */}
+                                                {datos.icono_celda && (
+                                                    <img 
+                                                        src={(() => {
+                                                            const iconoSeleccionado = icono_celda.find(i => i.id === parseInt(datos.icono_celda));
+                                                            return iconoSeleccionado?.icono;  // Devolvemos la URL del icono
+                                                        })()}
+                                                        alt="Icono seleccionado" 
+                                                        style={{ width: '30px', height: '30px', border: '1px solid #ccc', borderRadius: '5px' }}
+                                                    />
+                                                )}
+                                            </div>
+                                        </Form.Group>
+                                    :''}
                                 </Col>
                             </Row>
                         </Form>
@@ -661,7 +696,7 @@ const RodConjunto = ({show, setShow, handleClose, operacion_marcada, grupoId, gr
             </Modal.Body>
             <Modal.Footer>
                 {bancada_otraformacion.id?<Button variant="info" onClick={ElimniarBancada}>Eliminar Bancada</Button>:''}
-                <Button variant="info" onClick={Guardar}>Guardar</Button>
+                {colorVerde?<Button variant="info" onClick={ActualizarIcono}>Actualizar icono</Button>:<Button variant="info" onClick={Guardar}>Guardar</Button>}
                 <Button variant="waring" onClick={handlerCancelar}>Cancelar</Button>
             </Modal.Footer>
         </Modal>

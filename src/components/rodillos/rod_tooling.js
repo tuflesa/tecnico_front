@@ -365,7 +365,7 @@ const RodTooling = () => {
                                                             }
                                                             style={{border: "none",background: "none",padding: 0,cursor: "pointer",}}
                                                             >
-                                                            <img src={celda.conjunto?.operacion !== celda.operacion.id? icono_celda[4].icono: icono_celda[3].icono} alt="" style={{ width: "30px", height: "30px" }}/>
+                                                            <img src={celda.conjunto?.operacion !== celda.operacion.id? icono_celda[1].icono: icono_celda[0].icono} alt="" style={{ width: "30px", height: "30px" }}/>
                                                         </button>
                                                         ) : (
                                                             <button
