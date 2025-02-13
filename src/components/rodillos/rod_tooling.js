@@ -374,7 +374,7 @@ const RodTooling = () => {
                                                             }
                                                             style={{border: "none",background: "none",padding: 0,cursor: "pointer",}}
                                                             >
-                                                            <img src={celda.icono ? icono_celda[celda.icono].icono : ''} alt="" style={{ width: '30px', height: '30px' }} />
+                                                            <img src={celda.icono ? celda.icono.icono : ''} alt="" style={{ width: '30px', height: '30px' }} />
                                                         </button>
                                                         )}
                                                     </div>

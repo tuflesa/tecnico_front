@@ -39,12 +39,12 @@ const RodConjunto = ({show, setShow, elementos_formacion, handleClose, operacion
         operacion_filtro: '',
         tubo_madre_filtro: '',
         conjunto_elegido: '',
-        icono_celda:colorVerde?(elementos_formacion[0]?.icono?elementos_formacion[0].icono.id:operacion_marcada?operacion_marcada.icono_celda:''):'',
+        icono_celda:colorVerde || elementos_formacion.length===0?(elementos_formacion[0]?.icono?elementos_formacion[0].icono.id:operacion_marcada?operacion_marcada.icono_celda:''):'',
     });
     useEffect(() => {
         setDatos(prevDatos => ({
             ...prevDatos,
-            icono_celda: colorVerde?(elementos_formacion[0]?.icono?elementos_formacion[0].icono.id:operacion_marcada.icono_celda):''
+            icono_celda: colorVerde || elementos_formacion.length===0?(elementos_formacion[0]?.icono?elementos_formacion[0].icono.id:operacion_marcada.icono_celda):''
         }));
     }, [operacion_marcada]);
 
@@ -569,7 +569,7 @@ const RodConjunto = ({show, setShow, elementos_formacion, handleClose, operacion
                                             </Form.Control>
                                         </Form.Group>
                                     ))}
-                                    {colorVerde?
+                                    {colorVerde || elementos_formacion.length===0?
                                         <Form.Group controlId="icono_celda">
                                             <Form.Label>Icono Celda</Form.Label>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
