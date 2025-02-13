@@ -85,7 +85,7 @@ const RodConjunto = ({show, setShow, elementos_formacion, handleClose, operacion
             }
         })
         .then( res => {
-            setIcono_celda(res.data);
+            setIcono_celda(res.data.slice(3));
         })
         .catch( err => {
             console.log(err);

@@ -351,8 +351,9 @@ const RodTooling = () => {
                                             .map(operacion => {
                                             // Buscamos la celda dentro de esta bancada
                                             const celda = bancada?.celdas.find(c => c.operacion.id === operacion.id);
+                                            {console.log('vamos a ver el montaje: ',montaje)}
                                             return (
-                                                <td key={`${montaje.id}-${seccion.id}-${operacion.id}`} style={{ textAlign: 'center', backgroundColor: celda?.conjunto?.operacion && celda?.operacion?.id && celda.conjunto.operacion !== celda.operacion.id ? 'orange' : 'transparent', }}>
+                                                <td key={`${montaje.id}-${seccion.id}-${operacion.id}`} style={{ textAlign: 'center', backgroundColor: celda?.conjunto?.operacion && celda?.operacion?.id && celda.conjunto.operacion !== celda.operacion.id ? 'orange' : celda?.conjunto?.operacion && celda?.operacion?.id && seccion.pertenece_grupo===true && celda.conjunto.tubo_madre < montaje.grupo.tubo_madre? '#0cf317' : 'transparent', }}>
                                                 {celda ? (
                                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px',}}>
                                                         {(
@@ -365,7 +366,7 @@ const RodTooling = () => {
                                                             }
                                                             style={{border: "none",background: "none",padding: 0,cursor: "pointer",}}
                                                             >
-                                                            <img src={celda.conjunto?.operacion !== celda.operacion.id? icono_celda[1].icono: icono_celda[0].icono} alt="" style={{ width: "30px", height: "30px" }}/>
+                                                            <img src={celda.conjunto?.tubo_madre < montaje.grupo.tubo_madre? icono_celda[2].icono: celda.conjunto?.operacion !== celda.operacion.id? icono_celda[1].icono: icono_celda[0].icono} alt="" style={{ width: "30px", height: "30px" }}/>
                                                         </button>
                                                         ) : (
                                                             <button
