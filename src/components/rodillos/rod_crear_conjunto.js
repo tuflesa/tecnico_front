@@ -569,37 +569,39 @@ const RodConjunto = ({show, setShow, elementos_formacion, handleClose, operacion
                                             </Form.Control>
                                         </Form.Group>
                                     ))}
-                                    {colorVerde || elementos_formacion.length===0?
+                                    {colorVerde || elementos_formacion.length === 0 ? (
                                         <Form.Group controlId="icono_celda">
-                                            <Form.Label>Icono Celda</Form.Label>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                <Form.Control
-                                                    as="select"
-                                                    name='icono_celda'
-                                                    value={datos.icono_celda}
-                                                    onChange={handleInputChange_icono}
-                                                >
-                                                    <option key={0} value={''}>Elegir icono</option>
-                                                    {icono_celda && icono_celda.map(icono => (
-                                                            <option key={icono.id} value={parseInt(icono.id)}>
-                                                                {icono.nombre}
-                                                            </option>
+                                            <Form.Label style={{ color: "red" }}>Icono Celda</Form.Label>
+                                            <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+                                                {icono_celda &&
+                                                    icono_celda.map((icono) => (
+                                                        <Button
+                                                            key={icono.id}
+                                                            variant="light"
+                                                            onClick={() =>
+                                                                handleInputChange_icono({ target: { name: 'icono_celda', value: icono.id } })
+                                                            }
+                                                            style={{
+                                                                border: datos.icono_celda == icono.id ? "2px solid red" : "1px solid #ccc",
+                                                                padding: "5px",
+                                                                borderRadius: "5px",
+                                                                display: "flex",
+                                                                alignItems: "center",
+                                                                justifyContent: "center",
+                                                                background: datos.icono_celda == icono.id ? "#ffe6e6" : "white",
+                                                                cursor: "pointer",
+                                                            }}
+                                                        >
+                                                            <img
+                                                                src={icono.icono}
+                                                                alt={icono.nombre}
+                                                                style={{ width: "30px", height: "30px" }}
+                                                            />
+                                                        </Button>
                                                     ))}
-                                                </Form.Control>
-                                                {/* Muestra la imagen del icono seleccionado */}
-                                                {datos.icono_celda && (
-                                                    <img 
-                                                        src={(() => {
-                                                            const iconoSeleccionado = icono_celda.find(i => i.id === parseInt(datos.icono_celda));
-                                                            return iconoSeleccionado?.icono;  // Devolvemos la URL del icono
-                                                        })()}
-                                                        alt="Icono seleccionado" 
-                                                        style={{ width: '30px', height: '30px', border: '1px solid #ccc', borderRadius: '5px' }}
-                                                    />
-                                                )}
                                             </div>
                                         </Form.Group>
-                                    :''}
+                                    ) : null}
                                 </Col>
                             </Row>
                         </Form>
