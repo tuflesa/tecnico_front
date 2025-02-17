@@ -41,6 +41,7 @@ const RodConjunto = ({show, setShow, elementos_formacion, handleClose, operacion
         conjunto_elegido: '',
         icono_celda:colorVerde || elementos_formacion.length===0?(elementos_formacion[0]?.icono?elementos_formacion[0].icono.id:operacion_marcada?operacion_marcada.icono_celda:''):'',
     });
+    
     useEffect(() => {
         setDatos(prevDatos => ({
             ...prevDatos,
@@ -373,7 +374,6 @@ const RodConjunto = ({show, setShow, elementos_formacion, handleClose, operacion
                 }     
         })
         .then( res => { 
-            console.log('res.data de la celda despues del patch',res.data);
             handleClose();
             setShow(false);
             window.location.href=`/rodillos/grupo_editar/${grupoId}`;

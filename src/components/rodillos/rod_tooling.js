@@ -351,9 +351,16 @@ const RodTooling = () => {
                                             .map(operacion => {
                                             // Buscamos la celda dentro de esta bancada
                                             const celda = bancada?.celdas.find(c => c.operacion.id === operacion.id);
-                                            {console.log('vamos a ver el montaje: ',montaje)}
                                             return (
-                                                <td key={`${montaje.id}-${seccion.id}-${operacion.id}`} style={{ textAlign: 'center', backgroundColor: celda?.conjunto?.operacion && celda?.operacion?.id && celda.conjunto.operacion !== celda.operacion.id ? 'orange' : celda?.conjunto?.operacion && celda?.operacion?.id && seccion.pertenece_grupo===true && celda.conjunto.tubo_madre < montaje.grupo.tubo_madre? '#0cf317' : 'transparent', }}>
+                                                <td key={`${montaje.id}-${seccion.id}-${operacion.id}`} 
+                                                    style={{ textAlign: 'center', 
+                                                        backgroundColor: 
+                                                        celda?.conjunto?.elementos && celda?.operacion?.id && celda.conjunto.elementos.some(e => e.rodillo.operacion !== celda.operacion.id) ? 'orange' 
+                                                        : celda?.conjunto?.operacion && celda?.operacion?.id && celda.conjunto.operacion !== celda.operacion.id ? 'orange'
+                                                        : celda?.conjunto?.operacion && celda?.operacion?.id && seccion.pertenece_grupo===true && celda.conjunto.tubo_madre < montaje.grupo.tubo_madre? '#0cf317' 
+                                                        : 'transparent', }}>
+                                                
+                                                
                                                 {celda ? (
                                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px',}}>
                                                         {(

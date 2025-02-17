@@ -38,7 +38,6 @@ const RodBancadaCTListado = () => {
               }
         })
         .then( res => {
-            console.log(res.data.results)
             setBancadas(res.data.results);
             setCount(res.data.count);
         })
