@@ -93,3 +93,7 @@ code {
   background-color: white; /* Asegura que las opciones se vean bien */
   color: black;
 }
+
+.border-red {
+  border: 2px solid red;
+}
