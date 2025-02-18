@@ -346,7 +346,10 @@ const PedidoForm = ({pedido, setPedido}) => {
             })
             .catch(err => { console.log(err);})
         })
-        .catch(err => { console.log(err);})
+        .catch(err => { 
+            console.log(err);
+            alert('Faltan datos, por favor, introduce todos los datos obligatorios.')
+        })
     }
 
     const actualizarDatos = (event) => {
@@ -653,7 +656,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                         <Row>     
                             <Col>
                                 <Form.Group controlId="descripcion">
-                                    <Form.Label>Descripción pedido</Form.Label>
+                                    <Form.Label>Descripción pedido (*)</Form.Label>
                                     <Form.Control imput type="text" 
                                                 name='descripcion'
                                                 value = {datos.descripcion}
