@@ -166,6 +166,7 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
         const formData = new FormData();
         formData.append("titular_grupo", datos.titular);
         formData.append("anotciones_montaje", datos.anotaciones_montaje);
+        formData.append("nombre", datos.nombre);
         
         // Solo agregar el archivo si existe y es un objeto `File`
         if (select_Archivo instanceof File) {

@@ -186,6 +186,7 @@ const RodBancadaCT = ({bancada}) => {
             :''} 
             <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
             <RodConjuntoCT show={show_conjunto}
+                    setShow={setShowConjunto}
                     operacion_marcada={operacion_marcada}
                     handleClose={CerrarConjunto}
                     elementos_formacion={formaciones_filtradas}

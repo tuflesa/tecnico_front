@@ -130,7 +130,7 @@ const RodMontajeFiltro = ({actualizaFiltro}) => {
     }, [token, datos.maquina]);
 
     useEffect(()=>{
-        const filtro = `?maquina__empresa__id=${datos.empresa}&tubo_madre=${tubo_madre}&grupo=${grupoId}&maquina=${datos.maquina}&bancada=${dimensionesID}&nombre=${'M-'+ grupo_nombre + '-' + dimensiones}/* &titular_grupo=${datos.titular} */`
+        const filtro = `?maquina__empresa__id=${datos.empresa}&tubo_madre=${tubo_madre}&grupo=${grupoId}&maquina=${datos.maquina}&bancada=${dimensionesID}&nombre=${'M-'+ grupo_nombre + '-' + dimensiones}&titular_grupo=${datos.titular} */`
         actualizaFiltro(filtro);
     },[datos]);
 

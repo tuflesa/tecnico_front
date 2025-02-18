@@ -196,6 +196,7 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
             {operacion_marcada?
             <RodConjunto show={show_conjunto}
                     setShow={setShowConjunto}
+                    elementos_formacion={formaciones_filtradas}
                     operacion_marcada={operacion_marcada}
                     handleClose={CerrarConjunto}
                     grupoId={grupo.id}
@@ -203,7 +204,6 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                     grupo_bancadas={grupo.bancadas}
                     maquina={maquina}
                     tubomadre={tubo_madre}
-                    elementos_formacion={formaciones_filtradas}
                     colorAzul={colorAzul}
                     colorAzulB={colorAzulB}
                     colorVerde={colorVerde}
