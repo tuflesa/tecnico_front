@@ -41,7 +41,8 @@ const PedidoForm = ({pedido, setPedido}) => {
     const [direcciones, setDirecciones]= useState(null);
     const [contactos, setContactos]= useState(null);
     var total_pedido= 0;
-    
+    const [errores, setErrores] = useState({}); // Estado para guardar errores
+
     const [datos, setDatos] = useState({
         id: pedido ? pedido.id : null,
         proveedor: pedido ? pedido.proveedor.id : null,
@@ -343,11 +344,16 @@ const PedidoForm = ({pedido, setPedido}) => {
             })
             .then( res => {
                 setPedido(res.data);
+                setErrores({}); // Reiniciar errores si la petición es exitosa
             })
             .catch(err => { console.log(err);})
         })
         .catch(err => { 
-            console.log(err);
+            if (err.response && err.response.data) {
+                setErrores(err.response.data); // Guardar los errores del backend
+            } else {
+                console.log(err);
+            }
             alert('Faltan datos, por favor, introduce todos los datos obligatorios.')
         })
     }
@@ -535,6 +541,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                 name='fecha_creacion' 
                                                 value={datos.fecha_creacion}
                                                 onChange={handleInputChange} 
+                                                className={`form-control ${errores.fecha_creacion ? 'border-red' : ''}`}
                                                 placeholder="Fecha creación" />
                                 </Form.Group>
                             </Col>
@@ -555,6 +562,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                 name='fecha_prevista_entrega' 
                                                 value={datos.fecha_prevista_entrega}
                                                 onChange={handleInputChange} 
+                                                className={`form-control ${errores.fecha_prevista_entrega ? 'border-red' : ''}`}
                                                 placeholder="Fecha prevista entrega" />
                                 </Form.Group>
                             </Col>                            
@@ -585,7 +593,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                                     <Form.Control as="select"  
                                                 name='direccion_envio' 
                                                 value={datos.direccion_envio}
-                                                onChange={handleInputChange}                                               
+                                                onChange={handleInputChange}                                            
                                                 placeholder="Direccion de Envío">                                                   
                                                 {direcciones && direcciones.map( direccion => {
                                                     return (
@@ -607,6 +615,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                 value={datos.proveedor}
                                                 onChange={handleInputChange}
                                                 disabled={handleDeshabilitar()}
+                                                className={`form-control ${errores.proveedor ? 'border-red' : ''}`} 
                                                 placeholder="Elige Proveedor"
                                                 autoFocus >
                                                     <option key={0} value={''}>
@@ -661,6 +670,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                 name='descripcion'
                                                 value = {datos.descripcion}
                                                 onChange = {handleInputChange}
+                                                className={`form-control ${errores.descripcion ? 'border-red' : ''}`}
                                                 placeholder="Descripción Pedido">
                                     </Form.Control>
                                 </Form.Group>
