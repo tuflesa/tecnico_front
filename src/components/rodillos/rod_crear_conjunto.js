@@ -80,13 +80,13 @@ const RodConjunto = ({show, setShow, elementos_formacion, handleClose, operacion
     }, [token, elementos_formacion]);
 
     useEffect(() => { //recogemos todos los iconos posibles para la operación
-        axios.get(BACKEND_SERVER + `/api/rodillos/icono_celda/`,{
+        axios.get(BACKEND_SERVER + `/api/rodillos/icono_celda/?pertenece_grupo=${true}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }
         })
         .then( res => {
-            setIcono_celda(res.data.slice(3));
+            setIcono_celda(res.data.slice(3));  //QUITAREMOS 3 PERO HAY OTROS 3 RESERVADOS QUE NO CUMPLEN CON ESTO ?pertenece_grupo=${true}
         })
         .catch( err => {
             console.log(err);
@@ -595,6 +595,7 @@ const RodConjunto = ({show, setShow, elementos_formacion, handleClose, operacion
                                                             <img
                                                                 src={icono.icono}
                                                                 alt={icono.nombre}
+                                                                title={icono.nombre}
                                                                 style={{ width: "30px", height: "30px" }}
                                                             />
                                                         </Button>

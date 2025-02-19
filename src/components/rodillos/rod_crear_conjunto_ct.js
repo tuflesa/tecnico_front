@@ -102,13 +102,13 @@ const RodConjuntoCT = ({show, setShow, handleClose, operacion_marcada, elementos
     }, [rod_id, selectedEje, dimensiones]);
 
     useEffect(() => { //recogemos todos los iconos posibles para la operación
-        axios.get(BACKEND_SERVER + `/api/rodillos/icono_celda/`,{
+        axios.get(BACKEND_SERVER + `/api/rodillos/icono_celda/?pertenece_ct=${true}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }
         })
         .then( res => {
-            setIcono_celda(res.data.slice(3));
+            setIcono_celda(res.data.slice(3));  //QUITAREMOS 3 PERO HAY OTROS 3 RESERVADOS QUE NO CUMPLEN pertenece_ct=${true}
         })
         .catch( err => {
             console.log(err);
@@ -373,6 +373,7 @@ const RodConjuntoCT = ({show, setShow, handleClose, operacion_marcada, elementos
                                                         <img
                                                             src={icono.icono}
                                                             alt={icono.nombre}
+                                                            title={icono.nombre}
                                                             style={{ width: "30px", height: "30px" }}
                                                         />
                                                     </Button>

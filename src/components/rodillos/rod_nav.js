@@ -9,6 +9,7 @@ const RodNavBar = () => {
     const soyTecnico = user['tec-user'].perfil.puesto.nombre==='Técnico'?true:false;
     const soySuperTecnico = user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:false;
     const soyMantenimiento = user['tec-user'].perfil.puesto.nombre==='Mantenimiento'?true:false;
+    const soyProgramador = user['tec-user'].perfil.destrezas.filter(s => s === 7);
 
     return (
             <React.Fragment>
@@ -44,6 +45,9 @@ const RodNavBar = () => {
                                     <NavDropdown.Item href="/rodillos/lista_rectificacion">Lista Ordenes de Rectificados</NavDropdown.Item> 
                                     <NavDropdown.Item href="/rodillos/instancias_rectificar">Lista Rodillos a Rectificar</NavDropdown.Item>
                                     </NavDropdown>
+                                    {soyProgramador[0]===7?
+                                        <NavDropdown.Item href="/rodillos/programador">Programadores</NavDropdown.Item>                     
+                                    :null}
                                 </NavDropdown>
                             </Nav>
                             : 
