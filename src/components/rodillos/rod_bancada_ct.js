@@ -176,7 +176,14 @@ const RodBancadaCT = ({bancada}) => {
                                         operaciones
                                             .filter(op => op.seccion.id === seccion.id)
                                             .map(operacion => {
-                                                const esVerde = formaciones_completadas.find(form_completas => form_completas.conjunto.operacion === operacion.id);
+                                                let esVerde = null;
+                                                if (Array.isArray(formaciones_completadas)) {
+                                                    formaciones_completadas.forEach(form_completas => {
+                                                        if (form_completas.conjunto.operacion === operacion.id) {
+                                                            esVerde = form_completas;  // Guardamos el objeto encontrado
+                                                        }
+                                                    });
+                                                }
                                                 return (
                                                     <td key={`${seccion.id}-${operacion.id}`}>
                                                         <Button
