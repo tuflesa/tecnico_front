@@ -8,7 +8,7 @@ import RodConjunto from './rod_crear_conjunto';
 const RodBancada = ({visible, grupo, setGrupo}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
-    const [operaciones, setOperaciones] = useState(null);
+    const [operaciones, setOperaciones] = useState([]);
     const [secciones, setSecciones] = useState(null);
     const [maquina, setMaquina] = useState('');
     const [empresa, setEmpresa] = useState('');
@@ -135,7 +135,7 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
     }
 
     return (
-        <Container style = {{display: visible? 'block': 'none'}}>
+        <Container fluid style = {{display: visible? 'block': 'none'}}>
             {maquina? 
                 <Row>
                     <Col>
@@ -144,49 +144,128 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                             <thead>
                                 <tr>
                                     {secciones && secciones.map(seccion => (
-                                        <th key={seccion.id}>{seccion.nombre}</th>
+                                        <th key={seccion.id} colSpan={operaciones.filter(op => op.seccion.id === seccion.id).length}>
+                                            {seccion.nombre}
+                                        </th>
                                     ))}
                                 </tr>
+                                {/* Encabezado para las operaciones bajo cada sección */}
+                                {secciones && secciones.map(seccion => (
+                                    operaciones
+                                        .filter(op => op.seccion.id === seccion.id)
+                                        .map(operaciones => (
+                                            //<th key={seccion.id} colSpan={(operaciones && Array.isArray(operaciones)) ? operaciones.filter(op => op.seccion.id === seccion.id).length || 1 : 1}>
+                                            <th key={`${seccion.id}-${operaciones.id}`} colSpan={1}>
+                                                {operaciones.nombre}
+                                            </th>
+                                        ))
+                                ))}
                             </thead>
                             <tbody>
                                 <tr>
-                                    {secciones && secciones.map(seccion => (
-                                        <td key={seccion.id}>
-                                            {operaciones && operaciones.map((operacion) => {
-                                            if (operacion.seccion.id === seccion.id) {
-                                                let colorBoton1 = false;
-                                                let colorBoton2 = false;
-                                                let colorBoton3 = false;
-                                                formaciones_completadas && formaciones_completadas.forEach(form_completas => {
-                                                    if(form_completas.conjunto.operacion===operacion.id && form_completas.bancada.tubo_madre===form_completas.conjunto.tubo_madre && form_completas.bancada.tubo_madre===grupo.tubo_madre ){
-                                                        colorBoton1=true; //tenemos rodillos propios
-                                                    }
-                                                    if(form_completas.operacion!==form_completas.conjunto.operacion.id && form_completas.operacion===operacion.id && form_completas.bancada.tubo_madre===form_completas.conjunto.tubo_madre){
-                                                        colorBoton3=true; //tenemos bancada de otra formación
-                                                    }
-                                                    if( form_completas.bancada.tubo_madre!==form_completas.conjunto.tubo_madre && form_completas.operacion===operacion.id && form_completas.operacion===form_completas.conjunto.operacion){
-                                                        colorBoton2=true; //tenemos conjunto de otra formación
-                                                    }
-                                                    if(form_completas.bancada.tubo_madre!==grupo.tubo_madre && form_completas.operacion===operacion.id ){
-                                                        colorBoton2=true; //tenemos bancada de otra formación
-                                                    }
-                                                    if(form_completas.operacion!==form_completas.conjunto.operacion && form_completas.bancada.tubo_madre!==form_completas.conjunto.tubo_madre && form_completas.operacion===operacion.id){
-                                                        colorBoton3=true; //tenemos conjunto de otra formación y de otra posición
-                                                    }
-                                                });
+                                    {secciones && secciones.map(seccion =>
+                                        operaciones
+                                            .filter(op => op.seccion.id === seccion.id)
+                                            .map(operacion => {
+                                                let colorBoton1 = false; //color verde
+                                                let colorBoton2 = false; //color azul
+                                                let colorBoton3 = false; //color naranja?
+                                                let iconoOperacion = null;
+                                                let iconoOperacion2 = null;
+                                                let iconoOperacion3 = null;
+
+                                                formaciones_completadas &&
+                                                    formaciones_completadas.forEach(form_completas => {
+                                                        if (
+                                                            form_completas.conjunto.operacion === operacion.id &&
+                                                            form_completas.bancada.tubo_madre === form_completas.conjunto.tubo_madre &&
+                                                            form_completas.bancada.tubo_madre === grupo.tubo_madre
+                                                        ) {
+                                                            colorBoton1 = true; // Rodillos propios
+                                                            iconoOperacion = form_completas.icono && form_completas.icono.icono ? form_completas.icono.icono : '';
+                                                        }
+                                                        if (
+                                                            form_completas.operacion !== form_completas.conjunto.operacion.id &&
+                                                            form_completas.operacion === operacion.id &&
+                                                            form_completas.bancada.tubo_madre === form_completas.conjunto.tubo_madre
+                                                        ) {
+                                                            colorBoton3 = true; // Bancada de otra formación
+                                                            iconoOperacion3 = operacion.icono && operacion.icono.icono ? operacion.icono.icono : '';
+                                                        }
+                                                        if (
+                                                            form_completas.bancada.tubo_madre !== form_completas.conjunto.tubo_madre &&
+                                                            form_completas.operacion === operacion.id &&
+                                                            form_completas.operacion === form_completas.conjunto.operacion
+                                                        ) {
+                                                            colorBoton2 = true; // Conjunto de otra formación
+                                                            iconoOperacion2 = operacion.icono && operacion.icono.icono ? operacion.icono.icono : '';
+                                                        }
+                                                        if (
+                                                            form_completas.bancada.tubo_madre !== grupo.tubo_madre &&
+                                                            form_completas.operacion === operacion.id
+                                                        ) {
+                                                            colorBoton2 = true; // Bancada de otra formación
+                                                            iconoOperacion2 = operacion.icono && operacion.icono.icono ? operacion.icono.icono : '';
+                                                        }
+                                                        if (
+                                                            form_completas.operacion !== form_completas.conjunto.operacion &&
+                                                            form_completas.bancada.tubo_madre !== form_completas.conjunto.tubo_madre &&
+                                                            form_completas.operacion === operacion.id
+                                                        ) {
+                                                            colorBoton3 = true; // Conjunto de otra formación y otra posición
+                                                            iconoOperacion3 = operacion.icono && operacion.icono.icono ? operacion.icono.icono : '';
+                                                        }
+                                                    });
+
                                                 return (
-                                                    <Button
-                                                        key={operacion.id}
-                                                        className={`btn ${colorBoton2 ? 'btn-primary' : colorBoton1 ? 'btn-verde' : colorBoton3? 'btn-naranja-primary' : 'btn-gris-primary'} btn-sm`}
-                                                        onClick={() => {grupo?GuardarId_Operacion(operacion, colorBoton1, colorBoton2, colorBoton3):alert('Elige grupo')}}
-                                                    >
-                                                        {operacion.nombre}
-                                                    </Button>
+                                                    <td key={`${seccion.id}-${operacion.id}`}>
+                                                        <Button
+                                                            className={`btn ${
+                                                                colorBoton2
+                                                                    ? 'btn-primary'
+                                                                    : colorBoton1
+                                                                    ? 'btn-verde'
+                                                                    : colorBoton3
+                                                                    ? 'btn-naranja-primary'
+                                                                    : 'btn-gris-primary'
+                                                            } btn-sm`}
+                                                            onClick={() =>
+                                                                grupo
+                                                                    ? GuardarId_Operacion(operacion, colorBoton1, colorBoton2, colorBoton3)
+                                                                    : alert('Elige grupo')
+                                                            }
+                                                        >
+                                                            {iconoOperacion==='' ? (
+                                                                operacion.nombre
+                                                            ) :
+                                                            iconoOperacion ? (
+                                                                <img
+                                                                    src={iconoOperacion}
+                                                                    alt={operacion.nombre}
+                                                                    style={{ width: '20px', height: '20px', marginRight: '5px' }}
+                                                                />
+                                                            ) :
+                                                            iconoOperacion2 ? (
+                                                                <img
+                                                                    src={iconoOperacion2}
+                                                                    alt={operacion.nombre}
+                                                                    style={{ width: '20px', height: '20px', marginRight: '5px' }}
+                                                                />
+                                                            ) : 
+                                                            iconoOperacion3 ? (
+                                                                <img
+                                                                    src={iconoOperacion3}
+                                                                    alt={operacion.nombre}
+                                                                    style={{ width: '20px', height: '20px', marginRight: '5px' }}
+                                                                />
+                                                            ) : (
+                                                                operacion.nombre
+                                                            )}
+                                                        </Button>
+                                                    </td>
                                                 );
-                                            }
-                                            })}
-                                        </td>
-                                    ))}
+                                            })
+                                    )}
                                 </tr>
                             </tbody>
                         </Table>

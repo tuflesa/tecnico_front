@@ -32,15 +32,15 @@ code {
 
 
 .btn-verde {
-  background-color: green; /* Cambia el color a verde */
-  color: white; 
-  border: 1px solid green;
+  background-color: rgb(67, 187, 67); /* Cambia el color a verde */
+  color: rgb(0, 0, 0); 
+  border: 1px solid rgb(67, 187, 67);
 }
 
 .btn-verde:focus {
-  background-color: green; /* Cambia el color a verde */
-  color: white; 
-  border: 1px solid green;
+  background-color: rgb(67, 187, 67); /* Cambia el color a verde */
+  color: rgb(0, 0, 0); 
+  border: 1px solid rgb(67, 187, 67);
 }
 
 .btn-gris-primary {

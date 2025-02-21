@@ -11,7 +11,7 @@ import RodConjuntoCT from './rod_crear_conjunto_ct';
 const RodBancadaCT = ({bancada}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
-    const [operaciones, setOperaciones] = useState(null);
+    const [operaciones, setOperaciones] = useState([]);
     const [secciones, setSecciones] = useState(null);
     const [maquina, setMaquina] = useState('');
     const [empresa, setEmpresa] = useState('');
@@ -153,30 +153,56 @@ const RodBancadaCT = ({bancada}) => {
                             <thead>
                                 <tr>
                                     {secciones && secciones.map(seccion => (
-                                        <th key={seccion.id}>{seccion.nombre}</th>
+                                        <th key={seccion.id} colSpan={operaciones.filter(op => op.seccion.id === seccion.id).length}>
+                                        {seccion.nombre}
+                                    </th>
                                     ))}
                                 </tr>
+                                {/* Encabezado para las operaciones bajo cada sección */}
+                                {secciones?.map(seccion => (
+                                    operaciones
+                                        .filter(op => op.seccion.id === seccion.id)
+                                        .map(operaciones => (
+                                            //<th key={seccion.id} colSpan={(operaciones && Array.isArray(operaciones)) ? operaciones.filter(op => op.seccion.id === seccion.id).length || 1 : 1}>
+                                            <th key={`${seccion.id}-${operaciones.id}`} colSpan={1}>
+                                                {operaciones.nombre}
+                                            </th>
+                                        ))
+                                ))}
                             </thead>
                             <tbody>
                                 <tr>
-                                    {secciones && secciones.map(seccion => (
-                                        <td key={seccion.id}>
-                                            {operaciones && formaciones_completadas && operaciones.map((operacion) => {
-                                            if (operacion.seccion.id === seccion.id) {
-                                                const colorBoton = formaciones_completadas.some(form_completas => form_completas.conjunto.operacion === operacion.id);
-                                                //const colorNaranja = formaciones_completadas.some(form_completas => form_completas.conjunto.operacion !== operacion.id);
+                                    {secciones?.map(seccion => (
+                                        operaciones
+                                            .filter(op => op.seccion.id === seccion.id)
+                                            .map(operacion => {
+                                                let esVerde = null;
+                                                if (Array.isArray(formaciones_completadas)) {
+                                                    formaciones_completadas.forEach(form_completas => {
+                                                        if (form_completas.conjunto.operacion === operacion.id) {
+                                                            esVerde = form_completas;  // Guardamos el objeto encontrado
+                                                        }
+                                                    });
+                                                }
                                                 return (
-                                                <Button
-                                                    key={operacion.id}
-                                                    className={`btn ${colorBoton ? 'btn-primary' : 'btn-gris-primary'} btn-sm`}
-                                                    onClick={() => {dimensiones?GuardarId_Operacion(operacion):alert('Elige dimensiones')}}
-                                                >
-                                                    {operacion.nombre}
-                                                </Button>
+                                                    <td key={`${seccion.id}-${operacion.id}`}>
+                                                        <Button
+                                                            className={`btn ${esVerde ? 'btn-verde' : 'btn-gris-primary'} btn-sm`}
+                                                            onClick={() => dimensiones ? GuardarId_Operacion(operacion) : alert('Elige dimensiones')}
+                                                        >
+                                                            {esVerde ? (
+                                                                <img
+                                                                    src={esVerde.icono.icono}
+                                                                    alt={operacion.nombre}
+                                                                    style={{ width: '20px', height: '20px', marginRight: '5px' }}
+                                                                />
+                                                            ) : (
+                                                                operacion.nombre
+                                                            )}
+                                                        </Button>
+                                                    </td>
                                                 );
-                                            }
-                                            })}
-                                        </td>
+                                            })
                                     ))}
                                 </tr>
                             </tbody>

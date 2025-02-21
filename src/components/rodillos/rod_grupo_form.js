@@ -1,9 +1,8 @@
-import { Container } from 'react-bootstrap';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
-import { Button, Form, Col, Row } from 'react-bootstrap';
+import { Button, Form, Col, Row, Container } from 'react-bootstrap';
 import RodBancada from './rod_bancada_form';
 import logo from '../../assets/Bornay.svg';
 import logoTuf from '../../assets/logo_tuflesa.svg';
@@ -263,7 +262,9 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
 
             <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
             {grupo.length===0?<Button variant="outline-primary" onClick={GuardarGrupo}>Guardar</Button>:<Button variant="outline-primary" onClick={ActualizarGrupo}>Actualizar</Button>}
-            {mostrarRodBancada && <RodBancada visible={mostrarRodBancada} grupo={grupo} setGrupo={setGrupo} />} {/* mostramos en editar las bancadas de la máquina */}
+            <div className="vw-100 position-relative" style={{ left: '50%', marginLeft: '-50vw' }}>
+                {mostrarRodBancada && <RodBancada visible={mostrarRodBancada} grupo={grupo} setGrupo={setGrupo} />}
+            </div>
         </Container>
     )
 }
