@@ -9,7 +9,7 @@ const RodMontajeEditar = ({ match }) => {
     const [montaje_edi, setMontajeEditar] = useState(null)
 
     useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/rodillos/montaje_listado/${match.params.id}`,{
+        axios.get(BACKEND_SERVER + `/api/rodillos/montaje_tooling/${match.params.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }

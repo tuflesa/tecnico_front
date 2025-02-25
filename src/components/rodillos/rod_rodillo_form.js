@@ -33,7 +33,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [select_Archivo, setSelectArchivo] = useState('');
 
     const [datos, setDatos] = useState({
-        empresa: rodillo.id?rodillo.operacion.seccion.maquina.empresa_id:'',
+        empresa: rodillo.id?rodillo.operacion.seccion.maquina.empresa_id:user['tec-user'].perfil.empresa.id,
         empresa_nombre: rodillo.id?rodillo.operacion.seccion.maquina.empresa.nombre:'',
         zona: rodillo.id?rodillo.operacion.seccion.maquina.id:'',
         zona_siglas: rodillo.id?rodillo.operacion.seccion.maquina.siglas:'',

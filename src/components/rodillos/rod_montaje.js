@@ -7,6 +7,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import RodMontajeFiltro from './rod_montaje_filtro';
 import RodMontajeConjunto from './rod_montaje_conjunto';
+import RodMontajeAnotaciones from './rod_montaje_anotaciones';
 
 
 const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
@@ -26,6 +27,8 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
     const [grabado, setGrabar] = useState(true);
     const [color_cel, setColor] = useState(0);
     const [select_Archivo, setSelectArchivo] = useState(montaje_edi?.id?montaje_edi.archivo:'');
+    const [show_anotaciones, setShowAnotaciones] = useState(false);
+    const [montaje, setMontaje] = useState([montaje_edi?montaje_edi:[]]);
 
 
     const [datos, setDatos] = useState({
@@ -221,6 +224,7 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
                             }     
                     })
                     .then( res => { 
+                        setMontaje(res.data);
                         alert('Montaje creado con exito');
                         setGrabar(true);
                     })
@@ -236,12 +240,25 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
         }
     }
 
+    const AñadirAnotacion = () =>{
+        AbrirAnotacion();
+    }
+
     const AbrirConjunto = () => {
         setShowConjunto(true);
     }
 
     const CerrarConjunto = () => {
         setShowConjunto(false);
+    }
+    
+    const AbrirAnotacion = () => {
+        setShowAnotaciones(true);
+    }
+
+    const CerrarAnotacion = () => {
+        setShowAnotaciones(false);
+        window.location.reload();
     }
 
     const actualizaFiltro = str => {
@@ -359,7 +376,7 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
                     </Form.Group>
                 </Col>
             </Row>
-            <Row>
+            {/* <Row>
                 <Col>
                     <form encType='multipart/form-data'>
                         <Form.Group controlId="archivo">
@@ -378,7 +395,7 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
                         </Form.Text>
                     )}
                 </Col>
-            </Row>
+            </Row> */}
             <Row>
                 <Col>
                     <Form.Group controlId="nombre">
@@ -398,7 +415,7 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
                     <Button variant="outline-primary" onClick={GuardarMontaje}>Guardar</Button>
             )}
             <Button variant="outline-primary" type="submit" className={'mx-2'} onClick={() => window.history.back()}>Cancelar / Volver</Button>
-
+            {grabado || datos.actualizar?<Button variant="outline-primary" onClick={AñadirAnotacion}>Añadir anotaciones</Button>:''}
             {bancadas && operaciones && formaciones_completadas?
                 <Row>
                     <Col>
@@ -463,6 +480,10 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
                     elementos_formacion={formaciones_filtradas}
                     tubo_madre={datos.tubo_madre}
                     color={color_cel}/>
+            <RodMontajeAnotaciones show={show_anotaciones}
+                    montaje={montaje_edi?montaje_edi:montaje}
+                    handleClose={CerrarAnotacion}
+                    tooling={false}/>
         </Container>
     )
 }
