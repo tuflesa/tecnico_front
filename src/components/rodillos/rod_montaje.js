@@ -376,7 +376,7 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
                     </Form.Group>
                 </Col>
             </Row>
-            <Row>
+            {/* <Row>
                 <Col>
                     <form encType='multipart/form-data'>
                         <Form.Group controlId="archivo">
@@ -395,7 +395,7 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
                         </Form.Text>
                     )}
                 </Col>
-            </Row>
+            </Row> */}
             <Row>
                 <Col>
                     <Form.Group controlId="nombre">
