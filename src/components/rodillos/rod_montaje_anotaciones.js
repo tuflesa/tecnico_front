@@ -98,7 +98,7 @@ const RodMontajeAnotaciones = ({show, handleClose, montaje, tooling}) => {
                         <tr>
                             <th>Descripción</th>
                             <th>Archivo</th>
-                            <th>Acciones</th>
+                            {tooling===false?<th>Acciones</th>:''}
                         </tr>
                     </thead>
                     <tbody>
@@ -112,7 +112,7 @@ const RodMontajeAnotaciones = ({show, handleClose, montaje, tooling}) => {
                                         </a>
                                     )}
                                 </td>
-                                <td><Trash className="trash"  onClick={event =>{EliminaAnotacion(anotacion.id)}} /></td>
+                                {tooling===false?<td><Trash className="trash"  onClick={event =>{EliminaAnotacion(anotacion.id)}} /></td>:''}
                             </tr>
                         ))}
                         {tooling===false?
