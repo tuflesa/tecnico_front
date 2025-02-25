@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Table, Button, Modal } from 'react-bootstrap';
-import { Receipt, Paperclip } from 'react-bootstrap-icons';
+import { Receipt, Paperclip, CardImage } from 'react-bootstrap-icons';
 import logo from '../../assets/Bornay.svg';
 import logoTuf from '../../assets/logo_tuflesa.svg';
 import { useCookies } from 'react-cookie';
 import RodMontajeListadoFiltro from './Rod_montaje_listado_filtro';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
+import RodMontajeAnotaciones from './rod_montaje_anotaciones';
 
 const RodTooling = () => {
     const [user] = useCookies(['tec-user']);
@@ -33,6 +34,7 @@ const RodTooling = () => {
     const [setModalComentarios, setShowModalComentarios] = useState(false);
     const [montajeSeleccionado, setMontajeSeleccionado] = useState(null);
     const [comentariosMontaje, setComentariosMontaje] = useState('');
+    const [show_anotaciones, setShowAnotaciones] = useState(false);
     
     useEffect(() => { //SEPARAR DATOS QUE ENTRAN A TRAVES DEL FILTRO
         const params = new URLSearchParams(filtro);
@@ -282,6 +284,15 @@ const RodTooling = () => {
         setMontajeSeleccionado(null);
     };
 
+    const AbrirAnotacion = (montaje) => {
+        setMontajeSeleccionado(montaje);
+        setShowAnotaciones(true);
+    }
+
+    const CerrarAnotacion = () => {
+        setShowAnotaciones(false);
+    }
+
     return (
         <Container fluid>
             <img src ={user['tec-user'].perfil.empresa.id===1?logo:logoTuf} width="200" height="200"></img>
@@ -397,8 +408,11 @@ const RodTooling = () => {
                                             <Receipt className="mr-3 pencil" onClick={() => handleOpenModalComentarios(montaje)} 
                                                 style={{cursor: montaje.anotciones_montaje ? 'pointer' : 'not-allowed', opacity: montaje.anotciones_montaje ? 1 : 0.5}}     
                                             />
-                                            <Paperclip className="mr-3 pencil" onClick={() => window.open(montaje.archivo)} 
+                                            {/* <Paperclip className="mr-3 pencil" onClick={() => window.open(montaje.archivo)} 
                                                 style={{cursor: montaje.archivo ? 'pointer' : 'not-allowed', opacity: montaje.archivo ? 1 : 0.5}} 
+                                            /> */}
+                                            <CardImage className="mr-3 pencil" onClick={() => AbrirAnotacion(montaje)} 
+                                                style={{cursor: montaje.anotaciones.length!==0 ? 'pointer' : 'not-allowed', opacity: montaje.anotaciones.length!==0 ? 1 : 0.5}}     
                                             />
                                         </td>
                                     </tr>
@@ -410,7 +424,7 @@ const RodTooling = () => {
                     </Col>
                 </Row> 
             )}
-             {/* Modal */}
+             {/* Modal para mostrar los rodillos en cada celda*/}
              <Modal show={showModal} onHide={handleCloseModal} centered>
                 <Modal.Header closeButton>
                     <Modal.Title>Rodillos</Modal.Title>
@@ -449,7 +463,11 @@ const RodTooling = () => {
                         Cerrar
                     </Button>
                 </Modal.Footer>
-            </Modal>;
+            </Modal>
+            <RodMontajeAnotaciones show={show_anotaciones}
+                    montaje={montajeSeleccionado?montajeSeleccionado:[]}
+                    handleClose={CerrarAnotacion}
+                    tooling={true}/>
         </Container>
     )
 }
