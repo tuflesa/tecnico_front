@@ -3,6 +3,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Row, Col, Form, Button, Modal, Table } from 'react-bootstrap';
 import { useCookies } from 'react-cookie';
+import { Trash} from 'react-bootstrap-icons';
 
 const RodMontajeAnotaciones = ({show, handleClose, montaje, tooling}) => {
     const [token] = useCookies(['tec-token']);
@@ -69,6 +70,23 @@ const RodMontajeAnotaciones = ({show, handleClose, montaje, tooling}) => {
         }));
     };
 
+    const EliminaAnotacion = (anotacion_id) => {
+        axios.delete(BACKEND_SERVER + `/api/rodillos/anotaciones/${anotacion_id}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setAnotacionesLocales(prevAnotaciones => 
+                prevAnotaciones.filter(anotacion => anotacion.id !== anotacion_id)
+            );
+        })
+        .catch( err => {
+            console.log(err);
+            alert("Error al eliminar la anotación");
+        });
+    };
+
     return(
         <Modal show={show} onHide={handleClose} backdrop="static" keyboard={false} animation={false} size="lg">
             <Modal.Header>
@@ -80,6 +98,7 @@ const RodMontajeAnotaciones = ({show, handleClose, montaje, tooling}) => {
                         <tr>
                             <th>Descripción</th>
                             <th>Archivo</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -93,6 +112,7 @@ const RodMontajeAnotaciones = ({show, handleClose, montaje, tooling}) => {
                                         </a>
                                     )}
                                 </td>
+                                <td><Trash className="trash"  onClick={event =>{EliminaAnotacion(anotacion.id)}} /></td>
                             </tr>
                         ))}
                         {tooling===false?
