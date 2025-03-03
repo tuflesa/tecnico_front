@@ -167,7 +167,8 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                                             .map(operacion => {
                                                 let colorBoton1 = false; //color verde
                                                 let colorBoton2 = false; //color azul
-                                                let colorBoton3 = false; //color naranja?
+                                                let colorBoton3 = false; //color naranja
+                                                let colorBoton4 = false; //color amarillo
                                                 let iconoOperacion = null;
                                                 let iconoOperacion2 = null;
                                                 let iconoOperacion3 = null;
@@ -179,7 +180,21 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                                                             form_completas.bancada.tubo_madre === form_completas.conjunto.tubo_madre &&
                                                             form_completas.bancada.tubo_madre === grupo.tubo_madre
                                                         ) {
-                                                            colorBoton1 = true; // Rodillos propios
+                                                            let tieneRodilloSinNombre = false;
+                                                            form_completas.bancada.celdas.forEach(celda => {
+                                                                if (celda.conjunto.id === form_completas.conjunto.id) {
+                                                                    celda.conjunto.elementos.forEach(elemento => {
+                                                                        if (elemento.rodillo && elemento.rodillo.nombre === "Sin_Rodillo") {
+                                                                            tieneRodilloSinNombre = true;
+                                                                        }
+                                                                    });
+                                                                }
+                                                            });
+                                                            if (tieneRodilloSinNombre) {
+                                                                colorBoton4 = true; // Si hay al menos un rodillo "Sin rodillo"
+                                                            } else {
+                                                                colorBoton1 = true; 
+                                                            }
                                                             iconoOperacion = form_completas.icono && form_completas.icono.icono ? form_completas.icono.icono : '';
                                                         }
                                                         if (
@@ -221,6 +236,8 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                                                             className={`btn ${
                                                                 colorBoton2
                                                                     ? 'btn-primary'
+                                                                    : colorBoton4
+                                                                    ? 'btn-amarillo-primary'
                                                                     : colorBoton1
                                                                     ? 'btn-verde'
                                                                     : colorBoton3
