@@ -44,28 +44,26 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
     }, [token, grupo]);
 
     useEffect(() => { //Recogemos las celdas ya creadas según el grupo, elegidos
-        const formacionesCompletadasArray = [];
-        let objetosAcumulados = 0;
-        for(var x=0;x<grupo.bancadas.length;x++){
-            //maquina && empresa && grupo && axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__seccion__maquina__id=${maquina}&bancada__seccion__maquina__empresa=${empresa}&bancada__tubo_madre=${tubo_madre}`,{
-            if (maquina && empresa && grupo) {
-                axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__id=${grupo.bancadas[x].id}`,{
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`
-                    }
-                })
-                .then( rr => {
-                    formacionesCompletadasArray.push(...rr.data);
-                    objetosAcumulados += rr.data.length;
-                    if (objetosAcumulados === formacionesCompletadasArray.length) {//si tengo todas las respuesta, paso la información a formacionescompletadas.
-                        setFormacionesCompletadas(formacionesCompletadasArray);
-                    }
-                })
-                .catch( err => {
-                    console.log(err);
-                });
+        if (!maquina || !empresa || !grupo) return;
+
+        const fetchCeldas = async () => {
+            try {
+                const requests = grupo.bancadas.map(bancada =>
+                    axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__id=${bancada.id}`, {
+                        headers: { 'Authorization': `token ${token['tec-token']}` }
+                    })
+                );
+
+                const responses = await Promise.all(requests);
+                const formacionesCompletadasArray = responses.flatMap(response => response.data);
+
+                setFormacionesCompletadas(formacionesCompletadasArray);
+            } catch (error) {
+                console.log(error);
             }
-        }
+        };
+
+        fetchCeldas();
     }, [grupo, maquina, empresa]);
 
     useEffect(() => { //recogemos las operaciones de la máquina elegida
@@ -279,6 +277,7 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                     operacion_marcada={operacion_marcada}
                     handleClose={CerrarConjunto}
                     grupoId={grupo.id}
+                    grupo_nom={grupo.nombre}
                     grupoEspesor={grupo.espesor_1 +'÷'+grupo.espesor_2}
                     grupo_bancadas={grupo.bancadas}
                     maquina={maquina}

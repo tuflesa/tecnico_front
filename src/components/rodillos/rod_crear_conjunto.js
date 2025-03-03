@@ -4,12 +4,13 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 
-const RodConjunto = ({show, setShow, elementos_formacion, handleClose, operacion_marcada, grupoId, grupoEspesor, empresa_id, maquina, tubomadre, grupo_bancadas, colorAzul, colorAzulB, colorVerde, bancada_id, bancada_otraformacion}) => {
+const RodConjunto = ({show, setShow, elementos_formacion, handleClose, grupo_nom, operacion_marcada, grupoId, grupoEspesor, empresa_id, maquina, tubomadre, grupo_bancadas, colorAzul, colorAzulB, colorVerde, bancada_id, bancada_otraformacion}) => {
     const [token] = useCookies(['tec-token']);
     const [bancadaId, setBancadaId] = useState(bancada_id); // Estado para bancada_id
 
     const [ejes, setEjes] = useState(null);
     const [rodillos, setRodillos] = useState(null);
+    const [rod_generico, setRodGenerico] = useState(null);
     const [conjuntos_exist, setConjuntos_exist] = useState([]);
     const [selectedEje, setSelectedEje] = useState(null);
     const [selectRodilloId, setSelectRodilloId] = useState({});
@@ -34,7 +35,7 @@ const RodConjunto = ({show, setShow, elementos_formacion, handleClose, operacion
     var conjunto_id='';
 
     const [datos, setDatos] = useState({
-        bancada_elegida: '',
+        bancada_elegida: bancada_id? bancada_id:'',
         bancadas_guardar: grupo_bancadas ? grupo_bancadas : [''],
         operacion_filtro: '',
         tubo_madre_filtro: '',
@@ -137,6 +138,20 @@ const RodConjunto = ({show, setShow, elementos_formacion, handleClose, operacion
             console.log(err);
         });
     }, [token, operacion_marcada, grupoId]);
+
+    useEffect(() => { //RODILLOS QUE PODEMOS USAR EN ESTA OPERACIÓN CON ESTE GRUPO
+        operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/rodillos/?es_generico=${true}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setRodGenerico(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
 
     useEffect(() => {
         var valormenos=tubomadre -50;
@@ -531,22 +546,18 @@ const RodConjunto = ({show, setShow, elementos_formacion, handleClose, operacion
                                         <Form.Group controlId={eje.id} key={eje.id}>
                                             <Form.Label>{eje.tipo.nombre}</Form.Label>
                                             <Form.Control
-                                                as="text"
+                                                type="text"
                                                 name={eje.id}
-                                                value={rodillo_elegido[eje.id] || ''}
-                                                //onChange={handleInputChange}
+                                                value={
+                                                    rodillo_elegido && 
+                                                    rodillo_elegido.find(rod => 
+                                                        rod.eje.tipo.id === eje.tipo.id 
+                                                    )?.rodillo?.nombre || ''
+                                                  }
+                                                readOnly={true}
                                                 placeholder={eje.tipo.nombre}
-                                                style={{fontWeight: 'bold', color: 'red'}}
+                                                style={{color: 'red'}}
                                             >
-                                                {rodillo_elegido && rodillo_elegido.map(rod => {
-                                                    if (rod.eje.tipo.id === eje.tipo.id && rod.rodillo.diametro === eje.diametro) {
-                                                        return (
-                                                            <option key={rod.rodillo.id} value={rod.rodillo.id}>
-                                                                {rod.rodillo.nombre}
-                                                            </option>
-                                                        )
-                                                    }
-                                                })}
                                             </Form.Control>
                                             <Form.Control
                                                 as="select"
@@ -557,8 +568,13 @@ const RodConjunto = ({show, setShow, elementos_formacion, handleClose, operacion
                                                 disabled={bancada_otraformacion.id?true:false}
                                             >
                                                 <option key={0} value={''}>Elegir rodillo</option>
+                                                {rod_generico && rod_generico.map(rodilloGen => (
+                                                    <option key={rodilloGen.id} value={`${rodilloGen.id},${operacion_marcada.id},${grupoId},${eje.id},${rodilloGen.espesor_1},${rodilloGen.espesor_2},${grupo_nom}`}>
+                                                        {rodilloGen.nombre}
+                                                    </option>
+                                                ))}
                                                 {rodillos && rodillos.map(rodillo => {
-                                                    if (rodillo.tipo === eje.tipo.id && rodillo.diametro === eje.diametro) {
+                                                    if (rodillo.tipo === eje.tipo.id && rodillo.diametro === eje.diametro || rodillo.es_generico===true) {
                                                         return (
                                                             <option key={rodillo.id} value={`${rodillo.id},${rodillo.operacion},${rodillo.grupo.id},${eje.id},${rodillo.espesor_1},${rodillo.espesor_2},${rodillo.grupo.nombre}`}>
                                                                 {rodillo.nombre}

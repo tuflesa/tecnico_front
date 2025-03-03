@@ -411,7 +411,7 @@ const RodTooling = () => {
                                             {/* <Paperclip className="mr-3 pencil" onClick={() => window.open(montaje.archivo)} 
                                                 style={{cursor: montaje.archivo ? 'pointer' : 'not-allowed', opacity: montaje.archivo ? 1 : 0.5}} 
                                             /> */}
-                                            <CardImage className="mr-3 pencil" onClick={() => AbrirAnotacion(montaje)} 
+                                            <Paperclip className="mr-3 pencil" onClick={() => AbrirAnotacion(montaje)} 
                                                 style={{cursor: montaje.anotaciones.length!==0 ? 'pointer' : 'not-allowed', opacity: montaje.anotaciones.length!==0 ? 1 : 0.5}}     
                                             />
                                         </td>
