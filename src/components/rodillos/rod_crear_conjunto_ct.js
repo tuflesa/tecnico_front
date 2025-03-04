@@ -3,6 +3,7 @@ import { Row, Col, Form, Button, Modal, Tab, Tabs } from 'react-bootstrap';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
+import { exit } from 'process';
 
 const RodConjuntoCT = ({show, setShow, handleClose, operacion_marcada, elementos_formacion, dimensiones, bancada_id}) => {
     const [token] = useCookies(['tec-token']);
@@ -20,6 +21,8 @@ const RodConjuntoCT = ({show, setShow, handleClose, operacion_marcada, elementos
     const [rodillo_elegido, setRodillo_elegido] = useState([]);
     const [filtro, setFiltro] = useState(``);
     const [icono_celda, setIcono_celda] = useState([]);
+    const [rod_generico, setRodGenerico] = useState(null);
+    const [es_generico, setEsGenerico] = useState(null);
 
     const [datos, setDatos] = useState({
         dimension: '',
@@ -81,6 +84,20 @@ const RodConjuntoCT = ({show, setShow, handleClose, operacion_marcada, elementos
         });
     }, [token, operacion_marcada]);
 
+    useEffect(() => { //RODILLO NULO
+        operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/rodillos/?es_generico=${true}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setRodGenerico(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token, , operacion_marcada, filtro]);
+
     useEffect(() => { //PARA OBTENER LOS RODILLOS EXISTENTES DE LA MISMA SECCIÓN;
         operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/rodillos_existentes/?operacion__seccion__tipo=${operacion_marcada.seccion.tipo}`+ filtro,{
             headers: {
@@ -95,11 +112,31 @@ const RodConjuntoCT = ({show, setShow, handleClose, operacion_marcada, elementos
         });
     }, [operacion_marcada, filtro]);
 
-    useEffect(() => { //SI TENEMOS LOS 3 ELEMENTOS ACUMULAMOS LO SELECCIONADO
-        if(rod_id && selectedEje && dimensiones){
-            setEjesRodillos([...EjesRodillos, {eje: selectedEje, rodillo: rod_id, operacion: operacion_id, dimensiones:dimensiones}]);
+    /* useEffect(() => { //SI TENEMOS LOS 3 ELEMENTOS ACUMULAMOS LO SELECCIONADO
+        if(rod_id && selectedEje && dimensiones && rod_nom){
+            setEjesRodillos([...EjesRodillos, {eje: selectedEje, rodillo: rod_id, operacion: operacion_id, dimensiones:dimensiones, nombre: rod_nom}]);
         }        
-    }, [rod_id, selectedEje, dimensiones]);
+    }, [rod_id, selectedEje, dimensiones, rod_nom]); */
+
+    useEffect(() => {
+        if (rod_id && selectedEje && dimensiones && rod_nom) {
+            setEjesRodillos(prevEjesRodillos => {
+                const existe = prevEjesRodillos.some(e => e.eje === selectedEje);
+    
+                if (existe) {
+                    // Si ya existe, lo reemplazamos
+                    return prevEjesRodillos.map(e => 
+                        e.eje === selectedEje 
+                            ? { eje: selectedEje, rodillo: rod_id, operacion: operacion_id, dimensiones, nombre: rod_nom, es_generico: es_generico }
+                            : e
+                    );
+                } else {
+                    // Si no existe, lo agregamos
+                    return [...prevEjesRodillos, { eje: selectedEje, rodillo: rod_id, operacion: operacion_id, dimensiones, nombre: rod_nom, es_generico: es_generico }];
+                }
+            });
+        }
+    }, [rod_id, selectedEje, dimensiones, rod_nom]);    
 
     useEffect(() => { //recogemos todos los iconos posibles para la operación
         axios.get(BACKEND_SERVER + `/api/rodillos/icono_celda/?pertenece_ct=${true}`,{
@@ -116,31 +153,39 @@ const RodConjuntoCT = ({show, setShow, handleClose, operacion_marcada, elementos
     }, [token]);
 
     const GuardarConjuntoCT = () => {
-        if(bancada_id){
-            if(elementos_formacion.length>0){ //hay celda, machacamos el elemento
-                for(var x=0;x<EjesRodillos.length;x++){
-                    axios.patch(BACKEND_SERVER + `/api/rodillos/elemento/${rodillo_elegido[x].id}/`, {
-                        rodillo: EjesRodillos[x].rodillo,
-                    }, {
-                        headers: {
-                            'Authorization': `token ${token['tec-token']}`
-                            }     
-                    })
-                    .then( res => {  
-                        
-                    })
-                    .catch(err => { 
-                        console.error(err);
-                    })
-                }
-                window.location.href=`/rodillos/bacada_ct_editar/${bancada_id}`;
-            }
-            else{
-                GuardarConjunto_Elemento(bancada_id);
-            }
+        console.log('EjesRodillos',EjesRodillos)
+        let nulos = EjesRodillos.filter(rodillo=> rodillo.es_generico==='true').length
+        if(nulos>EjesRodillos.length/2){
+            alert('No podemos poner tantos rodillos nulos en una formación.')
+            return;
         }
         else{
-            GuardarBancada();
+            if(bancada_id){
+                if(elementos_formacion.length>0){ //hay celda, machacamos el elemento
+                    for(var x=0;x<EjesRodillos.length;x++){
+                        axios.patch(BACKEND_SERVER + `/api/rodillos/elemento/${rodillo_elegido[x].id}/`, {
+                            rodillo: EjesRodillos[x].rodillo,
+                        }, {
+                            headers: {
+                                'Authorization': `token ${token['tec-token']}`
+                                }     
+                        })
+                        .then( res => {  
+                            
+                        })
+                        .catch(err => { 
+                            console.error(err);
+                        })
+                    }
+                    window.location.href=`/rodillos/bacada_ct_editar/${bancada_id}`;
+                }
+                else{
+                    GuardarConjunto_Elemento(bancada_id);
+                }
+            }
+            else{
+                GuardarBancada();
+            }
         }
     }
 
@@ -240,30 +285,36 @@ const RodConjuntoCT = ({show, setShow, handleClose, operacion_marcada, elementos
         }));
     };
     
-    const handleInputChange = (event) => {
+    /* const handleInputChange = (event) => {
+        const [id, rodillo_nombre] = event.target.value.split(',');
         const campoNombre = event.target.name;
         const idRodillo = event.target.value;
         setRod_Id(idRodillo);
+        setRod_Nom(rodillo_nombre);
         const nuevaSeleccionRodilloId = {...selectRodilloId};
         nuevaSeleccionRodilloId[campoNombre] = idRodillo;
         setSelectedEje(campoNombre);
         setSelectRodilloId(nuevaSeleccionRodilloId);
-    }
+    } */
 
     const handleInputChangeRodExi = (event) => {
-        const [id, rodillo_nombre] = event.target.value.split(',');
+        const [id, rodillo_nombre, gen] = event.target.value.split(',');
         const campoNombre = event.target.name;
         const idRodillo = id;
         const nomRodillo = rodillo_nombre;
+        const generico = gen
         setRod_Id(idRodillo);
         setRod_Nom(nomRodillo);
         const nuevaSeleccionRodilloId = {...selectRodilloId};
         const nuevaSeleccionRodilloNom = {...selectRodilloNom};
-        nuevaSeleccionRodilloId[campoNombre] = idRodillo;
+        //nuevaSeleccionRodilloId[campoNombre] = idRodillo;
+        nuevaSeleccionRodilloId[campoNombre] = event.target.value; // Guarda "id,nombre"
+
         nuevaSeleccionRodilloNom[campoNombre] = nomRodillo;
         setSelectedEje(campoNombre);
         setSelectRodilloId(nuevaSeleccionRodilloId);
         setSelectRodilloNom(nuevaSeleccionRodilloNom);
+        setEsGenerico(generico)
     };
 
     const handleInputChange_icono = (event) => {
@@ -317,14 +368,16 @@ const RodConjuntoCT = ({show, setShow, handleClose, operacion_marcada, elementos
                                             <Form.Control
                                                 as="text"
                                                 name={eje.id}
-                                                value={rodillo_elegido[eje.id] || ''}
-                                                onChange={handleInputChange}
+                                                value={selectRodilloId[eje.id] || ''}
+                                                readOnly={true}
+                                                onChange={handleInputChangeRodExi}
                                                 placeholder={eje.tipo.nombre}
+                                                style={{color: 'blue'}}
                                             >
                                                 {rodillo_elegido && rodillo_elegido.map(rod => {
                                                     if (rod.eje.id === eje.id && rod.eje.tipo.id === eje.tipo.id && rod.conjunto.operacion.id === eje.operacion) {
                                                         return (
-                                                            <option key={rod.rodillo.id} value={rod.rodillo.id}>
+                                                            <option key={rod.rodillo.id} value={`${rod.rodillo.id},${rod.rodillo.nombre},${rod.rodillo.es_generico}`}>
                                                                 {rod.rodillo.nombre}
                                                             </option>
                                                         )
@@ -335,14 +388,19 @@ const RodConjuntoCT = ({show, setShow, handleClose, operacion_marcada, elementos
                                                 as="select"
                                                 name={eje.id}
                                                 value={selectRodilloId[eje.id] || ''}
-                                                onChange={handleInputChange}
+                                                onChange={handleInputChangeRodExi}
                                                 placeholder={eje.tipo.nombre}
                                             >
                                                 <option key={0} value={''}>Elegir rodillo</option>
+                                                {rod_generico && rod_generico.map(rodilloGen => (
+                                                    <option key={rodilloGen.id} value={`${rodilloGen.id},${rodilloGen.nombre},${rodilloGen.es_generico}`}>
+                                                        {rodilloGen.nombre}
+                                                    </option>
+                                                ))}
                                                 {rodillos && rodillos.map(rodillo => {
                                                     if (rodillo.tipo === eje.tipo.id && rodillo.diametro === eje.diametro && dimensiones.includes(parseInt(rodillo.dimension_perfil))) { 
                                                         return (
-                                                            <option key={rodillo.id} value={rodillo.id}>
+                                                            <option key={rodillo.id} value={`${rodillo.id},${rodillo.nombre},${rodillo.es_generico}`}>
                                                                 {rodillo.nombre}
                                                             </option>
                                                         )
@@ -417,10 +475,15 @@ const RodConjuntoCT = ({show, setShow, handleClose, operacion_marcada, elementos
                                             placeholder={eje.tipo.nombre}
                                         >
                                             <option key={0} value={''}>Elegir rodillo</option>
+                                            {rod_generico && rod_generico.map(rodilloGen => (
+                                                    <option key={rodilloGen.id} value={`${rodilloGen.id},${rodilloGen.nombre},${rodilloGen.es_generico}`}>
+                                                        {rodilloGen.nombre}
+                                                    </option>
+                                                ))}
                                             {rodillo_exist && rodillo_exist.map(rod_exist => {
                                                 if (rod_exist.diametro === eje.diametro) {
                                                     return (
-                                                        <option key={rod_exist.id} value={`${rod_exist.id},${rod_exist.nombre}`}>
+                                                        <option key={rod_exist.id} value={`${rod_exist.id},${rod_exist.nombre},${rod_exist.es_generico}`}>
                                                             {rod_exist.nombre}
                                                         </option>
                                                     )

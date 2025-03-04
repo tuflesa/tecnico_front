@@ -151,7 +151,7 @@ const RodConjunto = ({show, setShow, elementos_formacion, handleClose, grupo_nom
         .catch( err => {
             console.log(err);
         });
-    }, [token]);
+    }, [token, operacion_marcada]);
 
     useEffect(() => {
         var valormenos=tubomadre -50;
@@ -195,11 +195,31 @@ const RodConjunto = ({show, setShow, elementos_formacion, handleClose, grupo_nom
             });
     }, [token, tubomadre, operacion_marcada]);
 
-    useEffect(() => { //SI TENEMOS LOS 3 ELEMENTOS ACUMULAMOS LO SELECCIONADO
+    /* useEffect(() => { //SI TENEMOS LOS 3 ELEMENTOS ACUMULAMOS LO SELECCIONADO
         if(rod_id && selectedEje && operacion_rod && tubo_madre_rod){
             setEjesRodillos([...EjesRodillos, {eje: selectedEje, rodillo: rod_id, operacion: operacion_rod, TuboMadreRod:tubo_madre_rod}]);
         }        
-    }, [rod_id, selectedEje, operacion_rod, tubo_madre_rod]);
+    }, [rod_id, selectedEje, operacion_rod, tubo_madre_rod]); */
+
+    useEffect(() => {
+            if (rod_id && selectedEje && operacion_rod && tubo_madre_rod) {
+                setEjesRodillos(prevEjesRodillos => {
+                    const existe = prevEjesRodillos.some(e => e.eje === selectedEje);
+        
+                    if (existe) {
+                        // Si ya existe, lo reemplazamos
+                        return prevEjesRodillos.map(e => 
+                            e.eje === selectedEje 
+                                ? { eje: selectedEje, rodillo: rod_id, operacion: operacion_rod, TuboMadreRod:tubo_madre_rod}
+                                : e
+                        );
+                    } else {
+                        // Si no existe, lo agregamos
+                        return [...prevEjesRodillos, { eje: selectedEje, rodillo: rod_id, operacion: operacion_rod, TuboMadreRod:tubo_madre_rod}];
+                    }
+                });
+            }
+        }, [rod_id, selectedEje, operacion_rod, tubo_madre_rod]);
     
     useEffect(() => { //BUSCAMOS LAS BANCADAS QUE PRECISAMOS PARA ESTA OPERACIÓN
         operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/bancada_grupos/?seccion=${operacion_marcada.seccion.id}&tubo_madre__gte=${tubomadre-50}&tubo_madre__lte=${tubomadre+10}`,{
