@@ -61,6 +61,12 @@ code {
   border: 1px solid rgb(243, 145, 8)
 }
 
+.btn-amarillo-primary {
+  background-color: rgb(223, 230, 25); /* Cambia el color amarillo */
+  color: black; 
+  border: 1px solid rgb(223, 230, 25)
+}
+
 .btn-naranja-primary:focus {
   background-color: rgb(243, 145, 8); /* Cambia el color naranja */
   color: black; 

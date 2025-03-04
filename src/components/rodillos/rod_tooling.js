@@ -15,19 +15,19 @@ const RodTooling = () => {
 
     const [montajes, setMontajes] = useState(null)
     const [filtro, setFiltro] = useState(``);
-    const [, setFilaSeleccionada] = useState(null);
+    //const [, setFilaSeleccionada] = useState(null);
     const [show, setShow] = useState(false);
     const [celdas, setCeldas] = useState(null);
-    const [elementos, setElementos] = useState(null);
-    const [celdasCT, setCeldasCT] = useState(null);
-    const [elementosCT, setElementosCT] = useState(null);
+    //const [elementos, setElementos] = useState(null);
+    //const [celdasCT, setCeldasCT] = useState(null);
+    //const [elementosCT, setElementosCT] = useState(null);
     const [conjuntosCel, setConjuntosCel] = useState(null);
-    const [conjuntosCelCT, setConjuntosCelCT] = useState(null);
-    const [conjuntos_completadosCel, setConjuntosCompletadosCel] = useState(null);
+    //const [conjuntosCelCT, setConjuntosCelCT] = useState(null);
+    //const [conjuntos_completadosCel, setConjuntosCompletadosCel] = useState(null);
     const [maquina, setMaquina] = useState(null);
     const [operaciones, setOperaciones] = useState(null);
     const [secciones, setSecciones] = useState(null);
-    const [bancadas, setBancadas] = useState(null);
+    //const [bancadas, setBancadas] = useState(null);
     const [icono_celda, setIcono_celda] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [celdaSeleccionada, setCeldaSeleccionada] = useState(null);
@@ -58,7 +58,7 @@ const RodTooling = () => {
                 }
             }));
             setMontajes(nuevosMontajes);
-            let newBancadas = []; // Crear un nuevo array para almacenar los nuevos elementos
+            /* let newBancadas = []; // Crear un nuevo array para almacenar los nuevos elementos
             for (var x = 0; x < res.data.length; x++) {
                 var Idmontaje = {
                     ...res.data[x].bancadas,
@@ -75,7 +75,7 @@ const RodTooling = () => {
                     newBancadas = newBancadas.concat(IDmontaje);
                 }
             }
-            setBancadas(newBancadas); // Para tener todas las bancadas juntos BD y CT
+            setBancadas(newBancadas); */ // Para tener todas las bancadas juntos BD y CT
             cogerDatos(res.data);
         })
         .catch( err => {
@@ -136,7 +136,7 @@ const RodTooling = () => {
         }
     }, [celdas]);
 
-    useEffect(() => {
+    /* useEffect(() => {
         if (celdasCT) {
             const datosTablaCelCT = celdasCT.flatMap(e => { //idem celdas
                 if (e) {
@@ -154,9 +154,9 @@ const RodTooling = () => {
         } else {
             setConjuntosCelCT(null);
         }
-    }, [celdasCT]);
+    }, [celdasCT]); */
 
-    useEffect(() => { //Para tener todas las celdas juntos BD y CT
+    /* useEffect(() => { //Para tener todas las celdas juntos BD y CT
         if (conjuntosCel && conjuntosCelCT) {
             const unimos = conjuntosCel.concat(conjuntosCelCT);
             unimos.forEach((element, index) => {
@@ -166,7 +166,7 @@ const RodTooling = () => {
         } else {
             setConjuntosCompletadosCel(null);
         }
-    }, [conjuntosCel, conjuntosCelCT]);
+    }, [conjuntosCel, conjuntosCelCT]); */
 
     useEffect(() => { //recogemos todos los iconos posibles para la operación
         axios.get(BACKEND_SERVER + `/api/rodillos/icono_celda/`,{
@@ -186,9 +186,9 @@ const RodTooling = () => {
         try {
             // Arrays para almacenar la información de todos los montajes
             let todasLasCeldas = [];
-            let todasLasCeldasCT = [];
-            let todosLosElementos = [];
-            let todosLosElementosCT = [];
+            //let todasLasCeldasCT = [];
+            //let todosLosElementos = [];
+            //let todosLosElementosCT = [];
     
             // Procesar cada montaje individualmente
             await Promise.all(montajes.map(async (montaje) => {
@@ -204,21 +204,21 @@ const RodTooling = () => {
                     });
                 });
     
-                const solicitudesCeldasCT = axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__id=${montaje.bancadas.id}`, {
+                /* const solicitudesCeldasCT = axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__id=${montaje.bancadas.id}`, {
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
                     }
                 }).then(response => {
                     response.data.forEach(item => item.montajeId = montaje.id);
                     return response;
-                });
+                }); */
     
                 // Esperar a que todas las solicitudes a las celdas se completen y pasar la info a respuestasCeldas
                 const respuestasCeldas = await Promise.all(solicitudesCeldas);
-                const respuestasCeldasCT = await solicitudesCeldasCT;
+                //const respuestasCeldasCT = await solicitudesCeldasCT;
     
                 // Buscar para cada Celda el elemento con el id del conjunto
-                const solicitudesElementos = respuestasCeldas.map(res => {
+                /* const solicitudesElementos = respuestasCeldas.map(res => {
                     return Promise.all(res.data.map(celda => {
                         return axios.get(BACKEND_SERVER + `/api/rodillos/elemento_select/?conjunto__id=${celda.conjunto.id}`, {
                             headers: {
@@ -226,34 +226,34 @@ const RodTooling = () => {
                             }
                         });
                     }));
-                });
+                }); */
     
-                const solicitudesElementosCT = Promise.all(respuestasCeldasCT.data.map(ress => {
+                /* const solicitudesElementosCT = Promise.all(respuestasCeldasCT.data.map(ress => {
                     return axios.get(BACKEND_SERVER + `/api/rodillos/elemento_select/?conjunto__id=${ress.conjunto.id}`, {
                         headers: {
                             'Authorization': `token ${token['tec-token']}`
                         }
                     });
-                }));
+                })); */
     
                 // Esperar a que todas las solicitudes de elementos se completen y copiar la info en respuestasElementos
-                const respuestasElementos = await Promise.all(solicitudesElementos);
-                const respuestasElementosCT = await solicitudesElementosCT;
+                //const respuestasElementos = await Promise.all(solicitudesElementos);
+                //const respuestasElementosCT = await solicitudesElementosCT;
     
                 // Almacenar la información del montaje actual en los arrays respectivos
                 todasLasCeldas.push(respuestasCeldas.map(res => res.data));
-                todasLasCeldasCT.push(respuestasCeldasCT.data);
-                todosLosElementos.push(respuestasElementos.map(res => res.map(r => r.data)));
-                todosLosElementosCT.push(respuestasElementosCT.map(res => res.data));
+                //todasLasCeldasCT.push(respuestasCeldasCT.data);
+                //todosLosElementos.push(respuestasElementos.map(res => res.map(r => r.data)));
+                //todosLosElementosCT.push(respuestasElementosCT.map(res => res.data));
             }));
     
             // Actualizar los estados con la información de todos los montajes
-            setFilaSeleccionada(montajes.map(montaje => montaje.id));
+            //setFilaSeleccionada(montajes.map(montaje => montaje.id));
             setShow(!show);
             setCeldas(todasLasCeldas);
-            setCeldasCT(todasLasCeldasCT);
-            setElementos(todosLosElementos); //POR SI QUIERO LUEGO HACER UN CLICK Y VER INFORMACIÓN
-            setElementosCT(todosLosElementosCT);
+            //setCeldasCT(todasLasCeldasCT);
+            //setElementos(todosLosElementos); //POR SI QUIERO LUEGO HACER UN CLICK Y VER INFORMACIÓN
+            //setElementosCT(todosLosElementosCT);
         } catch (err) {
             console.log(err);
         }
@@ -411,7 +411,7 @@ const RodTooling = () => {
                                             {/* <Paperclip className="mr-3 pencil" onClick={() => window.open(montaje.archivo)} 
                                                 style={{cursor: montaje.archivo ? 'pointer' : 'not-allowed', opacity: montaje.archivo ? 1 : 0.5}} 
                                             /> */}
-                                            <CardImage className="mr-3 pencil" onClick={() => AbrirAnotacion(montaje)} 
+                                            <Paperclip className="mr-3 pencil" onClick={() => AbrirAnotacion(montaje)} 
                                                 style={{cursor: montaje.anotaciones.length!==0 ? 'pointer' : 'not-allowed', opacity: montaje.anotaciones.length!==0 ? 1 : 0.5}}     
                                             />
                                         </td>

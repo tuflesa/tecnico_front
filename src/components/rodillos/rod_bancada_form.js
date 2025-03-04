@@ -44,28 +44,26 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
     }, [token, grupo]);
 
     useEffect(() => { //Recogemos las celdas ya creadas según el grupo, elegidos
-        const formacionesCompletadasArray = [];
-        let objetosAcumulados = 0;
-        for(var x=0;x<grupo.bancadas.length;x++){
-            //maquina && empresa && grupo && axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__seccion__maquina__id=${maquina}&bancada__seccion__maquina__empresa=${empresa}&bancada__tubo_madre=${tubo_madre}`,{
-            if (maquina && empresa && grupo) {
-                axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__id=${grupo.bancadas[x].id}`,{
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`
-                    }
-                })
-                .then( rr => {
-                    formacionesCompletadasArray.push(...rr.data);
-                    objetosAcumulados += rr.data.length;
-                    if (objetosAcumulados === formacionesCompletadasArray.length) {//si tengo todas las respuesta, paso la información a formacionescompletadas.
-                        setFormacionesCompletadas(formacionesCompletadasArray);
-                    }
-                })
-                .catch( err => {
-                    console.log(err);
-                });
+        if (!maquina || !empresa || !grupo) return;
+
+        const fetchCeldas = async () => {
+            try {
+                const requests = grupo.bancadas.map(bancada =>
+                    axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__id=${bancada.id}`, {
+                        headers: { 'Authorization': `token ${token['tec-token']}` }
+                    })
+                );
+
+                const responses = await Promise.all(requests);
+                const formacionesCompletadasArray = responses.flatMap(response => response.data);
+
+                setFormacionesCompletadas(formacionesCompletadasArray);
+            } catch (error) {
+                console.log(error);
             }
-        }
+        };
+
+        fetchCeldas();
     }, [grupo, maquina, empresa]);
 
     useEffect(() => { //recogemos las operaciones de la máquina elegida
@@ -169,7 +167,8 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                                             .map(operacion => {
                                                 let colorBoton1 = false; //color verde
                                                 let colorBoton2 = false; //color azul
-                                                let colorBoton3 = false; //color naranja?
+                                                let colorBoton3 = false; //color naranja
+                                                let colorBoton4 = false; //color amarillo
                                                 let iconoOperacion = null;
                                                 let iconoOperacion2 = null;
                                                 let iconoOperacion3 = null;
@@ -181,7 +180,21 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                                                             form_completas.bancada.tubo_madre === form_completas.conjunto.tubo_madre &&
                                                             form_completas.bancada.tubo_madre === grupo.tubo_madre
                                                         ) {
-                                                            colorBoton1 = true; // Rodillos propios
+                                                            let tieneRodilloSinNombre = false;
+                                                            form_completas.bancada.celdas.forEach(celda => {
+                                                                if (celda.conjunto.id === form_completas.conjunto.id) {
+                                                                    celda.conjunto.elementos.forEach(elemento => {
+                                                                        if (elemento.rodillo && elemento.rodillo.nombre === "Sin_Rodillo") {
+                                                                            tieneRodilloSinNombre = true;
+                                                                        }
+                                                                    });
+                                                                }
+                                                            });
+                                                            if (tieneRodilloSinNombre) {
+                                                                colorBoton4 = true; // Si hay al menos un rodillo "Sin rodillo"
+                                                            } else {
+                                                                colorBoton1 = true; 
+                                                            }
                                                             iconoOperacion = form_completas.icono && form_completas.icono.icono ? form_completas.icono.icono : '';
                                                         }
                                                         if (
@@ -223,6 +236,8 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                                                             className={`btn ${
                                                                 colorBoton2
                                                                     ? 'btn-primary'
+                                                                    : colorBoton4
+                                                                    ? 'btn-amarillo-primary'
                                                                     : colorBoton1
                                                                     ? 'btn-verde'
                                                                     : colorBoton3
@@ -279,6 +294,7 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                     operacion_marcada={operacion_marcada}
                     handleClose={CerrarConjunto}
                     grupoId={grupo.id}
+                    grupo_nom={grupo.nombre}
                     grupoEspesor={grupo.espesor_1 +'÷'+grupo.espesor_2}
                     grupo_bancadas={grupo.bancadas}
                     maquina={maquina}
