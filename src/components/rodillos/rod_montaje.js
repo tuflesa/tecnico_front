@@ -20,7 +20,7 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
     const [bancadaCT, setBancadaCT] = useState(null);
     const [operaciones, setOperaciones] = useState(null);
     const [secciones, setSecciones] = useState(null);
-    const [formaciones_completadas, setFormacionesCompletadas] = useState('');
+    const [formaciones_completadas, setFormacionesCompletadas] = useState([]);
     const [formaciones_filtradas, setFormacionesFiltradas] = useState('');
     const [operacion_marcada, setOperacionMarcada] = useState(null);
     const [show_conjunto, setShowConjunto] = useState(false);
@@ -46,7 +46,7 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
 
     useEffect(() => { //SEPARAR DATOS QUE ENTRAN A TRAVES DEL FILTRO
         setGrabar(false);
-        setFormacionesCompletadas('');
+        setFormacionesCompletadas([]);
         const params = new URLSearchParams(filtro);
         const maquinaValue = params.get('maquina');
         const dimensionesValue = params.get('bancada');
@@ -127,27 +127,28 @@ const RodMontaje = ({montaje_edi, setMontajeEditar}) => {
         }
     }, [datos.bancada_ct, datos.grupo]);
 
-    useEffect(() => { //Recogemos las celdas ya creadas según empresa, máquina, elegidos
-        if(bancadas){
-            let celdas =[];
-            for(var x=0; x<bancadas.length;x++){
-                axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__id=${bancadas[x].id}`,{
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`
-                    }
-                })
-                .then( rr => {
-                    for(var y=0;y<rr.data.length;y++){
-                        celdas.push(rr.data[y]);
-                    }
-                })
-                .catch( err => {
-                    console.log(err);
-                });
-            }
-            setFormacionesCompletadas(celdas);
+    useEffect(() => { 
+        if (bancadas && bancadas.length > 0) {
+            const fetchCeldas = async () => {
+                try {
+                    const requests = bancadas.map(bancada =>
+                        axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__id=${bancada.id}`, {
+                            headers: { 'Authorization': `token ${token['tec-token']}` }
+                        })
+                    );
+    
+                    const responses = await Promise.all(requests);
+                    const celdas = responses.flatMap(response => response.data);
+    
+                    setFormacionesCompletadas(celdas);
+                } catch (error) {
+                    console.error("Error al obtener las celdas:", error);
+                }
+            };
+    
+            fetchCeldas();
         }
-    }, [bancadas]);
+    }, [bancadas]);    
 
     const GuardarId_Operacion = (operationId, color1, color2, color3) => {
         if(color1){
