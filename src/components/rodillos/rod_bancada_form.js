@@ -14,7 +14,7 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
     const [empresa, setEmpresa] = useState('');
     const [tubo_madre, setTuboMadre] = useState('');
     const [operacion_marcada, setOperacionMarcada] = useState(null);
-    const [formaciones_completadas, setFormacionesCompletadas] = useState('');
+    const [formaciones_completadas, setFormacionesCompletadas] = useState([]);
     const [formaciones_filtradas, setFormacionesFiltradas] = useState('');
     const [colorVerde, setColorVerde] = useState(false);
     const [colorAzul, setColorAzul] = useState(false);
@@ -55,7 +55,34 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                 );
 
                 const responses = await Promise.all(requests);
-                const formacionesCompletadasArray = responses.flatMap(response => response.data);
+                let formacionesCompletadasArray = responses.flatMap(response => response.data);
+                 // Asignamos colores y iconos antes de guardar en el estado
+                formacionesCompletadasArray = formacionesCompletadasArray.map(form_completas => {
+                    let colorBoton = "btn-gris-primary"; // Color por defecto
+                    let iconoOperacion = null;
+
+                    let tieneRodilloSinNombre = form_completas.bancada.celdas.some(celda =>
+                        celda.conjunto.id === form_completas.conjunto.id &&
+                        celda.conjunto.elementos.some(elemento => elemento.rodillo && elemento.rodillo.nombre === "Sin_Rodillo")
+                    );
+
+                    if (tieneRodilloSinNombre) {
+                        colorBoton = "btn-amarillo-primary";
+                    } else if (form_completas.conjunto.operacion === form_completas.operacion &&
+                            form_completas.bancada.tubo_madre === form_completas.conjunto.tubo_madre) {
+                        colorBoton = "btn-verde";
+                    } else if (form_completas.bancada.tubo_madre !== form_completas.conjunto.tubo_madre &&
+                            form_completas.operacion === form_completas.conjunto.operacion) {
+                        colorBoton = "btn-primary"; // Azul
+                    } else if (form_completas.operacion !== form_completas.conjunto.operacion &&
+                            form_completas.bancada.tubo_madre !== form_completas.conjunto.tubo_madre) {
+                        colorBoton = "btn-naranja-primary"; // Naranja
+                    }
+
+                    iconoOperacion = form_completas.icono?.icono || '';
+
+                    return { ...form_completas, colorBoton, iconoOperacion };
+                });
 
                 setFormacionesCompletadas(formacionesCompletadasArray);
             } catch (error) {
@@ -160,128 +187,36 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                                 ))}
                             </thead>
                             <tbody>
-                                <tr>
-                                    {secciones && secciones.map(seccion =>
-                                        operaciones
-                                            .filter(op => op.seccion.id === seccion.id)
-                                            .map(operacion => {
-                                                let colorBoton1 = false; //color verde
-                                                let colorBoton2 = false; //color azul
-                                                let colorBoton3 = false; //color naranja
-                                                let colorBoton4 = false; //color amarillo
-                                                let iconoOperacion = null;
-                                                let iconoOperacion2 = null;
-                                                let iconoOperacion3 = null;
+                                {secciones && secciones.map(seccion =>
+                                    operaciones
+                                        .filter(op => op.seccion.id === seccion.id)
+                                        .map(operacion => {
+                                            const form_completas = formaciones_completadas.find(f => f.operacion === operacion.id);
 
-                                                formaciones_completadas &&
-                                                    formaciones_completadas.forEach(form_completas => {
-                                                        if (
-                                                            form_completas.conjunto.operacion === operacion.id &&
-                                                            form_completas.bancada.tubo_madre === form_completas.conjunto.tubo_madre &&
-                                                            form_completas.bancada.tubo_madre === grupo.tubo_madre
-                                                        ) {
-                                                            let tieneRodilloSinNombre = false;
-                                                            form_completas.bancada.celdas.forEach(celda => {
-                                                                if (celda.conjunto.id === form_completas.conjunto.id) {
-                                                                    celda.conjunto.elementos.forEach(elemento => {
-                                                                        if (elemento.rodillo && elemento.rodillo.nombre === "Sin_Rodillo") {
-                                                                            tieneRodilloSinNombre = true;
-                                                                        }
-                                                                    });
-                                                                }
-                                                            });
-                                                            if (tieneRodilloSinNombre) {
-                                                                colorBoton4 = true; // Si hay al menos un rodillo "Sin rodillo"
-                                                            } else {
-                                                                colorBoton1 = true; 
-                                                            }
-                                                            iconoOperacion = form_completas.icono && form_completas.icono.icono ? form_completas.icono.icono : '';
+                                            return (
+                                                <td key={`${seccion.id}-${operacion.id}`}>
+                                                    <Button
+                                                        className={`btn ${form_completas ? form_completas.colorBoton : 'btn-gris-primary'} btn-sm`}
+                                                        onClick={() =>
+                                                            grupo
+                                                                ? GuardarId_Operacion(operacion, form_completas?.colorBoton)
+                                                                : alert('Elige grupo')
                                                         }
-                                                        if (
-                                                            form_completas.operacion !== form_completas.conjunto.operacion.id &&
-                                                            form_completas.operacion === operacion.id &&
-                                                            form_completas.bancada.tubo_madre === form_completas.conjunto.tubo_madre
-                                                        ) {
-                                                            colorBoton3 = true; // Bancada de otra formación
-                                                            iconoOperacion3 = operacion.icono && operacion.icono.icono ? operacion.icono.icono : '';
-                                                        }
-                                                        if (
-                                                            form_completas.bancada.tubo_madre !== form_completas.conjunto.tubo_madre &&
-                                                            form_completas.operacion === operacion.id &&
-                                                            form_completas.operacion === form_completas.conjunto.operacion
-                                                        ) {
-                                                            colorBoton2 = true; // Conjunto de otra formación
-                                                            iconoOperacion2 = operacion.icono && operacion.icono.icono ? operacion.icono.icono : '';
-                                                        }
-                                                        if (
-                                                            form_completas.bancada.tubo_madre !== grupo.tubo_madre &&
-                                                            form_completas.operacion === operacion.id
-                                                        ) {
-                                                            colorBoton2 = true; // Bancada de otra formación
-                                                            iconoOperacion2 = operacion.icono && operacion.icono.icono ? operacion.icono.icono : '';
-                                                        }
-                                                        if (
-                                                            form_completas.operacion !== form_completas.conjunto.operacion &&
-                                                            form_completas.bancada.tubo_madre !== form_completas.conjunto.tubo_madre &&
-                                                            form_completas.operacion === operacion.id
-                                                        ) {
-                                                            colorBoton3 = true; // Conjunto de otra formación y otra posición
-                                                            iconoOperacion3 = operacion.icono && operacion.icono.icono ? operacion.icono.icono : '';
-                                                        }
-                                                    });
-
-                                                return (
-                                                    <td key={`${seccion.id}-${operacion.id}`}>
-                                                        <Button
-                                                            className={`btn ${
-                                                                colorBoton2
-                                                                    ? 'btn-primary'
-                                                                    : colorBoton4
-                                                                    ? 'btn-amarillo-primary'
-                                                                    : colorBoton1
-                                                                    ? 'btn-verde'
-                                                                    : colorBoton3
-                                                                    ? 'btn-naranja-primary'
-                                                                    : 'btn-gris-primary'
-                                                            } btn-sm`}
-                                                            onClick={() =>
-                                                                grupo
-                                                                    ? GuardarId_Operacion(operacion, colorBoton1, colorBoton2, colorBoton3)
-                                                                    : alert('Elige grupo')
-                                                            }
-                                                        >
-                                                            {iconoOperacion==='' ? (
-                                                                operacion.nombre
-                                                            ) :
-                                                            iconoOperacion ? (
-                                                                <img
-                                                                    src={iconoOperacion}
-                                                                    alt={operacion.nombre}
-                                                                    style={{ width: '20px', height: '20px', marginRight: '5px' }}
-                                                                />
-                                                            ) :
-                                                            iconoOperacion2 ? (
-                                                                <img
-                                                                    src={iconoOperacion2}
-                                                                    alt={operacion.nombre}
-                                                                    style={{ width: '20px', height: '20px', marginRight: '5px' }}
-                                                                />
-                                                            ) : 
-                                                            iconoOperacion3 ? (
-                                                                <img
-                                                                    src={iconoOperacion3}
-                                                                    alt={operacion.nombre}
-                                                                    style={{ width: '20px', height: '20px', marginRight: '5px' }}
-                                                                />
-                                                            ) : (
-                                                                operacion.nombre
-                                                            )}
-                                                        </Button>
-                                                    </td>
-                                                );
-                                            })
-                                    )}
-                                </tr>
+                                                    >
+                                                        {form_completas?.iconoOperacion ? (
+                                                            <img
+                                                                src={form_completas.iconoOperacion}
+                                                                alt={operacion.nombre}
+                                                                style={{ width: '20px', height: '20px', marginRight: '5px' }}
+                                                            />
+                                                        ) : (
+                                                            operacion.nombre
+                                                        )}
+                                                    </Button>
+                                                </td>
+                                            );
+                                        })
+                                )}
                             </tbody>
                         </Table>
                     </Col>
