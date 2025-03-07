@@ -925,7 +925,7 @@ const StandChart2 = ({montaje, posiciones, gap, fleje}) => {
 
         function draw_CB(stand, i){
             const r = path();
-
+            console.log('stand: ', stand);
             // Rodillos y posiciones
             const roll_Superior= stand.rodillos.filter(r => r.eje=='SUP')[0];
             const roll_Inferior = stand.rodillos.filter(r => r.eje=='INF')[0];
@@ -946,632 +946,639 @@ const StandChart2 = ({montaje, posiciones, gap, fleje}) => {
             let m1, m2;
 
             // Superior
-            switch (roll_Superior.tipo_plano) {
-                case 'CB-CR-123-S': // Calibrador Cuadrado Rectangular 1 2 3 caja
-                    // Parametros
-                    R1 = roll_Superior.parametros.R1;
-                    Dext = roll_Superior.parametros.Dext;
-                    Df = roll_Superior.parametros.Df;
-                    Ancho = roll_Superior.parametros.Ancho;
-                    L1 = roll_Superior.parametros.L1;
+            if (roll_Superior){
+                switch (roll_Superior.tipo_plano) {
+                    case 'CB-CR-123-S': // Calibrador Cuadrado Rectangular 1 2 3 caja
+                        // Parametros
+                        R1 = roll_Superior.parametros.R1;
+                        Dext = roll_Superior.parametros.Dext;
+                        Df = roll_Superior.parametros.Df;
+                        Ancho = roll_Superior.parametros.Ancho;
+                        L1 = roll_Superior.parametros.L1;
 
-                    // Calculos
-                    pos = pos_sup; //AxisPos0_Superior - Df/2;
-                    xc = 0;
-                    yc = pos - R1;
-                    alfa1 = Math.asin(L1/(2*R1));
-                    x1 = xc + R1*Math.sin(alfa1);
-                    y1 = yc + R1*Math.cos(alfa1);
-                    x2 = Ancho/2;
-                    y2 = y1 + Math.tan(45*Math.PI/180)*(x2-x1);
-                    x3 = x2;
-                    y3 = y2 + 50;
-                    
-                    //Dibujo
-                    r.moveTo(xScale(-x1), yScale(y1));
-                    r.arc(xScale(xc), yScale(yc), rScale(R1), -Math.PI/2 - alfa1,  -Math.PI/2 + alfa1);
-                    r.lineTo(xScale(x2), yScale(y2));
-                    r.lineTo(xScale(x3), yScale(y3));
-                    r.moveTo(xScale(-x1), yScale(y1));
-                    r.lineTo(xScale(-x2), yScale(y2));
-                    r.lineTo(xScale(-x3), yScale(y3));
-                    break;
+                        // Calculos
+                        pos = pos_sup; //AxisPos0_Superior - Df/2;
+                        xc = 0;
+                        yc = pos - R1;
+                        alfa1 = Math.asin(L1/(2*R1));
+                        x1 = xc + R1*Math.sin(alfa1);
+                        y1 = yc + R1*Math.cos(alfa1);
+                        x2 = Ancho/2;
+                        y2 = y1 + Math.tan(45*Math.PI/180)*(x2-x1);
+                        x3 = x2;
+                        y3 = y2 + 50;
+                        
+                        //Dibujo
+                        r.moveTo(xScale(-x1), yScale(y1));
+                        r.arc(xScale(xc), yScale(yc), rScale(R1), -Math.PI/2 - alfa1,  -Math.PI/2 + alfa1);
+                        r.lineTo(xScale(x2), yScale(y2));
+                        r.lineTo(xScale(x3), yScale(y3));
+                        r.moveTo(xScale(-x1), yScale(y1));
+                        r.lineTo(xScale(-x2), yScale(y2));
+                        r.lineTo(xScale(-x3), yScale(y3));
+                        break;
 
-                case 'CB-R-4-S': // Redondo de 4 rodillos por operación
-                    // Parametros
-                    R1 = roll_Superior.parametros.R1;
-                    R2 = roll_Superior.parametros.R2;
-                    Dext = roll_Superior.parametros.Dext;
-                    Df = roll_Superior.parametros.Df;
-                    Ancho = roll_Superior.parametros.Ancho;
-                    C = roll_Superior.parametros.C;
-                    alfa1 = roll_Superior.parametros.alfa1 * Math.PI/180;
-                    alfa2 = roll_Superior.parametros.alfa2 * Math.PI/180;
+                    case 'CB-R-4-S': // Redondo de 4 rodillos por operación
+                        // Parametros
+                        R1 = roll_Superior.parametros.R1;
+                        R2 = roll_Superior.parametros.R2;
+                        Dext = roll_Superior.parametros.Dext;
+                        Df = roll_Superior.parametros.Df;
+                        Ancho = roll_Superior.parametros.Ancho;
+                        C = roll_Superior.parametros.C;
+                        alfa1 = roll_Superior.parametros.alfa1 * Math.PI/180;
+                        alfa2 = roll_Superior.parametros.alfa2 * Math.PI/180;
 
-                    // Calculos
-                    pos = pos_sup; //AxisPos0_Superior - Df/2;
-                    xc = 0;
-                    yc = pos - R1;
-                    x1 = 0;
-                    y1 = pos;
-                    x2 = -R1 * Math.sin(-alfa2 + alfa1/2);
-                    y2 = yc + R1 * Math.cos(-alfa2 + alfa1/2);
-                    m1 = Math.tan(alfa1/2 - alfa2);
-                    x3 = C / Math.cos(alfa1/2);
-                    y3 = yc;
-                    m2 = Math.tan(Math.PI/2 + alfa1/2);
-                    x4 = -Ancho/alfa1;
-                    y4 = y3 + m2*(x4-x3);
-                    x5 = (1/(m2-m1)) * (y2-y3+m2*x3-m1*x2);
-                    y5 = y3 +m2*(x5-x3);
+                        // Calculos
+                        pos = pos_sup; //AxisPos0_Superior - Df/2;
+                        xc = 0;
+                        yc = pos - R1;
+                        x1 = 0;
+                        y1 = pos;
+                        x2 = -R1 * Math.sin(-alfa2 + alfa1/2);
+                        y2 = yc + R1 * Math.cos(-alfa2 + alfa1/2);
+                        m1 = Math.tan(alfa1/2 - alfa2);
+                        x3 = C / Math.cos(alfa1/2);
+                        y3 = yc;
+                        m2 = Math.tan(Math.PI/2 + alfa1/2);
+                        x4 = -Ancho/alfa1;
+                        y4 = y3 + m2*(x4-x3);
+                        x5 = (1/(m2-m1)) * (y2-y3+m2*x3-m1*x2);
+                        y5 = y3 +m2*(x5-x3);
 
-                    //Dibujo
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.arc(xScale(xc), yScale(yc), rScale(R1), -Math.PI/2,  -Math.PI/2 - alfa1/2 + alfa2, true);
-                    r.arcTo(xScale(x5), yScale(y5), xScale(x4), yScale(y4), rScale(R2));
-                    r.lineTo(xScale(x4), yScale(y4));
-                    r.lineTo(xScale(x4), yScale(y4+50));
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.arc(xScale(xc), yScale(yc), rScale(R1), -Math.PI/2, -Math.PI/2 + alfa1/2 - alfa2);
-                    r.arcTo(xScale(-x5), yScale(y5), xScale(-x4), yScale(y4), rScale(R2));
-                    r.lineTo(xScale(-x4), yScale(y4));
-                    r.lineTo(xScale(-x4), yScale(y4+50));
-                    break;
+                        //Dibujo
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.arc(xScale(xc), yScale(yc), rScale(R1), -Math.PI/2,  -Math.PI/2 - alfa1/2 + alfa2, true);
+                        r.arcTo(xScale(x5), yScale(y5), xScale(x4), yScale(y4), rScale(R2));
+                        r.lineTo(xScale(x4), yScale(y4));
+                        r.lineTo(xScale(x4), yScale(y4+50));
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.arc(xScale(xc), yScale(yc), rScale(R1), -Math.PI/2, -Math.PI/2 + alfa1/2 - alfa2);
+                        r.arcTo(xScale(-x5), yScale(y5), xScale(-x4), yScale(y4), rScale(R2));
+                        r.lineTo(xScale(-x4), yScale(y4));
+                        r.lineTo(xScale(-x4), yScale(y4+50));
+                        break;
 
-                case 'CB-R-2-S': // Redondo de 2 rodillos por operación (media caña)
-                    // Parametros
-                    R1 = roll_Superior.parametros.R1;
-                    R2 = roll_Superior.parametros.R2;
-                    Dext = roll_Superior.parametros.Dext;
-                    Df = roll_Superior.parametros.Df;
-                    Dc = roll_Superior.parametros.Dc;
-                    Ancho = roll_Superior.parametros.Ancho;
-                    alfa1 = roll_Superior.parametros.alfa1 * Math.PI/180;
+                    case 'CB-R-2-S': // Redondo de 2 rodillos por operación (media caña)
+                        // Parametros
+                        R1 = roll_Superior.parametros.R1;
+                        R2 = roll_Superior.parametros.R2;
+                        Dext = roll_Superior.parametros.Dext;
+                        Df = roll_Superior.parametros.Df;
+                        Dc = roll_Superior.parametros.Dc;
+                        Ancho = roll_Superior.parametros.Ancho;
+                        alfa1 = roll_Superior.parametros.alfa1 * Math.PI/180;
 
-                    // Calculos
-                    pos = pos_sup; //AxisPos0_Superior - Df/2;
-                    xc = 0;
-                    yc = pos - R1;
-                    x1 = xc + R1*Math.cos(alfa1);
-                    y1 = yc + R1*Math.sin(alfa1);
-                    m1 = Math.tan(Math.PI/2 - alfa1);
-                    y2 = y1;
-                    x2 = -x1;
-                    x4 = -Ancho/2;
-                    y4 = yc + (Dc-Dext)/2;
-                    y3 = y4;
-                    x3 = x2 + (y3-y2)/m1;
+                        // Calculos
+                        pos = pos_sup; //AxisPos0_Superior - Df/2;
+                        xc = 0;
+                        yc = pos - R1;
+                        x1 = xc + R1*Math.cos(alfa1);
+                        y1 = yc + R1*Math.sin(alfa1);
+                        m1 = Math.tan(Math.PI/2 - alfa1);
+                        y2 = y1;
+                        x2 = -x1;
+                        x4 = -Ancho/2;
+                        y4 = yc + (Dc-Dext)/2;
+                        y3 = y4;
+                        x3 = x2 + (y3-y2)/m1;
 
-                    //Dibujo
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.arc(xScale(xc), yScale(yc), rScale(R1), -alfa1,  Math.PI + alfa1, true);
-                    r.arcTo(xScale(x3), yScale(y3), xScale(x4), yScale(y4), rScale(R2));
-                    r.lineTo(xScale(x4), yScale(y4));
-                    r.lineTo(xScale(x4), yScale(y4+50));
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.arcTo(xScale(-x3), yScale(y3), xScale(-x4), yScale(y4), rScale(R2));
-                    r.lineTo(xScale(-x4), yScale(y4));
-                    r.lineTo(xScale(-x4), yScale(y4+50));
-                    break;
+                        //Dibujo
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.arc(xScale(xc), yScale(yc), rScale(R1), -alfa1,  Math.PI + alfa1, true);
+                        r.arcTo(xScale(x3), yScale(y3), xScale(x4), yScale(y4), rScale(R2));
+                        r.lineTo(xScale(x4), yScale(y4));
+                        r.lineTo(xScale(x4), yScale(y4+50));
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.arcTo(xScale(-x3), yScale(y3), xScale(-x4), yScale(y4), rScale(R2));
+                        r.lineTo(xScale(-x4), yScale(y4));
+                        r.lineTo(xScale(-x4), yScale(y4+50));
+                        break;
 
-                case 'CB-CR-4-S': // Cuadrado y rectangular caja 4 (planos)
-                    // Parametros
-                    Df = roll_Superior.parametros.Df;
-                    L1 = roll_Superior.parametros.L1;
-                    Ancho = roll_Superior.parametros.Ancho;
+                    case 'CB-CR-4-S': // Cuadrado y rectangular caja 4 (planos)
+                        // Parametros
+                        Df = roll_Superior.parametros.Df;
+                        L1 = roll_Superior.parametros.L1;
+                        Ancho = roll_Superior.parametros.Ancho;
 
-                    // Calculos
-                    pos = pos_sup; //AxisPos0_Superior - Df/2;
-                    x1 = 0;
-                    y1 = pos;
-                    x2 = x1 + L1/2;
-                    y2 = y1;
-                    x3 = Ancho/2;
-                    y3 = y2 + (x3-x2); // Pendiente 1 (45º)
+                        // Calculos
+                        pos = pos_sup; //AxisPos0_Superior - Df/2;
+                        x1 = 0;
+                        y1 = pos;
+                        x2 = x1 + L1/2;
+                        y2 = y1;
+                        x3 = Ancho/2;
+                        y3 = y2 + (x3-x2); // Pendiente 1 (45º)
 
-                    // Dibujo
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.lineTo(xScale(x2), yScale(y2));
-                    r.lineTo(xScale(x3), yScale(y3));
-                    r.lineTo(xScale(x3), yScale(y3+50));
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.lineTo(xScale(-x2), yScale(y2));
-                    r.lineTo(xScale(-x3), yScale(y3));
-                    r.lineTo(xScale(-x3), yScale(y3+50));
-                    break;
-                case 'CB-CONVEX-S': //Rodillo convexo
-                    // Parametros
-                    Df = roll_Superior.parametros.Df;
-                    R1 = roll_Superior.parametros.R1;
-                    Ancho = roll_Superior.parametros.Ancho;
+                        // Dibujo
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.lineTo(xScale(x2), yScale(y2));
+                        r.lineTo(xScale(x3), yScale(y3));
+                        r.lineTo(xScale(x3), yScale(y3+50));
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.lineTo(xScale(-x2), yScale(y2));
+                        r.lineTo(xScale(-x3), yScale(y3));
+                        r.lineTo(xScale(-x3), yScale(y3+50));
+                        break;
+                    case 'CB-CONVEX-S': //Rodillo convexo
+                        // Parametros
+                        Df = roll_Superior.parametros.Df;
+                        R1 = roll_Superior.parametros.R1;
+                        Ancho = roll_Superior.parametros.Ancho;
 
-                    // Calculos
-                    pos = pos_sup; //AxisPos0_Superior - Df/2;
-                    alfa1 = Math.asin(Ancho/(2*R1));
-                    xc = 0;
-                    yc = pos + R1;
-                    x1 = -Ancho/2;
-                    y1 = yc - R1*Math.cos(alfa1);
+                        // Calculos
+                        pos = pos_sup; //AxisPos0_Superior - Df/2;
+                        alfa1 = Math.asin(Ancho/(2*R1));
+                        xc = 0;
+                        yc = pos + R1;
+                        x1 = -Ancho/2;
+                        y1 = yc - R1*Math.cos(alfa1);
 
-                    // Dibujo
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.arc(xScale(xc), yScale(yc), rScale(R1),Math.PI/2  + alfa1, Math.PI/2 - alfa1, true);
-                    r.lineTo(xScale(-x1), yScale(y1+50));
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.lineTo(xScale(x1), yScale(y1+50));
-                    break;
+                        // Dibujo
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.arc(xScale(xc), yScale(yc), rScale(R1),Math.PI/2  + alfa1, Math.PI/2 - alfa1, true);
+                        r.lineTo(xScale(-x1), yScale(y1+50));
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.lineTo(xScale(x1), yScale(y1+50));
+                        break;
+                }
             }
-            
             // Inferior
-            switch (roll_Inferior.tipo_plano) {
-                case 'CB-CR-123-S':
-                    // Parametros
-                    R1 = roll_Inferior.parametros.R1;
-                    Dext = roll_Inferior.parametros.Dext;
-                    Df = roll_Inferior.parametros.Df;
-                    Ancho = roll_Inferior.parametros.Ancho;
-                    L1 = roll_Inferior.parametros.L1;
+            if (roll_Inferior){
+                switch (roll_Inferior.tipo_plano) {
+                    case 'CB-CR-123-S':
+                        // Parametros
+                        R1 = roll_Inferior.parametros.R1;
+                        Dext = roll_Inferior.parametros.Dext;
+                        Df = roll_Inferior.parametros.Df;
+                        Ancho = roll_Inferior.parametros.Ancho;
+                        L1 = roll_Inferior.parametros.L1;
 
-                    // Calculos
-                    pos = pos_inf; //-AxisPos0_Inferior + Df/2;
-                    xc = 0;
-                    yc = pos + R1;
-                    alfa1 = Math.asin(L1/(2*R1));
-                    x1 = xc + R1*Math.sin(alfa1);
-                    y1 = yc - R1*Math.cos(alfa1);
-                    x2 = Ancho/2;
-                    y2 = y1 - Math.tan(45*Math.PI/180)*(x2-x1);
-                    x3 = x2;
-                    y3 = y2 - 50;
-                    
-                    //Dibujo
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.arc(xScale(xc), yScale(yc), rScale(R1), Math.PI/2 - alfa1,  Math.PI/2 + alfa1);
-                    r.lineTo(xScale(-x2), yScale(y2));
-                    r.lineTo(xScale(-x3), yScale(y3));
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.lineTo(xScale(x2), yScale(y2));
-                    r.lineTo(xScale(x3), yScale(y3));
-                    break;
+                        // Calculos
+                        pos = pos_inf; //-AxisPos0_Inferior + Df/2;
+                        xc = 0;
+                        yc = pos + R1;
+                        alfa1 = Math.asin(L1/(2*R1));
+                        x1 = xc + R1*Math.sin(alfa1);
+                        y1 = yc - R1*Math.cos(alfa1);
+                        x2 = Ancho/2;
+                        y2 = y1 - Math.tan(45*Math.PI/180)*(x2-x1);
+                        x3 = x2;
+                        y3 = y2 - 50;
+                        
+                        //Dibujo
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.arc(xScale(xc), yScale(yc), rScale(R1), Math.PI/2 - alfa1,  Math.PI/2 + alfa1);
+                        r.lineTo(xScale(-x2), yScale(y2));
+                        r.lineTo(xScale(-x3), yScale(y3));
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.lineTo(xScale(x2), yScale(y2));
+                        r.lineTo(xScale(x3), yScale(y3));
+                        break;
 
-                case 'CB-R-4-S':
-                    // Parametros
-                    R1 = roll_Inferior.parametros.R1;
-                    R2 = roll_Inferior.parametros.R2;
-                    Dext = roll_Inferior.parametros.Dext;
-                    Df = roll_Inferior.parametros.Df;
-                    Ancho = roll_Inferior.parametros.Ancho;
-                    C = roll_Inferior.parametros.C;
-                    alfa1 = roll_Inferior.parametros.alfa1 * Math.PI/180;
-                    alfa2 = roll_Inferior.parametros.alfa2 * Math.PI/180;
+                    case 'CB-R-4-S':
+                        // Parametros
+                        R1 = roll_Inferior.parametros.R1;
+                        R2 = roll_Inferior.parametros.R2;
+                        Dext = roll_Inferior.parametros.Dext;
+                        Df = roll_Inferior.parametros.Df;
+                        Ancho = roll_Inferior.parametros.Ancho;
+                        C = roll_Inferior.parametros.C;
+                        alfa1 = roll_Inferior.parametros.alfa1 * Math.PI/180;
+                        alfa2 = roll_Inferior.parametros.alfa2 * Math.PI/180;
 
-                    // Calculos
-                    pos = pos_inf; //-AxisPos0_Inferior + Df/2;
-                    xc = 0;
-                    yc = pos + R1;
-                    x1 = 0;
-                    y1 = pos;
-                    x2 = -R1 * Math.sin(-alfa2 + alfa1/2);
-                    y2 = yc - R1 * Math.cos(-alfa2 + alfa1/2);
-                    m1 = -Math.tan(alfa1/2 - alfa2);
-                    x3 = C / Math.cos(alfa1/2);
-                    y3 = yc;
-                    m2 = -Math.tan(Math.PI/2 + alfa1/2);
-                    x4 = -Ancho/alfa1;
-                    y4 = y3 + m2*(x4-x3);
-                    x5 = (1/(m2-m1)) * (y2-y3+m2*x3-m1*x2);
-                    y5 = y3 +m2*(x5-x3);
+                        // Calculos
+                        pos = pos_inf; //-AxisPos0_Inferior + Df/2;
+                        xc = 0;
+                        yc = pos + R1;
+                        x1 = 0;
+                        y1 = pos;
+                        x2 = -R1 * Math.sin(-alfa2 + alfa1/2);
+                        y2 = yc - R1 * Math.cos(-alfa2 + alfa1/2);
+                        m1 = -Math.tan(alfa1/2 - alfa2);
+                        x3 = C / Math.cos(alfa1/2);
+                        y3 = yc;
+                        m2 = -Math.tan(Math.PI/2 + alfa1/2);
+                        x4 = -Ancho/alfa1;
+                        y4 = y3 + m2*(x4-x3);
+                        x5 = (1/(m2-m1)) * (y2-y3+m2*x3-m1*x2);
+                        y5 = y3 +m2*(x5-x3);
 
-                    //Dibujo
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.arc(xScale(xc), yScale(yc), rScale(R1), Math.PI/2,  Math.PI/2 + alfa1/2 - alfa2);
-                    r.arcTo(xScale(x5), yScale(y5), xScale(x4), yScale(y4), rScale(R2));
-                    r.lineTo(xScale(x4), yScale(y4));
-                    r.lineTo(xScale(x4), yScale(y4-50));
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.arc(xScale(xc), yScale(yc), rScale(R1), Math.PI/2, Math.PI/2 - alfa1/2 + alfa2, true);
-                    r.arcTo(xScale(-x5), yScale(y5), xScale(-x4), yScale(y4), rScale(R2));
-                    r.lineTo(xScale(-x4), yScale(y4));
-                    r.lineTo(xScale(-x4), yScale(y4-50));
-                    break;
+                        //Dibujo
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.arc(xScale(xc), yScale(yc), rScale(R1), Math.PI/2,  Math.PI/2 + alfa1/2 - alfa2);
+                        r.arcTo(xScale(x5), yScale(y5), xScale(x4), yScale(y4), rScale(R2));
+                        r.lineTo(xScale(x4), yScale(y4));
+                        r.lineTo(xScale(x4), yScale(y4-50));
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.arc(xScale(xc), yScale(yc), rScale(R1), Math.PI/2, Math.PI/2 - alfa1/2 + alfa2, true);
+                        r.arcTo(xScale(-x5), yScale(y5), xScale(-x4), yScale(y4), rScale(R2));
+                        r.lineTo(xScale(-x4), yScale(y4));
+                        r.lineTo(xScale(-x4), yScale(y4-50));
+                        break;
 
-                case 'CB-R-2-S': // Redondo de 2 rodillos por operación (media caña)
-                    // Parametros
-                    R1 = roll_Inferior.parametros.R1;
-                    R2 = roll_Inferior.parametros.R2;
-                    Dext = roll_Inferior.parametros.Dext;
-                    Df = roll_Inferior.parametros.Df;
-                    Dc = roll_Inferior.parametros.Dc;
-                    Ancho = roll_Inferior.parametros.Ancho;
-                    alfa1 = roll_Inferior.parametros.alfa1 * Math.PI/180;
+                    case 'CB-R-2-S': // Redondo de 2 rodillos por operación (media caña)
+                        // Parametros
+                        R1 = roll_Inferior.parametros.R1;
+                        R2 = roll_Inferior.parametros.R2;
+                        Dext = roll_Inferior.parametros.Dext;
+                        Df = roll_Inferior.parametros.Df;
+                        Dc = roll_Inferior.parametros.Dc;
+                        Ancho = roll_Inferior.parametros.Ancho;
+                        alfa1 = roll_Inferior.parametros.alfa1 * Math.PI/180;
 
-                    // Calculos
-                    pos = pos_inf; //-AxisPos0_Inferior + Df/2;
-                    xc = 0;
-                    yc = pos + R1;
-                    x1 = xc + R1*Math.cos(alfa1);
-                    y1 = yc - R1*Math.sin(alfa1);
-                    m1 = -Math.tan(Math.PI/2 - alfa1);
-                    y2 = y1;
-                    x2 = -x1;
-                    x4 = -Ancho/2;
-                    y4 = yc - (Dc-Dext)/2;
-                    y3 = y4;
-                    x3 = x2 + (y3-y2)/m1;
+                        // Calculos
+                        pos = pos_inf; //-AxisPos0_Inferior + Df/2;
+                        xc = 0;
+                        yc = pos + R1;
+                        x1 = xc + R1*Math.cos(alfa1);
+                        y1 = yc - R1*Math.sin(alfa1);
+                        m1 = -Math.tan(Math.PI/2 - alfa1);
+                        y2 = y1;
+                        x2 = -x1;
+                        x4 = -Ancho/2;
+                        y4 = yc - (Dc-Dext)/2;
+                        y3 = y4;
+                        x3 = x2 + (y3-y2)/m1;
 
-                    //Dibujo
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.arc(xScale(xc), yScale(yc), rScale(R1), alfa1,  Math.PI - alfa1);
-                    r.arcTo(xScale(x3), yScale(y3), xScale(x4), yScale(y4), rScale(R2));
-                    r.lineTo(xScale(x4), yScale(y4));
-                    r.lineTo(xScale(x4), yScale(y4-50));
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.arcTo(xScale(-x3), yScale(y3), xScale(-x4), yScale(y4), rScale(R2));
-                    r.lineTo(xScale(-x4), yScale(y4));
-                    r.lineTo(xScale(-x4), yScale(y4-50));
-                    break;
+                        //Dibujo
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.arc(xScale(xc), yScale(yc), rScale(R1), alfa1,  Math.PI - alfa1);
+                        r.arcTo(xScale(x3), yScale(y3), xScale(x4), yScale(y4), rScale(R2));
+                        r.lineTo(xScale(x4), yScale(y4));
+                        r.lineTo(xScale(x4), yScale(y4-50));
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.arcTo(xScale(-x3), yScale(y3), xScale(-x4), yScale(y4), rScale(R2));
+                        r.lineTo(xScale(-x4), yScale(y4));
+                        r.lineTo(xScale(-x4), yScale(y4-50));
+                        break;
 
-                case 'CB-CR-4-S': // Cuadrado y rectangular caja 4 (planos)
-                    // Parametros
-                    Df = roll_Inferior.parametros.Df;
-                    L1 = roll_Inferior.parametros.L1;
-                    Ancho = roll_Inferior.parametros.Ancho;
+                    case 'CB-CR-4-S': // Cuadrado y rectangular caja 4 (planos)
+                        // Parametros
+                        Df = roll_Inferior.parametros.Df;
+                        L1 = roll_Inferior.parametros.L1;
+                        Ancho = roll_Inferior.parametros.Ancho;
 
-                    // Calculos
-                    pos = pos_inf; //-AxisPos0_Inferior + Df/2;
-                    x1 = 0;
-                    y1 = pos;
-                    x2 = x1 + L1/2;
-                    y2 = y1;
-                    x3 = Ancho/2;
-                    y3 = y2 - (x3-x2); // Pendiente -1 (45º)
+                        // Calculos
+                        pos = pos_inf; //-AxisPos0_Inferior + Df/2;
+                        x1 = 0;
+                        y1 = pos;
+                        x2 = x1 + L1/2;
+                        y2 = y1;
+                        x3 = Ancho/2;
+                        y3 = y2 - (x3-x2); // Pendiente -1 (45º)
 
-                    // Dibujo
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.lineTo(xScale(x2), yScale(y2));
-                    r.lineTo(xScale(x3), yScale(y3));
-                    r.lineTo(xScale(x3), yScale(y3-50));
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.lineTo(xScale(-x2), yScale(y2));
-                    r.lineTo(xScale(-x3), yScale(y3));
-                    r.lineTo(xScale(-x3), yScale(y3-50));
-                    break;
+                        // Dibujo
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.lineTo(xScale(x2), yScale(y2));
+                        r.lineTo(xScale(x3), yScale(y3));
+                        r.lineTo(xScale(x3), yScale(y3-50));
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.lineTo(xScale(-x2), yScale(y2));
+                        r.lineTo(xScale(-x3), yScale(y3));
+                        r.lineTo(xScale(-x3), yScale(y3-50));
+                        break;
 
-                case 'CB-CONVEX-S': //Rodillo convexo
-                    // Parametros
-                    Df = roll_Inferior.parametros.Df;
-                    R1 = roll_Inferior.parametros.R1;
-                    Ancho = roll_Inferior.parametros.Ancho;
+                    case 'CB-CONVEX-S': //Rodillo convexo
+                        // Parametros
+                        Df = roll_Inferior.parametros.Df;
+                        R1 = roll_Inferior.parametros.R1;
+                        Ancho = roll_Inferior.parametros.Ancho;
 
-                    // Calculos
-                    pos = pos_inf; //-AxisPos0_Inferior + Df/2;
-                    alfa1 = Math.asin(Ancho/(2*R1));
-                    xc = 0;
-                    yc = pos - R1;
-                    x1 = Ancho/2;
-                    y1 = yc + R1*Math.cos(alfa1);
+                        // Calculos
+                        pos = pos_inf; //-AxisPos0_Inferior + Df/2;
+                        alfa1 = Math.asin(Ancho/(2*R1));
+                        xc = 0;
+                        yc = pos - R1;
+                        x1 = Ancho/2;
+                        y1 = yc + R1*Math.cos(alfa1);
 
-                    // Dibujo
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.arc(xScale(xc), yScale(yc), rScale(R1),-Math.PI/2  + alfa1, -Math.PI/2 - alfa1, true);
-                    r.lineTo(xScale(-x1), yScale(y1-50));
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.lineTo(xScale(x1), yScale(y1-50));
-                    break;
+                        // Dibujo
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.arc(xScale(xc), yScale(yc), rScale(R1),-Math.PI/2  + alfa1, -Math.PI/2 - alfa1, true);
+                        r.lineTo(xScale(-x1), yScale(y1-50));
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.lineTo(xScale(x1), yScale(y1-50));
+                        break;
+                }
             }
-            
             // Lateral operador
-            switch (roll_Lat_Operador.tipo_plano) {
-                case 'CB-CR-123-L':
-                    // Parametros
-                    R1 = roll_Lat_Operador.parametros.R1;
-                    Dext = roll_Lat_Operador.parametros.Dext;
-                    Df = roll_Lat_Operador.parametros.Df;
-                    Ancho = roll_Lat_Operador.parametros.Ancho;
-                    L1 = roll_Lat_Operador.parametros.L1;
+            console.log('Lateral Operador: ', roll_Lat_Operador);
+            if (roll_Lat_Operador) {
+                switch (roll_Lat_Operador.tipo_plano) {
+                    case 'CB-CR-123-L':
+                        // Parametros
+                        R1 = roll_Lat_Operador.parametros.R1;
+                        Dext = roll_Lat_Operador.parametros.Dext;
+                        Df = roll_Lat_Operador.parametros.Df;
+                        Ancho = roll_Lat_Operador.parametros.Ancho;
+                        L1 = roll_Lat_Operador.parametros.L1;
 
-                    // Calculos
-                    pos = pos_lat_op; //-AxisPos0_Lat_Operador + Df/2;
-                    yc = 0;
-                    xc = pos + R1;
-                    alfa1 = Math.asin(L1/(2*R1));
-                    x1 = xc - R1*Math.cos(alfa1);
-                    y1 = yc - R1*Math.sin(alfa1);
-                    y2 = Ancho/2;
-                    x2 = x1 - Math.tan(45*Math.PI/180)*(y2+y1);
-                    y3 = y2;
-                    x3 = x2 - 50;
-                    
-                    //Dibujo
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.arc(xScale(xc), yScale(yc), rScale(R1), Math.PI - alfa1,  Math.PI + alfa1);
-                    r.lineTo(xScale(x2), yScale(y2));
-                    r.lineTo(xScale(x3), yScale(y3));
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.lineTo(xScale(x2), yScale(-y2));
-                    r.lineTo(xScale(x3), yScale(-y3));
-                    break;
+                        // Calculos
+                        pos = pos_lat_op; //-AxisPos0_Lat_Operador + Df/2;
+                        yc = 0;
+                        xc = pos + R1;
+                        alfa1 = Math.asin(L1/(2*R1));
+                        x1 = xc - R1*Math.cos(alfa1);
+                        y1 = yc - R1*Math.sin(alfa1);
+                        y2 = Ancho/2;
+                        x2 = x1 - Math.tan(45*Math.PI/180)*(y2+y1);
+                        y3 = y2;
+                        x3 = x2 - 50;
+                        
+                        //Dibujo
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.arc(xScale(xc), yScale(yc), rScale(R1), Math.PI - alfa1,  Math.PI + alfa1);
+                        r.lineTo(xScale(x2), yScale(y2));
+                        r.lineTo(xScale(x3), yScale(y3));
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.lineTo(xScale(x2), yScale(-y2));
+                        r.lineTo(xScale(x3), yScale(-y3));
+                        break;
 
-                case 'CB-CR-4-L': // Cuadrado y rectangular caja 4 (planos)
-                    // Parametros
-                    Df = roll_Lat_Operador.parametros.Df;
-                    L1 = roll_Lat_Operador.parametros.L1;
-                    Ancho = roll_Lat_Operador.parametros.Ancho;
+                    case 'CB-CR-4-L': // Cuadrado y rectangular caja 4 (planos)
+                        // Parametros
+                        Df = roll_Lat_Operador.parametros.Df;
+                        L1 = roll_Lat_Operador.parametros.L1;
+                        Ancho = roll_Lat_Operador.parametros.Ancho;
 
-                    // Calculos
-                    pos = pos_lat_op; //-AxisPos0_Lat_Operador + Df/2;
-                    y1 = 0;
-                    x1 = pos;
-                    y2 = y1 + L1/2;
-                    x2 = x1;
-                    y3 = Ancho/2;
-                    x3 = x2 - (y3-y2); // Pendiente -1 (45º)
+                        // Calculos
+                        pos = pos_lat_op; //-AxisPos0_Lat_Operador + Df/2;
+                        y1 = 0;
+                        x1 = pos;
+                        y2 = y1 + L1/2;
+                        x2 = x1;
+                        y3 = Ancho/2;
+                        x3 = x2 - (y3-y2); // Pendiente -1 (45º)
 
-                    // Dibujo
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.lineTo(xScale(x2), yScale(y2));
-                    r.lineTo(xScale(x3), yScale(y3));
-                    r.lineTo(xScale(x3-50), yScale(y3));
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.lineTo(xScale(x2), yScale(-y2));
-                    r.lineTo(xScale(x3), yScale(-y3));
-                    r.lineTo(xScale(x3-50), yScale(-y3));
-                    break;
+                        // Dibujo
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.lineTo(xScale(x2), yScale(y2));
+                        r.lineTo(xScale(x3), yScale(y3));
+                        r.lineTo(xScale(x3-50), yScale(y3));
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.lineTo(xScale(x2), yScale(-y2));
+                        r.lineTo(xScale(x3), yScale(-y3));
+                        r.lineTo(xScale(x3-50), yScale(-y3));
+                        break;
 
-                case 'CB-R-4-L': 
-                    // Parametros
-                    R1 = roll_Lat_Operador.parametros.R1;
-                    R2 = roll_Lat_Operador.parametros.R2;
-                    Dext = roll_Lat_Operador.parametros.Dext;
-                    Df = roll_Lat_Operador.parametros.Df;
-                    Ancho = roll_Lat_Operador.parametros.Ancho;
-                    C = roll_Lat_Operador.parametros.C;
-                    alfa1 = roll_Lat_Operador.parametros.alfa1 * Math.PI/180;
-                    alfa2 = roll_Lat_Operador.parametros.alfa2 * Math.PI/180;
+                    case 'CB-R-4-L': 
+                        // Parametros
+                        R1 = roll_Lat_Operador.parametros.R1;
+                        R2 = roll_Lat_Operador.parametros.R2;
+                        Dext = roll_Lat_Operador.parametros.Dext;
+                        Df = roll_Lat_Operador.parametros.Df;
+                        Ancho = roll_Lat_Operador.parametros.Ancho;
+                        C = roll_Lat_Operador.parametros.C;
+                        alfa1 = roll_Lat_Operador.parametros.alfa1 * Math.PI/180;
+                        alfa2 = roll_Lat_Operador.parametros.alfa2 * Math.PI/180;
 
-                    // Calculos
-                    pos = pos_lat_op; //-AxisPos0_Lat_Operador + Df/2;
-                    yc = 0;
-                    xc = pos + R1;
-                    y1 = 0;
-                    x1 = pos;
-                    y2 = R1 * Math.sin(-alfa2 + alfa1/2);
-                    x2 = xc - R1 * Math.cos(-alfa2 + alfa1/2);
-                    m1 = Math.tan(Math.PI/2 - alfa1/2 + alfa2);
-                    x3 =  xc - C / Math.sin(alfa1/2);
-                    y3 = yc;
-                    m2 = Math.tan(Math.PI - alfa1/2);
-                    y4 = Ancho/2;
-                    x4 = x3 + (y4-y3)/m2;
-                    x5 = (1/(m2-m1)) * (y2-y3+m2*x3-m1*x2);
-                    y5 = y3 +m2*(x5-x3);
+                        // Calculos
+                        pos = pos_lat_op; //-AxisPos0_Lat_Operador + Df/2;
+                        yc = 0;
+                        xc = pos + R1;
+                        y1 = 0;
+                        x1 = pos;
+                        y2 = R1 * Math.sin(-alfa2 + alfa1/2);
+                        x2 = xc - R1 * Math.cos(-alfa2 + alfa1/2);
+                        m1 = Math.tan(Math.PI/2 - alfa1/2 + alfa2);
+                        x3 =  xc - C / Math.sin(alfa1/2);
+                        y3 = yc;
+                        m2 = Math.tan(Math.PI - alfa1/2);
+                        y4 = Ancho/2;
+                        x4 = x3 + (y4-y3)/m2;
+                        x5 = (1/(m2-m1)) * (y2-y3+m2*x3-m1*x2);
+                        y5 = y3 +m2*(x5-x3);
 
-                    //Dibujo
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.arc(xScale(xc), yScale(yc), rScale(R1), Math.PI, Math.PI + alfa1/2 - alfa2);
-                    r.arcTo(xScale(x5), yScale(y5), xScale(x4), yScale(y4), rScale(R2));
-                    r.lineTo(xScale(x4), yScale(y4));
-                    r.lineTo(xScale(x4-50), yScale(y4));
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.arc(xScale(xc), yScale(yc), rScale(R1), Math.PI, Math.PI - alfa1/2 + alfa2, true);
-                    r.arcTo(xScale(x5), yScale(-y5), xScale(x4), yScale(-y4), rScale(R2));
-                    r.lineTo(xScale(x4), yScale(-y4));
-                    r.lineTo(xScale(x4-50), yScale(-y4));
-                    break;
+                        //Dibujo
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.arc(xScale(xc), yScale(yc), rScale(R1), Math.PI, Math.PI + alfa1/2 - alfa2);
+                        r.arcTo(xScale(x5), yScale(y5), xScale(x4), yScale(y4), rScale(R2));
+                        r.lineTo(xScale(x4), yScale(y4));
+                        r.lineTo(xScale(x4-50), yScale(y4));
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.arc(xScale(xc), yScale(yc), rScale(R1), Math.PI, Math.PI - alfa1/2 + alfa2, true);
+                        r.arcTo(xScale(x5), yScale(-y5), xScale(x4), yScale(-y4), rScale(R2));
+                        r.lineTo(xScale(x4), yScale(-y4));
+                        r.lineTo(xScale(x4-50), yScale(-y4));
+                        break;
 
-                case 'CB-R-2-L': // Redondo de media caña
-                    // Parametros
-                    R1 = roll_Lat_Operador.parametros.R1;
-                    Dext = roll_Lat_Operador.parametros.Dext;
-                    Df = roll_Lat_Operador.parametros.Df;
-                    Dc = roll_Lat_Operador.parametros.Dc;
-                    Ancho = roll_Lat_Operador.parametros.Ancho;
-                    alfa1 = roll_Lat_Operador.parametros.alfa1 * Math.PI/180;
+                    case 'CB-R-2-L': // Redondo de media caña
+                        // Parametros
+                        R1 = roll_Lat_Operador.parametros.R1;
+                        Dext = roll_Lat_Operador.parametros.Dext;
+                        Df = roll_Lat_Operador.parametros.Df;
+                        Dc = roll_Lat_Operador.parametros.Dc;
+                        Ancho = roll_Lat_Operador.parametros.Ancho;
+                        alfa1 = roll_Lat_Operador.parametros.alfa1 * Math.PI/180;
 
-                    // Calculos
-                    pos = pos_lat_op; //-AxisPos0_Lat_Operador + Df/2;
-                    xc = pos + R1;
-                    yc = 0;
-                    x1 = xc - R1*Math.sin(alfa1);
-                    y1 = R1*Math.cos(alfa1);
-                    x2 = x1;
-                    y2 = -y1;
-                    m1 = -Math.tan(alfa1);
-                    y4 = -Ancho/2;
-                    x4 = pos + (Dext-Df)/2;
-                    x3 = x4;
-                    y3 = y2 + m1*(x3-x2);
+                        // Calculos
+                        pos = pos_lat_op; //-AxisPos0_Lat_Operador + Df/2;
+                        xc = pos + R1;
+                        yc = 0;
+                        x1 = xc - R1*Math.sin(alfa1);
+                        y1 = R1*Math.cos(alfa1);
+                        x2 = x1;
+                        y2 = -y1;
+                        m1 = -Math.tan(alfa1);
+                        y4 = -Ancho/2;
+                        x4 = pos + (Dext-Df)/2;
+                        x3 = x4;
+                        y3 = y2 + m1*(x3-x2);
 
-                    // Dibujo
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.arc(xScale(xc), yScale(yc), rScale(R1), 3*Math.PI/2 - alfa1, Math.PI/2 + alfa1, true);
-                    r.arcTo(xScale(x3), yScale(y3), xScale(x4), yScale(y4), rScale(R2));
-                    r.lineTo(xScale(x4), yScale(y4));
-                    r.lineTo(xScale(x4-50), yScale(y4));
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.arcTo(xScale(x3), yScale(-y3), xScale(x4), yScale(-y4), rScale(R2));
-                    r.lineTo(xScale(x4), yScale(-y4));
-                    r.lineTo(xScale(x4-50), yScale(-y4));
-                    break;
+                        // Dibujo
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.arc(xScale(xc), yScale(yc), rScale(R1), 3*Math.PI/2 - alfa1, Math.PI/2 + alfa1, true);
+                        r.arcTo(xScale(x3), yScale(y3), xScale(x4), yScale(y4), rScale(R2));
+                        r.lineTo(xScale(x4), yScale(y4));
+                        r.lineTo(xScale(x4-50), yScale(y4));
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.arcTo(xScale(x3), yScale(-y3), xScale(x4), yScale(-y4), rScale(R2));
+                        r.lineTo(xScale(x4), yScale(-y4));
+                        r.lineTo(xScale(x4-50), yScale(-y4));
+                        break;
 
-                case 'CB-CONVEX-L': //Rodillo convexo
-                    // Parametros
-                    Df = roll_Lat_Operador.parametros.Df;
-                    R1 = roll_Lat_Operador.parametros.R1;
-                    Ancho = roll_Lat_Operador.parametros.Ancho;
+                    case 'CB-CONVEX-L': //Rodillo convexo
+                        // Parametros
+                        Df = roll_Lat_Operador.parametros.Df;
+                        R1 = roll_Lat_Operador.parametros.R1;
+                        Ancho = roll_Lat_Operador.parametros.Ancho;
 
-                    // Calculos
-                    pos = pos_lat_op; //-AxisPos0_Lat_Operador + Df/2;
-                    alfa1 = Math.asin(Ancho/(2*R1));
-                    yc = 0;
-                    xc = pos - R1;
-                    y1 = -Ancho/2;
-                    x1 = xc + R1*Math.cos(alfa1);
+                        // Calculos
+                        pos = pos_lat_op; //-AxisPos0_Lat_Operador + Df/2;
+                        alfa1 = Math.asin(Ancho/(2*R1));
+                        yc = 0;
+                        xc = pos - R1;
+                        y1 = -Ancho/2;
+                        x1 = xc + R1*Math.cos(alfa1);
 
-                    // Dibujo
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.arc(xScale(xc), yScale(yc), rScale(R1),alfa1, -alfa1, true);
-                    r.lineTo(xScale(x1-50), yScale(-y1));
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.lineTo(xScale(x1-50), yScale(y1));
-                    break;
+                        // Dibujo
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.arc(xScale(xc), yScale(yc), rScale(R1),alfa1, -alfa1, true);
+                        r.lineTo(xScale(x1-50), yScale(-y1));
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.lineTo(xScale(x1-50), yScale(y1));
+                        break;
+                }
             }
 
             // Lateral Motor
-            switch (roll_Lat_Motor.tipo_plano) {
-                case 'CB-CR-123-L':
-                    // Parametros
-                    R1 = roll_Lat_Motor.parametros.R1;
-                    Dext = roll_Lat_Motor.parametros.Dext;
-                    Df = roll_Lat_Motor.parametros.Df;
-                    Ancho = roll_Lat_Motor.parametros.Ancho;
-                    L1 = roll_Lat_Motor.parametros.L1;
+            if (roll_Lat_Motor){
+                switch (roll_Lat_Motor.tipo_plano) {
+                    case 'CB-CR-123-L':
+                        // Parametros
+                        R1 = roll_Lat_Motor.parametros.R1;
+                        Dext = roll_Lat_Motor.parametros.Dext;
+                        Df = roll_Lat_Motor.parametros.Df;
+                        Ancho = roll_Lat_Motor.parametros.Ancho;
+                        L1 = roll_Lat_Motor.parametros.L1;
 
-                    // Calculos
-                    pos = pos_lat_mo; //AxisPos0_Lat_Motor - Df/2;
-                    yc = 0;
-                    xc = pos - R1;
-                    alfa1 = Math.asin(L1/(2*R1));
-                    x1 = xc + R1*Math.cos(alfa1);
-                    y1 = yc + R1*Math.sin(alfa1);
-                    y2 = -Ancho/2;
-                    x2 = x1 - Math.tan(45*Math.PI/180)*(y2+y1);
-                    y3 = y2;
-                    x3 = x2 + 50;
-                    
-                    //Dibujo
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.arc(xScale(xc), yScale(yc), rScale(R1), -alfa1, alfa1);
-                    r.lineTo(xScale(x2), yScale(y2));
-                    r.lineTo(xScale(x3), yScale(y3));
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.lineTo(xScale(x2), yScale(-y2));
-                    r.lineTo(xScale(x3), yScale(-y3));
-                    break;
+                        // Calculos
+                        pos = pos_lat_mo; //AxisPos0_Lat_Motor - Df/2;
+                        yc = 0;
+                        xc = pos - R1;
+                        alfa1 = Math.asin(L1/(2*R1));
+                        x1 = xc + R1*Math.cos(alfa1);
+                        y1 = yc + R1*Math.sin(alfa1);
+                        y2 = -Ancho/2;
+                        x2 = x1 - Math.tan(45*Math.PI/180)*(y2+y1);
+                        y3 = y2;
+                        x3 = x2 + 50;
+                        
+                        //Dibujo
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.arc(xScale(xc), yScale(yc), rScale(R1), -alfa1, alfa1);
+                        r.lineTo(xScale(x2), yScale(y2));
+                        r.lineTo(xScale(x3), yScale(y3));
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.lineTo(xScale(x2), yScale(-y2));
+                        r.lineTo(xScale(x3), yScale(-y3));
+                        break;
 
-                case 'CB-CR-4-L': // Cuadrado y rectangular caja 4 (planos)
-                    // Parametros
-                    Df = roll_Lat_Motor.parametros.Df;
-                    L1 = roll_Lat_Motor.parametros.L1;
-                    Ancho = roll_Lat_Motor.parametros.Ancho;
+                    case 'CB-CR-4-L': // Cuadrado y rectangular caja 4 (planos)
+                        // Parametros
+                        Df = roll_Lat_Motor.parametros.Df;
+                        L1 = roll_Lat_Motor.parametros.L1;
+                        Ancho = roll_Lat_Motor.parametros.Ancho;
 
-                    // Calculos
-                    pos = pos_lat_mo; //AxisPos0_Lat_Motor - Df/2;
-                    y1 = 0;
-                    x1 = pos;
-                    y2 = y1 + L1/2;
-                    x2 = x1;
-                    y3 = Ancho/2;
-                    x3 = x2 + (y3-y2); // Pendiente -1 (45º)
+                        // Calculos
+                        pos = pos_lat_mo; //AxisPos0_Lat_Motor - Df/2;
+                        y1 = 0;
+                        x1 = pos;
+                        y2 = y1 + L1/2;
+                        x2 = x1;
+                        y3 = Ancho/2;
+                        x3 = x2 + (y3-y2); // Pendiente -1 (45º)
 
-                    // Dibujo
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.lineTo(xScale(x2), yScale(y2));
-                    r.lineTo(xScale(x3), yScale(y3));
-                    r.lineTo(xScale(x3+50), yScale(y3));
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.lineTo(xScale(x2), yScale(-y2));
-                    r.lineTo(xScale(x3), yScale(-y3));
-                    r.lineTo(xScale(x3+50), yScale(-y3));
-                    break;
+                        // Dibujo
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.lineTo(xScale(x2), yScale(y2));
+                        r.lineTo(xScale(x3), yScale(y3));
+                        r.lineTo(xScale(x3+50), yScale(y3));
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.lineTo(xScale(x2), yScale(-y2));
+                        r.lineTo(xScale(x3), yScale(-y3));
+                        r.lineTo(xScale(x3+50), yScale(-y3));
+                        break;
 
-                case 'CB-R-4-L':
-                    // Parametros
-                    R1 = roll_Lat_Motor.parametros.R1;
-                    R2 = roll_Lat_Motor.parametros.R2;
-                    Dext = roll_Lat_Motor.parametros.Dext;
-                    Df = roll_Lat_Motor.parametros.Df;
-                    Ancho = roll_Lat_Motor.parametros.Ancho;
-                    C = roll_Lat_Motor.parametros.C;
-                    alfa1 = roll_Lat_Motor.parametros.alfa1 * Math.PI/180;
-                    alfa2 = roll_Lat_Motor.parametros.alfa2 * Math.PI/180;
+                    case 'CB-R-4-L':
+                        // Parametros
+                        R1 = roll_Lat_Motor.parametros.R1;
+                        R2 = roll_Lat_Motor.parametros.R2;
+                        Dext = roll_Lat_Motor.parametros.Dext;
+                        Df = roll_Lat_Motor.parametros.Df;
+                        Ancho = roll_Lat_Motor.parametros.Ancho;
+                        C = roll_Lat_Motor.parametros.C;
+                        alfa1 = roll_Lat_Motor.parametros.alfa1 * Math.PI/180;
+                        alfa2 = roll_Lat_Motor.parametros.alfa2 * Math.PI/180;
 
-                    // Calculos
-                    pos = pos_lat_mo; //AxisPos0_Lat_Motor - Df/2;
-                    yc = 0;
-                    xc = pos - R1;
-                    y1 = 0;
-                    x1 = pos;
-                    y2 = -R1 * Math.sin(-alfa2 + alfa1/2);
-                    x2 = xc + R1 * Math.cos(-alfa2 + alfa1/2);
-                    m1 = 1/Math.tan(alfa1/2 - alfa2);
-                    x3 =  xc + C / Math.sin(alfa1/2);
-                    y3 = yc;
-                    m2 = Math.tan(Math.PI - alfa1/2);
-                    y4 = -Ancho/2;
-                    x4 = x3 + (y4-y3)/m2;
-                    x5 = (1/(m2-m1)) * (y2-y3+m2*x3-m1*x2);
-                    y5 = y3 +m2*(x5-x3);
+                        // Calculos
+                        pos = pos_lat_mo; //AxisPos0_Lat_Motor - Df/2;
+                        yc = 0;
+                        xc = pos - R1;
+                        y1 = 0;
+                        x1 = pos;
+                        y2 = -R1 * Math.sin(-alfa2 + alfa1/2);
+                        x2 = xc + R1 * Math.cos(-alfa2 + alfa1/2);
+                        m1 = 1/Math.tan(alfa1/2 - alfa2);
+                        x3 =  xc + C / Math.sin(alfa1/2);
+                        y3 = yc;
+                        m2 = Math.tan(Math.PI - alfa1/2);
+                        y4 = -Ancho/2;
+                        x4 = x3 + (y4-y3)/m2;
+                        x5 = (1/(m2-m1)) * (y2-y3+m2*x3-m1*x2);
+                        y5 = y3 +m2*(x5-x3);
 
-                    //Dibujo
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.arc(xScale(xc), yScale(yc), rScale(R1), 0, alfa1/2 - alfa2);
-                    r.arcTo(xScale(x5), yScale(y5), xScale(x4), yScale(y4), rScale(R2));
-                    r.lineTo(xScale(x4), yScale(y4));
-                    r.lineTo(xScale(x4+50), yScale(y4));
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.arc(xScale(xc), yScale(yc), rScale(R1), 0, - alfa1/2 + alfa2, true);
-                    r.arcTo(xScale(x5), yScale(-y5), xScale(x4), yScale(-y4), rScale(R2));
-                    r.lineTo(xScale(x4), yScale(-y4));
-                    r.lineTo(xScale(x4+50), yScale(-y4));
-                    break;
+                        //Dibujo
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.arc(xScale(xc), yScale(yc), rScale(R1), 0, alfa1/2 - alfa2);
+                        r.arcTo(xScale(x5), yScale(y5), xScale(x4), yScale(y4), rScale(R2));
+                        r.lineTo(xScale(x4), yScale(y4));
+                        r.lineTo(xScale(x4+50), yScale(y4));
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.arc(xScale(xc), yScale(yc), rScale(R1), 0, - alfa1/2 + alfa2, true);
+                        r.arcTo(xScale(x5), yScale(-y5), xScale(x4), yScale(-y4), rScale(R2));
+                        r.lineTo(xScale(x4), yScale(-y4));
+                        r.lineTo(xScale(x4+50), yScale(-y4));
+                        break;
 
-                case 'CB-R-2-L': // Redondo de media caña
-                    // Parametros
-                    R1 = roll_Lat_Motor.parametros.R1;
-                    Dext = roll_Lat_Motor.parametros.Dext;
-                    Df = roll_Lat_Motor.parametros.Df;
-                    Dc = roll_Lat_Motor.parametros.Dc;
-                    Ancho = roll_Lat_Motor.parametros.Ancho;
-                    alfa1 = roll_Lat_Motor.parametros.alfa1 * Math.PI/180;
+                    case 'CB-R-2-L': // Redondo de media caña
+                        // Parametros
+                        R1 = roll_Lat_Motor.parametros.R1;
+                        Dext = roll_Lat_Motor.parametros.Dext;
+                        Df = roll_Lat_Motor.parametros.Df;
+                        Dc = roll_Lat_Motor.parametros.Dc;
+                        Ancho = roll_Lat_Motor.parametros.Ancho;
+                        alfa1 = roll_Lat_Motor.parametros.alfa1 * Math.PI/180;
 
-                    // Calculos
-                    pos = pos_lat_mo; //AxisPos0_Lat_Motor - Df/2;
-                    xc = pos - R1;
-                    yc = 0;
-                    x1 = xc + R1*Math.sin(alfa1);
-                    y1 = -R1*Math.cos(alfa1);
-                    x2 = x1;
-                    y2 = -y1;
-                    m1 = -Math.tan(alfa1);
-                    y4 = Ancho/2;
-                    x4 = pos - (Dext-Df)/2;
-                    x3 = x4;
-                    y3 = y2 + m1*(x3-x2);
+                        // Calculos
+                        pos = pos_lat_mo; //AxisPos0_Lat_Motor - Df/2;
+                        xc = pos - R1;
+                        yc = 0;
+                        x1 = xc + R1*Math.sin(alfa1);
+                        y1 = -R1*Math.cos(alfa1);
+                        x2 = x1;
+                        y2 = -y1;
+                        m1 = -Math.tan(alfa1);
+                        y4 = Ancho/2;
+                        x4 = pos - (Dext-Df)/2;
+                        x3 = x4;
+                        y3 = y2 + m1*(x3-x2);
 
-                    // Dibujo
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.arc(xScale(xc), yScale(yc), rScale(R1), Math.PI/2 - alfa1, -Math.PI/2 + alfa1, true);
-                    r.arcTo(xScale(x3), yScale(y3), xScale(x4), yScale(y4), rScale(R2));
-                    r.lineTo(xScale(x4), yScale(y4));
-                    r.lineTo(xScale(x4+50), yScale(y4));
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.arcTo(xScale(x3), yScale(-y3), xScale(x4), yScale(-y4), rScale(R2));
-                    r.lineTo(xScale(x4), yScale(-y4));
-                    r.lineTo(xScale(x4+50), yScale(-y4));
-                    break;
+                        // Dibujo
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.arc(xScale(xc), yScale(yc), rScale(R1), Math.PI/2 - alfa1, -Math.PI/2 + alfa1, true);
+                        r.arcTo(xScale(x3), yScale(y3), xScale(x4), yScale(y4), rScale(R2));
+                        r.lineTo(xScale(x4), yScale(y4));
+                        r.lineTo(xScale(x4+50), yScale(y4));
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.arcTo(xScale(x3), yScale(-y3), xScale(x4), yScale(-y4), rScale(R2));
+                        r.lineTo(xScale(x4), yScale(-y4));
+                        r.lineTo(xScale(x4+50), yScale(-y4));
+                        break;
 
-                case 'CB-CONVEX-L': //Rodillo convexo
-                    // Parametros
-                    Df = roll_Lat_Motor.parametros.Df;
-                    R1 = roll_Lat_Motor.parametros.R1;
-                    Ancho = roll_Lat_Motor.parametros.Ancho;
+                    case 'CB-CONVEX-L': //Rodillo convexo
+                        // Parametros
+                        Df = roll_Lat_Motor.parametros.Df;
+                        R1 = roll_Lat_Motor.parametros.R1;
+                        Ancho = roll_Lat_Motor.parametros.Ancho;
 
-                    // Calculos
-                    pos = pos_lat_mo; //AxisPos0_Lat_Motor - Df/2;
-                    alfa1 = Math.asin(Ancho/(2*R1));
-                    yc = 0;
-                    xc = pos + R1;
-                    y1 = Ancho/2;
-                    x1 = xc - R1*Math.cos(alfa1);
+                        // Calculos
+                        pos = pos_lat_mo; //AxisPos0_Lat_Motor - Df/2;
+                        alfa1 = Math.asin(Ancho/(2*R1));
+                        yc = 0;
+                        xc = pos + R1;
+                        y1 = Ancho/2;
+                        x1 = xc - R1*Math.cos(alfa1);
 
-                    // Dibujo
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.arc(xScale(xc), yScale(yc), rScale(R1),Math.PI + alfa1, Math.PI - alfa1, true);
-                    r.lineTo(xScale(x1+50), yScale(-y1));
-                    r.moveTo(xScale(x1), yScale(y1));
-                    r.lineTo(xScale(x1+50), yScale(y1));
-                    break;
+                        // Dibujo
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.arc(xScale(xc), yScale(yc), rScale(R1),Math.PI + alfa1, Math.PI - alfa1, true);
+                        r.lineTo(xScale(x1+50), yScale(-y1));
+                        r.moveTo(xScale(x1), yScale(y1));
+                        r.lineTo(xScale(x1+50), yScale(y1));
+                        break;
+                }
             }
             return r.toString()
         }
