@@ -557,124 +557,140 @@ const QS_Produccion = () => {
         else {
             console.log('posiciones ', posiciones);
             console.log('posicionesSim ', posicionesSim);
+            const data = simulador ? [...posicionesSim] : [...posiciones];
             var now = new Date();
             const nombre = simulador ? 'Simulador ' + now.toLocaleString() : 'PLC ' + now.toLocaleString();
             const montaje = montajeActivo;
-            const articulo = articulo;
-            const pr_inf = simulador?posicionesSim.filter(p => p.nombre=='PR')[0].posiciones.filter(p =>p.eje=='INF')[0].pos:posiciones.filter(p => p.nombre=='PR')[0].posiciones.filter(p =>p.eje=='INF')[0].pos;
+            // const articulo = articulo;
+            const pr_inf = data.filter(p => p.nombre=='PR')[0].posiciones.filter(p =>p.eje=='INF')[0].pos;
             const pr_presion = 60; //TODO: falta lectura real para cuando no estamos en simulación
-            const bd1_sup = simulador?posicionesSim.filter(p => p.nombre=='BD1')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos:posiciones.filter(p => p.nombre=='BD1')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos;
-            const bd1_inf = simulador?posicionesSim.filter(p => p.nombre=='BD1')[0].posiciones.filter(p =>p.eje=='INF')[0].pos:posiciones.filter(p => p.nombre=='BD1')[0].posiciones.filter(p =>p.eje=='INF')[0].pos;
-            const bd2_sup = simulador?posicionesSim.filter(p => p.nombre=='BD2')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos:posiciones.filter(p => p.nombre=='BD2')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos;
-            const bd2_inf = simulador?posicionesSim.filter(p => p.nombre=='BD2')[0].posiciones.filter(p =>p.eje=='INF')[0].pos:posiciones.filter(p => p.nombre=='BD2')[0].posiciones.filter(p =>p.eje=='INF')[0].pos;
-            const is1_ancho = simulador?posicionesSim.filter(p => p.nombre=='IS1')[0].posiciones.filter(p =>p.eje=='ANCHO')[0].pos:posiciones.filter(p => p.nombre=='IS1')[0].posiciones.filter(p =>p.eje=='ANCHO')[0].pos;
-            const is1_alto = simulador?posicionesSim.filter(p => p.nombre=='IS1')[0].posiciones.filter(p =>p.eje=='ALTO')[0].pos:posiciones.filter(p => p.nombre=='IS1')[0].posiciones.filter(p =>p.eje=='ALTO')[0].pos;
-            // const l_entrada_sup = simulador?posicionesSim.filter(p => p.nombre=='LINEAL')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos:posiciones.filter(p => p.nombre=='BD2')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos;
-            // l_entrada_ancho: 0,
-            // l_entrada_alto: 0,
-            // l_entrada_rod_inf: 0,
-            // l_centro_rod_inf: 0,
-            // l_salida_sup: 0,
-            // l_salida_ancho: 0,
-            // l_salida_alto: 0,
-            // l_salida_rod_inf: 0,
-            // fp1_sup: 0,
-            // fp1_inf: 0,
-            // is2_ancho: 0,
-            // is2_alto: 0,
-            // fp2_sup: 0,
-            // fp2_inf: 0,
-            // is3_ancho: 0,
-            // is3_alto: 0,
-            // fp3_sup: 0,
-            // fp3_inf: 0,
-            // w_inf: 0,
-            // w_lat_op: 0,
-            // w_lat_mo: 0,
-            // w_sup_op_v: 0,
-            // w_sup_op_h: 0,
-            // w_sup_mo_v: 0,
-            // w_sup_mo_h: 0,
-            // cb1_sup: 0,
-            // cb1_inf: 0,
-            // cb1_lat_op: 0,
-            // cb1_lat_mo: 0,
-            // cb2_sup: 0,
-            // cb2_inf: 0,
-            // cb2_lat_op: 0,
-            // cb2_lat_mo: 0,
-            // cb3_sup: 0,
-            // cb3_inf: 0,
-            // cb3_lat_op: 0,
-            // cb3_lat_mo: 0,
-            // cb4_sup: 0,
-            // cb4_inf: 0,
-            // cb4_lat_op: 0,
-            // cb4_lat_mo: 0
-            // axios.post(BACKEND_SERVER + `/api/qs/variante/`, {
-            //     nombre: 'Simulador' ,
-            //     montaje: montajeActivo,
-            //     articulo: articulo,
-            //     pr_inf: 0, //simulador?posicionesSim.filter(p => p.nombre=='PR')[0].posiciones.filter(p =>p.eje=='INF')[0].pos:posiciones.filter(p => p.nombre=='PR')[0].posiciones.filter(p =>p.eje=='INF')[0].pos,
-            //     pr_presion: 100,
-            //     bd1_sup: 0,
-            //     bd1_inf: 0,
-            //     bd2_sup: 0,
-            //     bd2_inf: 0,
-            //     is1_ancho: 0,
-            //     is1_alto: 0,
-            //     l_entrada_sup: 0,
-            //     l_entrada_ancho: 0,
-            //     l_entrada_alto: 0,
-            //     l_entrada_rod_inf: 0,
-            //     l_centro_rod_inf: 0,
-            //     l_salida_sup: 0,
-            //     l_salida_ancho: 0,
-            //     l_salida_alto: 0,
-            //     l_salida_rod_inf: 0,
-            //     fp1_sup: 0,
-            //     fp1_inf: 0,
-            //     is2_ancho: 0,
-            //     is2_alto: 0,
-            //     fp2_sup: 0,
-            //     fp2_inf: 0,
-            //     is3_ancho: 0,
-            //     is3_alto: 0,
-            //     fp3_sup: 0,
-            //     fp3_inf: 0,
-            //     w_inf: 0,
-            //     w_lat_op: 0,
-            //     w_lat_mo: 0,
-            //     w_sup_op_v: 0,
-            //     w_sup_op_h: 0,
-            //     w_sup_mo_v: 0,
-            //     w_sup_mo_h: 0,
-            //     cb1_sup: 0,
-            //     cb1_inf: 0,
-            //     cb1_lat_op: 0,
-            //     cb1_lat_mo: 0,
-            //     cb2_sup: 0,
-            //     cb2_inf: 0,
-            //     cb2_lat_op: 0,
-            //     cb2_lat_mo: 0,
-            //     cb3_sup: 0,
-            //     cb3_inf: 0,
-            //     cb3_lat_op: 0,
-            //     cb3_lat_mo: 0,
-            //     cb4_sup: 0,
-            //     cb4_inf: 0,
-            //     cb4_lat_op: 0,
-            //     cb4_lat_mo: 0
-            // }, {
-            //     headers: {
-            //         'Authorization': `token ${token['tec-token']}`
-            //       }     
-            // })
-            // .then( res => { 
-            //     console.log('POST variantes: ',res.data);            
+            const bd1_sup = data.filter(p => p.nombre=='BD1')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos;
+            const bd1_inf = data.filter(p => p.nombre=='BD1')[0].posiciones.filter(p =>p.eje=='INF')[0].pos;
+            const bd2_sup = data.filter(p => p.nombre=='BD2')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos;
+            const bd2_inf = data.filter(p => p.nombre=='BD2')[0].posiciones.filter(p =>p.eje=='INF')[0].pos;
+            const is1_ancho = data.filter(p => p.nombre=='IS1')[0].posiciones.filter(p =>p.eje=='ANCHO')[0].pos;
+            const is1_alto = data.filter(p => p.nombre=='IS1')[0].posiciones.filter(p =>p.eje=='ALTO')[0].pos;
+            const l_entrada_sup = data.filter(p => p.nombre=='LINEAL')[0].posiciones.filter(p =>p.eje=='ENTRADA_SUP')[0].pos;
+            const l_entrada_ancho = data.filter(p => p.nombre=='LINEAL')[0].posiciones.filter(p =>p.eje=='ENTRADA_ANCHO')[0].pos;
+            const l_entrada_alto = data.filter(p => p.nombre=='LINEAL')[0].posiciones.filter(p =>p.eje=='ENTRADA_ALTO')[0].pos;
+            const l_entrada_rod_inf = data.filter(p => p.nombre=='LINEAL')[0].posiciones.filter(p =>p.eje=='RODILLO_INF_ENTRADA')[0].pos;
+            const l_centro_rod_inf = data.filter(p => p.nombre=='LINEAL')[0].posiciones.filter(p =>p.eje=='RODILLO_INF_CENTRO')[0].pos;
+            const l_salida_sup = data.filter(p => p.nombre=='LINEAL')[0].posiciones.filter(p =>p.eje=='SALIDA_SUP')[0].pos;
+            const l_salida_ancho = data.filter(p => p.nombre=='LINEAL')[0].posiciones.filter(p =>p.eje=='SALIDA_ANCHO')[0].pos;
+            const l_salida_alto = data.filter(p => p.nombre=='LINEAL')[0].posiciones.filter(p =>p.eje=='SALIDA_ALTO')[0].pos;
+            const l_salida_rod_inf = data.filter(p => p.nombre=='LINEAL')[0].posiciones.filter(p =>p.eje=='RODILLO_INF_SALIDA')[0].pos;
+            const fp1_sup = data.filter(p => p.nombre=='FP1')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos;
+            const fp1_inf = data.filter(p => p.nombre=='FP1')[0].posiciones.filter(p =>p.eje=='INF')[0].pos;
+            let is2_ancho, is2_alto, is3_ancho, is3_alto;
+            if (data.filter(p => p.nombre=='IS2')[0]) {
+                is2_ancho = data.filter(p => p.nombre=='IS2')[0].posiciones.filter(p =>p.eje=='ANCHO')[0].pos;
+                is2_alto = data.filter(p => p.nombre=='IS2')[0].posiciones.filter(p =>p.eje=='ALTO')[0].pos;
+            }
+            else {
+                is2_ancho = 250;
+                is2_alto = 0;
+            }
+            const fp2_sup = data.filter(p => p.nombre=='FP2')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos;
+            const fp2_inf = data.filter(p => p.nombre=='FP2')[0].posiciones.filter(p =>p.eje=='INF')[0].pos;
+            if (data.filter(p => p.nombre=='IS3')[0]) {
+                is3_ancho = data.filter(p => p.nombre=='IS3')[0].posiciones.filter(p =>p.eje=='ANCHO')[0].pos;
+                is3_alto = data.filter(p => p.nombre=='IS3')[0].posiciones.filter(p =>p.eje=='ALTO')[0].pos;
+            }
+            else {
+                is3_ancho = 250;
+                is3_alto = 0;
+            }
+            const fp3_sup = data.filter(p => p.nombre=='FP3')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos;
+            const fp3_inf = data.filter(p => p.nombre=='FP3')[0].posiciones.filter(p =>p.eje=='INF')[0].pos;
+            const w_inf = data.filter(p => p.nombre=='W')[0].posiciones.filter(p =>p.eje=='INF')[0].pos;
+            const w_lat_op = data.filter(p => p.nombre=='W')[0].posiciones.filter(p =>p.eje=='LAT_OP')[0].pos;
+            const w_lat_mo = data.filter(p => p.nombre=='W')[0].posiciones.filter(p =>p.eje=='LAT_MO')[0].pos;
+            const w_sup_op_v = data.filter(p => p.nombre=='W')[0].posiciones.filter(p =>p.eje=='SUP_V_OP')[0].pos;
+            const w_sup_op_h = data.filter(p => p.nombre=='W')[0].posiciones.filter(p =>p.eje=='SUP_H_OP')[0].pos;
+            const w_sup_mo_v = data.filter(p => p.nombre=='W')[0].posiciones.filter(p =>p.eje=='SUP_V_MO')[0].pos;
+            const w_sup_mo_h = data.filter(p => p.nombre=='W')[0].posiciones.filter(p =>p.eje=='SUP_H_MO')[0].pos;
+            const w_cab = data.filter(p => p.nombre=='W')[0].posiciones.filter(p =>p.eje=='CAB')[0].pos;
+            const cb1_sup = data.filter(p => p.nombre=='CB1')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos;
+            const cb1_inf = data.filter(p => p.nombre=='CB1')[0].posiciones.filter(p =>p.eje=='INF')[0].pos;
+            const cb1_lat_op = data.filter(p => p.nombre=='CB1')[0].posiciones.filter(p =>p.eje=='LAT_OP')[0].pos;
+            const cb1_lat_mo = data.filter(p => p.nombre=='CB1')[0].posiciones.filter(p =>p.eje=='LAT_MO')[0].pos;
+            const cb2_sup = data.filter(p => p.nombre=='CB2')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos;
+            const cb2_inf = data.filter(p => p.nombre=='CB2')[0].posiciones.filter(p =>p.eje=='INF')[0].pos;
+            const cb2_lat_op = data.filter(p => p.nombre=='CB2')[0].posiciones.filter(p =>p.eje=='LAT_OP')[0].pos;
+            const cb2_lat_mo = data.filter(p => p.nombre=='CB2')[0].posiciones.filter(p =>p.eje=='LAT_MO')[0].pos;
+            const cb3_sup = data.filter(p => p.nombre=='CB3')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos;
+            const cb3_inf = data.filter(p => p.nombre=='CB3')[0].posiciones.filter(p =>p.eje=='INF')[0].pos;
+            const cb3_lat_op = data.filter(p => p.nombre=='CB3')[0].posiciones.filter(p =>p.eje=='LAT_OP')[0].pos;
+            const cb3_lat_mo = data.filter(p => p.nombre=='CB3')[0].posiciones.filter(p =>p.eje=='LAT_MO')[0].pos;
+            const cb4_sup = data.filter(p => p.nombre=='CB4')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos;
+            const cb4_inf = data.filter(p => p.nombre=='CB4')[0].posiciones.filter(p =>p.eje=='INF')[0].pos;
+            const cb4_lat_op = data.filter(p => p.nombre=='CB4')[0].posiciones.filter(p =>p.eje=='LAT_OP')[0].pos;
+            const cb4_lat_mo = data.filter(p => p.nombre=='CB4')[0].posiciones.filter(p =>p.eje=='LAT_MO')[0].pos;
+            axios.post(BACKEND_SERVER + `/api/qs/variante/`, {
+                nombre: 'Simulador' ,
+                montaje: montajeActivo,
+                articulo: articulo,
+                pr_inf: pr_inf, 
+                pr_presion: pr_presion,
+                bd1_sup: bd1_sup,
+                bd1_inf: bd1_inf,
+                bd2_sup: bd2_sup,
+                bd2_inf: bd2_inf,
+                is1_ancho: is1_ancho,
+                is1_alto: is1_alto,
+                l_entrada_sup: l_entrada_sup,
+                l_entrada_ancho: l_entrada_ancho,
+                l_entrada_alto: l_entrada_alto,
+                l_entrada_rod_inf: l_entrada_rod_inf,
+                l_centro_rod_inf: l_centro_rod_inf,
+                l_salida_sup: l_salida_sup,
+                l_salida_ancho: l_salida_ancho,
+                l_salida_alto: l_salida_alto,
+                l_salida_rod_inf: l_salida_rod_inf,
+                fp1_sup: fp1_sup,
+                fp1_inf: fp1_inf,
+                is2_ancho: is2_ancho,
+                is2_alto: is2_alto,
+                fp2_sup: fp2_sup,
+                fp2_inf: fp2_inf,
+                is3_ancho: is3_ancho,
+                is3_alto: is3_alto,
+                fp3_sup: fp3_sup,
+                fp3_inf: fp3_inf,
+                w_inf: w_inf,
+                w_lat_op: w_lat_op,
+                w_lat_mo: w_lat_mo,
+                w_sup_op_v: w_sup_op_v,
+                w_sup_op_h: w_sup_op_h,
+                w_sup_mo_v: w_sup_mo_v,
+                w_sup_mo_h: w_sup_mo_h,
+                w_cab: w_cab,
+                cb1_sup: cb1_sup,
+                cb1_inf: cb1_inf,
+                cb1_lat_op: cb1_lat_op,
+                cb1_lat_mo: cb1_lat_mo,
+                cb2_sup: cb2_sup,
+                cb2_inf: cb2_inf,
+                cb2_lat_op: cb2_lat_op,
+                cb2_lat_mo: cb2_lat_mo,
+                cb3_sup: cb3_sup,
+                cb3_inf: cb3_inf,
+                cb3_lat_op: cb3_lat_op,
+                cb3_lat_mo: cb3_lat_mo,
+                cb4_sup: cb4_sup,
+                cb4_inf: cb4_inf,
+                cb4_lat_op: cb4_lat_op,
+                cb4_lat_mo: cb4_lat_mo
+            }, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                  }     
+            })
+            .then( res => { 
+                console.log('POST variantes: ',res.data);            
                 
-            // })
-            // .catch(err => { console.log(err);})
+            })
+            .catch(err => { console.log(err);})
         }
     }
 
