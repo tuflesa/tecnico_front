@@ -687,7 +687,8 @@ const QS_Produccion = () => {
                   }     
             })
             .then( res => { 
-                console.log('POST variantes: ',res.data);            
+                console.log('POST variantes: ',res.data);  
+                alert('Variante guardada con exito ...');          
                 
             })
             .catch(err => { console.log(err);})
