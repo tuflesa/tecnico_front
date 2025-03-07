@@ -14,7 +14,7 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
     const [empresa, setEmpresa] = useState('');
     const [tubo_madre, setTuboMadre] = useState('');
     const [operacion_marcada, setOperacionMarcada] = useState(null);
-    const [formaciones_completadas, setFormacionesCompletadas] = useState('');
+    const [formaciones_completadas, setFormacionesCompletadas] = useState([]);
     const [formaciones_filtradas, setFormacionesFiltradas] = useState('');
     const [colorVerde, setColorVerde] = useState(false);
     const [colorAzul, setColorAzul] = useState(false);
@@ -56,7 +56,6 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
 
                 const responses = await Promise.all(requests);
                 const formacionesCompletadasArray = responses.flatMap(response => response.data);
-
                 setFormacionesCompletadas(formacionesCompletadasArray);
             } catch (error) {
                 console.log(error);
