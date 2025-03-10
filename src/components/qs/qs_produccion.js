@@ -697,7 +697,19 @@ const QS_Produccion = () => {
 
     // Enviar Variante al PLC
     const EnviarPLC = () => {
-        alert('TODO');
+        const data = simulador?posiciones:posicionesSim;
+        axios.post(BACKEND_SERVER + `/api/qs/enviar_variante_PLC/`, {
+            data
+        }, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => { 
+            console.log('POST variantes: ',res.data);         
+            
+        })
+        .catch(err => { console.log(err);})
     }
 
     const simular = (event) => {
@@ -718,6 +730,9 @@ const QS_Produccion = () => {
         setMontaje(null);
         setArticulos(null);
         setArticulo(0);
+        setPosiciones(null);
+        setPosicionesSim(null);
+        setSimulador(false);
     }
 
     const handleMontajeChange = (event) => {
