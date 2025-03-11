@@ -15,7 +15,10 @@ const FlowerChart2 = ({montaje, posiciones, fleje, setDesarrollosModelo}) => {
     const wrapperRef = useRef();
     const dimensions = useResizeObserver(wrapperRef);
 
-    let des_FP1, des_FP2, des_FP3, des_W;
+    const [des_FP1, setDesFP1] = useState(null);
+    const [des_FP2, setDesFP2] = useState(null);
+    const [des_FP3, setDesFP3] = useState(null);
+    const [des_W, setDesW] = useState(null);
 
     useEffect(()=>{
         if (!dimensions) return;
@@ -344,13 +347,13 @@ const FlowerChart2 = ({montaje, posiciones, fleje, setDesarrollosModelo}) => {
             const Desarrollo = R1*alfa1 + 2*R2*((Math.PI-alfa1)/2 - alfa3) + 2*R4*(2*alfa3) + 2*R2_s*(alfa2_s-alfa3_s) + 2*R1_s*(alfa1_s/2-alfa_c);
             switch (m.nombre) {
                 case 'FP1':
-                    des_FP1 = Desarrollo;
+                    setDesFP1(Desarrollo);
                     break;
                 case 'FP2':
-                    des_FP2 = Desarrollo;
+                    setDesFP2(Desarrollo);
                     break;
                 case 'FP3':
-                    des_FP3 = Desarrollo;
+                    setDesFP3(Desarrollo);
                     break;
             }
             console.log(m.nombre + ' desarrollo: ', Desarrollo); 
@@ -481,6 +484,8 @@ const FlowerChart2 = ({montaje, posiciones, fleje, setDesarrollosModelo}) => {
                 }
                 else {
                     R2 = (R1_l**2 - (R1_l - pos_inf)**2 - pos_lop**2)/(2*(R1_l - pos_lop));
+                    // console.log('R1: ', R1_l);
+                    // console.log('R2: ', R2);
                     alfa4 = Math.atan((R1_l-pos_inf)/(pos_lop-R2));
                     x6 = -(pos_lop - R2);
                     y6 = h_cab;
@@ -490,6 +495,7 @@ const FlowerChart2 = ({montaje, posiciones, fleje, setDesarrollosModelo}) => {
             const y7 = R1_l - pos_inf + h_cab;
             if (alfa4 < 0) {
                 dibujar=false;
+                // console.log('R2: ', R2);
                 console.log('No dibuja porque alfa4 <0 ', alfa4);
             }
             if (y02i < (pos_inf-h_cab)){
@@ -576,36 +582,36 @@ const FlowerChart2 = ({montaje, posiciones, fleje, setDesarrollosModelo}) => {
             // Desarrollo
             if (dibujar) {
                 let Desarrollo = 0;
-                console.log('Calculo desarrollo W ...');
+                // console.log('Calculo desarrollo W ...');
                 if (alfa3 > 0){
                     Desarrollo = R1_s*(alfa3-alfa2) + R1_l*alfa1;
                 }
                 else {
                     Desarrollo = R1_s*(alfa3-alfa2+2*Math.PI) + R1_l*alfa1;
                 }
-                console.log('alfa3, alfa2 ', alfa3, alfa2);
-                console.log('sup OP: ', Desarrollo);
+                // console.log('alfa3, alfa2 ', alfa3, alfa2);
+                // console.log('sup OP: ', Desarrollo);
                 if (pos_lop<pos_inf) {
                     Desarrollo = Desarrollo + R1_l*alfa4 + R2*(Math.PI/2 - alfa4);
                 }
                 else {
                     Desarrollo = Desarrollo + R2*alfa4 + R1_l*(Math.PI/2 - alfa4);
                 }
-                console.log('LAT OP: ', Desarrollo);
+                // console.log('LAT OP: ', Desarrollo);
                 if (pos_lmo<pos_inf) {
                     Desarrollo = Desarrollo + R1_l*alfa4m + R2m*(Math.PI/2 - alfa4m);
                 }
                 else {
                     Desarrollo = Desarrollo + R2m*alfa4m + R1_l*(Math.PI/2 - alfa4m);
                 }
-                console.log('LAT MO: ', Desarrollo);
+                // console.log('LAT MO: ', Desarrollo);
                 if (alfa3m>0) {
-                    des_W = Desarrollo + R1_l*alfa1m + R1_s*(alfa3m-alfa2m);
+                    setDesW(Desarrollo + R1_l*alfa1m + R1_s*(alfa3m-alfa2m));
                 }
                 else {
-                    des_W = Desarrollo + R1_l*alfa1m + R1_s*(alfa3m-alfa2m+2*Math.PI);
+                    setDesW(Desarrollo + R1_l*alfa1m + R1_s*(alfa3m-alfa2m+2*Math.PI));
                 }
-                console.log(m.nombre + ' desarrollo: ', des_W);
+                // console.log(m.nombre + ' desarrollo: ', des_W);
             }
 
             // Dibujo

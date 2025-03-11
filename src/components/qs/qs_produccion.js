@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from 'axios';
-import { Container, Button, Row, Col, Form} from 'react-bootstrap';
+import { Container, Button, Row, Col, Form, Table} from 'react-bootstrap';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import QSNavBar from "./qs_nav";
@@ -15,6 +15,7 @@ const QS_Produccion = () => {
     const [montajes, setMontajes] = useState(null);
     const [montaje, setMontaje] = useState(null);
     const [montajeActivo, setMontajeActivo] = useState(0);
+    const [montajePLC_OK, setMontajePLC_OK] = useState(false);
     const [articulos, setArticulos] = useState(null);
     const [articulo, setArticulo] = useState(0);
     const [diametrosPLC, setDiametrosPLC] = useState(null);
@@ -58,19 +59,22 @@ const QS_Produccion = () => {
     }
 
     const compara_diametros_PLC_montaje = () => {
+        let montaje_OK = true;
         montaje.forEach(o => {
             o.rodillos.forEach(r =>{
                 const Df_PC = r.parametros.Df;
                 const PLC = diametrosPLC[o.nombre];
                 const Df_PLC = PLC[r.eje];
-                // if (Math.abs(Df_PC-Df_PLC) > 0.1) {
-                //     console.log('Operacion ', o.nombre);
-                //     console.log('Eje: ', r.eje);
-                //     console.log('Df_PC ', Df_PC);
-                //     console.log('Df_PLC ', Df_PLC);
-                // }
+                if (Math.abs(Df_PC-Df_PLC) > 0.1) {
+                    // console.log('Operacion ', o.nombre);
+                    // console.log('Eje: ', r.eje);
+                    // console.log('Df_PC ', Df_PC);
+                    // console.log('Df_PLC ', Df_PLC);
+                    montaje_OK = false;
+                }
             });
         });
+        setMontajePLC_OK(montaje_OK);
     }
 
     const LeeMontaje = (dato) => {
@@ -89,6 +93,8 @@ const QS_Produccion = () => {
         dato.grupo.bancadas.forEach(b => bancadas.push(b)); // Bancadas del grupo
         bancadas.push(dato.bancadas); // Añadimos la calibradora que viene como bancada sin grupo
         // Guardamos los articulos de montaje
+        console.log('Articulos ...');
+        console.log(dato.articulos);
         setArticulos(dato.articulos);
         bancadas.map(b => {
             b.celdas.map(c => {
@@ -182,7 +188,7 @@ const QS_Produccion = () => {
                 });
                 temp.push({
                     operacion: c.operacion.orden,
-                    color: 'blue',
+                    color: c.operacion.color,
                     tipo: tipo,
                     nombre: c.operacion.nombre,
                     rodillos: rod
@@ -195,7 +201,7 @@ const QS_Produccion = () => {
     // Calculo de posiciones estándar
     const CalculaPosicionEstandar = ()=>{
         console.log('Calculo de posiciones estandar ...');
-        if (!desarrollosTeorico || !fleje || !montaje || !alturas) {
+        if (!desarrollosTeorico || !fleje || !montaje || !alturas || !articulo) {
             return;
         }
         let R, R1, R2, R3, R1_s, R2_s, R3_s, R4;
@@ -208,13 +214,19 @@ const QS_Produccion = () => {
         let Dt; // Desarrollo teorico de una operacion
         let roll_s, roll_i, roll_lat;
         let anchoFP1, anchoFP2, anchoFP3;
+        let rod_sup_inf, rod_lat;
 
+        const tubo = articulos.filter(a => a.id==articulo)[0];
+        console.log('montaje ...');
+        console.log(montaje);
         console.log('desarrollos teorico ...');
         console.log(desarrollosTeorico);
         console.log('posiciones...');
         console.log(posicionesSim);
         console.log('fleje ...');
         console.log(fleje);
+        console.log('tubo ...');
+        console.log(tubo);
         const pos_STD = [];
         // Soldadura
         Dt = desarrollosTeorico['W']/Math.PI; // Desarrollo en soldadura teorico
@@ -295,15 +307,15 @@ const QS_Produccion = () => {
             switch (fp.nombre) { // Ancho en el centro de máquina de cada cuchilla para posicionar IS2 e IS3
                 case 'FP1':
                     anchoFP1 = 2*(R4-xcr);
-                    console.log('Ancho FP1: ', anchoFP1);
+                    // console.log('Ancho FP1: ', anchoFP1);
                     break;
                 case 'FP2':
                     anchoFP2 = 2*(R4-xcr);
-                    console.log('Ancho FP2: ', anchoFP2);
+                    // console.log('Ancho FP2: ', anchoFP2);
                     break;
                 case 'FP3':
                     anchoFP3 = 2*(R4-xcr);
-                    console.log('Ancho FP3: ', anchoFP3);
+                    // console.log('Ancho FP3: ', anchoFP3);
                     break;
             }
             console.log('gap_i: ', gap);
@@ -322,7 +334,7 @@ const QS_Produccion = () => {
         const pos_fp1_inf = pos_STD.filter(p => p.nombre=='FP1')[0].posiciones.filter(p => p.eje=='INF')[0].pos;
         const x_fp1 = alturas.filter(a => a.nombre=='MIN')[0].puntos.filter(p => p.nombre=='FP1')[0].x;
         const m = pos_fp1_inf/x_fp1;
-        console.log('pendiente: ', m);
+        // console.log('pendiente: ', m);
 
         // Break Down
         montaje.filter(m => m.tipo=='BD').map(bd => {
@@ -434,8 +446,270 @@ const QS_Produccion = () => {
             });
         });
         
-        console.log('posiciones calculadas ...');
-        console.log(pos_STD);
+        // Lineal: Calculamos con regresión lineal
+        const Ds =  fleje.ancho/Math.PI;
+
+        const l_in_alto = 0.34*Ds - 41.35;
+        const l_in_ancho = 2.08*Ds + 200;
+        const l_in_sup = -0.4*Ds - 1.185;
+        const l_out_alto = 0.73*Ds - 56.44;
+        const l_out_ancho = 0.9*Ds + 322;
+        const l_out_sup = -0.53*Ds - 2.41;
+        const rod_inf_in = -0.43*Ds -4.12;
+        const rod_inf_center = -0.4961*Ds - 5.252;
+        const rod_inf_out = -0.57*Ds -6.07;
+        pos_STD.push({
+            op: 4,
+            nombre: 'LINEAL',
+            posiciones: [
+                {eje: 'ENTRADA_ALTO', pos: l_in_alto},
+                {eje: 'ENTRADA_ANCHO', pos: l_in_ancho},
+                {eje: 'ENTRADA_SUP', pos: l_in_sup},
+                {eje: 'SALIDA_ALTO', pos: l_out_alto},
+                {eje: 'SALIDA_ANCHO', pos: l_out_ancho},
+                {eje: 'SALIDA_SUP', pos: l_out_sup},
+                {eje: 'RODILLO_INF_ENTRADA', pos: rod_inf_in},
+                {eje: 'RODILLO_INF_CENTRO', pos: rod_inf_center},
+                {eje: 'RODILLO_INF_SALIDA', pos: rod_inf_out},
+            ]
+        });
+
+        // Calibradora
+        montaje.filter(m => m.tipo=='CB').map(cb => {
+            const ancho = tubo.dim1;
+            const alto = tubo.dim2;
+            let factor = 1;
+            if (ancho==0){ //Tubo redondo
+                // console.log('CB: ', cb);
+                // alert('TODO');
+                switch (cb.rodillos[0].tipo_plano) {
+                    case 'CB-R-2-S':
+                        rod_sup_inf = cb.rodillos[0].parametros.R1;
+                        rod_lat = 200;
+                        break;
+                    case 'CB-R-2-L':
+                        rod_sup_inf = 200;
+                        rod_lat = cb.rodillos[0].parametros.R1;
+                        break;
+                    default:
+                        rod_sup_inf = cb.rodillos[0].parametros.R1;
+                        rod_lat = cb.rodillos[0].parametros.R1;
+                }
+            }
+            else { // Cuadrado - rectangular
+                switch (cb.nombre){
+                    case 'CB1':
+                        factor = 1.18;
+                        break;
+                    case 'CB2':
+                        factor = 1.09;
+                        break;
+                    case 'CB3':
+                        factor = 1.045;
+                        break;
+                    case 'CB4':
+                        factor = 1;
+                }
+                rod_sup_inf = alto/2 * factor;
+                rod_lat = ancho/2 * factor;
+            }
+
+            pos_STD.push({
+                op: cb.operacion,
+                nombre: cb.nombre,
+                posiciones: [
+                    {eje: 'SUP', pos: rod_sup_inf},
+                    {eje: 'INF', pos: rod_sup_inf},
+                    {eje: 'LAT_OP', pos: rod_lat},
+                    {eje: 'LAT_MO', pos: rod_lat},
+                ]
+            });
+        });
+
+        // Pinch roll
+        pos_STD.push({
+            op: 0,
+            nombre: 'PR',
+            posiciones: [
+                {eje: 'INF', pos: 0},
+            ]
+        });
+
+        function compare( a, b ) {
+            if ( a.op < b.op ){
+              return -1;
+            }
+            if ( a.op > b.op ){
+              return 1;
+            }
+            return 0;
+          }
+        // console.log('posiciones calculadas ...');
+        // console.log(pos_STD.sort(compare));
+        setPosicionesSim(pos_STD.sort(compare));
+    }
+
+    // Guardar Variante - TODO
+    const GuardarVariante = () => {
+        if (!montajePLC_OK && !simulador){
+            alert('Los rodillos del PLC no coinciden con el montaje actual');
+        }
+        else {
+            console.log('posiciones ', posiciones);
+            console.log('posicionesSim ', posicionesSim);
+            const data = simulador ? [...posicionesSim] : [...posiciones];
+            var now = new Date();
+            const nombre = simulador ? 'Simulador ' + now.toLocaleString() : 'PLC ' + now.toLocaleString();
+            const montaje = montajeActivo;
+            // const articulo = articulo;
+            const pr_inf = data.filter(p => p.nombre=='PR')[0].posiciones.filter(p =>p.eje=='INF')[0].pos;
+            const pr_presion = 60; //TODO: falta lectura real para cuando no estamos en simulación
+            const bd1_sup = data.filter(p => p.nombre=='BD1')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos;
+            const bd1_inf = data.filter(p => p.nombre=='BD1')[0].posiciones.filter(p =>p.eje=='INF')[0].pos;
+            const bd2_sup = data.filter(p => p.nombre=='BD2')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos;
+            const bd2_inf = data.filter(p => p.nombre=='BD2')[0].posiciones.filter(p =>p.eje=='INF')[0].pos;
+            const is1_ancho = data.filter(p => p.nombre=='IS1')[0].posiciones.filter(p =>p.eje=='ANCHO')[0].pos;
+            const is1_alto = data.filter(p => p.nombre=='IS1')[0].posiciones.filter(p =>p.eje=='ALTO')[0].pos;
+            const l_entrada_sup = data.filter(p => p.nombre=='LINEAL')[0].posiciones.filter(p =>p.eje=='ENTRADA_SUP')[0].pos;
+            const l_entrada_ancho = data.filter(p => p.nombre=='LINEAL')[0].posiciones.filter(p =>p.eje=='ENTRADA_ANCHO')[0].pos;
+            const l_entrada_alto = data.filter(p => p.nombre=='LINEAL')[0].posiciones.filter(p =>p.eje=='ENTRADA_ALTO')[0].pos;
+            const l_entrada_rod_inf = data.filter(p => p.nombre=='LINEAL')[0].posiciones.filter(p =>p.eje=='RODILLO_INF_ENTRADA')[0].pos;
+            const l_centro_rod_inf = data.filter(p => p.nombre=='LINEAL')[0].posiciones.filter(p =>p.eje=='RODILLO_INF_CENTRO')[0].pos;
+            const l_salida_sup = data.filter(p => p.nombre=='LINEAL')[0].posiciones.filter(p =>p.eje=='SALIDA_SUP')[0].pos;
+            const l_salida_ancho = data.filter(p => p.nombre=='LINEAL')[0].posiciones.filter(p =>p.eje=='SALIDA_ANCHO')[0].pos;
+            const l_salida_alto = data.filter(p => p.nombre=='LINEAL')[0].posiciones.filter(p =>p.eje=='SALIDA_ALTO')[0].pos;
+            const l_salida_rod_inf = data.filter(p => p.nombre=='LINEAL')[0].posiciones.filter(p =>p.eje=='RODILLO_INF_SALIDA')[0].pos;
+            const fp1_sup = data.filter(p => p.nombre=='FP1')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos;
+            const fp1_inf = data.filter(p => p.nombre=='FP1')[0].posiciones.filter(p =>p.eje=='INF')[0].pos;
+            let is2_ancho, is2_alto, is3_ancho, is3_alto;
+            if (data.filter(p => p.nombre=='IS2')[0]) {
+                is2_ancho = data.filter(p => p.nombre=='IS2')[0].posiciones.filter(p =>p.eje=='ANCHO')[0].pos;
+                is2_alto = data.filter(p => p.nombre=='IS2')[0].posiciones.filter(p =>p.eje=='ALTO')[0].pos;
+            }
+            else {
+                is2_ancho = 250;
+                is2_alto = 0;
+            }
+            const fp2_sup = data.filter(p => p.nombre=='FP2')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos;
+            const fp2_inf = data.filter(p => p.nombre=='FP2')[0].posiciones.filter(p =>p.eje=='INF')[0].pos;
+            if (data.filter(p => p.nombre=='IS3')[0]) {
+                is3_ancho = data.filter(p => p.nombre=='IS3')[0].posiciones.filter(p =>p.eje=='ANCHO')[0].pos;
+                is3_alto = data.filter(p => p.nombre=='IS3')[0].posiciones.filter(p =>p.eje=='ALTO')[0].pos;
+            }
+            else {
+                is3_ancho = 250;
+                is3_alto = 0;
+            }
+            const fp3_sup = data.filter(p => p.nombre=='FP3')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos;
+            const fp3_inf = data.filter(p => p.nombre=='FP3')[0].posiciones.filter(p =>p.eje=='INF')[0].pos;
+            const w_inf = data.filter(p => p.nombre=='W')[0].posiciones.filter(p =>p.eje=='INF')[0].pos;
+            const w_lat_op = data.filter(p => p.nombre=='W')[0].posiciones.filter(p =>p.eje=='LAT_OP')[0].pos;
+            const w_lat_mo = data.filter(p => p.nombre=='W')[0].posiciones.filter(p =>p.eje=='LAT_MO')[0].pos;
+            const w_sup_op_v = data.filter(p => p.nombre=='W')[0].posiciones.filter(p =>p.eje=='SUP_V_OP')[0].pos;
+            const w_sup_op_h = data.filter(p => p.nombre=='W')[0].posiciones.filter(p =>p.eje=='SUP_H_OP')[0].pos;
+            const w_sup_mo_v = data.filter(p => p.nombre=='W')[0].posiciones.filter(p =>p.eje=='SUP_V_MO')[0].pos;
+            const w_sup_mo_h = data.filter(p => p.nombre=='W')[0].posiciones.filter(p =>p.eje=='SUP_H_MO')[0].pos;
+            const w_cab = data.filter(p => p.nombre=='W')[0].posiciones.filter(p =>p.eje=='CAB')[0].pos;
+            const cb1_sup = data.filter(p => p.nombre=='CB1')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos;
+            const cb1_inf = data.filter(p => p.nombre=='CB1')[0].posiciones.filter(p =>p.eje=='INF')[0].pos;
+            const cb1_lat_op = data.filter(p => p.nombre=='CB1')[0].posiciones.filter(p =>p.eje=='LAT_OP')[0].pos;
+            const cb1_lat_mo = data.filter(p => p.nombre=='CB1')[0].posiciones.filter(p =>p.eje=='LAT_MO')[0].pos;
+            const cb2_sup = data.filter(p => p.nombre=='CB2')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos;
+            const cb2_inf = data.filter(p => p.nombre=='CB2')[0].posiciones.filter(p =>p.eje=='INF')[0].pos;
+            const cb2_lat_op = data.filter(p => p.nombre=='CB2')[0].posiciones.filter(p =>p.eje=='LAT_OP')[0].pos;
+            const cb2_lat_mo = data.filter(p => p.nombre=='CB2')[0].posiciones.filter(p =>p.eje=='LAT_MO')[0].pos;
+            const cb3_sup = data.filter(p => p.nombre=='CB3')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos;
+            const cb3_inf = data.filter(p => p.nombre=='CB3')[0].posiciones.filter(p =>p.eje=='INF')[0].pos;
+            const cb3_lat_op = data.filter(p => p.nombre=='CB3')[0].posiciones.filter(p =>p.eje=='LAT_OP')[0].pos;
+            const cb3_lat_mo = data.filter(p => p.nombre=='CB3')[0].posiciones.filter(p =>p.eje=='LAT_MO')[0].pos;
+            const cb4_sup = data.filter(p => p.nombre=='CB4')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos;
+            const cb4_inf = data.filter(p => p.nombre=='CB4')[0].posiciones.filter(p =>p.eje=='INF')[0].pos;
+            const cb4_lat_op = data.filter(p => p.nombre=='CB4')[0].posiciones.filter(p =>p.eje=='LAT_OP')[0].pos;
+            const cb4_lat_mo = data.filter(p => p.nombre=='CB4')[0].posiciones.filter(p =>p.eje=='LAT_MO')[0].pos;
+            axios.post(BACKEND_SERVER + `/api/qs/variante/`, {
+                nombre: 'Simulador' ,
+                montaje: montajeActivo,
+                articulo: articulo,
+                pr_inf: pr_inf, 
+                pr_presion: pr_presion,
+                bd1_sup: bd1_sup,
+                bd1_inf: bd1_inf,
+                bd2_sup: bd2_sup,
+                bd2_inf: bd2_inf,
+                is1_ancho: is1_ancho,
+                is1_alto: is1_alto,
+                l_entrada_sup: l_entrada_sup,
+                l_entrada_ancho: l_entrada_ancho,
+                l_entrada_alto: l_entrada_alto,
+                l_entrada_rod_inf: l_entrada_rod_inf,
+                l_centro_rod_inf: l_centro_rod_inf,
+                l_salida_sup: l_salida_sup,
+                l_salida_ancho: l_salida_ancho,
+                l_salida_alto: l_salida_alto,
+                l_salida_rod_inf: l_salida_rod_inf,
+                fp1_sup: fp1_sup,
+                fp1_inf: fp1_inf,
+                is2_ancho: is2_ancho,
+                is2_alto: is2_alto,
+                fp2_sup: fp2_sup,
+                fp2_inf: fp2_inf,
+                is3_ancho: is3_ancho,
+                is3_alto: is3_alto,
+                fp3_sup: fp3_sup,
+                fp3_inf: fp3_inf,
+                w_inf: w_inf,
+                w_lat_op: w_lat_op,
+                w_lat_mo: w_lat_mo,
+                w_sup_op_v: w_sup_op_v,
+                w_sup_op_h: w_sup_op_h,
+                w_sup_mo_v: w_sup_mo_v,
+                w_sup_mo_h: w_sup_mo_h,
+                w_cab: w_cab,
+                cb1_sup: cb1_sup,
+                cb1_inf: cb1_inf,
+                cb1_lat_op: cb1_lat_op,
+                cb1_lat_mo: cb1_lat_mo,
+                cb2_sup: cb2_sup,
+                cb2_inf: cb2_inf,
+                cb2_lat_op: cb2_lat_op,
+                cb2_lat_mo: cb2_lat_mo,
+                cb3_sup: cb3_sup,
+                cb3_inf: cb3_inf,
+                cb3_lat_op: cb3_lat_op,
+                cb3_lat_mo: cb3_lat_mo,
+                cb4_sup: cb4_sup,
+                cb4_inf: cb4_inf,
+                cb4_lat_op: cb4_lat_op,
+                cb4_lat_mo: cb4_lat_mo
+            }, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                  }     
+            })
+            .then( res => { 
+                console.log('POST variantes: ',res.data);  
+                alert('Variante guardada con exito ...');          
+                
+            })
+            .catch(err => { console.log(err);})
+        }
+    }
+
+    // Enviar Variante al PLC
+    const EnviarPLC = () => {
+        const data = simulador?posiciones:posicionesSim;
+        axios.post(BACKEND_SERVER + `/api/qs/enviar_variante_PLC/`, {
+            data
+        }, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => { 
+            console.log('POST variantes: ',res.data);         
+            
+        })
+        .catch(err => { console.log(err);})
     }
 
     const simular = (event) => {
@@ -456,6 +730,9 @@ const QS_Produccion = () => {
         setMontaje(null);
         setArticulos(null);
         setArticulo(0);
+        setPosiciones(null);
+        setPosicionesSim(null);
+        setSimulador(false);
     }
 
     const handleMontajeChange = (event) => {
@@ -558,7 +835,7 @@ const QS_Produccion = () => {
 
         const gap_list = [];
         // console.log('Calculo de gap ...');
-        fleje&&montaje&&montaje.map(m => {
+        fleje&&montaje&&posiciones&&posicionesSim&&montaje.map(m => {
             // console.log(m);
             switch (m.tipo) {
                 case 'BD':
@@ -671,6 +948,44 @@ const QS_Produccion = () => {
                     gap = pos_ancho + Df - Dext;
                     piston = null;
                     break;
+                case 'CB':
+                    piston = null;
+                    switch(m.rodillos[0].tipo_plano){
+                        case 'CB-R-2-S':
+                            if (!simulador){
+                                pos_i = posiciones.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='INF')[0].pos;
+                                pos_s = posiciones.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='SUP')[0].pos;
+                            }
+                            else {
+                                pos_i = posicionesSim.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='INF')[0].pos;
+                                pos_s = posicionesSim.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='SUP')[0].pos;
+                            }
+                            dext_i = m.rodillos.filter(r => r.eje=='INF')[0].parametros.Dext;
+                            dext_s = m.rodillos.filter(r => r.eje=='SUP')[0].parametros.Dext;
+                            df_i = m.rodillos.filter(r => r.eje=='INF')[0].parametros.Df;
+                            df_s = m.rodillos.filter(r => r.eje=='SUP')[0].parametros.Df;
+                            gap = pos_i + pos_s - (dext_i-df_i)/2 - (dext_s-df_s)/2;
+                            break;
+                        case 'CB-R-2-L':
+                            gap = null;
+                            if (!simulador){
+                                pos_i = posiciones.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='LAT_OP')[0].pos;
+                                pos_s = posiciones.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='LAT_MO')[0].pos;
+                            }
+                            else {
+                                pos_i = posicionesSim.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='LAT_OP')[0].pos;
+                                pos_s = posicionesSim.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='LAT_MO')[0].pos;
+                            }
+                            dext_i = m.rodillos.filter(r => r.eje=='LAT_OP')[0].parametros.Dext;
+                            dext_s = m.rodillos.filter(r => r.eje=='LAT_MO')[0].parametros.Dext;
+                            df_i = m.rodillos.filter(r => r.eje=='LAT_OP')[0].parametros.Df;
+                            df_s = m.rodillos.filter(r => r.eje=='LAT_MO')[0].parametros.Df;
+                            gap = pos_i + pos_s - (dext_i-df_i)/2 - (dext_s-df_s)/2;
+                            break;
+                        default:
+                            gap = null;
+                    }
+                    break;
                 default:
                     gap = null;
                     piston = null;
@@ -683,7 +998,7 @@ const QS_Produccion = () => {
                 piston: piston
             });
         });
-        console.log('gap_list', gap_list);
+        // console.log('gap_list', gap_list);
         // console.log(gap_list);
         setGap(gap_list);
     
@@ -943,7 +1258,7 @@ const QS_Produccion = () => {
 
     // Desarrollos modelo
     useEffect(()=>{
-        desarrollosModelo&&console.log(desarrollosModelo);
+        desarrollosModelo&&console.log('Desarrollos modelo: ',desarrollosModelo);
     },[desarrollosModelo]);
 
     return (
@@ -996,7 +1311,7 @@ const QS_Produccion = () => {
                         </Col>
                         <Col lg={6}>
                             <Row>
-                                <Col>
+                                <Col lg={6}>
                                     <Form.Group controlId="Articulo">
                                         <Form.Label>Artículo</Form.Label>
                                         <Form.Control   size="lg"
@@ -1015,6 +1330,19 @@ const QS_Produccion = () => {
                                         </Form.Control>
                                     </Form.Group>
                                 </Col>
+                                <Col>
+                                    <Form.Group controlId="Articulo">
+                                        <Form.Label>Variante</Form.Label>
+                                        <Form.Control   size="lg"
+                                                        as="select" 
+                                                        value={null}
+                                                        name='variante'
+                                                        onChange={null}>
+                                            <option key={0} value={0}>Ninguno</option>                
+                                            {}
+                                        </Form.Control>
+                                    </Form.Group>
+                                </Col>
                             </Row>
                         </Col>
                     </Row>
@@ -1022,22 +1350,25 @@ const QS_Produccion = () => {
                     montaje&&articulo&&fleje&&posiciones&&posicionesSim&&<React.Fragment>
                     <Row>
                         <Col lg={3}>
-                            <Form.Group controlId="operacion">
-                                <Form.Control as="select" 
-                                                value={OP}
-                                                name='operacion'
-                                                onChange={handleOPChange}>
-                                    {montaje && montaje.map( m => {
-                                        return (
-                                        <option key={m.operacion} value={m.operacion}>
-                                            {m.nombre}
-                                        </option>
-                                        )
-                                    })}
-                                </Form.Control>
+                            <Form.Group as={Row} controlId="operacion">
+                                <Form.Label column>Operación</Form.Label>
+                                <Col>
+                                    <Form.Control as="select" 
+                                                    value={OP}
+                                                    name='operacion'
+                                                    onChange={handleOPChange}>
+                                        {montaje && montaje.map( m => {
+                                            return (
+                                            <option key={m.operacion} value={m.operacion}>
+                                                {m.nombre}
+                                            </option>
+                                            )
+                                        })}
+                                    </Form.Control>
+                                </Col>
                             </Form.Group>
                         </Col>
-                        <Col lg={2}>            
+                        <Col lg={1}>            
                             <Form.Check // prettier-ignore
                                     type="switch"
                                     id="custom-switch"
@@ -1050,13 +1381,22 @@ const QS_Produccion = () => {
                         </Col>
                         {simulador && 
                         <React.Fragment>
-                            <Col lg={1}>
-                                <Button variant="info" type="submit" className={'mx-2'} onClick={simular}>Simular</Button>
-                            </Col>
                             <Col lg={2}>
-                                <Button variant="info" className={'mx-2'} onClick={CalculaPosicionEstandar}>Calcula PE</Button>
+                                <Button variant="info" type="submit" className={'mx-2 float-right'} onClick={simular}>Simular</Button>
+                                <Button variant="info" className={'mx-2 float-right'} onClick={CalculaPosicionEstandar}>Calcula PE</Button>
                             </Col>
+                            
                         </React.Fragment>}  
+                        {!simulador && 
+                        <React.Fragment>
+                            <Col lg={2}>
+                                <Button variant={montajePLC_OK ? "success" : "danger"} className={'mx-2 float-right'} enabled={false}>Rodillos OK</Button>
+                            </Col>
+                        </React.Fragment>}
+                            <Col lg={6}>
+                                <Button variant="info" className={'mx-2 float-right'} onClick={GuardarVariante}>Guardar Variante</Button>
+                                <Button variant="info" className={'mx-2 float-right'} onClick={EnviarPLC}>Enviar PLC</Button>
+                            </Col>
                     </Row>
                     <Row>
                         <Col lg={6}>
@@ -1066,7 +1406,7 @@ const QS_Produccion = () => {
                                 gap = {gap&&gap.filter(g => g.op == OP)}
                                 fleje={fleje}/> 
                         </Col>
-                        <Col className="col-6">
+                        <Col>
                             <FlowerChart2 montaje={montaje}
                                         posiciones={simulador ? posicionesSim : posiciones}
                                         fleje={fleje}
@@ -1094,10 +1434,49 @@ const QS_Produccion = () => {
                                 })}
                             </Row>
                         </Col>
+                        
                     </Row> 
                     <Row>
-                        <Col className="col-12">
+                        <Col lg={6}>
                             <HeightChart alturas={alturas}/>
+                        </Col>
+                        <Col>
+                            {desarrollosModelo && desarrollosTeorico && fleje &&
+                            <React.Fragment>
+                                <Table striped bordered hover>
+                                    <thead>
+                                        <tr>
+                                            <th className={"w-40"}>Origen</th>
+                                            <th className={"w-10"}>Desarrollo</th>
+                                            <th className={"w-10"}>Lineal</th>
+                                            <th className={"w-10"}>FP1</th>
+                                            <th className={"w-10"}>FP2</th>
+                                            <th className={"w-10"}>FP3</th>
+                                            <th className={"w-10"}>W</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Modelo</td>
+                                            <td>{fleje.ancho}</td>
+                                            <td>{desarrollosModelo.Lineal.toFixed(1)}</td>
+                                            <td>{desarrollosModelo.FP1.toFixed(1)}</td>
+                                            <td>{desarrollosModelo.FP2.toFixed(1)}</td>
+                                            <td>{desarrollosModelo.FP3.toFixed(1)}</td>
+                                            <td>{desarrollosModelo.W.toFixed(1)}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Teórico</td>
+                                            <td>{fleje.ancho}</td>
+                                            <td>{desarrollosTeorico.Lineal.toFixed(1)}</td>
+                                            <td>{desarrollosTeorico.FP1.toFixed(1)}</td>
+                                            <td>{desarrollosTeorico.FP2.toFixed(1)}</td>
+                                            <td>{desarrollosTeorico.FP3.toFixed(1)}</td>
+                                            <td>{desarrollosTeorico.W.toFixed(1)}</td>
+                                        </tr>
+                                    </tbody>
+                                </Table> 
+                            </React.Fragment>}
                         </Col>
                     </Row>
                     </React.Fragment>
