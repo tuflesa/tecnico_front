@@ -23,15 +23,22 @@ const LineasPartesMov = ({tarea, handleCloseList, show, parte}) => {
             }
         })
         .then( res => {
-            setListados(res.data.sort(function(a, b){
-                if(a.fecha_fin > b.fecha_fin){
-                    return 1;
-                }
-                if(a.fecha_fin < b.fecha_fin){
-                    return -1;
-                }
-                return 0;
-            }))
+            console.log(res.data);
+            setListados(
+                res.data.sort((a, b) => {
+                    const dateA = a.fecha_fin ? new Date(a.fecha_fin) : null;
+                    const dateB = b.fecha_fin ? new Date(b.fecha_fin) : null;
+            
+                    // Si A no tiene fecha, lo manda al final
+                    if (!dateA) return 1;
+                    // Si B no tiene fecha, lo manda al final
+                    if (!dateB) return -1;
+            
+                    // Orden normal de más antiguo a más reciente
+                    return dateA - dateB;
+                })
+            );
+            
         })
         .catch( err => {
             console.log(err);
