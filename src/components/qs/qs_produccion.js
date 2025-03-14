@@ -628,11 +628,7 @@ const QS_Produccion = () => {
             const cb4_lat_op = data.filter(p => p.nombre=='CB4')[0].posiciones.filter(p =>p.eje=='LAT_OP')[0].pos;
             const cb4_lat_mo = data.filter(p => p.nombre=='CB4')[0].posiciones.filter(p =>p.eje=='LAT_MO')[0].pos;
             axios.post(BACKEND_SERVER + `/api/qs/variante/`, {
-<<<<<<< HEAD
                 nombre: nombre ,
-=======
-                nombre: 'Simulador' ,
->>>>>>> b30060e8e832f6d6e41b56ef42fb9b5e2c9675e6
                 montaje: montajeActivo,
                 articulo: articulo,
                 pr_inf: pr_inf, 
@@ -702,7 +698,6 @@ const QS_Produccion = () => {
 
     // Enviar Variante al PLC
     const EnviarPLC = () => {
-<<<<<<< HEAD
         const data = simulador?posicionesSim:posiciones;
         console.log('datos enviados ...');
         console.log(data);
@@ -715,11 +710,6 @@ const QS_Produccion = () => {
             bd2_sup: data.filter(p => p.nombre=='BD2')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos,
             is1_ancho: data.filter(p => p.nombre=='IS1')[0].posiciones.filter(p =>p.eje=='ANCHO')[0].pos,
             is1_alto: data.filter(p => p.nombre=='IS1')[0].posiciones.filter(p =>p.eje=='ALTO')[0].pos,
-=======
-        const data = simulador?posiciones:posicionesSim;
-        axios.post(BACKEND_SERVER + `/api/qs/enviar_variante_PLC/`, {
-            data
->>>>>>> b30060e8e832f6d6e41b56ef42fb9b5e2c9675e6
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
