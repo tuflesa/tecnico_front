@@ -66,17 +66,10 @@ const QS_Produccion = () => {
                 const PLC = diametrosPLC[o.nombre];
                 const Df_PLC = PLC[r.eje];
                 if (Math.abs(Df_PC-Df_PLC) > 0.1) {
-<<<<<<< HEAD
                     console.log('Operacion ', o.nombre);
                     console.log('Eje: ', r.eje);
                     console.log('Df_PC ', Df_PC);
                     console.log('Df_PLC ', Df_PLC);
-=======
-                    // console.log('Operacion ', o.nombre);
-                    // console.log('Eje: ', r.eje);
-                    // console.log('Df_PC ', Df_PC);
-                    // console.log('Df_PLC ', Df_PLC);
->>>>>>> b30060e8e832f6d6e41b56ef42fb9b5e2c9675e6
                     montaje_OK = false;
                 }
             });
