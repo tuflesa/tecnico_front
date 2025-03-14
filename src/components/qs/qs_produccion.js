@@ -564,11 +564,7 @@ const QS_Produccion = () => {
             const montaje = montajeActivo;
             // const articulo = articulo;
             const pr_inf = data.filter(p => p.nombre=='PR')[0].posiciones.filter(p =>p.eje=='INF')[0].pos;
-<<<<<<< HEAD
             const pr_presion = data.filter(p => p.nombre=='PR')[0].posiciones.filter(p =>p.eje=='PRES')[0].pos; //TODO: falta lectura real para cuando no estamos en simulación
-=======
-            const pr_presion = 60; //TODO: falta lectura real para cuando no estamos en simulación
->>>>>>> b30060e8e832f6d6e41b56ef42fb9b5e2c9675e6
             const bd1_sup = data.filter(p => p.nombre=='BD1')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos;
             const bd1_inf = data.filter(p => p.nombre=='BD1')[0].posiciones.filter(p =>p.eje=='INF')[0].pos;
             const bd2_sup = data.filter(p => p.nombre=='BD2')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos;
