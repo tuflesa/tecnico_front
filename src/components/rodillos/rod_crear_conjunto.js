@@ -4,7 +4,7 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 
-const RodConjunto = ({show, setShow, elementos_formacion, handleClose, grupo_nom, operacion_marcada, grupoId, grupoEspesor, empresa_id, maquina, tubomadre, grupo_bancadas, colorAzul, colorAzulB, colorVerde, bancada_id, bancada_otraformacion}) => {
+const RodConjunto = ({show, setShow, elementos_formacion, handleClose, grupo_nom, operacion_marcada, grupoId, grupoEspesor, empresa_id, maquina, tubomadre, grupo_bancadas, colorAzul, colorAzulB, colorVerde, colorAmarillo, bancada_id, bancada_otraformacion}) => {
     const [token] = useCookies(['tec-token']);
     const [bancadaId, setBancadaId] = useState(bancada_id); // Estado para bancada_id
 
@@ -29,6 +29,7 @@ const RodConjunto = ({show, setShow, elementos_formacion, handleClose, grupo_nom
     const [espesores_unidos, setEspesores_unidos] = useState(``);
     const [nombreGrupo, setNombreGrupo] = useState(``);
     const [icono_celda, setIcono_celda] = useState([]);
+    const [es_generico, setEsGenerico] = useState(null);
     
     var bancadas_nuevas=[''];
     var bancadas_nuevas2=[''];
@@ -210,12 +211,12 @@ const RodConjunto = ({show, setShow, elementos_formacion, handleClose, grupo_nom
                         // Si ya existe, lo reemplazamos
                         return prevEjesRodillos.map(e => 
                             e.eje === selectedEje 
-                                ? { eje: selectedEje, rodillo: rod_id, operacion: operacion_rod, TuboMadreRod:tubo_madre_rod}
+                                ? { eje: selectedEje, rodillo: rod_id, operacion: operacion_rod, TuboMadreRod:tubo_madre_rod, es_generico: es_generico}
                                 : e
                         );
                     } else {
                         // Si no existe, lo agregamos
-                        return [...prevEjesRodillos, { eje: selectedEje, rodillo: rod_id, operacion: operacion_rod, TuboMadreRod:tubo_madre_rod}];
+                        return [...prevEjesRodillos, { eje: selectedEje, rodillo: rod_id, operacion: operacion_rod, TuboMadreRod:tubo_madre_rod, es_generico: es_generico}];
                     }
                 });
             }
@@ -236,69 +237,83 @@ const RodConjunto = ({show, setShow, elementos_formacion, handleClose, grupo_nom
     }, [token, operacion_marcada]);
 
     const Guardar = () => {
-        if(datos.bancada_elegida){ //si hemos elegido una bancada de otra formación
-            bancadas_nuevas = grupo_bancadas?grupo_bancadas:[''];
-            bancadas_nuevas2 = grupo_bancadas?grupo_bancadas.map(bancada => bancada.id):'';
-            if(bancada_id){
-                alert('Si ya tenemos bancada de grupo, no podemos coger una bancada adicional');
-                bancadas_nuevas2=[''];
-                return;
-            }
-            else{
-                bancadas_nuevas2.push(datos.bancada_elegida);
-                ActualizarGrupo(bancadas_nuevas2);
-                return;
-            }
+        let nulos = EjesRodillos.filter(rodillo=> rodillo.es_generico==='true').length
+        if(nulos>EjesRodillos.length/2){
+            alert('No podemos poner tantos rodillos nulos en una formación.')
+            return;
         }
-        else{ 
-            if(datos.conjunto_elegido){ //conjunto de otra formación
-                if(colorAzul){//¿tenia ya conjunto? sustituyo conjunto en celda
-                    SustituirConjuntoEnCelda(datos.conjunto_elegido);
-                }
-                if(colorAzulB){//¿tenia ya conjunto naranja? sustituyo conjunto en celda
-                    SustituirConjuntoEnCelda(datos.conjunto_elegido);
+        else{
+            if(datos.bancada_elegida){ //si hemos elegido una bancada de otra formación
+                bancadas_nuevas = grupo_bancadas?grupo_bancadas:[''];
+                bancadas_nuevas2 = grupo_bancadas?grupo_bancadas.map(bancada => bancada.id):'';
+                if(bancada_id){
+                    alert('Si ya tenemos bancada de grupo, no podemos coger una bancada adicional');
+                    bancadas_nuevas2=[''];
+                    return;
                 }
                 else{
-                    if(bancada_id || bancadaId){
-                        if(bancada_id){
-                            GuardarCelda(bancada_id); //tengo bancada, crear celda
+                    bancadas_nuevas2.push(datos.bancada_elegida);
+                    ActualizarGrupo(bancadas_nuevas2);
+                    return;
+                }
+            }
+            else{ 
+                if(datos.conjunto_elegido){ //conjunto de otra formación
+                    if(colorAzul){//¿tenia ya conjunto? sustituyo conjunto en celda
+                        SustituirConjuntoEnCelda(datos.conjunto_elegido);
+                    }
+                    if(colorAzulB){//¿tenia ya conjunto naranja? sustituyo conjunto en celda
+                        SustituirConjuntoEnCelda(datos.conjunto_elegido);
+                    }
+                    else{
+                        if(bancada_id || bancadaId){
+                            if(bancada_id){
+                                GuardarCelda(bancada_id); //tengo bancada, crear celda
+                            }
+                            if(bancadaId){
+                                GuardarCelda(bancadaId); //tengo bancada grabada sin actualizar, crear celda
+                            }
                         }
-                        if(bancadaId){
-                            GuardarCelda(bancadaId); //tengo bancada grabada sin actualizar, crear celda
+                        else{
+                            GuardarBancada(); //crear bancada y celda
+                        }
+                    }
+                }
+                else{ //rodillos nuestros
+                    if(EjesRodillos.length===0){
+                        alert('Introduce algún dato');
+                        return;
+                    }
+                    var rodillo_tubo_madre = EjesRodillos[0].TuboMadreRod;
+                    var rodillo_operacion = EjesRodillos[0].operacion;
+                    var no_coincide=false;
+                    //var x=0;
+                    for(var x=0;x<EjesRodillos.length;x++){
+                        if(EjesRodillos[x].TuboMadreRod!==rodillo_tubo_madre||EjesRodillos[x].operacion!==rodillo_operacion){
+                            no_coincide=true;
+                            alert('Los rodillos seleccionados no coinciden en su Ø o su operación');
+                            handlerCancelar();
+                            break
+                        }
+                    }
+                    if(no_coincide===false){
+                        if(colorVerde===true || colorAmarillo===true){ 
+                            const confirmacion = window.confirm('Ya tenemos elementos creados originales ¿Deseas cambiarlos?'); //Si tengo ya un juego original para esta formación, no puedo poner otro.
+                            if(confirmacion){
+                                ActualizarElementoVerde();
+                                return;
+                            }
+                            else{
+                                return;
+                            }
+                        }
+                        if(colorAzul===true || colorVerde===false){ //no tengo conjunto ni elemento
+                            GuardarConjuntoElemento();
                         }
                     }
                     else{
-                        GuardarBancada(); //crear bancada y celda
+                        alert('Por favor selecciona todos los elementos del conjunto');
                     }
-                }
-            }
-            else{ //rodillos nuestros
-                if(EjesRodillos.length===0){
-                    alert('Introduce algún dato');
-                    return;
-                }
-                var rodillo_tubo_madre = EjesRodillos[0].TuboMadreRod;
-                var rodillo_operacion = EjesRodillos[0].operacion;
-                var no_coincide=false;
-                //var x=0;
-                for(var x=0;x<EjesRodillos.length;x++){
-                    if(EjesRodillos[x].TuboMadreRod!==rodillo_tubo_madre||EjesRodillos[x].operacion!==rodillo_operacion){
-                        no_coincide=true;
-                        alert('Los rodillos seleccionados no coinciden en su Ø o su operación');
-                        handlerCancelar();
-                        break
-                    }
-                }
-                if(no_coincide===false){
-                    if(colorVerde===true){ 
-                        alert('Ya tenemos elementos creados originales'); //Si tengo ya un juego original para esta formación, no puedo poner otro.
-                    }
-                    if(colorAzul===true || colorVerde===false){ //no tengo conjunto ni elemento
-                        GuardarConjuntoElemento();
-                    }
-                }
-                else{
-                    alert('Por favor selecciona todos los elementos del conjunto');
                 }
             }
         }
@@ -321,6 +336,42 @@ const RodConjunto = ({show, setShow, elementos_formacion, handleClose, grupo_nom
             console.error(err);
         })
     }
+
+    const ActualizarElementoVerde = () => {
+        for(var x=0;x<EjesRodillos.length;x++){
+            for(var y=0; y<rodillo_elegido.length;y++){
+                if(parseInt(EjesRodillos[x].eje)===rodillo_elegido[y].eje.id && parseInt(EjesRodillos[x].operacion)===rodillo_elegido[y].conjunto.operacion.id){
+                    const rodillo_nuevo = EjesRodillos[x];
+                    axios.get(BACKEND_SERVER + `/api/rodillos/elemento/?eje=${EjesRodillos[x].eje}`, { //modificamos los elementos.
+                       
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                            }     
+                    })
+                    .then( res => {
+                        axios.patch(BACKEND_SERVER + `/api/rodillos/elemento/${res.data[0].id}/`, { //modificamos los elementos.
+                            rodillo: rodillo_nuevo.rodillo,
+                        }, {
+                            headers: {
+                                'Authorization': `token ${token['tec-token']}`
+                                }     
+                        })
+                        .then( res => {
+                            window.location.href=`/rodillos/grupo_editar/${grupoId}`;
+                        })
+                        .catch(err => { 
+                            console.error(err);
+                        })
+                    })
+                    .catch(err => { 
+                        console.error(err);
+                    })
+                    
+                }
+                
+            }
+        }
+     }
 
     const GuardarConjuntoElemento = () => { 
         if(EjesRodillos.length===ejes.length){//cantidad de rodillo igual a cantidad de ejes
@@ -492,7 +543,7 @@ const RodConjunto = ({show, setShow, elementos_formacion, handleClose, grupo_nom
 
     const handleInputChange = (event) => {
         const selectedValue = event.target.options[event.target.selectedIndex].value;
-        const [rodilloId, operacion, grupo, eje, espesor_1, espesor_2, grupo_nombre] = selectedValue.split(',');
+        const [rodilloId, operacion, grupo, eje, espesor_1, espesor_2, grupo_nombre, generico] = selectedValue.split(',');
         const grupoID = grupo;
         const operacion_rodillo = operacion;
         const valores_rodillo = selectedValue;
@@ -500,10 +551,12 @@ const RodConjunto = ({show, setShow, elementos_formacion, handleClose, grupo_nom
         const ejeId_posicion = eje;
         const espesores = espesor_1 + '÷' + espesor_2;
         const nombre_grupo = grupo_nombre;
+        const gen = generico;
         setRod_Id(rodillo_id);
         setGrupoId_Rod(grupoID);
         setOperacionRod(operacion_rodillo);
-        setEspesores_unidos(espesores)
+        setEspesores_unidos(espesores);
+        setEsGenerico(gen);
         const nuevaSeleccionRodilloId = {...selectRodilloId};
         nuevaSeleccionRodilloId[ejeId_posicion] = valores_rodillo;
         setSelectedEje(ejeId_posicion);
@@ -589,14 +642,14 @@ const RodConjunto = ({show, setShow, elementos_formacion, handleClose, grupo_nom
                                             >
                                                 <option key={0} value={''}>Elegir rodillo</option>
                                                 {rod_generico && rod_generico.map(rodilloGen => (
-                                                    <option key={rodilloGen.id} value={`${rodilloGen.id},${operacion_marcada.id},${grupoId},${eje.id},${rodilloGen.espesor_1},${rodilloGen.espesor_2},${grupo_nom}`}>
+                                                    <option key={rodilloGen.id} value={`${rodilloGen.id},${operacion_marcada.id},${grupoId},${eje.id},${rodilloGen.espesor_1},${rodilloGen.espesor_2},${grupo_nom},${rodilloGen.es_generico}`}>
                                                         {rodilloGen.nombre}
                                                     </option>
                                                 ))}
                                                 {rodillos && rodillos.map(rodillo => {
                                                     if (rodillo.tipo === eje.tipo.id && rodillo.diametro === eje.diametro || rodillo.es_generico===true) {
                                                         return (
-                                                            <option key={rodillo.id} value={`${rodillo.id},${rodillo.operacion},${rodillo.grupo.id},${eje.id},${rodillo.espesor_1},${rodillo.espesor_2},${rodillo.grupo.nombre}`}>
+                                                            <option key={rodillo.id} value={`${rodillo.id},${rodillo.operacion},${rodillo.grupo.id},${eje.id},${rodillo.espesor_1},${rodillo.espesor_2},${rodillo.grupo.nombre},${rodillo.es_generico}`}>
                                                                 {rodillo.nombre}
                                                             </option>
                                                         )

@@ -19,6 +19,7 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
     const [colorVerde, setColorVerde] = useState(false);
     const [colorAzul, setColorAzul] = useState(false);
     const [colorAzulB, setColorAzulB] = useState(false);
+    const [colorAmarillo, setColorAmarillo] = useState(false);
     const [show_conjunto, setShowConjunto] = useState(false);
     const [bancada_id, setBancada_id] = useState('');
     const [bancada_otraformacion, setBancadaOtraFormacion] = useState('');
@@ -97,12 +98,13 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
         }  
     }, [operacion_marcada, grupo]);
 
-    const GuardarId_Operacion = (operationId, colorV, colorA, colorAB) => {
+    const GuardarId_Operacion = (operationId, colorV, colorA, colorAB, colorAM) => {
         setOperacionMarcada(operationId); // Almacena la operación seleccionada
         setFormacionesFiltradas(formaciones_completadas? formaciones_completadas.filter(formacion => formacion.operacion === operationId.id):[]); //pasa los elementos de esta operación
         let newColorVerde = colorV;
         let newColorAzul = colorA;
         let newColorAzulB = colorAB;
+        let newColorAmarillo = colorAM;
 
         if (colorV === true) {
             newColorVerde = true;
@@ -113,15 +115,19 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
         if (colorAB === true) {
             newColorAzulB = true;
         };
+        if (colorAM === true) {
+            newColorAzulB = true;
+        };
         
-        AbrirConjunto(newColorVerde, newColorAzul, newColorAzulB);
+        AbrirConjunto(newColorVerde, newColorAzul, newColorAzulB, newColorAmarillo);
     }
 
-    const AbrirConjunto = (colorV, colorA, colorAB) => {
+    const AbrirConjunto = (colorV, colorA, colorAB, colorAM) => {
         setColorVerde(colorV); // Actualiza el estado de colorVerde
         setColorAzul(colorA); // Actualiza el estado de colorAzul de conjunto
         setColorAzulB(colorAB); // Actualiza el estado de colorAzul de bancada
-          
+        setColorAmarillo(colorAM); // Actualiza el estado de colorAzul de bancada
+
         setShowConjunto(true);    
     }
 
@@ -245,7 +251,7 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                                                             } btn-sm`}
                                                             onClick={() =>
                                                                 grupo
-                                                                    ? GuardarId_Operacion(operacion, colorBoton1, colorBoton2, colorBoton3)
+                                                                    ? GuardarId_Operacion(operacion, colorBoton1, colorBoton2, colorBoton3, colorBoton4)
                                                                     : alert('Elige grupo')
                                                             }
                                                         >
@@ -301,6 +307,7 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                     colorAzul={colorAzul}
                     colorAzulB={colorAzulB}
                     colorVerde={colorVerde}
+                    colorAmarillo={colorAmarillo}
                     bancada_id={bancada_id}
                     bancada_otraformacion={bancada_otraformacion}
                     empresa_id={empresa}/>
