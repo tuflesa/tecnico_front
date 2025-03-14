@@ -532,10 +532,7 @@ const QS_Produccion = () => {
             nombre: 'PR',
             posiciones: [
                 {eje: 'INF', pos: 0},
-<<<<<<< HEAD
                 {eje: 'PRES', pos: 60}
-=======
->>>>>>> b30060e8e832f6d6e41b56ef42fb9b5e2c9675e6
             ]
         });
 
