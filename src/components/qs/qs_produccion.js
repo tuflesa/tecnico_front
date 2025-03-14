@@ -66,10 +66,10 @@ const QS_Produccion = () => {
                 const PLC = diametrosPLC[o.nombre];
                 const Df_PLC = PLC[r.eje];
                 if (Math.abs(Df_PC-Df_PLC) > 0.1) {
-                    // console.log('Operacion ', o.nombre);
-                    // console.log('Eje: ', r.eje);
-                    // console.log('Df_PC ', Df_PC);
-                    // console.log('Df_PLC ', Df_PLC);
+                    console.log('Operacion ', o.nombre);
+                    console.log('Eje: ', r.eje);
+                    console.log('Df_PC ', Df_PC);
+                    console.log('Df_PLC ', Df_PLC);
                     montaje_OK = false;
                 }
             });
@@ -532,6 +532,7 @@ const QS_Produccion = () => {
             nombre: 'PR',
             posiciones: [
                 {eje: 'INF', pos: 0},
+                {eje: 'PRES', pos: 60}
             ]
         });
 
@@ -563,7 +564,7 @@ const QS_Produccion = () => {
             const montaje = montajeActivo;
             // const articulo = articulo;
             const pr_inf = data.filter(p => p.nombre=='PR')[0].posiciones.filter(p =>p.eje=='INF')[0].pos;
-            const pr_presion = 60; //TODO: falta lectura real para cuando no estamos en simulación
+            const pr_presion = data.filter(p => p.nombre=='PR')[0].posiciones.filter(p =>p.eje=='PRES')[0].pos; //TODO: falta lectura real para cuando no estamos en simulación
             const bd1_sup = data.filter(p => p.nombre=='BD1')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos;
             const bd1_inf = data.filter(p => p.nombre=='BD1')[0].posiciones.filter(p =>p.eje=='INF')[0].pos;
             const bd2_sup = data.filter(p => p.nombre=='BD2')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos;
@@ -627,7 +628,7 @@ const QS_Produccion = () => {
             const cb4_lat_op = data.filter(p => p.nombre=='CB4')[0].posiciones.filter(p =>p.eje=='LAT_OP')[0].pos;
             const cb4_lat_mo = data.filter(p => p.nombre=='CB4')[0].posiciones.filter(p =>p.eje=='LAT_MO')[0].pos;
             axios.post(BACKEND_SERVER + `/api/qs/variante/`, {
-                nombre: 'Simulador' ,
+                nombre: nombre ,
                 montaje: montajeActivo,
                 articulo: articulo,
                 pr_inf: pr_inf, 
@@ -697,9 +698,18 @@ const QS_Produccion = () => {
 
     // Enviar Variante al PLC
     const EnviarPLC = () => {
-        const data = simulador?posiciones:posicionesSim;
+        const data = simulador?posicionesSim:posiciones;
+        console.log('datos enviados ...');
+        console.log(data);
         axios.post(BACKEND_SERVER + `/api/qs/enviar_variante_PLC/`, {
-            data
+            pr_inf: data.filter(p => p.nombre=='PR')[0].posiciones.filter(p =>p.eje=='INF')[0].pos,
+            pr_press: data.filter(p => p.nombre=='PR')[0].posiciones.filter(p =>p.eje=='PRES')[0].pos,
+            bd1_inf: data.filter(p => p.nombre=='BD1')[0].posiciones.filter(p =>p.eje=='INF')[0].pos,
+            bd1_sup: data.filter(p => p.nombre=='BD1')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos,
+            bd2_inf: data.filter(p => p.nombre=='BD2')[0].posiciones.filter(p =>p.eje=='INF')[0].pos,
+            bd2_sup: data.filter(p => p.nombre=='BD2')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos,
+            is1_ancho: data.filter(p => p.nombre=='IS1')[0].posiciones.filter(p =>p.eje=='ANCHO')[0].pos,
+            is1_alto: data.filter(p => p.nombre=='IS1')[0].posiciones.filter(p =>p.eje=='ALTO')[0].pos,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
