@@ -532,9 +532,9 @@ const FlowerChart2 = ({montaje, posiciones, fleje, setDesarrollosModelo}) => {
             const y7m = R1_l - pos_inf + h_cab;
 
             // Condiciones para dibujar
-            if(R2<0) {
+            if(R2<0 || R2m<0 || R2-e <0 || R2m-e <0) {
                 dibujar=false;
-                console.log('No dibuja porque R2<0 ', R2);
+                console.log('No dibuja porque R2<0 o R2m<0 o R2-e<0 0 R2m-e<0 ', R2, R2m, R2-e, R2m-e);
             }
 
             // Superior MO

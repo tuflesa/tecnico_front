@@ -19,6 +19,7 @@ const QS_Produccion = () => {
     const [articulos, setArticulos] = useState(null);
     const [articulo, setArticulo] = useState(0);
     const [diametrosPLC, setDiametrosPLC] = useState(null);
+    const [diametrosPC, setDiametrosPC] = useState(null);
     const [posiciones, setPosiciones] = useState(null);
     const [posicionesSim, setPosicionesSim] = useState(null);
     const [fleje, setFleje] = useState(null);
@@ -550,7 +551,7 @@ const QS_Produccion = () => {
         setPosicionesSim(pos_STD.sort(compare));
     }
 
-    // Guardar Variante - TODO
+    // Guardar Variante 
     const GuardarVariante = () => {
         if (!montajePLC_OK && !simulador){
             alert('Los rodillos del PLC no coinciden con el montaje actual');
@@ -696,11 +697,13 @@ const QS_Produccion = () => {
         }
     }
 
-    // Enviar Variante al PLC
+    // Enviar Variante al PLC - TODO
     const EnviarPLC = () => {
         const data = simulador?posicionesSim:posiciones;
         console.log('datos enviados ...');
         console.log(data);
+        console.log('Diametros PC ...');
+        console.log(diametrosPC);
         axios.post(BACKEND_SERVER + `/api/qs/enviar_variante_PLC/`, {
             pr_inf: data.filter(p => p.nombre=='PR')[0].posiciones.filter(p =>p.eje=='INF')[0].pos,
             pr_press: data.filter(p => p.nombre=='PR')[0].posiciones.filter(p =>p.eje=='PRES')[0].pos,
@@ -710,6 +713,50 @@ const QS_Produccion = () => {
             bd2_sup: data.filter(p => p.nombre=='BD2')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos,
             is1_ancho: data.filter(p => p.nombre=='IS1')[0].posiciones.filter(p =>p.eje=='ANCHO')[0].pos,
             is1_alto: data.filter(p => p.nombre=='IS1')[0].posiciones.filter(p =>p.eje=='ALTO')[0].pos,
+            lineal_entrada_ancho: data.filter(p => p.nombre=='LINEAL')[0].posiciones.filter(p =>p.eje=='ENTRADA_ANCHO')[0].pos,
+            lineal_entrada_alto: data.filter(p => p.nombre=='LINEAL')[0].posiciones.filter(p =>p.eje=='ENTRADA_ALTO')[0].pos,
+            lineal_entrada_superior: data.filter(p => p.nombre=='LINEAL')[0].posiciones.filter(p =>p.eje=='ENTRADA_SUP')[0].pos,
+            lineal_salida_ancho: data.filter(p => p.nombre=='LINEAL')[0].posiciones.filter(p =>p.eje=='SALIDA_ANCHO')[0].pos,
+            lineal_salida_alto: data.filter(p => p.nombre=='LINEAL')[0].posiciones.filter(p =>p.eje=='SALIDA_ALTO')[0].pos,
+            lineal_salida_superior: data.filter(p => p.nombre=='LINEAL')[0].posiciones.filter(p =>p.eje=='SALIDA_SUP')[0].pos,
+            lineal_rodillo_entrada: data.filter(p => p.nombre=='LINEAL')[0].posiciones.filter(p =>p.eje=='RODILLO_INF_ENTRADA')[0].pos,
+            lineal_rodillo_centro: data.filter(p => p.nombre=='LINEAL')[0].posiciones.filter(p =>p.eje=='RODILLO_INF_CENTRO')[0].pos,
+            lineal_rodillo_salida: data.filter(p => p.nombre=='LINEAL')[0].posiciones.filter(p =>p.eje=='RODILLO_INF_SALIDA')[0].pos,
+            fp1_inf: data.filter(p => p.nombre=='FP1')[0].posiciones.filter(p =>p.eje=='INF')[0].pos,
+            fp1_sup: data.filter(p => p.nombre=='FP1')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos,
+            is2_ancho: data.filter(p => p.nombre=='IS2')[0].posiciones.filter(p =>p.eje=='ANCHO')[0].pos,
+            is2_alto: data.filter(p => p.nombre=='IS2')[0].posiciones.filter(p =>p.eje=='ALTO')[0].pos,
+            fp2_inf: data.filter(p => p.nombre=='FP2')[0].posiciones.filter(p =>p.eje=='INF')[0].pos,
+            fp2_sup: data.filter(p => p.nombre=='FP2')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos,
+            is3_ancho: data.filter(p => p.nombre=='IS3')[0].posiciones.filter(p =>p.eje=='ANCHO')[0].pos,
+            is3_alto: data.filter(p => p.nombre=='IS3')[0].posiciones.filter(p =>p.eje=='ALTO')[0].pos,
+            fp3_inf: data.filter(p => p.nombre=='FP3')[0].posiciones.filter(p =>p.eje=='INF')[0].pos,
+            fp3_sup: data.filter(p => p.nombre=='FP3')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos,
+            w_cab: data.filter(p => p.nombre=='W')[0].posiciones.filter(p =>p.eje=='CAB')[0].pos,
+            w_lat_op: data.filter(p => p.nombre=='W')[0].posiciones.filter(p =>p.eje=='LAT_OP')[0].pos,
+            w_lat_mo: data.filter(p => p.nombre=='W')[0].posiciones.filter(p =>p.eje=='LAT_MO')[0].pos,
+            w_inf: data.filter(p => p.nombre=='W')[0].posiciones.filter(p =>p.eje=='INF')[0].pos,
+            w_sup_v_op: data.filter(p => p.nombre=='W')[0].posiciones.filter(p =>p.eje=='SUP_V_OP')[0].pos,
+            w_sup_v_mo: data.filter(p => p.nombre=='W')[0].posiciones.filter(p =>p.eje=='SUP_V_MO')[0].pos,
+            w_sup_h_op: data.filter(p => p.nombre=='W')[0].posiciones.filter(p =>p.eje=='SUP_H_OP')[0].pos,
+            w_sup_h_mo: data.filter(p => p.nombre=='W')[0].posiciones.filter(p =>p.eje=='SUP_H_MO')[0].pos,
+            cb1_sup: data.filter(p => p.nombre=='CB1')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos,
+            cb1_inf: data.filter(p => p.nombre=='CB1')[0].posiciones.filter(p =>p.eje=='INF')[0].pos,
+            cb1_lat_op: data.filter(p => p.nombre=='CB1')[0].posiciones.filter(p =>p.eje=='LAT_OP')[0].pos,
+            cb1_lat_mo: data.filter(p => p.nombre=='CB1')[0].posiciones.filter(p =>p.eje=='LAT_MO')[0].pos,
+            cb2_sup: data.filter(p => p.nombre=='CB2')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos,
+            cb2_inf: data.filter(p => p.nombre=='CB2')[0].posiciones.filter(p =>p.eje=='INF')[0].pos,
+            cb2_lat_op: data.filter(p => p.nombre=='CB2')[0].posiciones.filter(p =>p.eje=='LAT_OP')[0].pos,
+            cb2_lat_mo: data.filter(p => p.nombre=='CB2')[0].posiciones.filter(p =>p.eje=='LAT_MO')[0].pos,
+            cb3_sup: data.filter(p => p.nombre=='CB3')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos,
+            cb3_inf: data.filter(p => p.nombre=='CB3')[0].posiciones.filter(p =>p.eje=='INF')[0].pos,
+            cb3_lat_op: data.filter(p => p.nombre=='CB3')[0].posiciones.filter(p =>p.eje=='LAT_OP')[0].pos,
+            cb3_lat_mo: data.filter(p => p.nombre=='CB3')[0].posiciones.filter(p =>p.eje=='LAT_MO')[0].pos,
+            cb4_sup: data.filter(p => p.nombre=='CB4')[0].posiciones.filter(p =>p.eje=='SUP')[0].pos,
+            cb4_inf: data.filter(p => p.nombre=='CB4')[0].posiciones.filter(p =>p.eje=='INF')[0].pos,
+            cb4_lat_op: data.filter(p => p.nombre=='CB4')[0].posiciones.filter(p =>p.eje=='LAT_OP')[0].pos,
+            cb4_lat_mo: data.filter(p => p.nombre=='CB4')[0].posiciones.filter(p =>p.eje=='LAT_MO')[0].pos,
+            ...diametrosPC
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -730,7 +777,7 @@ const QS_Produccion = () => {
             p.pos = parseFloat(datos[p.eje]);
         });
 
-        setPosicionesSim(temp);
+        setPosicionesSim([...temp]);
     }
     
     const handleGrupoChange = (event) => {
@@ -803,10 +850,22 @@ const QS_Produccion = () => {
         });
     }, [token, grupo]);
 
-    // Si cambia el montaje leemos los diametros activos en el PLC para ver si coinciden con el montaje actual
+    // Si cambia el montaje leemos los diametros y posiciones activos en el PLC.
+    // También leemos los diametros activos en el montaje acutal PC 
     useEffect(()=>{
         leeDiametrosPLC();
         leePosicionesPLC();
+        let temp = {};
+        montaje&&montaje.forEach(o => {
+            o.rodillos.forEach(r =>{
+                const Df_PC = r.parametros.Df;
+                temp = {
+                    ...temp,
+                    [o.nombre + '_' + r.eje + '_D']: r.parametros.Df,
+                }
+            });
+        });
+        setDiametrosPC(temp);
     },[montaje]);
 
     // Cuando tenemos nuevos diametros del PLC y montaje comparamos si los diametros coinciden
@@ -1227,23 +1286,26 @@ const QS_Produccion = () => {
          setAlturas(H);
     },[montaje, posiciones, posicionesSim, simulador, fleje]);
 
-    // Paso de posiciones sim a datos
+    // Paso de posicionesSim a datos
     useEffect(()=>{
         // console.log('Pasamos posiciones sim a datos ...')
+        if (posiciones) {
             if (!posicionesSim) {
-                // console.log('No hay posiciones sim');
-                setPosicionesSim(posiciones);
+                console.log('No hay posiciones sim');
+                const temp = [...posiciones];
+                setPosicionesSim(temp);
             } 
             if (simulador) {
                 const dat = {};
                 posicionesSim.filter(p => p.op == OP)[0].posiciones.map(p => {
                     dat[p.eje] =  parseFloat(p.pos).toFixed(2);
                 });
-                console.log('dat ...');
-                console.log(dat);
                 setDatos(dat);
+                console.log('posiciones ...');
+                console.log(posiciones);
             }
-        }, [simulador, OP, posiciones]);
+        }
+    }, [simulador, OP, posiciones]);
 
      // Calculo de desarrollo teoricos:
      useEffect(()=>{
@@ -1391,8 +1453,8 @@ const QS_Produccion = () => {
                         </Col>
                         {simulador && 
                         <React.Fragment>
-                            <Col lg={2}>
-                                <Button variant="info" type="submit" className={'mx-2 float-right'} onClick={simular}>Simular</Button>
+                            <Col lg={2}> 
+                                <Button variant="info"  type= 'submit' className={'mx-2 float-right'} onClick={simular}>Simular</Button>
                                 <Button variant="info" className={'mx-2 float-right'} onClick={CalculaPosicionEstandar}>Calcula PE</Button>
                             </Col>
                             
