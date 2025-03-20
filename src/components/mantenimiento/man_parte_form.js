@@ -927,8 +927,8 @@ const ParteForm = ({parte, setParte, op}) => {
                             <Row>
                                 <Col>
                                 <h5 className="pb-3 pt-1 mt-2">Tareas del Parte: </h5>
-                                <h5>- Verde = Tarea Finalizada</h5>
-                                <h5>- Azul = Tarea Iniciada</h5>
+                                <h5 style={{ color: 'green' }}>Tarea Finalizada</h5>
+                                <h5 style={{ color: 'blue' }}>Tarea Iniciada</h5>
                                 </Col>
                                 {op?
                                     <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
