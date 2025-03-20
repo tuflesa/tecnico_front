@@ -97,9 +97,12 @@ const ManPorEquipos = () => {
     }
 
     const updateTarea = () => {
-        axios.get(BACKEND_SERVER + '/api/mantenimiento/listado_lineas_activas_destrezas/'+ filtro,{
+        axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_activas_destrezas/`+ filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
+                },
+                params: {
+                    destrezas: user['tec-user'].perfil.destrezas.join(',')
                 }
         })
         .then( res => {
@@ -139,6 +142,7 @@ const ManPorEquipos = () => {
                           }     
                     })
                     .then( ress => {
+                        updateTarea();
                         axios.get(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea_filtro/?trabajador=${user['tec-user'].perfil.usuario}`,{
                             headers: {
                                 'Authorization': `token ${token['tec-token']}`
@@ -146,15 +150,12 @@ const ManPorEquipos = () => {
                         })
                         .then( res => {
                             setlineasTrabajadores(res.data);
-                            updateTarea();
                         })
                         .catch( err => {
                             console.log(err);
                         });
-                        updateTarea();
                     })
                     .catch(err => { console.log(err);})
-                    updateTarea();
                 })
                 .catch(err => { console.log(err);})
             }
@@ -395,18 +396,12 @@ const ManPorEquipos = () => {
                     <h5><FileCheck/> ---- Para finalizar un trabajo o poner un comentario</h5>
                     <h5><Receipt/> ---- Listado del personal que está interviniendo en este trabajo</h5>
                     <h5><Eye/> ---- Ver el parte al que pertenece la tarea</h5>
-                </Col>
-                <Col>
-                    <br></br>
-                    <br></br>
-                    <br></br>
-                    <br></br>
                     <h5 style={{ color: 'blue' }}>Trabajo cogido por nosotros</h5>
                     <h5 style={{ color: '#E0B800'}}>Trabajo cogido por un compañero</h5>
                 </Col>
             </Row>
             :null} 
-            <Row>
+            <Row className="mb-2 mt-2">
                 <Col>
                     <ManEquipoFiltro actualizaFiltro={actualizaFiltro}/>
                 </Col>
