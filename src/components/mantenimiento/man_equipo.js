@@ -49,7 +49,7 @@ const ManPorEquipos = () => {
 
     useEffect(() => {
         if (filtro && user['tec-user'].perfil.destrezas.length > 0) {
-            axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_activas/` + filtro, {
+            axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_activas_destrezas/` + filtro, {
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 },
@@ -97,18 +97,13 @@ const ManPorEquipos = () => {
     }
 
     const updateTarea = () => {
-        axios.get(BACKEND_SERVER + '/api/mantenimiento/listado_lineas_activas/'+ filtro,{
+        axios.get(BACKEND_SERVER + '/api/mantenimiento/listado_lineas_activas_destrezas/'+ filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
                 }
         })
         .then( res => {
-            //filtramos los trabajos que sean de nuestras destrezas.
-            var MisTrabajos;
-            var destrezas = user['tec-user'].perfil.destrezas;
-            MisTrabajos = res.data.results.filter(s => destrezas.includes(s.tarea.especialidad));
-            //ordenamos los trabajos por prioridad
-            setLineas(MisTrabajos);
+            setLineas(res.data.results);
             setCount(res.data.count);
         })
         .catch( err => {
@@ -151,6 +146,7 @@ const ManPorEquipos = () => {
                         })
                         .then( res => {
                             setlineasTrabajadores(res.data);
+                            updateTarea();
                         })
                         .catch( err => {
                             console.log(err);
@@ -420,7 +416,7 @@ const ManPorEquipos = () => {
                     <tr>
                         <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
                         <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
-                        <th>Página {datos.pagina} de {pagTotal}</th>
+                        <th>Página {datos.pagina} de {pagTotal} - Número registros totales: {count}</th>
                     </tr>
                 </tbody>
             </table> 
