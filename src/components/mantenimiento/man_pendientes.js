@@ -57,7 +57,7 @@ const ManPendientes = () => {
         <Container className="mb-5 mt-5"> 
             <Row>     
                 <Col>
-                    <h5 className="mb-3 mt-3">Tareas Retrasadas</h5>                    
+                    <h5 className="mb-3 mt-3">Tareas Retrasadas (+ 1 semana)</h5>                    
                     <Table striped bordered hover>
                         <thead>
                             <tr>

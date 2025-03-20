@@ -927,8 +927,8 @@ const ParteForm = ({parte, setParte, op}) => {
                             <Row>
                                 <Col>
                                 <h5 className="pb-3 pt-1 mt-2">Tareas del Parte: </h5>
-                                <h5>- Rojo = Tarea Finalizada</h5>
-                                <h5>- Verde = Tarea Iniciada</h5>
+                                <h5>- Verde = Tarea Finalizada</h5>
+                                <h5>- Azul = Tarea Iniciada</h5>
                                 </Col>
                                 {op?
                                     <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
@@ -951,10 +951,9 @@ const ParteForm = ({parte, setParte, op}) => {
                                     </tr>
                                 </thead>                                                                             
                                 <tbody>
-                                    {console.log(datos.tipo)}
                                     {lineas && lineas.map( linea => {
                                         return (
-                                            <tr key={linea.tarea.id} className={ linea.fecha_fin?"table-danger":linea.fecha_inicio?"table-success":"" }/* class = {linea.fecha_inicio?"table-danger":" " } */>
+                                            <tr key={linea.tarea.id} className={ linea.fecha_fin?"table-success":linea.fecha_inicio?"table-primary":"" }/* class = {linea.fecha_inicio?"table-danger":" " } */>
                                                 <td>{linea.tarea.prioridad}</td>
                                                 <td>{linea.tarea.nombre}</td>
                                                 <td>{linea.tarea.especialidad_nombre}</td>

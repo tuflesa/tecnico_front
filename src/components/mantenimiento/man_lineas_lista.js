@@ -90,7 +90,6 @@ const ManLineasListado = () => {
                     }
             })
             .then( res => {
-                console.log(res.data.results);
                 res.data.results.forEach( r => {
                     //solo para poder utilizar los campos en el excel
                     r['priori']=r.tarea.prioridad;
@@ -292,8 +291,10 @@ const ManLineasListado = () => {
             <Row>                
                 <Col>
                     <h5 className="mb-3 mt-3">Listado de Trabajos</h5>
-                    <h5>--- Verde = Trabajo terminado   --- Rojo = Trabajo NO iniciado con fecha pasada</h5>  
-                    <h5>--- Azul = Trabajo iniciado   --- Naranja = Trabajo iniciado con fecha pasada</h5>             
+                    <h5  style={{ color: 'green' }}>Trabajo terminado</h5>  
+                    <h5  style={{ color: 'blue' }}>Trabajo iniciado</h5>  
+                    <h5  style={{ color: 'orange' }}>Trabajo iniciado con fecha pasada (un mes vista desde la fecha de planificación)</h5>
+                    <h5  style={{ color: 'red' }}>Trabajo NO iniciado con fecha pasada (un mes vista desde la fecha de planificación)</h5>
                     <Table striped bordered hover>
                         <thead>
                             <tr>

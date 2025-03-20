@@ -46,33 +46,32 @@ const ManPorEquipos = () => {
         pagina:1,
         observaciones:'',
     });
-    
-    useEffect(()=>{ 
-        console.log('useEffect actualizando');
-        filtro && axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_activas/`+ filtro,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-                }
-        })
-        .then( res => {
-            //filtramos los trabajos que sean de nuestras destrezas, para cuando son varias destrezas 
-            var MisTrabajos;
-            var destrezas = user['tec-user'].perfil.destrezas;
-            MisTrabajos = res.data.results.filter(s => destrezas.includes(s.tarea.especialidad));
-            setLineas(MisTrabajos);
-            setCount(res.data.count);
-            let pagT = res.data.count/20;
-            if (res.data.count % 20 !== 0){
-                pagT += 1;
-            }
-            setPagTotal(Math.trunc(pagT));
 
-        })
-        .catch( err => {
-            console.log(err);
-        });
-        setActualizarSeg(false);
-    }, [token, filtro, datos.observaciones, actualizar_seg, user]); 
+    useEffect(() => {
+        if (filtro && user['tec-user'].perfil.destrezas.length > 0) {
+            axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_activas/` + filtro, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                },
+                params: {
+                    destrezas: user['tec-user'].perfil.destrezas.join(',')
+                }
+            })
+            .then(res => {
+                setLineas(res.data.results);
+                setCount(res.data.count);
+                let pagT = res.data.count / 20;
+                if (res.data.count % 20 !== 0) {
+                    pagT += 1;
+                }
+                setPagTotal(Math.trunc(pagT));
+            })
+            .catch(err => {
+                console.log(err);
+            });
+            setActualizarSeg(false);
+        }
+    }, [token, filtro, datos.observaciones, actualizar_seg, user]);    
  
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea_filtro/?trabajador=${user['tec-user'].perfil.usuario}`,{
@@ -388,14 +387,16 @@ const ManPorEquipos = () => {
     return(
         <Container className extends="pt-1 mt-5">
             <br></br>
-            <button type="button" className='mt-5' onClick={event => {abroFiltro()}}>Ver Anotaciones</button>
+            <h5 className="mb-5 mt-5" style={{ color: 'red' }}>
+                Listado de Trabajos <span style={{ color: 'black' }}>{user['tec-user'].get_full_name}</span>, por prioridades:
+            </h5>
+            <button type="button" onClick={event => {abroFiltro()}}>Ver Anotaciones</button>
             {abrirFiltro?   
             <Row className extends>                
-                <Col>
-                    <h5 className="mb-3 mt-3" style={ { color: 'red' } }>Listado de Trabajos {user['tec-user'].get_full_name}, por prioridades:</h5>              
+                <Col>             
                     <h5>Acciones:</h5>
-                    <h5><Tools/> ---- Para iniciar un trabajo "Iniciados en color verde"</h5>
-                    <h5><FileCheck/> ---- Para finalizar un trabajo</h5>
+                    <h5><Tools/> ---- Para iniciar un trabajo</h5>
+                    <h5><FileCheck/> ---- Para finalizar un trabajo o poner un comentario</h5>
                     <h5><Receipt/> ---- Listado del personal que está interviniendo en este trabajo</h5>
                     <h5><Eye/> ---- Ver el parte al que pertenece la tarea</h5>
                 </Col>
@@ -404,8 +405,8 @@ const ManPorEquipos = () => {
                     <br></br>
                     <br></br>
                     <br></br>
-                    <h5 style={{ color: 'black' }}>Amarillo ---- Trabajo cogido por un compañero</h5>
-                    <h5 style={{ color: 'orange' }}>Naranja ---- Trabajo cogido por nosotros</h5>
+                    <h5 style={{ color: 'blue' }}>Trabajo cogido por nosotros</h5>
+                    <h5 style={{ color: '#E0B800'}}>Trabajo cogido por un compañero</h5>
                 </Col>
             </Row>
             :null} 
@@ -440,8 +441,9 @@ const ManPorEquipos = () => {
                         </thead>
                         <tbody>
                             {lineas && lineas.map( linea => {
+                                //'#cce5ff' ----> es el tono de color azul de la table-primary gastada en otras pantallas
                                 return (
-                                    <tr key={linea.id} style={{ backgroundColor: comparar(linea) ? 'orange' : linea.fecha_inicio!==null? 'yellow' : " " }} className="table-secundary">
+                                    <tr key={linea.id} style={{ backgroundColor: comparar(linea) ? '#cce5ff': linea.fecha_inicio!==null? 'yellow' : " " }} className="table-secundary">
                                         <td>{linea.tarea.prioridad}</td>
                                         <td>{invertirFecha(linea.fecha_plan)}</td>
                                         <td>{linea.tarea.nombre}</td>
