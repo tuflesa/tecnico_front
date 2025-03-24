@@ -27,10 +27,8 @@ const ManLineasListado = () => {
     var unmesatras = new Date(haceunmes);
     var fechapasadaString = unmesatras.getFullYear() + '-' + ('0' + (unmesatras.getMonth()+1)).slice(-2) + '-' + ('0' + unmesatras.getDate()).slice(-2);
 
-    //const [filtro, setFiltro] = useState(`?parte__empresa__id=${user['tec-user'].perfil.empresa.id}&estado=${'2'}&fecha_plan__lte=${fechaenunmesString}`);
     const [filtro, setFiltro] = useState(`?parte__empresa__id=${user['tec-user'].perfil.empresa.id}&fecha_plan__lte=${fechaenunmesString}&estado__in=1,2&exclude_estado=3,4`);
-      
-    const [activos, setActivos] = useState(true);
+ 
     const [linea_id, setLinea_id] = useState(null);
     const [show, setShow] = useState(false);
     const [actualizar, setActualizar] = useState('');

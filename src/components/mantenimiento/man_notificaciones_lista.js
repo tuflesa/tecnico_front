@@ -4,7 +4,6 @@ import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table } from 'react-bootstrap';
 import { PencilFill } from 'react-bootstrap-icons';
-import { Link } from 'react-router-dom';
 import ManNotificacionesFiltro from './man_notificaciones_filtro';
 
 const ManNotificacionesLista = () => {

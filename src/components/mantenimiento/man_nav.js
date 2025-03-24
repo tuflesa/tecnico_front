@@ -11,6 +11,7 @@ const ManNavBar = () => {
     const [notificacion, setnotificacion] = useState(null);
 
     const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Técnico'&&user['tec-user'].perfil.puesto.nombre!=='Director Técnico'?true:false;
+    const soyProgramador = user['tec-user'].perfil.destrezas.filter(s => s === 7);
 
     useEffect(()=>{        
         axios.get(BACKEND_SERVER + `/api/mantenimiento/notificaciones_sinpaginar/?revisado=${false}&finalizado=${false}&descartado=${false}&empresa__id=${user['tec-user'].perfil.empresa.id}`,{
@@ -46,6 +47,10 @@ const ManNavBar = () => {
                                         <NavDropdown.Divider />
                                         <NavDropdown.Item href="/mantenimiento/notificaciones">Lista de notificaciones</NavDropdown.Item>
                                         <NavDropdown.Item href="/mantenimiento/notificacion/nueva">Nueva Notificacion</NavDropdown.Item>
+                                        <NavDropdown.Divider />
+                                        {soyProgramador?
+                                            <NavDropdown.Item href="/mantenimiento/programadores">Programadores</NavDropdown.Item>
+                                        :''}
 
                                     </NavDropdown>
                                 </Nav> 
