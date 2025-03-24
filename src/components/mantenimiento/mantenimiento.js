@@ -14,6 +14,7 @@ import ManNotificacionDetalle from './man_notificacion_editar';
 import ManPendientes from './man_pendientes';
 import ManParteDetalleOp from './man_parte_editar_op';
 import TareasTrabajador from './man_tareas_trabajador';
+import ManProgramadores from './man_programadores';
 
 const Mantenimiento = () => {
     const [user] = useCookies(['tec-user']);
@@ -23,6 +24,7 @@ const Mantenimiento = () => {
         <React.Fragment>
             <ManNavBar />
             <Switch>
+                <Route path='/mantenimiento/programadores' component={ManProgramadores} />
                 <Route path='/mantenimiento/parte_op/:id' component={ManParteDetalleOp} />
                 <Route path='/mantenimiento/tareas_trabajador' component={TareasTrabajador} />
                 <Route path='/mantenimiento/linea_tarea/:id' component={ManLineaDetalle} /> 

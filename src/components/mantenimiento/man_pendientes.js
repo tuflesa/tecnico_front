@@ -4,7 +4,6 @@ import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
 import { PencilFill, Eye } from 'react-bootstrap-icons';
-import { Link } from 'react-router-dom';
 
 const ManPendientes = () => {
     const [token] = useCookies(['tec-token']);

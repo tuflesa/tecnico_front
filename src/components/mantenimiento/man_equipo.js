@@ -25,7 +25,6 @@ const ManPorEquipos = () => {
     const [show_Observacion, setShowObservacion] = useState(false);
     const [abrirFiltro, setabrirFiltro] = useState(false);
     const [actualizar_seg, setActualizarSeg] = useState(false);
-    const [render, setRender] = useState(false);
 
     const actualizaFiltro = str => {
         setFiltro(str);
@@ -101,7 +100,6 @@ const ManPorEquipos = () => {
         .then( res => {
             setLineas([...res.data.results]); 
             setCount(res.data.count);
-            setRender(prev => !prev);
         })
         .catch( err => {
             console.log(err);
@@ -219,10 +217,10 @@ const ManPorEquipos = () => {
     const FinalizarTarea = (linea) => { 
         var Finalizar_Tarea = window.confirm('Vas a finalizar la tarea ¿Desea continuar?');
         if (Finalizar_Tarea){
-            for(var x=0;x<linea.length;x++){
-                axios.patch(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea/${linea[x].id}/`,{
-                    fecha_fin: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
-
+            for(var x=0;x<linea.lineas.length;x++){
+                axios.patch(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea/${linea.lineas[x].id}/`,{
+                    //fecha_fin: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
+                    fecha_fin: datos.fecha_fin,
                 },
                 {
                     headers: {
@@ -230,7 +228,6 @@ const ManPorEquipos = () => {
                     }
                 })
                 .then( r => {
-                    updateTarea();
                 })
                 .catch( err => {
                     console.log(err);

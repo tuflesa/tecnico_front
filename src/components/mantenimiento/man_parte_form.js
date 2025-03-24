@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, Table, Modal } from 'react-bootstrap';
 import { Trash, PlusCircle, Receipt, PencilFill } from 'react-bootstrap-icons';
-import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';

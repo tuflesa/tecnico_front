@@ -12,7 +12,6 @@ const ParteMediciones = ({parte, setParte}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
 
-    const [tipoparte, setTipoParte] = useState(null);
     const [lineasparte, setLineasParte] = useState(null);
     const [empresas, setEmpresas] = useState(null);
     const [secciones, setSecciones] = useState(null);
@@ -26,7 +25,6 @@ const ParteMediciones = ({parte, setParte}) => {
     const [lineaLineasTareas, setListLineasTareas] = useState(null);
     const [cambio_fecha, setCambioFecha] = useState(false);
     const [estados, setEstados] = useState(null);
-    const [lineas, setLineas] = useState(null);
 
     const [datos, setDatos] = useState({
         id: parte.id ? parte.id : null,

@@ -2,12 +2,9 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Row, Modal, Col, Table } from 'react-bootstrap';
 import {invertirFecha} from '../utilidades/funciones_fecha';
-import axios from 'axios';
-import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
 
 const ListaDePersonal = ({lineas_trab, show, handlerClose}) => {
-    const [token] = useCookies(['tec-token']);
     const [trabajadores_lineas, setTrabajadoresLineas] = useState([]);
 
     useEffect(() => {

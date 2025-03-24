@@ -7,7 +7,6 @@ import FiltroTareasTrabajador from './man_tareas_trabajador_filtro';
 import {invertirFecha} from '../utilidades/funciones_fecha';
 import ListaDePersonal from './man_equipo_trabajadores';
 import { Receipt, Eye} from 'react-bootstrap-icons';
-import { Link } from 'react-router-dom';
 import ReactExport from 'react-data-export';
 
 const TareasTrabajador = () => {

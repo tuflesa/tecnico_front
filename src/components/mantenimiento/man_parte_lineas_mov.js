@@ -22,7 +22,6 @@ const LineasPartesMov = ({tarea, handleCloseList, show, parte}) => {
             }
         })
         .then( res => {
-            console.log('trabajadores: ',res.data);
             setListados(
                 res.data.sort((a, b) => {
                     const dateA = a.fecha_fin ? new Date(a.fecha_fin) : null;
