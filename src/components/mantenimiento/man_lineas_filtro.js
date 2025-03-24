@@ -220,7 +220,10 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
     }, [token]);
 
     useEffect(()=>{
-        const filtro1 = `?tarea__nombre__icontains=${datos.nombre_tarea}&parte__nombre__icontains=${datos.nombre_parte}&tarea__especialidad=${datos.especialidad}&tarea__prioridad__lte=${datos.prioridad_menor}&tarea__prioridad__gte=${datos.prioridad_mayor}&parte__tipo=${datos.tipo}&parte__empresa=${datos.empresa}&finalizada=${datos.finalizada}&fecha_inicio__lte=${datos.fecha_inicio_lte}&fecha_inicio__gte=${datos.fecha_inicio_gte}&fecha_plan__lte=${datos.fecha_plan_lte}&fecha_plan__gte=${datos.fecha_plan_gte}&estado=${datos.estado==='5' ?'':datos.estado}`;
+        let filtro1 = `?tarea__nombre__icontains=${datos.nombre_tarea}&parte__nombre__icontains=${datos.nombre_parte}&tarea__especialidad=${datos.especialidad}&tarea__prioridad__lte=${datos.prioridad_menor}&tarea__prioridad__gte=${datos.prioridad_mayor}&parte__tipo=${datos.tipo}&parte__empresa=${datos.empresa}&finalizada=${datos.finalizada}&fecha_inicio__lte=${datos.fecha_inicio_lte}&fecha_inicio__gte=${datos.fecha_inicio_gte}&fecha_plan__lte=${datos.fecha_plan_lte}&fecha_plan__gte=${datos.fecha_plan_gte}&estado=${datos.estado === '5' ? '' : datos.estado}`;
+        if (datos.estado === '') {
+            filtro1 += `&estado__in=1,2&exclude_estado=3,4`;
+        }
         let filtro2 = `&parte__empresa__id=${datos.empresa}`;
         if (datos.empresa !== ''){
             filtro2 = filtro2 + `&parte__zona__id=${datos.zona}`;
@@ -232,8 +235,7 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
             }
         }
         const filtro = filtro1 + filtro2 ;
-        const activos = datos.estado<3;
-        actualizaFiltro(filtro, activos);
+        actualizaFiltro(filtro);
     },[datos, token]);
     /* eslint-disable react-hooks/exhaustive-deps */
 

@@ -6,31 +6,14 @@ import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { useCookies } from 'react-cookie';
 
-const ListaDePersonal = ({linea_id, show, handlerClose}) => {
+const ListaDePersonal = ({lineas_trab, show, handlerClose}) => {
     const [token] = useCookies(['tec-token']);
-    const [trabajadores_lineas, setTrabajadoresLineas] = useState(null);
+    const [trabajadores_lineas, setTrabajadoresLineas] = useState([]);
 
     useEffect(() => {
-        linea_id && axios.get(BACKEND_SERVER + `/api/mantenimiento/trabajadores_en_linea/?linea=${linea_id}`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-                }
-        })
-        .then( res => {
-            setTrabajadoresLineas(res.data.sort(function(a, b){
-                if(a.fecha_inicio < b.fecha_inicio){
-                    return 1;
-                }
-                if(a.fecha_inicio > b.fecha_inicio){
-                    return -1;
-                }
-                return 0;
-            }))            
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    }, [token, linea_id]); 
+        setTrabajadoresLineas(lineas_trab?.lineas ?? []);  // Si no existe, usa un array vacío
+    }, [lineas_trab]);
+            
     
     const handlerListCerrar = () => {      
         handlerClose();
@@ -53,18 +36,17 @@ const ListaDePersonal = ({linea_id, show, handlerClose}) => {
                                     <th>Observaciones Mantenimiento</th>
                                 </tr>
                             </thead>                               
-                            <tbody>                                    
-                                {trabajadores_lineas && trabajadores_lineas.map(t =>{
-                                    return(
-                                        <tr key={t.id}>
-                                            <td>{t.trabajador.get_full_name}</td>
-                                            <td>{invertirFecha(String(t.linea.fecha_inicio))}</td>
-                                            <td>{t.linea.fecha_fin?invertirFecha(String(t.linea.fecha_fin)):''}</td>
-                                            <td>{t.linea.observaciones_trab}</td>
-                                        </tr>
-                                    )
-                                })}                                
+                            <tbody>                               
+                                {trabajadores_lineas?.map(t => (
+                                    <tr key={t.id}>
+                                        <td>{t.trabajador?.get_full_name || 'Sin nombre'}</td>
+                                        <td>{invertirFecha(String(t.fecha_inicio))}</td>
+                                        <td>{t.fecha_fin ? invertirFecha(String(t.fecha_fin)) : ''}</td>
+                                        <td>{lineas_trab?.observaciones_trab || 'Sin observaciones'}</td>
+                                    </tr>
+                                ))}                                
                             </tbody>
+
                         </Table>
                     </Col>
                 </Row>

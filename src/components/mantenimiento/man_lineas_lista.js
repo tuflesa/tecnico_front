@@ -3,8 +3,7 @@ import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table} from 'react-bootstrap';
-import { Trash, PencilFill, Receipt, Eye, PlusSquare, DashSquare, HandThumbsUpFill, Pencil } from 'react-bootstrap-icons';
-import { Link } from 'react-router-dom';
+import { Trash, PencilFill, Receipt, Eye, PlusSquare, DashSquare, HandThumbsUpFill } from 'react-bootstrap-icons';
 import ManLineasFiltro from './man_lineas_filtro';
 import {invertirFecha} from '../utilidades/funciones_fecha';
 import ListaDePersonal from './man_equipo_trabajadores';
@@ -28,7 +27,9 @@ const ManLineasListado = () => {
     var unmesatras = new Date(haceunmes);
     var fechapasadaString = unmesatras.getFullYear() + '-' + ('0' + (unmesatras.getMonth()+1)).slice(-2) + '-' + ('0' + unmesatras.getDate()).slice(-2);
 
-    const [filtro, setFiltro] = useState(`?parte__empresa__id=${user['tec-user'].perfil.empresa.id}&estado=${''}&fecha_plan__lte=${fechaenunmesString}`);
+    //const [filtro, setFiltro] = useState(`?parte__empresa__id=${user['tec-user'].perfil.empresa.id}&estado=${'2'}&fecha_plan__lte=${fechaenunmesString}`);
+    const [filtro, setFiltro] = useState(`?parte__empresa__id=${user['tec-user'].perfil.empresa.id}&fecha_plan__lte=${fechaenunmesString}&estado__in=1,2&exclude_estado=3,4`);
+      
     const [activos, setActivos] = useState(true);
     const [linea_id, setLinea_id] = useState(null);
     const [show, setShow] = useState(false);
@@ -38,8 +39,7 @@ const ManLineasListado = () => {
     const [abrirFiltro, setabrirFiltro] = useState(false);
     const [actualizar_seg, setActualizarSeg] = useState(false);
 
-    const actualizaFiltro = (str, act) => {   
-        setActivos(act)
+    const actualizaFiltro = (str) => {   
         setFiltro(str);
     }
 
@@ -48,77 +48,39 @@ const ManLineasListado = () => {
     });
 
     useEffect(()=>{
-        if(activos){
-            axios.get(BACKEND_SERVER + '/api/mantenimiento/listado_lineas_activas/'+ filtro,{
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                    }
-            })
-            .then( res => {
-                res.data.results.forEach( r => {
-                    //solo para poder utilizar los campos en el excel
-                    r['priori']=r.tarea.prioridad;
-                    r['nom_parte']=r.parte.nombre;
-                    r['obparte']=r.parte.observaciones;
-                    r['nom_tarea']=r.tarea.nombre;
-                    r['obtarea']=r.tarea.observaciones;
-                    r['obtareaT']=r.tarea.observaciones_trab;
-                    r['parte_tip']=r.parte.tipo_nombre;
-                    r['especial']=r.tarea.especialidad_nombre;
-                    r['periodo']=r.tarea.tipo_periodo?r.tarea.tipo_periodo.nombre:'';
-                    r['equipoT']=r.parte.seccion?r.parte.seccion.siglas_zona +' - '+r.parte.seccion.nombre + (r.parte.equipo?' - ' + r.parte.equipo.nombre:''):null;
-                    r['fecha_plani']=r.fecha_inicio?invertirFecha(String(r.fecha_plan)):'';
-                    r['fecha_ini']=r.fecha_inicio?invertirFecha(String(r.fecha_inicio)):'';
-                })
-                setLineas(res.data.results);
-                setCount(res.data.count);
-                let pagT = res.data.count/20;
-                if (res.data.count % 20 !== 0){
-                    pagT += 1;
+        axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_activas/`+ filtro,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
                 }
-                setPagTotal(Math.trunc(pagT));
+        })
+        .then( res => {
+            res.data.results.forEach( r => {
+                //solo para poder utilizar los campos en el excel
+                r['priori']=r.tarea.prioridad;
+                r['nom_parte']=r.parte.nombre;
+                r['obparte']=r.parte.observaciones;
+                r['nom_tarea']=r.tarea.nombre;
+                r['obtarea']=r.tarea.observaciones;
+                r['obtareaT']=r.tarea.observaciones_trab;
+                r['parte_tip']=r.parte.tipo_nombre;
+                r['especial']=r.tarea.especialidad_nombre;
+                r['periodo']=r.tarea.tipo_periodo?r.tarea.tipo_periodo.nombre:'';
+                r['equipoT']=r.parte.seccion?r.parte.seccion.siglas_zona +' - '+r.parte.seccion.nombre + (r.parte.equipo?' - ' + r.parte.equipo.nombre:''):null;
+                r['fecha_plani']=r.fecha_inicio?invertirFecha(String(r.fecha_plan)):'';
+                r['fecha_ini']=r.fecha_inicio?invertirFecha(String(r.fecha_inicio)):'';
             })
-            .catch( err => {
-                console.log(err);
-            });
-        }
-        else{
-            //si no hay opción 5 (Activos) filtramos de forma normal
-            axios.get(BACKEND_SERVER + '/api/mantenimiento/listado_lineas_partes/'+ filtro,{
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                    }
-            })
-            .then( res => {
-                res.data.results.forEach( r => {
-                    //solo para poder utilizar los campos en el excel
-                    r['priori']=r.tarea.prioridad;
-                    r['nom_parte']=r.parte.nombre;
-                    r['obparte']=r.parte.observaciones;
-                    r['nom_tarea']=r.tarea.nombre;
-                    r['obtarea']=r.tarea.observaciones;
-                    r['obtareaT']=r.tarea.observaciones_trab;
-                    r['parte_tip']=r.parte.tipo_nombre;
-                    r['especial']=r.tarea.especialidad_nombre;
-                    r['periodo']=r.tarea.tipo_periodo?r.tarea.tipo_periodo.nombre:'';
-                    r['equipoT']=r.parte.seccion?r.parte.seccion.siglas_zona +' - '+r.parte.seccion.nombre + (r.parte.equipo?' - ' + r.parte.equipo.nombre:''):null;
-                    r['fecha_plani']=r.fecha_inicio?invertirFecha(String(r.fecha_plan)):'';
-                    r['fecha_ini']=r.fecha_inicio?invertirFecha(String(r.fecha_inicio)):'';
-                })
-                setLineas(res.data.results);
-                setCount(res.data.count);
-                let pagT = res.data.count/20;
-                if (res.data.count % 20 !== 0){
-                    pagT += 1;
-                }
-                setPagTotal(Math.trunc(pagT));
-            })
-            .catch( err => {
-                console.log(err);
-            });
-        } 
-        setActualizarSeg(false);
-    }, [token, filtro, activos, actualizar, actualizar_seg]); 
+            setLineas(res.data.results);
+            setCount(res.data.count);
+            let pagT = res.data.count/20;
+            if (res.data.count % 20 !== 0){
+                pagT += 1;
+            }
+            setPagTotal(Math.trunc(pagT));
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token, filtro, actualizar, actualizar_seg]); 
 
     const BorrarLinea =(linea) =>{ 
         axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/?tarea=${linea.tarea.id}`,{
@@ -234,7 +196,7 @@ const ManLineasListado = () => {
         }
         var filtro2=`&page=${datos.pagina}`;
         const filtro3 = filtro + filtro2;
-        actualizaFiltro(filtro3, activos);
+        actualizaFiltro(filtro3);
     }
 
     const abroFiltro = () => {
@@ -332,13 +294,11 @@ const ManLineasListado = () => {
                                         <td>{linea.fecha_inicio?invertirFecha(String(linea.fecha_inicio)):''}</td>
                                         <td>{linea.fecha_fin?invertirFecha(String(linea.fecha_fin)):''}</td>
                                         <td>                                            
-                                            {/* <Link to={`/mantenimiento/linea_tarea/${linea.id}`}><PencilFill className="mr-3 pencil"/></Link>  */}
                                             <a href={`/mantenimiento/linea_tarea/${linea.id}`} target="_blank" rel="noopener noreferrer">
                                                 <PencilFill className="mr-3 pencil"/>
                                             </a> 
                                             <Trash className="mr-3 pencil"  onClick={event =>{BorrarLinea(linea)}} />                                       
-                                            <Receipt className="mr-3 pencil" onClick={event =>{listarTrabajadores(linea.id)}}/>
-                                            {/* <Link to={`/mantenimiento/parte/${linea.parte.id}`}><Eye className="mr-3 pencil"/></Link> */}
+                                            <Receipt className="mr-3 pencil" onClick={event =>{listarTrabajadores(linea)}}/>
                                             <a href={`/mantenimiento/parte/${linea.parte.id}`} target="_blank" rel="noopener noreferrer">
                                                 <Eye className="mr-3 pencil"/>
                                             </a>
@@ -361,7 +321,7 @@ const ManLineasListado = () => {
             </table>
             
             <ListaDePersonal    show={show}
-                                linea_id ={linea_id}
+                                lineas_trab ={linea_id}
                                 handlerClose={handlerClose}
         />
         </Container>
