@@ -16,7 +16,7 @@ const ManPorEquipos = () => {
     const [lineas, setLineas] = useState(null);  
     const [hoy] = useState(new Date());
     const [show, setShow] = useState(false);
-    const [linea_id, setLinea_id] = useState(null);
+    const [linea_trab, setLinea_Trab] = useState(null);
     const [linea_completa, setLinea_completa] = useState(null);
     const [lineasTrabajadores, setlineasTrabajadores] = useState(null);
     const [count, setCount] = useState(null);
@@ -25,15 +25,8 @@ const ManPorEquipos = () => {
     const [show_Observacion, setShowObservacion] = useState(false);
     const [abrirFiltro, setabrirFiltro] = useState(false);
     const [actualizar_seg, setActualizarSeg] = useState(false);
+    const [render, setRender] = useState(false);
 
-    //var dentrodeunmes=null;
-    //var fechaenunmesString=null;
-    //var fecha_hoy=Date.parse(hoy);
-    //var mesEnMilisegundos = 1000 * 60 * 60 * 24 * 7;  //cambiado a una semana, en vez del mes
-    //var enunmes=fecha_hoy+mesEnMilisegundos;
-    //dentrodeunmes = new Date(enunmes);
-    //fechaenunmesString = dentrodeunmes.getFullYear() + '-' + ('0' + (dentrodeunmes.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunmes.getDate()).slice(-2);
-    
     const actualizaFiltro = str => {
         setFiltro(str);
     }
@@ -106,8 +99,9 @@ const ManPorEquipos = () => {
                 }
         })
         .then( res => {
-            setLineas(res.data.results);
+            setLineas([...res.data.results]); 
             setCount(res.data.count);
+            setRender(prev => !prev);
         })
         .catch( err => {
             console.log(err);
@@ -186,30 +180,20 @@ const ManPorEquipos = () => {
     }
 
     const pedir_observaciones = (linea) => {
-        axios.get(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea/?linea=${linea.id}`, {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }     
-        })
-        .then( res => {
-            if(linea.fecha_inicio===null){
-                alert('Esta tarea todavía no se ha iniciado');
+        if(linea.fecha_inicio===null){
+            alert('Esta tarea todavía no se ha iniciado');
+        }
+        else{
+            const trabajador_activo = linea.lineas?.filter(s => s.trabajador.id === user['tec-user'].perfil.usuario);
+            if(trabajador_activo.length===0){
+                alert('No tienes esta tarea iniciada, no la puedes comentar ni finalizar');
             }
-            else{
-                const trabajador_activo = res.data.filter(s => s.trabajador === user['tec-user'].perfil.usuario);
-                if(trabajador_activo.length===0){
-                    alert('No tienes esta tarea iniciada, no la puedes comentar ni finalizar');
-                }
-                else if(trabajador_activo.length!==0){
-                    datos.observaciones=linea.observaciones_trab;
-                    setShowObservacion(true);
-                    setLinea_completa(linea);
-                }
+            else if(trabajador_activo.length!==0){
+                datos.observaciones=linea.observaciones_trab;
+                setShowObservacion(true);
+                setLinea_completa(linea);
             }
-        })
-        .catch( err => {
-            console.log(err);
-        });
+        }
     }
 
     const handleCloseObservacion = () => {
@@ -224,6 +208,7 @@ const ManPorEquipos = () => {
         })
         .then( r => {
             updateTarea();
+            setLinea_completa(r.data);
         })
         .catch( err => {
             console.log(err);
@@ -251,7 +236,7 @@ const ManPorEquipos = () => {
                     console.log(err);
                 });
             }
-            axios.patch(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_activas/${linea.id}/`,{
+            axios.patch(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/${linea.id}/`,{
                 fecha_fin: datos.fecha_fin,
                 estado: 3,
             },
@@ -337,8 +322,8 @@ const ManPorEquipos = () => {
         }
     }
 
-    const listarTrabajadores = (linea_id)=>{
-        setLinea_id(linea_id);
+    const listarTrabajadores = (linea)=>{
+        setLinea_Trab(linea);
         setShow(true);
     }
     
@@ -445,7 +430,7 @@ const ManPorEquipos = () => {
                                         <td>
                                         <Tools className="mr-3 pencil"  onClick={event =>{InicioTarea(linea)}}/>
                                         <FileCheck className="mr-3 pencil"  onClick={event =>{pedir_observaciones(linea)}} />
-                                        <Receipt className="mr-3 pencil" onClick={event =>{listarTrabajadores(linea.id)}}/>
+                                        <Receipt className="mr-3 pencil" onClick={event =>{listarTrabajadores(linea)}}/>
                                         <Link to={`/mantenimiento/parte_op/${linea.parte.id}`}><Eye className="mr-3 pencil"/></Link>
                                         </td>
                                     </tr>
@@ -469,8 +454,6 @@ const ManPorEquipos = () => {
                     <Modal.Title>Conclusiones de la tarea</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    {/* <Row>                            
-                        <Col> */}
                     <Container>
                         <Row>
                             <Col>
@@ -486,15 +469,13 @@ const ManPorEquipos = () => {
                             </Col>
                         </Row>
                     </Container>
-                      {/*   </Col>
-                    </Row> */}
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleCloseObservacion}>Aceptar</Button>
                 </Modal.Footer>
             </Modal>
         <ListaDePersonal    show={show}
-                            linea_id ={linea_id}
+                            lineas_trab ={linea_trab}
                             handlerClose={handlerClose}
         />
         </Container>
