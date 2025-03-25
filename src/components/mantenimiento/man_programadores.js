@@ -7,9 +7,9 @@ import { Container } from 'react-bootstrap';
 const ManProgramadores = () => {
     const [token] = useCookies(['tec-token']);
     const [linea_parte, setLineaparte] = useState(null);
-    
+
     useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_contrabajador/`,{
+        axios.get(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_contrabajador/?fecha_inicio__gte=2024-12-31&fecha_inicio__lte=2025-03-25`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -29,7 +29,7 @@ const ManProgramadores = () => {
             if(linea_parte[x].fecha_fin!==null){
                 if(linea_parte[x].lineas.length!==0){
                     for(var y=0; y<linea_parte[x].lineas.length;y++){
-                        if(linea_parte[x].lineas[y].fecha_fin===null){
+                        if(linea_parte[x].lineas[y].fecha_inicio!==linea_parte[x].fecha_inicio){
                             console.log('esta tiene fecha en la linea del parte pero null la fecha del trabajador----> : ',linea_parte[x].lineas[y]);
                         }
                     }
@@ -56,9 +56,9 @@ const ManProgramadores = () => {
             if(linea_parte[x].fecha_fin!==null){
                 if(linea_parte[x].lineas.length!==0){
                     for(var y=0; y<linea_parte[x].lineas.length;y++){
-                        if(linea_parte[x].lineas[y].fecha_fin===null){
+                        if(linea_parte[x].lineas[y].fecha_inicio!==linea_parte[x].fecha_inicio){
                             axios.patch(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea/${linea_parte[x].lineas[y].id}/`,{
-                                fecha_fin: linea_parte[x].fecha_fin,
+                                fecha_inicio: linea_parte[x].fecha_inicio,
                             },
                             {
                                 headers: {

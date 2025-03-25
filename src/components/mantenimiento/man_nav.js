@@ -48,9 +48,9 @@ const ManNavBar = () => {
                                         <NavDropdown.Item href="/mantenimiento/notificaciones">Lista de notificaciones</NavDropdown.Item>
                                         <NavDropdown.Item href="/mantenimiento/notificacion/nueva">Nueva Notificacion</NavDropdown.Item>
                                         <NavDropdown.Divider />
-                                        {/* {soyProgramador?
+                                        {soyProgramador[0]===7?
                                             <NavDropdown.Item href="/mantenimiento/programadores">Programadores</NavDropdown.Item>
-                                        :''} */}
+                                        :''}
 
                                     </NavDropdown>
                                 </Nav> 
