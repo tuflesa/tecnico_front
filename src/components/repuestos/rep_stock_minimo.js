@@ -290,12 +290,12 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_escritico, repuesto_i
                             </Col>
                             <Col>
                                 <Form.Group controlId="stock_aconsejado">
-                                    <Form.Label>Stock Aconsejable</Form.Label>
+                                    <Form.Label>Stock Recomendado</Form.Label>
                                     <Form.Control type="text" 
                                                 name='stock_aconsejado' 
                                                 value={datos.stock_aconsejado}
                                                 onChange={handleInputChange} 
-                                                placeholder="Stock Aconsejado"
+                                                placeholder="Stock Recomendado"
                                                 disabled={repuesto_escritico===false?false:true}
                                     />
                                 </Form.Group>

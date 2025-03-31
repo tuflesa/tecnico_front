@@ -229,8 +229,18 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
                                         <th>Almacén</th>
                                         <th>Ubicación</th>
                                         <th>Stock Actual</th>
-                                        <th>Stock Mínimo</th>
-                                        <th>Stock Aconsejable</th>
+                                        <th style={{ 
+                                            fontStyle: repuesto.es_critico === false ? "italic" : "normal",
+                                            color: repuesto?.es_critico === false ? "#808080" : "black" 
+                                        }}>
+                                            Stock Mínimo
+                                        </th>
+                                        <th style={{ 
+                                            fontStyle: repuesto.es_critico === true ? "italic" : "normal",
+                                            color: repuesto?.es_critico === true ? "#808080" : "black"
+                                        }}>
+                                                Stock Recomendado
+                                        </th>
                                         {!nosoyTecnico?<th>Acciones</th>:null}
                                     </tr>
                                 </thead>
