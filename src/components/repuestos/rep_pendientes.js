@@ -94,9 +94,10 @@ const RepPendientes = () => {
             .then( r => {
                 const stock_empresa = r.data.reduce((a, b) => a + b.stock_act, 0);
                 const stock_minimo_empresa = r.data.reduce((a, b) => a + b.cantidad, 0);
-                if(stock_empresa<stock_minimo_empresa){
+                const stock_aconsejado_empresa = r.data.reduce((a, b) => a + b.cantidad_aconsejable, 0);
+                if(stock_empresa<stock_minimo_empresa || stock_empresa<stock_aconsejado_empresa){
                     if(res_data_results.length>0){
-                        stock_por_empresa.push({id: id, articulo: repuesto_nombre, tipo:repuesto_tipo, critico: repuesto_critico, stock: stock_empresa, stock_minimo: stock_minimo_empresa});            
+                        stock_por_empresa.push({id: id, articulo: repuesto_nombre, tipo:repuesto_tipo, critico: repuesto_critico, stock: stock_empresa, stock_minimo: stock_minimo_empresa, stock_aconsejado: stock_aconsejado_empresa});            
                     }
                     if(stock_por_empresa){
                         let hash = {};
@@ -351,6 +352,7 @@ const RepPendientes = () => {
                                         <th>Crítico</th>
                                         <th>Stock Actual</th>
                                         <th>Stock Mínimo</th>
+                                        <th>Stock Aconsejado</th>
                                         <th>Cant. por recibir</th>
                                         <th style={{ width: 90 }}>Acciones</th>
                                     </tr>
@@ -364,6 +366,7 @@ const RepPendientes = () => {
                                                 <td>{pendiente.critico ? 'Si' : 'No'}</td>
                                                 <td>{pendiente.stock}</td>
                                                 <td>{pendiente.stock_minimo}</td> 
+                                                <td>{pendiente.stock_aconsejado}</td> 
                                                 <td>{lineasPendientes && lineasPendientes.map(linea => {
                                                     let suma = 0;
                                                     if (linea.repuesto.id === pendiente.id) {                                        
@@ -407,6 +410,7 @@ const RepPendientes = () => {
                                         <th>Crítico</th>
                                         <th>Stock Actual</th>
                                         <th>Stock Mínimo</th>
+                                        <th>Stock Aconsejado</th>
                                         <th>Cant. por recibir</th>
                                         <th style={{ width: 90 }}>Acciones</th>
                                     </tr>
@@ -420,6 +424,7 @@ const RepPendientes = () => {
                                                 <td>{pendiente.critico ? 'Si' : 'No'}</td>
                                                 <td>{pendiente.stock}</td>
                                                 <td>{pendiente.stock_minimo}</td> 
+                                                <td>{pendiente.stock_aconsejado}</td>
                                                 <td>{lineasPendientes && lineasPendientes.map(linea => {
                                                     let suma = 0;
                                                     if (linea.repuesto.id === pendiente.id) {                                        
