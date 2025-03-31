@@ -628,8 +628,18 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                         <tr>
                                             <th>Empresa</th>
                                             <th>Stock Actual</th>
-                                            <th>Stock Mínimo</th>
-                                            <th>Stock Aconsejable</th>
+                                            <th style={{ 
+                                                fontStyle: repuesto.es_critico === false ? "italic" : "normal",
+                                                color: repuesto?.es_critico === false ? "#808080" : "black" 
+                                            }}>
+                                                Stock Mínimo
+                                            </th>
+                                            <th style={{ 
+                                                fontStyle: repuesto.es_critico === true ? "italic" : "normal",
+                                                color: repuesto?.es_critico === true ? "#808080" : "black"
+                                            }}>
+                                                    Stock Recomendado
+                                            </th>
                                             <th>Acciones</th>
                                         </tr>
                                     </thead>

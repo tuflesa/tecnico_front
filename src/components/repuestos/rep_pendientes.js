@@ -352,7 +352,7 @@ const RepPendientes = () => {
                                         <th>Crítico</th>
                                         <th>Stock Actual</th>
                                         <th>Stock Mínimo</th>
-                                        <th>Stock Aconsejado</th>
+                                        <th>Stock Recomendado</th>
                                         <th>Cant. por recibir</th>
                                         <th style={{ width: 90 }}>Acciones</th>
                                     </tr>
@@ -410,7 +410,7 @@ const RepPendientes = () => {
                                         <th>Crítico</th>
                                         <th>Stock Actual</th>
                                         <th>Stock Mínimo</th>
-                                        <th>Stock Aconsejado</th>
+                                        <th>Stock Recomendado</th>
                                         <th>Cant. por recibir</th>
                                         <th style={{ width: 90 }}>Acciones</th>
                                     </tr>
