@@ -22,10 +22,12 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
 
     const [datos, setDatos] = useState({
         stocks_minimos: repuesto ? repuesto.stocks_minimos : null,
-        cantidad: repuesto.stocks_minimos ? repuesto.stocks_minimos.cantidad : null,
+        //cantidad: repuesto.stocks_minimos ? repuesto.stocks_minimos.cantidad : null,
+        //cantidad_aconsejable: repuesto.stocks_minimos ? repuesto.stocks_minimos.cantidad_aconsejable : null,
         almacen: null,
         stock_actual: null,
         stock_minimo: null, 
+        stock_aconsejable: null, 
         localizaciones: null,
         habilitar: true,   
     });  
@@ -64,7 +66,8 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
         let r_id = r.id;
         let r_almacen = r.almacen.id;
         axios.patch(BACKEND_SERVER + `/api/repuestos/stocks_minimos/${r_id}/`, {
-            cantidad: datos.stock_minimo ? datos.stock_minimo : repuesto.stocks_minimos.cantidad,  
+            cantidad: datos.stock_minimo ? datos.stock_minimo : repuesto.stocks_minimos.cantidad, 
+            cantidad_aconsejable: datos.stock_aconsejable ? datos.stock_aconsejable : repuesto.stocks_minimos.cantidad_aconsejable,  
             stock_act: datos.stock_actual ? 0 : repuesto.stocks_minimos.stock_act,
             localizacion: datos.localizaciones ? datos.localizaciones : repuesto.stocks_minimos.localizacion,
         }, {
@@ -133,15 +136,46 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
         datos.localizaciones= '';
     } 
 
-    const habilitar_linea = (r)=>{
-        if(user['tec-user'].perfil.puesto.nombre!=='Operador'){
-            var input_min =  document.getElementsByClassName(r.almacen.nombre);
-            for(var i = 0; i < input_min.length; i++) {
-                input_min[i].disabled = !input_min[i].disabled;
+    /* const habilitar_linea = (r) => {
+        if (user['tec-user'].perfil.puesto.nombre !== 'Operador') {
+            var input_min = document.getElementsByClassName(r.almacen.nombre);
+            for (var i = 0; i < input_min.length; i++) {
+                let input = input_min[i];
+                if (repuesto.es_critico === true) { // Habilitar todo menos stock_aconsejable
+                    input.disabled = input.name === 'stock_aconsejable';
+                } else {// Habilitar todo menos stock_minimo
+                    input.disabled = input.name === 'stock_minimo';
+                }
             }
+        } else {
+            alert('No tienes permisos');
         }
-        else (alert('no tienes permisos'))
-    }
+    }; */ 
+
+    const habilitar_linea = (r) => {
+        if (user['tec-user'].perfil.puesto.nombre !== 'Operador') {
+            var input_min = document.getElementsByClassName(r.almacen.nombre);
+            const currentlyDisabled = input_min[0].disabled; // Comprobar si actualmente están habilitados o deshabilitados
+            for (var i = 0; i < input_min.length; i++) {
+                let input = input_min[i];
+                // Si estaban deshabilitados, aplicar condiciones específicas
+                if (currentlyDisabled) {
+                    if (repuesto.es_critico === true) {
+                        input.disabled = input.name === 'stock_aconsejable';
+                    } else {
+                        input.disabled = input.name === 'stock_minimo';
+                    }
+                } 
+                // Si estaban habilitados, deshabilitar todos
+                else {
+                    input.disabled = true;
+                }
+            }
+        } else {
+            alert('No tienes permisos');
+        }
+    };
+    
 
     const BorrarAlmacen = (r)=>{
         if(r.stock_act>0){
@@ -196,6 +230,7 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
                                         <th>Ubicación</th>
                                         <th>Stock Actual</th>
                                         <th>Stock Mínimo</th>
+                                        <th>Stock Aconsejable</th>
                                         {!nosoyTecnico?<th>Acciones</th>:null}
                                     </tr>
                                 </thead>
@@ -236,6 +271,16 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
                                                                     disabled
                                                             />
                                                             </td> 
+                                                            <td>
+                                                            <input  className={r.almacen.nombre}
+                                                                    type = "text"                                                                      
+                                                                    name='stock_aconsejable'                                                             
+                                                                    value= {datos.stock_aconsejable}
+                                                                    onChange={handleInputChange}
+                                                                    placeholder={r.cantidad_aconsejable}
+                                                                    disabled
+                                                            />
+                                                            </td>
                                                             {!nosoyTecnico?                                                     
                                                                 <td>                                                            
                                                                     <PencilFill className="mr-3 pencil" onClick= {event => {habilitar_linea(r)}}/>                                               
