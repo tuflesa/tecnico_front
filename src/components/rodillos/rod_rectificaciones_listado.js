@@ -114,6 +114,7 @@ const RodListaRectificaciones = () => {
                                 <th>Empresa</th>
                                 <th>Creado por</th>
                                 <th>Máquina</th>
+                                <th>Ext-Int</th>
                                 <th>Fecha</th>
                                 <th>Fecha estimada</th>
                                 <th>Acciones</th>
@@ -128,6 +129,13 @@ const RodListaRectificaciones = () => {
                                         <td>{lista.maquina.empresa.nombre}</td>
                                         <td>{lista.creado_por.get_full_name}</td>
                                         <td>{lista.maquina.siglas}</td>
+                                        <td>
+                                            {lista.proveedor ? (
+                                                <span style={{ color: 'green', fontWeight: 'bold' }}>✔️</span>
+                                            ) : (
+                                                <span style={{ color: 'red', fontWeight: 'bold' }}>❌</span>
+                                            )}
+                                        </td>
                                         <td>{invertirFecha(String(lista.fecha))}</td>
                                         <td>{invertirFecha(String(lista.fecha_estimada))}</td>
                                         <td>
