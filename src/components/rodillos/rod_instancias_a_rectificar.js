@@ -535,7 +535,6 @@ const RodInstanciasRectificar = () => {
                     <Table striped bordered hover>
                         <thead>
                             <tr>
-                                <th>Id</th>
                                 <th>Nombre</th>
                                 <th>Diámetro Fondo</th> 
                                 {datos.finalizado !== false && <th style={{ backgroundColor: '#DBFAC9' }}>Nuevo Diámetro Fondo</th>}                                
@@ -558,7 +557,6 @@ const RodInstanciasRectificar = () => {
                             {lineas_rectificacion.map(linea => {
                                 return (
                                     <tr key={linea.id}>
-                                        <td>{linea.instancia.id}</td>
                                         <td>{linea.instancia.nombre}</td>
                                         <td>{linea.diametro}</td>
                                         {datos.finalizado !== false && <td style={{ backgroundColor: '#DBFAC9' }}>{linea.nuevo_diametro}</td>}

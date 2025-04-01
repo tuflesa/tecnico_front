@@ -109,7 +109,6 @@ const RodListaRectificaciones = () => {
                     <Table striped bordered hover>
                         <thead>
                             <tr>
-                                <th>Código</th>
                                 <th>Nombre</th>
                                 <th>Empresa</th>
                                 <th>Creado por</th>
@@ -124,7 +123,6 @@ const RodListaRectificaciones = () => {
                             { lista_rectificaciones && lista_rectificaciones.map( lista => {
                                 return (
                                     <tr key={lista.id}>
-                                        <td>{lista.id}</td>
                                         <td>{lista.numero}</td>
                                         <td>{lista.maquina.empresa.nombre}</td>
                                         <td>{lista.creado_por.get_full_name}</td>
