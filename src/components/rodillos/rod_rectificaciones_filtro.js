@@ -8,6 +8,7 @@ const RodRectificacionesFiltro = ({actualizaFiltro}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
     const soyTecnico = user['tec-user'].perfil.puesto.nombre==='Técnico'||user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:false;
+    const [proveedores, setProveedores] = useState([]);
 
     const [datos, setDatos] = useState({
         id:'',
@@ -16,6 +17,7 @@ const RodRectificacionesFiltro = ({actualizaFiltro}) => {
         maquina: user['tec-user'].perfil.zona?user['tec-user'].perfil.zona.id:'',
         creado_por: '',
         finalizado: false,
+        proveedor: '',
     });
 
     const [empresas, setEmpresas] = useState(null);
@@ -63,9 +65,23 @@ const RodRectificacionesFiltro = ({actualizaFiltro}) => {
     }, [token, datos.empresa]);
    
     useEffect(()=>{
-        const filtro = `?empresa=${datos.empresa}&numero__icontains=${datos.numero}&maquina__id=${user['tec-user'].perfil.zona?user['tec-user'].perfil.zona.id:datos.maquina}&full_name=${datos.creado_por?datos.creado_por:''}&finalizado=${datos.finalizado}`
+        const filtro = `?empresa=${datos.empresa}&numero__icontains=${datos.numero}&maquina__id=${user['tec-user'].perfil.zona?user['tec-user'].perfil.zona.id:datos.maquina}&full_name=${datos.creado_por?datos.creado_por:''}&finalizado=${datos.finalizado}&proveedor=${datos.proveedor}`
         actualizaFiltro(filtro);
-    },[datos]);
+    },[datos]);   
+
+    useEffect(()=>{
+        axios.get(BACKEND_SERVER + `/api/repuestos/proveedor/?de_rectificado=${true}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+                }
+        })
+        .then( res => {
+            setProveedores(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
 
 
     const handleInputChange = (event) => {
@@ -138,6 +154,26 @@ const RodRectificacionesFiltro = ({actualizaFiltro}) => {
                                         onChange={handleInputChange}                                        
                                         placeholder="Creado_por contiene"
                                         autoFocus/>
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="proveedor">
+                            <Form.Label>Proveedor *</Form.Label>
+                            <Form.Control as="select" 
+                                            value={datos.proveedor}
+                                            name='proveedor'
+                                            onChange={handleInputChange}
+                                            disabled = {datos.activado}>
+                                <option key={0} value={''}>Todas</option>
+                                <option key={'sin_proveedor'} value={'sin_proveedor'}>Sin proveedor</option>
+                                {proveedores && proveedores.map( proveedor => {
+                                    return (
+                                    <option key={proveedor.id} value={proveedor.id}>
+                                        {proveedor.nombre}
+                                    </option>
+                                    )
+                                })}
+                            </Form.Control>
                         </Form.Group>
                     </Col>
                     <Col>

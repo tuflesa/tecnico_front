@@ -26,6 +26,7 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
     const soySuperTecnico = user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:false;
     const soyMantenimiento = user['tec-user'].perfil.puesto.nombre==='Mantenimiento'?true:false;
     const visible = user['tec-user'].perfil.puesto.nombre==='Técnico'||user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:rectificacion?false:true;
+    const [proveedores, setProveedores] = useState([]);
 
     const [datos, setDatos] = useState({
         id: rectificacion? rectificacion.id : '',
@@ -39,6 +40,7 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
         activado: rectificacion?true:false,
         disabled: rectificacion?rectificacion.finalizado?true:false:false,
         finalizado: rectificacion?rectificacion.finalizado:false,
+        proveedor: rectificacion?.proveedor? rectificacion.proveedor: '',
         fecha_estimada: rectificacion?rectificacion.fecha_estimada 
             : (hoy_10.getFullYear() + '-' + 
             String(hoy_10.getMonth() + 1).padStart(2, '0') + '-' + 
@@ -101,6 +103,20 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
         });
     }, [cambioCodigo]);
 
+    useEffect(()=>{
+            axios.get(BACKEND_SERVER + `/api/repuestos/proveedor/?de_rectificado=${true}`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                    }
+            })
+            .then( res => {
+                setProveedores(res.data);
+            })
+            .catch( err => {
+                console.log(err);
+            });
+        }, [token]);
+
     useEffect(() => {
         if (datos.empresa === '') {
             setZonas([]);
@@ -137,6 +153,7 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
             maquina: datos.zona,
             finalizado: false,
             fecha_estimada: datos.fecha_estimada,
+            proveedor: '',
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -244,6 +261,27 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
                             />
                         </Form.Group>
                     </Col>
+                    {datos.proveedor?
+                        <Col>
+                            <Form.Group controlId="proveedor">
+                                <Form.Label>Proveedor *</Form.Label>
+                                <Form.Control as="select" 
+                                                value={datos.proveedor}
+                                                name='proveedor'
+                                                onChange={handleInputChange}
+                                                disabled = {datos.activado}>
+                                    <option key={0} value={''}>Todas</option>
+                                    {proveedores && proveedores.map( proveedor => {
+                                        return (
+                                        <option key={proveedor.id} value={proveedor.id}>
+                                            {proveedor.nombre}
+                                        </option>
+                                        )
+                                    })}
+                                </Form.Control>
+                            </Form.Group>
+                        </Col>
+                    :''}
                 </Row>
                 <Row>
                     <Col>

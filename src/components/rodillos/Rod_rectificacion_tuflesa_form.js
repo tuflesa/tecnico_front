@@ -143,7 +143,7 @@ const RodRectificacion_TuflesaForm = ({rectificacion, setRectificacion, lineas_r
 
     const GuardarRectificacion = (event) => {
         event.preventDefault();
-        if((datos.empresa === "2" && datos.proveedor.trim() !== '') || datos.empresa!=="2"){
+        if(datos.proveedor.trim() !== ''){
             axios.post(BACKEND_SERVER + `/api/rodillos/rectificacion_nueva/`, {
                 empresa: datos.empresa,
                 fecha: datos.fecha,
@@ -151,6 +151,7 @@ const RodRectificacion_TuflesaForm = ({rectificacion, setRectificacion, lineas_r
                 maquina: datos.zona,
                 finalizado: false,
                 fecha_estimada: datos.fecha_estimada,
+                proveedor: datos.proveedor,
             }, {
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
