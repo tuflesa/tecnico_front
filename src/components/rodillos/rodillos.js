@@ -50,6 +50,7 @@ const Rodillos = () => {
                 <Route path='/rodillos/nueva_rectificacion_tuflesa' component={RodRectificacion_TuflesaForm} />
                 <Route path='/rodillos/editar_rectificacion/:id' component={RodEditarRectificado} />
                 <Route path='/rodillos/lista_rectificacion' component={RodListaRectificaciones} />
+                <Route path='/rodillos/' component={RodTooling} />
             </Switch>
         </React.Fragment>
     )
