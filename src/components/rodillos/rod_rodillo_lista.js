@@ -122,7 +122,6 @@ const RodLista = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {console.log('lista de rodillos para ver las instancias: ',lista_rodillos)}
                             { lista_rodillos && lista_rodillos.map( lista => {
                                 return (
                                     <tr key={lista.id}>
