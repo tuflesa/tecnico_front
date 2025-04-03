@@ -104,6 +104,7 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
                     }     
                 })
                 .then(r => {
+                    console.log('QUE VALE RODILLO.NUM_INSTANCIAS????',rodillo);
                     axios.patch(BACKEND_SERVER + `/api/rodillos/rodillos/${rodillo.id}/`, {
                         num_instancias: rodillo.num_instancias+1,
                     }, {
@@ -111,12 +112,14 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
                             'Authorization': `token ${token['tec-token']}`
                         }     
                     })
-                    .then(r => {
+                    .then(rs => {
+                        alert('instancia sumada: ',rs.data);
+                        console.log('rodillo con instancia sumada: ',rs.data);
                     })
                     .catch(err => { 
                         console.log(err);
                     });
-                    window.location.href = `/rodillos/editar/${rodillo.id}`;
+                    //window.location.href = `/rodillos/editar/${rodillo.id}`;
                 })
                 .catch(err => { 
                     alert('NO SE GUARDA LA INSTANCIA, REVISAR');
