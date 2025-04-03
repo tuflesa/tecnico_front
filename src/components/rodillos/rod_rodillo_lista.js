@@ -101,7 +101,7 @@ const RodLista = () => {
                             <tr>
                                 <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina-1)}}>Pág Anterior</button></th> 
                                 <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina+1)}}>Pág Siguiente</button></th> 
-                                <th>Número páginas: {datos.pagina} / {datos.total_pag} - Registros: {count}</th>
+                                <th>Número páginas: {datos.pagina} / {datos.total_pag===0?1:datos.total_pag} - Registros: {count}</th>
                                 <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
                             </tr>
                         </tbody>
@@ -122,6 +122,7 @@ const RodLista = () => {
                             </tr>
                         </thead>
                         <tbody>
+                            {console.log('lista de rodillos para ver las instancias: ',lista_rodillos)}
                             { lista_rodillos && lista_rodillos.map( lista => {
                                 return (
                                     <tr key={lista.id}>
@@ -133,7 +134,7 @@ const RodLista = () => {
                                         <td>{lista.operacion.nombre}</td>
                                         <td>{lista.tipo?lista.tipo.nombre:''}</td>
                                         <td>{lista.grupo?lista.grupo.nombre:''}</td>
-                                        <td>{lista.grupo?lista.num_instancias:''}</td>
+                                        <td>{lista?lista.num_instancias:''}</td>
                                         <td>
                                             <Link to={`/rodillos/editar/${lista.id}`}><PencilFill className="mr-3 pencil"/></Link>
                                         </td>
@@ -150,7 +151,7 @@ const RodLista = () => {
                         <tr>
                             <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
                             <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
-                            <th>Número páginas: {datos.pagina} / {datos.total_pag}</th>
+                            <th>Número páginas: {datos.pagina} / {datos.total_pag===0?1:datos.total_pag}</th>
                             <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
                         </tr>
                     </tbody>

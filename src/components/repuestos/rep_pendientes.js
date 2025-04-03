@@ -341,7 +341,7 @@ const RepPendientes = () => {
                                     <tr>
                                         <th><button type="button" className="btn btn-default" onClick={() => cambioPagina2(datos.pagina2=datos.pagina2-1)}>Pág Anterior</button></th> 
                                         <th><button type="button" className="btn btn-default" onClick={() => cambioPagina2(datos.pagina2=datos.pagina2+1)}>Pág Siguiente</button></th> 
-                                        <th>Número páginas: {datos.pagina2} / {datos.total_pag2} - Registros: {count2}</th>
+                                        <th>Número páginas: {datos.pagina2} / {datos.total_pag2===0?1:datos.total_pag2} - Registros: {count2}</th>
                                     </tr>
                                 </tbody>
                             </table>               
@@ -399,7 +399,7 @@ const RepPendientes = () => {
                                     <tr>
                                         <th><button type="button" className="btn btn-default" onClick={() => cambioPagina3(datos.pagina3=datos.pagina3-1)}>Pág Anterior</button></th> 
                                         <th><button type="button" className="btn btn-default" onClick={() => cambioPagina3(datos.pagina3=datos.pagina3+1)}>Pág Siguiente</button></th> 
-                                        <th>Número páginas: {datos.pagina3} / {datos.total_pag3} - Registros: {count3}</th>
+                                        <th>Número páginas: {datos.pagina3} / {datos.total_pag3===0?1:datos.total_pag3} - Registros: {count3}</th>
                                     </tr>
                                 </tbody>
                             </table>               
@@ -457,7 +457,7 @@ const RepPendientes = () => {
                                     <tr>
                                         <th><button type="button" className="btn btn-default" onClick={() => cambioPagina(datos.pagina=datos.pagina-1)}>Pág Anterior</button></th> 
                                         <th><button type="button" className="btn btn-default" onClick={() => cambioPagina(datos.pagina=datos.pagina+1)}>Pág Siguiente</button></th> 
-                                        <th>Número páginas: {datos.pagina} / {datos.total_pag} - Registros: {count}</th>
+                                        <th>Número páginas: {datos.pagina} / {datos.total_pag===0?1:datos.total_pag} - Registros: {count}</th>
                                     </tr>
                                 </tbody>
                             </table>                    
