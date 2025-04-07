@@ -80,6 +80,7 @@ const StandChart2 = ({montaje, posiciones, gap, fleje}) => {
             const pos_sup = posiciones.filter(p => p.eje=='SUP')[0].pos;
 
             // Variables
+            // let RR=0;
             let R, R1, R2, R3, R4;
             let Dext, Df, Dc; 
             let Ancho;
@@ -212,7 +213,7 @@ const StandChart2 = ({montaje, posiciones, gap, fleje}) => {
                     break;
             }
 
-            // Rodillo superior
+            // Rodillo superior 
             switch (roll_s.tipo_plano){
                 case 'BD_SUP':
                     R = roll_s.parametros.R;
@@ -245,13 +246,13 @@ const StandChart2 = ({montaje, posiciones, gap, fleje}) => {
                     break;
                 case 'BD_W_SUP':
                     // Rodillo superior
-                    const R = roll_s.parametros.R;
+                    R = roll_s.parametros.R;
                     const H = roll_s.parametros.H;
                     Df = roll_s.parametros.Df;
                     Ancho = roll_s.parametros.Ancho;
 
                     // Calculos
-                    const alfa = 2 * Math.asin(Ancho / (2*R));
+                    alfa = 2 * Math.asin(Ancho / (2*R));
                     pos = pos_sup; //AxisPos0_s - Df / 2;
                     //const pos_i = roll_i.parametros.Df/2 + AxisPos0_i;
                     c = 60; 
@@ -263,8 +264,8 @@ const StandChart2 = ({montaje, posiciones, gap, fleje}) => {
                     // console.log('OP: ', stand.operacion);
                     // console.log('Piston: ', c);
 
-                    const xc = H/2;
-                    const yc = pos + R;
+                    xc = H/2;
+                    yc = pos + R;
                     x0 = (Ancho + H) / 2;
                     y0 = R + pos + 100;
                     x1 = x0;
@@ -671,6 +672,9 @@ const StandChart2 = ({montaje, posiciones, gap, fleje}) => {
                 r.lineTo(xScale(x4), yScale(y7));
                     break;
                 case 'W_Lat_4':
+                    // Debug
+                    console.log('W_Lat_4 ...');
+                    console.log('rodillo', roll_Lat_Operador);
                     // Parametros
                     R1 = roll_Lat_Operador.parametros.R1;
                     R2 = roll_Lat_Operador.parametros.R2;
@@ -805,45 +809,47 @@ const StandChart2 = ({montaje, posiciones, gap, fleje}) => {
             
 
             // Inferior
-            // Parametros
-            R1 = roll_Inf.parametros.R1;
-            R2 = roll_Inf.parametros.R2;
-            alfa1 = roll_Inf.parametros.alfa1 * Math.PI / 180;
-            alfa2 = roll_Inf.parametros.alfa2 * Math.PI / 180;
-            Df = roll_Inf.parametros.Df;
-            Ancho = roll_Inf.parametros.Ancho;
-            C = roll_Inf.parametros.C;
+            if (roll_Inf){
+                // Parametros
+                R1 = roll_Inf.parametros.R1;
+                R2 = roll_Inf.parametros.R2;
+                alfa1 = roll_Inf.parametros.alfa1 * Math.PI / 180;
+                alfa2 = roll_Inf.parametros.alfa2 * Math.PI / 180;
+                Df = roll_Inf.parametros.Df;
+                Ancho = roll_Inf.parametros.Ancho;
+                C = roll_Inf.parametros.C;
 
-            // Calculos
-            pos = pos_inf + h_cab; //-AxisPos0_Inf + Df/2;// + h_cab;
-            xc = 0;
-            yc = pos + R1;
-            x1 = xc + R1 * Math.sin((alfa1/2)-alfa2);
-            y1 = yc - R1 * Math.cos((alfa1/2)-alfa2);
-             
-            m1 = Math.tan(alfa1/2-alfa2);
-            m2 = -1/Math.tan(alfa1/2);
-            B1 = y1 - m1 * x1;
-            B2 = yc - C/Math.sin(alfa1/2);
+                // Calculos
+                pos = pos_inf + h_cab; //-AxisPos0_Inf + Df/2;// + h_cab;
+                xc = 0;
+                yc = pos + R1;
+                x1 = xc + R1 * Math.sin((alfa1/2)-alfa2);
+                y1 = yc - R1 * Math.cos((alfa1/2)-alfa2);
+                
+                m1 = Math.tan(alfa1/2-alfa2);
+                m2 = -1/Math.tan(alfa1/2);
+                B1 = y1 - m1 * x1;
+                B2 = yc - C/Math.sin(alfa1/2);
 
-            x2 = (B2-B1)/(m1-m2);
-            y2 = m1 * x2 + B1;
-            x3 = Ancho/2;
-            y3 = m2* x3 + B2; 
-            x4 = x3;
-            y4 = y3 - 20;
+                x2 = (B2-B1)/(m1-m2);
+                y2 = m1 * x2 + B1;
+                x3 = Ancho/2;
+                y3 = m2* x3 + B2; 
+                x4 = x3;
+                y4 = y3 - 20;
 
-            // Dibujo
-            r.moveTo(xScale(-x1), yScale(y1));
-            r.arc(xScale(xc), yScale(yc), rScale(R1), (Math.PI + alfa1)/2 - alfa2, (Math.PI - alfa1)/2 + alfa2, true);
-            r.arcTo(xScale(x2), yScale(y2), xScale(x3), yScale(y3), rScale(R2));
-            r.lineTo(xScale(x3), yScale(y3));
-            r.lineTo(xScale(x4), yScale(y4));
-            r.moveTo(xScale(-x1), yScale(y1));
-            r.arcTo(xScale(-x2), yScale(y2), xScale(-x3), yScale(y3), rScale(R2));
-            r.lineTo(xScale(-x3), yScale(y3));
-            r.lineTo(xScale(-x4), yScale(y4));
-
+                // Dibujo
+                r.moveTo(xScale(-x1), yScale(y1));
+                r.arc(xScale(xc), yScale(yc), rScale(R1), (Math.PI + alfa1)/2 - alfa2, (Math.PI - alfa1)/2 + alfa2, true);
+                r.arcTo(xScale(x2), yScale(y2), xScale(x3), yScale(y3), rScale(R2));
+                r.lineTo(xScale(x3), yScale(y3));
+                r.lineTo(xScale(x4), yScale(y4));
+                r.moveTo(xScale(-x1), yScale(y1));
+                r.arcTo(xScale(-x2), yScale(y2), xScale(-x3), yScale(y3), rScale(R2));
+                r.lineTo(xScale(-x3), yScale(y3));
+                r.lineTo(xScale(-x4), yScale(y4));
+            }
+            
             // Superior Motor
             // Parámetros
             Ancho = roll_Sup_Motor.parametros.Ancho;
@@ -925,7 +931,7 @@ const StandChart2 = ({montaje, posiciones, gap, fleje}) => {
 
         function draw_CB(stand, i){
             const r = path();
-            console.log('stand: ', stand);
+            // console.log('stand: ', stand);
             // Rodillos y posiciones
             const roll_Superior= stand.rodillos.filter(r => r.eje=='SUP')[0];
             const roll_Inferior = stand.rodillos.filter(r => r.eje=='INF')[0];
@@ -1263,7 +1269,7 @@ const StandChart2 = ({montaje, posiciones, gap, fleje}) => {
                 }
             }
             // Lateral operador
-            console.log('Lateral Operador: ', roll_Lat_Operador);
+            // console.log('Lateral Operador: ', roll_Lat_Operador);
             if (roll_Lat_Operador) {
                 switch (roll_Lat_Operador.tipo_plano) {
                     case 'CB-CR-123-L':

@@ -18,6 +18,8 @@ const QS_Produccion = () => {
     const [montajePLC_OK, setMontajePLC_OK] = useState(false);
     const [articulos, setArticulos] = useState(null);
     const [articulo, setArticulo] = useState(0);
+    const [variantes, setVariantes] = useState(null);
+    const [variante, setVariante] = useState(0);
     const [diametrosPLC, setDiametrosPLC] = useState(null);
     const [diametrosPC, setDiametrosPC] = useState(null);
     const [posiciones, setPosiciones] = useState(null);
@@ -59,6 +61,125 @@ const QS_Produccion = () => {
         })
     }
 
+    const leePosicionesSimPLC = (event) => {
+        // event.preventDefault();
+        axios.get(BACKEND_SERVER + '/api/qs/posiciones_actuales_PLC/',{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+                }
+        })
+        .then( res => {
+                console.log('Posiciones PLC ...');
+                console.log(res.data);
+                setPosicionesSim(res.data);
+        })
+    }
+
+    const leeVariante = (id) => {
+        const var_data = variantes.filter(v => v.id == id)[0];
+        const posiciones_variante = [];
+        if (id == 0) {
+            simulador ? leePosicionesSimPLC() : leePosicionesPLC();
+        }
+        else {
+            // Pinch Roll
+            posiciones_variante.push({
+                op: 0,
+                nombre: 'PR',
+                posiciones: [{eje: 'INF', pos: var_data.pr_inf}, {eje: 'PRES', pos: var_data.pr_presion}]
+            });
+            // Breakdown 1
+            posiciones_variante.push({
+                op: 1,
+                nombre: 'BD1',
+                posiciones: [{eje: 'INF', pos: var_data.bd1_inf}, {eje: 'SUP', pos: var_data.bd1_sup}]
+            });
+            // Breakdown 2
+            posiciones_variante.push({
+                op: 2,
+                nombre: 'BD2',
+                posiciones: [{eje: 'INF', pos: var_data.bd2_inf}, {eje: 'SUP', pos: var_data.bd2_sup}]
+            });
+            // IS1
+            posiciones_variante.push({
+                op: 3,
+                nombre: 'IS1',
+                posiciones: [{eje: 'ANCHO', pos: var_data.is1_ancho}, {eje: 'ALTO', pos: var_data.is1_alto}]
+            });
+            // Lineal
+            posiciones_variante.push({
+                op: 4,
+                nombre: 'LINEAL',
+                posiciones: [{eje: 'ENTRADA_ALTO', pos: var_data.l_entrada_alto}, {eje: 'ENTRADA_ANCHO', pos: var_data.l_entrada_ancho}, {eje: 'ENTRADA_SUP', pos: var_data.l_entrada_sup},
+                            {eje: 'SALIDA_ANCHO', pos: var_data.l_salida_ancho}, {eje: 'SALIDA_ANCHO', pos: var_data.l_salida_ancho}, {eje: 'SALIDA_SUP', pos: var_data.l_salida_sup},
+                            {eje: 'RODILLO_INF_ENTRADA', pos: var_data.l_entrada_rod_inf}, {eje: 'RODILLO_INF_CENTRO', pos: var_data.l_centro_rod_inf}, {eje: 'RODILLO_INF_SALIDA', pos: var_data.l_salida_rod_inf}]
+            });
+            // FP1
+            posiciones_variante.push({
+                op: 5,
+                nombre: 'FP1',
+                posiciones: [{eje: 'INF', pos: var_data.fp1_inf}, {eje: 'SUP', pos: var_data.fp1_sup}]
+            });
+            // IS2
+            posiciones_variante.push({
+                op: 6,
+                nombre: 'IS2',
+                posiciones: [{eje: 'ANCHO', pos: var_data.is2_ancho}, {eje: 'ALTO', pos: var_data.is2_alto}]
+            });
+            // FP2
+            posiciones_variante.push({
+                op: 7,
+                nombre: 'FP2',
+                posiciones: [{eje: 'INF', pos: var_data.fp2_inf}, {eje: 'SUP', pos: var_data.fp2_sup}]
+            });
+            // IS3
+            posiciones_variante.push({
+                op: 8,
+                nombre: 'IS3',
+                posiciones: [{eje: 'ANCHO', pos: var_data.is3_ancho}, {eje: 'ALTO', pos: var_data.is3_alto}]
+            });
+            // FP3
+            posiciones_variante.push({
+                op: 9,
+                nombre: 'FP3',
+                posiciones: [{eje: 'INF', pos: var_data.fp3_inf}, {eje: 'SUP', pos: var_data.fp3_sup}]
+            });
+            // Welding
+            posiciones_variante.push({
+                op: 10,
+                nombre: 'W',
+                posiciones: [{eje: 'CAB', pos: var_data.w_cab}, {eje: 'INF', pos: var_data.w_inf}, {eje: 'LAT_OP', pos: var_data.w_lat_op}, {eje: 'LAT_MO', pos: var_data.w_lat_mo},
+                            {eje: 'SUP_V_OP', pos: var_data.w_sup_op_v}, {eje: 'SUP_H_OP', pos: var_data.w_sup_op_h}, {eje: 'SUP_V_MO', pos: var_data.w_sup_mo_v}, {eje: 'SUP_H_MO', pos: var_data.w_sup_mo_h}]
+            });
+            // CB1
+            posiciones_variante.push({
+                op: 12,
+                nombre: 'CB1',
+                posiciones: [{eje: 'INF', pos: var_data.cb1_inf}, {eje: 'SUP', pos: var_data.cb1_sup}, {eje: 'LAT_OP', pos: var_data.cb1_lat_op}, {eje: 'LAT_MO', pos: var_data.cb1_lat_mo}]
+            });
+            // CB2
+            posiciones_variante.push({
+                op: 13,
+                nombre: 'CB2',
+                posiciones: [{eje: 'INF', pos: var_data.cb2_inf}, {eje: 'SUP', pos: var_data.cb2_sup}, {eje: 'LAT_OP', pos: var_data.cb2_lat_op}, {eje: 'LAT_MO', pos: var_data.cb2_lat_mo}]
+            });
+            // CB3
+            posiciones_variante.push({
+                op: 14,
+                nombre: 'CB3',
+                posiciones: [{eje: 'INF', pos: var_data.cb3_inf}, {eje: 'SUP', pos: var_data.cb3_sup}, {eje: 'LAT_OP', pos: var_data.cb3_lat_op}, {eje: 'LAT_MO', pos: var_data.cb3_lat_mo}]
+            });
+            // CB4
+            posiciones_variante.push({
+                op: 15,
+                nombre: 'CB4',
+                posiciones: [{eje: 'INF', pos: var_data.cb4_inf}, {eje: 'SUP', pos: var_data.cb4_sup}, {eje: 'LAT_OP', pos: var_data.cb4_lat_op}, {eje: 'LAT_MO', pos: var_data.cb4_lat_mo}]
+            });
+            console.log('posicones_variante', posiciones_variante);
+            simulador ? setPosicionesSim(posiciones_variante) : setPosiciones(posiciones_variante);
+        }
+    }
+
     const compara_diametros_PLC_montaje = () => {
         let montaje_OK = true;
         montaje.forEach(o => {
@@ -67,10 +188,10 @@ const QS_Produccion = () => {
                 const PLC = diametrosPLC[o.nombre];
                 const Df_PLC = PLC[r.eje];
                 if (Math.abs(Df_PC-Df_PLC) > 0.1) {
-                    console.log('Operacion ', o.nombre);
-                    console.log('Eje: ', r.eje);
-                    console.log('Df_PC ', Df_PC);
-                    console.log('Df_PLC ', Df_PLC);
+                //     console.log('Operacion ', o.nombre);
+                //     console.log('Eje: ', r.eje);
+                //     console.log('Df_PC ', Df_PC);
+                //     console.log('Df_PLC ', Df_PLC);
                     montaje_OK = false;
                 }
             });
@@ -87,15 +208,15 @@ const QS_Produccion = () => {
             return
         }
         // Si hay dato continuamos
-        console.log('dato ...');
-        console.log(dato);
+        // console.log('dato ...');
+        // console.log(dato);
         const temp = []; // Aqui guardo el montaje temporal
         const bancadas = [];
         dato.grupo.bancadas.forEach(b => bancadas.push(b)); // Bancadas del grupo
         bancadas.push(dato.bancadas); // Añadimos la calibradora que viene como bancada sin grupo
         // Guardamos los articulos de montaje
-        console.log('Articulos ...');
-        console.log(dato.articulos);
+        // console.log('Articulos ...');
+        // console.log(dato.articulos);
         setArticulos(dato.articulos);
         bancadas.map(b => {
             b.celdas.map(c => {
@@ -169,7 +290,7 @@ const QS_Produccion = () => {
                                 }
                             }
                             else { //Rodillos diferentes
-                                console.log('Rodillos diferentes');
+                                // console.log('Rodillos diferentes');
                                 eje = instancia.posicion;
                                 rod.push({
                                     tipo_plano: e.rodillo.tipo_plano?e.rodillo.tipo_plano.nombre:'NONE',
@@ -201,7 +322,7 @@ const QS_Produccion = () => {
 
     // Calculo de posiciones estándar
     const CalculaPosicionEstandar = ()=>{
-        console.log('Calculo de posiciones estandar ...');
+        // console.log('Calculo de posiciones estandar ...');
         if (!desarrollosTeorico || !fleje || !montaje || !alturas || !articulo) {
             return;
         }
@@ -218,16 +339,16 @@ const QS_Produccion = () => {
         let rod_sup_inf, rod_lat;
 
         const tubo = articulos.filter(a => a.id==articulo)[0];
-        console.log('montaje ...');
-        console.log(montaje);
-        console.log('desarrollos teorico ...');
-        console.log(desarrollosTeorico);
-        console.log('posiciones...');
-        console.log(posicionesSim);
-        console.log('fleje ...');
-        console.log(fleje);
-        console.log('tubo ...');
-        console.log(tubo);
+        // console.log('montaje ...');
+        // console.log(montaje);
+        // console.log('desarrollos teorico ...');
+        // console.log(desarrollosTeorico);
+        // console.log('posiciones...');
+        // console.log(posicionesSim);
+        // console.log('fleje ...');
+        // console.log(fleje);
+        // console.log('tubo ...');
+        // console.log(tubo);
         const pos_STD = [];
         // Soldadura
         Dt = desarrollosTeorico['W']/Math.PI; // Desarrollo en soldadura teorico
@@ -319,8 +440,8 @@ const QS_Produccion = () => {
                     // console.log('Ancho FP3: ', anchoFP3);
                     break;
             }
-            console.log('gap_i: ', gap);
-            console.log('pos_s: ', pos_s);
+            // console.log('gap_i: ', gap);
+            // console.log('pos_s: ', pos_s);
             pos_STD.push({
                 op: fp.operacion,
                 nombre: fp.nombre,
@@ -339,7 +460,7 @@ const QS_Produccion = () => {
 
         // Break Down
         montaje.filter(m => m.tipo=='BD').map(bd => {
-            console.log(bd);
+            // console.log(bd);
             // Calculos
             x_i = alturas.filter(a => a.nombre=='MIN')[0].puntos.filter(p => p.nombre==bd.nombre)[0].x;
             pos_i = m * x_i;
@@ -356,10 +477,10 @@ const QS_Produccion = () => {
         });
 
         // ISs
-        console.log(montaje);
+        // console.log(montaje);
         const tipo_bd2 = montaje.filter(m => m.nombre=='BD2')[0].rodillos.filter(r => r.eje=='INF')[0].tipo_plano.slice(0,4);
         montaje.filter(m => m.tipo=='IS').map(is => {
-            console.log(is);
+            // console.log(is);
             switch (is.nombre) {
                 case 'IS1':
                     roll_i = montaje.filter(m=>m.nombre=='BD2')[0].rodillos.filter(r => r.eje=='INF')[0]; // Rodillo interior
@@ -421,8 +542,8 @@ const QS_Produccion = () => {
                     alfa1 = roll_lat.parametros.alfa1 * Math.PI / 180;
                     R1 = roll_lat.parametros.R1;
                     R2 = roll_lat.parametros.R2;
-                    console.log(roll_lat);
-                    console.log('parametros lat ... ', Hc, alfa2, R1, R2);
+                    // console.log(roll_lat);
+                    // console.log('parametros lat ... ', Hc, alfa2, R1, R2);
                     y1 = y - Hc + (R1+R2)*Math.sin(alfa1);
 
                     ancho = 2*x0;
@@ -557,9 +678,11 @@ const QS_Produccion = () => {
             alert('Los rodillos del PLC no coinciden con el montaje actual');
         }
         else {
-            console.log('posiciones ', posiciones);
-            console.log('posicionesSim ', posicionesSim);
+            // console.log('posiciones ', posiciones);
+            // console.log('posicionesSim ', posicionesSim);
             const data = simulador ? [...posicionesSim] : [...posiciones];
+            // console.log('posiciones ', posiciones);
+            // console.log('posicionesSim ', posicionesSim);
             var now = new Date();
             const nombre = simulador ? 'Simulador ' + now.toLocaleString() : 'PLC ' + now.toLocaleString();
             const montaje = montajeActivo;
@@ -689,7 +812,7 @@ const QS_Produccion = () => {
                   }     
             })
             .then( res => { 
-                console.log('POST variantes: ',res.data);  
+                // console.log('POST variantes: ',res.data);  
                 alert('Variante guardada con exito ...');          
                 
             })
@@ -700,10 +823,11 @@ const QS_Produccion = () => {
     // Enviar Variante al PLC - TODO
     const EnviarPLC = () => {
         const data = simulador?posicionesSim:posiciones;
-        console.log('datos enviados ...');
-        console.log(data);
-        console.log('Diametros PC ...');
-        console.log(diametrosPC);
+        // console.log('datos enviados ...');
+        // console.log(data);
+        // console.log('Diametros PC ...');
+        // console.log(diametrosPC);
+        // console.log(data.filter(p => p.nombre=='W')[0].posiciones.filter(p =>p.eje=='SUP_H_MO')[0].pos);
         axios.post(BACKEND_SERVER + `/api/qs/enviar_variante_PLC/`, {
             pr_inf: data.filter(p => p.nombre=='PR')[0].posiciones.filter(p =>p.eje=='INF')[0].pos,
             pr_press: data.filter(p => p.nombre=='PR')[0].posiciones.filter(p =>p.eje=='PRES')[0].pos,
@@ -763,13 +887,14 @@ const QS_Produccion = () => {
               }     
         })
         .then( res => { 
-            console.log('POST variantes: ',res.data);         
+            // console.log('POST variantes: ',res.data);         
             
         })
         .catch(err => { console.log(err);})
     }
 
     const simular = (event) => {
+        console.log('simular ...');
         event.preventDefault();
         const temp = [...posicionesSim];
 
@@ -787,9 +912,10 @@ const QS_Produccion = () => {
         setMontaje(null);
         setArticulos(null);
         setArticulo(0);
-        setPosiciones(null);
-        setPosicionesSim(null);
+        setOP(1);
+        setVariante(0);
         setSimulador(false);
+        setPosicionesSim(null);
     }
 
     const handleMontajeChange = (event) => {
@@ -798,12 +924,23 @@ const QS_Produccion = () => {
         const montaje_id = event.target.value;
         LeeMontaje(montajes.filter(m => m.id==montaje_id)[0]);
         setArticulo(0);
+        setVariante(0);
     }
 
     const handleArticuloChange = (event) => {
         event.preventDefault();
         // console.log('cambio de articulo');
         setArticulo(event.target.value);
+        setVariante(0);
+        leePosicionesSimPLC();
+    }
+
+    const handleVarianteChange = (event) => {
+        console.log('cambio de variante ...');
+        console.log('posiciones',posiciones);
+        console.log('variante', variantes.filter(v => v.id == event.target.value)[0]);
+        leeVariante(event.target.value);
+        setVariante(event.target.value);
     }
 
     const handleOPChange = (event) => {
@@ -842,7 +979,7 @@ const QS_Produccion = () => {
               }
         })
         .then( res => {
-            //console.log(res.data);
+            // console.log(res.data);
             setMontajes(res.data);
         })
         .catch( err => {
@@ -873,15 +1010,15 @@ const QS_Produccion = () => {
         diametrosPLC&&montaje&&compara_diametros_PLC_montaje();
     },[diametrosPLC, montaje]);
 
-    // Actualizar Fleje al cambiar de articulo
+    // Actualizar Fleje al cambiar de articulo, actualizamos sus variantes y el diametro teorico en soldadura
     useEffect(() => {
         if (articulo==0) {
             setFleje(null);
             setDst(null);
         }
         else {
-            console.log('montaje ...');
-            console.log(montaje);
+            // console.log('montaje ...');
+            // console.log(montaje);
             const art = articulos.filter(a => a.id == articulo)[0];
             setFleje({
                 espesor: parseFloat(art.espesor),
@@ -890,6 +1027,10 @@ const QS_Produccion = () => {
                 color: 'aqua'
             });
             setDst(art.Dst);
+
+            // Variantes del articulo actual y montaje actual
+            const variantes_temp = art.variantes.filter(v => v.montaje==montajeActivo); // Solo variantes del montaje actual
+            setVariantes(variantes_temp);
         }
     },[articulo]);
 
@@ -930,7 +1071,8 @@ const QS_Produccion = () => {
                     }
                     break;
                 case 'FP':
-                    // console.log('Gap: Fin pass');
+                    console.log('Gap: Fin pass');
+                    console.log('m', m);
                     piston = null;
                     if (!simulador){
                         pos_i = posiciones.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='INF')[0].pos;
@@ -1000,7 +1142,7 @@ const QS_Produccion = () => {
                     piston = null;
                     break;
                 case 'IS':
-                    console.log('IS calculo de gap');
+                    // console.log('IS calculo de gap');
                     // Posiciones
                     if (!simulador){
                         pos_ancho = posiciones.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='ANCHO')[0].pos;
@@ -1084,14 +1226,14 @@ const QS_Produccion = () => {
             color: 'blue',
             puntos:[{x: 0, y:0, OP: 0, nombre: 'PR'}, {x:1590, y:-10, OP:1, nombre: 'BD1'}, {x:2760, y:-20, OP:2, nombre: 'BD2'}, {x:6320, y:-30, OP:5, nombre: 'FP1'},{x:7570, y:-40, OP:7, nombre: 'FP2'},{x:8820, y:-50, OP:9, nombre: 'FP3'}, {x:10070, y:40, OP:10, nombre: 'W'}]
          }];
-         console.log('Fleje ...');
-        fleje&&console.log(fleje);
+        //  console.log('Fleje ...');
+        // fleje&&console.log(fleje);
         fleje&&posiciones&&posicionesSim&&montaje&&montaje.map(m => {
             switch (m.tipo) {
                 case 'BD':
                     switch (m.rodillos.filter(r => r.eje=='INF')[0].tipo_plano.slice(0,4)) {
                         case 'BD_I':
-                            console.log('Alturas: BD Standar ...');
+                            // console.log('Alturas: BD Standar ...');
                             H.map(h => {
                                 let y,q;
                                 if (h.nombre == 'MIN'){
@@ -1124,7 +1266,7 @@ const QS_Produccion = () => {
                             });
                             break;
                         case 'BD_W':
-                            console.log('Alturas: BD W ...');
+                            // console.log('Alturas: BD W ...');
                             H.map( h => {
                                 let y;
                                 if (h.nombre == 'MIN'){
@@ -1177,7 +1319,7 @@ const QS_Produccion = () => {
                             });
                             break;
                         case 'BD_2':
-                            console.log('Alturas: BD 2R ...');
+                            // console.log('Alturas: BD 2R ...');
                             H.map( h => {
                                 let y;
                                 if (h.nombre == 'MIN'){
@@ -1219,7 +1361,7 @@ const QS_Produccion = () => {
                                     }
                                     
                                     y = yc3 - R3 * Math.cos(alfa2+alfa3);
-                                    console.log('Calculo alturas BD2R y:', y);
+                                    // console.log('Calculo alturas BD2R y:', y);
                                     h.puntos.filter(p => p.OP == m.operacion)[0].y = y;
                                 }
                             });
@@ -1227,7 +1369,7 @@ const QS_Produccion = () => {
                     }
                     break;
                 case 'FP':
-                    console.log('Alturas: FP ...');
+                    // console.log('Alturas: FP ...');
                     H.map( h => {
                         let y;
                         if (h.nombre == 'MIN'){
@@ -1242,7 +1384,7 @@ const QS_Produccion = () => {
                     });
                     break;
                 case 'W':
-                    console.log('Alturas: W ...');
+                    // console.log('Alturas: W ...');
                     H.map( h => {
                         let y;
                         if (h.nombre == 'MIN'){
@@ -1288,24 +1430,19 @@ const QS_Produccion = () => {
 
     // Paso de posicionesSim a datos
     useEffect(()=>{
-        // console.log('Pasamos posiciones sim a datos ...')
-        if (posiciones) {
-            if (!posicionesSim) {
-                console.log('No hay posiciones sim');
-                const temp = [...posiciones];
-                setPosicionesSim(temp);
-            } 
-            if (simulador) {
-                const dat = {};
-                posicionesSim.filter(p => p.op == OP)[0].posiciones.map(p => {
-                    dat[p.eje] =  parseFloat(p.pos).toFixed(2);
-                });
-                setDatos(dat);
-                console.log('posiciones ...');
-                console.log(posiciones);
-            }
+        if (simulador&&posicionesSim) {
+            const dat = {};
+            posicionesSim.filter(p => p.op == OP)[0].posiciones.map(p => {
+                dat[p.eje] =  parseFloat(p.pos).toFixed(2);
+            });
+            setDatos(dat);
         }
-    }, [simulador, OP, posiciones]);
+    }, [simulador, OP, posicionesSim]);
+
+    // Si cambia el valor de simulador actualizamos posiciones a la variante seleccionada
+    useEffect(()=>{
+        variantes&&leeVariante(variante);
+    },[simulador]);
 
      // Calculo de desarrollo teoricos:
      useEffect(()=>{
@@ -1327,11 +1464,6 @@ const QS_Produccion = () => {
         }
         setDesarrollosTeorico(dT);
     },[Dst, fleje]);
-
-    // Desarrollos modelo
-    useEffect(()=>{
-        desarrollosModelo&&console.log('Desarrollos modelo: ',desarrollosModelo);
-    },[desarrollosModelo]);
 
     return (
         <React.Fragment>
@@ -1403,14 +1535,21 @@ const QS_Produccion = () => {
                                     </Form.Group>
                                 </Col>
                                 <Col>
-                                    <Form.Group controlId="Articulo">
+                                    <Form.Group controlId="Variante">
                                         <Form.Label>Variante</Form.Label>
                                         <Form.Control   size="lg"
                                                         as="select" 
-                                                        value={null}
+                                                        value={variante}
                                                         name='variante'
-                                                        onChange={null}>
-                                            <option key={0} value={0}>Ninguno</option>                
+                                                        onChange={handleVarianteChange}>
+                                            <option key={0} value={0}>PLC</option> 
+                                            {variantes&&variantes.map(v => {
+                                                return (
+                                                    <option key={v.id} value={v.id}>
+                                                        {v.nombre}
+                                                    </option>
+                                                )
+                                            })}               
                                             {}
                                         </Form.Control>
                                     </Form.Group>
