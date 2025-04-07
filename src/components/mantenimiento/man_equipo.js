@@ -16,7 +16,7 @@ const ManPorEquipos = () => {
     const [lineas, setLineas] = useState(null);  
     const [hoy] = useState(new Date());
     const [show, setShow] = useState(false);
-    const [linea_id, setLinea_id] = useState(null);
+    const [linea_trab, setLinea_Trab] = useState(null);
     const [linea_completa, setLinea_completa] = useState(null);
     const [lineasTrabajadores, setlineasTrabajadores] = useState(null);
     const [count, setCount] = useState(null);
@@ -26,14 +26,6 @@ const ManPorEquipos = () => {
     const [abrirFiltro, setabrirFiltro] = useState(false);
     const [actualizar_seg, setActualizarSeg] = useState(false);
 
-    //var dentrodeunmes=null;
-    //var fechaenunmesString=null;
-    //var fecha_hoy=Date.parse(hoy);
-    //var mesEnMilisegundos = 1000 * 60 * 60 * 24 * 7;  //cambiado a una semana, en vez del mes
-    //var enunmes=fecha_hoy+mesEnMilisegundos;
-    //dentrodeunmes = new Date(enunmes);
-    //fechaenunmesString = dentrodeunmes.getFullYear() + '-' + ('0' + (dentrodeunmes.getMonth()+1)).slice(-2) + '-' + ('0' + dentrodeunmes.getDate()).slice(-2);
-    
     const actualizaFiltro = str => {
         setFiltro(str);
     }
@@ -46,33 +38,32 @@ const ManPorEquipos = () => {
         pagina:1,
         observaciones:'',
     });
-    
-    useEffect(()=>{ 
-        console.log('useEffect actualizando');
-        filtro && axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_activas/`+ filtro,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-                }
-        })
-        .then( res => {
-            //filtramos los trabajos que sean de nuestras destrezas, para cuando son varias destrezas 
-            var MisTrabajos;
-            var destrezas = user['tec-user'].perfil.destrezas;
-            MisTrabajos = res.data.results.filter(s => destrezas.includes(s.tarea.especialidad));
-            setLineas(MisTrabajos);
-            setCount(res.data.count);
-            let pagT = res.data.count/20;
-            if (res.data.count % 20 !== 0){
-                pagT += 1;
-            }
-            setPagTotal(Math.trunc(pagT));
 
-        })
-        .catch( err => {
-            console.log(err);
-        });
-        setActualizarSeg(false);
-    }, [token, filtro, datos.observaciones, actualizar_seg, user]); 
+    useEffect(() => {
+        if (filtro && user['tec-user'].perfil.destrezas.length > 0) {
+            axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_activas_destrezas/` + filtro, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                },
+                params: {
+                    destrezas: user['tec-user'].perfil.destrezas.join(',')
+                }
+            })
+            .then(res => {
+                setLineas(res.data.results);
+                setCount(res.data.count);
+                let pagT = res.data.count / 20;
+                if (res.data.count % 20 !== 0) {
+                    pagT += 1;
+                }
+                setPagTotal(Math.trunc(pagT));
+            })
+            .catch(err => {
+                console.log(err);
+            });
+            setActualizarSeg(false);
+        }
+    }, [token, filtro, datos.observaciones, actualizar_seg, user]);    
  
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea_filtro/?trabajador=${user['tec-user'].perfil.usuario}`,{
@@ -98,18 +89,16 @@ const ManPorEquipos = () => {
     }
 
     const updateTarea = () => {
-        axios.get(BACKEND_SERVER + '/api/mantenimiento/listado_lineas_activas/'+ filtro,{
+        axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_activas_destrezas/`+ filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
+                },
+                params: {
+                    destrezas: user['tec-user'].perfil.destrezas.join(',')
                 }
         })
         .then( res => {
-            //filtramos los trabajos que sean de nuestras destrezas.
-            var MisTrabajos;
-            var destrezas = user['tec-user'].perfil.destrezas;
-            MisTrabajos = res.data.results.filter(s => destrezas.includes(s.tarea.especialidad));
-            //ordenamos los trabajos por prioridad
-            setLineas(MisTrabajos);
+            setLineas([...res.data.results]); 
             setCount(res.data.count);
         })
         .catch( err => {
@@ -145,6 +134,7 @@ const ManPorEquipos = () => {
                           }     
                     })
                     .then( ress => {
+                        updateTarea();
                         axios.get(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea_filtro/?trabajador=${user['tec-user'].perfil.usuario}`,{
                             headers: {
                                 'Authorization': `token ${token['tec-token']}`
@@ -156,10 +146,8 @@ const ManPorEquipos = () => {
                         .catch( err => {
                             console.log(err);
                         });
-                        updateTarea();
                     })
                     .catch(err => { console.log(err);})
-                    updateTarea();
                 })
                 .catch(err => { console.log(err);})
             }
@@ -190,30 +178,20 @@ const ManPorEquipos = () => {
     }
 
     const pedir_observaciones = (linea) => {
-        axios.get(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea/?linea=${linea.id}`, {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }     
-        })
-        .then( res => {
-            if(linea.fecha_inicio===null){
-                alert('Esta tarea todavía no se ha iniciado');
+        if(linea.fecha_inicio===null){
+            alert('Esta tarea todavía no se ha iniciado');
+        }
+        else{
+            const trabajador_activo = linea.lineas?.filter(s => s.trabajador.id === user['tec-user'].perfil.usuario);
+            if(trabajador_activo.length===0){
+                alert('No tienes esta tarea iniciada, no la puedes comentar ni finalizar');
             }
-            else{
-                const trabajador_activo = res.data.filter(s => s.trabajador === user['tec-user'].perfil.usuario);
-                if(trabajador_activo.length===0){
-                    alert('No tienes esta tarea iniciada, no la puedes comentar ni finalizar');
-                }
-                else if(trabajador_activo.length!==0){
-                    datos.observaciones=linea.observaciones_trab;
-                    setShowObservacion(true);
-                    setLinea_completa(linea);
-                }
+            else if(trabajador_activo.length!==0){
+                datos.observaciones=linea.observaciones_trab;
+                setShowObservacion(true);
+                setLinea_completa(linea);
             }
-        })
-        .catch( err => {
-            console.log(err);
-        });
+        }
     }
 
     const handleCloseObservacion = () => {
@@ -228,6 +206,7 @@ const ManPorEquipos = () => {
         })
         .then( r => {
             updateTarea();
+            setLinea_completa(r.data);
         })
         .catch( err => {
             console.log(err);
@@ -238,10 +217,10 @@ const ManPorEquipos = () => {
     const FinalizarTarea = (linea) => { 
         var Finalizar_Tarea = window.confirm('Vas a finalizar la tarea ¿Desea continuar?');
         if (Finalizar_Tarea){
-            for(var x=0;x<linea.length;x++){
-                axios.patch(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea/${linea[x].id}/`,{
-                    fecha_fin: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
-
+            for(var x=0;x<linea.lineas.length;x++){
+                axios.patch(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea/${linea.lineas[x].id}/`,{
+                    //fecha_fin: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
+                    fecha_fin: datos.fecha_fin,
                 },
                 {
                     headers: {
@@ -249,13 +228,12 @@ const ManPorEquipos = () => {
                     }
                 })
                 .then( r => {
-                    updateTarea();
                 })
                 .catch( err => {
                     console.log(err);
                 });
             }
-            axios.patch(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_activas/${linea.id}/`,{
+            axios.patch(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/${linea.id}/`,{
                 fecha_fin: datos.fecha_fin,
                 estado: 3,
             },
@@ -341,8 +319,8 @@ const ManPorEquipos = () => {
         }
     }
 
-    const listarTrabajadores = (linea_id)=>{
-        setLinea_id(linea_id);
+    const listarTrabajadores = (linea)=>{
+        setLinea_Trab(linea);
         setShow(true);
     }
     
@@ -388,28 +366,24 @@ const ManPorEquipos = () => {
     return(
         <Container className extends="pt-1 mt-5">
             <br></br>
-            <button type="button" className='mt-5' onClick={event => {abroFiltro()}}>Ver Anotaciones</button>
+            <h5 className="mb-5 mt-5" style={{ color: 'red' }}>
+                Listado de Trabajos <span style={{ color: 'black' }}>{user['tec-user'].get_full_name}</span>, por prioridades:
+            </h5>
+            <button type="button" onClick={event => {abroFiltro()}}>Ver Anotaciones</button>
             {abrirFiltro?   
             <Row className extends>                
-                <Col>
-                    <h5 className="mb-3 mt-3" style={ { color: 'red' } }>Listado de Trabajos {user['tec-user'].get_full_name}, por prioridades:</h5>              
+                <Col>             
                     <h5>Acciones:</h5>
-                    <h5><Tools/> ---- Para iniciar un trabajo "Iniciados en color verde"</h5>
-                    <h5><FileCheck/> ---- Para finalizar un trabajo</h5>
+                    <h5><Tools/> ---- Para iniciar un trabajo</h5>
+                    <h5><FileCheck/> ---- Para finalizar un trabajo o poner un comentario</h5>
                     <h5><Receipt/> ---- Listado del personal que está interviniendo en este trabajo</h5>
                     <h5><Eye/> ---- Ver el parte al que pertenece la tarea</h5>
-                </Col>
-                <Col>
-                    <br></br>
-                    <br></br>
-                    <br></br>
-                    <br></br>
-                    <h5 style={{ color: 'black' }}>Amarillo ---- Trabajo cogido por un compañero</h5>
-                    <h5 style={{ color: 'orange' }}>Naranja ---- Trabajo cogido por nosotros</h5>
+                    <h5 style={{ color: 'blue' }}>Trabajo cogido por nosotros</h5>
+                    <h5 style={{ color: '#E0B800'}}>Trabajo cogido por un compañero</h5>
                 </Col>
             </Row>
             :null} 
-            <Row>
+            <Row className="mb-2 mt-2">
                 <Col>
                     <ManEquipoFiltro actualizaFiltro={actualizaFiltro}/>
                 </Col>
@@ -419,7 +393,7 @@ const ManPorEquipos = () => {
                     <tr>
                         <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
                         <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
-                        <th>Página {datos.pagina} de {pagTotal}</th>
+                        <th>Página {datos.pagina} de {pagTotal===0?1:pagTotal} - Número registros totales: {count}</th>
                     </tr>
                 </tbody>
             </table> 
@@ -440,8 +414,9 @@ const ManPorEquipos = () => {
                         </thead>
                         <tbody>
                             {lineas && lineas.map( linea => {
+                                //'#cce5ff' ----> es el tono de color azul de la table-primary gastada en otras pantallas
                                 return (
-                                    <tr key={linea.id} style={{ backgroundColor: comparar(linea) ? 'orange' : linea.fecha_inicio!==null? 'yellow' : " " }} className="table-secundary">
+                                    <tr key={linea.id} style={{ backgroundColor: comparar(linea) ? '#cce5ff': linea.fecha_inicio!==null? 'yellow' : " " }} className="table-secundary">
                                         <td>{linea.tarea.prioridad}</td>
                                         <td>{invertirFecha(linea.fecha_plan)}</td>
                                         <td>{linea.tarea.nombre}</td>
@@ -452,7 +427,7 @@ const ManPorEquipos = () => {
                                         <td>
                                         <Tools className="mr-3 pencil"  onClick={event =>{InicioTarea(linea)}}/>
                                         <FileCheck className="mr-3 pencil"  onClick={event =>{pedir_observaciones(linea)}} />
-                                        <Receipt className="mr-3 pencil" onClick={event =>{listarTrabajadores(linea.id)}}/>
+                                        <Receipt className="mr-3 pencil" onClick={event =>{listarTrabajadores(linea)}}/>
                                         <Link to={`/mantenimiento/parte_op/${linea.parte.id}`}><Eye className="mr-3 pencil"/></Link>
                                         </td>
                                     </tr>
@@ -467,7 +442,7 @@ const ManPorEquipos = () => {
                     <tr>
                         <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
                         <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
-                        <th>Página {datos.pagina} de {pagTotal}</th>
+                        <th>Página {datos.pagina} de {pagTotal===0?1:pagTotal}</th>
                     </tr>
                 </tbody>
             </table>
@@ -476,8 +451,6 @@ const ManPorEquipos = () => {
                     <Modal.Title>Conclusiones de la tarea</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    {/* <Row>                            
-                        <Col> */}
                     <Container>
                         <Row>
                             <Col>
@@ -493,15 +466,13 @@ const ManPorEquipos = () => {
                             </Col>
                         </Row>
                     </Container>
-                      {/*   </Col>
-                    </Row> */}
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleCloseObservacion}>Aceptar</Button>
                 </Modal.Footer>
             </Modal>
         <ListaDePersonal    show={show}
-                            linea_id ={linea_id}
+                            lineas_trab ={linea_trab}
                             handlerClose={handlerClose}
         />
         </Container>

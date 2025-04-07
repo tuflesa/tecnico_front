@@ -15,7 +15,6 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
     const [zonas, setZonas] = useState(null);
     const [equipos, setEquipos] = useState(null);
     const [estados, setEstados] = useState(null);
-    //const soyTecnico = user['tec-user'].perfil.destrezas.filter(s => s === 6);
     const soyTecnico_mantenimiento = user['tec-user'].perfil.puesto.nombre==='Técnico'||user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:false;
     const soyTecnico = user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:false;
 

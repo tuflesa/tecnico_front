@@ -101,7 +101,7 @@ const RodListaRectificaciones = () => {
                             <tr>
                                 <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina-1)}}>Pág Anterior</button></th> 
                                 <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina+1)}}>Pág Siguiente</button></th> 
-                                <th>Número páginas: {datos.pagina} / {datos.total_pag} - Registros: {count}</th>
+                                <th>Número páginas: {datos.pagina} / {datos.total_pag===0?1:datos.total_pag} - Registros: {count}</th>
                                 <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
                             </tr>
                         </tbody>
@@ -109,11 +109,11 @@ const RodListaRectificaciones = () => {
                     <Table striped bordered hover>
                         <thead>
                             <tr>
-                                <th>Código</th>
                                 <th>Nombre</th>
                                 <th>Empresa</th>
                                 <th>Creado por</th>
                                 <th>Máquina</th>
+                                <th>Ext-Int</th>
                                 <th>Fecha</th>
                                 <th>Fecha estimada</th>
                                 <th>Acciones</th>
@@ -123,11 +123,17 @@ const RodListaRectificaciones = () => {
                             { lista_rectificaciones && lista_rectificaciones.map( lista => {
                                 return (
                                     <tr key={lista.id}>
-                                        <td>{lista.id}</td>
                                         <td>{lista.numero}</td>
                                         <td>{lista.maquina.empresa.nombre}</td>
                                         <td>{lista.creado_por.get_full_name}</td>
                                         <td>{lista.maquina.siglas}</td>
+                                        <td>
+                                            {lista.proveedor ? (
+                                                <span style={{ color: 'green', fontWeight: 'bold' }}>✔️</span>
+                                            ) : (
+                                                <span style={{ color: 'red', fontWeight: 'bold' }}>❌</span>
+                                            )}
+                                        </td>
                                         <td>{invertirFecha(String(lista.fecha))}</td>
                                         <td>{invertirFecha(String(lista.fecha_estimada))}</td>
                                         <td>
@@ -146,7 +152,7 @@ const RodListaRectificaciones = () => {
                         <tr>
                             <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
                             <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
-                            <th>Número páginas: {datos.pagina} / {datos.total_pag}</th>
+                            <th>Número páginas: {datos.pagina} / {datos.total_pag===0?1:datos.total_pag}</th>
                             <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
                         </tr>
                     </tbody>

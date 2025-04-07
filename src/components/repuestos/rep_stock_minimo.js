@@ -4,7 +4,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 
-const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_minimo, updateRepuesto, stocks_utilizados, setShowStock}) => {
+const StockMinimoForm = ({show, handleCloseStock, repuesto_escritico, repuesto_id, stock, stock_minimo, updateRepuesto, stocks_utilizados, setShowStock}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
     const [datos, setDatos] = useState({
@@ -12,8 +12,10 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
         repuesto: repuesto_id,
         almacen: '',
         stock_minimo_cantidad: null,
+        stock_aconsejado: null,
         stock_actual: null,
         localizacion: null,
+        stock_minimo : null,
     });
     const [empresas, setEmpresas] = useState([]);
     const [almacenes, setAlmacenes] = useState([]);
@@ -59,6 +61,7 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
         setDatos({
             ...datos,
             stock_minimo_cantidad : stock ? stock.stock_minimo : null,
+            stock_aconsejado : stock ? stock.stock_minimo : null, // revisar
             stock_minimo_inicial : stock ? stock.stock_minimo : null,
             stock_actual : stock ? stock.suma : null,
             stock_actual_inicial : stock ? stock.suma : null,
@@ -88,6 +91,7 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
         setDatos({
             ...datos,
             stock_minimo_cantidad : null,
+            stock_aconsejado : null,
             stock_actual : null,
             localizacion : null,
         });
@@ -101,7 +105,8 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
             if (datos.stock_minimo) { // Actualizar stock mínimo
                 // datos.stock_minimo.cantidad = parseInt(datos.stock_minimo_cantidad);
                 axios.patch(BACKEND_SERVER + `/api/repuestos/stocks_minimos/${datos.stock_minimo.id}/`, {
-                    cantidad: datos.stock_minimo_cantidad
+                    cantidad: datos.stock_minimo_cantidad,
+                    cantidad_aconsejable: datos.stock_aconsejado,
                 }, {
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
@@ -119,6 +124,7 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
                     repuesto: repuesto_id,
                     almacen: datos.almacen,
                     cantidad: datos.stock_minimo_cantidad ? datos.stock_minimo_cantidad : 0,
+                    cantidad_aconsejable: datos.stock_aconsejado? datos.stock_aconsejado : 0,
                     stock_act: 0,
                     localizacion: datos.localizacion, 
                 }, {
@@ -140,7 +146,6 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
 
         // Ajustar Stock
         if (datos.stock_actual !== datos.stock_actual_inicial || !datos.stock_actual){ // Si hay cambios o se deja sin valor el campo stock
-            // console.log('Guardar ajuste stock ' + datos.stock_actual);
             // 1 Crear un inventario
             // 2 Añadir una línea de inventario
             // 3 Generar un movimiento correspondiente al inventario
@@ -172,13 +177,12 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
                           }     
                     })
                     .then( res => {
-                        const linea_inventario = res.data;
                         axios.post(BACKEND_SERVER + `/api/repuestos/movimiento/`, {
                             fecha : yyyy + '-' + mm + '-' + dd,
                             cantidad : datos.stock_actual_inicial ? (parseInt(datos.stock_actual) - parseInt(datos.stock_actual_inicial)) : datos.stock_actual ? datos.stock_actual : 0,
                             almacen : datos.almacen,
                             usuario : user['tec-user'].id,
-                            linea_inventario : linea_inventario.id
+                            linea_inventario : res.data.id
                         }, {
                             headers: {
                                 'Authorization': `token ${token['tec-token']}`
@@ -280,6 +284,19 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_id, stock, stock_mini
                                                 value={datos.stock_minimo_cantidad}
                                                 onChange={handleInputChange} 
                                                 placeholder="Stock Mínimo"
+                                                disabled={repuesto_escritico===false?true:false}
+                                    />
+                                </Form.Group>
+                            </Col>
+                            <Col>
+                                <Form.Group controlId="stock_aconsejado">
+                                    <Form.Label>Stock Recomendado</Form.Label>
+                                    <Form.Control type="text" 
+                                                name='stock_aconsejado' 
+                                                value={datos.stock_aconsejado}
+                                                onChange={handleInputChange} 
+                                                placeholder="Stock Recomendado"
+                                                disabled={repuesto_escritico===false?false:true}
                                     />
                                 </Form.Group>
                             </Col>

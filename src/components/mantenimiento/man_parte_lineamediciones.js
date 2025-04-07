@@ -3,7 +3,6 @@ import { Button, Modal, Form, Col, Row } from 'react-bootstrap';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
-import {invertirFecha} from '../utilidades/funciones_fecha';
 
 const LineaMedicionNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateParte}) => {
     

@@ -16,6 +16,20 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
     const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Mantenimiento'&&user['tec-user'].perfil.puesto.nombre!=='Operador'?false:true;
+    const [tiposRepuesto, setTiposRepuesto] = useState(null);
+    const [tiposUnidad, setTiposUnidad] = useState(null);
+    const [show_stock, setShowStock] = useState(false);
+    const [show_equipo, setShowEquipo] = useState(false);
+    const [show_proveedor, setShowProveedor] = useState(false);
+    const [show_modificar_proveedor, setShowModificarProveedor] = useState(false);
+    const [stock_editar, setStockEditar] = useState(null);
+    const [stock_minimo_editar, setStockMinimoEditar] = useState(null);
+    const [empresas, setEmpresas] = useState(null);
+    const [precio, setPrecio] = useState(null);
+    const [stock_empresa, setStockEmpresa] = useState(null);
+    const [show_listalmacen, setShowListAlmacen] = useState(null);
+    const [almacenes_empresa, setAlmacenesEmpresa] = useState(null);
+    const [datos_precio, setDatosPrecio] = useState(null);
 
     const [datos, setDatos] = useState({
         id: repuesto.id ? repuesto.id : null,
@@ -33,22 +47,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         equipos: repuesto.equipos,
         proveedores: repuesto.proveedores,
         observaciones: repuesto.observaciones ? repuesto.observaciones : ''
-    });
-    const [tiposRepuesto, setTiposRepuesto] = useState(null);
-    const [tiposUnidad, setTiposUnidad] = useState(null);
-    const [show_stock, setShowStock] = useState(false);
-    const [show_equipo, setShowEquipo] = useState(false);
-    const [show_proveedor, setShowProveedor] = useState(false);
-    const [show_modificar_proveedor, setShowModificarProveedor] = useState(false);
-    const [stock_editar, setStockEditar] = useState(null);
-    const [stock_minimo_editar, setStockMinimoEditar] = useState(null);
-    const [empresas, setEmpresas] = useState(null);
-    const [precio, setPrecio] = useState(null);
-    const [stock_empresa, setStockEmpresa] = useState(null);
-    const [show_listalmacen, setShowListAlmacen] = useState(null);
-    const [almacenes_empresa, setAlmacenesEmpresa] = useState(null);
-    const [datos_precio, setDatosPrecio] = useState(null);
-    
+    });    
     
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/repuestos/tipo_repuesto/`, {
@@ -90,7 +89,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
 
     /* eslint-disable react-hooks/exhaustive-deps */
     useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/repuestos/repuesto_precio/?repuesto=${repuesto.id}`,{
+        repuesto.id && axios.get(BACKEND_SERVER + `/api/repuestos/repuesto_precio/?repuesto=${repuesto.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -123,7 +122,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         });
     },[repuesto]);
 
-    useEffect(()=>{
+    useEffect(()=>{ //sumando todos los stocks actuales
         let stock_T = 0;
         datos.stocks_minimos && datos.stocks_minimos.forEach(element => {
             stock_T += element.stock_act;           
@@ -135,14 +134,15 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     },[datos.stocks_minimos]);
     /* eslint-disable react-hooks/exhaustive-deps */
 
-    useEffect(()=>{
+    useEffect(()=>{ //sumando los stocks por almacenes
         const stock_por_empresa = [];
         datos.stocks_minimos && empresas && empresas.map( empresa => {
             const almacenes_por_empresa = repuesto.stocks_minimos.filter( s => s.almacen.empresa_id === empresa.id);
             const stock_empresa = almacenes_por_empresa.reduce((a, b) => a + b.stock_act, 0);
             const stock_minimo_empresa = almacenes_por_empresa.reduce((a, b) => a + b.cantidad, 0);
+            const stock_minimo_aconsejable = almacenes_por_empresa.reduce((a, b) => a + b.cantidad_aconsejable, 0);
             if(almacenes_por_empresa.length>0){
-                stock_por_empresa.push({empresa: empresa, stock: stock_empresa, stock_minimo: stock_minimo_empresa});            
+                stock_por_empresa.push({empresa: empresa, stock: stock_empresa, stock_minimo: stock_minimo_empresa, stock_aconsejable:stock_minimo_aconsejable});            
             }
             return null;
         });
@@ -193,7 +193,46 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         })
     }
 
+    const validarStocksMinimos = () => {
+        let cambiado=false;
+        if (repuesto.es_critico !== datos.es_critico) {
+            if (datos.es_critico === true && repuesto.es_critico === false) {
+                for(var m=0;m<datos.stocks_minimos.length;m++){
+                    datos.stocks_minimos[m].cantidad = datos.stocks_minimos[m].cantidad_aconsejable;
+                    datos.stocks_minimos[m].cantidad_aconsejable = 0;
+                }
+                cambiado=true;
+            }
+            if (datos.es_critico === false && repuesto.es_critico === true) {
+                for(var m=0;m<datos.stocks_minimos.length;m++){
+                    datos.stocks_minimos[m].cantidad_aconsejable = datos.stocks_minimos[m].cantidad;
+                    datos.stocks_minimos[m].cantidad = 0;
+                }
+                cambiado=true;
+            }
+        }
+        if(cambiado===true){
+            alert('Se ha cambiado la condición de crítico, por lo que se cambiarán los stocks de los almacenes');
+            for(var x=0;x<datos.stocks_minimos.length;x++){    
+                axios.patch(BACKEND_SERVER + `/api/repuestos/stocks_minimos/${datos.stocks_minimos[x].id}/`, {
+                    cantidad: datos.stocks_minimos[x].cantidad,
+                    cantidad_aconsejable: datos.stocks_minimos[x].cantidad_aconsejable,
+                }, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }     
+                })
+                .then( res => { 
+                        updateRepuesto();
+                    }
+                )
+                .catch(err => { console.log(err);});
+            }
+        }
+    };
+
     const actualizarDatos = (event) => {
+        validarStocksMinimos();
         event.preventDefault();
         if(user['tec-user'].perfil.puesto.nombre!=='Operador'){
             axios.put(BACKEND_SERVER + `/api/repuestos/detalle/${datos.id}/`, {
@@ -215,8 +254,6 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             .then( res => { 
                 setRepuesto(res.data);
                 alert('Repuesto actualizado');
-                //window.location.href = "/repuestos/listado";
-                //window.location.href="javascript: history.go(-1)"
             })
             .catch(err => { console.log(err);})
         }
@@ -381,11 +418,6 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     }
 
     function Barcode({datos}) {
-        /* var descripcion;
-        if(datos.nombre_comun){
-            descripcion=datos.nombre_comun;
-        }
-        else {descripcion = datos.nombre;} */
         const {inputRef}  = useBarcode({
           value: String(datos.id).padStart(12,'0'),
           options: {
@@ -596,7 +628,18 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                         <tr>
                                             <th>Empresa</th>
                                             <th>Stock Actual</th>
-                                            <th>Stock Mínimo</th>
+                                            <th style={{ 
+                                                fontStyle: repuesto.es_critico === false ? "italic" : "normal",
+                                                color: repuesto?.es_critico === false ? "#808080" : "black" 
+                                            }}>
+                                                Stock Mínimo
+                                            </th>
+                                            <th style={{ 
+                                                fontStyle: repuesto.es_critico === true ? "italic" : "normal",
+                                                color: repuesto?.es_critico === true ? "#808080" : "black"
+                                            }}>
+                                                    Stock Recomendado
+                                            </th>
                                             <th>Acciones</th>
                                         </tr>
                                     </thead>
@@ -607,6 +650,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                     <td>{stock.empresa.nombre}</td>
                                                     <td>{stock.stock}</td>
                                                     <td>{stock.stock_minimo}</td>
+                                                    <td>{stock.stock_aconsejable}</td>
                                                     <td>
                                                         <GeoAltFill className="mr-3 pencil" onClick={event => {abrirListAlmacen(stock.empresa.id)}}/>                                                        
                                                     </td>
@@ -723,6 +767,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             <StockMinimoForm show={show_stock}
                              handleCloseStock = {handleCloseStock}
                              repuesto_id = {repuesto.id}
+                             repuesto_escritico = {repuesto.es_critico}
                              stock = {stock_editar}
                              stock_minimo =  {stock_minimo_editar}
                              updateRepuesto = {updateRepuesto}

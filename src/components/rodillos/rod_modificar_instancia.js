@@ -111,7 +111,7 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
                             'Authorization': `token ${token['tec-token']}`
                         }     
                     })
-                    .then(r => {
+                    .then(rs => {
                     })
                     .catch(err => { 
                         console.log(err);

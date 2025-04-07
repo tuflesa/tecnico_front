@@ -94,9 +94,10 @@ const RepPendientes = () => {
             .then( r => {
                 const stock_empresa = r.data.reduce((a, b) => a + b.stock_act, 0);
                 const stock_minimo_empresa = r.data.reduce((a, b) => a + b.cantidad, 0);
-                if(stock_empresa<stock_minimo_empresa){
+                const stock_aconsejado_empresa = r.data.reduce((a, b) => a + b.cantidad_aconsejable, 0);
+                if(stock_empresa<stock_minimo_empresa || stock_empresa<stock_aconsejado_empresa){
                     if(res_data_results.length>0){
-                        stock_por_empresa.push({id: id, articulo: repuesto_nombre, tipo:repuesto_tipo, critico: repuesto_critico, stock: stock_empresa, stock_minimo: stock_minimo_empresa});            
+                        stock_por_empresa.push({id: id, articulo: repuesto_nombre, tipo:repuesto_tipo, critico: repuesto_critico, stock: stock_empresa, stock_minimo: stock_minimo_empresa, stock_aconsejado: stock_aconsejado_empresa});            
                     }
                     if(stock_por_empresa){
                         let hash = {};
@@ -340,7 +341,7 @@ const RepPendientes = () => {
                                     <tr>
                                         <th><button type="button" className="btn btn-default" onClick={() => cambioPagina2(datos.pagina2=datos.pagina2-1)}>Pág Anterior</button></th> 
                                         <th><button type="button" className="btn btn-default" onClick={() => cambioPagina2(datos.pagina2=datos.pagina2+1)}>Pág Siguiente</button></th> 
-                                        <th>Número páginas: {datos.pagina2} / {datos.total_pag2} - Registros: {count2}</th>
+                                        <th>Número páginas: {datos.pagina2} / {datos.total_pag2===0?1:datos.total_pag2} - Registros: {count2}</th>
                                     </tr>
                                 </tbody>
                             </table>               
@@ -351,6 +352,7 @@ const RepPendientes = () => {
                                         <th>Crítico</th>
                                         <th>Stock Actual</th>
                                         <th>Stock Mínimo</th>
+                                        <th>Stock Recomendado</th>
                                         <th>Cant. por recibir</th>
                                         <th style={{ width: 90 }}>Acciones</th>
                                     </tr>
@@ -364,6 +366,7 @@ const RepPendientes = () => {
                                                 <td>{pendiente.critico ? 'Si' : 'No'}</td>
                                                 <td>{pendiente.stock}</td>
                                                 <td>{pendiente.stock_minimo}</td> 
+                                                <td>{pendiente.stock_aconsejado}</td> 
                                                 <td>{lineasPendientes && lineasPendientes.map(linea => {
                                                     let suma = 0;
                                                     if (linea.repuesto.id === pendiente.id) {                                        
@@ -396,7 +399,7 @@ const RepPendientes = () => {
                                     <tr>
                                         <th><button type="button" className="btn btn-default" onClick={() => cambioPagina3(datos.pagina3=datos.pagina3-1)}>Pág Anterior</button></th> 
                                         <th><button type="button" className="btn btn-default" onClick={() => cambioPagina3(datos.pagina3=datos.pagina3+1)}>Pág Siguiente</button></th> 
-                                        <th>Número páginas: {datos.pagina3} / {datos.total_pag3} - Registros: {count3}</th>
+                                        <th>Número páginas: {datos.pagina3} / {datos.total_pag3===0?1:datos.total_pag3} - Registros: {count3}</th>
                                     </tr>
                                 </tbody>
                             </table>               
@@ -407,6 +410,7 @@ const RepPendientes = () => {
                                         <th>Crítico</th>
                                         <th>Stock Actual</th>
                                         <th>Stock Mínimo</th>
+                                        <th>Stock Recomendado</th>
                                         <th>Cant. por recibir</th>
                                         <th style={{ width: 90 }}>Acciones</th>
                                     </tr>
@@ -420,6 +424,7 @@ const RepPendientes = () => {
                                                 <td>{pendiente.critico ? 'Si' : 'No'}</td>
                                                 <td>{pendiente.stock}</td>
                                                 <td>{pendiente.stock_minimo}</td> 
+                                                <td>{pendiente.stock_aconsejado}</td>
                                                 <td>{lineasPendientes && lineasPendientes.map(linea => {
                                                     let suma = 0;
                                                     if (linea.repuesto.id === pendiente.id) {                                        
@@ -452,7 +457,7 @@ const RepPendientes = () => {
                                     <tr>
                                         <th><button type="button" className="btn btn-default" onClick={() => cambioPagina(datos.pagina=datos.pagina-1)}>Pág Anterior</button></th> 
                                         <th><button type="button" className="btn btn-default" onClick={() => cambioPagina(datos.pagina=datos.pagina+1)}>Pág Siguiente</button></th> 
-                                        <th>Número páginas: {datos.pagina} / {datos.total_pag} - Registros: {count}</th>
+                                        <th>Número páginas: {datos.pagina} / {datos.total_pag===0?1:datos.total_pag} - Registros: {count}</th>
                                     </tr>
                                 </tbody>
                             </table>                    
