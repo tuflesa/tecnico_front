@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Form, Button, Table, Modal } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, Table, Modal, Alert } from 'react-bootstrap';
 import { Trash, PlusCircle, Receipt, PencilFill } from 'react-bootstrap-icons';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
@@ -28,6 +28,7 @@ const ParteForm = ({parte, setParte, op}) => {
     const soyTecnico = user['tec-user'].perfil.destrezas.filter(s => s === 6);
     const nosoyTecnico = user['tec-user'].perfil.puesto.nombre==='Operador'||user['tec-user'].perfil.puesto.nombre==='Mantenimiento'?true:false;
     const [consumibles, setConsumibles] = useState([]);
+    const [eliminar_consumible, setEliminarConsumible] = useState(false);
 
     const [datos, setDatos] = useState({
         id: parte.id ? parte.id : null,
@@ -106,11 +107,12 @@ const ParteForm = ({parte, setParte, op}) => {
         })
         .then( res => {
             setConsumibles(res.data);
+            setEliminarConsumible(false);
         })
         .catch( err => {
             console.log(err); 
         })       
-    }, [token]);
+    }, [token, eliminar_consumible]);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
@@ -700,36 +702,39 @@ const ParteForm = ({parte, setParte, op}) => {
     };
 
     const BorrarConsumible = (consumible) => {
-        axios.delete(BACKEND_SERVER + `/api/repuestos/lineas_salidas/${consumible.linea_salida.id}/`,{            
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-            } 
-        })
-        .then(r =>{
-            axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimos/?repuesto=${consumible.linea_salida.repuesto.id}&almacen=${consumible.almacen.id}`, {
+        var eliminar = window.confirm('Vas a eliminar un consumible ¿Deseas continuar?');
+        if(eliminar){    
+            axios.delete(BACKEND_SERVER + `/api/repuestos/lineas_salidas/${consumible.linea_salida.id}/`,{            
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
-                }
+                } 
             })
-            .then(res => {      
-                let id_stock = res.data[0].id;
-                let stock_actual = res.data[0].stock_act + consumible.linea_salida.cantidad;
-                axios.patch(BACKEND_SERVER + `/api/repuestos/stocks_minimos/${id_stock}/`, {
-                    stock_act: stock_actual
-                }, {
+            .then(r =>{
+                axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimos/?repuesto=${consumible.linea_salida.repuesto.id}&almacen=${consumible.almacen.id}`, {
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
                     }
                 })
-                .then(rs => {
-
-                })
-                .catch(err => { 
-                    console.log(err);
-                }); 
-            })   
-        })
-        .catch (err=>{console.log((err));});
+                .then(res => {      
+                    let id_stock = res.data[0].id;
+                    let stock_actual = res.data[0].stock_act + consumible.linea_salida.cantidad;
+                    axios.patch(BACKEND_SERVER + `/api/repuestos/stocks_minimos/${id_stock}/`, {
+                        stock_act: stock_actual
+                    }, {
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                        }
+                    })
+                    .then(rs => {
+                        setEliminarConsumible(true);
+                    })
+                    .catch(err => { 
+                        console.log(err);
+                    }); 
+                })   
+            })
+            .catch (err=>{console.log((err));});
+        }
     };
 
     return(
