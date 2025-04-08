@@ -208,8 +208,8 @@ const RepSalidas = ({alm}) => {
             })
             .catch(err => { console.log(err);})
         }
-        setNum_parte(null);
-        sessionStorage.removeItem('num_parte');
+        setNum_parte(null)
+        sessionStorage.removeItem('parte');
     }    
 
     const abrirListRepuestos = () => {
@@ -228,8 +228,9 @@ const RepSalidas = ({alm}) => {
     }
 
     const cancelar = ()=>{
-        sessionStorage.removeItem('num_parte'); // ← limpia almacenamiento
+        sessionStorage.removeItem('parte'); // ← limpia almacenamiento
         setNum_parte(null)
+        setID_parte(null);
         history.push('/home');
     }
 
