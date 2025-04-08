@@ -27,6 +27,7 @@ const ParteForm = ({parte, setParte, op}) => {
     const [lineas, setLineas] = useState(null);
     const soyTecnico = user['tec-user'].perfil.destrezas.filter(s => s === 6);
     const nosoyTecnico = user['tec-user'].perfil.puesto.nombre==='Operador'||user['tec-user'].perfil.puesto.nombre==='Mantenimiento'?true:false;
+    const [consumibles, setConsumibles] = useState([]);
 
     const [datos, setDatos] = useState({
         id: parte.id ? parte.id : null,
@@ -91,6 +92,20 @@ const ParteForm = ({parte, setParte, op}) => {
                 }
                 return 0;
             }));
+        })
+        .catch( err => {
+            console.log(err); 
+        })       
+    }, [token]);
+
+    useEffect(() => {
+        parte && axios.get(BACKEND_SERVER + `/api/repuestos/movimiento_trazabilidad/?linea_salida__salida__num_parte=${parte.id}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setConsumibles(res.data);
         })
         .catch( err => {
             console.log(err); 
@@ -678,6 +693,45 @@ const ParteForm = ({parte, setParte, op}) => {
         return (user['tec-user'].perfil.puesto.nombre==='Mantenimiento')
     }
 
+    const handlerConsumibles = () => {
+        const Parte = parte;
+        sessionStorage.setItem('parte', JSON.stringify(parte));
+        window.location.href = `/repuestos/salidas/`;
+    };
+
+    const BorrarConsumible = (consumible) => {
+        axios.delete(BACKEND_SERVER + `/api/repuestos/lineas_salidas/${consumible.linea_salida.id}/`,{            
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            } 
+        })
+        .then(r =>{
+            axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimos/?repuesto=${consumible.linea_salida.repuesto.id}&almacen=${consumible.almacen.id}`, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }
+            })
+            .then(res => {      
+                let id_stock = res.data[0].id;
+                let stock_actual = res.data[0].stock_act + consumible.linea_salida.cantidad;
+                axios.patch(BACKEND_SERVER + `/api/repuestos/stocks_minimos/${id_stock}/`, {
+                    stock_act: stock_actual
+                }, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }
+                })
+                .then(rs => {
+
+                })
+                .catch(err => { 
+                    console.log(err);
+                }); 
+            })   
+        })
+        .catch (err=>{console.log((err));});
+    };
+
     return(
         <Container className='mt-5'>
             <Row className="justify-content-center"> 
@@ -975,6 +1029,41 @@ const ParteForm = ({parte, setParte, op}) => {
                     </Form.Row>                                                
                 </React.Fragment> 
             : null} 
+            <Modal.Footer>                    
+                <Button variant="info" onClick={handlerConsumibles}> Consumibles </Button> 
+            </Modal.Footer>
+            {parte.id ? 
+                <React.Fragment>
+                    <Form.Row>
+                        <Col>
+                            <Table bordered hover>
+                                <thead>
+                                    <tr>
+                                        <th>Responsable</th>
+                                        <th>Almacén</th>
+                                        <th>Descripción</th>
+                                        <th>Cantidad</th>
+                                        {soyTecnico?<th>Acciones</th>:''}
+                                    </tr>
+                                </thead>                                                                             
+                                <tbody>
+                                    {consumibles && consumibles.map( consumible => {
+                                        return (
+                                            <tr key={consumible.id}>
+                                                <td>{consumible.usuario.get_full_name}</td>
+                                                <td>{consumible.almacen.nombre}</td>
+                                                <td>{consumible.linea_salida.repuesto.nombre}</td>
+                                                <td>{consumible.linea_salida.cantidad}</td>
+                                                {soyTecnico?<td>{<Trash className="mr-3 pencil"  onClick={event =>{BorrarConsumible(consumible)}} />}</td>:''}
+                                            </tr>
+                                        )})
+                                    }
+                                </tbody>
+                            </Table>                                     
+                        </Col>
+                    </Form.Row>                                                
+                </React.Fragment> 
+            : null}
             <LineaTareaNueva     show={show_linea}
                                 handleCloseLinea ={cerrarAddLinea}
                                 tareaAsignadas={parte.tarea}
