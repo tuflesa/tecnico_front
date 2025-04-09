@@ -70,51 +70,41 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
         })  
     }
     
-    const actualizaTarea = () => { //actualiza datos en la tarea que cuelga del parte
+    const actualizaTarea = (datosActualizados) => {
         axios.patch(BACKEND_SERVER + `/api/mantenimiento/tarea_nueva/${linea_tarea.tarea.id}/`, {
-            nombre: datos.nombre,
-            prioridad: datos.prioridad,
-            observaciones: datos.observaciones,
-            //observaciones_trab: datos.observaciones_trab,
-            tipo_periodo: datos.tipo_periodo,
-            periodo: datos.periodo,
-            //fecha_plan: datos.fecha_plan,
+            nombre: datosActualizados.nombre,
+            prioridad: datosActualizados.prioridad,
+            observaciones: datosActualizados.observaciones,
+            tipo_periodo: datosActualizados.tipo_periodo,
+            periodo: datosActualizados.periodo,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }     
         })
-        .then( res => {  
+        .then(res => {
             alert('Tarea actualizada');
         })
-        .catch(err => { console.log(err);})
-    }
+        .catch(err => { console.log(err); })
+    }    
 
-    const actualizarLinea = () => { //actualiza la linea generada de la tarea
+    const actualizarLinea = (datosActualizados) => {
         axios.patch(BACKEND_SERVER + `/api/mantenimiento/linea_nueva/${linea_tarea.id}/`, {
-            fecha_inicio:datos.fecha_inicio,
-            fecha_fin:datos.fecha_fin,
-            fecha_plan:datos.fecha_plan,
-            estado: datos.estado,
-            observaciones_trab: datos.observaciones_trab,
+            fecha_inicio: datosActualizados.fecha_inicio,
+            fecha_fin: datosActualizados.fecha_fin,
+            fecha_plan: datosActualizados.fecha_plan,
+            estado: datosActualizados.estado,
+            observaciones_trab: datosActualizados.observaciones_trab,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }     
         })
-        .then( res => { 
-            datos.nombre= '';
-            datos.especialidad='';
-            datos.prioridad='';
-            datos.observaciones='';
-            datos.observaciones_trab='';
-            datos.fecha_plan=null;
-            datos.fecha_inicio=null;
-            datos.fecha_fin=null;
-            datos.estado='';
+        .then(res => {
+            console.log("Línea actualizada");
         })
-        .catch(err => { console.log(err);})
-    }
+        .catch(err => { console.log(err); })
+    }    
 
     const crearLineaNueva = () => { //si es un preventivo y le ponemos fecha de cierre, crea una nueva linea de la tarea
         var fechaString= null;
@@ -148,30 +138,41 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
         });
     }
 
-    const actualizarDatos = (event) => { //movimientos al pulsar el botón actualizar
+    const actualizarDatos = (event) => {
         event.preventDefault();
-        if(datos.fecha_plan===''){datos.fecha_plan=null;}
-        if(datos.fecha_fin!==null){
-            datos.estado=3;
-            if(linea_tarea.parte.tipo_nombre==='Preventivo'){
-                if(datos.fecha_inicio===null){
-                    datos.fecha_inicio=(hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0'));
+        // Crea una copia del objeto datos para no modificar el original directamente
+        const datosActualizados = {...datos};
+        // Solo establecer fecha_plan a null si realmente está vacío y antes tenía un valor
+        if(datosActualizados.fecha_plan === ''){
+            datosActualizados.fecha_plan = null;
+        }
+        // Actualiza el estado según las fechas
+        if(datosActualizados.fecha_fin !== null){
+            datosActualizados.estado = 3;
+            if(linea_tarea.parte.tipo_nombre === 'Preventivo'){
+                // Si no hay fecha de inicio, establecerla a hoy
+                if(datosActualizados.fecha_inicio === null){
+                    datosActualizados.fecha_inicio = (hoy.getFullYear() + '-' + 
+                        String(hoy.getMonth()+1).padStart(2,'0') + '-' + 
+                        String(hoy.getDate()).padStart(2,'0'));
                 }
                 crearLineaNueva();
-                actualizarLinea();
+                actualizarLinea(datosActualizados);
+                return;
+            } else {
+                actualizarLinea(datosActualizados);
+                actualizaTarea(datosActualizados);
                 return;
             }
-            else{
-                actualizarLinea();
-                actualizaTarea();
-                return;
-            }
+        } else if(datosActualizados.fecha_inicio !== null){
+            datosActualizados.estado = 2;
+        } else if(datosActualizados.fecha_plan !== null){
+            datosActualizados.estado = 1;
+        } else if(datosActualizados.fecha_plan === null){
+            datosActualizados.estado = 4;
         }
-        else if(datos.fecha_inicio!==null){datos.estado=2;}
-        else if(datos.fecha_plan!==null){datos.estado=1;}
-        else if(datos.fecha_plan===null){datos.estado=4;}
-        actualizarLinea();
-        actualizaTarea();
+        actualizarLinea(datosActualizados);
+        actualizaTarea(datosActualizados);
     }
 
     const handleDisabledObservaciones = () => { //inhabilitar observaciones si no eres técnico
@@ -196,7 +197,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                                                 value={datos.prioridad}
                                                 onChange={handleInputChange} 
                                                 placeholder="Prioridad"
-                                                disabled={nosoyTecnico? + true: + false}
+                                                disabled={nosoyTecnico? true: false}
                                                 autoFocus
                                     />
                                 </Form.Group>
@@ -208,7 +209,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                                                 name='estado' 
                                                 value={datos.estado}
                                                 onChange={handleInputChange}
-                                                disabled='true'
+                                                disabled
                                                 placeholder="Estado">
                                                     <option key={0} value={''}>Todos</option>
                                                     {estados && estados.map( estado => {
@@ -227,7 +228,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                                     <Form.Control type="text" 
                                                 name='especialidad' 
                                                 value={datos.especialidad}
-                                                disabled='true'
+                                                disabled
                                     />
                                 </Form.Group>
                             </Col>                                          
@@ -241,7 +242,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                                                 value={datos.nombre}
                                                 onChange={handleInputChange} 
                                                 placeholder="Nombre"
-                                                disabled={nosoyTecnico? + true: + false}
+                                                disabled={nosoyTecnico? true: false}
                                     />
                                 </Form.Group>
                             </Col>
@@ -255,7 +256,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                                                         value={datos.periodo}
                                                         name='periodo'
                                                         onChange={handleInputChange}
-                                                        disabled={nosoyTecnico? + true: + false}>
+                                                        disabled={nosoyTecnico? true: false}>
                                                         {datos.periodo===0?  <option key={0} value={''}>Seleccionar</option>:''}
                                                         <option key={1} value={1}>1</option>
                                                         <option key={2} value={2}>2</option>
@@ -281,7 +282,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                                                     value={datos.tipo_periodo}
                                                     onChange={handleInputChange}
                                                     placeholder="Tipo Periodo"
-                                                    disabled={nosoyTecnico? + true: + false}>  
+                                                    disabled={nosoyTecnico? true: false}>  
                                                     {datos.tipo_periodo===''?  <option key={0} value={''}>Seleccionar</option>:''}   
                                                     {/* {linea_tarea.tipo_periodo===null?  <option key={0} value={''}>Seleccionar</option>:''}                                                */}
                                                     {tipo_periodos && tipo_periodos.map( periodo => {
@@ -305,7 +306,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                                                 value={datos.fecha_plan}
                                                 onChange={handleInputChange} 
                                                 placeholder="Fecha Plan"
-                                                disabled={nosoyTecnico? + true: linea_tarea.parte.fecha_prevista_inicio===null?+ true:+ false} />
+                                                disabled={nosoyTecnico || linea_tarea.parte.fecha_prevista_inicio===null} />
                                 </Form.Group>
                             </Col> 
                             <Col>
@@ -316,7 +317,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                                                 value={datos.fecha_inicio}
                                                 onChange={handleInputChange} 
                                                 placeholder="Fecha Inicio"
-                                                disabled='true' />
+                                                disabled />
                                 </Form.Group>
                             </Col> 
                             <Col>
@@ -358,9 +359,8 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                             </Col>
                         </Row>                    
                         <Form.Row className="justify-content-center">
-                                <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button>
-                                <Button variant="info" className={'mx-2'} onClick={() => window.close()}>Cerrar</Button>
-                                {/* <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar</Button> */}
+                            <Button variant="info" type="button" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button>
+                            <Button variant="info" className={'mx-2'} onClick={() => window.close()}>Cerrar</Button>
                         </Form.Row>
                     </Form>
                 </Col>
