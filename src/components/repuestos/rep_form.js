@@ -685,6 +685,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                         <th>Modelo Prov</th>
                                                         <th>Precio</th>
                                                         <th>Dto</th>
+                                                        <th>Total</th>
                                                         {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
                                                             <th>Acciones</th>
                                                         :null}
@@ -701,6 +702,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                                 <td>{p.modelo_proveedor}</td>
                                                                 <td>{p.precio}</td>
                                                                 <td>{p.descuento}</td>
+                                                                <td>{p.precio-(p.precio*p.descuento/100)}</td>
                                                             {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
                                                                 <td>
                                                                     <Trash className="mr-3 pencil"  onClick={event => {handlerBorrarProveedor(p.proveedor.id)}} />

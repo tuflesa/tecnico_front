@@ -1,7 +1,7 @@
 import React , { useState, useEffect } from "react";
 import { useCookies } from 'react-cookie';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table, Button, Form } from 'react-bootstrap';
 import { Trash, PlusSquare, DashSquare } from 'react-bootstrap-icons';
@@ -10,6 +10,7 @@ import BuscarRepuestos from "./rep_salida_buscar";
 const RepSalidas = ({alm}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
+    const history = useHistory();
 
     const [almacenes, setAlmacenes] = useState(null);
     const [show_listrepuestos, setShowListRepuestos] = useState(null);
@@ -17,6 +18,8 @@ const RepSalidas = ({alm}) => {
     const [cambioCodigo, setCambioCodigo] = useState(false);
     const [almacenesBloqueado, setAlmacenesBloqueado] = useState(false);
     const [salida, setSalida] = useState(null);
+    const [num_parte, setNum_parte] = useState(null);
+    const [id_parte, setID_parte] = useState(null);
     //const [movimientos, setMovimientos] = useState([]);
 
     const [numeroBar, setNumeroBar] = useState({
@@ -34,6 +37,16 @@ const RepSalidas = ({alm}) => {
         critico: '',
         cantidad: '',
     }); 
+
+    useEffect(() => {
+        const parteStr = sessionStorage.getItem('parte');
+    
+        if (parteStr) {
+            const Parte = JSON.parse(parteStr);
+            setNum_parte(Parte.num_parte);
+            setID_parte(Parte.id);
+        }
+    }, []);
 
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/repuestos/almacen/?empresa=${datos.usuario.perfil.empresa.id}`,{
@@ -183,7 +196,8 @@ const RepSalidas = ({alm}) => {
         if (lineasSalida.length > 0) {
             axios.post(BACKEND_SERVER + `/api/repuestos/salida/`, {
                 nombre: 'Salida de almacen',
-                responsable: user['tec-user'].id
+                responsable: user['tec-user'].id,
+                num_parte: id_parte?id_parte:'',
             }, {
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
@@ -194,6 +208,8 @@ const RepSalidas = ({alm}) => {
             })
             .catch(err => { console.log(err);})
         }
+        setNum_parte(null)
+        sessionStorage.removeItem('parte');
     }    
 
     const abrirListRepuestos = () => {
@@ -209,6 +225,13 @@ const RepSalidas = ({alm}) => {
         datos.almacen=numeroBar.almacen;
         setCambioCodigo(!cambioCodigo);
         cerrarListRepuestos();      
+    }
+
+    const cancelar = ()=>{
+        sessionStorage.removeItem('parte'); // ← limpia almacenamiento
+        setNum_parte(null)
+        setID_parte(null);
+        history.push('/home');
     }
 
     return (
@@ -237,7 +260,18 @@ const RepSalidas = ({alm}) => {
                                     })}                                                                                                                                                          
                         </Form.Control>
                     </Form.Group>
-                </Col>                 
+                </Col>  
+                {num_parte?
+                    <Col>
+                        <Form.Group controlId="num_parte">
+                            <Form.Label>Numero Parte</Form.Label>
+                            <Form.Control type="text" 
+                                        name='num_parte' 
+                                        disabled
+                                        value={num_parte}/>
+                        </Form.Group>
+                    </Col>
+                :''}           
                 {numeroBar.almacen ?                            
                 <Col>
                     <Form.Group>
@@ -295,13 +329,7 @@ const RepSalidas = ({alm}) => {
                     <Button variant="info" type="submit" className={'mx-2'} onClick={GenerarSalida}>Hacer Salida</Button> :
                     null
                 }
-                
-                <Link to = '/home'>
-                    <Button variant="warning" >
-                        Cancelar
-                    </Button>
-                </Link>
-                                          
+                <Button variant="warning" onClick={cancelar}> Cancelar </Button>               
             </Form.Row>
             <BuscarRepuestos    show={show_listrepuestos}
                                 cerrarListRepuestos={cerrarListRepuestos}
