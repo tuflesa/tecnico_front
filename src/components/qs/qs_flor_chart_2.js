@@ -98,7 +98,6 @@ const FlowerChart2 = ({montaje, posiciones, fleje, setDesarrollosModelo}) => {
                     else {
                         L = fleje.ancho - R * alfa;
                     }
-                    console.log('L: ', L);
                     Df = roll.parametros.Df;
                 
                     // Calculos
@@ -401,10 +400,6 @@ const FlowerChart2 = ({montaje, posiciones, fleje, setDesarrollosModelo}) => {
         function draw_W(m,i) { //Soldadura
             const r = path();
 
-            //debug
-            console.log('draw_W...');
-            console.log('m', m);
-
             // Rodillos
             const roll_lop = m.rodillos.filter(r => r.eje=='LAT_OP')[0]; // Lateral OP
             const roll_lmo = m.rodillos.filter(r => r.eje=='LAT_MO')[0]; // Lateral OP
@@ -468,7 +463,7 @@ const FlowerChart2 = ({montaje, posiciones, fleje, setDesarrollosModelo}) => {
             const y02i = Math.abs((-b - Math.sqrt(b**2 - 4*a*c))/(2*a)); // corte inferior
             if (y0 > y02) {
                 dibujar = false;
-                // console.log('No dibuja porque y0 =', y0, ' es mayor que y02 = ', y02);
+                console.log('No dibuja porque y0 =', y0, ' es mayor que y02 = ', y02);
             }
             
             // Inferior OP
@@ -501,11 +496,11 @@ const FlowerChart2 = ({montaje, posiciones, fleje, setDesarrollosModelo}) => {
             if (alfa4 < 0) {
                 dibujar=false;
                 // console.log('R2: ', R2);
-                // console.log('No dibuja porque alfa4 <0 ', alfa4);
+                console.log('No dibuja porque alfa4 <0 ', alfa4);
             }
-            if (y02i < (pos_inf-h_cab)){
+            if (y02i < (pos_inf-h_cab) && (pos_lop != pos_inf) ){
                 dibujar = false;
-                // console.log('No dibuja porque y02i<pos_inf ', y02i);
+                console.log('No dibuja porque y02i<pos_inf ', y02i);
             } 
 
             // Inferior motor
@@ -539,7 +534,7 @@ const FlowerChart2 = ({montaje, posiciones, fleje, setDesarrollosModelo}) => {
             // Condiciones para dibujar
             if(R2<0 || R2m<0 || R2-e <0 || R2m-e <0) {
                 dibujar=false;
-                // console.log('No dibuja porque R2<0 o R2m<0 o R2-e<0 0 R2m-e<0 ', R2, R2m, R2-e, R2m-e);
+                console.log('No dibuja porque R2<0 o R2m<0 o R2-e<0 0 R2m-e<0 ', R2, R2m, R2-e, R2m-e);
             }
 
             // Superior MO
@@ -565,11 +560,11 @@ const FlowerChart2 = ({montaje, posiciones, fleje, setDesarrollosModelo}) => {
             const y02mi = Math.abs((-b - Math.sqrt(b**2 - 4*a*c))/(2*a));
             if (y0m > y02m) {
                 dibujar = false;
-                // console.log('No dibuja porque y0m > y02m ', y0m, y02m);
+                console.log('No dibuja porque y0m > y02m ', y0m, y02m);
             }
-            if (y02mi < (pos_inf-h_cab)) {
+            if (y02mi < (pos_inf-h_cab) && (pos_lop != pos_inf)) {
                 dibujar = false;
-                // console.log('No dibuja porque y02mi < pos_inf ', y02mi);
+                console.log('No dibuja porque y02mi < pos_inf ', y02mi);
             }
 
             const m1m = (x4m-x3m)/(y3m-y4m);
@@ -746,7 +741,7 @@ const FlowerChart2 = ({montaje, posiciones, fleje, setDesarrollosModelo}) => {
     // Calculo del desarrollo y crecimiento hasta final del lineal
     useEffect(()=>{
         if(fleje&&des_FP1&&des_FP2&&des_FP3&&des_W) {
-            console.log('Calculos desarrollos modelo ...');
+            // console.log('Calculos desarrollos modelo ...');
             setDesarrollosModelo({
             'Fleje' : fleje.ancho,
             'Lineal': fleje.ancho + 0.863428+2.255361*fleje.espesor,
@@ -757,7 +752,7 @@ const FlowerChart2 = ({montaje, posiciones, fleje, setDesarrollosModelo}) => {
             });
         }
         else {
-            console.log('modelo null ...');
+            // console.log('modelo null ...');
             setDesarrollosModelo(null);
         } 
     },[fleje, des_FP1, des_FP2, des_FP3, des_W]);

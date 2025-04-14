@@ -55,8 +55,8 @@ const QS_Produccion = () => {
                 }
         })
         .then( res => {
-                console.log('Posiciones PLC ...');
-                console.log(res.data);
+                // console.log('Posiciones PLC ...');
+                // console.log(res.data);
                 setPosiciones(res.data);
         })
     }
@@ -69,8 +69,8 @@ const QS_Produccion = () => {
                 }
         })
         .then( res => {
-                console.log('Posiciones PLC ...');
-                console.log(res.data);
+                // console.log('Posiciones PLC ...');
+                // console.log(res.data);
                 setPosicionesSim(res.data);
         })
     }
@@ -175,7 +175,7 @@ const QS_Produccion = () => {
                 nombre: 'CB4',
                 posiciones: [{eje: 'INF', pos: var_data.cb4_inf}, {eje: 'SUP', pos: var_data.cb4_sup}, {eje: 'LAT_OP', pos: var_data.cb4_lat_op}, {eje: 'LAT_MO', pos: var_data.cb4_lat_mo}]
             });
-            console.log('posicones_variante', posiciones_variante);
+            // console.log('posicones_variante', posiciones_variante);
             simulador ? setPosicionesSim(posiciones_variante) : setPosiciones(posiciones_variante);
         }
     }
@@ -208,7 +208,7 @@ const QS_Produccion = () => {
             return
         }
         // Si hay dato continuamos
-        // console.log('dato ...');
+        // console.log('Lee Montaje dato ...');
         // console.log(dato);
         const temp = []; // Aqui guardo el montaje temporal
         const bancadas = [];
@@ -291,7 +291,7 @@ const QS_Produccion = () => {
                             }
                             else { //Rodillos diferentes
                                 // console.log('Rodillos diferentes');
-                                eje = instancia.posicion;
+                                eje = e.eje.tipo.siglas + '_' + instancia.posicion.siglas;
                                 rod.push({
                                     tipo_plano: e.rodillo.tipo_plano?e.rodillo.tipo_plano.nombre:'NONE',
                                     eje: eje,
@@ -384,7 +384,6 @@ const QS_Produccion = () => {
         montaje.filter(m => m.tipo=='FP').map(fp => {
             // console.log(fp);
             Dt = desarrollosTeorico[fp.nombre]; // Desarrollo teorico
-
             // Rodillos
             roll_i = fp.rodillos.filter(r => r.eje == 'INF')[0];
             roll_s = fp.rodillos.filter(r => r.eje == 'SUP')[0];
@@ -412,8 +411,12 @@ const QS_Produccion = () => {
             // Calulos
             let alfa_c = 0;
             if (R1_s != 0) {
-            alfa_c = Math.asin(C/(2*R1_s));
+                alfa_c = Math.asin(C/(2*R1_s));
             }
+            // console.log('L01: ', R1*alfa1 + 2*R2*((Math.PI-alfa1)/2 - alfa3));
+            // console.log('R2_s, alfa2_s, alfa3_s', R2_s, alfa2_s*180/Math.PI, alfa3_s*180/Math.PI);
+            // console.log('R1_s, alfa1_s, alfa_c', R1_s, alfa1_s*180/Math.PI, alfa_c*180/Math.PI);
+            // console.log('L02: ', 2*R2_s*(alfa2_s-alfa3_s) + 2*R1_s*(alfa1_s/2-alfa_c));
             const L0 = R1*alfa1 + 2*R2*((Math.PI-alfa1)/2 - alfa3) + 2*R2_s*(alfa2_s-alfa3_s) + 2*R1_s*(alfa1_s/2-alfa_c); // Parte fija del desarrollo
             const L = Dt - L0;
             R4 = L/(4*alfa3);
@@ -440,8 +443,7 @@ const QS_Produccion = () => {
                     // console.log('Ancho FP3: ', anchoFP3);
                     break;
             }
-            // console.log('gap_i: ', gap);
-            // console.log('pos_s: ', pos_s);
+
             pos_STD.push({
                 op: fp.operacion,
                 nombre: fp.nombre,
@@ -456,7 +458,6 @@ const QS_Produccion = () => {
         const pos_fp1_inf = pos_STD.filter(p => p.nombre=='FP1')[0].posiciones.filter(p => p.eje=='INF')[0].pos;
         const x_fp1 = alturas.filter(a => a.nombre=='MIN')[0].puntos.filter(p => p.nombre=='FP1')[0].x;
         const m = pos_fp1_inf/x_fp1;
-        // console.log('pendiente: ', m);
 
         // Break Down
         montaje.filter(m => m.tipo=='BD').map(bd => {
@@ -498,7 +499,7 @@ const QS_Produccion = () => {
                             else {
                                 L = fleje.ancho - R * alfa;
                             }
-                            y = R * (1 - Math.cos(alfa/2)) + (L/2) * Math.sin(alfa/2) - pos_bd2_inf;
+                            y = R * (1 - Math.cos(alfa/2)) + (L/2) * Math.sin(alfa/2) + pos_bd2_inf;
                             x0 = R * Math.sin(alfa/2) + (L/2) * Math.cos(alfa/2);
                             break;
                         case 'BD_2':
@@ -542,11 +543,9 @@ const QS_Produccion = () => {
                     alfa1 = roll_lat.parametros.alfa1 * Math.PI / 180;
                     R1 = roll_lat.parametros.R1;
                     R2 = roll_lat.parametros.R2;
-                    // console.log(roll_lat);
-                    // console.log('parametros lat ... ', Hc, alfa2, R1, R2);
                     y1 = y - Hc + (R1+R2)*Math.sin(alfa1);
 
-                    ancho = 2*x0;
+                    ancho = 2*x0 + 10;
                     alto = y1 + 310 + 10; // +10 es la ditancia que debe quedar entre el angulo del rodillo y el fleje
                     break;
                 case 'IS2':
@@ -621,19 +620,20 @@ const QS_Produccion = () => {
             else { // Cuadrado - rectangular
                 switch (cb.nombre){
                     case 'CB1':
-                        factor = 1.18;
+                        factor = 3;//1.18;
                         break;
                     case 'CB2':
-                        factor = 1.09;
+                        factor = 2;//1.09;
                         break;
                     case 'CB3':
-                        factor = 1.045;
+                        factor = 1;//1.045;
                         break;
                     case 'CB4':
-                        factor = 1;
+                        factor = 0;
                 }
-                rod_sup_inf = alto/2 * factor;
-                rod_lat = ancho/2 * factor;
+                const K=0.06;
+                rod_sup_inf = alto/2 * (1 + K * ancho/alto)**factor;
+                rod_lat = ancho/2 * (1 + K * alto/ancho)**factor;
             }
 
             pos_STD.push({
@@ -894,7 +894,7 @@ const QS_Produccion = () => {
     }
 
     const simular = (event) => {
-        console.log('simular ...');
+        // console.log('simular ...');
         event.preventDefault();
         const temp = [...posicionesSim];
 
@@ -936,9 +936,9 @@ const QS_Produccion = () => {
     }
 
     const handleVarianteChange = (event) => {
-        console.log('cambio de variante ...');
-        console.log('posiciones',posiciones);
-        console.log('variante', variantes.filter(v => v.id == event.target.value)[0]);
+        // console.log('cambio de variante ...');
+        // console.log('posiciones',posiciones);
+        // console.log('variante', variantes.filter(v => v.id == event.target.value)[0]);
         leeVariante(event.target.value);
         setVariante(event.target.value);
     }
@@ -979,7 +979,7 @@ const QS_Produccion = () => {
               }
         })
         .then( res => {
-            // console.log(res.data);
+            console.log(res.data);
             setMontajes(res.data);
         })
         .catch( err => {
@@ -1071,8 +1071,8 @@ const QS_Produccion = () => {
                     }
                     break;
                 case 'FP':
-                    console.log('Gap: Fin pass');
-                    console.log('m', m);
+                    // console.log('Gap: Fin pass');
+                    // console.log('m', m);
                     piston = null;
                     if (!simulador){
                         pos_i = posiciones.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='INF')[0].pos;

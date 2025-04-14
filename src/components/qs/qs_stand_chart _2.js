@@ -672,9 +672,6 @@ const StandChart2 = ({montaje, posiciones, gap, fleje}) => {
                 r.lineTo(xScale(x4), yScale(y7));
                     break;
                 case 'W_Lat_4':
-                    // Debug
-                    console.log('W_Lat_4 ...');
-                    console.log('rodillo', roll_Lat_Operador);
                     // Parametros
                     R1 = roll_Lat_Operador.parametros.R1;
                     R2 = roll_Lat_Operador.parametros.R2;
