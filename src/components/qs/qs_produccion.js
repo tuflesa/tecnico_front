@@ -111,7 +111,7 @@ const QS_Produccion = () => {
                 op: 4,
                 nombre: 'LINEAL',
                 posiciones: [{eje: 'ENTRADA_ALTO', pos: var_data.l_entrada_alto}, {eje: 'ENTRADA_ANCHO', pos: var_data.l_entrada_ancho}, {eje: 'ENTRADA_SUP', pos: var_data.l_entrada_sup},
-                            {eje: 'SALIDA_ANCHO', pos: var_data.l_salida_ancho}, {eje: 'SALIDA_ANCHO', pos: var_data.l_salida_ancho}, {eje: 'SALIDA_SUP', pos: var_data.l_salida_sup},
+                            {eje: 'SALIDA_ALTO', pos: var_data.l_salida_alto}, {eje: 'SALIDA_ANCHO', pos: var_data.l_salida_ancho}, {eje: 'SALIDA_SUP', pos: var_data.l_salida_sup},
                             {eje: 'RODILLO_INF_ENTRADA', pos: var_data.l_entrada_rod_inf}, {eje: 'RODILLO_INF_CENTRO', pos: var_data.l_centro_rod_inf}, {eje: 'RODILLO_INF_SALIDA', pos: var_data.l_salida_rod_inf}]
             });
             // FP1
@@ -887,7 +887,8 @@ const QS_Produccion = () => {
               }     
         })
         .then( res => { 
-            // console.log('POST variantes: ',res.data);         
+            console.log('POST variantes: ',res.data); 
+            alert('Variante enviada con exito ...');        
             
         })
         .catch(err => { console.log(err);})
@@ -1231,6 +1232,7 @@ const QS_Produccion = () => {
         fleje&&posiciones&&posicionesSim&&montaje&&montaje.map(m => {
             switch (m.tipo) {
                 case 'BD':
+                    console.log('m ', m);
                     switch (m.rodillos.filter(r => r.eje=='INF')[0].tipo_plano.slice(0,4)) {
                         case 'BD_I':
                             // console.log('Alturas: BD Standar ...');
