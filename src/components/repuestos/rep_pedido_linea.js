@@ -10,7 +10,8 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
 
     const [repuestos, setRepuestos]= useState(null);
     const [show_listrepuestos, setShowListRepuestos] = useState(null);
-    
+    const [tipo_unidad, setTipoUnidad]=useState([])
+
     const [datos, setDatos] = useState({  
         repuesto: linea ? linea.repuesto : '',
         cantidad: linea ? linea.cantidad : 0,
@@ -24,6 +25,7 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
         id_linea_precio: 0,
         descripcion_proveedor: linea ? linea.descripcion_proveedor : '',
         modelo_proveedor: linea ? linea.modelo_proveedor : '',
+        tipo_unidad: linea ? linea.tipo_unidad?linea.tipo_unidad: linea.repuesto?linea.repuesto.tipo_unidad:'':'',
     });   
 
     useEffect(()=>{
@@ -42,6 +44,7 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
             descripcion_proveedor: linea ? linea.descripcion_proveedor : '',
             modelo_proveedor_recibida: linea ? linea.modelo_proveedor : '',
             modelo_proveedor: linea ? linea.modelo_proveedor : '',
+            tipo_unidad: linea ? linea.tipo_unidad?linea.tipo_unidad: linea.repuesto?linea.repuesto.tipo_unidad:'':'',
         });
     },[linea, pedido_id]);
 
@@ -65,6 +68,18 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
         })
         .catch(err => { console.log(err);})
     },[token, proveedor_id, datos.repuesto]);
+
+    useEffect(()=>{
+        axios.get(BACKEND_SERVER + `/api/repuestos/tipo_unidad/`, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => { 
+            setTipoUnidad(res.data);
+        })
+        .catch(err => { console.log(err);})
+    },[token]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -118,6 +133,7 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
             por_recibir: datos.cantidad,
             descripcion_proveedor: datos.descripcion_proveedor,
             modelo_proveedor: datos.modelo_proveedor,
+            tipo_unidad: datos.tipo_unidad,
         },
         {
             headers: {
@@ -147,13 +163,17 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
     }
      
     const handlerEditar = async () => {   
-        if (datos.cantidad<(linea.cantidad - linea.por_recibir) || datos.por_recibir<0){            
+        console.log('datos.cantidad: ', typeof datos.cantidad)
+        console.log('linea.cantidad: ', typeof linea.cantidad)
+        console.log('linea.por_recibir: ', typeof linea.por_recibir)
+        console.log('datos.por_recibir: ', typeof datos.por_recibir)
+        if (parseFloat(datos.cantidad)<(parseFloat(linea.cantidad) - parseFloat(linea.por_recibir)) ||parseFloat( datos.por_recibir)<0){            
             alert('Cantidad erronea, revisa cantidad recibida');            
             handlerCancelar();
         }
         else{              
             axios.patch(BACKEND_SERVER + `/api/repuestos/linea_pedido/${linea.id}/`,{
-                cantidad: datos.cantidad,
+                cantidad: parseFloat(datos.cantidad),
                 precio: datos.precio,
                 descuento: datos.descuento,
                 total: datos.total,
@@ -208,6 +228,7 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
         datos.descuento_recibido=r.descuento;
         datos.id_linea_precio=r.id;
         datos.descripcion_proveedor=r.descripcion_proveedor;
+        datos.tipo_unidad=r.repuesto.tipo_unidad;
         cerrarListRepuestos();      
     }
 
@@ -243,6 +264,25 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
                                                 onChange={handleInputChange}
                                                 placeholder="Modelo Proveedor"
                                                 disabled>  
+                                    </Form.Control>
+                                </Form.Group>
+                                <Form.Group controlId="tipo_unidad">
+                                    <Form.Label>Medida</Form.Label>
+                                    <Form.Control as="select"  
+                                                name='tipo_unidad' 
+                                                value={datos.tipo_unidad}
+                                                onChange={handleInputChange}
+                                                placeholder="Unidad medida"> 
+                                                <option key={0} value={''}>
+                                                        ----
+                                                </option>
+                                                {tipo_unidad && tipo_unidad.map( medida => {
+                                                    return (
+                                                    <option key={medida.id} value={medida.id}>
+                                                        {medida.siglas}
+                                                    </option>
+                                                    )
+                                                })}                                                                                                 
                                     </Form.Control>
                                 </Form.Group>
                                 <Form.Group controlId="cantidad">

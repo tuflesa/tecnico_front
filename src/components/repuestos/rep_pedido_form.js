@@ -817,7 +817,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                     <tr key={linea.id} className = {((linea.por_recibir===0) && (linea.cantidad!=linea.por_recibir) || (linea.cantidad<(linea.cantidad-linea.por_recibir)))? "table-success" : (linea.cantidad - linea.por_recibir)>0? "table-primary" : " "}>
                                                         <td>{linea.descripcion_proveedor!==null?linea.descripcion_proveedor + ' - ' + linea.modelo_proveedor:linea.repuesto.nombre + (linea.repuesto.fabricante? ' - ' + linea.repuesto.fabricante:'') + (linea.modelo_proveedor? ' - ' + linea.modelo_proveedor:'')}</td>
                                                         <td>{linea.cantidad}</td>
-                                                        <td>{linea.repuesto.unidad_nombre}</td>
+                                                        <td>{linea.tipo_unidad_nombre}</td>
                                                         <td>{formatNumber(linea.precio)}</td>
                                                         <td>{formatPorcentaje(linea.descuento)+'%'}</td>
                                                         {/* <td>{linea.total + '€'}</td> */}
