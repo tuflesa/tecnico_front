@@ -188,10 +188,10 @@ const QS_Produccion = () => {
                 const PLC = diametrosPLC[o.nombre];
                 const Df_PLC = PLC[r.eje];
                 if (Math.abs(Df_PC-Df_PLC) > 0.1) {
-                //     console.log('Operacion ', o.nombre);
-                //     console.log('Eje: ', r.eje);
-                //     console.log('Df_PC ', Df_PC);
-                //     console.log('Df_PLC ', Df_PLC);
+                    console.log('Operacion ', o.nombre);
+                    console.log('Eje: ', r.eje);
+                    console.log('Df_PC ', Df_PC);
+                    console.log('Df_PLC ', Df_PLC);
                     montaje_OK = false;
                 }
             });
@@ -823,10 +823,10 @@ const QS_Produccion = () => {
     // Enviar Variante al PLC - TODO
     const EnviarPLC = () => {
         const data = simulador?posicionesSim:posiciones;
-        // console.log('datos enviados ...');
-        // console.log(data);
-        // console.log('Diametros PC ...');
-        // console.log(diametrosPC);
+        console.log('datos enviados ...');
+        console.log(data);
+        console.log('Diametros PC ...');
+        console.log(diametrosPC);
         // console.log(data.filter(p => p.nombre=='W')[0].posiciones.filter(p =>p.eje=='SUP_H_MO')[0].pos);
         axios.post(BACKEND_SERVER + `/api/qs/enviar_variante_PLC/`, {
             pr_inf: data.filter(p => p.nombre=='PR')[0].posiciones.filter(p =>p.eje=='INF')[0].pos,
@@ -996,14 +996,28 @@ const QS_Produccion = () => {
         let temp = {};
         montaje&&montaje.forEach(o => {
             o.rodillos.forEach(r =>{
-                const Df_PC = r.parametros.Df;
+                // const Df_PC = r.parametros.Df;
                 temp = {
                     ...temp,
                     [o.nombre + '_' + r.eje + '_D']: r.parametros.Df,
                 }
             });
         });
-        setDiametrosPC(temp);
+        // Añadir Dext de los ISs
+        const iss = montaje&&montaje.filter(o => o.nombre.substring(0,2)=='IS');
+        iss&&iss.forEach(is => {
+            is.rodillos.forEach(r => {
+                // console.log('Eje: ', r.eje);
+                // console.log(is.nombre + ' Dext: ' + r.parametros.Dext);
+                if(r.eje == 'ANCHO') {
+                    temp = {
+                        ...temp,
+                        [is.nombre + '_Dext_D']: r.parametros.Dext,
+                    }
+                }
+            });
+        });
+        montaje&&setDiametrosPC(temp);
     },[montaje]);
 
     // Cuando tenemos nuevos diametros del PLC y montaje comparamos si los diametros coinciden
