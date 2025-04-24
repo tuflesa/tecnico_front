@@ -55,8 +55,8 @@ const QS_Produccion = () => {
                 }
         })
         .then( res => {
-                // console.log('Posiciones PLC ...');
-                // console.log(res.data);
+                console.log('Posiciones PLC ...');
+                console.log(res.data);
                 setPosiciones(res.data);
         })
     }
@@ -823,10 +823,10 @@ const QS_Produccion = () => {
     // Enviar Variante al PLC - TODO
     const EnviarPLC = () => {
         const data = simulador?posicionesSim:posiciones;
-        console.log('datos enviados ...');
-        console.log(data);
-        console.log('Diametros PC ...');
-        console.log(diametrosPC);
+        // console.log('datos enviados ...');
+        // console.log(data);
+        // console.log('Diametros PC ...');
+        // console.log(diametrosPC);
         // console.log(data.filter(p => p.nombre=='W')[0].posiciones.filter(p =>p.eje=='SUP_H_MO')[0].pos);
         axios.post(BACKEND_SERVER + `/api/qs/enviar_variante_PLC/`, {
             pr_inf: data.filter(p => p.nombre=='PR')[0].posiciones.filter(p =>p.eje=='INF')[0].pos,
@@ -1246,7 +1246,7 @@ const QS_Produccion = () => {
         fleje&&posiciones&&posicionesSim&&montaje&&montaje.map(m => {
             switch (m.tipo) {
                 case 'BD':
-                    console.log('m ', m);
+                    // console.log('m ', m);
                     switch (m.rodillos.filter(r => r.eje=='INF')[0].tipo_plano.slice(0,4)) {
                         case 'BD_I':
                             // console.log('Alturas: BD Standar ...');
@@ -1557,6 +1557,7 @@ const QS_Produccion = () => {
                                                         as="select" 
                                                         value={variante}
                                                         name='variante'
+                                                        disabled = {simulador}
                                                         onChange={handleVarianteChange}>
                                             <option key={0} value={0}>PLC</option> 
                                             {variantes&&variantes.map(v => {

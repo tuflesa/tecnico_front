@@ -29,7 +29,7 @@ const CargaForm = ({ carga }) => {
         bruto: Number.isInteger(parseInt(carga.bruto)) ? carga.bruto : '',
         fecha_salida: carga.fecha_salida,
         bascula: '',
-        observaciones: ''
+        observaciones: carga ? carga.observaciones : ''
     });
  
     useEffect(()=>{
