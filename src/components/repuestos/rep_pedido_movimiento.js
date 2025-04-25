@@ -246,7 +246,7 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
                                         <Form.Label>Ctd. a guardar*</Form.Label>
                                         <Form.Control imput type="text"  
                                                     name='guardar' 
-                                                    value={datos.recibido}
+                                                    value={datos.guardar}
                                                     onChange={handleInputChange2}
                                                     placeholder="Cantidad Guardar">  
                                         </Form.Control>

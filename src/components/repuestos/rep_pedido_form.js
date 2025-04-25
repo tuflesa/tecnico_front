@@ -814,16 +814,15 @@ const PedidoForm = ({pedido, setPedido}) => {
                                             {datos.lineas_pedido && datos.lineas_pedido.map( linea => {
                                                 {total_pedido+=Number(linea.total)}
                                                 return (
-                                                    <tr key={linea.id} className = {((linea.por_recibir===0) && (linea.cantidad!=linea.por_recibir) || (linea.cantidad<(linea.cantidad-linea.por_recibir)))? "table-success" : (linea.cantidad - linea.por_recibir)>0? "table-primary" : " "}>
+                                                    <tr key={linea.id} className = {((parseFloat(linea.por_recibir)===0) && (parseFloat(linea.cantidad)!=parseFloat(linea.por_recibir)) || (parseFloat(linea.cantidad)<(parseFloat(linea.cantidad)-parseFloat(linea.por_recibir))))? "table-success" : (linea.cantidad - linea.por_recibir)>0? "table-primary" : " "}>
                                                         <td>{linea.descripcion_proveedor!==null?linea.descripcion_proveedor + ' - ' + linea.modelo_proveedor:linea.repuesto.nombre + (linea.repuesto.fabricante? ' - ' + linea.repuesto.fabricante:'') + (linea.modelo_proveedor? ' - ' + linea.modelo_proveedor:'')}</td>
-                                                        <td>{linea.cantidad}</td>
+                                                        <td>{parseFloat(linea.cantidad)}</td>
                                                         <td>{linea.tipo_unidad_nombre}</td>
                                                         <td>{formatNumber(linea.precio)}</td>
                                                         <td>{formatPorcentaje(linea.descuento)+'%'}</td>
-                                                        {/* <td>{linea.total + '€'}</td> */}
                                                         <td>{formatNumber(linea.total)}</td>
-                                                        <td>{linea.cantidad - linea.por_recibir}</td>
-                                                        <td>{linea.por_recibir}</td>
+                                                        <td>{parseFloat(linea.cantidad - linea.por_recibir).toFixed(2)}</td>
+                                                        <td>{parseFloat(linea.por_recibir)}</td>
                                                         <td>
                                                             <PencilFill className="mr-3 pencil" onClick={event => {editLinea(linea)}}/>
                                                             <Truck className="mr-3 pencil" onClick={event =>{creaMoviviento(linea)}}/>
@@ -870,14 +869,14 @@ const PedidoForm = ({pedido, setPedido}) => {
                                             {datos.lineas_adicionales && datos.lineas_adicionales.map( lineaAdicional => {
                                                 {total_pedido+=Number(lineaAdicional.total)}
                                                 return (
-                                                    <tr key={lineaAdicional.id}  className = {((lineaAdicional.por_recibir===0) && (lineaAdicional.cantidad!=lineaAdicional.por_recibir) || (lineaAdicional.cantidad<(lineaAdicional.cantidad-lineaAdicional.por_recibir)))? "table-success" : (lineaAdicional.cantidad - lineaAdicional.por_recibir)>0? "table-primary" : " "}>
+                                                    <tr key={lineaAdicional.id}  className = {((parseFloat(lineaAdicional.por_recibir)===0) && (parseFloat(lineaAdicional.cantidad)!=parseFloat(lineaAdicional.por_recibir)) || (parseFloat(lineaAdicional.cantidad)<(parseFloat(lineaAdicional.cantidad)-parseFloat(lineaAdicional.por_recibir))))? "table-success" : (parseFloat(lineaAdicional.cantidad) - parseFloat(lineaAdicional.por_recibir))>0? "table-primary" : " "}>
                                                         <td>{lineaAdicional.descripcion}</td>
-                                                        <td>{lineaAdicional.cantidad}</td>
+                                                        <td>{parseFloat(lineaAdicional.cantidad)}</td>
                                                         <td>{formatNumber(lineaAdicional.precio)}</td>
                                                         <td>{lineaAdicional.descuento + '%'}</td>
                                                         <td>{formatNumber(lineaAdicional.total)}</td>
-                                                        <td>{lineaAdicional.cantidad - lineaAdicional.por_recibir}</td>
-                                                        <td>{lineaAdicional.por_recibir}</td>
+                                                        <td>{parseFloat(lineaAdicional.cantidad - lineaAdicional.por_recibir).toFixed(2)}</td>
+                                                        <td>{parseFloat(lineaAdicional.por_recibir)}</td>
                                                         <td>
                                                             <PencilFill className="mr-3 pencil" onClick={event => {editLineaAdicional(lineaAdicional)}}/>
                                                             <Truck className="mr-3 pencil" onClick={event => {creaEntrega(lineaAdicional)}}/>

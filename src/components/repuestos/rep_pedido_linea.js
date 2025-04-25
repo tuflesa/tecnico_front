@@ -54,7 +54,7 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
         datos.descuento=Number.parseFloat(datos.descuento).toFixed(2);
         datos.total = Number.parseFloat((datos.precio*datos.cantidad)-(datos.precio*datos.cantidad*datos.descuento/100)).toFixed(4);
         //datos.total=Number.parseFloat(datos.total).toFixed(2);
-        datos.por_recibir = linea ? (linea.por_recibir+(datos.cantidad-linea.cantidad)) : datos.cantidad;
+        datos.por_recibir = linea ? parseFloat(parseFloat(linea.por_recibir)+(parseFloat(datos.cantidad)-parseFloat(linea.cantidad))).toFixed(2) : parseFloat(datos.cantidad);
     },[datos.cantidad, datos.precio, datos.descuento]);
 
     useEffect(()=>{
@@ -163,10 +163,6 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
     }
      
     const handlerEditar = async () => {   
-        console.log('datos.cantidad: ', typeof datos.cantidad)
-        console.log('linea.cantidad: ', typeof linea.cantidad)
-        console.log('linea.por_recibir: ', typeof linea.por_recibir)
-        console.log('datos.por_recibir: ', typeof datos.por_recibir)
         if (parseFloat(datos.cantidad)<(parseFloat(linea.cantidad) - parseFloat(linea.por_recibir)) ||parseFloat( datos.por_recibir)<0){            
             alert('Cantidad erronea, revisa cantidad recibida');            
             handlerCancelar();
@@ -178,9 +174,10 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
                 descuento: datos.descuento,
                 total: datos.total,
                 pedido: datos.pedido,
-                por_recibir: datos.por_recibir,
+                por_recibir: parseFloat(datos.por_recibir),
                 descripcion_proveedor: datos.descripcion_proveedor,
                 modelo_proveedor: datos.modelo_proveedor,
+                tipo_unidad: datos.tipo_unidad,
                 //descripcion_proveedor: datos.descripcion_proveedor,
             },
             {

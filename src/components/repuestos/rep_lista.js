@@ -116,7 +116,7 @@ const RepLista = () => {
     }
 
     const borrarRepuesto = () => {
-        axios.patch(BACKEND_SERVER + `/api/repuestos/lista/${repuestoBorrar.id}/`,{
+        axios.patch(BACKEND_SERVER + `/api/repuestos/lista/${repuestoBorrar.id}/`,{ //tabla de repuestos
             descatalogado: true
         }, {
             headers: {

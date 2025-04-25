@@ -14,6 +14,8 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
     const [lineaElegida, setLineaElegida]=useState(null);
     const [almacenes, setAlmacenes]=useState(null);
     const [reset, setReset]=useState(null);
+    const [lineaActiva, setLineaActiva] = useState(null);
+    const [actualizar_listado, setActualizarListado] = useState(false);
 
     const [datos, setDatos] = useState({
         fecha: null,
@@ -38,7 +40,7 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
         .catch( err => {
             console.log(err);
         });
-    },[linea, token]);
+    },[linea, token, actualizar_listado]);
 
     useEffect(()=>{
         linea && axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimo_detalle/?repuesto=${linea.repuesto.id}`, {
@@ -75,75 +77,105 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
     },[datos.almacen]);
 
     // activa y desactiva la escritura en la línea
-    const habilitar_linea = (r)=>{;
-        setLineaElegida(r);
-        if(user['tec-user'].perfil.puesto.nombre!=='Operador'){
-            var input_min =  document.getElementsByClassName(r.id);
-            for(var i = 0; i < input_min.length; i++) {
-                input_min[i].disabled = !input_min[i].disabled;
-            }
+    const habilitar_linea = (linea) => {
+        setLineaActiva(linea.id);
+        setLineaElegida(linea);
+        setDatos({
+            fecha: null,
+            cantidad: '',
+            albaran: '',
+            almacen: null,
+        });    
+        const inputs = document.getElementsByClassName(linea.id);
+        for (let i = 0; i < inputs.length; i++) {
+            inputs[i].disabled = false;
         }
-        else (alert('no tienes permisos'))
     }
 
     const guardarMovimiento = () => {
-        habilitar_linea(lineaElegida);
-        axios.patch(BACKEND_SERVER + `/api/repuestos/movimiento/${lineaElegida.id}/`, { 
-            fecha: datos.fecha? datos.fecha : lineaElegida.fecha,
-            cantidad: datos.cantidad !==''? datos.cantidad : lineaElegida.cantidad,
-            almacen: datos.almacen? datos.almacen : lineaElegida.almacen.id,
+        if (!lineaElegida) return;
+    
+        const nuevaCantidad = parseFloat(datos.cantidad || lineaElegida.cantidad).toFixed(2);
+        const cantidadAnterior = parseFloat(lineaElegida.cantidad).toFixed(2);
+        const cantidadCambio = nuevaCantidad !== cantidadAnterior;
+    
+        const nuevoAlbaran = datos.albaran || lineaElegida.albaran;
+        const nuevoAlmacen = datos.almacen || lineaElegida.almacen.id;
+        const nuevaFecha = datos.fecha || lineaElegida.fecha;
+    
+        const sinCambios =
+            !cantidadCambio &&
+            nuevoAlbaran === lineaElegida.albaran &&
+            nuevoAlmacen === lineaElegida.almacen.id &&
+            nuevaFecha === lineaElegida.fecha;
+    
+        if (sinCambios) {
+            alert('⚠️ No se han realizado cambios.');
+            return;
+        }
+    
+        axios.patch(`${BACKEND_SERVER}/api/repuestos/movimiento/${lineaElegida.id}/`, {
+            fecha: nuevaFecha,
+            cantidad: nuevaCantidad,
+            almacen: nuevoAlmacen,
             usuario: user['tec-user'].id,
             linea_pedido: lineaElegida.linea_pedido,
             linea_inventario: lineaElegida.linea_inventario,
-            albaran: datos.albaran? datos.albaran : lineaElegida.albaran,
+            albaran: nuevoAlbaran
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
-              }     
-        })
-        .then( res => { 
-            axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimos/?repuesto=${linea.repuesto.id}&almacen=${lineaElegida.almacen.id}`, {
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                  }     
-            })
-            .then( r => { 
-                axios.patch(BACKEND_SERVER + `/api/repuestos/stocks_minimos/${r.data[0].id}/`, {
-                    stock_act: (r.data[0].stock_act - res.data.cantidad) - (listados[0].cantidad - res.data.cantidad), 
+            }
+        }).then(res => {
+            const nuevaCantidadGuardada = parseFloat(res.data.cantidad);
+            axios.get(`${BACKEND_SERVER}/api/repuestos/stocks_minimos/?repuesto=${linea.repuesto.id}&almacen=${lineaElegida.almacen.id}`, {
+                headers: { 'Authorization': `token ${token['tec-token']}` }
+            }).then(r => {
+                const stockActual = parseFloat(r.data[0].stock_act);
+                const stockId = r.data[0].id;
+                const diferenciaStock = nuevaCantidadGuardada - parseFloat(lineaElegida.cantidad);
+                const nuevoStock = (stockActual-nuevaCantidadGuardada) + diferenciaStock;
+    
+                axios.patch(`${BACKEND_SERVER}/api/repuestos/stocks_minimos/${stockId}/`, {
+                    stock_act: nuevoStock.toFixed(2)
+                }, {
+                    headers: { 'Authorization': `token ${token['tec-token']}` }
+                });
+                // Actualizar por_recibir si la cantidad cambia
+                if (cantidadCambio) {
+                    const nuevoPorRecibir = parseFloat(linea.por_recibir) + (parseFloat(lineaElegida.cantidad) - nuevaCantidadGuardada);
+                    axios.patch(`${BACKEND_SERVER}/api/repuestos/linea_pedido/${linea.id}/`, {
+                        por_recibir: nuevoPorRecibir.toFixed(2)
                     }, {
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`
-                      }     
-                })
-                .then( rs => { 
-                    if(lineaElegida.cantidad!==res.data.cantidad){ //de momento funciona bien
-                        axios.patch(BACKEND_SERVER + `/api/repuestos/linea_pedido/${linea.id}/`, {
-                            por_recibir: linea.por_recibir + (lineaElegida.cantidad - datos.cantidad),            
-                        }, {
-                            headers: {
-                                'Authorization': `token ${token['tec-token']}`
-                            }     
-                        })
-                        .then( res => {    
-                            habilitar_linea(lineaElegida);
-                        })
-                        .catch(err => { console.log(err);})
-                    }
-                })
-                .catch(err => { console.log(err);})
-            })
-            .catch(err => { console.log(err);})
-            actualizarRecibir();           
-            handlerCancelar();
-        })
-        .catch(err => { console.log(err);})
-    }
-
-    const handlerCancelar = () => {  
-        datos.recibido= '';
-        datos.albaran = '';
-        datos.almacen = '';
-    } 
+                        headers: { 'Authorization': `token ${token['tec-token']}` }
+                    });
+                }
+    
+                alert("✅ Movimiento actualizado correctamente.");
+                actualizarRecibir();
+                handlerCancelar();
+                setActualizarListado(!actualizar_listado);
+            });
+        }).catch(err => {
+            console.error(err);
+        });
+    };
+        
+        
+    
+    const handlerCancelar = () => {
+        setDatos({
+            fecha: null,
+            cantidad: '',
+            albaran: '',
+            almacen: null,
+            habilitar: true,
+            usuario: user['tec-user'].id
+        });
+        setLineaActiva(null);
+        setLineaElegida(null);
+    };
+    
 
     const handleInputChange = (event) => {
         setDatos({
@@ -151,7 +183,7 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
             [event.target.name] : event.target.value
         })        
     }
-
+    
     const actualizarDatos = () => {
         setDatos({
             ...datos,
@@ -166,6 +198,7 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
 
     const handlerListCancelar = () => {      
         handleCloseListMovimiento();
+        setLineaActiva(null);
     } 
 
     // lo necesitaremos por si ponemos una cantidad menor a la inicial, que vuelva estar pendiente de recibir
@@ -215,28 +248,32 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
                                                         <input  className={lista.id} 
                                                                 type = "date" 
                                                                 name='fecha'
-                                                                value= {datos.fech}
+                                                                value= {datos.fecha}
                                                                 onChange={handleInputChange}
                                                                 placeholder={datos.fecha}
-                                                                disabled/>
+                                                                disabled={lineaActiva !== lista.id}/>
                                                     </td>  
                                                 <td>
-                                                    <input  className={lista.id} 
-                                                            type = "text" 
-                                                            name='cantidad'
-                                                            value= {datos.cantida}
-                                                            onChange={handleInputChange}
-                                                            placeholder={lista.cantidad}
-                                                            disabled/>
+                                                    <input
+                                                        className={lista.id}
+                                                        type="number"
+                                                        name="cantidad"
+                                                        step="0.01"
+                                                        value={lineaActiva === lista.id ? datos.cantidad : ''}
+                                                        onChange={handleInputChange}
+                                                        placeholder={lista.cantidad}
+                                                        disabled={lineaActiva !== lista.id}
+                                                    />
+
                                                 </td>
                                                 <td>
                                                     <input  className={lista.id}
                                                             type = "text"                                                                      
                                                             name='albaran'                                                             
-                                                            value= {datos.albara}
+                                                            value= {datos.albaran}
                                                             onChange={handleInputChange}
                                                             placeholder={lista.albaran}
-                                                            disabled/>
+                                                            disabled={lineaActiva !== lista.id}/>
                                                 </td> 
                                                 <td>{lista.almacen.nombre}</td> 
                                                 <td>
@@ -244,10 +281,9 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
                                                         <Form.Control as="select" 
                                                                     className={lista.id} 
                                                                     name='almacen' 
-                                                                    value={datos.alma}
+                                                                    value={datos.almacen}
                                                                     onChange={handleInputChange}
-                                                                    placeholder="Almacén"
-                                                                    disabled>
+                                                                    disabled={lineaActiva !== lista.id}>
                                                                     <option key={0} value={''}>
                                                                         ----
                                                                     </option>
@@ -263,7 +299,13 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
                                                 </td>                                                    
                                                 <td>                                                            
                                                     <PencilFill className="mr-3 pencil" onClick= {event => {habilitar_linea(lista)}}/>                                               
-                                                    <HandThumbsUpFill className="mr-3 pencil" onClick= {async => {guardarMovimiento()}}/>
+                                                    <HandThumbsUpFill
+                                                        onClick={() => {
+                                                            if (lineaActiva === lista.id) guardarMovimiento();
+                                                        }}
+                                                        className={`mr-3 pencil ${lineaActiva === lista.id ? '' : 'text-muted'}`}
+                                                        style={{ cursor: lineaActiva === lista.id ? 'pointer' : 'not-allowed' }}
+                                                    />
                                                 </td>
                                             </tr>
                                         )

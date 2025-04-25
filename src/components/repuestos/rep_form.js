@@ -137,16 +137,16 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     useEffect(()=>{ //sumando los stocks por almacenes
         const stock_por_empresa = [];
         datos.stocks_minimos && empresas && empresas.map( empresa => {
-            const almacenes_por_empresa = repuesto.stocks_minimos.filter( s => s.almacen.empresa_id === empresa.id);
-            const stock_empresa = almacenes_por_empresa.reduce((a, b) => a + parseFloat(b.stock_act), 0);
-            const stock_minimo_empresa = almacenes_por_empresa.reduce((a, b) => a + parseFloat(b.cantidad), 0);
-            const stock_minimo_aconsejable = almacenes_por_empresa.reduce((a, b) => a + parseFloat(b.cantidad_aconsejable), 0);
+            const almacenes_por_empresa = repuesto.stocks_minimos.filter( s => s.almacen.empresa === empresa.id);
+            const stock_empresa = almacenes_por_empresa.reduce((a, b) => parseFloat(a) + parseFloat(b.stock_act), 0);
+            const stock_minimo_empresa = almacenes_por_empresa.reduce((a, b) => parseFloat(a) + parseFloat(b.cantidad), 0);
+            const stock_minimo_aconsejable = almacenes_por_empresa.reduce((a, b) => parseFloat(a) + parseFloat(b.cantidad_aconsejable), 0);
             if(almacenes_por_empresa.length>0){
                 stock_por_empresa.push({empresa: empresa, stock: stock_empresa, stock_minimo: stock_minimo_empresa, stock_aconsejable:stock_minimo_aconsejable});            
             }
             return null;
         });
-        setStockEmpresa(stock_por_empresa);        
+        setStockEmpresa(stock_por_empresa);     
     },[repuesto, empresas]);
 
     const updateRepuesto = () => {
@@ -195,7 +195,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
 
     const validarStocksMinimos = () => {
         let cambiado=false;
-        if (repuesto.es_critico !== datos.es_critico) {
+        if (repuesto.es_critico !== datos.es_critico) { //confirmamos si hemos cambiado el crítico del repuesto 
             if (datos.es_critico === true && repuesto.es_critico === false) {
                 for(var m=0;m<datos.stocks_minimos.length;m++){
                     datos.stocks_minimos[m].cantidad = datos.stocks_minimos[m].cantidad_aconsejable;
@@ -353,7 +353,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             }
         });
         
-        axios.patch(BACKEND_SERVER + `/api/repuestos/lista/${repuesto.id}/`, {
+        axios.patch(BACKEND_SERVER + `/api/repuestos/lista/${repuesto.id}/`, { //Tabla de repuestos
             equipos: newEquipos
         }, {
             headers: {
