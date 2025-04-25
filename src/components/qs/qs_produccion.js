@@ -317,6 +317,47 @@ const QS_Produccion = () => {
                 });
             });
         });
+        // Comprobamos que todos los calibradores tengan 4 rodillos.
+        // Si alguno operacion tiene menos de 4 rodillos, se añader rodillos virtuales 
+        // para que el QS tenga diametros
+        temp.filter(t => t.tipo == 'CB').forEach(op => {
+            if (op.rodillos.length == 2) {
+                console.log('Operacion incompleta ...')
+                if (op.rodillos.filter(r => r.eje == 'SUP').length != 1) { // Falta superior e inferior
+                    op.rodillos.push(
+                        {tipo_plano: 'VIRTUAL', 
+                         eje: 'SUP', 
+                         parametros: {
+                            Df: 450
+                         }}
+                    );
+                    op.rodillos.push(
+                        {tipo_plano: 'VIRTUAL', 
+                         eje: 'INF', 
+                         parametros: {
+                            Df: 450
+                         }}
+                    );
+                }
+                else { // Faltan laterales
+                    op.rodillos.push(
+                        {tipo_plano: 'VIRTUAL', 
+                         eje: 'LAT_OP', 
+                         parametros: {
+                            Df: 330
+                         }}
+                    );
+                    op.rodillos.push(
+                        {tipo_plano: 'VIRTUAL', 
+                         eje: 'LAT_MO', 
+                         parametros: {
+                            Df: 330
+                         }}
+                    );
+                }
+            }
+        });
+        console.log('montaje', temp.sort((a,b) => a.operacion - b.operacion).filter(o => o.nombre !=='ET'));
         setMontaje(temp.sort((a,b) => a.operacion - b.operacion).filter(o => o.nombre !=='ET'));
     }
 
@@ -825,8 +866,8 @@ const QS_Produccion = () => {
         const data = simulador?posicionesSim:posiciones;
         // console.log('datos enviados ...');
         // console.log(data);
-        // console.log('Diametros PC ...');
-        // console.log(diametrosPC);
+        console.log('Diametros PC ...');
+        console.log(diametrosPC);
         // console.log(data.filter(p => p.nombre=='W')[0].posiciones.filter(p =>p.eje=='SUP_H_MO')[0].pos);
         axios.post(BACKEND_SERVER + `/api/qs/enviar_variante_PLC/`, {
             pr_inf: data.filter(p => p.nombre=='PR')[0].posiciones.filter(p =>p.eje=='INF')[0].pos,
