@@ -182,6 +182,7 @@ const QS_Produccion = () => {
 
     const compara_diametros_PLC_montaje = () => {
         let montaje_OK = true;
+        console.log('Compara diametros');
         montaje.forEach(o => {
             o.rodillos.forEach(r =>{
                 const Df_PC = r.parametros.Df;
@@ -1659,7 +1660,7 @@ const QS_Produccion = () => {
                         {!simulador && 
                         <React.Fragment>
                             <Col lg={2}>
-                                <Button variant={montajePLC_OK ? "success" : "danger"} className={'mx-2 float-right'} enabled={false}>Rodillos OK</Button>
+                                <Button variant={montajePLC_OK ? "success" : "danger"} className={'mx-2 float-right'} onClick={compara_diametros_PLC_montaje}>Rodillos OK</Button>
                             </Col>
                         </React.Fragment>}
                             <Col lg={6}>
