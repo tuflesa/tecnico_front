@@ -41,11 +41,6 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
     } 
 
     useEffect(()=>{
-        //console.log('que entra en la linea-----> ',linea)
-        console.log('que entra en la datos-----> ',datos)
-    },[datos]);
-
-    useEffect(()=>{
         linea && axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimo_detalle/?almacen__empresa__id=${empresa}&repuesto=${linea.repuesto.id}`, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -65,6 +60,7 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
             cantidad:  linea ? linea.cantidad : '',
             precio: linea ? linea.precio : '', 
             fecha: fechaString,
+            guardar:  datos ? datos.cantidad : '',
             recibido: datos ? datos.recibido : '',
             albaran: datos ? datos.albaran : '',
             almacen: datos ? datos.almacen : '',
@@ -118,7 +114,7 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
         event.preventDefault();
         axios.post(BACKEND_SERVER + `/api/repuestos/movimiento/`, {
             fecha: datos.fecha,
-            cantidad: datos.recibido,
+            cantidad: datos.guardar?datos.guardar:datos.recibido,
             almacen: datos.almacen,
             usuario: user['tec-user'].id,
             linea_pedido: datos.linea_pedido,
@@ -231,7 +227,7 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
                             </Col>
                             <Col>
                                 <Form.Group controlId="unidad_linea">
-                                    <Form.Label>Und. recibida</Form.Label>
+                                    <Form.Label>Und. medida</Form.Label>
                                     <Form.Control imput type="text"  
                                                 name='unidad_linea' 
                                                 value={datos.unidad_linea}
@@ -256,7 +252,7 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
                             {(linea?.tipo_unidad !== linea?.repuesto?.tipo_unidad)?
                                 <Col>
                                 <Form.Group controlId="unidad_repuesto">
-                                    <Form.Label>Und. repuesto</Form.Label>
+                                    <Form.Label>Und. medida</Form.Label>
                                     <Form.Control imput type="text"  
                                                 name='unidad_repuesto' 
                                                 value={datos.unidad_repuesto}
