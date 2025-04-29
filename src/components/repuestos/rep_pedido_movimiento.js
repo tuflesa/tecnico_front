@@ -110,28 +110,35 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
         .catch(err => { console.log(err);})
     }
  
-    const guardarMovimiento = (event) => {   
-        event.preventDefault();
-        axios.post(BACKEND_SERVER + `/api/repuestos/movimiento/`, {
-            fecha: datos.fecha,
-            cantidad: datos.guardar?datos.guardar:datos.recibido,
-            almacen: datos.almacen,
-            usuario: user['tec-user'].id,
-            linea_pedido: datos.linea_pedido,
-            linea_inventario: datos.inventario,
-            albaran: datos.albaran
-        }, {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }     
-        })
-        .then( res => { 
-            setMovimiento(res.data); 
-            actualizarRecibir();           
-            handlerCancelar();
-            
-        })
-        .catch(err => { console.log(err);})
+    const guardarMovimiento = (event) => { 
+        if(linea?.tipo_unidad !== linea?.repuesto?.tipo_unidad){
+            if(datos.guardar===''){
+                alert('Se debe rellenar la cantidad que debemos almacenar en almacen.');
+            }
+            else{
+                event.preventDefault();
+                axios.post(BACKEND_SERVER + `/api/repuestos/movimiento/`, {
+                    fecha: datos.fecha,
+                    cantidad: datos.guardar?datos.guardar:datos.recibido,
+                    almacen: datos.almacen,
+                    usuario: user['tec-user'].id,
+                    linea_pedido: datos.linea_pedido,
+                    linea_inventario: datos.inventario,
+                    albaran: datos.albaran
+                }, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }     
+                })
+                .then( res => { 
+                    setMovimiento(res.data); 
+                    actualizarRecibir();           
+                    handlerCancelar();
+                    
+                })
+                .catch(err => { console.log(err);})
+            }
+        }  
     }
 
     const handleInputChange = (event) => {
