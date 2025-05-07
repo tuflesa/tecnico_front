@@ -446,6 +446,10 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         printWindow.close();
     }
 
+    const formatearNumero = (numero) => {
+        return Number(numero) % 1 === 0 ? Number(numero) : Number(numero).toFixed(2);
+    };    
+
     return (
         <Container>
             <Row className="justify-content-center"> 
@@ -700,9 +704,9 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                                                 <td>{p.fabricante}</td>
                                                                 <td>{p.descripcion_proveedor}</td>
                                                                 <td>{p.modelo_proveedor}</td>
-                                                                <td>{p.precio}</td>
-                                                                <td>{p.descuento}</td>
-                                                                <td>{p.precio-(p.precio*p.descuento/100)}</td>
+                                                                <td>{formatearNumero(p.precio)+'€'}</td>
+                                                                <td>{p.descuento+'%'}</td>
+                                                                <td>{formatearNumero(p.precio-(p.precio*p.descuento/100))+'€'}</td>
                                                             {(user['tec-user'].perfil.puesto.nombre!=='Operador')?
                                                                 <td>
                                                                     <Trash className="mr-3 pencil"  onClick={event => {handlerBorrarProveedor(p.proveedor.id)}} />

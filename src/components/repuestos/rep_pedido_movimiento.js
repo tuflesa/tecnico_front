@@ -19,7 +19,7 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
         inventario: '',
         repuesto:  linea ? linea.repuesto.nombre : '',
         cantidad:  linea ? linea.cantidad : '',
-        guardar:  linea ? linea.cantidad : '',
+        guardar:  '',
         precio: linea ? linea.precio : '', 
         //fecha: (('0'+hoy.getDay()) + '-'+(hoy.getMonth()+1)+'-'+ hoy.getFullYear()),
         fecha: fechaString,
@@ -36,6 +36,7 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
     const handlerCancelar = () => {      
         handleCloseMovimiento();
         datos.recibido= '';
+        datos.guardar= '';
         datos.albaran = '';
         datos.almacen = '';
     } 
@@ -60,7 +61,7 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
             cantidad:  linea ? linea.cantidad : '',
             precio: linea ? linea.precio : '', 
             fecha: fechaString,
-            guardar:  datos ? datos.cantidad : '',
+            guardar:  datos ? datos.guardar : '',
             recibido: datos ? datos.recibido : '',
             albaran: datos ? datos.albaran : '',
             almacen: datos ? datos.almacen : '',

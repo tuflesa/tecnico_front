@@ -328,6 +328,10 @@ const RepPendientes = () => {
         }
     }
 
+    const formatearNumero = (numero) => {
+        return Number(numero) % 1 === 0 ? Number(numero) : Number(numero).toFixed(2);
+    };    
+
     return (
         <Container className="mt-5 pt-4">
             <Tabs defaultActiveKey="repuestos" id="tab-control" className="mb-3">
@@ -364,17 +368,18 @@ const RepPendientes = () => {
                                             <tr key={pendiente.id} className={comparar2(pendiente) ? "table-warning" : (comparar(pendiente)) ? "table-success" : pendiente.critico ? "table-danger" : ""}>
                                                 <td>{pendiente.articulo}</td>
                                                 <td>{pendiente.critico ? 'Si' : 'No'}</td>
-                                                <td>{pendiente.stock}</td>
-                                                <td>{pendiente.stock_minimo}</td> 
-                                                <td>{pendiente.stock_aconsejado}</td> 
-                                                <td>{lineasPendientes && lineasPendientes.map(linea => {
-                                                    let suma = 0;
-                                                    if (linea.repuesto.id === pendiente.id) {                                        
-                                                        suma += parseInt(linea.por_recibir);
-                                                    }
-                                                    return suma;
-                                                }).reduce((partialSum, a) => partialSum + a, 0)}
-                                                </td>
+                                                <td>{formatearNumero(pendiente.stock)}</td>
+                                                <td>{formatearNumero(pendiente.stock_minimo)}</td> 
+                                                <td>{formatearNumero(pendiente.stock_aconsejado)}</td> 
+                                                <td>{formatearNumero(
+                                                    lineasPendientes && lineasPendientes.map(linea => {
+                                                        let suma = 0;
+                                                        if (linea.repuesto.id === pendiente.id) {                                        
+                                                            suma += parseFloat(linea.por_recibir);
+                                                        }
+                                                        return suma;
+                                                    }).reduce((partialSum, a) => partialSum + a, 0)
+                                                )}</td>
                                                 <td>
                                                     <Receipt className="mr-3 pencil" onClick={() => listarPedidos(pendiente.id)} />
                                                     <Link to={`/repuestos/${pendiente.id}`}>

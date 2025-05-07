@@ -504,6 +504,13 @@ const PedidoForm = ({pedido, setPedido}) => {
         return user['tec-user'].perfil.nivel_acceso.nombre === 'local' || handleDeshabilitar()
     }
 
+    const formatearNumero = (numero) => {
+        const num = Number(numero);
+        return num % 1 === 0
+            ? num.toLocaleString('es-ES')
+            : num.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 2 });
+    };      
+
     return (
         <Container className='mt-5'>
             <Row className="justify-content-center"> 
@@ -816,12 +823,12 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                 return (
                                                     <tr key={linea.id} className = {((parseFloat(linea.por_recibir)===0) && (parseFloat(linea.cantidad)!=parseFloat(linea.por_recibir)) || (parseFloat(linea.cantidad)<(parseFloat(linea.cantidad)-parseFloat(linea.por_recibir))))? "table-success" : (linea.cantidad - linea.por_recibir)>0? "table-primary" : " "}>
                                                         <td>{linea.descripcion_proveedor!==null?linea.descripcion_proveedor + ' - ' + linea.modelo_proveedor:linea.repuesto.nombre + (linea.repuesto.fabricante? ' - ' + linea.repuesto.fabricante:'') + (linea.modelo_proveedor? ' - ' + linea.modelo_proveedor:'')}</td>
-                                                        <td>{parseFloat(linea.cantidad)}</td>
+                                                        <td>{formatearNumero(parseFloat(linea.cantidad))}</td>
                                                         <td>{linea.tipo_unidad_nombre}</td>
                                                         <td>{formatNumber(linea.precio)}</td>
                                                         <td>{formatPorcentaje(linea.descuento)+'%'}</td>
                                                         <td>{formatNumber(linea.total)}</td>
-                                                        <td>{parseFloat(linea.cantidad - linea.por_recibir).toFixed(2)}</td>
+                                                        <td>{formatearNumero(parseFloat(linea.cantidad - linea.por_recibir))}</td>
                                                         <td>{parseFloat(linea.por_recibir)}</td>
                                                         <td>
                                                             <PencilFill className="mr-3 pencil" onClick={event => {editLinea(linea)}}/>
