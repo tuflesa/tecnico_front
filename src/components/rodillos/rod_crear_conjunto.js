@@ -183,7 +183,7 @@ const RodConjunto = ({show, setShow, elementos_formacion, handleClose, grupo_nom
     }, [filtro]);
 
     useEffect(() => { //PARA OBTENER LOS Ø DE TUBO MADRE UNICOS
-        axios.get(BACKEND_SERVER + `/api/rodillos/grupo_only/?tubo_madre__gte=${tubomadre-50}&tubo_madre__lte=${tubomadre+10}&maquina__empresa=${empresa_id}`,{
+        axios.get(BACKEND_SERVER + `/api/rodillos/grupo_only/?tubo_madre__gte=${tubomadre-90}&tubo_madre__lte=${tubomadre+20}&maquina__empresa=${empresa_id}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                   }
