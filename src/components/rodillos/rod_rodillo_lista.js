@@ -95,7 +95,7 @@ const RodLista = () => {
             </ Row>
             <Row>
                 <Col>
-                    <h5 className="mb-3 mt-3">Lista de Rodillos</h5>
+                    <h5 className="mb-3 mt-3">Listado de Rodillos</h5>
                     <table>
                         <tbody>
                             <tr>
