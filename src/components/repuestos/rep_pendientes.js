@@ -92,9 +92,9 @@ const RepPendientes = () => {
                 }     
             })
             .then( r => {
-                const stock_empresa = r.data.reduce((a, b) => a + b.stock_act, 0);
-                const stock_minimo_empresa = r.data.reduce((a, b) => a + b.cantidad, 0);
-                const stock_aconsejado_empresa = r.data.reduce((a, b) => a + b.cantidad_aconsejable, 0);
+                const stock_empresa = r.data.reduce((a, b) => a + parseFloat(b.stock_act), 0);
+                const stock_minimo_empresa = r.data.reduce((a, b) => a + parseFloat(b.cantidad), 0);
+                const stock_aconsejado_empresa = r.data.reduce((a, b) => a + parseFloat(b.cantidad_aconsejable), 0);
                 if(stock_empresa<stock_minimo_empresa || stock_empresa<stock_aconsejado_empresa){
                     if(res_data_results.length>0){
                         stock_por_empresa.push({id: id, articulo: repuesto_nombre, tipo:repuesto_tipo, critico: repuesto_critico, stock: stock_empresa, stock_minimo: stock_minimo_empresa, stock_aconsejado: stock_aconsejado_empresa});            
