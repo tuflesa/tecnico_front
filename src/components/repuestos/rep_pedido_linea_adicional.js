@@ -40,7 +40,8 @@ const LineaAdicionalForm = ({show, pedido_id, handleCloseLineaAdicional, updateP
         datos.descuento=Number.parseFloat(datos.descuento).toFixed(2);
         datos.total = Number.parseFloat((datos.precio*datos.cantidad)-(datos.precio*datos.cantidad*datos.descuento/100)).toFixed(4);
         //datos.total=Number.parseFloat(datos.total).toFixed(2);
-        datos.por_recibir = linea_adicional ? (linea_adicional.por_recibir+(datos.cantidad-linea_adicional.cantidad)) : datos.cantidad;
+        //datos.por_recibir = linea_adicional ? (linea_adicional.por_recibir+(datos.cantidad-linea_adicional.cantidad)) : datos.cantidad;
+        datos.por_recibir = linea_adicional ? parseFloat(parseFloat(linea_adicional.por_recibir)+(parseFloat(datos.cantidad)-parseFloat(linea_adicional.cantidad))).toFixed(2) : parseFloat(datos.cantidad);
     },[datos.cantidad, datos.precio, datos.descuento]);
     
     const handleInputChange = (event) => {
@@ -84,19 +85,19 @@ const LineaAdicionalForm = ({show, pedido_id, handleCloseLineaAdicional, updateP
     }   
     
     const handlerEditar = async () => {   
-        if (datos.cantidad<(linea_adicional.cantidad - linea_adicional.por_recibir) || datos.por_recibir<0){            
+        if (parseFloat(datos.cantidad)<(parseFloat(linea_adicional.cantidad) - parseFloat(linea_adicional.por_recibir)) || parseFloat(datos.por_recibir)<0){            
             alert('Cantidad erronea, revisa cantidad recibida');            
             handlerCancelar();
         }
         else{  
             axios.patch(BACKEND_SERVER + `/api/repuestos/linea_adicional_pedido/${linea_adicional.id}/`,{
                 descripcion: datos.descripcion,
-                cantidad: datos.cantidad,
+                cantidad: parseFloat(datos.cantidad),
                 precio: datos.precio,
                 descuento: datos.descuento,
                 total: datos.total,
                 pedido: datos.pedido,
-                por_recibir: datos.por_recibir,
+                por_recibir: parseFloat(datos.por_recibir),
             },
             {
                 headers: {
