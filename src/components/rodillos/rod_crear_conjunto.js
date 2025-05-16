@@ -183,7 +183,7 @@ const RodConjunto = ({show, setShow, elementos_formacion, handleClose, grupo_nom
     }, [filtro]);
 
     useEffect(() => { //PARA OBTENER LOS Ø DE TUBO MADRE UNICOS
-        axios.get(BACKEND_SERVER + `/api/rodillos/grupo_only/?tubo_madre__gte=${tubomadre-120}&tubo_madre__lte=${tubomadre+20}&maquina__empresa=${empresa_id}`,{
+        axios.get(BACKEND_SERVER + `/api/rodillos/grupo_only/?tubo_madre__gte=${tubomadre-90}&tubo_madre__lte=${tubomadre+120}&maquina__empresa=${empresa_id}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                   }
@@ -223,7 +223,7 @@ const RodConjunto = ({show, setShow, elementos_formacion, handleClose, grupo_nom
         }, [rod_id, selectedEje, operacion_rod, tubo_madre_rod]);
     
     useEffect(() => { //BUSCAMOS LAS BANCADAS QUE PRECISAMOS PARA ESTA OPERACIÓN
-        operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/bancada_grupos/?seccion=${operacion_marcada.seccion.id}&tubo_madre__gte=${tubomadre-120}&tubo_madre__lte=${tubomadre+10}`,{
+        operacion_marcada && axios.get(BACKEND_SERVER + `/api/rodillos/bancada_grupos/?seccion=${operacion_marcada.seccion.id}&tubo_madre__gte=${tubomadre-50}&tubo_madre__lte=${tubomadre+10}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
