@@ -151,6 +151,21 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
                 }
             })
             .then(r => {
+                if(datos.obsoleta===true && instancia.obsoleta===false){
+                    const nuevo_valor = instancia.rodillo.num_instancias - 1;
+                    axios.patch(BACKEND_SERVER + `/api/rodillos/rodillos/${instancia.rodillo.id}/`, { //Si es obsoleta la restamos de las activas
+                        num_instancias: nuevo_valor,
+                    }, {
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                            }     
+                    })
+                    .then( res => {  
+                    })
+                    .catch(err => { 
+                        console.error(err);
+                    })
+                }
                 window.location.href = `/rodillos/editar/${instancia.rodillo.id}`;
             })
             .catch(err => { 
@@ -264,7 +279,7 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
             <Modal.Body>
                 <Row>
                     <Col>
-                        {datos.id?<h5>Modificar instancia al rodillo</h5>:<h5>Agregar instancia al rodillo</h5>}
+                        {datos.id?<h5>Modificar instancia del rodillo</h5>:<h5>Agregar instancia al rodillo</h5>}
                     </Col>
                 </Row>
                 <Row>

@@ -69,7 +69,6 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, alm
             }
         })
         .then( res => {
-            console.log(res.data);
             res.data.map( r => {
                 r.albaran=r.linea_salida.salida.nombre;
                 r['alm'] = r.almacen.nombre;
@@ -103,13 +102,13 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, alm
                     y=listado_completo.length-1;
                 }
                 if(listado_completo[x].albaran==='Ajuste de stock'){
-                    listado_completo[x].stock=listado_completo[x].cantidad;
+                    listado_completo[x].stock=parseFloat(listado_completo[x].cantidad);
                 }
                 else if (listado_completo[x].albaran==='Ajuste Inicial'){
-                    listado_completo[x].stock=listado_completo[x].cantidad;
+                    listado_completo[x].stock=parseFloat(listado_completo[x].cantidad);
                 }
                 else {
-                    listado_completo[x].stock= listado_completo[y].stock + listado_completo[x].cantidad;
+                    listado_completo[x].stock= parseFloat(listado_completo[y].stock) + parseFloat(listado_completo[x].cantidad);
                 }
             }
             setListado(listado_completo);
