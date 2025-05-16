@@ -17,6 +17,10 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
         return new Intl.NumberFormat('de-DE').format(numero)
     }
 
+    useEffect(()=>{
+        console.log('esto entra en linea: ', linea);
+    },[token]);
+
     function parseData(){
         if(linea){
             return linea.map((data, i)=>{
@@ -26,7 +30,7 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
                             <View style={styles.section}>
                                 <View style={styles.section6}><Text>{data.descripcion_proveedor + " " + (data.repuesto.fabricante? " - " + data.repuesto.fabricante:'') + (" - " + data.modelo_proveedor? data.modelo_proveedor:'')}</Text></View>
                                 <View style={styles.section7}><Text>{data.cantidad}</Text></View>
-                                <View style={styles.section7}><Text>{data.repuesto.unidad_siglas}</Text></View>
+                                <View style={styles.section7}><Text>{data.tipo_unidad_nombre}</Text></View>
                                 <View style={styles.section9}><Text>{formatNumber(data.precio)}</Text></View>
                                 <View style={styles.section9}><Text>{formatPorcentaje(data.descuento) + '%'}</Text></View>
                                 <View style={styles.section9}><Text>{formatNumber(data.total)}</Text></View>
