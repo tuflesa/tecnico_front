@@ -21,7 +21,38 @@ const PedLista = () => {
     const history = useHistory(); // para redirigir luego
     const [hoy] = useState(new Date());
     const nextMonth = new Date(hoy.getFullYear(), hoy.getMonth() + 1, hoy.getDate());
+    let filtroPag=(null);
+    const [count, setCount] = useState(null);
 
+    const [datos, setDatos] = useState({
+            pagina: 1,
+            total_pag:0,
+        });
+
+    useEffect(()=>{
+        filtroPag = (`&page=${datos.pagina}`);
+        if (!buscando){
+            setFiltro(filtroII + filtroPag);
+        }
+    },[buscando, filtroII, datos.pagina]);
+
+    /* eslint-disable react-hooks/exhaustive-deps */
+    useEffect(()=>{
+        if(count % 20 === 0){
+            setDatos({
+                ...datos,
+                total_pag:Math.trunc(count/20),
+            })
+        }
+        else if(count % 20 !== 0){
+            setDatos({
+                ...datos,
+                total_pag:Math.trunc(count/20)+1,
+            })
+        }
+    }, [count, filtro]);
+    /* eslint-disable react-hooks/exhaustive-deps */
+    
     const actualizaFiltro = str => {
         setFiltroII(str);
     } 
@@ -35,13 +66,14 @@ const PedLista = () => {
     useEffect(()=>{
         if (filtro){
             setBuscando(true);
-            axios.get(BACKEND_SERVER + `/api/repuestos/lista_pedidos/` + filtro,{
+            axios.get(BACKEND_SERVER + `/api/repuestos/lista_pedidos_fuera_fecha/` + filtro,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
             })
             .then( res => {
-                setPedidos(res.data);
+                setPedidos(res.data.results);
+                setCount(res.data.count);
                 setBuscando(false);
             })
             .catch( err => {
@@ -195,6 +227,25 @@ const PedLista = () => {
         }
     };
 
+    const cambioPagina = (pag) => {
+        if(pag<=0){
+            pag=1;
+        }
+        if(pag>count/20){
+            if(count % 20 === 0){
+                pag=Math.trunc(count/20);
+            }
+            if(count % 20 !== 0){
+                pag=Math.trunc(count/20)+1;
+            }
+        }
+        if(pag>0){
+            setDatos({
+                ...datos,
+                pagina: pag,
+            })
+        }
+    } 
    
     return (
         <Container className="mt-5">
@@ -203,6 +254,11 @@ const PedLista = () => {
                     <PedidosFiltro actualizaFiltro={actualizaFiltro}/>
                 </Col>
             </ Row>
+            <table>
+                <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
+                <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
+                <th>Número páginas: {datos.pagina} / {datos.total_pag===0?1:datos.total_pag} - Registros: {count}</th>
+            </table>
             <Row>
                 <Col>
                     <h5 className="mb-3 mt-3">Lista de Pedidos</h5>
