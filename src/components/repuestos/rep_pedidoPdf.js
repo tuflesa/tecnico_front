@@ -17,10 +17,6 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
         return new Intl.NumberFormat('de-DE').format(numero)
     }
 
-    useEffect(()=>{
-        console.log('esto entra en linea: ', linea);
-    },[token]);
-
     function parseData(){
         if(linea){
             return linea.map((data, i)=>{

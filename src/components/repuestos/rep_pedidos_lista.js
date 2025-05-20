@@ -3,10 +3,12 @@ import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table } from 'react-bootstrap';
-import { Trash, PencilFill } from 'react-bootstrap-icons';
+import { Trash, PencilFill, Clipboard } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import PedidosFiltro from './rep_pedidos_filtro';
 import {invertirFecha} from '../utilidades/funciones_fecha';
+import { useHistory } from 'react-router-dom';
+
 
 const PedLista = () => {
     const [token] = useCookies(['tec-token']);
@@ -16,6 +18,9 @@ const PedLista = () => {
     const [filtroII, setFiltroII] = useState(`?empresa=${user['tec-user'].perfil.empresa.id}&finalizado=${false}&creado_por=${user['tec-user'].perfil.usuario}`);
     const [filtro, setFiltro] = useState('');
     const [buscando, setBuscando] = useState(false);
+    const history = useHistory(); // para redirigir luego
+    const [hoy] = useState(new Date());
+    const nextMonth = new Date(hoy.getFullYear(), hoy.getMonth() + 1, hoy.getDate());
 
     const actualizaFiltro = str => {
         setFiltroII(str);
@@ -92,6 +97,104 @@ const PedLista = () => {
         }
 
     }
+
+    const copiarPedido = async (pedido) => {
+        try {
+            // Paso 1: Obtener detalles del pedido original (con líneas)
+            const response = await axios.get(`${BACKEND_SERVER}/api/repuestos/pedido_detalle/${pedido.id}/`, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }
+            });
+            const original = response.data;
+
+            // Paso 2: Crear nuevo pedido (cabecera)
+            const nuevoPedidoPayload = {
+                proveedor: original.proveedor.id,
+                empresa: original.empresa.id,
+                descripcion: `${original.descripcion} (COPIA)`,
+                fecha_entrega: null,
+                fecha_prevista_entrega: `${nextMonth.getFullYear()}-${String(nextMonth.getMonth() + 1).padStart(2, '0')}-${String(nextMonth.getDate()).padStart(2, '0')}`,
+                fecha_creacion: hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0'),
+                finalizado: false,
+                creado_por: user['tec-user'].id,
+                direccion_envio: original.direccion_envio?.id || null,
+                contacto: original.contacto?.id|| null,
+                observaciones: original.observaciones,
+                observaciones2: original.observaciones2,
+                intervencion: original.intervencion,
+                revisado: original.revisado,
+            };
+
+            let nuevoPedido = null;
+
+            try {
+                const nuevoPedidoRes = await axios.post(
+                    `${BACKEND_SERVER}/api/repuestos/pedido/`,
+                    nuevoPedidoPayload,
+                    {
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                        }
+                    }
+                );
+                nuevoPedido = nuevoPedidoRes.data;
+                }catch( err ) {
+                    console.log(err);
+                }
+            // Paso 3: Clonar líneas
+            for (const linea of original.lineas_pedido) {
+                const nuevaLineaPayload = {
+                    pedido: nuevoPedido.id,
+                    repuesto: linea.repuesto.id,
+                    cantidad: linea.cantidad || 0,
+                    descripcion_proveedor: linea.descripcion_proveedor || '',
+                    modelo_proveedor: linea.modelo_proveedor || '',
+                    observaciones: linea.observaciones || '',
+                    por_recibir: linea.cantidad,
+                    precio: linea.precio || 0,
+                    descuento: linea.descuento || 0,
+                    total: linea.total,
+                    tipo_unidad: linea.tipo_unidad,
+                };
+                try {
+                    await axios.post(`${BACKEND_SERVER}/api/repuestos/linea_pedido/`, nuevaLineaPayload, {
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                        }
+                    });
+                }catch( err ) {
+                    console.log(err);
+                }
+            }
+            // Paso 4: Clonar líneasAdicionales
+            for (const linea_adicional of original.lineas_adicionales) {
+                const nuevaLineaadicionalPayload = {
+                    pedido: nuevoPedido.id,
+                    descripcion: linea_adicional.descripcion,
+                    cantidad: linea_adicional.cantidad,
+                    precio: linea_adicional.precio || 0,
+                    por_recibir: linea_adicional.cantidad,
+                    descuento: linea_adicional.descuento || 0,
+                    total: linea_adicional.total,
+                };
+                try {
+                    await axios.post(`${BACKEND_SERVER}/api/repuestos/linea_adicional_pedido/`, nuevaLineaadicionalPayload, {
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                        }
+                    });
+                } catch (err) {
+                    console.log(err);
+                }
+            }
+            alert("Pedido duplicado correctamente.");
+            history.push(`/repuestos/pedido_detalle/${nuevoPedido.id}`);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
    
     return (
         <Container className="mt-5">
@@ -136,6 +239,10 @@ const PedLista = () => {
                                                 <PencilFill className="mr-3 pencil"/>
                                             </Link>
                                             <Trash className="trash"  onClick={event =>{BorrarP(pedido)}} />
+                                            <svg className="bi bi-copy mr-3" onClick={() => copiarPedido(pedido)} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                                <path d="M10 1.5A1.5 1.5 0 0 1 11.5 3v9A1.5 1.5 0 0 1 10 13.5H5A1.5 1.5 0 0 1 3.5 12V3A1.5 1.5 0 0 1 5 1.5h5Zm0 1H5A.5.5 0 0 0 4.5 3v9a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 .5-.5V3a.5.5 0 0 0-.5-.5Z"/>
+                                                <path d="M12 4a1 1 0 0 1 1 1v8a2 2 0 0 1-2 2H5a1 1 0 0 1-1-1v-1h1v1h6a1 1 0 0 0 1-1V5h1Z"/>
+                                            </svg>
                                         </td>
                                     </tr>
                                 )})
