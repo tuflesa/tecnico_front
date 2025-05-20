@@ -291,7 +291,7 @@ const PedLista = () => {
                                         <td>{pedido.fecha_prevista_entrega && invertirFecha(String(pedido.fecha_prevista_entrega))}</td> 
                                         <td>{pedido.finalizado ? 'Si' : 'No'}</td>
                                         <td>
-                                            <Link to={`/repuestos/pedido_detalle/${pedido.id}`}>
+                                            <Link to={`/repuestos/pedido_detalle/${pedido.id}`} target="_blank" rel="noopener noreferrer">
                                                 <PencilFill className="mr-3 pencil"/>
                                             </Link>
                                             <Trash className="trash"  onClick={event =>{BorrarP(pedido)}} />
