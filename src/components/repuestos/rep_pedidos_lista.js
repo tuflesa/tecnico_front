@@ -35,34 +35,7 @@ const PedLista = () => {
             setFiltro(filtroII + filtroPag);
         }
     },[buscando, filtroII, datos.pagina]);
-
-    /* eslint-disable react-hooks/exhaustive-deps */
-    useEffect(()=>{
-        if(count % 20 === 0){
-            setDatos({
-                ...datos,
-                total_pag:Math.trunc(count/20),
-            })
-        }
-        else if(count % 20 !== 0){
-            setDatos({
-                ...datos,
-                total_pag:Math.trunc(count/20)+1,
-            })
-        }
-    }, [count, filtro]);
-    /* eslint-disable react-hooks/exhaustive-deps */
     
-    const actualizaFiltro = str => {
-        setFiltroII(str);
-    } 
-
-    useEffect(()=>{
-        if (!buscando){
-            setFiltro(filtroII);
-        }
-    },[buscando, filtroII]);
-
     useEffect(()=>{
         if (filtro){
             setBuscando(true);
@@ -81,6 +54,48 @@ const PedLista = () => {
             });
         }
     },[filtro, token]); 
+
+        /* eslint-disable react-hooks/exhaustive-deps */
+    useEffect(()=>{
+        if(count % 20 === 0){
+            setDatos({
+                ...datos,
+                total_pag:Math.trunc(count/20),
+            })
+        }
+        else if(count % 20 !== 0){
+            setDatos({
+                ...datos,
+                total_pag:Math.trunc(count/20)+1,
+            })
+        }
+    }, [count, filtro]);
+    /* eslint-disable react-hooks/exhaustive-deps */
+
+    
+    const cambioPagina = (pag) => {
+        if(pag<=0){
+            pag=1;
+        }
+        if(pag>count/20){
+            if(count % 20 === 0){
+                pag=Math.trunc(count/20);
+            }
+            if(count % 20 !== 0){
+                pag=Math.trunc(count/20)+1;
+            }
+        }
+        if(pag>0){
+            setDatos({
+                ...datos,
+                pagina: pag,
+            })
+        }
+    } 
+
+    const actualizaFiltro = str => {
+        setFiltroII(str);
+    } 
     
     const BorrarP = (pedido)=>{
         axios.get(BACKEND_SERVER + `/api/repuestos/pedido_detalle/${pedido.id}/`,{
@@ -226,26 +241,6 @@ const PedLista = () => {
             console.log(error);
         }
     };
-
-    const cambioPagina = (pag) => {
-        if(pag<=0){
-            pag=1;
-        }
-        if(pag>count/20){
-            if(count % 20 === 0){
-                pag=Math.trunc(count/20);
-            }
-            if(count % 20 !== 0){
-                pag=Math.trunc(count/20)+1;
-            }
-        }
-        if(pag>0){
-            setDatos({
-                ...datos,
-                pagina: pag,
-            })
-        }
-    } 
    
     return (
         <Container className="mt-5">
