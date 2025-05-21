@@ -144,7 +144,7 @@ const PedLista = () => {
             const nuevoPedidoPayload = {
                 proveedor: original.proveedor.id,
                 empresa: original.empresa.id,
-                descripcion: `${original.descripcion} (COPIA)`,
+                descripcion: original.descripcion,
                 fecha_entrega: null,
                 fecha_prevista_entrega: `${nextMonth.getFullYear()}-${String(nextMonth.getMonth() + 1).padStart(2, '0')}-${String(nextMonth.getDate()).padStart(2, '0')}`,
                 fecha_creacion: hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0'),
@@ -295,7 +295,16 @@ const PedLista = () => {
                                                 <PencilFill className="mr-3 pencil"/>
                                             </Link>
                                             <Trash className="trash"  onClick={event =>{BorrarP(pedido)}} />
-                                            <svg className="bi bi-copy mr-3" onClick={() => copiarPedido(pedido)} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                            <svg
+                                                className="bi bi-copy mr-3"
+                                                onClick={() => copiarPedido(pedido)}
+                                                style={{ cursor: 'pointer' }}
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                width="16"
+                                                height="16"
+                                                fill="currentColor"
+                                                viewBox="0 0 16 16"
+                                            >
                                                 <path d="M10 1.5A1.5 1.5 0 0 1 11.5 3v9A1.5 1.5 0 0 1 10 13.5H5A1.5 1.5 0 0 1 3.5 12V3A1.5 1.5 0 0 1 5 1.5h5Zm0 1H5A.5.5 0 0 0 4.5 3v9a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 .5-.5V3a.5.5 0 0 0-.5-.5Z"/>
                                                 <path d="M12 4a1 1 0 0 1 1 1v8a2 2 0 0 1-2 2H5a1 1 0 0 1-1-1v-1h1v1h6a1 1 0 0 0 1-1V5h1Z"/>
                                             </svg>
