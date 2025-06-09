@@ -9,11 +9,10 @@ const Programadores = () => {
     const [user] = useCookies(['tec-user']);
     const [token] = useCookies(['tec-token']);
     const [celdas, setCeldas] = useState([]);
-    let celda_qs = [];
     
     const poner_icono = () => {
-        console.log('estamos dentro del poner_icono');
-        console.log('esto vale celda_qs: ', celda_qs);
+        console.log('estamos dentro del color');
+/*         console.log('esto vale celda_qs: ', celda_qs);
     
         celda_qs.forEach(item => {
             if (item.operacion?.icono_celda !== undefined) {
@@ -21,13 +20,30 @@ const Programadores = () => {
             }
         });
     
-        console.log('esto vale celda_qs después: ', celda_qs);
+        console.log('esto vale celda_qs después: ', celda_qs); */
     }; 
     
     const grabar_icono = () => {
-        for(var x=0;x<celda_qs.length;x++){
-            celda_qs && axios.patch(BACKEND_SERVER + `/api/rodillos/celda/${celda_qs[x].id}/`,{
-                icono: celda_qs[x].operacion.icono_celda,
+        console.log('entramos a grabar_icono')
+        let color_asignado='';
+        for(var x=0;x<celdas.length;x++){
+            if(celdas[x].conjunto.operacion!==celdas[x].operacion.id){
+                color_asignado='naranja'
+            }
+            else if(celdas[x].bancada.tubo_madre!==celdas[x].conjunto.tubo_madre){
+                color_asignado='azul'
+            }
+            if(celdas[x].conjunto.operacion===celdas[x].operacion.id && celdas[x].bancada.tubo_madre===celdas[x].conjunto.tubo_madre){
+                color_asignado='verde'
+            }
+            for(var y=0; y<celdas[x].conjunto.elementos.length;y++){
+                if(celdas[x].conjunto.elementos[y].rodillo.nombre==='Sin_Rodillo'){
+                    color_asignado='amarillo'
+                }
+            }
+        
+            color_asignado && celdas && axios.patch(BACKEND_SERVER + `/api/rodillos/celda/${celdas[x].id}/`,{
+                color_celda: color_asignado,
             },
             {
                 headers: {
@@ -42,19 +58,14 @@ const Programadores = () => {
     };
 
     useEffect(()=>{
-        celda_qs=celdas;
-        console.log('CAMBIAN LAS CELDAS: ',celda_qs);
-    },[celda_qs]);
-
-    useEffect(()=>{
-        axios.get(BACKEND_SERVER + `/api/rodillos/celda_qs/?icono_isnull=${true}`,{
+        axios.get(BACKEND_SERVER + `/api/rodillos/celda_program/?bancada__tubo_madre=${'17.3'}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }     
         })
         .then( res => { 
             setCeldas(res.data);
-            console.log(res.data);
+            console.log('recogida de celdas: ',res.data);
         })
         .catch(err => { console.log(err);})
     },[token]);
