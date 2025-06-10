@@ -160,7 +160,7 @@ const EquipoForm = ({show, repuesto_id, handleCloseEquipo, equiposAsignados, upd
     
     const handlerGuardar = () => {
         const newEquipos = [...listaAsignados, parseInt(datos.equipo)];
-        axios.patch(BACKEND_SERVER + `/api/repuestos/lista/${repuesto_id}/`, {
+        axios.patch(BACKEND_SERVER + `/api/repuestos/lista/${repuesto_id}/`, { //tabla repuestos
             equipos: newEquipos
         }, {
             headers: {

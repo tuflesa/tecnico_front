@@ -113,7 +113,7 @@ const BuscarRepuestosPedido = ({cerrarListRepuestos, show, proveedor_id, elegirR
                                 </tr>
                             </thead>
                             <tbody>
-                                {repuestos && repuestos.map( rep => {                                    
+                                {repuestos && repuestos.map( rep => {  
                                     return (                                                
                                         <tr key={rep.id}>
                                             <td>{rep.repuesto.nombre}</td> 

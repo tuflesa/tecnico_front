@@ -16,30 +16,32 @@ const RodInstanciasRodillo = ({rodillo}) => {
     const [instancia_activa, setInstanciaActiva] = useState([]);
     const [instancias_activas, setInstanciasActivas] = useState([]);
     const [modificar_instancia, setModificarInstancia] = useState(null);
+    const [filtroObsoleta, setFiltroObsoleta] = useState('false');
 
     useEffect(() => {
-        if(rodillo.id){
-            axios.get(BACKEND_SERVER + `/api/rodillos/instancia_listado/?rodillo__id=${rodillo.id}&obsoleta=${false}`,{
+        if (rodillo.id) {
+            let url = `${BACKEND_SERVER}/api/rodillos/instancia_listado/?rodillo__id=${rodillo.id}`;
+            if (filtroObsoleta !== 'todas') {
+                url += `&obsoleta=${filtroObsoleta}`;
+            }
+    
+            axios.get(url, {
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
-                  }
+                }
             })
-            .then( res => {
-                setInstancias(res.data); //todas las instancias del rodillo
+            .then(res => {
+                setInstancias(res.data);
                 const instanciaActiva = res.data.filter(instancia => instancia.activa_qs === true);
-                setInstanciasActivas(instanciaActiva);//instancias activas
-                if(Object.keys(instanciaActiva).length === rodillo.num_ejes){
-                    setInstanciaActiva(1);
-                }
-                else{
-                    setInstanciaActiva(0);
-                }
+                setInstanciasActivas(instanciaActiva);
+                setInstanciaActiva(instanciaActiva.length === rodillo.num_ejes ? 1 : 0);
             })
-            .catch( err => {
+            .catch(err => {
                 console.log(err);
             });
         }
-    }, [token, rodillo]);
+    }, [token, rodillo, filtroObsoleta]);
+    
 
     const añadirInstancia = () => {
         setShowInstancia(true);
@@ -80,6 +82,19 @@ const RodInstanciasRodillo = ({rodillo}) => {
                     </React.Fragment>
                 :null}
             </Form>
+            <Row className="mb-3">
+            <Col className="d-flex justify-content-end">
+                <Form.Group controlId="filtroObsoleta" className="mb-0" style={{ minWidth: '250px' }}>
+                <Form.Label>Filtrar instancias</Form.Label>
+                <Form.Control as="select" value={filtroObsoleta} onChange={(e) => setFiltroObsoleta(e.target.value)}>
+                    <option value="false">No obsoletas</option>
+                    <option value="true">Obsoletas</option>
+                    <option value="todas">Todas</option>
+                </Form.Control>
+                </Form.Group>
+            </Col>
+            </Row>
+
                 {instancias?instancias.length!==0?
                     <Table striped bordered hover>
                         <thead>

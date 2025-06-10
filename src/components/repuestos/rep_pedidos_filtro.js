@@ -155,26 +155,6 @@ const PedidosFiltro = ({ actualizaFiltro }) => {
                         </Form.Control>
                         </Form.Group>
                     </Col>
-                    {/* <Col>
-                        <Form.Group controlId="destrezas">
-                            <Form.Label>Destreza</Form.Label>
-                            <Form.Control as="select"  
-                                        name='destrezas' 
-                                        value={datos.destrezas}
-                                        onChange={handleInputChange}
-                                        placeholder="Destrezas"
-                                        disabled={soyTecnico.length===0?true:false}>
-                                        <option key={0} value={''}>Todas</option>    
-                                        {destrezas && destrezas.map( destreza => {
-                                            return (
-                                            <option key={destreza.id} value={destreza.id}>
-                                                {destreza.nombre}
-                                            </option>
-                                            )
-                                        })}
-                        </Form.Control>
-                        </Form.Group>
-                    </Col> */}
                     <Col>
                         <Form.Group controlId="numero">
                             <Form.Label>Numero Pedido</Form.Label>

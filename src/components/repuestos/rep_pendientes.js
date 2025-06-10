@@ -92,9 +92,9 @@ const RepPendientes = () => {
                 }     
             })
             .then( r => {
-                const stock_empresa = r.data.reduce((a, b) => a + b.stock_act, 0);
-                const stock_minimo_empresa = r.data.reduce((a, b) => a + b.cantidad, 0);
-                const stock_aconsejado_empresa = r.data.reduce((a, b) => a + b.cantidad_aconsejable, 0);
+                const stock_empresa = r.data.reduce((a, b) => a + parseFloat(b.stock_act), 0);
+                const stock_minimo_empresa = r.data.reduce((a, b) => a + parseFloat(b.cantidad), 0);
+                const stock_aconsejado_empresa = r.data.reduce((a, b) => a + parseFloat(b.cantidad_aconsejable), 0);
                 if(stock_empresa<stock_minimo_empresa || stock_empresa<stock_aconsejado_empresa){
                     if(res_data_results.length>0){
                         stock_por_empresa.push({id: id, articulo: repuesto_nombre, tipo:repuesto_tipo, critico: repuesto_critico, stock: stock_empresa, stock_minimo: stock_minimo_empresa, stock_aconsejado: stock_aconsejado_empresa});            
@@ -328,6 +328,10 @@ const RepPendientes = () => {
         }
     }
 
+    const formatearNumero = (numero) => {
+        return Number(numero) % 1 === 0 ? Number(numero) : Number(numero).toFixed(2);
+    };    
+
     return (
         <Container className="mt-5 pt-4">
             <Tabs defaultActiveKey="repuestos" id="tab-control" className="mb-3">
@@ -364,17 +368,18 @@ const RepPendientes = () => {
                                             <tr key={pendiente.id} className={comparar2(pendiente) ? "table-warning" : (comparar(pendiente)) ? "table-success" : pendiente.critico ? "table-danger" : ""}>
                                                 <td>{pendiente.articulo}</td>
                                                 <td>{pendiente.critico ? 'Si' : 'No'}</td>
-                                                <td>{pendiente.stock}</td>
-                                                <td>{pendiente.stock_minimo}</td> 
-                                                <td>{pendiente.stock_aconsejado}</td> 
-                                                <td>{lineasPendientes && lineasPendientes.map(linea => {
-                                                    let suma = 0;
-                                                    if (linea.repuesto.id === pendiente.id) {                                        
-                                                        suma += parseInt(linea.por_recibir);
-                                                    }
-                                                    return suma;
-                                                }).reduce((partialSum, a) => partialSum + a, 0)}
-                                                </td>
+                                                <td>{formatearNumero(pendiente.stock)}</td>
+                                                <td>{formatearNumero(pendiente.stock_minimo)}</td> 
+                                                <td>{formatearNumero(pendiente.stock_aconsejado)}</td> 
+                                                <td>{formatearNumero(
+                                                    lineasPendientes && lineasPendientes.map(linea => {
+                                                        let suma = 0;
+                                                        if (linea.repuesto.id === pendiente.id) {                                        
+                                                            suma += parseFloat(linea.por_recibir);
+                                                        }
+                                                        return suma;
+                                                    }).reduce((partialSum, a) => partialSum + a, 0)
+                                                )}</td>
                                                 <td>
                                                     <Receipt className="mr-3 pencil" onClick={() => listarPedidos(pendiente.id)} />
                                                     <Link to={`/repuestos/${pendiente.id}`}>

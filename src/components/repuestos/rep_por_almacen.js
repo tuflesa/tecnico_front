@@ -18,12 +18,12 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
     const [almacentraza, setAlmacenTraza] = useState(null);
     const [showBorrar, setShowBorrar] = useState(false);
     const [pedidos_pendientes, setPedidosPendientes] = useState(null);
+    const [editandoFila, setEditandoFila] = useState({});
+
     const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Mantenimiento'&&user['tec-user'].perfil.puesto.nombre!=='Operador'?false:true;
 
     const [datos, setDatos] = useState({
         stocks_minimos: repuesto ? repuesto.stocks_minimos : null,
-        //cantidad: repuesto.stocks_minimos ? repuesto.stocks_minimos.cantidad : null,
-        //cantidad_aconsejable: repuesto.stocks_minimos ? repuesto.stocks_minimos.cantidad_aconsejable : null,
         almacen: null,
         stock_actual: null,
         stock_minimo: null, 
@@ -77,6 +77,22 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
         })
         .then( res => { 
             habilitar_linea(r);
+            const updatedStock = { //actualiza la variable repuesto.stocks_minimos para mostrar el cambio y no el dato anterior.
+                ...r,
+                cantidad: datos.stock_minimo ? datos.stock_minimo : r.cantidad,
+                cantidad_aconsejable: datos.stock_aconsejable ? datos.stock_aconsejable : r.cantidad_aconsejable,
+                stock_act: datos.stock_actual ? datos.stock_actual : r.stock_act,
+                localizacion: datos.localizaciones ? datos.localizaciones : r.localizacion
+            };
+            
+            const nuevosStocks = repuesto.stocks_minimos.map(item => 
+                item.id === r.id ? updatedStock : item
+            );
+        
+            setRepuesto({
+                ...repuesto,
+                stocks_minimos: nuevosStocks
+            });
             if (datos.stock_actual){
                 const hoy = new Date();
                 var dd = String(hoy.getDate()).padStart(2, '0');
@@ -131,28 +147,27 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
 
     const handlerListCancelar = () => {      
         cerrarListAlmacen();
-        datos.stock_actual= '';
-        datos.stock_minimo= '';
-        datos.localizaciones= '';
+        setDatos({
+            ...datos,
+            stock_actual: '',
+            stock_minimo: '',
+            localizaciones: '',
+        });
+        setEditandoFila({});
     } 
 
-    /* const habilitar_linea = (r) => {
+    const habilitar_linea = (r) => {
         if (user['tec-user'].perfil.puesto.nombre !== 'Operador') {
-            var input_min = document.getElementsByClassName(r.almacen.nombre);
-            for (var i = 0; i < input_min.length; i++) {
-                let input = input_min[i];
-                if (repuesto.es_critico === true) { // Habilitar todo menos stock_aconsejable
-                    input.disabled = input.name === 'stock_aconsejable';
-                } else {// Habilitar todo menos stock_minimo
-                    input.disabled = input.name === 'stock_minimo';
-                }
-            }
+            setEditandoFila(prev => ({
+                ...prev,
+                [r.id]: !prev[r.id] // toggle edición por ID de la fila
+            }));
         } else {
             alert('No tienes permisos');
         }
-    }; */ 
+    };
 
-    const habilitar_linea = (r) => {
+    /* const habilitar_linea = (r) => {
         if (user['tec-user'].perfil.puesto.nombre !== 'Operador') {
             var input_min = document.getElementsByClassName(r.almacen.nombre);
             const currentlyDisabled = input_min[0].disabled; // Comprobar si actualmente están habilitados o deshabilitados
@@ -174,8 +189,7 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
         } else {
             alert('No tienes permisos');
         }
-    };
-    
+    }; */
 
     const BorrarAlmacen = (r)=>{
         if(r.stock_act>0){
@@ -209,6 +223,10 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
         setShowBorrar(false);
     } 
 
+    const formatearNumero = (numero) => {
+        return Number(numero) % 1 === 0 ? Number(numero) : Number(numero).toFixed(2);
+    };
+    
     return (
         <Container>
             <Modal index={1} show={show} backdrop="static" keyboard={ false } animation={false} size="xl" >
@@ -255,40 +273,40 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
                                                             <input          className={r.almacen.nombre} 
                                                                             type = "text" 
                                                                             name='localizaciones'
-                                                                            value= {datos.localizacion}
+                                                                            value= {datos.localizaciones}
                                                                             onChange={handleInputChange}
                                                                             placeholder={r.localizacion}
-                                                                            disabled
+                                                                            disabled={!editandoFila[r.id]}
                                                             />
                                                             </td>                                                                                                       
                                                             <td>
                                                             <input          className={r.almacen.nombre} 
                                                                             type = "text" 
                                                                             name='stock_actual'
-                                                                            value= {datos.stock_act}
+                                                                            value= {editandoFila[r.id] ? datos.stock_actual : formatearNumero(r.stock_act)}
                                                                             onChange={handleInputChange}
                                                                             placeholder={r.stock_act}
-                                                                            disabled
+                                                                            disabled={!editandoFila[r.id]}
                                                             />
                                                             </td>
                                                             <td>
                                                             <input  className={r.almacen.nombre}
                                                                     type = "text"                                                                      
-                                                                    name='stock_minimo'                                                             
-                                                                    value= {datos.stock_min}
+                                                                    name='stock_minimo' 
+                                                                    value= {editandoFila[r.id] ? datos.stock_minimo : formatearNumero(r.cantidad)}
                                                                     onChange={handleInputChange}
                                                                     placeholder={r.cantidad}
-                                                                    disabled
+                                                                    disabled={!(editandoFila[r.id]&& r.repuesto.es_critico === true)}
                                                             />
                                                             </td> 
                                                             <td>
                                                             <input  className={r.almacen.nombre}
                                                                     type = "text"                                                                      
                                                                     name='stock_aconsejable'                                                             
-                                                                    value= {datos.stock_aconsejable}
+                                                                    value= {editandoFila[r.id] ? datos.stock_aconsejable : formatearNumero(r.cantidad_aconsejable)}
                                                                     onChange={handleInputChange}
                                                                     placeholder={r.cantidad_aconsejable}
-                                                                    disabled
+                                                                    disabled={!(editandoFila[r.id] && r.repuesto.es_critico === false)} 
                                                             />
                                                             </td>
                                                             {!nosoyTecnico?                                                     

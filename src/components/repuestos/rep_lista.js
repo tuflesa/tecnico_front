@@ -116,7 +116,7 @@ const RepLista = () => {
     }
 
     const borrarRepuesto = () => {
-        axios.patch(BACKEND_SERVER + `/api/repuestos/lista/${repuestoBorrar.id}/`,{
+        axios.patch(BACKEND_SERVER + `/api/repuestos/lista/${repuestoBorrar.id}/`,{ //tabla de repuestos
             descatalogado: true
         }, {
             headers: {
@@ -182,7 +182,7 @@ const RepLista = () => {
                                         {/* <td>{repuesto.es_critico ? 'Si' : 'No'}</td>
                                         <td>{repuesto.descatalogado ? 'Si' : 'No'}</td> */}
                                         <td>
-                                            <Link title='Detalle/Modificar'to={`/repuestos/${re.id}`}><PencilFill className="mr-3 pencil"/></Link>
+                                            <Link title='Detalle/Modificar'to={`/repuestos/${re.id}`}target="_blank" rel="noopener noreferrer"><PencilFill className="mr-3 pencil"/></Link>
                                             {!nosoyTecnico?<Trash className="mr-3 trash" onClick={event => {handleTrashClick(re)}} />:''}
                                         </td>
                                     </tr>

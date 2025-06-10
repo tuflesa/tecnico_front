@@ -19,6 +19,7 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
         inventario: '',
         repuesto:  linea ? linea.repuesto.nombre : '',
         cantidad:  linea ? linea.cantidad : '',
+        guardar:  '',
         precio: linea ? linea.precio : '', 
         //fecha: (('0'+hoy.getDay()) + '-'+(hoy.getMonth()+1)+'-'+ hoy.getFullYear()),
         fecha: fechaString,
@@ -28,11 +29,14 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
         localizacion: '',
         usuario: user['tec-user'],
         entregadoAnterior: linea? (linea.cantidad - linea.por_recibir) : 0,
+        unidad_linea: linea ? linea.tipo_unidad_nombre: '',
+        unidad_repuesto: linea ? linea.repuesto.tipo_unidad_siglas: '',
     });
 
     const handlerCancelar = () => {      
         handleCloseMovimiento();
         datos.recibido= '';
+        datos.guardar= '';
         datos.albaran = '';
         datos.almacen = '';
     } 
@@ -57,12 +61,15 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
             cantidad:  linea ? linea.cantidad : '',
             precio: linea ? linea.precio : '', 
             fecha: fechaString,
+            guardar:  datos ? datos.guardar : '',
             recibido: datos ? datos.recibido : '',
             albaran: datos ? datos.albaran : '',
             almacen: datos ? datos.almacen : '',
             localizacion: datos ? datos.localizacion : '',
             usuario: user['tec-user'].id,
             entregadoAnterior: linea? (linea.cantidad - linea.por_recibir) : 0,
+            unidad_linea: linea ? linea.tipo_unidad_nombre: '',
+            unidad_repuesto: linea ? linea.repuesto.tipo_unidad_siglas: '',
         });
     },[linea]);
 
@@ -74,18 +81,18 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
     },[datos.recibido])
 
     const actualizarRecibir = () =>{
-        if((datos.entregadoAnterior + parseInt(datos.recibido))>linea.cantidad){
+        if((datos.entregadoAnterior + parseFloat(datos.recibido))>linea.cantidad){
             var igualar = window.confirm("Se ha recibido una cantidad mayor a la indicada, ¿Deseas cambiar la cantidad pedida?");
             if(igualar){
                 datos.por_recibir = 0;
-                datos.cantidad = datos.entregadoAnterior + parseInt(datos.recibido);
+                datos.cantidad = parseFloat(parseFloat(datos.entregadoAnterior) + parseFloat(datos.recibido)).toFixed(2);
             }
             else{
-                datos.por_recibir = linea.por_recibir - datos.recibido;
+                datos.por_recibir = parseFloat(parseFloat(linea.por_recibir) - parseFloat(datos.recibido)).toFixed(2);
             }
         }
         else{
-            datos.por_recibir = linea.por_recibir - datos.recibido;
+            datos.por_recibir = parseFloat(parseFloat(linea.por_recibir) - parseFloat(datos.recibido)).toFixed(2);
         }
         axios.patch(BACKEND_SERVER + `/api/repuestos/linea_pedido/${linea.id}/`, {
             por_recibir: datos.por_recibir,  
@@ -104,11 +111,17 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
         .catch(err => { console.log(err);})
     }
  
-    const guardarMovimiento = (event) => {   
+    const guardarMovimiento = (event) => { 
+        if(linea?.tipo_unidad !== linea?.repuesto?.tipo_unidad){
+            if(datos.guardar===''){
+                alert('Se debe rellenar la cantidad que debemos almacenar en almacen.');
+                return;
+            }
+        }  
         event.preventDefault();
         axios.post(BACKEND_SERVER + `/api/repuestos/movimiento/`, {
             fecha: datos.fecha,
-            cantidad: datos.recibido,
+            cantidad: datos.guardar?datos.guardar:datos.recibido,
             almacen: datos.almacen,
             usuario: user['tec-user'].id,
             linea_pedido: datos.linea_pedido,
@@ -117,7 +130,7 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
-              }     
+            }     
         })
         .then( res => { 
             setMovimiento(res.data); 
@@ -210,7 +223,7 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
                             </Col>                        
                             <Col>
                                 <Form.Group controlId="recibido">
-                                    <Form.Label>Cantida Recibida</Form.Label>
+                                    <Form.Label>Ctd. Recibida</Form.Label>
                                     <Form.Control imput type="text"  
                                                 name='recibido' 
                                                 value={datos.recibido}
@@ -220,8 +233,45 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
                                 </Form.Group>
                             </Col>
                             <Col>
+                                <Form.Group controlId="unidad_linea">
+                                    <Form.Label>Und. medida</Form.Label>
+                                    <Form.Control imput type="text"  
+                                                name='unidad_linea' 
+                                                value={datos.unidad_linea}
+                                                placeholder="Unidad de linea"
+                                                disabled>
+                                    </Form.Control>
+                                </Form.Group>
+                            </Col>
+                            {(linea?.tipo_unidad !== linea?.repuesto?.tipo_unidad)?
+                                <Col>
+                                    <Form.Group controlId="guardar">
+                                        <Form.Label>Ctd. a guardar*</Form.Label>
+                                        <Form.Control imput type="text"  
+                                                    name='guardar' 
+                                                    value={datos.guardar}
+                                                    onChange={handleInputChange2}
+                                                    placeholder="Cantidad Guardar">  
+                                        </Form.Control>
+                                    </Form.Group>
+                                </Col>
+                            :''}
+                            {(linea?.tipo_unidad !== linea?.repuesto?.tipo_unidad)?
+                                <Col>
+                                <Form.Group controlId="unidad_repuesto">
+                                    <Form.Label>Und. medida</Form.Label>
+                                    <Form.Control imput type="text"  
+                                                name='unidad_repuesto' 
+                                                value={datos.unidad_repuesto}
+                                                placeholder="Unidad repuesto" 
+                                                disabled>
+                                    </Form.Control>
+                                </Form.Group>
+                            </Col>
+                            :''}
+                            <Col>
                                 <Form.Group controlId="albaran">
-                                    <Form.Label>Albarán Proveedor</Form.Label>
+                                    <Form.Label>Albarán Prov.</Form.Label>
                                     <Form.Control imput type="text"  
                                                 name='albaran' 
                                                 value={datos.albaran}
