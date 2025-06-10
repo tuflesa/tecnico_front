@@ -27,7 +27,7 @@ const Programadores = () => {
     const grabar_icono = () => {
         for(var x=0;x<celda_qs.length;x++){
             celda_qs && axios.patch(BACKEND_SERVER + `/api/rodillos/celda/${celda_qs[x].id}/`,{
-                icono: celda_qs[x].icono,
+                icono: celda_qs[x].operacion.icono_celda,
             },
             {
                 headers: {

@@ -209,8 +209,8 @@ const QS_Produccion = () => {
             return
         }
         // Si hay dato continuamos
-        // console.log('Lee Montaje dato ...');
-        // console.log(dato);
+        console.log('Lee Montaje dato ...');
+        console.log(dato);
         const temp = []; // Aqui guardo el montaje temporal
         const bancadas = [];
         dato.grupo.bancadas.forEach(b => bancadas.push(b)); // Bancadas del grupo
@@ -224,7 +224,7 @@ const QS_Produccion = () => {
                 const tipo = c.operacion.nombre.substring(0,2);
                 const rod = []
                 c.conjunto.elementos.map(e => {
-                    const num_instancias = e.rodillo.instancias.length;
+                    const num_instancias = e.rodillo.instancias.filter(i => i.activa_qs==true).length;
                     e.rodillo.instancias.filter(i => i.activa_qs==true).map((instancia,i) => { // Instancias activas
                         // Parametros de la instancia
                         const param = {
@@ -1128,8 +1128,8 @@ const QS_Produccion = () => {
                     }
                     break;
                 case 'FP':
-                    // console.log('Gap: Fin pass');
-                    // console.log('m', m);
+                    console.log('Gap: Fin pass');
+                    console.log('m', m);
                     piston = null;
                     if (!simulador){
                         pos_i = posiciones.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='INF')[0].pos;
@@ -1207,7 +1207,6 @@ const QS_Produccion = () => {
                     else {
                         pos_ancho = posicionesSim.filter(p => p.op==m.operacion)[0].posiciones.filter(p => p.eje=='ANCHO')[0].pos;
                     }
-
                     // Parametros
                     Df = m.rodillos.filter(r => r.eje=='ANCHO')[0].parametros.Df;
                     Dext = m.rodillos.filter(r => r.eje=='ANCHO')[0].parametros.Dext;
