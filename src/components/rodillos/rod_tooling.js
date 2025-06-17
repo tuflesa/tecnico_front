@@ -179,6 +179,7 @@ const RodTooling = () => {
                                     icono_id: celda.icono?.id || null,
                                     conjunto: celda.conjunto,
                                     cel_id: celda.id || null,
+                                    pertenece_ct: celda.icono.pertenece_ct,
                                 });
                             }
                         });
@@ -325,7 +326,7 @@ const RodTooling = () => {
                                             <td key={i} style={{ backgroundColor: celda?.color_celda && celda.color_celda !== '#4CAF50' && celda.color_celda !== '#2196F3'? celda.color_celda : 'transparent' }}>
                                                 {celda ? (
                                                     <button onClick={() => handleOpenModal(celda)} style={{border: "none", background: "none", padding: 0, cursor: "pointer"}} >
-                                                        <img src={celda.color_celda==='#FFA500' || celda.color_celda === '#2196F3'? obtenerIcono(1): celda.conjunto?.tubo_madre > montaje.tubo_madre? obtenerIcono(1): montaje.titular_grupo ? obtenerIcono(celda.icono_id) :celda.conjunto?.tubo_madre===null?obtenerIcono(celda.icono_id): obtenerIcono(1)} alt="" width={30} height={30} />
+                                                        <img src={(!celda.pertenece_ct && (celda.color_celda==='#FFA500' || celda.color_celda === '#2196F3'))? obtenerIcono(1): celda.conjunto?.tubo_madre > montaje.tubo_madre? obtenerIcono(1): montaje.titular_grupo ? obtenerIcono(celda.icono_id) :celda.conjunto?.tubo_madre===null?obtenerIcono(celda.icono_id): obtenerIcono(1)} alt="" width={30} height={30} />
                                                     </button>
                                                 ) : (
                                                     <div style={{ width: '30px', height: '30px' }} />
