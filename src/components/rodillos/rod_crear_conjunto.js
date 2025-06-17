@@ -41,13 +41,13 @@ const RodConjunto = ({show, celda_marcada, setShow, elementos_formacion, handleC
         operacion_filtro: '',
         tubo_madre_filtro: '',
         conjunto_elegido: '',
-        icono_celda:celda_marcada?.color_celda==='verde' || elementos_formacion.length===0?(elementos_formacion[0]?.icono?elementos_formacion[0].icono.id:operacion_marcada?operacion_marcada.icono_celda:''):'',
+        icono_celda:celda_marcada?.color_celda==='#4CAF50' || elementos_formacion.length===0?(elementos_formacion[0]?.icono?elementos_formacion[0].icono.id:operacion_marcada?operacion_marcada.icono_celda:''):'',
     });
     
     useEffect(() => {
         setDatos(prevDatos => ({
             ...prevDatos,
-            icono_celda: (celda_marcada?.color_celda==='verde' || elementos_formacion.length===0)?(elementos_formacion[0]?.icono?elementos_formacion[0].icono.id:operacion_marcada.icono_celda):'',
+            icono_celda: (celda_marcada?.color_celda==='#4CAF50' || elementos_formacion.length===0)?(elementos_formacion[0]?.icono?elementos_formacion[0].icono.id:operacion_marcada.icono_celda):'',
         }));
     }, [operacion_marcada]);
 
@@ -256,29 +256,29 @@ const RodConjunto = ({show, celda_marcada, setShow, elementos_formacion, handleC
             else{ 
                 if(datos.conjunto_elegido){ 
                     if(operacion_marcada.id!==datos.conjunto_elegido.operacion.id){
-                        color = 'naranja';
+                        color = '#FFA500'; //naranja
                     }
                     else if(operacion_marcada.id===datos.conjunto_elegido.operacion.id && tubomadre!==datos.conjunto_elegido.tubo_madre){
-                        color = 'azul';
+                        color = '#2196F3'; //azul
                     }
                     else if(amarillo){
-                        color='amarillo'
+                        color='#FFEB3B'; //amarillo
                     }
                     else{
                         alert('NO ENTRA EN NINGÚN COLOR')
                     }
-                    if(celda_marcada?.color_celda==='verde'){
+                    if(celda_marcada?.color_celda==='#4CAF50'){ //verde
                         alert('Ya tienes celda verde');
                         return;
                     }
                     else{
-                        if(celda_marcada?.color_celda==='azul'){//¿tenia ya conjunto? sustituyo conjunto en celda
+                        if(celda_marcada?.color_celda==='#2196F3'){//¿tenia ya conjunto? sustituyo conjunto en celda AZUL
                             SustituirConjuntoEnCelda(datos.conjunto_elegido, color);
                         }
-                        if(celda_marcada?.color_celda==='naranja'){//¿tenia ya conjunto naranja? sustituyo conjunto en celda
+                        if(celda_marcada?.color_celda==='#FFA500'){//¿tenia ya conjunto naranja? sustituyo conjunto en celda NARANJA
                             SustituirConjuntoEnCelda(datos.conjunto_elegido, color);
                         }
-                        if(celda_marcada?.color_celda==='amarillo'){//¿tenia ya conjunto amarillo? sustituyo conjunto en celda
+                        if(celda_marcada?.color_celda==='#FFEB3B'){//¿tenia ya conjunto amarillo? sustituyo conjunto en celda AMARILLO
                             SustituirConjuntoEnCelda(datos.conjunto_elegido, color);
                         }
                         if(!celda_marcada){
@@ -301,7 +301,7 @@ const RodConjunto = ({show, celda_marcada, setShow, elementos_formacion, handleC
                         alert('Introduce algún dato');
                         return;
                     }
-                    color='verde';
+                    color='#4CAF50';
                     var rodillo_tubo_madre = EjesRodillos[0].TuboMadreRod;
                     var rodillo_operacion = EjesRodillos[0].operacion;
                     var no_coincide=false;
@@ -314,7 +314,7 @@ const RodConjunto = ({show, celda_marcada, setShow, elementos_formacion, handleC
                         }
                     }
                     if(no_coincide===false){
-                        if(celda_marcada?.color_celda==='verde' || celda_marcada?.color_celda==='amarillo'){ 
+                        if(celda_marcada?.color_celda==='#4CAF50' || celda_marcada?.color_celda==='#FFEB3B'){  //VERDE O AMARILLO
                             const confirmacion = window.confirm('Ya tenemos elementos creados originales ¿Deseas cambiarlos?'); //Si tengo ya un juego original para esta formación, no puedo poner otro.
                             if(confirmacion){
                                 ActualizarElementoVerde();
@@ -371,11 +371,11 @@ const RodConjunto = ({show, celda_marcada, setShow, elementos_formacion, handleC
                     })
                     .then( res => {
                         let color='';
-                        if(celda_marcada?.color_celda==='amarillo' && amarillo===false){
-                            color='verde';
+                        if(celda_marcada?.color_celda==='#FFEB3B' && amarillo===false){
+                            color='#4CAF50'; //VERDE
                         }
-                        else if(celda_marcada?.color_celda==='verde' && amarillo===true){
-                            color='amarillo';
+                        else if(celda_marcada?.color_celda==='#4CAF50' && amarillo===true){
+                            color='#FFEB3B';
                         }
                         else{
                             color=celda_marcada?.color_celda;
@@ -408,10 +408,10 @@ const RodConjunto = ({show, celda_marcada, setShow, elementos_formacion, handleC
         var amarillo = EjesRodillos.some(rodillo => rodillo.es_generico === 'true');
         let color='';
         if(amarillo){
-            color='amarillo';
+            color='#FFEB3B';
         }
         else{
-            color='verde';
+            color='#4CAF50'; //verde
         }
         if(EjesRodillos.length===ejes.length){//cantidad de rodillo igual a cantidad de ejes
             axios.post(BACKEND_SERVER + `/api/rodillos/conjunto/`, { //creamos conjunto, (Operación y Tubo_madre del rodillo).
@@ -446,19 +446,19 @@ const RodConjunto = ({show, celda_marcada, setShow, elementos_formacion, handleC
                                 var amarillo = EjesRodillos.some(rodillo => rodillo.es_generico === 'true');
                                 if(bancada_id || bancadaId){
                                     if(amarillo){
-                                        color='amarillo'
+                                        color='#FFEB3B';
                                     }
                                     else{
-                                        color='verde'
+                                        color='#4CAF50' //verde
                                     }
                                     GuardarCelda(bancada_id, color); //tengo bancada creo celda
                                 }
                                 else{
                                     if(amarillo){
-                                        color='amarillo'
+                                        color='#FFEB3B';
                                     }
                                     else{
-                                        color='verde'
+                                        color='#4CAF50' //verde
                                     }
                                     GuardarBancada(color); //creo bancada y celda
                                 }
@@ -485,10 +485,10 @@ const RodConjunto = ({show, celda_marcada, setShow, elementos_formacion, handleC
             conjunto_id=datos.conjunto_elegido.id;
             datos.icono_celda = datos.icono_celda? datos.icono_celda:datos.conjunto_elegido.conjunto_celda[0].icono;
             if(operacion_marcada.id!==datos.conjunto_elegido.operacion.id){
-                color = 'naranja';
+                color = '#FFA500';
             }
             if(operacion_marcada.id===datos.conjunto_elegido.operacion.id && tubomadre!==datos.conjunto_elegido.tubo_madre){
-                color = 'azul';
+                color = '#2196F3';
             }
         }
         id_bancada && axios.post(BACKEND_SERVER + `/api/rodillos/celda/`, { //creamos celda
@@ -738,7 +738,7 @@ const RodConjunto = ({show, celda_marcada, setShow, elementos_formacion, handleC
                                             </Form.Control>
                                         </Form.Group>
                                     ))}
-                                    {celda_marcada?.color_celda==='amarillo'|| celda_marcada?.color_celda==='verde' || elementos_formacion.length === 0 ? (
+                                    {celda_marcada?.color_celda==='#FFEB3B'|| celda_marcada?.color_celda==='#4CAF50' || elementos_formacion.length === 0 ? (
                                         <Form.Group controlId="icono_celda">
                                             <Form.Label style={{ color: "red" }}>Icono Celda</Form.Label>
                                             <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
@@ -787,7 +787,7 @@ const RodConjunto = ({show, celda_marcada, setShow, elementos_formacion, handleC
                                             value={datos.operacion_filtro}
                                             name='operacion'
                                             onChange={handleInputChangeOpFiltro} 
-                                            disabled={celda_marcada?.color_celda==='verde'?true:bancada_otraformacion.id?true:false}> {/*si tenemos rodillos nuestros, no podemos coger de otro*/}
+                                            disabled={celda_marcada?.color_celda==='#4CAF50'?true:bancada_otraformacion.id?true:false}> {/*si tenemos rodillos nuestros, no podemos coger de otro*/}
                                             <option key={0} value={''}>Todas</option>
                                             {operaciones_filtro && operaciones_filtro.map(operacion => (
                                                 <option key={operacion.id} value={operacion.id}>
@@ -805,7 +805,7 @@ const RodConjunto = ({show, celda_marcada, setShow, elementos_formacion, handleC
                                             value={datos.tubo_madre_filtro}
                                             name='tubo_madre'
                                             onChange={handleInputChangeTuboFiltro} 
-                                            disabled={celda_marcada?.color_celda==='verde'?true:bancada_otraformacion.id?true:false}>
+                                            disabled={celda_marcada?.color_celda==='#4CAF50'?true:bancada_otraformacion.id?true:false}>
                                             <option key={0} value={``}>Todas</option>
                                             {tuboMadre_unicos && tuboMadre_unicos.map(conjunto => (
                                                 <option key={conjunto.id} value={conjunto.tubo_madre}>
@@ -826,7 +826,7 @@ const RodConjunto = ({show, celda_marcada, setShow, elementos_formacion, handleC
                                             value={datos.conjunto_elegido}
                                             onChange={handleInputChange_conjunto}
                                             placeholder="Conjunto Existente"
-                                            disabled={celda_marcada?.color_celda==='verde'?true:bancada_otraformacion.id?true:false}
+                                            disabled={celda_marcada?.color_celda==='#4CAF50'?true:bancada_otraformacion.id?true:false}
                                         >
                                             <option key={0} value={''}>Conjuntos rodillos otras formaciones</option>
                                             {conjuntos_exist && conjuntos_exist.map(conjunto => {
@@ -868,7 +868,7 @@ const RodConjunto = ({show, celda_marcada, setShow, elementos_formacion, handleC
             </Modal.Body>
             <Modal.Footer>
                 {bancada_otraformacion.id?<Button variant="info" onClick={ElimniarBancada}>Eliminar Bancada</Button>:''}
-                {Object.keys(selectRodilloId).length === 0 && (celda_marcada?.color_celda==='verde'||celda_marcada?.color_celda==='amarillo')?<Button variant="info" onClick={ActualizarIcono}>Actualizar icono</Button>:<Button variant="info" onClick={Guardar}>Guardar</Button>}
+                {Object.keys(selectRodilloId).length === 0 && (celda_marcada?.color_celda==='#4CAF50'||celda_marcada?.color_celda==='#FFEB3B')&& !bancada_otraformacion.id?<Button variant="info" onClick={ActualizarIcono}>Actualizar icono</Button>:<Button variant="info" onClick={Guardar}>Guardar</Button>}
                 <Button variant="waring" onClick={handlerCancelar}>Cancelar</Button>
             </Modal.Footer>
         </Modal>

@@ -108,13 +108,16 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
         let newColorAzulB = false;
         let newColorAmarillo = false;
 
-        if (formacionSeleccionada?.color_celda === 'verde') {
+        if (formacionSeleccionada?.color_celda === '#4CAF50') { //verde
             newColorVerde = true;
         };
-        if (formacionSeleccionada?.color_celda === 'azul') {
+        if (formacionSeleccionada?.color_celda === '#2196F3') { //azul
             newColorAzul = true;
         };
-        if (formacionSeleccionada?.color_celda === 'amarillo') {
+        if (formacionSeleccionada?.color_celda === '#FFEB3B') { //amarillo
+            newColorAmarillo = true;
+        };
+        if (formacionSeleccionada?.color_celda === '#FFA500') { //naranja
             newColorAzulB = true;
         };
         
@@ -179,19 +182,21 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                                                             formacionSeleccionada = form_completas;
                                                         }
                                                         else{
-                                                            if(form_completas.color_celda === 'verde' && form_completas.operacion === operacion.id){
+                                                            //verde
+                                                            if(form_completas.color_celda === '#4CAF50' && form_completas.operacion === operacion.id){
                                                                 iconoOperacion = form_completas.icono && form_completas.icono.icono ? form_completas.icono.icono : '';
                                                                 formacionSeleccionada = form_completas;
                                                             }
-                                                            if(form_completas.color_celda === 'amarillo' && form_completas.operacion === operacion.id){
+                                                            if(form_completas.color_celda === '#FFEB3B' && form_completas.operacion === operacion.id){
                                                                 iconoOperacion = form_completas.icono && form_completas.icono.icono ? form_completas.icono.icono : '';
                                                                 formacionSeleccionada = form_completas;
                                                             }
-                                                            if(form_completas.color_celda === 'naranja' && form_completas.operacion === operacion.id){
+                                                            //naranja
+                                                            if(form_completas.color_celda === '#FFA500' && form_completas.operacion === operacion.id){
                                                                 iconoOperacion = form_completas.icono && form_completas.icono.icono ? form_completas.icono.icono : '';
                                                                 formacionSeleccionada = form_completas;
                                                             }
-                                                            if(form_completas.color_celda === 'azul' && form_completas.operacion === operacion.id){
+                                                            if(form_completas.color_celda === '#2196F3' && form_completas.operacion === operacion.id){
                                                                 colorBoton2 = true;
                                                                 iconoOperacion = form_completas.icono && form_completas.icono.icono ? form_completas.icono.icono : '';
                                                                 formacionSeleccionada = form_completas;
@@ -205,11 +210,11 @@ const RodBancada = ({visible, grupo, setGrupo}) => {
                                                             className={`btn ${
                                                                 colorBoton2
                                                                     ? 'btn-primary'
-                                                                    : formacionSeleccionada?.color_celda==='amarillo'
+                                                                    : formacionSeleccionada?.color_celda==='#FFEB3B'//amarillo
                                                                     ? 'btn-amarillo-primary'
-                                                                    : formacionSeleccionada?.color_celda==='verde'
+                                                                    : formacionSeleccionada?.color_celda==='#4CAF50' //verde
                                                                     ? 'btn-verde'
-                                                                    : formacionSeleccionada?.color_celda==='naranja'
+                                                                    : formacionSeleccionada?.color_celda==='#FFA500' //naranja
                                                                     ? 'btn-naranja-primary'
                                                                     : 'btn-gris-primary'
                                                             } btn-sm`}

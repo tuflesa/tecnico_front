@@ -24,23 +24,46 @@ const Programadores = () => {
     }; 
     
     const grabar_icono = () => {
-        console.log('entramos a grabar_icono')
+        
+        console.log('entramos a grabar_icono y celda vale....: ')
         let color_asignado='';
         for(var x=0;x<celdas.length;x++){
-            if(celdas[x].conjunto.operacion!==celdas[x].operacion.id){
-                color_asignado='naranja'
+            //var naranja = celdas[x].conjunto.elementos.some(element => element.rodillo.operacion !== celdas[x].operacion.id);
+            const colores = {
+                naranja: '#FFA500',
+                azul: '#2196F3',
+                verde: '#4CAF50',
+                amarillo: '#FFEB3B'
+            };
+            if(celdas[x].conjunto.elementos.some(element => element.rodillo.nombre === 'Sin_Rodillo')){
+                console.log('ENTRA EN AMARILLO: ', celdas)
+                color_asignado=colores.amarillo;
+            }
+            else if(celdas[x].conjunto.elementos.some(element => element.rodillo.operacion !== celdas[x].operacion.id)){
+                console.log('ENTRA EN NARANJA: ', celdas)
+                color_asignado=colores.naranja;
+            }
+            else if(celdas[x].conjunto.operacion!==celdas[x].operacion.id){
+                console.log('ENTRA EN NARANJA POR OPERACIÓN: ', celdas)
+                color_asignado=colores.naranja;
             }
             else if(celdas[x].bancada.tubo_madre!==celdas[x].conjunto.tubo_madre){
-                color_asignado='azul'
+                console.log('ENTRA EN AZUL: ', celdas)
+                color_asignado=colores.azul;
             }
-            if(celdas[x].conjunto.operacion===celdas[x].operacion.id && celdas[x].bancada.tubo_madre===celdas[x].conjunto.tubo_madre){
-                color_asignado='verde'
+            else if(celdas[x].conjunto.operacion===celdas[x].operacion.id && celdas[x].bancada.tubo_madre===celdas[x].conjunto.tubo_madre){
+                console.log('ENTRA EN VERDE: ', celdas)
+                color_asignado=colores.verde;
             }
-            for(var y=0; y<celdas[x].conjunto.elementos.length;y++){
-                if(celdas[x].conjunto.elementos[y].rodillo.nombre==='Sin_Rodillo'){
-                    color_asignado='amarillo'
+            else if(celdas[x].conjunto.elementos.some(element => element.rodillo.nombre === 'Sin_Rodillo')){
+                console.log('ENTRA EN AMARILLO: ', celdas)
+                color_asignado=colores.amarillo;
+            }
+            /* for(var y=0; y<celdas[142].conjunto.elementos.length;y++){
+                if(celdas[142].conjunto.elementos[y].rodillo.nombre==='Sin_Rodillo'){
+                    color_asignado=colores.amarillo;
                 }
-            }
+            } */
         
             color_asignado && celdas && axios.patch(BACKEND_SERVER + `/api/rodillos/celda/${celdas[x].id}/`,{
                 color_celda: color_asignado,
@@ -51,14 +74,14 @@ const Programadores = () => {
                 }
             })
             .then( res => { 
-                console.log('DESPUES DE GRABAR: ',res.data);
+                //console.log('DESPUES DE GRABAR: ',res.data);
             })
             .catch(err => { console.log(err);})
         }
     };
 
     useEffect(()=>{
-        axios.get(BACKEND_SERVER + `/api/rodillos/celda_program/?bancada__tubo_madre=${'17.3'}`,{
+        axios.get(BACKEND_SERVER + `/api/rodillos/celda_program/`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }     

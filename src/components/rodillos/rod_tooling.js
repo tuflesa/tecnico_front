@@ -27,6 +27,8 @@ const RodTooling = () => {
     const [montajeSeleccionado, setMontajeSeleccionado] = useState(null);
     const [comentariosMontaje, setComentariosMontaje] = useState('');
     const [show_anotaciones, setShowAnotaciones] = useState(false);
+    const [resultado, setResultado] = useState([]);
+
     
     useEffect(() => { //SEPARAR DATOS QUE ENTRAN A TRAVES DEL FILTRO
         const params = new URLSearchParams(filtro);
@@ -50,26 +52,68 @@ const RodTooling = () => {
     }, [operaciones]);
 
     useEffect(() => {
-        maquina && axios.get(BACKEND_SERVER + `/api/rodillos/montaje_tooling/`+filtro,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            const nuevosMontajes = res.data.map(m => ({
-                ...m,
-                grupo: {
-                    ...m.grupo,
-                    bancadas: (m.grupo?.bancadas ?? []).concat(m.bancadas ?? [])
+        if (!maquina) return;
+        const fetchDatos = async () => {
+            try {
+                const operacionesRes = await axios.get(
+                    `${BACKEND_SERVER}/api/rodillos/operacion/?seccion__maquina__id=${maquina}`,
+                    { headers: { 'Authorization': `token ${token['tec-token']}` } }
+                );
+                const operacionesData = operacionesRes.data;
+                setOperaciones(operacionesData);
+
+                const montajesRes = await axios.get(
+                    `${BACKEND_SERVER}/api/rodillos/montaje_tooling/${filtro}`,
+                    { headers: { 'Authorization': `token ${token['tec-token']}` } }
+                );
+                const nuevosMontajes = montajesRes.data.map(m => ({
+                    ...m,
+                    grupo: {
+                        ...m.grupo,
+                        bancadas: (m.grupo?.bancadas ?? []).concat(m.bancadas ?? [])
+                    }
+                }));
+                setMontajes(nuevosMontajes);
+                // Traer celdas desde backend
+                const todasLasBancadasIds = nuevosMontajes.flatMap(montaje =>
+                    montaje.grupo?.bancadas?.map(b => b.id) || []
+                );
+
+                if (todasLasBancadasIds.length > 0) {
+                    const queryString = todasLasBancadasIds.map(id => `bancada__id=${id}`).join('&');
+                    const celdaRes = await axios.get(
+                        `${BACKEND_SERVER}/api/rodillos/celda_select/?${queryString}`,
+                        { headers: { 'Authorization': `token ${token['tec-token']}` } }
+                    );
+                    const todasLasCeldas = nuevosMontajes.map(montaje => {
+                    const celdasDelMontaje = [];
+
+                    montaje.grupo?.bancadas?.forEach(bancada => {
+                        if (Array.isArray(bancada.celdas)) {
+                        // Añadimos todas las celdas de esta bancada, y agregamos el montajeId
+                        const celdasConMontajeId = bancada.celdas.map(c => ({
+                            ...c,
+                            montajeId: montaje.id
+                        }));
+                        celdasDelMontaje.push(...celdasConMontajeId);
+                        }
+                    });
+
+                    return celdasDelMontaje;
+                    });
+                    setCeldas(todasLasCeldas);
+                    // Aquí ejecutamos DatosFinales sobre los montajes que ya tienen celdas
+                    const resultadoFinal = DatosFinales(nuevosMontajes, operacionesData);
+                    setResultado(resultadoFinal);
                 }
-            }));
-            setMontajes(nuevosMontajes);
-            cogerDatos(res.data);
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    }, [filtro, maquina]);    
+
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+        fetchDatos();
+    }, [maquina]);
 
     useEffect(() => { //recogemos las secciones de la máquina elegida
         maquina && axios.get(BACKEND_SERVER + `/api/rodillos/seccion/` + filtro,{
@@ -85,36 +129,16 @@ const RodTooling = () => {
         });
     }, [maquina]);
 
-    useEffect(() => { //recogemos las operaciones de la máquina elegida
-        if(maquina){
-            axios.get(BACKEND_SERVER + `/api/rodillos/operacion/?seccion__maquina__id=${maquina}`,{
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                }
-            })
-            .then( r => {
-                setOperaciones(r.data);
-            })
-            .catch( err => {
-                console.log(err);
-            });
-        }
-    }, [maquina]);
-
     useEffect(() => {
         if (celdas) {
             const datosTablaCel = celdas.flatMap(e => { //en esta operación creamos un array con la información que queremos mostras
                 if (e) {
-                    return e.flatMap(c => {
-                        if(c){
-                            return c.map(d => ({
-                                cel:d,
-                                seccion: d.bancada.seccion.id,
-                                operacion: d.operacion,
-                                bancada: d.bancada.id,
-                            }));
-                        }       
-                    });
+                    return e.map(d => ({
+                        cel:d,
+                        seccion: d.operacion.seccion,
+                        operacion: d.operacion,
+                        bancada: d.bancada,
+                    }));
                 }
                 return [];
             });
@@ -138,37 +162,45 @@ const RodTooling = () => {
         });
     }, [token]);
 
-    const cogerDatos = async (montajes) => {
-        try {// Recopilar todos los IDs de bancadas
-            const todasLasBancadasIds = montajes.flatMap(montaje => 
-                montaje.grupo.bancadas.map(bancada => bancada.id)
-            );
-            if (todasLasBancadasIds.length > 0) {
-                const queryString = todasLasBancadasIds.map(id => `bancada__id=${id}`).join('&');
-                const response = await axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?${queryString}`, {
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`
+    const DatosFinales = (montajes, operaciones) => {
+        const operacionIds = operaciones.map(op => op.id);
+        montajes.forEach((montaje) => {
+            const fila = [];
+            const celdaMap = new Map();
+            if (montaje.grupo && Array.isArray(montaje.grupo.bancadas)) {
+                montaje.grupo.bancadas.forEach((bancada) => {
+                    if (Array.isArray(bancada.celdas)) {
+                        bancada.celdas.forEach((celda) => {
+                            const operacionId = celda?.operacion?.id;
+                            if (operacionId) {
+                                celdaMap.set(operacionId, {
+                                    color_celda: celda.color_celda || null,
+                                    operacion_id: operacionId,
+                                    icono_id: celda.icono?.id || null,
+                                    conjunto: celda.conjunto,
+                                    cel_id: celda.id || null,
+                                });
+                            }
+                        });
                     }
                 });
-                const todasLasCeldas = [];
-                // Para cada montaje, crear un array de arrays de celdas (uno por bancada)
-                montajes.forEach(montaje => {
-                    const celdasDelMontaje = [];
-                    montaje.grupo.bancadas.forEach(bancada => {
-                        const celdasDeBancada = response.data
-                            .filter(celda => celda.bancada.id === bancada.id)
-                            .map(celda => ({...celda, montajeId: montaje.id}));
-                        celdasDelMontaje.push(celdasDeBancada);
-                    });
-                    todasLasCeldas.push(celdasDelMontaje);
-                });
-                
-                setShow(!show);
-                setCeldas(todasLasCeldas);
             }
-        } catch (err) {
-            console.log(err);
-        }
+            operacionIds.forEach((id) => {
+                fila.push(celdaMap.get(id) || null);
+            });
+            resultado.push({
+                id: montaje.id,
+                anotaciones: montaje.anotaciones || null,
+                anotaciones_montaje: montaje.anotaciones_montaje || null,
+                nombre_montaje: montaje.nombre || null,
+                espesores: montaje.grupo.espesor_1 + '÷' + montaje.grupo.espesor_2 || null,
+                tubo_madre: montaje.grupo.tubo_madre || null,
+                dimensiones: montaje.bancadas.dimensiones || null,
+                titular_grupo: montaje.titular_grupo,
+                fila
+            });
+        });
+        return resultado;
     };
     
     const actualizaFiltro = str => {
@@ -204,6 +236,12 @@ const RodTooling = () => {
     const CerrarAnotacion = () => {
         setShowAnotaciones(false);
     }
+
+    const obtenerIcono = (id) => {
+        const icono = icono_celda.find(i => i.id === id);
+        return icono ? icono.icono : '';
+    };
+
 
     return (
         <Container fluid>
@@ -277,86 +315,23 @@ const RodTooling = () => {
                             })()}
                             </thead>
                             <tbody>
-                                {montajes.map(montaje => (
+                                {resultado.map(montaje => (
                                     <tr key={montaje.id}>
-                                    <td>{montaje.nombre}</td>
-                                    <td>{montaje.grupo.espesor_1 + '÷' + montaje.grupo.espesor_2}</td>
-                                    <td>{'Ø' + montaje.grupo.tubo_madre}</td>
-                                    <td>{montaje.bancadas?.dimensiones || '-'}</td>
-                                    {secciones && secciones.map(seccion => {
-                                        const bancada = montaje.grupo.bancadas.find(b => b.seccion.id === seccion.id);
-                                        return (operacionesPorSeccion[seccion.id] || []).map(operacion => {
-                                        const celda = bancada?.celdas?.find(c => c.operacion.id === operacion.id);
-                                        let bgColor = 'transparent';
-                                        if (celda?.conjunto?.elementos) {
-                                            if (celda.conjunto.elementos.some(e => {
-                                            if (!e.rodillo.instancias || e.rodillo.instancias.length === 0) return false;
-                                            const totalLineasInstancias = e.rodillo.instancias.reduce((total, instancia) => 
-                                                total + (instancia.lineasinstancias ? instancia.lineasinstancias.length : 0), 0);
-                                            return e.rodillo.instancias.length === totalLineasInstancias;
-                                            })) {
-                                            bgColor = 'red';
-                                            } else if (celda.conjunto.elementos.some(e => e.rodillo.nombre === "Sin_Rodillo")) {
-                                            bgColor = 'yellow';
-                                            } else if (celda.conjunto.elementos.some(e => e.rodillo.operacion !== celda.operacion.id)) {
-                                            bgColor = 'orange';
-                                            } else if (celda.conjunto?.operacion && celda.operacion?.id && 
-                                                    celda.conjunto.operacion !== celda.operacion.id) {
-                                            bgColor = 'orange';
-                                            } else if (celda.conjunto?.operacion && celda.operacion?.id && 
-                                                    seccion.pertenece_grupo === true && 
-                                                    celda.conjunto.tubo_madre < montaje.grupo.tubo_madre) {
-                                            bgColor = '#0cf317';
-                                            }
-                                        }
-                                        
-                                        return (
-                                            <td key={`${montaje.id}-${seccion.id}-${operacion.id}`} 
-                                                style={{ 
-                                                textAlign: 'center', 
-                                                backgroundColor: bgColor 
-                                                }}>
-                                            {celda ? (
-                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px'}}>
-                                                {(
-                                                    (montaje.titular_grupo === false && celda.conjunto?.tubo_madre !== null) ||
-                                                    (montaje.titular_grupo === true && celda.conjunto?.tubo_madre !== null && 
-                                                    celda.conjunto?.tubo_madre !== montaje.grupo.tubo_madre)
-                                                ) ? (
-                                                    <button
-                                                    onClick={() => handleOpenModal(celda)}
-                                                    style={{border: "none", background: "none", padding: 0, cursor: "pointer"}}
-                                                    >
-                                                    <img 
-                                                        src={celda.conjunto?.tubo_madre < montaje.grupo.tubo_madre
-                                                            ? icono_celda[2].icono
-                                                            : celda.conjunto?.operacion !== celda.operacion.id
-                                                            ? icono_celda[1].icono
-                                                            : icono_celda[0].icono} 
-                                                        alt="" 
-                                                        style={{ width: "30px", height: "30px" }}
-                                                    />
+                                        <td>{montaje.nombre_montaje}</td>
+                                        <td>{montaje.espesores}</td>
+                                        <td>{'Ø' + montaje.tubo_madre}</td>
+                                        <td>{montaje.dimensiones || '-'}</td>
+                                        {montaje.fila.map((celda, i) => (
+                                            <td key={i} style={{ backgroundColor: celda?.color_celda && celda.color_celda !== '#4CAF50' && celda.color_celda !== '#2196F3'? celda.color_celda : 'transparent' }}>
+                                                {celda ? (
+                                                    <button onClick={() => handleOpenModal(celda)} style={{border: "none", background: "none", padding: 0, cursor: "pointer"}} >
+                                                        <img src={celda.color_celda==='#FFA500' || celda.color_celda === '#2196F3'? obtenerIcono(1): celda.conjunto?.tubo_madre > montaje.tubo_madre? obtenerIcono(1): montaje.titular_grupo ? obtenerIcono(celda.icono_id) :celda.conjunto?.tubo_madre===null?obtenerIcono(celda.icono_id): obtenerIcono(1)} alt="" width={30} height={30} />
                                                     </button>
                                                 ) : (
-                                                    <button
-                                                    onClick={() => handleOpenModal(celda)}
-                                                    style={{border: "none", background: "none", padding: 0, cursor: "pointer"}}
-                                                    >
-                                                    <img 
-                                                        src={celda.icono ? celda.icono.icono : ''} 
-                                                        alt="" 
-                                                        style={{ width: '30px', height: '30px' }} 
-                                                    />
-                                                    </button>
+                                                    <div style={{ width: '30px', height: '30px' }} />
                                                 )}
-                                                </div>
-                                            ) : (
-                                                <div style={{ width: '30px', height: '30px' }}></div>
-                                            )}
                                             </td>
-                                        );
-                                        });
-                                    })}
+                                        ))}
                                     <td>
                                         <Receipt 
                                         className="mr-3 pencil" 
@@ -377,7 +352,7 @@ const RodTooling = () => {
                                     </td>
                                     </tr>
                                 ))}
-                                </tbody>
+                            </tbody>
                             
                         </Table>
                     </Col>

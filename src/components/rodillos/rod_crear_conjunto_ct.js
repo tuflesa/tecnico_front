@@ -153,8 +153,9 @@ const RodConjuntoCT = ({show, setShow, handleClose, operacion_marcada, elementos
     }, [token]);
 
     const GuardarConjuntoCT = () => {
-        console.log('EjesRodillos',EjesRodillos)
         let nulos = EjesRodillos.filter(rodillo=> rodillo.es_generico==='true').length
+        var amarillo = EjesRodillos.some(rodillo => rodillo.es_generico === 'true');
+        var naranja = EjesRodillos.some(rodillo => rodillo.operacion !== operacion_marcada);
         if(nulos>EjesRodillos.length/2){
             alert('No podemos poner tantos rodillos nulos en una formación.')
             return;
@@ -180,16 +181,16 @@ const RodConjuntoCT = ({show, setShow, handleClose, operacion_marcada, elementos
                     window.location.href=`/rodillos/bacada_ct_editar/${bancada_id}`;
                 }
                 else{
-                    GuardarConjunto_Elemento(bancada_id);
+                    GuardarConjunto_Elemento(bancada_id, naranja, amarillo);
                 }
             }
             else{
-                GuardarBancada();
+                GuardarBancada(naranja, amarillo);
             }
         }
     }
 
-    const GuardarBancada = () => {
+    const GuardarBancada = (naranja, amarillo) => {
         if(EjesRodillos.length===ejes.length){
             axios.post(BACKEND_SERVER + `/api/rodillos/bancada/`, { //creamos bancada
                 seccion: operacion_marcada.seccion.id,
@@ -201,7 +202,7 @@ const RodConjuntoCT = ({show, setShow, handleClose, operacion_marcada, elementos
             })
             .then( res => {
                 bancada_id = res.data.id;
-                GuardarConjunto_Elemento(res.data.id);
+                GuardarConjunto_Elemento(res.data.id, naranja, amarillo);
             })
             .catch(err => { 
                 console.error(err);
@@ -212,7 +213,10 @@ const RodConjuntoCT = ({show, setShow, handleClose, operacion_marcada, elementos
         }
     }
 
-    const GuardarConjunto_Elemento = (bancadaId) => {
+    const GuardarConjunto_Elemento = (bancadaId, naranja, amarillo) => {
+        var color='';
+        if(naranja){color='#FFA500'}
+        if(amarillo){color='#FFEB3B'}
         if(EjesRodillos.length===ejes.length){
             axios.post(BACKEND_SERVER + `/api/rodillos/conjunto/`, { //creamos conjunto
                 operacion: operacion_id,
@@ -222,7 +226,7 @@ const RodConjuntoCT = ({show, setShow, handleClose, operacion_marcada, elementos
                     }     
             })
             .then( r => {   
-                GuardarCelda(bancadaId,r.data.id);//mandamos los 2 id para crear la celda
+                GuardarCelda(bancadaId, r.data.id, color);//mandamos los 2 id para crear la celda
                 for(var x=0;x<EjesRodillos.length;x++){
                     axios.post(BACKEND_SERVER + `/api/rodillos/elemento/`, { //creamos con id de conjunto el elemento
                         conjunto: r.data.id,
@@ -251,12 +255,13 @@ const RodConjuntoCT = ({show, setShow, handleClose, operacion_marcada, elementos
         }
     }
 
-    const GuardarCelda = (bancadaId, conjuntoId) => {
+    const GuardarCelda = (bancadaId, conjuntoId, color) => {
         axios.post(BACKEND_SERVER + `/api/rodillos/celda/`, { //creamos CELDA con el Id de bancada y el Id de conjunto
             conjunto: conjuntoId,
             bancada: bancadaId,
             icono: datos.icono_celda,
             operacion: operacion_id,
+            color_celda: color,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
