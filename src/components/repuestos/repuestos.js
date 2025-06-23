@@ -21,6 +21,7 @@ import RepTraspasoAlmacen from './rep_traspaso_almacen';
 import RepPrecio from './rep_precio';
 import Programadores from './a_rep_programadores';
 import LineaAdicional from './rep_lineas_adicionales';
+import LineaPorAlbaran from './rep_lineas_por_albaran';
 import RepPedidosPRL from './rep_pedidos_prl';
 import { useCookies } from 'react-cookie';
 
@@ -38,6 +39,7 @@ const Repuestos = () => {
                 <Route path='/repuestos/traspasos' component={RepTraspasoAlmacen} /> 
                 <Route path='/repuestos/inventario' component={RepInventario} /> 
                 <Route path='/repuestos/listado' component={RepLista} />
+                <Route path='/repuestos/lineas_por_albaran' component={LineaPorAlbaran} /> 
                 <Route path='/repuestos/lineas_adicionales' component={LineaAdicional} /> 
                 <Route path='/repuestos/pedidos' component={PedLista} /> 
                 <Route path='/repuestos/salidas/:id' component={RepSalidasID} /> 

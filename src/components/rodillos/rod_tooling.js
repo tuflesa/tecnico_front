@@ -222,9 +222,9 @@ const RodTooling = () => {
                 nombre_montaje: montaje.nombre || null,
                 espesores: (montaje.grupo?.espesor_1 && montaje.grupo?.espesor_2) 
                     ? montaje.grupo.espesor_1 + '÷' + montaje.grupo.espesor_2 
-                    : null, // 🆕 Safe access
+                    : null,
                 tubo_madre: montaje.grupo?.tubo_madre || null,
-                dimensiones: montaje.bancadas?.dimensiones || null, // 🆕 Safe access
+                dimensiones: montaje.bancadas?.dimensiones || null,
                 titular_grupo: montaje.titular_grupo,
                 fila
             });
@@ -271,7 +271,7 @@ const RodTooling = () => {
         return icono ? icono.icono : '';
     };
 
-    // 🆕 Componente de Loading
+    // Componente de Loading
     if (loading) {
         return (
             <Container fluid>
@@ -287,7 +287,7 @@ const RodTooling = () => {
                     Cancelar / Volver
                 </Button>
                 
-                {/* 🆕 Indicador de carga */}
+                {/* Indicador de carga */}
                 <Row>
                     <Col className="text-center mt-5">
                         <div className="d-flex flex-column align-items-center">
@@ -313,21 +313,19 @@ const RodTooling = () => {
             </ Row>
             <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
             
-            {/* 🆕 Mensaje cuando no hay máquina seleccionada */}
+            {/* Mensaje cuando no hay máquina seleccionada */}
             {!maquina && (
                 <Row>
                     <Col className="text-center mt-5">
                         <div className="alert alert-info">
                             <h4 className="alert-heading">¡Selecciona una máquina!</h4>
                             <p>Para visualizar los datos de tooling, primero debes seleccionar una empresa y una máquina utilizando el filtro superior.</p>
-                            <hr />
-                            <p className="mb-0">Una vez seleccionada, los montajes y bancadas se cargarán automáticamente.</p>
                         </div>
                     </Col>
                 </Row>
             )}
             
-            {/* 🆕 Mensaje cuando hay máquina pero no datos */}
+            {/* Mensaje cuando hay máquina pero no datos */}
             {maquina && conjuntosCel !== null && conjuntosCel.length === 0 && (
                 <Row>
                     <Col className="text-center mt-4">
