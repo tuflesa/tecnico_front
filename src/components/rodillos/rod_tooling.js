@@ -343,7 +343,7 @@ const RodTooling = () => {
                         <h5 className="mb-3 mt-3">
                             Bancadas - Máquina ID: {maquina} ({resultado.length} montajes)
                         </h5>
-                        <Table striped bordered hover responsive> {/* 🆕 Añadido responsive */}
+                        <Table striped bordered hover responsive> {/* Añadido responsive */}
                         <thead>
                             {(() => {
                                 // Preprocesamos los datos fuera del JSX
@@ -353,13 +353,13 @@ const RodTooling = () => {
                                 const operacionesPorSeccion = {};
                                 operaciones.forEach(op => {
                                     if (!operacionesPorSeccion[op.seccion.id]) {
-                                    operacionesPorSeccion[op.seccion.id] = [];
+                                        operacionesPorSeccion[op.seccion.id] = [];
                                     }
                                     operacionesPorSeccion[op.seccion.id].push(op);
                                 });
                                 secciones.forEach(seccion => {
                                     const operacionesDeSeccion = operacionesPorSeccion[seccion.id] || [];
-                                    if (operacionesDeSeccion.length > 0) { // 🆕 Solo mostrar secciones con operaciones
+                                    if (operacionesDeSeccion.length > 0) { // Solo mostrar secciones con operaciones
                                         seccionHeaders.push(
                                         <th key={seccion.id} colSpan={operacionesDeSeccion.length}>
                                             {seccion.nombre}

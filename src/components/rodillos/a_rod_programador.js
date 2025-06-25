@@ -74,7 +74,7 @@ const Programadores = () => {
                 }
             })
             .then( res => { 
-                //console.log('DESPUES DE GRABAR: ',res.data);
+                console.log('DESPUES DE GRABAR: ',res.data);
             })
             .catch(err => { console.log(err);})
         }
