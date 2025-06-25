@@ -12,7 +12,7 @@ const LineaPorAlbaran = () => {
     
     const [token] = useCookies(['tec-token']);
     const [filtro, setFiltro] = useState(``);
-    const [lineas_pedido, setLineasPedido] = useState([]);
+    const [pedidos, setPedidos] = useState([]);
     const [filtroII, setFiltroII] = useState( `?page=${1}`);
     const [buscando, setBuscando] = useState(false);
     const [count, setCount] = useState(null);
@@ -38,15 +38,14 @@ const LineaPorAlbaran = () => {
 
         const source = axios.CancelToken.source();
         setBuscando(true);
-
-        axios.get(BACKEND_SERVER + '/api/repuestos/linea_por_albaran/' + filtro, {
+        axios.get(BACKEND_SERVER + '/api/repuestos/pedidos_por_albaran/' + filtro, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             },
             cancelToken: source.token
         })
         .then(res => {
-            setLineasPedido(res.data.results);
+            setPedidos(res.data.results);
             setCount(res.data.count);
             setBuscando(false);
         })
@@ -93,7 +92,7 @@ const LineaPorAlbaran = () => {
             </ Row>
             <Row>
                 <Col>
-                    <h5 className="mb-3 mt-3">Lista lineas adionales</h5>
+                    <h5 className="mb-3 mt-3">Busquedas por albarán</h5>
                     <table>
                         <tbody>
                             <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
@@ -106,30 +105,20 @@ const LineaPorAlbaran = () => {
                             <tr>
                                 <th style={{width:138}}>Num-Pedido</th>
                                 <th>Proveedor</th>
-                                <th>Descripción</th>
-                                <th style={{width:110}}>Cantidad</th>
-                                <th style={{width:110}}>Por Recibir</th>
-                                <th style={{width:110}}>Precio</th>
-                                <th style={{width:110}}>Dto.</th>
-                                <th style={{width:110}}>Total</th>
+                                <th>Creado por</th>
                                 <th style={{width:90}}>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {lineas_pedido.length > 0 ? (
-                                lineas_pedido && lineas_pedido.map( linea => {
+                            {pedidos.length > 0 ? (
+                                pedidos && pedidos.map( pedido => {
                                     return (
-                                        <tr key={linea.id}>
-                                            <td>{linea.pedido.numero}</td>
-                                            <td>{linea.pedido.proveedor.nombre}</td>
-                                            <td>{linea.descripcion_proveedor}</td>                  
-                                            <td>{linea.cantidad}</td> 
-                                            <td>{linea.por_recibir}</td> 
-                                            <td>{linea.precio}</td>
-                                            <td>{linea.descuento}</td>
-                                            <td>{linea.total}</td>
+                                        <tr key={pedido.id}>
+                                            <td>{pedido.numero}</td>
+                                            <td>{pedido.proveedor.nombre}</td>
+                                            <td>{pedido.creado_por.get_full_name}</td>
                                             <td>
-                                                <Link to={`/repuestos/pedido_detalle/${linea.pedido.id}`}>
+                                                <Link to={`/repuestos/pedido_detalle/${pedido.id}`}>
                                                     <PencilFill className="mr-3 pencil"/>
                                                 </Link>
                                             </td>

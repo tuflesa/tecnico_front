@@ -13,32 +13,22 @@ const LineasPorAlbaranFiltro = ({ actualizaFiltro }) => {
     const [datos, setDatos] = useState({
         nombre_proveedor: '',
         empresa: user['tec-user'].perfil.empresa.id,
-        finalizado: '',
-        numero:'',
-        descripcion: '',
-        descripcion_proveedor:'',
         numero_albaran:'',
 
     });
 
-/*     useEffect(()=>{
-        const filtro = `?pedido__proveedor__nombre__icontains=${datos.nombre_proveedor}&pedido__finalizado=${datos.finalizado}&pedido__numero__icontains=${datos.numero}&pedido__empresa__id=${datos.empresa}&descripcion__icontains=${datos.descripcion}&descripcion_proveedor__icontains=${datos.descripcion_proveedor}&movimiento__albaran__icontains=${datos.numero_albaran}`;
-        actualizaFiltro(filtro);
-    },[datos, actualizaFiltro]); */
-
     useEffect(() => {
-    const debounceFiltro = debounce(() => {
-        const filtro = `?pedido__proveedor__nombre__icontains=${datos.nombre_proveedor}&pedido__finalizado=${datos.finalizado}&pedido__numero__icontains=${datos.numero}&pedido__empresa__id=${datos.empresa}&descripcion__icontains=${datos.descripcion}&descripcion_proveedor__icontains=${datos.descripcion_proveedor}&movimiento__albaran__icontains=${datos.numero_albaran}`;
-        actualizaFiltro(filtro);
-    }, 500); // 300ms de espera
+        const debounceFiltro = debounce(() => {
+            const filtro = `?proveedor__nombre__icontains=${datos.nombre_proveedor}&empresa__id=${datos.empresa}&numero_albaran=${datos.numero_albaran}`;
+            actualizaFiltro(filtro);
+        }, 700); // 700ms de espera
 
-    debounceFiltro();
+        debounceFiltro();
 
-    return () => {
-        debounceFiltro.cancel();
-    };
-}, [datos]);
-
+        return () => {
+            debounceFiltro.cancel();
+        };
+    }, [datos]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -78,16 +68,6 @@ const LineasPorAlbaranFiltro = ({ actualizaFiltro }) => {
                         </Form.Group>
                     </Col>
                     <Col>
-                        <Form.Group controlId="descripcion_proveedor">
-                            <Form.Label>Descripción</Form.Label>
-                            <Form.Control type="text" 
-                                        name='descripcion_proveedor' 
-                                        value={datos.descripcion_proveedor}
-                                        onChange={handleInputChange} 
-                                        placeholder="Descripción contiene"/>
-                        </Form.Group>
-                    </Col>
-                    <Col>
                         <Form.Group controlId="empresa">
                             <Form.Label>Empresa</Form.Label>
                             <Form.Control as="select"  
@@ -107,16 +87,6 @@ const LineasPorAlbaranFiltro = ({ actualizaFiltro }) => {
                         </Form.Group>
                     </Col>
                     <Col>
-                        <Form.Group controlId="numero">
-                            <Form.Label>Numero Pedido</Form.Label>
-                            <Form.Control type="text" 
-                                        name='numero' 
-                                        value={datos.numero}
-                                        onChange={handleInputChange} 
-                                        placeholder="Numero de pedido" />
-                        </Form.Group>
-                    </Col>
-                    <Col>
                         <Form.Group controlId="numero_albaran">
                             <Form.Label>Numero Albarán</Form.Label>
                             <Form.Control type="text" 
@@ -124,19 +94,6 @@ const LineasPorAlbaranFiltro = ({ actualizaFiltro }) => {
                                         value={datos.numero_albaran}
                                         onChange={handleInputChange} 
                                         placeholder="Numero de albaran" />
-                        </Form.Group>
-                    </Col>
-                    <Col>
-                        <Form.Group controlId="finalizado">
-                            <Form.Label>Pedido Finalizado</Form.Label>
-                            <Form.Control as="select" 
-                                            value={datos.finalizado}
-                                            name='finalizado'
-                                            onChange={handleInputChange}>
-                                <option key={0} value={''}>Todos</option>
-                                <option key={1} value={true}>Si</option>
-                                <option key={2} value={false}>No</option>
-                            </Form.Control>
                         </Form.Group>
                     </Col>
                 </Row>
