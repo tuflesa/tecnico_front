@@ -36,9 +36,9 @@ const RepPendientes = () => {
         total_pag3:0,
     });
 
-    const [filtro, setFiltro] = useState(`?empresa=${datos.empresa}&page=${datos.pagina}&finalizado=${false}&fecha_prevista_entrega__lte=${datos.hoy}&creado_por=${nosoyTecnico?user['tec-user'].perfil.usuario:''}`);
-    const [filtro2, setFiltro2] = useState(`?almacen__empresa__id=${datos.empresa}&repuesto__descatalogado=${false}&page=${datos.pagina}&repuesto__tipo_repuesto=${1}`);
-    const [filtro3, setFiltro3] = useState(`?almacen__empresa__id=${datos.empresa}&repuesto__descatalogado=${false}&page=${datos.pagina}&repuesto__tipo_repuesto=${2}`);
+    const [filtro, setFiltro] = useState(`?empresa=${user['tec-user'].perfil.empresa.id}&page=${datos.pagina}&finalizado=${false}&fecha_prevista_entrega__lte=${datos.hoy}&creado_por=${nosoyTecnico?user['tec-user'].perfil.usuario:''}`);
+    const [filtro2, setFiltro2] = useState(`?almacen__empresa__id=${user['tec-user'].perfil.empresa.id}&repuesto__descatalogado=${false}&page=${datos.pagina}&repuesto__tipo_repuesto=${1}`);
+    const [filtro3, setFiltro3] = useState(`?almacen__empresa__id=${user['tec-user'].perfil.empresa.id}&repuesto__descatalogado=${false}&page=${datos.pagina}&repuesto__tipo_repuesto=${2}`);
 
     useEffect(() => {
         setFiltro3(`?almacen__empresa__id=${datos.empresa}&repuesto__descatalogado=${false}&page=${datos.pagina2}&repuesto__tipo_repuesto=${2}`);
