@@ -83,7 +83,7 @@ const RepProveedoresLista = () => {
                 </Modal.Header>
 
                 <Modal.Body>
-                    <p>Por favor pongase en contacto con el administrador de la base de datos para borrar el proveedor.</p>
+                    <p>Por favor póngase en contacto con el administrador de la base de datos para borrar el proveedor.</p>
                 </Modal.Body>
 
                 <Modal.Footer>

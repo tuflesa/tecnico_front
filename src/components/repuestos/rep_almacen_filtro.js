@@ -70,7 +70,7 @@ const AlmacenFiltro = ({ actualizaFiltro }) => {
                     </Col>
                     <Col>
                         <Form.Group controlId="nombre">
-                            <Form.Label>Nombre Almacen</Form.Label>
+                            <Form.Label>Nombre Almacén</Form.Label>
                             <Form.Control type="text" 
                                         name='nombre' 
                                         value={datos.nombre}

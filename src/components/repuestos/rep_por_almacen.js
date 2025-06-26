@@ -167,30 +167,6 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
         }
     };
 
-    /* const habilitar_linea = (r) => {
-        if (user['tec-user'].perfil.puesto.nombre !== 'Operador') {
-            var input_min = document.getElementsByClassName(r.almacen.nombre);
-            const currentlyDisabled = input_min[0].disabled; // Comprobar si actualmente están habilitados o deshabilitados
-            for (var i = 0; i < input_min.length; i++) {
-                let input = input_min[i];
-                // Si estaban deshabilitados, aplicar condiciones específicas
-                if (currentlyDisabled) {
-                    if (repuesto.es_critico === true) {
-                        input.disabled = input.name === 'stock_aconsejable';
-                    } else {
-                        input.disabled = input.name === 'stock_minimo';
-                    }
-                } 
-                // Si estaban habilitados, deshabilitar todos
-                else {
-                    input.disabled = true;
-                }
-            }
-        } else {
-            alert('No tienes permisos');
-        }
-    }; */
-
     const BorrarAlmacen = (r)=>{
         if(r.stock_act>0){
             setShowBorrar(true);
@@ -355,7 +331,7 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
                             <Table striped bordered hover>
                                 <thead>
                                     <tr>
-                                        <th>Numero Pedido</th>
+                                        <th>Número Pedido</th>
                                         <th>Cantidad Pendiente</th>
                                         <th>Proveedor</th>
                                         <th>Fecha estimada</th>

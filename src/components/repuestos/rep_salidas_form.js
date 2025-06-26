@@ -264,7 +264,7 @@ const RepSalidas = ({alm}) => {
                 {num_parte?
                     <Col>
                         <Form.Group controlId="num_parte">
-                            <Form.Label>Numero Parte</Form.Label>
+                            <Form.Label>Número Parte</Form.Label>
                             <Form.Control type="text" 
                                         name='num_parte' 
                                         disabled
@@ -275,7 +275,7 @@ const RepSalidas = ({alm}) => {
                 {numeroBar.almacen ?                            
                 <Col>
                     <Form.Group>
-                        <Form.Label className="mt-2">Codigo Barras (con lector) </Form.Label>
+                        <Form.Label className="mt-2">Código Barras (con lector) </Form.Label>
                         <Form.Control
                                     type="text"
                                     id="prueba"

@@ -100,27 +100,7 @@ const RepInventarioFiltro = ({actualizaFiltro}) => {
                                         onChange={handleInputChange} 
                                         placeholder="Fabricante contiene" />
                         </Form.Group>
-                    </Col>  
-                    {/* <Col>
-                        <Form.Group controlId="almacen">
-                            <Form.Label>Almacén contiene</Form.Label>
-                            <Form.Control type="text" 
-                                        name='almacen' 
-                                        value={datos.almacen}
-                                        onChange={handleInputChange} 
-                                        placeholder="Almacén contiene" />
-                        </Form.Group>
-                    </Col>  */}
-                    {/* <Col>
-                        <Form.Group controlId="id">
-                            <Form.Label>Id Repuesto</Form.Label>
-                            <Form.Control type="text" 
-                                        name='id' 
-                                        value={datos.id}
-                                        onChange={handleInputChange} 
-                                        placeholder="Id repuesto" />
-                        </Form.Group>
-                    </Col>  */}                                     
+                    </Col>                                  
                 </Row>                               
             </Form>
         </Container>

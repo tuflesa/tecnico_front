@@ -245,12 +245,7 @@ const RepProveedorForm = ({proveedor}) => {
                                 <Button variant="info" type="submit" className={'mr-1'} onClick={actualizarDatos}>Actualizar</Button> :
                                 <Button variant="info" type="submit" className={'mr-1'} onClick={nuevoDatos}>Guardar</Button>
                             }    
-                            <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>                   
-                            {/* <Link to='/repuestos/proveedores'>
-                                <Button variant="warning" className={'ml-1'} >
-                                    Cancelar
-                                </Button>
-                            </Link> */}
+                            <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>  
                         </Form.Row>
                         {datos.contactos ?
                             <React.Fragment>
