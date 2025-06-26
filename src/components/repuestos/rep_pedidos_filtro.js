@@ -157,7 +157,7 @@ const PedidosFiltro = ({ actualizaFiltro }) => {
                     </Col>
                     <Col>
                         <Form.Group controlId="numero">
-                            <Form.Label>Numero Pedido</Form.Label>
+                            <Form.Label>Número Pedido</Form.Label>
                             <Form.Control type="text" 
                                         name='numero' 
                                         value={datos.numero}

@@ -233,8 +233,8 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
         <Modal show={show} backdrop="static" keyboard={ false } animation={false}>
                 <Modal.Header>  
                 { linea ?               
-                    <Modal.Title>Rectificar Linea</Modal.Title> :
-                    <Modal.Title>Nueva Linea</Modal.Title>
+                    <Modal.Title>Rectificar Línea</Modal.Title> :
+                    <Modal.Title>Nueva Línea</Modal.Title>
                 }
                 </Modal.Header>
                 <Modal.Body>

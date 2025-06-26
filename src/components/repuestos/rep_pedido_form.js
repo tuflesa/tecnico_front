@@ -525,7 +525,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                         <Row> 
                             <Col>
                                 <Form.Group controlId="numero">
-                                    <Form.Label>Numero Pedido</Form.Label>
+                                    <Form.Label>Número Pedido</Form.Label>
                                     <Form.Control type="text" 
                                                 name='numero' 
                                                 disabled
@@ -596,7 +596,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                             </Col>                                             
                             <Col>
                                 <Form.Group controlId="direccion_envio">
-                                    <Form.Label>Direccion de Envío (*)</Form.Label>
+                                    <Form.Label>Dirección de Envío (*)</Form.Label>
                                     <Form.Control as="select"  
                                                 name='direccion_envio' 
                                                 value={datos.direccion_envio}
@@ -796,7 +796,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                                 <Col>
                                     <Row>
                                         <Col>
-                                        <h5 className="pb-3 pt-1 mt-2">Lineas de pedido:</h5>
+                                        <h5 className="pb-3 pt-1 mt-2">Líneas de pedido:</h5>
                                         </Col>
                                         <Col className="d-flex flex-row-reverse align-content-center flex-wrap">
                                                 <PlusCircle className="plus mr-2" size={30} onClick={abrirAddLinea}/>

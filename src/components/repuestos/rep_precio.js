@@ -129,26 +129,6 @@ const RepPrecio = ()=>{
         })
     }
 
-    /* const PerderFoco = () => {
-        for(var x=0; x<precios.length;x++){
-            if(precios[x].id===datos.id){
-                precios[x].precio_n=datos.precio_n;
-                //precios[x].descuento_n=datos.descuento_n;
-            }
-        }
-        datos.precio_n=0;        
-    } */
-
-    /* const PerderFocoDto = () => {
-        for(var x=0; x<precios.length;x++){
-            if(precios[x].id===datos.id){
-                precios[x].descuento_n=datos.descuento_n;
-                datos.descuento_n=0;
-            }
-        }
-        
-    }  */
-
     const handlerGuardar =()=>{
         for(var x=0; x<precios.length; x++){
             var precios_nuevos = precios[x].precio_n;
@@ -296,7 +276,7 @@ const RepPrecio = ()=>{
                         <Table striped bordered hover>
                             <thead>
                                 <tr>
-                                    <th>Codigo</th>
+                                    <th>Código</th>
                                     <th>Descripción proveedor</th>
                                     <th>Modelo proveedor</th>
                                     <th>Descripción repuesto</th>

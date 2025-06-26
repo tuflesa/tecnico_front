@@ -102,7 +102,7 @@ const EntregaForm = ({show, updatePedido, linea_adicional, handleCloseEntrega}) 
                         <Row>
                             <Col>
                                 <Form.Group controlId="descripcion">
-                                    <Form.Label>Descripcion</Form.Label>
+                                    <Form.Label>Descripción</Form.Label>
                                     <Form.Control type="text"  
                                                 name='descripcion' 
                                                 value={datos.descripcion}

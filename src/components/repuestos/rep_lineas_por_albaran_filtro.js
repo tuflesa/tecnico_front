@@ -88,7 +88,7 @@ const LineasPorAlbaranFiltro = ({ actualizaFiltro }) => {
                     </Col>
                     <Col>
                         <Form.Group controlId="numero_albaran">
-                            <Form.Label>Numero Albarán</Form.Label>
+                            <Form.Label>Número Albarán</Form.Label>
                             <Form.Control type="text" 
                                         name='numero_albaran' 
                                         value={datos.numero_albaran}

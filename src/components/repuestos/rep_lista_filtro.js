@@ -258,7 +258,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
                     </Col>
                     <Col>
                         <Form.Group controlId="formId">
-                            <Form.Label>Codigo Barras</Form.Label>
+                            <Form.Label>Código Barras</Form.Label>
                             <Form.Control type="text" 
                                         name='id' 
                                         value={numeroBar.id}
@@ -300,7 +300,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
                     </Col>
                     <Col>
                         <Form.Group controlId="critico">
-                            <Form.Label>Critico</Form.Label>
+                            <Form.Label>Crítico</Form.Label>
                             <Form.Control as="select" 
                                             value={datos.critico}
                                             name='critico'
@@ -345,7 +345,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
                     </Col>
                     <Col>
                         <Form.Group controlId="almacen">
-                            <Form.Label>Almacen</Form.Label>
+                            <Form.Label>Almacén</Form.Label>
                             <Form.Control as="select"  
                                         name='almacen' 
                                         value={datos.almacen}
@@ -403,7 +403,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
                     </Col>
                     <Col>
                         <Form.Group controlId="seccion">
-                            <Form.Label>Seccion</Form.Label>
+                            <Form.Label>Sección</Form.Label>
                             <Form.Control as="select" 
                                             value={datos.seccion}
                                             name='seccion'

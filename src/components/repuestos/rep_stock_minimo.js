@@ -231,7 +231,7 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_escritico, repuesto_i
                             </Col>
                             <Col>
                                 <Form.Group controlId="almacen">
-                                    <Form.Label>Almacen</Form.Label>
+                                    <Form.Label>Almacén</Form.Label>
                                     <Form.Control as="select"  
                                                 name='almacen' 
                                                 value={datos.almacen}
