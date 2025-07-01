@@ -163,7 +163,7 @@ const EstEquipoForm = ({ equipo }) => {
             <Row className="justify-content-center"> 
             {equipo.id ?
                 <h5 className="pb-1 pt-1 mt-1">Editar Equipo</h5>:
-                <h5 className="pb-1 pt-1 mt-1">Nuevo Eqquipo</h5>}
+                <h5 className="pb-1 pt-1 mt-1">Nuevo Equipo</h5>}
             </Row>
             <Row className="justify-content-center">
                 {datos.imagen ?
@@ -209,7 +209,7 @@ const EstEquipoForm = ({ equipo }) => {
                     </Form.Group>
 
                     <Form.Group controlId="seccion">
-                        <Form.Label>Seccion</Form.Label>
+                        <Form.Label>Sección</Form.Label>
                         <Form.Control as="select" 
                                       value={datos.seccion}
                                       name='seccion'

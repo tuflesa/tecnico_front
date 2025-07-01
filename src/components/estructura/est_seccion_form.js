@@ -111,8 +111,8 @@ const EstSeccionForm = ({ seccion }) => {
         <Container>
             <Row className="justify-content-center"> 
             {seccion.id ?
-                <h5 className="pb-3 pt-3 mt-5">Editar Seccion</h5>:
-                <h5 className="pb-3 pt-3 mt-5">Nueva Seccion</h5>}
+                <h5 className="pb-3 pt-3 mt-5">Editar Sección</h5>:
+                <h5 className="pb-3 pt-3 mt-5">Nueva Sección</h5>}
             </Row>
             <Row className="justify-content-center">
                 <Form>
