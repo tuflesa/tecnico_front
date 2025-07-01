@@ -737,7 +737,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                                             <thead>
                                                 <tr>
                                                     <th>Zona</th>
-                                                    <th>Seccion</th>
+                                                    <th>Sección</th>
                                                     <th>Equipo</th>
                                                     {!nosoyTecnico?
                                                         <th>Acciones</th>

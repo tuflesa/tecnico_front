@@ -80,7 +80,7 @@ const LineaAdicional = () => {
             </ Row>
             <Row>
                 <Col>
-                    <h5 className="mb-3 mt-3">Lista lineas adionales</h5>
+                    <h5 className="mb-3 mt-3">Lista líneas adicionales</h5>
                     <table>
                         <tbody>
                             <th><button type="button" class="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 

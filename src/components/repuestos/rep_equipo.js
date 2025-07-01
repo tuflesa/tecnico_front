@@ -227,7 +227,7 @@ const EquipoForm = ({show, repuesto_id, handleCloseEquipo, equiposAsignados, upd
                             <Row>
                                 <Col>
                                     <Form.Group controlId="seccion">
-                                        <Form.Label>Seccion</Form.Label>
+                                        <Form.Label>Sección</Form.Label>
                                         <Form.Control as="select" 
                                                         value={datos.seccion}
                                                         name='seccion'

@@ -58,14 +58,6 @@ const RepLista = () => {
         
     }, [token, filtro, show]);
 
-    /* useEffect(()=>{
-        if(repuestos){
-            const map = new Map(repuestos.map(pos => [pos.repuesto.id, pos.repuesto]));
-            const unicos = [...map.values()];
-            setResulRepuestos(unicos);
-        }
-    }, [repuestos]); */
-
     /* eslint-disable react-hooks/exhaustive-deps */
     useEffect(()=>{
         if(count % 20 === 0){

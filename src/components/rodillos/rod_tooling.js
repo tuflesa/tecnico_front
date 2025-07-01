@@ -14,7 +14,6 @@ const RodTooling = () => {
     const [token] = useCookies(['tec-token']);
     const [montajes, setMontajes] = useState(null)
     const [filtro, setFiltro] = useState(``);
-    const [show, setShow] = useState(false);
     const [celdas, setCeldas] = useState(null);
     const [conjuntosCel, setConjuntosCel] = useState(null);
     const [maquina, setMaquina] = useState(null);
@@ -27,12 +26,21 @@ const RodTooling = () => {
     const [montajeSeleccionado, setMontajeSeleccionado] = useState(null);
     const [comentariosMontaje, setComentariosMontaje] = useState('');
     const [show_anotaciones, setShowAnotaciones] = useState(false);
+    const [resultado, setResultado] = useState([]);
+    
+    // Estados para loading
+    const [loading, setLoading] = useState(false);
+    const [loadingMessage, setLoadingMessage] = useState('');
+
     
     useEffect(() => { //SEPARAR DATOS QUE ENTRAN A TRAVES DEL FILTRO
         const params = new URLSearchParams(filtro);
         const maquinaValue = params.get('maquina__id');
         setMaquina(maquinaValue);
         setMontajes([]);
+        //Limpiar resultado anterior al cambiar filtro
+        setResultado([]);
+        setConjuntosCel(null);
     }, [filtro]);
 
     // Mapa de operaciones por sección (añadir cerca del inicio del componente)
@@ -50,29 +58,89 @@ const RodTooling = () => {
     }, [operaciones]);
 
     useEffect(() => {
-        maquina && axios.get(BACKEND_SERVER + `/api/rodillos/montaje_tooling/`+filtro,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            const nuevosMontajes = res.data.map(m => ({
-                ...m,
-                grupo: {
-                    ...m.grupo,
-                    bancadas: (m.grupo?.bancadas ?? []).concat(m.bancadas ?? [])
+        if (!maquina) return;
+        
+        // Activar loading al inicio
+        setLoading(true);
+        setLoadingMessage('Cargando datos de la máquina...');
+        
+        const fetchDatos = async () => {
+            try {
+                setLoadingMessage('Obteniendo operaciones...');
+                const operacionesRes = await axios.get(
+                    `${BACKEND_SERVER}/api/rodillos/operacion/?seccion__maquina__id=${maquina}`,
+                    { headers: { 'Authorization': `token ${token['tec-token']}` } }
+                );
+                const operacionesData = operacionesRes.data;
+                setOperaciones(operacionesData);
+
+                setLoadingMessage('Obteniendo montajes...');
+                const montajesRes = await axios.get(
+                    `${BACKEND_SERVER}/api/rodillos/montaje_tooling/${filtro}`,
+                    { headers: { 'Authorization': `token ${token['tec-token']}` } }
+                );
+                const nuevosMontajes = montajesRes.data.map(m => ({
+                    ...m,
+                    grupo: {
+                        ...m.grupo,
+                        bancadas: (m.grupo?.bancadas ?? []).concat(m.bancadas ?? [])
+                    }
+                }));
+                setMontajes(nuevosMontajes);
+                
+                // Traer celdas desde backend
+                const todasLasBancadasIds = nuevosMontajes.flatMap(montaje =>
+                    montaje.grupo?.bancadas?.map(b => b.id) || []
+                );
+
+                if (todasLasBancadasIds.length > 0) {
+                    setLoadingMessage('Procesando celdas...');
+                    const queryString = todasLasBancadasIds.map(id => `bancada__id=${id}`).join('&');
+                    const celdaRes = await axios.get(
+                        `${BACKEND_SERVER}/api/rodillos/celda_select/?${queryString}`,
+                        { headers: { 'Authorization': `token ${token['tec-token']}` } }
+                    );
+                    const todasLasCeldas = nuevosMontajes.map(montaje => {
+                    const celdasDelMontaje = [];
+
+                    montaje.grupo?.bancadas?.forEach(bancada => {
+                        if (Array.isArray(bancada.celdas)) {
+                        // Añadimos todas las celdas de esta bancada, y agregamos el montajeId
+                        const celdasConMontajeId = bancada.celdas.map(c => ({
+                            ...c,
+                            montajeId: montaje.id
+                        }));
+                        celdasDelMontaje.push(...celdasConMontajeId);
+                        }
+                    });
+
+                    return celdasDelMontaje;
+                    });
+                    setCeldas(todasLasCeldas);
+                    
+                    setLoadingMessage('Generando tabla final...');
+                    // Aquí ejecutamos DatosFinales sobre los montajes que ya tienen celdas
+                    const resultadoFinal = DatosFinales(nuevosMontajes, operacionesData);
+                    setResultado(resultadoFinal);
                 }
-            }));
-            setMontajes(nuevosMontajes);
-            cogerDatos(res.data);
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    }, [filtro, maquina]);    
+
+            } catch (err) {
+                console.error('Error cargando datos:', err);
+            } finally {
+                // Desactivar loading al final
+                setLoading(false);
+                setLoadingMessage('');
+            }
+        };
+
+        fetchDatos();
+    }, [maquina]);
 
     useEffect(() => { //recogemos las secciones de la máquina elegida
-        maquina && axios.get(BACKEND_SERVER + `/api/rodillos/seccion/` + filtro,{
+        if (!maquina) return;
+        
+        setLoadingMessage('Obteniendo secciones...');
+        axios.get(BACKEND_SERVER + `/api/rodillos/seccion/` + filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -85,36 +153,16 @@ const RodTooling = () => {
         });
     }, [maquina]);
 
-    useEffect(() => { //recogemos las operaciones de la máquina elegida
-        if(maquina){
-            axios.get(BACKEND_SERVER + `/api/rodillos/operacion/?seccion__maquina__id=${maquina}`,{
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                }
-            })
-            .then( r => {
-                setOperaciones(r.data);
-            })
-            .catch( err => {
-                console.log(err);
-            });
-        }
-    }, [maquina]);
-
     useEffect(() => {
         if (celdas) {
             const datosTablaCel = celdas.flatMap(e => { //en esta operación creamos un array con la información que queremos mostras
                 if (e) {
-                    return e.flatMap(c => {
-                        if(c){
-                            return c.map(d => ({
-                                cel:d,
-                                seccion: d.bancada.seccion.id,
-                                operacion: d.operacion,
-                                bancada: d.bancada.id,
-                            }));
-                        }       
-                    });
+                    return e.map(d => ({
+                        cel:d,
+                        seccion: d.operacion.seccion,
+                        operacion: d.operacion,
+                        bancada: d.bancada,
+                    }));
                 }
                 return [];
             });
@@ -138,37 +186,50 @@ const RodTooling = () => {
         });
     }, [token]);
 
-    const cogerDatos = async (montajes) => {
-        try {// Recopilar todos los IDs de bancadas
-            const todasLasBancadasIds = montajes.flatMap(montaje => 
-                montaje.grupo.bancadas.map(bancada => bancada.id)
-            );
-            if (todasLasBancadasIds.length > 0) {
-                const queryString = todasLasBancadasIds.map(id => `bancada__id=${id}`).join('&');
-                const response = await axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?${queryString}`, {
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`
+    const DatosFinales = (montajes, operaciones) => {
+        const operacionIds = operaciones.map(op => op.id);
+        const resultadoTemp = []; //Variable temporal
+        
+        montajes.forEach((montaje) => {
+            const fila = [];
+            const celdaMap = new Map();
+            if (montaje.grupo && Array.isArray(montaje.grupo.bancadas)) {
+                montaje.grupo.bancadas.forEach((bancada) => {
+                    if (Array.isArray(bancada.celdas)) {
+                        bancada.celdas.forEach((celda) => {
+                            const operacionId = celda?.operacion?.id;
+                            if (operacionId) {
+                                celdaMap.set(operacionId, {
+                                    color_celda: celda.color_celda || null,
+                                    operacion_id: operacionId,
+                                    icono_id: celda.icono?.id || null,
+                                    conjunto: celda.conjunto,
+                                    cel_id: celda.id || null,
+                                    pertenece_ct: celda.icono?.pertenece_ct,
+                                });
+                            }
+                        });
                     }
                 });
-                const todasLasCeldas = [];
-                // Para cada montaje, crear un array de arrays de celdas (uno por bancada)
-                montajes.forEach(montaje => {
-                    const celdasDelMontaje = [];
-                    montaje.grupo.bancadas.forEach(bancada => {
-                        const celdasDeBancada = response.data
-                            .filter(celda => celda.bancada.id === bancada.id)
-                            .map(celda => ({...celda, montajeId: montaje.id}));
-                        celdasDelMontaje.push(celdasDeBancada);
-                    });
-                    todasLasCeldas.push(celdasDelMontaje);
-                });
-                
-                setShow(!show);
-                setCeldas(todasLasCeldas);
             }
-        } catch (err) {
-            console.log(err);
-        }
+            operacionIds.forEach((id) => {
+                fila.push(celdaMap.get(id) || null);
+            });
+            resultadoTemp.push({
+                id: montaje.id,
+                anotaciones: montaje.anotaciones || null,
+                anotciones_montaje: montaje.anotciones_montaje || null,
+                nombre_montaje: montaje.nombre || null,
+                espesores: (montaje.grupo?.espesor_1 && montaje.grupo?.espesor_2) 
+                    ? montaje.grupo.espesor_1 + '÷' + montaje.grupo.espesor_2 
+                    : null,
+                tubo_madre: montaje.grupo?.tubo_madre || null,
+                dimensiones: montaje.bancadas?.dimensiones || null,
+                titular_grupo: montaje.titular_grupo,
+                fila
+            });
+        });
+        return resultadoTemp;
     };
     
     const actualizaFiltro = str => {
@@ -205,6 +266,43 @@ const RodTooling = () => {
         setShowAnotaciones(false);
     }
 
+    const obtenerIcono = (id) => {
+        const icono = icono_celda.find(i => i.id === id);
+        return icono ? icono.icono : '';
+    };
+
+    // Componente de Loading
+    if (loading) {
+        return (
+            <Container fluid>
+                <img src={user['tec-user'].perfil.empresa.id === 1 ? logo : logoTuf} width="200" height="200" alt="Logo" />
+                
+                <Row>
+                    <Col>
+                        <RodMontajeListadoFiltro actualizaFiltro={actualizaFiltro}/>
+                    </Col>
+                </Row>
+                
+                <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">
+                    Cancelar / Volver
+                </Button>
+                
+                {/* Indicador de carga */}
+                <Row>
+                    <Col className="text-center mt-5">
+                        <div className="d-flex flex-column align-items-center">
+                            <div className="spinner-border text-primary mb-3" role="status" style={{width: '3rem', height: '3rem'}}>
+                                <span className="sr-only">Cargando...</span>
+                            </div>
+                            <h5 className="text-primary">{loadingMessage}</h5>
+                            <p className="text-muted">Por favor, espere mientras procesamos los datos...</p>
+                        </div>
+                    </Col>
+                </Row>
+            </Container>
+        );
+    }
+
     return (
         <Container fluid>
             <img src ={user['tec-user'].perfil.empresa.id===1?logo:logoTuf} width="200" height="200"></img>
@@ -214,11 +312,38 @@ const RodTooling = () => {
                 </Col>
             </ Row>
             <Button variant="outline-primary" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
+            
+            {/* Mensaje cuando no hay máquina seleccionada */}
+            {!maquina && (
+                <Row>
+                    <Col className="text-center mt-5">
+                        <div className="alert alert-info">
+                            <h4 className="alert-heading">¡Selecciona una máquina!</h4>
+                            <p>Para visualizar los datos de tooling, primero debes seleccionar una empresa y una máquina utilizando el filtro superior.</p>
+                        </div>
+                    </Col>
+                </Row>
+            )}
+            
+            {/* Mensaje cuando hay máquina pero no datos */}
+            {maquina && conjuntosCel !== null && conjuntosCel.length === 0 && (
+                <Row>
+                    <Col className="text-center mt-4">
+                        <div className="alert alert-warning">
+                            <h5>No hay datos disponibles</h5>
+                            <p>No se encontraron montajes para la máquina seleccionada (ID: {maquina}).</p>
+                        </div>
+                    </Col>
+                </Row>
+            )}
+            
             {maquina && conjuntosCel!==null && conjuntosCel.length!==0 &&(
                 <Row>
                     <Col>
-                        <h5 className="mb-3 mt-3">Bancadas</h5>
-                        <Table striped bordered hover>
+                        <h5 className="mb-3 mt-3">
+                            Bancadas - Máquina ID: {maquina} ({resultado.length} montajes)
+                        </h5>
+                        <Table striped bordered hover responsive> {/* Añadido responsive */}
                         <thead>
                             {(() => {
                                 // Preprocesamos los datos fuera del JSX
@@ -228,29 +353,31 @@ const RodTooling = () => {
                                 const operacionesPorSeccion = {};
                                 operaciones.forEach(op => {
                                     if (!operacionesPorSeccion[op.seccion.id]) {
-                                    operacionesPorSeccion[op.seccion.id] = [];
+                                        operacionesPorSeccion[op.seccion.id] = [];
                                     }
                                     operacionesPorSeccion[op.seccion.id].push(op);
                                 });
                                 secciones.forEach(seccion => {
                                     const operacionesDeSeccion = operacionesPorSeccion[seccion.id] || [];
-                                    seccionHeaders.push(
-                                    <th key={seccion.id} colSpan={operacionesDeSeccion.length}>
-                                        {seccion.nombre}
-                                    </th>
-                                    );
-                                    operacionesDeSeccion.forEach(operacion => {
-                                    operacionHeaders.push(
-                                        <th key={operacion.id}>
-                                        <img 
-                                            src={operacion.icono.icono} 
-                                            alt="" 
-                                            style={{ width: '30px', height: '30px' }} 
-                                        />
-                                        <p>{operacion.nombre}</p>
+                                    if (operacionesDeSeccion.length > 0) { // Solo mostrar secciones con operaciones
+                                        seccionHeaders.push(
+                                        <th key={seccion.id} colSpan={operacionesDeSeccion.length}>
+                                            {seccion.nombre}
                                         </th>
-                                    );
-                                    });
+                                        );
+                                        operacionesDeSeccion.forEach(operacion => {
+                                        operacionHeaders.push(
+                                            <th key={operacion.id}>
+                                            <img 
+                                                src={operacion.icono?.icono || ''} 
+                                                alt={operacion.nombre || ''} 
+                                                style={{ width: '30px', height: '30px' }} 
+                                            />
+                                            <p>{operacion.nombre}</p>
+                                            </th>
+                                        );
+                                        });
+                                    }
                                 });
                                 }
                                 
@@ -277,107 +404,53 @@ const RodTooling = () => {
                             })()}
                             </thead>
                             <tbody>
-                                {montajes.map(montaje => (
+                                {resultado.map(montaje => (
                                     <tr key={montaje.id}>
-                                    <td>{montaje.nombre}</td>
-                                    <td>{montaje.grupo.espesor_1 + '÷' + montaje.grupo.espesor_2}</td>
-                                    <td>{'Ø' + montaje.grupo.tubo_madre}</td>
-                                    <td>{montaje.bancadas?.dimensiones || '-'}</td>
-                                    {secciones && secciones.map(seccion => {
-                                        const bancada = montaje.grupo.bancadas.find(b => b.seccion.id === seccion.id);
-                                        return (operacionesPorSeccion[seccion.id] || []).map(operacion => {
-                                        const celda = bancada?.celdas?.find(c => c.operacion.id === operacion.id);
-                                        let bgColor = 'transparent';
-                                        if (celda?.conjunto?.elementos) {
-                                            if (celda.conjunto.elementos.some(e => {
-                                            if (!e.rodillo.instancias || e.rodillo.instancias.length === 0) return false;
-                                            const totalLineasInstancias = e.rodillo.instancias.reduce((total, instancia) => 
-                                                total + (instancia.lineasinstancias ? instancia.lineasinstancias.length : 0), 0);
-                                            return e.rodillo.instancias.length === totalLineasInstancias;
-                                            })) {
-                                            bgColor = 'red';
-                                            } else if (celda.conjunto.elementos.some(e => e.rodillo.nombre === "Sin_Rodillo")) {
-                                            bgColor = 'yellow';
-                                            } else if (celda.conjunto.elementos.some(e => e.rodillo.operacion !== celda.operacion.id)) {
-                                            bgColor = 'orange';
-                                            } else if (celda.conjunto?.operacion && celda.operacion?.id && 
-                                                    celda.conjunto.operacion !== celda.operacion.id) {
-                                            bgColor = 'orange';
-                                            } else if (celda.conjunto?.operacion && celda.operacion?.id && 
-                                                    seccion.pertenece_grupo === true && 
-                                                    celda.conjunto.tubo_madre < montaje.grupo.tubo_madre) {
-                                            bgColor = '#0cf317';
-                                            }
-                                        }
-                                        
-                                        return (
-                                            <td key={`${montaje.id}-${seccion.id}-${operacion.id}`} 
-                                                style={{ 
-                                                textAlign: 'center', 
-                                                backgroundColor: bgColor 
-                                                }}>
-                                            {celda ? (
-                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '30px', height: '30px'}}>
-                                                {(
-                                                    (montaje.titular_grupo === false && celda.conjunto?.tubo_madre !== null) ||
-                                                    (montaje.titular_grupo === true && celda.conjunto?.tubo_madre !== null && 
-                                                    celda.conjunto?.tubo_madre !== montaje.grupo.tubo_madre)
-                                                ) ? (
-                                                    <button
-                                                    onClick={() => handleOpenModal(celda)}
-                                                    style={{border: "none", background: "none", padding: 0, cursor: "pointer"}}
-                                                    >
-                                                    <img 
-                                                        src={celda.conjunto?.tubo_madre < montaje.grupo.tubo_madre
-                                                            ? icono_celda[2].icono
-                                                            : celda.conjunto?.operacion !== celda.operacion.id
-                                                            ? icono_celda[1].icono
-                                                            : icono_celda[0].icono} 
-                                                        alt="" 
-                                                        style={{ width: "30px", height: "30px" }}
-                                                    />
-                                                    </button>
-                                                ) : (
-                                                    <button
-                                                    onClick={() => handleOpenModal(celda)}
-                                                    style={{border: "none", background: "none", padding: 0, cursor: "pointer"}}
-                                                    >
-                                                    <img 
-                                                        src={celda.icono ? celda.icono.icono : ''} 
-                                                        alt="" 
-                                                        style={{ width: '30px', height: '30px' }} 
-                                                    />
-                                                    </button>
-                                                )}
-                                                </div>
-                                            ) : (
-                                                <div style={{ width: '30px', height: '30px' }}></div>
-                                            )}
-                                            </td>
-                                        );
-                                        });
-                                    })}
-                                    <td>
+                                        <td>{montaje.nombre_montaje}</td>
+                                        <td>{montaje.espesores}</td>
+                                        <td>{'Ø' + (montaje.tubo_madre || '')}</td>
+                                        <td>{montaje.dimensiones || '-'}</td>
+                                            {montaje.fila.map((celda, i) => (
+                                                <td key={i} 
+                                                    style={{ 
+                                                        backgroundColor: celda?.color_celda && 
+                                                            celda.color_celda !== '#4CAF50' && 
+                                                            celda.color_celda !== '#2196F3' 
+                                                            ? celda.color_celda 
+                                                            : 'transparent',
+                                                        textAlign: 'center',
+                                                        verticalAlign: 'middle'
+                                                    }}>
+                                                    {celda ? (
+                                                        <button onClick={() => handleOpenModal(celda)} style={{border: "none", background: "none", padding: 0, cursor: "pointer"}} >
+                                                            <img src={(!celda.pertenece_ct && (celda.color_celda==='#FFA500' || celda.color_celda === '#2196F3'))? obtenerIcono(1): celda.conjunto?.tubo_madre > montaje.tubo_madre? obtenerIcono(1): montaje.titular_grupo ? obtenerIcono(celda.icono_id) :celda.conjunto?.tubo_madre===null?obtenerIcono(celda.icono_id): obtenerIcono(1)} alt="" width={30} height={30} />
+                                                        </button>
+                                                    ) : (
+                                                        <div style={{ width: '30px', height: '30px' }} />
+                                                    )}
+                                                </td>
+                                            ))}
+                                        <td>
                                         <Receipt 
-                                        className="mr-3 pencil" 
-                                        onClick={() => handleOpenModalComentarios(montaje)} 
-                                        style={{
-                                            cursor: montaje.anotciones_montaje ? 'pointer' : 'not-allowed', 
-                                            opacity: montaje.anotciones_montaje ? 1 : 0.5
+                                            className="mr-3 pencil" 
+                                            onClick={() => handleOpenModalComentarios(montaje)} 
+                                            style={{
+                                                cursor: montaje.anotciones_montaje ? 'pointer' : 'not-allowed', 
+                                                opacity: montaje.anotciones_montaje ? 1 : 0.5
                                         }}     
                                         />
                                         <Paperclip 
-                                        className="mr-3 pencil" 
-                                        onClick={() => AbrirAnotacion(montaje)} 
-                                        style={{
-                                            cursor: montaje.anotaciones.length !== 0 ? 'pointer' : 'not-allowed', 
-                                            opacity: montaje.anotaciones.length !== 0 ? 1 : 0.5
+                                            className="mr-3 pencil" 
+                                            onClick={() => AbrirAnotacion(montaje)} 
+                                            style={{
+                                                cursor: montaje.anotaciones?.length !== 0 ? 'pointer' : 'not-allowed', 
+                                                opacity: montaje.anotaciones?.length !== 0 ? 1 : 0.5
                                         }}     
                                         />
                                     </td>
                                     </tr>
                                 ))}
-                                </tbody>
+                            </tbody>
                             
                         </Table>
                     </Col>
@@ -389,13 +462,13 @@ const RodTooling = () => {
                     <Modal.Title>Rodillos</Modal.Title>
                 </Modal.Header>
                 <Modal.Body style={{ textAlign: "center" }}>
-                    {celdaSeleccionada && (
+                    {celdaSeleccionada && celdaSeleccionada.conjunto?.elementos && (
                     <div style={{ textAlign: "left" }}>
-                        {celdaSeleccionada?.conjunto?.elementos?.map((elemento, index) => (
+                        {celdaSeleccionada.conjunto.elementos.map((elemento, index) => (
                         <div key={index} style={{ marginBottom: "5px" }}>
                             <div style={{ display: "flex", justifyContent: "space-between", padding: "5px 0" }}>
-                            <span>{elemento.eje.tipo.nombre}</span>
-                            <span>{elemento.rodillo.nombre}</span>
+                            <span>{elemento.eje?.tipo?.nombre || 'N/A'}</span>
+                            <span>{elemento.rodillo?.nombre || 'N/A'}</span>
                             </div>
                             {index < celdaSeleccionada.conjunto.elementos.length - 1 && <hr style={{ margin: "5px 0", borderTop: "1px solid #ccc" }} />}
                         </div>

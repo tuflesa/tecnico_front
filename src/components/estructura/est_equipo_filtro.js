@@ -151,7 +151,7 @@ const EstEquiposFiltro = ({ actualizaFiltro }) => {
                     </Form.Group>
 
                     <Form.Group controlId="zona">
-                        <Form.Label>Seccion</Form.Label>
+                        <Form.Label>Sección</Form.Label>
                         <Form.Control as="select" 
                                         value={datos.seccion}
                                         name='seccion'

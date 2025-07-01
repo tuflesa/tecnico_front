@@ -6,7 +6,7 @@ import { useCookies } from 'react-cookie';
 
 const RepListaFilto = ({actualizaFiltro}) => {
     const [token] = useCookies(['tec-token']);
-    //const [user] = useCookies(['tec-user']);  
+    const [user] = useCookies(['tec-user']);  
 
     const [datos, setDatos] = useState({
         id:'',
@@ -23,6 +23,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
         seccion: '',
         equipo: '',
         proveedor: '',
+        almacen: '',
     });
 
     const [numeroBar, setnumeroBar] = useState({id:''});
@@ -32,6 +33,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
     const [secciones, setSecciones] = useState(null);
     const [zonas, setZonas] = useState(null);
     const [equipos, setEquipos] = useState(null);
+    const [almacenes, setAlmacenes] = useState(null);
 
     /* eslint-disable react-hooks/exhaustive-deps */
     useEffect(() => {
@@ -64,6 +66,17 @@ const RepListaFilto = ({actualizaFiltro}) => {
         })
         .then( res => {
             setProveedores(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+        axios.get(BACKEND_SERVER + `/api/repuestos/almacen/?empresa=${user['tec-user'].perfil.empresa.id}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }
+        })
+        .then( res => {
+            setAlmacenes(res.data);
         })
         .catch( err => {
             console.log(err);
@@ -159,7 +172,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
     /* eslint-disable react-hooks/exhaustive-deps */
 
     useEffect(()=>{
-        const filtro1 = `?precios__modelo_proveedor__icontains=${datos.modelo_proveedor}&nombre__icontains=${datos.nombre}&nombre_comun__icontains=${datos.nombre_comun}&precios__fabricante__icontains=${datos.fabricante}&id=${datos.id}&es_critico=${datos.critico}&descatalogado=${datos.descatalogado}&tipo_repuesto=${datos.tipo_repuesto}&proveedores__id=${datos.proveedor}`;
+        const filtro1 = `?precios__modelo_proveedor__icontains=${datos.modelo_proveedor}&nombre__icontains=${datos.nombre}&nombre_comun__icontains=${datos.nombre_comun}&precios__fabricante__icontains=${datos.fabricante}&id=${datos.id}&es_critico=${datos.critico}&descatalogado=${datos.descatalogado}&tipo_repuesto=${datos.tipo_repuesto}&proveedores__id=${datos.proveedor}&stocks_minimos__almacen__id=${datos.almacen}`;
         let filtro2 = `&equipos__seccion__zona__empresa__id=${datos.empresa}`;
         if (datos.empresa !== ''){
             filtro2 = filtro2 + `&equipos__seccion__zona__id=${datos.zona}`;
@@ -245,7 +258,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
                     </Col>
                     <Col>
                         <Form.Group controlId="formId">
-                            <Form.Label>Codigo Barras</Form.Label>
+                            <Form.Label>Código Barras</Form.Label>
                             <Form.Control type="text" 
                                         name='id' 
                                         value={numeroBar.id}
@@ -287,7 +300,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
                     </Col>
                     <Col>
                         <Form.Group controlId="critico">
-                            <Form.Label>Critico</Form.Label>
+                            <Form.Label>Crítico</Form.Label>
                             <Form.Control as="select" 
                                             value={datos.critico}
                                             name='critico'
@@ -321,6 +334,25 @@ const RepListaFilto = ({actualizaFiltro}) => {
                                         placeholder="Proveedor">
                                             <option key={0} value={''}>Todos</option>
                                         {proveedores && proveedores.map( prov => {
+                                            return (
+                                            <option key={prov.id} value={prov.id}>
+                                                {prov.nombre}
+                                            </option>
+                                            )
+                                        })}
+                            </Form.Control>
+                        </Form.Group>
+                    </Col>
+                    <Col>
+                        <Form.Group controlId="almacen">
+                            <Form.Label>Almacén</Form.Label>
+                            <Form.Control as="select"  
+                                        name='almacen' 
+                                        value={datos.almacen}
+                                        onChange={handleInputChange}
+                                        placeholder="Almacen">
+                                            <option key={0} value={''}>Todos</option>
+                                        {almacenes && almacenes.map( prov => {
                                             return (
                                             <option key={prov.id} value={prov.id}>
                                                 {prov.nombre}
@@ -371,7 +403,7 @@ const RepListaFilto = ({actualizaFiltro}) => {
                     </Col>
                     <Col>
                         <Form.Group controlId="seccion">
-                            <Form.Label>Seccion</Form.Label>
+                            <Form.Label>Sección</Form.Label>
                             <Form.Control as="select" 
                                             value={datos.seccion}
                                             name='seccion'

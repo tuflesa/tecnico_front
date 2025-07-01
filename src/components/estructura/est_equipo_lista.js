@@ -69,7 +69,7 @@ const EstEquipoLista = () => {
                         <thead>
                             <tr>
                             <th>Zona</th>
-                            <th>Seccion</th>
+                            <th>Sección</th>
                             <th>Nombre</th>
                             <th>Acciones</th>
                             </tr>

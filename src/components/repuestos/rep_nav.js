@@ -24,7 +24,7 @@ const RepNavBar = () => {
                                     <NavDropdown.Item href="/repuestos/nuevo">Nuevo repuesto</NavDropdown.Item>
                                     <NavDropdown.Item href="/repuestos/precio">Precio repuestos</NavDropdown.Item>
                                     <NavDropdown.Divider />
-                                    <NavDropdown.Item href="/repuestos/traspasos">Traspaso de almacen</NavDropdown.Item>
+                                    <NavDropdown.Item href="/repuestos/traspasos">Traspaso de almacén</NavDropdown.Item>
                                     <NavDropdown.Item href="/repuestos/almacenes">Lista de almacenes</NavDropdown.Item>
                                     <NavDropdown.Item href="/repuestos/almacen/nuevo">Nuevo almacén</NavDropdown.Item>
                                     <NavDropdown.Divider />
@@ -33,7 +33,8 @@ const RepNavBar = () => {
                                     <NavDropdown.Divider />
                                     <NavDropdown.Item href="/repuestos/pedidos">Lista de pedidos</NavDropdown.Item>
                                     <NavDropdown.Item href="/repuestos/pedido/nuevo">Nuevo pedido</NavDropdown.Item>
-                                    <NavDropdown.Item href="/repuestos/lineas_adicionales">Lineas Adicionales</NavDropdown.Item>
+                                    <NavDropdown.Item href="/repuestos/lineas_adicionales">Líneas Adicionales</NavDropdown.Item>
+                                    <NavDropdown.Item href="/repuestos/lineas_por_albaran">Pedidos por Albarán</NavDropdown.Item>
                                     <NavDropdown.Divider />
                                     <NavDropdown.Item href="/repuestos/salidas">Salidas</NavDropdown.Item>  
                                     <NavDropdown.Divider />  

@@ -146,99 +146,102 @@ const PedLista = () => {
     }
 
     const copiarPedido = async (pedido) => {
-        try {
-            // Paso 1: Obtener detalles del pedido original (con líneas)
-            const response = await axios.get(`${BACKEND_SERVER}/api/repuestos/pedido_detalle/${pedido.id}/`, {
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                }
-            });
-            const original = response.data;
-
-            // Paso 2: Crear nuevo pedido (cabecera)
-            const nuevoPedidoPayload = {
-                proveedor: original.proveedor.id,
-                empresa: original.empresa.id,
-                descripcion: original.descripcion,
-                fecha_entrega: null,
-                fecha_prevista_entrega: `${nextMonth.getFullYear()}-${String(nextMonth.getMonth() + 1).padStart(2, '0')}-${String(nextMonth.getDate()).padStart(2, '0')}`,
-                fecha_creacion: hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0'),
-                finalizado: false,
-                creado_por: user['tec-user'].id,
-                direccion_envio: original.direccion_envio?.id || null,
-                contacto: original.contacto?.id|| null,
-                observaciones: original.observaciones,
-                observaciones2: original.observaciones2,
-                intervencion: original.intervencion,
-                revisado: original.revisado,
-            };
-
-            let nuevoPedido = null;
-
+        var duplicar = window.confirm('Va a duplicar el pedido, ¿desea continuar?');
+        if(duplicar){    
             try {
-                const nuevoPedidoRes = await axios.post(
-                    `${BACKEND_SERVER}/api/repuestos/pedido/`,
-                    nuevoPedidoPayload,
-                    {
-                        headers: {
-                            'Authorization': `token ${token['tec-token']}`
-                        }
+                // Paso 1: Obtener detalles del pedido original (con líneas)
+                const response = await axios.get(`${BACKEND_SERVER}/api/repuestos/pedido_detalle/${pedido.id}/`, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
                     }
-                );
-                nuevoPedido = nuevoPedidoRes.data;
-                }catch( err ) {
-                    console.log(err);
-                }
-            // Paso 3: Clonar líneas
-            for (const linea of original.lineas_pedido) {
-                const nuevaLineaPayload = {
-                    pedido: nuevoPedido.id,
-                    repuesto: linea.repuesto.id,
-                    cantidad: linea.cantidad || 0,
-                    descripcion_proveedor: linea.descripcion_proveedor || '',
-                    modelo_proveedor: linea.modelo_proveedor || '',
-                    observaciones: linea.observaciones || '',
-                    por_recibir: linea.cantidad,
-                    precio: linea.precio || 0,
-                    descuento: linea.descuento || 0,
-                    total: linea.total,
-                    tipo_unidad: linea.tipo_unidad,
+                });
+                const original = response.data;
+
+                // Paso 2: Crear nuevo pedido (cabecera)
+                const nuevoPedidoPayload = {
+                    proveedor: original.proveedor.id,
+                    empresa: original.empresa.id,
+                    descripcion: original.descripcion,
+                    fecha_entrega: null,
+                    fecha_prevista_entrega: `${nextMonth.getFullYear()}-${String(nextMonth.getMonth() + 1).padStart(2, '0')}-${String(nextMonth.getDate()).padStart(2, '0')}`,
+                    fecha_creacion: hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0'),
+                    finalizado: false,
+                    creado_por: user['tec-user'].id,
+                    direccion_envio: original.direccion_envio?.id || null,
+                    contacto: original.contacto?.id|| null,
+                    observaciones: original.observaciones,
+                    observaciones2: original.observaciones2,
+                    intervencion: original.intervencion,
+                    revisado: original.revisado,
                 };
+
+                let nuevoPedido = null;
+
                 try {
-                    await axios.post(`${BACKEND_SERVER}/api/repuestos/linea_pedido/`, nuevaLineaPayload, {
-                        headers: {
-                            'Authorization': `token ${token['tec-token']}`
+                    const nuevoPedidoRes = await axios.post(
+                        `${BACKEND_SERVER}/api/repuestos/pedido/`,
+                        nuevoPedidoPayload,
+                        {
+                            headers: {
+                                'Authorization': `token ${token['tec-token']}`
+                            }
                         }
-                    });
-                }catch( err ) {
-                    console.log(err);
+                    );
+                    nuevoPedido = nuevoPedidoRes.data;
+                    }catch( err ) {
+                        console.log(err);
+                    }
+                // Paso 3: Clonar líneas
+                for (const linea of original.lineas_pedido) {
+                    const nuevaLineaPayload = {
+                        pedido: nuevoPedido.id,
+                        repuesto: linea.repuesto.id,
+                        cantidad: linea.cantidad || 0,
+                        descripcion_proveedor: linea.descripcion_proveedor || '',
+                        modelo_proveedor: linea.modelo_proveedor || '',
+                        observaciones: linea.observaciones || '',
+                        por_recibir: linea.cantidad,
+                        precio: linea.precio || 0,
+                        descuento: linea.descuento || 0,
+                        total: linea.total,
+                        tipo_unidad: linea.tipo_unidad,
+                    };
+                    try {
+                        await axios.post(`${BACKEND_SERVER}/api/repuestos/linea_pedido/`, nuevaLineaPayload, {
+                            headers: {
+                                'Authorization': `token ${token['tec-token']}`
+                            }
+                        });
+                    }catch( err ) {
+                        console.log(err);
+                    }
                 }
-            }
-            // Paso 4: Clonar líneasAdicionales
-            for (const linea_adicional of original.lineas_adicionales) {
-                const nuevaLineaadicionalPayload = {
-                    pedido: nuevoPedido.id,
-                    descripcion: linea_adicional.descripcion,
-                    cantidad: linea_adicional.cantidad,
-                    precio: linea_adicional.precio || 0,
-                    por_recibir: linea_adicional.cantidad,
-                    descuento: linea_adicional.descuento || 0,
-                    total: linea_adicional.total,
-                };
-                try {
-                    await axios.post(`${BACKEND_SERVER}/api/repuestos/linea_adicional_pedido/`, nuevaLineaadicionalPayload, {
-                        headers: {
-                            'Authorization': `token ${token['tec-token']}`
-                        }
-                    });
-                } catch (err) {
-                    console.log(err);
+                // Paso 4: Clonar líneasAdicionales
+                for (const linea_adicional of original.lineas_adicionales) {
+                    const nuevaLineaadicionalPayload = {
+                        pedido: nuevoPedido.id,
+                        descripcion: linea_adicional.descripcion,
+                        cantidad: linea_adicional.cantidad,
+                        precio: linea_adicional.precio || 0,
+                        por_recibir: linea_adicional.cantidad,
+                        descuento: linea_adicional.descuento || 0,
+                        total: linea_adicional.total,
+                    };
+                    try {
+                        await axios.post(`${BACKEND_SERVER}/api/repuestos/linea_adicional_pedido/`, nuevaLineaadicionalPayload, {
+                            headers: {
+                                'Authorization': `token ${token['tec-token']}`
+                            }
+                        });
+                    } catch (err) {
+                        console.log(err);
+                    }
                 }
+                alert("Pedido duplicado correctamente.");
+                history.push(`/repuestos/pedido_detalle/${nuevoPedido.id}`);
+            } catch (error) {
+                console.log(error);
             }
-            alert("Pedido duplicado correctamente.");
-            history.push(`/repuestos/pedido_detalle/${nuevoPedido.id}`);
-        } catch (error) {
-            console.log(error);
         }
     };
    

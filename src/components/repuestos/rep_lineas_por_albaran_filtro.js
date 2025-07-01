@@ -3,8 +3,9 @@ import { Container, Row, Col, Form } from 'react-bootstrap';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
+import debounce from 'lodash.debounce';
 
-const LineasAdicionalesFiltro = ({ actualizaFiltro }) => {
+const LineasPorAlbaranFiltro = ({ actualizaFiltro }) => {
     const [empresas, setEmpresas] = useState(null);
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
@@ -12,16 +13,22 @@ const LineasAdicionalesFiltro = ({ actualizaFiltro }) => {
     const [datos, setDatos] = useState({
         nombre_proveedor: '',
         empresa: user['tec-user'].perfil.empresa.id,
-        finalizado: '',
-        numero:'',
-        descripcion: '',
+        numero_albaran:'',
 
     });
 
-    useEffect(()=>{
-        const filtro = `?pedido__proveedor__nombre__icontains=${datos.nombre_proveedor}&pedido__finalizado=${datos.finalizado}&pedido__numero__icontains=${datos.numero}&pedido__empresa__id=${datos.empresa}&descripcion__icontains=${datos.descripcion}`;
-        actualizaFiltro(filtro);
-    },[datos, actualizaFiltro]);
+    useEffect(() => {
+        const debounceFiltro = debounce(() => {
+            const filtro = `?proveedor__nombre__icontains=${datos.nombre_proveedor}&empresa__id=${datos.empresa}&numero_albaran=${datos.numero_albaran}`;
+            actualizaFiltro(filtro);
+        }, 700); // 700ms de espera
+
+        debounceFiltro();
+
+        return () => {
+            debounceFiltro.cancel();
+        };
+    }, [datos]);
 
     const handleInputChange = (event) => {
         setDatos({
@@ -61,16 +68,6 @@ const LineasAdicionalesFiltro = ({ actualizaFiltro }) => {
                         </Form.Group>
                     </Col>
                     <Col>
-                        <Form.Group controlId="descripcion">
-                            <Form.Label>Descripción Línea</Form.Label>
-                            <Form.Control type="text" 
-                                        name='descripcion' 
-                                        value={datos.descripcion}
-                                        onChange={handleInputChange} 
-                                        placeholder="Descripción contiene"/>
-                        </Form.Group>
-                    </Col>
-                    <Col>
                         <Form.Group controlId="empresa">
                             <Form.Label>Empresa</Form.Label>
                             <Form.Control as="select"  
@@ -90,26 +87,13 @@ const LineasAdicionalesFiltro = ({ actualizaFiltro }) => {
                         </Form.Group>
                     </Col>
                     <Col>
-                        <Form.Group controlId="numero">
-                            <Form.Label>Número Pedido</Form.Label>
+                        <Form.Group controlId="numero_albaran">
+                            <Form.Label>Número Albarán</Form.Label>
                             <Form.Control type="text" 
-                                        name='numero' 
-                                        value={datos.numero}
+                                        name='numero_albaran' 
+                                        value={datos.numero_albaran}
                                         onChange={handleInputChange} 
-                                        placeholder="Numero de pedido" />
-                        </Form.Group>
-                    </Col>
-                    <Col>
-                        <Form.Group controlId="finalizado">
-                            <Form.Label>Pedido Finalizado</Form.Label>
-                            <Form.Control as="select" 
-                                            value={datos.finalizado}
-                                            name='finalizado'
-                                            onChange={handleInputChange}>
-                                <option key={0} value={''}>Todos</option>
-                                <option key={1} value={true}>Si</option>
-                                <option key={2} value={false}>No</option>
-                            </Form.Control>
+                                        placeholder="Numero de albaran" />
                         </Form.Group>
                     </Col>
                 </Row>
@@ -118,4 +102,4 @@ const LineasAdicionalesFiltro = ({ actualizaFiltro }) => {
     )
 }
 
-export default LineasAdicionalesFiltro;
+export default LineasPorAlbaranFiltro;

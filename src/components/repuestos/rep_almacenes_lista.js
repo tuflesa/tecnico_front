@@ -89,11 +89,11 @@ const RepAlmacenesLista = () => {
             </Row>
             <Modal show={show} onHide={handlerClose} backdrop="static" keyboard={ false } animation={false}>
                 <Modal.Header>
-                    <Modal.Title>Borrar Almacen no permitido ...</Modal.Title>
+                    <Modal.Title>Borrar Almacén no permitido ...</Modal.Title>
                 </Modal.Header>
 
                 <Modal.Body>
-                    <p>Por favor pongase en contacto con el administrador de la base de datos para borrar el almacén.</p>
+                    <p>Por favor póngase en contacto con el administrador de la base de datos para borrar el almacén.</p>
                 </Modal.Body>
 
                 <Modal.Footer>

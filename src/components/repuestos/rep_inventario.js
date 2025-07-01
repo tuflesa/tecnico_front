@@ -88,7 +88,7 @@ const RepInventario = () => {
                             <tr>
                                 <th>Código</th>
                                 <th>Descripción Repuesto</th>
-                                <th>Critico</th>
+                                <th>Crítico</th>
                                 <th>Descripción Etiqueta</th>
                                 <th>Almacén</th>
                                 <th>Localización</th>
