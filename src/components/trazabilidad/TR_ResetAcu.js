@@ -27,6 +27,7 @@ const ResetAcu = ({Acumulador, setAcumulador, Flejes}) => {
               }     
         })
         .then( res => { 
+            console.log('post flejes')
             console.log(res);
         })
         .catch(err => { console.log(err);})
@@ -80,7 +81,7 @@ const ResetAcu = ({Acumulador, setAcumulador, Flejes}) => {
     }
 
     return (
-        <Form>
+        <React.Fragment>
             <Table striped bordered hover>
                 <thead>
                     <tr>
@@ -120,7 +121,7 @@ const ResetAcu = ({Acumulador, setAcumulador, Flejes}) => {
                         </Button>
                     </Col>
             </Row>
-        </Form>
+        </React.Fragment>
     )
 }
 
