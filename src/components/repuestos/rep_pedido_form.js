@@ -762,7 +762,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                             }
                             <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
                             {pedido ? 
-                                <Button variant="danger" type="button" className={'mx-2'} onClick={abrirModal}>Recibir todo</Button> :''                               
+                                <Button variant="danger" type="button" className={'mx-2'} onClick={abrirModal}>Recepcionar todo</Button> :''                               
                             }
                         </Form.Row> 
                         <Form className="justify-content-center">
