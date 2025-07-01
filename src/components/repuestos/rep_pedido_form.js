@@ -15,6 +15,7 @@ import VistaPdf from './rep_pedidoPdf';
 import { PDFViewer } from '@react-pdf/renderer';
 import VistaIngPdf from './rep_pedidoIngPdf';
 import moment from 'moment';
+import CerrarTodoElPedido from './rep_cerrar_todoelpedido';
 
 const PedidoForm = ({pedido, setPedido}) => {
     const [token] = useCookies(['tec-token']);
@@ -42,6 +43,7 @@ const PedidoForm = ({pedido, setPedido}) => {
     const [contactos, setContactos]= useState(null);
     var total_pedido= 0;
     const [errores, setErrores] = useState({}); // Estado para guardar errores
+    const [show_cerrar, setShowCerrar] = useState(false);
 
     const [datos, setDatos] = useState({
         id: pedido ? pedido.id : null,
@@ -160,6 +162,13 @@ const PedidoForm = ({pedido, setPedido}) => {
         });
     }, [token]);
 
+    const abrirModal =() =>{
+        setShowCerrar(true);
+    }
+    const cerrarModal =() =>{
+        setShowCerrar(false);
+    }
+
     const handleInputChange = (event) => {
         setDatos({
             ...datos,
@@ -171,6 +180,13 @@ const PedidoForm = ({pedido, setPedido}) => {
         setDatos({
             ...datos,
             finalizado : !datos.finalizado
+        })
+    }
+
+    const handleRecibido = (event) => {
+        setDatos({
+            ...datos,
+            recibido : !datos.recibido
         })
     }
 
@@ -745,6 +761,9 @@ const PedidoForm = ({pedido, setPedido}) => {
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={crearPedido}>Guardar</Button>                                
                             }
                             <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
+                            {pedido ? 
+                                <Button variant="danger" type="button" className={'mx-2'} onClick={abrirModal}>Recibir todo</Button> :''                               
+                            }
                         </Form.Row> 
                         <Form className="justify-content-center">
                             {!verPdf && !verIngPdf && datos.numero ?  
@@ -941,6 +960,12 @@ const PedidoForm = ({pedido, setPedido}) => {
                         handleCloseListEntrega ={cerrarListEntrega}
                         linea_adicional={listEntrega}
             />
+            {pedido? <CerrarTodoElPedido
+                show ={show_cerrar}
+                pedido={pedido}
+                onClose={cerrarModal}
+                updatePedido={updatePedido}
+            />:''}
         </Container>
     )
 }
