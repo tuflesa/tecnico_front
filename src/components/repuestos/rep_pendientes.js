@@ -36,20 +36,20 @@ const RepPendientes = () => {
         total_pag3:0,
     });
 
-    const [filtro, setFiltro] = useState(`?empresa=${user['tec-user'].perfil.empresa.id}&page=${datos.pagina}&finalizado=${false}&fecha_prevista_entrega__lte=${datos.hoy}&creado_por=${nosoyTecnico?user['tec-user'].perfil.usuario:''}`);
+    const [filtro, setFiltro] = useState(`&page=${datos.pagina}&finalizado=${false}&fecha_prevista_entrega__lte=${datos.hoy}&creado_por=${nosoyTecnico?user['tec-user'].perfil.usuario:''}`);
     const [filtro2, setFiltro2] = useState(`?almacen__empresa__id=${user['tec-user'].perfil.empresa.id}&repuesto__descatalogado=${false}&page=${datos.pagina}&repuesto__tipo_repuesto=${1}`);
     const [filtro3, setFiltro3] = useState(`?almacen__empresa__id=${user['tec-user'].perfil.empresa.id}&repuesto__descatalogado=${false}&page=${datos.pagina}&repuesto__tipo_repuesto=${2}`);
 
     useEffect(() => {
-        setFiltro3(`?almacen__empresa__id=${datos.empresa}&repuesto__descatalogado=${false}&page=${datos.pagina2}&repuesto__tipo_repuesto=${2}`);
+        setFiltro3(`?almacen__empresa__id=${user['tec-user'].perfil.empresa.id}&repuesto__descatalogado=${false}&page=${datos.pagina2}&repuesto__tipo_repuesto=${2}`);
     },[datos.pagina3, token]);
 
     useEffect(() => {
-        setFiltro2(`?almacen__empresa__id=${datos.empresa}&repuesto__descatalogado=${false}&page=${datos.pagina2}&repuesto__tipo_repuesto=${1}`);
+        setFiltro2(`?almacen__empresa__id=${user['tec-user'].perfil.empresa.id}&repuesto__descatalogado=${false}&page=${datos.pagina2}&repuesto__tipo_repuesto=${1}`);
     },[datos.pagina2, token]);
 
     useEffect(() => {
-        setFiltro(`?empresa__id=${datos.empresa}&page=${datos.pagina}&finalizado=${false}&fecha_prevista_entrega__lte=${datos.hoy}&creado_por=${nosoyTecnico?user['tec-user'].perfil.usuario:''}`);
+        setFiltro(`&page=${datos.pagina}&finalizado=${false}&fecha_prevista_entrega__lte=${datos.hoy}&creado_por=${nosoyTecnico?user['tec-user'].perfil.usuario:''}`);
     },[datos.pagina, datos.empresa, datos.hoy, token]);
     
     useEffect(() => { //buscamos articulos con stock por debajo del stock mínimo
@@ -203,7 +203,7 @@ const RepPendientes = () => {
     }, [count3, filtro3]);
      
     useEffect(()=>{ //buscamos pedidos pasados de fecha de entrega
-        axios.get(BACKEND_SERVER + `/api/repuestos/lista_pedidos_fuera_fecha/` + filtro,{
+        axios.get(BACKEND_SERVER + `/api/repuestos/lista_pedidos_fuera_fecha/?empresa__id=${user['tec-user'].perfil.empresa.id}` + filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }
@@ -362,7 +362,7 @@ const RepPendientes = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {repuestosPendientes && repuestosPendientes
+                                    {repuestosPendientes && lineasPendientes && repuestosPendientes
                                         .filter(pendiente => pendiente.tipo === 1) //primero filtro solo los que sean REPUESTOS
                                         .map(pendiente => (
                                             <tr key={pendiente.id} className={comparar2(pendiente) ? "table-warning" : (comparar(pendiente)) ? "table-success" : pendiente.critico ? "table-danger" : ""}>

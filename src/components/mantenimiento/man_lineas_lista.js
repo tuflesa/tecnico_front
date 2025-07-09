@@ -207,7 +207,7 @@ const ManLineasListado = () => {
             setActualizarSeg(true);
         }, 60000);
       }, []);
-    
+
     return (
         <Container className='mt-3'>
             <button type="button" className='mt-5' onClick={event => {abroFiltro()}}>Ver Filtros</button>
@@ -321,7 +321,7 @@ const ManLineasListado = () => {
             <ListaDePersonal    show={show}
                                 lineas_trab ={linea_id}
                                 handlerClose={handlerClose}
-        />
+            />
         </Container>
     )
 }

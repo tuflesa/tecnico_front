@@ -25,6 +25,7 @@ const ManPorEquipos = () => {
     const [show_Observacion, setShowObservacion] = useState(false);
     const [abrirFiltro, setabrirFiltro] = useState(false);
     const [actualizar_seg, setActualizarSeg] = useState(false);
+    const [parte, setParte] = useState(null);
 
     const actualizaFiltro = str => {
         setFiltro(str);
@@ -38,6 +39,25 @@ const ManPorEquipos = () => {
         pagina:1,
         observaciones:'',
     });
+
+    useEffect(() => { //para mantener el modal abierto cuando regresamos de hacer una salida de almacén
+        
+        const datos = sessionStorage.getItem('datos_salida')
+        if (datos) {
+            const { volverConObservacion } = JSON.parse(datos)
+            if (volverConObservacion) {
+                setShowObservacion(true)
+                const nuevosDatos = { ...JSON.parse(datos), volverConObservacion: false }
+                sessionStorage.setItem('datos_salida', JSON.stringify(nuevosDatos))
+                setParte(datos?.parte);
+                setLinea_completa(datos?.linea_completa);
+                    setDatos({
+                        ...datos,
+                        observaciones: datos?.linea_completa?.observaciones_trab
+                }) 
+            }
+        }
+    }, [])
 
     useEffect(() => {
         if (filtro && user['tec-user'].perfil.destrezas.length > 0) {
@@ -80,7 +100,7 @@ const ManPorEquipos = () => {
     }, [token, user]);
 
     const comparar = (x) => {
-        for(var y=0;y<lineasTrabajadores.length;y++){
+        for(var y=0;y<lineasTrabajadores?.length;y++){
             if(lineasTrabajadores[y].linea===x.id){
                 return( true);
             }
@@ -177,7 +197,7 @@ const ManPorEquipos = () => {
         .catch(err => { console.log(err);}) 
     }
 
-    const pedir_observaciones = (linea) => {
+    const pedir_observaciones = (linea, parte) => {
         if(linea.fecha_inicio===null){
             alert('Esta tarea todavía no se ha iniciado');
         }
@@ -190,13 +210,13 @@ const ManPorEquipos = () => {
                 datos.observaciones=linea.observaciones_trab;
                 setShowObservacion(true);
                 setLinea_completa(linea);
+                setParte(parte);
             }
         }
     }
 
-    const handleCloseObservacion = () => {
-        setShowObservacion(false);
-        axios.patch(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_mov/${linea_completa.id}/`,{
+    const GuardarComentarios = () => {
+        linea_completa && datos.observaciones && axios.patch(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_mov/${linea_completa.id}/`,{
             observaciones_trab: datos.observaciones,
         },
         {
@@ -205,20 +225,25 @@ const ManPorEquipos = () => {
             }
         })
         .then( r => {
-            updateTarea();
             setLinea_completa(r.data);
         })
         .catch( err => {
             console.log(err);
         });
-        FinalizarTarea(linea_completa);
     }
 
-    const FinalizarTarea = (linea) => { 
+    const handleCloseObservacion = () => {
+        setShowObservacion(false);
+        updateTarea();
+    }
+
+    const FinalizarTarea = () => { 
+        setShowObservacion(false);
+        updateTarea();
         var Finalizar_Tarea = window.confirm('Vas a finalizar la tarea ¿Desea continuar?');
         if (Finalizar_Tarea){
-            for(var x=0;x<linea.lineas.length;x++){
-                axios.patch(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea/${linea.lineas[x].id}/`,{
+            for(var x=0;x<linea_completa.lineas.length;x++){
+                axios.patch(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea/${linea_completa.lineas[x].id}/`,{
                     //fecha_fin: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
                     fecha_fin: datos.fecha_fin,
                 },
@@ -233,7 +258,7 @@ const ManPorEquipos = () => {
                     console.log(err);
                 });
             }
-            axios.patch(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/${linea.id}/`,{
+            axios.patch(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/${linea_completa.id}/`,{
                 fecha_fin: datos.fecha_fin,
                 estado: 3,
             },
@@ -363,11 +388,21 @@ const ManPorEquipos = () => {
         setabrirFiltro(!abrirFiltro);
     }
 
+    const handlerConsumibles = () => {//mando los datos a la app de repuestos para la salida
+        const dataToStore = {
+            parte,
+            linea_completa,
+            volverConObservacion: true
+        };
+        sessionStorage.setItem('datos_salida', JSON.stringify(dataToStore));
+        window.location.href = `/repuestos/salidas/`;
+    };
+
     return(
         <Container className extends="pt-1 mt-5">
             <br></br>
             <h5 className="mb-5 mt-5" style={{ color: 'red' }}>
-                Listado de Trabajos <span style={{ color: 'black' }}>{user['tec-user'].get_full_name}</span>, por prioridades:
+                Listado de Trabajos <span style={{ color: 'black' }}>{user['tec-user'].get_full_name}</span>, por fecha y prioridad:
             </h5>
             <button type="button" onClick={event => {abroFiltro()}}>Ver Anotaciones</button>
             {abrirFiltro?   
@@ -426,7 +461,7 @@ const ManPorEquipos = () => {
                                         <td>{linea.fecha_fin?invertirFecha(String(linea.fecha_fin)):''}</td>
                                         <td>
                                         <Tools className="mr-3 pencil"  onClick={event =>{InicioTarea(linea)}}/>
-                                        <FileCheck className="mr-3 pencil"  onClick={event =>{pedir_observaciones(linea)}} />
+                                        <FileCheck className="mr-3 pencil"  onClick={event =>{pedir_observaciones(linea, linea.parte)}} />
                                         <Receipt className="mr-3 pencil" onClick={event =>{listarTrabajadores(linea)}}/>
                                         <Link to={`/mantenimiento/parte_op/${linea.parte.id}`}><Eye className="mr-3 pencil"/></Link>
                                         </td>
@@ -467,7 +502,12 @@ const ManPorEquipos = () => {
                         </Row>
                     </Container>
                 </Modal.Body>
+                <Modal.Footer>                    
+                    <Button variant="info" onClick={handlerConsumibles}> Consumibles </Button> 
+                    <Button variant="info" onClick={GuardarComentarios}>Guardar Comentarios</Button>
+                </Modal.Footer>
                 <Modal.Footer>
+                    <Button variant="secondary" onClick={FinalizarTarea}>Finalizar Tarea</Button>
                     <Button variant="secondary" onClick={handleCloseObservacion}>Aceptar</Button>
                 </Modal.Footer>
             </Modal>

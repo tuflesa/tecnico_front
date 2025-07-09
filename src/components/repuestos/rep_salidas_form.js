@@ -20,6 +20,10 @@ const RepSalidas = ({alm}) => {
     const [salida, setSalida] = useState(null);
     const [num_parte, setNum_parte] = useState(null);
     const [id_parte, setID_parte] = useState(null);
+    const soyMentenimiento = user['tec-user'].perfil.puesto.nombre==='Director Técnico'||user['tec-user'].perfil.puesto.nombre==='Técnico'||user['tec-user'].perfil.puesto.nombre==='Mantenimiento'?true:false;
+    //const soyTecnico = user['tec-user'].perfil.puesto.nombre==='Director Técnico'||user['tec-user'].perfil.puesto.nombre==='Técnico'?true:false;
+    //const [usuarios, setUsuarios] = useState(null);
+    const [linea_completa, setLineaCompleta] = useState(null);
     //const [movimientos, setMovimientos] = useState([]);
 
     const [numeroBar, setNumeroBar] = useState({
@@ -36,17 +40,43 @@ const RepSalidas = ({alm}) => {
         stock: '',
         critico: '',
         cantidad: '',
+        usuario_elegido: '',
     }); 
 
-    useEffect(() => {
+    /* useEffect(() => {
         const parteStr = sessionStorage.getItem('parte');
-    
         if (parteStr) {
             const Parte = JSON.parse(parteStr);
             setNum_parte(Parte.num_parte);
             setID_parte(Parte.id);
         }
+    }, []); */
+    useEffect(() => { //recojo los datos mandados desde mantenimiento
+        const datosStr = sessionStorage.getItem('datos_salida');
+        if (datosStr) {
+            const datos = JSON.parse(datosStr);
+            setNum_parte(datos?.parte?.num_parte);
+            setID_parte(datos?.parte?.id);
+            setLineaCompleta(datos?.linea_completa);
+        }
     }, []);
+
+    /* useEffect(()=>{
+        axios.get(BACKEND_SERVER + `/api/administracion/usuarios/?perfil__empresa__id=${datos.usuario.perfil.empresa.id}&`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+              }     
+        })
+        .then( res => { 
+            const usuariosFiltrados = res.data.filter(usuario =>
+            usuario.perfil?.puesto?.nombre === "Director Técnico" ||
+            usuario.perfil?.puesto?.nombre === "Técnico" ||
+            usuario.perfil?.puesto?.nombre === "Mantenimiento"
+        );
+        setUsuarios(usuariosFiltrados);
+        })
+        .catch(err => { console.log(err);})
+    },[token, alm]); */
 
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/repuestos/almacen/?empresa=${datos.usuario.perfil.empresa.id}`,{
@@ -157,6 +187,13 @@ const RepSalidas = ({alm}) => {
         });        
     },[salida]);
 
+/*     const handleInputChangeDatos = (event) => {
+        setDatos({
+            ...datos,
+            [event.target.name] : event.target.value
+        })  
+    } */
+
     const handleInputChange = (event) => { 
         setNumeroBar ({
             ...numeroBar,
@@ -196,8 +233,9 @@ const RepSalidas = ({alm}) => {
         if (lineasSalida.length > 0) {
             axios.post(BACKEND_SERVER + `/api/repuestos/salida/`, {
                 nombre: 'Salida de almacen',
-                responsable: user['tec-user'].id,
+                responsable: datos.usuario_elegido?datos.usuario_elegido:user['tec-user'].id,
                 num_parte: id_parte?id_parte:'',
+                num_linea_tarea: linea_completa?linea_completa.id:'',
             }, {
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
@@ -209,6 +247,7 @@ const RepSalidas = ({alm}) => {
             .catch(err => { console.log(err);})
         }
         setNum_parte(null)
+        setLineaCompleta(null)
         sessionStorage.removeItem('parte');
     }    
 
@@ -230,12 +269,39 @@ const RepSalidas = ({alm}) => {
     const cancelar = ()=>{
         sessionStorage.removeItem('parte'); // ← limpia almacenamiento
         setNum_parte(null)
+        setLineaCompleta(null)
         setID_parte(null);
-        history.push('/home');
+        {soyMentenimiento? window.location.href = "javascript: history.go(-1)" 
+        :history.push('/home')}
     }
 
     return (
         <Container className="mt-5">
+            <Row>
+                {num_parte?
+                    <Col xs="auto">
+                        <Form.Group controlId="num_parte">
+                            <Form.Label>Número Parte</Form.Label>
+                            <Form.Control type="text" 
+                                        name='num_parte' 
+                                        disabled
+                                        value={num_parte}
+                                        style={{ width: 'fit-content' }}/>
+                        </Form.Group>
+                    </Col>
+                :''}   
+                {num_parte?
+                    <Col xs="auto">
+                        <Form.Group controlId="linea">
+                            <Form.Label>Tarea</Form.Label>
+                            <Form.Control type="text" 
+                                        name='linea' 
+                                        disabled
+                                        value={linea_completa.tarea.nombre}/>
+                        </Form.Group>
+                    </Col>
+                :''}   
+            </Row>
             <Row>                
                 <Col>
                     <Form.Group>
@@ -261,17 +327,26 @@ const RepSalidas = ({alm}) => {
                         </Form.Control>
                     </Form.Group>
                 </Col>  
-                {num_parte?
+                {/* {soyTecnico?
                     <Col>
-                        <Form.Group controlId="num_parte">
-                            <Form.Label>Número Parte</Form.Label>
-                            <Form.Control type="text" 
-                                        name='num_parte' 
-                                        disabled
-                                        value={num_parte}/>
+                        <Form.Group controlId="usuario">
+                            <Form.Label>Usuario</Form.Label>
+                            <Form.Control as="select"  
+                                        name='usuario' 
+                                        value={datos.usuario_elegido}
+                                        onChange={handleInputChangeDatos}>
+                                            <option key={0} value={''}>Todos</option>
+                                            {usuarios && usuarios.map( usuario => {
+                                            return (
+                                            <option key={usuario.id} value={usuario.id}>
+                                                {usuario.full_name}
+                                            </option>
+                                            )
+                                        })}                                                
+                            </Form.Control>
                         </Form.Group>
                     </Col>
-                :''}           
+                :''} */}      
                 {numeroBar.almacen ?                            
                 <Col>
                     <Form.Group>
@@ -291,7 +366,7 @@ const RepSalidas = ({alm}) => {
                 <br></br>
                     {numeroBar.almacen? <Button variant="info" tabIndex={3} className={'btn-lg'} onClick={event => {abrirListRepuestos()}}>Buscar Repuesto</Button> : null}                 
                 </Col>
-            </Row>         
+            </Row>  
             <Row>
                 <Col>
                     <h5 className="mb-3 mt-3">Lista de Repuestos</h5>
