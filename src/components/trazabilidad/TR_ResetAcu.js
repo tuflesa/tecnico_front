@@ -11,42 +11,42 @@ const ResetAcu = ({Acumulador, setAcumulador, Flejes}) => {
 
     const resetAcu = () => {
         // Guarda el fleje seleccionado en la tabla de Flejes
-        axios.post(BACKEND_SERVER + `/api/trazabilidad/flejes/`, {
-            pos: flejeSeleccionado.pos,
-            idProduccion: flejeSeleccionado.idProduccion,
-            IdArticulo: flejeSeleccionado.IdArticulo,
-            peso: flejeSeleccionado.peso,
-            of: flejeSeleccionado.of,
-            maquina_siglas: flejeSeleccionado.maquina_siglas,
-            descripcion: flejeSeleccionado.descripcion,
-            acumulador: Acumulador.id,
-            finalizada: false
-        }, {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }     
-        })
-        .then( res => { 
-            console.log('post flejes')
-            console.log(res);
-        })
-        .catch(err => { console.log(err);})
+        // axios.post(BACKEND_SERVER + `/api/trazabilidad/flejes/`, {
+        //     pos: flejeSeleccionado.pos,
+        //     idProduccion: flejeSeleccionado.idProduccion,
+        //     IdArticulo: flejeSeleccionado.IdArticulo,
+        //     peso: flejeSeleccionado.peso,
+        //     of: flejeSeleccionado.of,
+        //     maquina_siglas: flejeSeleccionado.maquina_siglas,
+        //     descripcion: flejeSeleccionado.descripcion,
+        //     acumulador: Acumulador.id,
+        //     finalizada: false
+        // }, {
+        //     headers: {
+        //         'Authorization': `token ${token['tec-token']}`
+        //       }     
+        // })
+        // .then( res => { 
+        //     console.log('post flejes')
+        //     console.log(res);
+        // })
+        // .catch(err => { console.log(err);})
 
         // Actualiza el acumulador
-        axios.patch(BACKEND_SERVER + `/api/trazabilidad/acumuladores/${Acumulador.id}/`, {
-            of_activa: flejeSeleccionado.of,
-            n_bobina_activa: flejeSeleccionado.pos,
-            n_bobina_ultima: flejeSeleccionado.pos
-        }, {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }     
-        })
-        .then( res => { 
-            console.log(res.data);
-            setAcumulador(res.data);
-        })
-        .catch(err => { console.log(err);})
+        // axios.patch(BACKEND_SERVER + `/api/trazabilidad/acumuladores/${Acumulador.id}/`, {
+        //     of_activa: flejeSeleccionado.of,
+        //     n_bobina_activa: flejeSeleccionado.pos,
+        //     n_bobina_ultima: flejeSeleccionado.pos
+        // }, {
+        //     headers: {
+        //         'Authorization': `token ${token['tec-token']}`
+        //       }     
+        // })
+        // .then( res => { 
+        //     console.log(res.data);
+        //     setAcumulador(res.data);
+        // })
+        // .catch(err => { console.log(err);})
 
         // Actualiza PLC
         axios.post(BACKEND_SERVER + `/api/trazabilidad/resetPLC/`, {
@@ -66,7 +66,8 @@ const ResetAcu = ({Acumulador, setAcumulador, Flejes}) => {
               }     
         })
         .then( res => { 
-            console.log(res);
+            console.log(res.data);
+            setAcumulador(res.data);
         })
         .catch(err => { console.log(err);})
     }

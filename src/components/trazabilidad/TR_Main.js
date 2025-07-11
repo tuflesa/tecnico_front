@@ -40,7 +40,7 @@ const TR_Main = () => {
     },[token]);
 
     useEffect(()=>{
-         axios.get(BACKEND_SERVER + `/api/trazabilidad/acumuladores/?zona__empresa__id=${empresa}`,{ 
+        axios.get(BACKEND_SERVER + `/api/trazabilidad/acumuladores/?zona__empresa__id=${empresa}`,{ 
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
@@ -70,6 +70,7 @@ const TR_Main = () => {
 
     useEffect(()=>{
         if (acumulador) {
+            console.log('acumulador',acumulador);
             if (acumulador.of_activa) {
                 leerFlejesTecnicoDB();
                 leerEstadoPLC();
@@ -82,9 +83,31 @@ const TR_Main = () => {
                 leerFlejesProduccionDB();
             }
         }
-    },[acumulador,])
+    },[acumulador])
 
-    useEffect(()=>{leerFlejesTecnicoDB()},[filtro]);
+    useEffect(()=>{
+        // console.log('filtro. ', filtro);
+        leerFlejesTecnicoDB()
+    },[filtro]);
+
+    useEffect(()=>{
+        if (flejesAcumulador && acumulador && flejesAcumulador.length>0) {
+            if (acumulador.of_activa != flejesAcumulador[0].of) {
+                console.log('Cambio de of ...');
+                axios.get(BACKEND_SERVER + `/api/trazabilidad/acumuladores/${acuId}`,{ 
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }
+                })
+                .then( res => { 
+                    setAcumulador(res.data);
+                })
+                .catch( err => {
+                    console.log(err);
+                });
+            }
+        }
+    }, [flejesAcumulador])
 
     const handleEmpresaChange = (event) => {
         setEmpresa(event.target.value);
@@ -117,7 +140,9 @@ const TR_Main = () => {
     }
 
     const leerFlejesTecnicoDB = () => {
-        // console.log(acumulador);
+        // console.log('lee tecnico DB');
+        // console.log('acu', acumulador);
+        // console.log('filtro: ', filtro);
         acumulador&&axios.get(BACKEND_SERVER + `/api/trazabilidad/flejesLista/?acumulador=${acumulador.id}&finalizada=${filtro.finalizado}&of=${filtro.of}`,{ 
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -126,7 +151,7 @@ const TR_Main = () => {
         .then( res => {
             const flejes_OF_actual = res.data.filter(f => f.of == acumulador.of_activa).sort((a, b) => a.pos - b.pos);
             const flejes_OF_next = res.data.filter(f => f.of != acumulador.of_activa).sort((a, b) => a.pos - b.pos);
-            // console.log(flejes_OF_actual);
+            // console.log('Flejes: ', flejes_OF_actual.concat(flejes_OF_next));
             setFlejesAcumulador(flejes_OF_actual.concat(flejes_OF_next));
         })
         .catch( err => {
