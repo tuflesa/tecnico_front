@@ -20,7 +20,7 @@ const TR_Main = () => {
         of: null,
         finalizado: 'False'
     });
-    
+    const [PLC_status, setPLC_status] = useState(null);
     const [flejesDB, setFlejesDB] = useState(null); // Flejes de la base de datos de producción
     const [flejesAcumulador, setFlejesAcumulador] = useState(null);
 
@@ -73,7 +73,7 @@ const TR_Main = () => {
             console.log('acumulador',acumulador);
             if (acumulador.of_activa) {
                 leerFlejesTecnicoDB();
-                leerEstadoPLC();
+                // leerEstadoPLC();
                 setFiltro({
                     ...filtro,
                     of: acumulador.of_activa
@@ -90,24 +90,47 @@ const TR_Main = () => {
         leerFlejesTecnicoDB()
     },[filtro]);
 
+    // useEffect(()=>{
+    //     if (flejesAcumulador && acumulador && flejesAcumulador.length>0) {
+    //         if (acumulador.of_activa != flejesAcumulador[0].of) {
+    //             console.log('Cambio de of ...');
+    //             axios.get(BACKEND_SERVER + `/api/trazabilidad/acumuladores/${acuId}`,{ 
+    //                 headers: {
+    //                     'Authorization': `token ${token['tec-token']}`
+    //                 }
+    //             })
+    //             .then( res => { 
+    //                 setAcumulador(res.data);
+    //             })
+    //             .catch( err => {
+    //                 console.log(err);
+    //             });
+    //         }
+    //     }
+    // }, [flejesAcumulador]);
+
     useEffect(()=>{
-        if (flejesAcumulador && acumulador && flejesAcumulador.length>0) {
-            if (acumulador.of_activa != flejesAcumulador[0].of) {
-                console.log('Cambio de of ...');
-                axios.get(BACKEND_SERVER + `/api/trazabilidad/acumuladores/${acuId}`,{ 
+        if (PLC_status) {
+            if(PLC_status.fleje_actual.of != acumulador.of_activa) {
+                console.log('cambio de of');
+                console.log('PLC of activa: ', PLC_status.fleje_actual.of);
+                console.log('Acumulador of activa: ', acumulador.of_activa);
+                axios.get(BACKEND_SERVER + `/api/trazabilidad/acumuladores/${acumulador.id}`,{ 
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
                     }
                 })
-                .then( res => { 
+                .then( res => {
+                    // console.log(acumulador);
                     setAcumulador(res.data);
                 })
                 .catch( err => {
                     console.log(err);
                 });
             }
+            else console.log('misma of');
         }
-    }, [flejesAcumulador])
+    },[PLC_status]);
 
     const handleEmpresaChange = (event) => {
         setEmpresa(event.target.value);
@@ -157,6 +180,7 @@ const TR_Main = () => {
         .catch( err => {
             console.log(err);
         });
+        leerEstadoPLC();
     }
 
     const leerFlejesProduccionDB = () => {
@@ -177,13 +201,14 @@ const TR_Main = () => {
     }
 
     const leerEstadoPLC = () => {
-        axios.get(BACKEND_SERVER + `/api/trazabilidad/leerEstadoPLC/?acu_id=${acumulador.id}`,{ 
+        acumulador&&axios.get(BACKEND_SERVER + `/api/trazabilidad/leerEstadoPLC/?acu_id=${acumulador.id}`,{ 
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
         .then( res => {
-            console.log(res.data);
+            // console.log(res.data);
+            setPLC_status(res.data);
         })
         .catch( err => {
             console.log(err);
@@ -265,7 +290,7 @@ const TR_Main = () => {
                             <Col>
                                 {acumulador?(acumulador.n_bobina_activa?
                                 <React.Fragment>
-                                    <h4>OF ACTUAL: {acumulador.of_activa}</h4>
+                                    <h4>OF ACTUAL: {PLC_status&&PLC_status.fleje_actual.of}</h4>
                                     <FlejesAcu 
                                         Flejes = {flejesAcumulador}
                                     />
