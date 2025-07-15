@@ -8,6 +8,7 @@ import { Tools, FileCheck, Receipt, Eye} from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import ListaDePersonal from './man_equipo_trabajadores';
 import ManEquipoFiltro from './man_equipo_filtro';
+import ObservacionesModal from './man_equipo_observaciones';
 
 const ManPorEquipos = () => {
     const [token] = useCookies(['tec-token']);
@@ -25,6 +26,7 @@ const ManPorEquipos = () => {
     const [show_Observacion, setShowObservacion] = useState(false);
     const [abrirFiltro, setabrirFiltro] = useState(false);
     const [actualizar_seg, setActualizarSeg] = useState(false);
+    const [parte, setParte] = useState(null);
 
     const actualizaFiltro = str => {
         setFiltro(str);
@@ -38,6 +40,28 @@ const ManPorEquipos = () => {
         pagina:1,
         observaciones:'',
     });
+
+    useEffect(() => { //para mantener el modal abierto cuando regresamos de hacer una salida de almacén
+        const datosStr  = sessionStorage.getItem('datos_salida')
+        if (datosStr) {
+            const datos = JSON.parse(datosStr)
+            if (datos.volverConObservacion) {
+                setShowObservacion(true)
+                const nuevosDatos = { ...datos, volverConObservacion: false };
+                sessionStorage.setItem('datos_salida', JSON.stringify(nuevosDatos));
+                
+                setParte(datos.parte);
+                setLinea_completa(datos.linea_completa);
+
+                if (datos.observaciones_temp) {
+                    setDatos(prev => ({
+                        ...prev,
+                        observaciones: datos.observaciones_temp
+                    }));
+                }
+            }
+        }
+    }, []);
 
     useEffect(() => {
         if (filtro && user['tec-user'].perfil.destrezas.length > 0) {
@@ -63,7 +87,7 @@ const ManPorEquipos = () => {
             });
             setActualizarSeg(false);
         }
-    }, [token, filtro, datos.observaciones, actualizar_seg, user]);    
+    }, [token, filtro, actualizar_seg, user]);    
  
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea_filtro/?trabajador=${user['tec-user'].perfil.usuario}`,{
@@ -80,7 +104,7 @@ const ManPorEquipos = () => {
     }, [token, user]);
 
     const comparar = (x) => {
-        for(var y=0;y<lineasTrabajadores.length;y++){
+        for(var y=0;y<lineasTrabajadores?.length;y++){
             if(lineasTrabajadores[y].linea===x.id){
                 return( true);
             }
@@ -177,7 +201,7 @@ const ManPorEquipos = () => {
         .catch(err => { console.log(err);}) 
     }
 
-    const pedir_observaciones = (linea) => {
+    const pedir_observaciones = (linea, parte) => {
         if(linea.fecha_inicio===null){
             alert('Esta tarea todavía no se ha iniciado');
         }
@@ -190,133 +214,14 @@ const ManPorEquipos = () => {
                 datos.observaciones=linea.observaciones_trab;
                 setShowObservacion(true);
                 setLinea_completa(linea);
+                setParte(parte);
             }
         }
     }
 
     const handleCloseObservacion = () => {
         setShowObservacion(false);
-        axios.patch(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_mov/${linea_completa.id}/`,{
-            observaciones_trab: datos.observaciones,
-        },
-        {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-            }
-        })
-        .then( r => {
-            updateTarea();
-            setLinea_completa(r.data);
-        })
-        .catch( err => {
-            console.log(err);
-        });
-        FinalizarTarea(linea_completa);
-    }
-
-    const FinalizarTarea = (linea) => { 
-        var Finalizar_Tarea = window.confirm('Vas a finalizar la tarea ¿Desea continuar?');
-        if (Finalizar_Tarea){
-            for(var x=0;x<linea.lineas.length;x++){
-                axios.patch(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea/${linea.lineas[x].id}/`,{
-                    //fecha_fin: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
-                    fecha_fin: datos.fecha_fin,
-                },
-                {
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`
-                    }
-                })
-                .then( r => {
-                })
-                .catch( err => {
-                    console.log(err);
-                });
-            }
-            axios.patch(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/${linea.id}/`,{
-                fecha_fin: datos.fecha_fin,
-                estado: 3,
-            },
-            {
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                }
-            })
-            .then( re => {
-                if(re.data.parte.tipo===1 || re.data.parte.tipo===7){
-                    var fechaString= null;
-                    var diaEnMilisegundos = 1000 * 60 * 60 * 24;
-                    var fecha=Date.parse(re.data.fecha_fin);
-                    var fechaPorSemanas=null;
-                    var suma=null;
-                    suma = fecha + (diaEnMilisegundos * re.data.tarea.periodo * re.data.tarea.tipo_periodo.cantidad_dias);
-                    fechaPorSemanas = new Date(suma);
-                    fechaString = fechaPorSemanas.getFullYear() + '-' + ('0' + (fechaPorSemanas.getMonth()+1)).slice(-2) + '-' + ('0' + fechaPorSemanas.getDate()).slice(-2);
-                    
-                    fechaString && axios.post(BACKEND_SERVER + `/api/mantenimiento/linea_nueva/`,{
-                        parte: re.data.parte.id,
-                        tarea: re.data.tarea.id,
-                        fecha_inicio:null,
-                        fecha_fin:null,
-                        fecha_plan: fechaString,
-                        estado: 1,
-                    },
-                    {
-                        headers: {
-                            'Authorization': `token ${token['tec-token']}`
-                        }
-                    })
-                    .then( r => {
-                        console.log('linea hecha');
-
-                    })
-                    .catch( err => {
-                        console.log(err);  
-                    });
-                    updateTarea();
-                }                            
-                else{
-                    axios.get(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_trabajo/?parte=${re.data.parte.id}`, {
-                        headers: {
-                            'Authorization': `token ${token['tec-token']}`
-                            }     
-                    })
-                    .then( res => {
-                        var contador = 0;
-                        for(var x=0;x<res.data.length;x++){
-                            if(res.data[x].estado===3){
-                                contador=contador+1;
-                                if(contador===res.data.length){
-                                    axios.patch(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${res.data[0].parte}/`,{
-                                        estado: 3,
-                                    },
-                                    {
-                                        headers: {
-                                            'Authorization': `token ${token['tec-token']}`
-                                        }
-                                    })
-                                    .then( re => {
-                                        alert('Parte finalizado');
-                                    })
-                                    .catch( err => {
-                                        console.log(err);  
-                                    });
-                                }
-                            }
-                            else{
-                                console.log('hay lineas sin finalizar');
-                            }
-                        }
-
-                    })
-                    .catch( err => {
-                        console.log(err);  
-                    });
-                }
-                updateTarea();
-            })
-            .catch(err => { console.log(err);}) 
-        }
+        updateTarea();
     }
 
     const listarTrabajadores = (linea)=>{
@@ -364,14 +269,14 @@ const ManPorEquipos = () => {
     }
 
     return(
-        <Container className extends="pt-1 mt-5">
+        <Container className="pt-1 mt-5">
             <br></br>
             <h5 className="mb-5 mt-5" style={{ color: 'red' }}>
-                Listado de Trabajos <span style={{ color: 'black' }}>{user['tec-user'].get_full_name}</span>, por prioridades:
+                Listado de Trabajos <span style={{ color: 'black' }}>{user['tec-user'].get_full_name}</span>, por fecha y prioridad:
             </h5>
             <button type="button" onClick={event => {abroFiltro()}}>Ver Anotaciones</button>
             {abrirFiltro?   
-            <Row className extends>                
+            <Row className="mb-2">                
                 <Col>             
                     <h5>Acciones:</h5>
                     <h5><Tools/> ---- Para iniciar un trabajo</h5>
@@ -387,7 +292,7 @@ const ManPorEquipos = () => {
                 <Col>
                     <ManEquipoFiltro actualizaFiltro={actualizaFiltro}/>
                 </Col>
-            </ Row>
+            </Row>
             <table>
                 <tbody>
                     <tr>
@@ -414,7 +319,6 @@ const ManPorEquipos = () => {
                         </thead>
                         <tbody>
                             {lineas && lineas.map( linea => {
-                                //'#cce5ff' ----> es el tono de color azul de la table-primary gastada en otras pantallas
                                 return (
                                     <tr key={linea.id} style={{ backgroundColor: comparar(linea) ? '#cce5ff': linea.fecha_inicio!==null? 'yellow' : " " }} className="table-secundary">
                                         <td>{linea.tarea.prioridad}</td>
@@ -426,7 +330,7 @@ const ManPorEquipos = () => {
                                         <td>{linea.fecha_fin?invertirFecha(String(linea.fecha_fin)):''}</td>
                                         <td>
                                         <Tools className="mr-3 pencil"  onClick={event =>{InicioTarea(linea)}}/>
-                                        <FileCheck className="mr-3 pencil"  onClick={event =>{pedir_observaciones(linea)}} />
+                                        <FileCheck className="mr-3 pencil"  onClick={event =>{pedir_observaciones(linea, linea.parte)}} />
                                         <Receipt className="mr-3 pencil" onClick={event =>{listarTrabajadores(linea)}}/>
                                         <Link to={`/mantenimiento/parte_op/${linea.parte.id}`}><Eye className="mr-3 pencil"/></Link>
                                         </td>
@@ -446,35 +350,23 @@ const ManPorEquipos = () => {
                     </tr>
                 </tbody>
             </table>
-            <Modal show={show_Observacion} onHide={handleCloseObservacion} backdrop="static" keyboard={ false } animation={false}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Conclusiones de la tarea</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Container>
-                        <Row>
-                            <Col>
-                                <Form.Group id="observaciones">
-                                    <Form.Label>Conclusiones Personal Mantenmiento</Form.Label>
-                                    <Form.Control as="textarea" rows={3}
-                                                name='observaciones' 
-                                                value={datos.observaciones}
-                                                onChange={handleInputChange} 
-                                                placeholder="Conclusiones"
-                                    />
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                    </Container>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={handleCloseObservacion}>Aceptar</Button>
-                </Modal.Footer>
-            </Modal>
-        <ListaDePersonal    show={show}
-                            lineas_trab ={linea_trab}
-                            handlerClose={handlerClose}
-        />
+            
+            {/* Usar el modal independiente */}
+            <ObservacionesModal 
+                show={show_Observacion}
+                onHide={handleCloseObservacion}
+                linea={linea_completa}
+                parte={parte}
+                onUpdateTarea={updateTarea}
+                showConsumibles={true}
+                showFinalizar={true}
+            />
+            
+            <ListaDePersonal    
+                show={show}
+                lineas_trab={linea_trab}
+                handlerClose={handlerClose}
+            />
         </Container>
     )
 }
