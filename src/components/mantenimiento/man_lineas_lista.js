@@ -3,10 +3,11 @@ import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import { Container, Row, Col, Table} from 'react-bootstrap';
-import { Trash, PencilFill, Receipt, Eye, PlusSquare, DashSquare, HandThumbsUpFill } from 'react-bootstrap-icons';
+import { Trash, PencilFill, Receipt, Eye, PlusSquare, DashSquare, HandThumbsUpFill, FileCheck } from 'react-bootstrap-icons';
 import ManLineasFiltro from './man_lineas_filtro';
 import {invertirFecha} from '../utilidades/funciones_fecha';
 import ListaDePersonal from './man_equipo_trabajadores';
+import ObservacionesModal from './man_equipo_observaciones'; // IMPORTAR EL MODAL
 import ReactExport from 'react-data-export';
 
 
@@ -37,6 +38,11 @@ const ManLineasListado = () => {
     const [abrirFiltro, setabrirFiltro] = useState(false);
     const [actualizar_seg, setActualizarSeg] = useState(false);
 
+    // ESTADOS PARA EL MODAL DE OBSERVACIONES
+    const [show_Observacion, setShowObservacion] = useState(false);
+    const [linea_completa, setLinea_completa] = useState(null);
+    const [parte, setParte] = useState(null);
+
     const actualizaFiltro = (str) => {   
         setFiltro(str);
     }
@@ -45,7 +51,33 @@ const ManLineasListado = () => {
         pagina: 1,
     });
 
-    useEffect(()=>{
+    useEffect(() => { //para mantener el modal abierto cuando regresamos de hacer una salida de almacén
+        const datosStr  = sessionStorage.getItem('datos_salida')
+        if (datosStr) {
+            const datos = JSON.parse(datosStr)
+            if (datos.volverConObservacion) {
+                setShowObservacion(true)
+                const nuevosDatos = { ...datos, volverConObservacion: false };
+                sessionStorage.setItem('datos_salida', JSON.stringify(nuevosDatos));
+                
+                setParte(datos.parte);
+                setLinea_completa(datos.linea_completa);
+
+                if (datos.observaciones_temp) {
+                    setDatos(prev => ({
+                        ...prev,
+                        observaciones: datos.observaciones_temp
+                    }));
+                }
+                if(datos.filtro){
+                    setFiltro(datos.filtro);
+                }
+            }
+        }
+    }, []);
+
+    // FUNCIÓN PARA ACTUALIZAR LA TABLA (similar a updateTarea en ManPorEquipos)
+    const updateTarea = () => {
         axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_activas/`+ filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -67,7 +99,7 @@ const ManLineasListado = () => {
                 r['fecha_plani']=r.fecha_inicio?invertirFecha(String(r.fecha_plan)):'';
                 r['fecha_ini']=r.fecha_inicio?invertirFecha(String(r.fecha_inicio)):'';
             })
-            setLineas(res.data.results);
+            setLineas([...res.data.results]);
             setCount(res.data.count);
             let pagT = res.data.count/20;
             if (res.data.count % 20 !== 0){
@@ -78,67 +110,26 @@ const ManLineasListado = () => {
         .catch( err => {
             console.log(err);
         });
-    }, [token, filtro, actualizar, actualizar_seg]); 
-
-    const BorrarLinea =(linea) =>{ 
-        axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/?tarea=${linea.tarea.id}`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-                }
-        })
-        .then( res => {
-            //si solo hay una linea y la fecha fin esta vacía, podemos eliminar linea y tarea.
-            if(res.data.length===1 && res.data[0].fecha_fin===null){
-                var confirmacion = window.confirm('¿Deseas eliminar la línea?');
-                if(confirmacion){
-                    axios.delete(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/${res.data[0].id}/`,{            
-                        headers: {
-                            'Authorization': `token ${token['tec-token']}`
-                        } 
-                    })
-                    .then(re =>{
-                        axios.delete(BACKEND_SERVER + `/api/mantenimiento/tareas/${res.data[0].tarea.id}/`,{            
-                            headers: {
-                                'Authorization': `token ${token['tec-token']}`
-                            } 
-                        })
-                        .then(r =>{
-                            alert('tarea eliminada');
-                            setActualizar(linea);  
-                        })
-                        .catch (err=>{console.log((err));});
-                    })
-                    .catch (err=>{console.log((err));});
-                }
-            }
-            else{
-                //Si la ultima linea tiene fecha fin, no se puede eliminar
-                if(res.data[res.data.length-1].fecha_fin!==null){
-                    alert('No se puede elimnar, trabajo ya ejecutado y terminado');
-                }
-                //en un preventivo, queremos detener el ciclo del trabajo.
-                else{
-                    var detenerTrabajo = window.confirm('No se puede eliminar, tiene trabajos finalizados. ¿Deseas detener el proceso?');
-                    if(detenerTrabajo){
-                        //eliminamos la linea que es la que ejecuta de nuevo la tarea'
-                        axios.delete(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_partes/${res.data[res.data.length-1].id}/`,{            
-                            headers: {
-                                'Authorization': `token ${token['tec-token']}`
-                            } 
-                        })
-                        .then(ress =>{
-                            alert('Trabajo detenido, no volverá a generar linea');
-                            setActualizar(linea);  
-                        })
-                        .catch (err=>{console.log((err));});
-                    }
-                }
-            }       
-        })
-        .catch( err => {
-            console.log(err);
-        });                 
     }
+
+    // FUNCIÓN PARA ABRIR EL MODAL DE OBSERVACIONES
+    const pedir_observaciones = (linea, parte) => {
+        // En ManLineasListado no hay la misma lógica de validación que en ManPorEquipos
+        // porque aquí se muestran todas las líneas independientemente del trabajador
+        setShowObservacion(true);
+        setLinea_completa(linea);
+        setParte(parte);
+    }
+
+    // FUNCIÓN PARA CERRAR EL MODAL DE OBSERVACIONES
+    const handleCloseObservacion = () => {
+        setShowObservacion(false);
+        updateTarea(); 
+    }
+
+    useEffect(()=>{
+        updateTarea(); 
+    }, [token, filtro, actualizar, actualizar_seg ]); 
 
     const listarTrabajadores = (linea_id)=>{
         setLinea_id(linea_id);
@@ -295,7 +286,8 @@ const ManLineasListado = () => {
                                             <a href={`/mantenimiento/linea_tarea/${linea.id}`} target="_blank" rel="noopener noreferrer">
                                                 <PencilFill className="mr-3 pencil"/>
                                             </a> 
-                                            <Trash className="mr-3 pencil"  onClick={event =>{BorrarLinea(linea)}} />                                       
+                                            {/* <Trash className="mr-3 pencil"  onClick={event =>{BorrarLinea(linea)}} />   */}
+                                            <FileCheck className="mr-3 pencil"  onClick={event =>{pedir_observaciones(linea, linea.parte)}} />                                     
                                             <Receipt className="mr-3 pencil" onClick={event =>{listarTrabajadores(linea)}}/>
                                             <a href={`/mantenimiento/parte/${linea.parte.id}`} target="_blank" rel="noopener noreferrer">
                                                 <Eye className="mr-3 pencil"/>
@@ -317,6 +309,18 @@ const ManLineasListado = () => {
                     </tr>
                 </tbody>
             </table>
+            
+            {/* MODAL DE OBSERVACIONES */}
+            <ObservacionesModal 
+                show={show_Observacion}
+                onHide={handleCloseObservacion}
+                linea={linea_completa}
+                parte={parte}
+                onUpdateTarea={updateTarea}
+                showConsumibles={true}
+                showFinalizar={false}
+                filtro={filtro}
+            />
             
             <ListaDePersonal    show={show}
                                 lineas_trab ={linea_id}

@@ -21,14 +21,10 @@ const RepSalidas = ({alm}) => {
     const [num_parte, setNum_parte] = useState(null);
     const [id_parte, setID_parte] = useState(null);
     const soyMentenimiento = user['tec-user'].perfil.puesto.nombre==='Director Técnico'||user['tec-user'].perfil.puesto.nombre==='Técnico'||user['tec-user'].perfil.puesto.nombre==='Mantenimiento'?true:false;
-    //const soyTecnico = user['tec-user'].perfil.puesto.nombre==='Director Técnico'||user['tec-user'].perfil.puesto.nombre==='Técnico'?true:false;
-    //const [usuarios, setUsuarios] = useState(null);
     const [linea_completa, setLineaCompleta] = useState(null);
-    //const [movimientos, setMovimientos] = useState([]);
 
     const [numeroBar, setNumeroBar] = useState({
         id: '',
-        //almacen: alm ? alm : '',
         almacen:'',
         idCod: '',
     });
@@ -43,14 +39,6 @@ const RepSalidas = ({alm}) => {
         usuario_elegido: '',
     }); 
 
-    /* useEffect(() => {
-        const parteStr = sessionStorage.getItem('parte');
-        if (parteStr) {
-            const Parte = JSON.parse(parteStr);
-            setNum_parte(Parte.num_parte);
-            setID_parte(Parte.id);
-        }
-    }, []); */
     useEffect(() => { //recojo los datos mandados desde mantenimiento
         const datosStr = sessionStorage.getItem('datos_salida');
         if (datosStr) {
@@ -60,23 +48,6 @@ const RepSalidas = ({alm}) => {
             setLineaCompleta(datos?.linea_completa);
         }
     }, []);
-
-    /* useEffect(()=>{
-        axios.get(BACKEND_SERVER + `/api/administracion/usuarios/?perfil__empresa__id=${datos.usuario.perfil.empresa.id}&`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }     
-        })
-        .then( res => { 
-            const usuariosFiltrados = res.data.filter(usuario =>
-            usuario.perfil?.puesto?.nombre === "Director Técnico" ||
-            usuario.perfil?.puesto?.nombre === "Técnico" ||
-            usuario.perfil?.puesto?.nombre === "Mantenimiento"
-        );
-        setUsuarios(usuariosFiltrados);
-        })
-        .catch(err => { console.log(err);})
-    },[token, alm]); */
 
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/repuestos/almacen/?empresa=${datos.usuario.perfil.empresa.id}`,{
@@ -187,13 +158,6 @@ const RepSalidas = ({alm}) => {
         });        
     },[salida]);
 
-/*     const handleInputChangeDatos = (event) => {
-        setDatos({
-            ...datos,
-            [event.target.name] : event.target.value
-        })  
-    } */
-
     const handleInputChange = (event) => { 
         setNumeroBar ({
             ...numeroBar,
@@ -248,7 +212,7 @@ const RepSalidas = ({alm}) => {
         }
         setNum_parte(null)
         setLineaCompleta(null)
-        sessionStorage.removeItem('parte');
+        //sessionStorage.removeItem('parte');
     }    
 
     const abrirListRepuestos = () => {
@@ -267,12 +231,18 @@ const RepSalidas = ({alm}) => {
     }
 
     const cancelar = ()=>{
-        sessionStorage.removeItem('parte'); // ← limpia almacenamiento
+        //sessionStorage.removeItem('parte'); // ← limpia almacenamiento
+        //sessionStorage.removeItem('datos_salida'); // ← limpia almacenamiento
         setNum_parte(null)
         setLineaCompleta(null)
         setID_parte(null);
-        {soyMentenimiento? window.location.href = "javascript: history.go(-1)" 
-        :history.push('/home')}
+        if (soyMentenimiento) {
+            window.location.href = "javascript:history.go(-1)";
+        } else {
+            history.push('/home');
+        }
+        /* {soyMentenimiento? window.location.href = "javascript: history.go(-1)" 
+        :history.push('/home')} */
     }
 
     return (
@@ -326,27 +296,7 @@ const RepSalidas = ({alm}) => {
                                     })}                                                                                                                                                          
                         </Form.Control>
                     </Form.Group>
-                </Col>  
-                {/* {soyTecnico?
-                    <Col>
-                        <Form.Group controlId="usuario">
-                            <Form.Label>Usuario</Form.Label>
-                            <Form.Control as="select"  
-                                        name='usuario' 
-                                        value={datos.usuario_elegido}
-                                        onChange={handleInputChangeDatos}>
-                                            <option key={0} value={''}>Todos</option>
-                                            {usuarios && usuarios.map( usuario => {
-                                            return (
-                                            <option key={usuario.id} value={usuario.id}>
-                                                {usuario.full_name}
-                                            </option>
-                                            )
-                                        })}                                                
-                            </Form.Control>
-                        </Form.Group>
-                    </Col>
-                :''} */}      
+                </Col>     
                 {numeroBar.almacen ?                            
                 <Col>
                     <Form.Group>
