@@ -267,7 +267,7 @@ const RepSalidas = ({alm}) => {
                             <Form.Control type="text" 
                                         name='linea' 
                                         disabled
-                                        value={linea_completa.tarea.nombre}/>
+                                        value={linea_completa?.tarea.nombre}/>
                         </Form.Group>
                     </Col>
                 :''}   
