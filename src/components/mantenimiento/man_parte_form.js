@@ -695,9 +695,18 @@ const ParteForm = ({parte, setParte, op}) => {
         return (user['tec-user'].perfil.puesto.nombre==='Mantenimiento')
     }
 
-    const handlerConsumibles = () => {
+/*     const handlerConsumibles = () => {
         const Parte = parte;
         sessionStorage.setItem('parte', JSON.stringify(parte));
+        window.location.href = `/repuestos/salidas/`;
+    }; */
+
+    const handlerConsumibles = () => {
+        // Guardar datos en sessionStorage para RepSalidas
+        const dataToStore = {
+            parte,
+        };
+        sessionStorage.setItem('datos_salida', JSON.stringify(dataToStore));
         window.location.href = `/repuestos/salidas/`;
     };
 
