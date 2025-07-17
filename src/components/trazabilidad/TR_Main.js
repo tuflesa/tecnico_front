@@ -46,8 +46,7 @@ const TR_Main = () => {
               }
         })
         .then( res => {
-            // console.log(acumulador);
-            setAcumuladores(res.data);
+            setAcumuladores(res.data.sort((a, b) => a.maquina_siglas.localeCompare(b.maquina_siglas)));
         })
         .catch( err => {
             console.log(err);
@@ -201,10 +200,10 @@ const TR_Main = () => {
     }
 
     const leerEstadoPLC = () => {
-        acumulador&&axios.get(BACKEND_SERVER + `/api/trazabilidad/leerEstadoPLC/?acu_id=${acumulador.id}`,{ 
+        acumulador&&acumulador.ip&&axios.get(BACKEND_SERVER + `/api/trazabilidad/leerEstadoPLC/?acu_id=${acumulador.id}`,{ 
             headers: {
                 'Authorization': `token ${token['tec-token']}`
-              }
+            }
         })
         .then( res => {
             // console.log(res.data);
