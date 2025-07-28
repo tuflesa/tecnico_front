@@ -7,6 +7,7 @@ import { PencilFill, Trash } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import logo from '../../assets/Bornay.svg';
 import logoTuf from '../../assets/logo_tuflesa.svg';
+import debounce from 'lodash.debounce';
 
 const RodGruposListado = () => {
     const [token] = useCookies(['tec-token']);
@@ -35,7 +36,22 @@ const RodGruposListado = () => {
 
     useEffect(()=>{
         setFiltro(`?tubo_madre=${datos.tubo_madre}&nombre__icontains=${datos.nombre}&maquina__id=${datos.maquina}&maquina__empresa=${datos.empresa}&page=${datos.pagina}`);
-    },[datos]);
+    },[datos.tubo_madre, datos.maquina, datos.empresa, datos.pagina]);
+
+    useEffect(() => {
+        const debounceFiltro = debounce(() => {
+            setFiltro(prev => {
+                return `?tubo_madre=${datos.tubo_madre}&nombre__icontains=${datos.nombre}&maquina__id=${datos.maquina}&maquina__empresa=${datos.empresa}&page=${datos.pagina}`;
+            });
+        }, 500);
+
+        debounceFiltro();
+
+        return () => {
+            debounceFiltro.cancel();
+        };
+    }, [datos.nombre]);
+
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + `/api/rodillos/grupo/` + filtro,{

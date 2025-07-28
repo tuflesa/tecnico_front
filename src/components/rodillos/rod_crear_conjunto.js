@@ -3,6 +3,7 @@ import { Row, Col, Form, Button, Modal, Tab, Tabs } from 'react-bootstrap';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
+import debounce from 'lodash.debounce';
 
 const RodConjunto = ({show, celda_marcada, setShow, elementos_formacion, handleClose, grupo_nom, operacion_marcada, grupoId, grupoEspesor, empresa_id, maquina, tubomadre, grupo_bancadas, colorAzul, colorAzulB, colorVerde, colorAmarillo, bancada_id, bancada_otraformacion}) => {
     const [token] = useCookies(['tec-token']);
@@ -155,17 +156,24 @@ const RodConjunto = ({show, celda_marcada, setShow, elementos_formacion, handleC
     }, [token, operacion_marcada]);
 
     useEffect(() => {
-        var valormenos=tubomadre -50;
-        var valormayor=tubomadre +50;
-        if(!datos.tubo_madre_filtro){
-            valormenos = tubomadre -50;
-            valormayor = tubomadre +50;
-        }
-        else{
-            valormenos = datos.tubo_madre_filtro;
-            valormayor = datos.tubo_madre_filtro;
-        }
-        setFiltro(`&operacion__id=${datos.operacion_filtro}&tubo_madre__gte=${valormenos}&tubo_madre__lte=${valormayor}&posiciones_count=${operacion_marcada?.posiciones.length}`);
+        const generarFiltro = debounce(() => {
+            var valormenos=tubomadre -50;
+            var valormayor=tubomadre +50;
+            if(!datos.tubo_madre_filtro){
+                valormenos = tubomadre -50;
+                valormayor = tubomadre +50;
+            }
+            else{
+                valormenos = datos.tubo_madre_filtro;
+                valormayor = datos.tubo_madre_filtro;
+            }
+            const nuevoFiltro = (`&operacion__id=${datos.operacion_filtro}&tubo_madre__gte=${valormenos}&tubo_madre__lte=${valormayor}&posiciones_count=${operacion_marcada?.posiciones.length}`);
+            setFiltro(nuevoFiltro);
+        },500);
+        generarFiltro();
+        return () => {
+            generarFiltro.cancel();
+        };
     }, [datos.operacion_filtro, datos.tubo_madre_filtro, tubomadre, operacion_marcada]);
 
     useEffect(() => { //PARA OBTENER LOS CONJUNTO YA CREADOS

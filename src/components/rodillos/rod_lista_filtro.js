@@ -3,6 +3,7 @@ import { Container, Row, Form, Col } from 'react-bootstrap';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
+import debounce from 'lodash.debounce';
 
 const RodListaFiltro = ({actualizaFiltro}) => {
     const [token] = useCookies(['tec-token']);
@@ -130,11 +131,23 @@ const RodListaFiltro = ({actualizaFiltro}) => {
             });
         }
     }, [token, datos.seccion]);
-    
+
     useEffect(()=>{
         const filtro = `?operacion__seccion__maquina__empresa__id=${datos.empresa}&nombre__icontains=${datos.nombre}&id=${datos.id}&tipo=${datos.tipo_rodillo}&operacion__seccion__maquina=${datos.maquina}&operacion__seccion=${datos.seccion}&operacion__id=${datos.operacion}&num_instancias=${datos.instancias==='0'?datos.instancias:''}`
         actualizaFiltro(filtro);
-    },[datos]);
+    },[datos.empresa, datos.id, datos.tipo_rodillo, datos.maquina, datos.seccion, datos.operacion, datos.instancias]);
+    
+    useEffect(()=>{
+        const debounceFiltro = debounce(() => {
+            const filtro = `?operacion__seccion__maquina__empresa__id=${datos.empresa}&nombre__icontains=${datos.nombre}&id=${datos.id}&tipo=${datos.tipo_rodillo}&operacion__seccion__maquina=${datos.maquina}&operacion__seccion=${datos.seccion}&operacion__id=${datos.operacion}&num_instancias=${datos.instancias==='0'?datos.instancias:''}`
+            actualizaFiltro(filtro);
+        },500);
+            debounceFiltro();
+
+        return () => {
+            debounceFiltro.cancel(); // Limpia si cambia antes de que pasen los 500ms
+        };
+    },[datos.nombre]);
 
 
     const handleInputChange = (event) => {

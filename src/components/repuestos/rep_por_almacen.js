@@ -122,6 +122,7 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
                         })
                         .then( res => {
                             const linea_inventario = res.data;
+                            console.log('repuesto: ', repuesto)
                             axios.post(BACKEND_SERVER + `/api/repuestos/movimiento/`, {
                                 fecha : yyyy + '-' + mm + '-' + dd,
                                 cantidad : datos.stock_actual,

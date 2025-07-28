@@ -4,6 +4,7 @@ import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import Modal from 'react-bootstrap/Modal'
 import { Button, Row, Form, Col, Table, Container } from 'react-bootstrap';
+import debounce from 'lodash.debounce';
 
 const BuscarInstancia = ({lineas_rectificandose, rectificacion, datos_rectificacion, show, cerrarList, setLineasInstancias, lineasInstancias, rectificados_pendientes})=>{
     const [token] = useCookies(['tec-token']);
@@ -27,10 +28,21 @@ const BuscarInstancia = ({lineas_rectificandose, rectificacion, datos_rectificac
         }
     }, [token, lineas_rectificandose]);
 
+    useEffect(() => {
+        const filtroBase = `?rodillo__operacion__seccion__maquina__id=${datos_rectificacion.zona}&rodillo__operacion__seccion__id=${datos.seccion}&rodillo__operacion__id=${datos.operacion}&id=${datos.id_instancia}`;
+        actualizaFiltro(filtroBase);
+    }, [datos_rectificacion.zona, datos.seccion, datos.operacion, datos.id_instancia]);
+
     useEffect(()=>{
-        const filtro1 = `?rodillo__operacion__seccion__maquina__id=${datos_rectificacion.zona}&rodillo__operacion__seccion__id=${datos.seccion}&rodillo__operacion__id=${datos.operacion}&nombre__icontains=${datos.grupo}&nombre__icontains=${datos.nombre}&id=${datos.id_instancia}`;
-        actualizaFiltro(filtro1);
-    },[datos, token]);
+        const debounceFiltro = debounce(() => {
+            const filtro1 = `?rodillo__operacion__seccion__maquina__id=${datos_rectificacion.zona}&rodillo__operacion__seccion__id=${datos.seccion}&rodillo__operacion__id=${datos.operacion}&nombre__icontains=${datos.grupo}&nombre__icontains=${datos.nombre}&id=${datos.id_instancia}`;
+            actualizaFiltro(filtro1);
+        }, 500);
+        debounceFiltro();
+        return () => {
+            debounceFiltro.cancel(); // Limpia el temporizador
+        };
+    },[datos.grupo, datos.nombre]);
 
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/rodillos/instancia_listado/`+ filtro,{
