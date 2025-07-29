@@ -34,7 +34,6 @@ const RodMontajeListado = () => {
     });
 
     useEffect(() => {
-        console.log('que vale empresa: ', filtro)
         axios.get(BACKEND_SERVER + `/api/rodillos/montaje_listado/`+filtro,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`

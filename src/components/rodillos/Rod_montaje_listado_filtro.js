@@ -3,6 +3,7 @@ import { Container, Row, Form, Col } from 'react-bootstrap';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
+import debounce from 'lodash.debounce';
 
 const RodMontajeListadoFiltro = ({actualizaFiltro}) => {
     const [token] = useCookies(['tec-token']);
@@ -127,7 +128,20 @@ const RodMontajeListadoFiltro = ({actualizaFiltro}) => {
     useEffect(()=>{
         const filtro = `?maquina__empresa__id=${datos.empresa}&maquina__id=${datos.maquina}&nombre__icontains=${datos.nombre}&grupo__id=${grupoId===null?'':grupoId}&bancadas__id=${dimensionesID===null?'':dimensionesID}`
         actualizaFiltro(filtro);
-    },[datos, grupoId!==null, dimensionesID!==null]);
+    },[datos.empresa, datos.maquina, grupoId!==null, dimensionesID!==null]);
+
+    useEffect(() => {
+        const debounceFiltro = debounce(() => {
+            const filtro = `?nombre__icontains=${datos.nombre}`;
+            actualizaFiltro(prevFiltro => prevFiltro + `&${filtro.slice(1)}`); // conserva lo anterior
+        }, 500);
+
+        debounceFiltro();
+
+        return () => {
+            debounceFiltro.cancel();
+        };
+    }, [datos.nombre]);
 
     const handleInputChange = (event) => {
         setDatos({
