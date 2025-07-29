@@ -5,6 +5,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import Modal from 'react-bootstrap/Modal'
 import { Button, Row, Form, Col, Table, Container } from 'react-bootstrap';
 import { ArrowDownCircle} from 'react-bootstrap-icons';
+import debounce from 'lodash.debounce';
 
 //import TablePagination from '@mui/material/TablePagination';
 
@@ -35,8 +36,18 @@ const BuscarRepuestos = ({cerrarListRepuestos, show, almacen, elegirRepuesto})=>
   
     useEffect(()=>{
         const filtro2 = `?stocks_minimos__almacen__id=${almacen}&page=${datos.pagina}&nombre__icontains=${datos.nombre}&id=${datos.id}&nombre_comun__icontains=${datos.nombre_comun}&descatalogado=${false}`;
-        actualizaFiltro(filtro2);
-    },[datos.id, datos.nombre, datos.nombre_comun, almacen, datos.pagina]);
+        if (['', null, undefined].includes(datos.nombre) && ['', null, undefined].includes(datos.nombre_comun)) {
+            // Si no se está escribiendo nada, en nombre y nombre_comun, lanza el cambio directamente
+            actualizaFiltro(filtro2);
+        } else {
+            // Si se está escribiendo en nombre y nombre_comun, activamos el debounce para retardar 500sg
+            const debounceFiltro = debounce(() => {
+                actualizaFiltro(filtro2);
+            }, 500);
+            debounceFiltro();
+            return () => debounceFiltro.cancel();
+        }
+    },[datos.id, almacen, datos.pagina, datos.nombre, datos.nombre_comun]);
 
     useEffect(()=>{
         if (filtro){

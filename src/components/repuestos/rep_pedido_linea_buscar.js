@@ -5,6 +5,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import Modal from 'react-bootstrap/Modal'
 import { Button, Row, Form, Col, Table } from 'react-bootstrap';
 import { ArrowDownCircle} from 'react-bootstrap-icons';
+import debounce from 'lodash.debounce';
 
 const BuscarRepuestosPedido = ({cerrarListRepuestos, show, proveedor_id, elegirRepuesto})=>{
     const [token] = useCookies(['tec-token']);
@@ -41,8 +42,13 @@ const BuscarRepuestosPedido = ({cerrarListRepuestos, show, proveedor_id, elegirR
     }  
     
     useEffect(()=>{
-        const filtro = `?proveedores__id=${proveedor_id}&descripcion_proveedor__icontains=${datos.descripcion_proveedor}&repuesto__descatalogado=${false}&repuesto__nombre__icontains=${datos.nombre}&repuesto__id=${datos.id}&modelo_proveedor__icontains=${datos.modelo_proveedor}`;
-        actualizaFiltro(filtro);
+        const debounceFiltro = debounce(() => {
+            const filtro = `?proveedores__id=${proveedor_id}&descripcion_proveedor__icontains=${datos.descripcion_proveedor}&repuesto__descatalogado=${false}&repuesto__nombre__icontains=${datos.nombre}&repuesto__id=${datos.id}&modelo_proveedor__icontains=${datos.modelo_proveedor}`;
+            actualizaFiltro(filtro);
+        }, 500);
+
+        debounceFiltro();
+        return () => debounceFiltro.cancel();
     },[datos]);
 
     return(

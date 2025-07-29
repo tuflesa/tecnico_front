@@ -3,6 +3,7 @@ import { Container, Row, Col, Form } from 'react-bootstrap';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
+import debounce from 'lodash.debounce';
 
 const AlmacenFiltro = ({ actualizaFiltro }) => {
     const [user] = useCookies(['tec-user']);
@@ -28,8 +29,14 @@ const AlmacenFiltro = ({ actualizaFiltro }) => {
     }, [token]);
 
     useEffect(()=>{
-        const filtro = `?nombre__icontains=${datos.nombre}&empresa=${datos.empresa}`;
-        actualizaFiltro(filtro);
+        const debounceFiltro = debounce(() => {
+            const filtro = `?nombre__icontains=${datos.nombre}&empresa=${datos.empresa}`;
+            actualizaFiltro(filtro);
+        }, 500);
+        debounceFiltro();
+        return () => {
+            debounceFiltro.cancel();
+        };
     },[datos, actualizaFiltro]);
 
     const handleInputChange = (event) => {
