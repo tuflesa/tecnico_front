@@ -120,13 +120,15 @@ const BuscarRepuestosPedido = ({cerrarListRepuestos, show, proveedor_id, elegirR
                             </thead>
                             <tbody>
                                 {repuestos && repuestos.map( rep => {  
+                                    const necesitaStock = rep.necesita_stock; // booleano
+                                    const rowClass = necesitaStock ? 'text-danger' : ''; // Bootstrap rojo
                                     return (                                                
-                                        <tr key={rep.id}>
+                                        <tr key={rep.id} className={rowClass}>
                                             <td>{rep.repuesto.nombre}</td> 
                                             <td>{rep.descripcion_proveedor}</td>
                                             <td>{rep.modelo_proveedor}</td> 
                                             <td>
-                                            <ArrowDownCircle className="mr-3 pencil" onClick={event => {elegirRepuesto(rep)}}/>
+                                                <ArrowDownCircle className="mr-3 pencil" onClick={event => {elegirRepuesto(rep)}}/>
                                             </td>                                                
                                         </tr>
                                     )})

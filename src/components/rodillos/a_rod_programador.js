@@ -11,7 +11,6 @@ const Programadores = () => {
     const [celdas, setCeldas] = useState([]);
     
     const poner_icono = () => {
-        console.log('estamos dentro del color');
 /*         console.log('esto vale celda_qs: ', celda_qs);
     
         celda_qs.forEach(item => {
@@ -24,8 +23,6 @@ const Programadores = () => {
     }; 
     
     const grabar_icono = () => {
-        
-        console.log('entramos a grabar_icono y celda vale....: ')
         let color_asignado='';
         for(var x=0;x<celdas.length;x++){
             //var naranja = celdas[x].conjunto.elementos.some(element => element.rodillo.operacion !== celdas[x].operacion.id);
@@ -36,27 +33,21 @@ const Programadores = () => {
                 amarillo: '#FFEB3B'
             };
             if(celdas[x].conjunto.elementos.some(element => element.rodillo.nombre === 'Sin_Rodillo')){
-                console.log('ENTRA EN AMARILLO: ', celdas)
                 color_asignado=colores.amarillo;
             }
             else if(celdas[x].conjunto.elementos.some(element => element.rodillo.operacion !== celdas[x].operacion.id)){
-                console.log('ENTRA EN NARANJA: ', celdas)
                 color_asignado=colores.naranja;
             }
             else if(celdas[x].conjunto.operacion!==celdas[x].operacion.id){
-                console.log('ENTRA EN NARANJA POR OPERACIÓN: ', celdas)
                 color_asignado=colores.naranja;
             }
             else if(celdas[x].bancada.tubo_madre!==celdas[x].conjunto.tubo_madre){
-                console.log('ENTRA EN AZUL: ', celdas)
                 color_asignado=colores.azul;
             }
             else if(celdas[x].conjunto.operacion===celdas[x].operacion.id && celdas[x].bancada.tubo_madre===celdas[x].conjunto.tubo_madre){
-                console.log('ENTRA EN VERDE: ', celdas)
                 color_asignado=colores.verde;
             }
             else if(celdas[x].conjunto.elementos.some(element => element.rodillo.nombre === 'Sin_Rodillo')){
-                console.log('ENTRA EN AMARILLO: ', celdas)
                 color_asignado=colores.amarillo;
             }
             /* for(var y=0; y<celdas[142].conjunto.elementos.length;y++){
@@ -88,7 +79,6 @@ const Programadores = () => {
         })
         .then( res => { 
             setCeldas(res.data);
-            console.log('recogida de celdas: ',res.data);
         })
         .catch(err => { console.log(err);})
     },[token]);
