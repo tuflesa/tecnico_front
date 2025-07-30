@@ -3,6 +3,7 @@ import { Container, Row, Form, Col } from 'react-bootstrap';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
+import debounce from 'lodash.debounce'; 
 
 const ManPartesFiltro = ({actualizaFiltro}) => {
     const [token] = useCookies(['tec-token']);
@@ -240,9 +241,17 @@ const ManPartesFiltro = ({actualizaFiltro}) => {
         }
         const filtro = filtro1 + filtro2;
         const activos = datos.estados<3;
-        actualizaFiltro(filtro, activos);
-    },[datos, token]);
-    /* eslint-disable react-hooks/exhaustive-deps */
+        const camposTexto = [datos.nombre, datos.observaciones, datos.num_parte];
+        if (camposTexto.some(campo => campo !== '' && campo !== null)) {
+            const debounceFiltro = debounce(() => {
+                actualizaFiltro(filtro, activos);
+            }, 500);
+            debounceFiltro();
+            return () => debounceFiltro.cancel();
+        } else {
+            actualizaFiltro(filtro, activos);
+        }
+    },[datos, actualizaFiltro]);
 
     const handleInputChange = (event) => {
         setDatos({

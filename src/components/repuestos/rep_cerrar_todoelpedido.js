@@ -20,23 +20,30 @@ function CerrarTodoElPedido({ pedido, show, onClose, updatePedido }) {
     });
 
     useEffect(()=>{
-        if(pedido?.lineas_pedido?.length>0){
+        if (pedido?.lineas_pedido?.length > 0) {
             const empresaUsuario = user['tec-user']?.perfil?.empresa?.id;
-            // Obtener todos los almacenes únicos de la primera línea y de la empresa del usuario
             const primeraLinea = pedido.lineas_pedido[0];
-            const almacenesCandidatos = primeraLinea.repuesto.stocks_minimos
-                .map(stock => stock.almacen)
-                .filter(almacen => almacen.empresa === empresaUsuario);
-            // Filtrar solo los que aparecen en todas las líneas y de la empresa del usuario
-            const almacenesEnTodasLineas = almacenesCandidatos.filter(almacenCandidato => {
-                return pedido.lineas_pedido.every(linea => {
-                    return linea.repuesto.stocks_minimos.some(stock => 
-                        stock.almacen.id === almacenCandidato.id && 
-                        stock.almacen.empresa === empresaUsuario
-                    );
+
+            const stocks = primeraLinea.repuesto?.stocks_minimos;
+            if (Array.isArray(stocks) && stocks.length > 0) {
+                const almacenesCandidatos = stocks
+                    .map(stock => stock.almacen)
+                    .filter(almacen => almacen.empresa === empresaUsuario);
+
+                const almacenesEnTodasLineas = almacenesCandidatos.filter(almacenCandidato => {
+                    return pedido.lineas_pedido.every(linea => {
+                        return Array.isArray(linea.repuesto?.stocks_minimos) &&
+                            linea.repuesto.stocks_minimos.some(stock =>
+                                stock.almacen.id === almacenCandidato.id &&
+                                stock.almacen.empresa === empresaUsuario
+                            );
+                    });
                 });
-            });
-            setAlmacenes(almacenesEnTodasLineas);
+
+                setAlmacenes(almacenesEnTodasLineas);
+            } else {
+                setAlmacenes([]); // si no encuentra stocks_minimos deja sin almacenes los repuestos pero no da error
+            }
         }
     },[token]);
 
