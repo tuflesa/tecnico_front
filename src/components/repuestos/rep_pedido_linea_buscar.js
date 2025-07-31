@@ -11,6 +11,8 @@ const BuscarRepuestosPedido = ({cerrarListRepuestos, show, proveedor_id, elegirR
     const [token] = useCookies(['tec-token']);
     const [filtro, setFiltro] = useState(null);
     const [repuestos, setRepuestos] = useState(null);
+    const [lineasPendientes, setLineasPendientes] = useState(null);
+
     const [datos, setDatos] = useState({
         id:'',
         nombre: '', 
@@ -50,6 +52,42 @@ const BuscarRepuestosPedido = ({cerrarListRepuestos, show, proveedor_id, elegirR
         debounceFiltro();
         return () => debounceFiltro.cancel();
     },[datos]);
+
+    useEffect(() => { //buscamos las lineas de los pedidos pendientes para mostrar en las lineas de los articulos fuera de stock
+        datos.empresa && axios.get(BACKEND_SERVER + `/api/repuestos/linea_pedido_pend/?pedido__finalizado=${'false'}&pedido__empresa=${datos.empresa}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( rs => {
+            setLineasPendientes(rs.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
+
+    useEffect(()=>{
+        let pedido = false;
+        if(lineasPendientes && repuestos){
+            for(var y=0;y<lineasPendientes.length;y++){
+                for(var x=0; x<repuestos.length; x++){
+                    if(lineasPendientes[y].repuesto.id === repuestos[x].repuesto.id){                                      ;
+                        setRepuestos(prev => ({
+                            ...prev,
+                            [pedido]: true
+                        }));
+                    }
+                    else{
+                        setRepuestos(prev => ({
+                            ...prev,
+                            [pedido]: false
+                        }));
+                    }
+                }
+            }
+        }
+    },[lineasPendientes, repuestos]);
 
     return(
         <Modal show={show} backdrop="static" keyboard={ false } animation={false} size="xl">
@@ -121,7 +159,8 @@ const BuscarRepuestosPedido = ({cerrarListRepuestos, show, proveedor_id, elegirR
                             <tbody>
                                 {repuestos && repuestos.map( rep => {  
                                     const necesitaStock = rep.necesita_stock; // booleano
-                                    const rowClass = necesitaStock ? 'text-danger' : ''; // Bootstrap rojo
+                                    const tienepedido = rep.pedido; // booleano
+                                    const rowClass = tienepedido? 'text-success' : necesitaStock ? 'text-danger' : ''; // Pondrá la linea en rojo, verde o blanca
                                     return (                                                
                                         <tr key={rep.id} className={rowClass}>
                                             <td>{rep.repuesto.nombre}</td> 
