@@ -125,7 +125,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     useEffect(()=>{ //sumando todos los stocks actuales
         let stock_T = 0;
         datos.stocks_minimos && datos.stocks_minimos.forEach(element => {
-            stock_T += element.stock_act;           
+            stock_T += Number(element.stock_act);           
         });        
         setDatos({
             ...datos,
