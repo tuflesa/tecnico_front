@@ -656,6 +656,7 @@ const ParteForm = ({parte, setParte, op}) => {
                         .then(r =>{
                             alert('tarea eliminada');
                             setActualizar(linea);  
+                            actualizarEstado();
                         })
                         .catch (err=>{console.log((err));});
                     })
@@ -689,6 +690,38 @@ const ParteForm = ({parte, setParte, op}) => {
         .catch( err => {
             console.log(err);
         });                 
+    }
+
+    const actualizarEstado = (event) => {
+        axios.get(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_trabajo/?parte=${parte.id}`, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }     
+        })
+        .then( res => { 
+            const todosFinalizados = res.data.every(tarea => tarea.estado === 3);
+            if(todosFinalizados){
+                axios.patch(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${parte.id}/`, {
+                    estado: 3,
+                }, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }     
+                })
+                .then( res => { 
+                    setParte(res.data); 
+                    updateParte();   
+                })
+                .catch(err => { 
+                    setShowError(true);
+                    console.log(err);
+                })
+            }
+        })
+        .catch(err => { 
+            console.log(err);
+        })
+        
     }
 
     const handleDisabledMantenimiento = () => {
