@@ -179,6 +179,19 @@ const ObservacionesModal = ({ show, onHide, linea, filtro, parte, onUpdateTarea,
     };
 
     const handleClose = () => {
+        if(datos.observaciones!==linea_completa.observaciones_trab){
+           var hay_modificado = window.confirm('No has guardado los comentarios ¿Deseas guardarlos?');
+            if(hay_modificado){
+                GuardarComentarios();
+                onHide();
+            }
+            else{
+                onHide();
+            }
+        }
+        else{
+            onHide();
+        }
         if (onUpdateTarea) {
             onUpdateTarea();
         }
