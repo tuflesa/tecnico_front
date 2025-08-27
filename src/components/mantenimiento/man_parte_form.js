@@ -29,6 +29,7 @@ const ParteForm = ({parte, setParte, op}) => {
     const nosoyTecnico = user['tec-user'].perfil.puesto.nombre==='Operador'||user['tec-user'].perfil.puesto.nombre==='Mantenimiento'?true:false;
     const [consumibles, setConsumibles] = useState([]);
     const [eliminar_consumible, setEliminarConsumible] = useState(false);
+    const [errores, setErrores] = useState({}); // Estado para guardar errores
 
     const [datos, setDatos] = useState({
         id: parte.id ? parte.id : null,
@@ -503,9 +504,16 @@ const ParteForm = ({parte, setParte, op}) => {
         })
         .then( res => { 
             setParte(res.data);
+            setErrores({}); // Reiniciar errores si la petición es exitosa
         })
         .catch(err => { 
-            setShowError(true);
+            //setShowError(true);
+            if (err.response && err.response.data) {
+                setErrores(err.response.data); // Guardar los errores del backend
+            } else {
+                console.log(err);
+            }
+            alert('Faltan datos, por favor, introduce todos los datos obligatorios.')
             console.log(err);
         })
     } 
@@ -841,6 +849,7 @@ const ParteForm = ({parte, setParte, op}) => {
                                                 placeholder="Nombre"
                                                 disabled={nosoyTecnico? true: false}
                                                 autoFocus
+                                                className={`form-control ${errores.nombre ? 'border-red' : ''}`}
                                     />
                                 </Form.Group>
                             </Col> 
@@ -854,7 +863,8 @@ const ParteForm = ({parte, setParte, op}) => {
                                                 value={datos.tipo}
                                                 onChange={handleInputChange}
                                                 placeholder="Tipo Mantenimiento"
-                                                disabled={nosoyTecnico? true: false}> 
+                                                disabled={nosoyTecnico? true: false}
+                                                className={`form-control ${errores.tipo ? 'border-red' : ''}`}> 
                                                 {datos.id===null? <option key={0} value={''}>Seleccionar</option>: ''}                                                   
                                                 {tipoparte && tipoparte.map( tipo => {
                                                     return (
@@ -874,7 +884,8 @@ const ParteForm = ({parte, setParte, op}) => {
                                                 value={datos.fecha_creacion}
                                                 onChange={handleInputChange} 
                                                 placeholder="Fecha creación" 
-                                                disabled={nosoyTecnico? true: false}/>
+                                                disabled={nosoyTecnico? true: false}
+                                                className={`form-control ${errores.fecha_creacion ? 'border-red' : ''}`}/>
                                 </Form.Group>
                             </Col> 
                             <Col>
@@ -928,7 +939,8 @@ const ParteForm = ({parte, setParte, op}) => {
                                                     value={datos.zona}
                                                     name='zona'
                                                     onChange={handleInputChangeZona}
-                                                    disabled={nosoyTecnico? true: false}> 
+                                                    disabled={nosoyTecnico? true: false}
+                                                    className={`form-control ${errores.zona ? 'border-red' : ''}`}> 
                                                     <option key={0} value={''}>Seleccionar</option>                                      
                                                     {zonas && zonas.map( zona => {
                                                         return (
@@ -947,7 +959,8 @@ const ParteForm = ({parte, setParte, op}) => {
                                                     value={datos.seccion}
                                                     name='seccion'
                                                     onChange={handleInputChangeSeccion}
-                                                    disabled={nosoyTecnico? true: false}>  
+                                                    disabled={nosoyTecnico? true: false}
+                                                    className={`form-control ${errores.seccion ? 'border-red' : ''}`}>  
                                                     <option key={0} value={''}>Seleccionar</option>                                      
                                                     {secciones && secciones.map( seccion => {
                                                         return (
@@ -1122,7 +1135,7 @@ const ParteForm = ({parte, setParte, op}) => {
                                 tarea={lineaLineasTareas}
                                 parte={parte}
             />
-            <Modal show={show_error} onHide={handleCloseError} backdrop="static" keyboard={ false } animation={false}>
+            {/* <Modal show={show_error} onHide={handleCloseError} backdrop="static" keyboard={ false } animation={false}>
                 <Modal.Header closeButton>
                     <Modal.Title>Error</Modal.Title>
                 </Modal.Header>
@@ -1132,7 +1145,7 @@ const ParteForm = ({parte, setParte, op}) => {
                         Cerrar
                     </Button>
                 </Modal.Footer>
-            </Modal>
+            </Modal> */}
         </Container>
     )
 }

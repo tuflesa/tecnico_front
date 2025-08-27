@@ -14,6 +14,7 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
     const [empresas, setEmpresas] = useState(null);
     const [zonas, setZonas] = useState([]);
     const [mostrarRodBancada] = useState(mostrarBancada);
+    const [errores, setErrores] = useState({}); // Estado para guardar errores
 
     const [datos, setDatos] = useState({
         id: grupo.id? grupo.id:null,
@@ -120,16 +121,30 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
                     }
                 })
                 .then(res => { 
-                    window.location.href=`/rodillos/grupo_editar/${res.data.id}`;       
+                    window.location.href=`/rodillos/grupo_editar/${res.data.id}`;  
+                    setErrores({});     
                 })
                 .catch(err => { 
                     console.log(err);
-                    alert('Falta datos, por favor rellena todos los campos obligatorios.');
+                    if (err.response && err.response.data) {
+                        setErrores(err.response.data); // Guardar los errores del backend
+                        console.log('error con empresa: ',err.response.data)
+                    } else {
+                        console.log(err);
+                    }
+                    alert('Faltan datos, por favor, introduce todos los datos obligatorios.')
                 });
             }
         })
         .catch( err => {
             console.log(err);
+            if (err.response && err.response.data) {
+                setErrores(err.response.data); // Guardar los errores del backend
+                console.log('error con empresa: ',err.response.data)
+            } else {
+                console.log(err);
+            }
+            alert('Por favor escribe correctamente los espesores.')
         });
         
     };  
@@ -188,6 +203,7 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
                                         placeholder="Ø tubo madre"
                                         autoFocus
                                         disabled={grupo.length!==0}
+                                        className={`form-control ${errores.tubo_madre ? 'border-red' : ''}`}
                             />
                         </Form.Group>
                     </Col>
@@ -220,7 +236,8 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
                                             value={datos.zona}
                                             name='zona'
                                             onChange={handleInputChange_zona}
-                                            disabled={grupo.length!==0}>
+                                            disabled={grupo.length!==0}
+                                            className={`form-control ${errores.maquina ? 'border-red' : ''}`}>
                                 <option key={0} value={''}>Todas</option>
                                 {zonas && zonas.map( zona => {
                                     return (
@@ -240,7 +257,8 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
                                             value={datos.espesor_1}
                                             onChange={handleInputChange}
                                             placeholder='Rango espesores'
-                                            disabled={grupo.length!==0}>
+                                            disabled={grupo.length!==0}
+                                            className={`form-control ${errores.espesor_1 ? 'border-red' : ''}`}>
                             </Form.Control>
                         </Form.Group>
                     </Col>
@@ -252,7 +270,8 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
                                             value={datos.espesor_2}
                                             onChange={handleInputChange}
                                             placeholder='Rango espesores'
-                                            disabled={grupo.length!==0}>
+                                            disabled={grupo.length!==0}
+                                            className={`form-control ${errores.espesor_2 ? 'border-red' : ''}`}>
                             </Form.Control>
                         </Form.Group>
                     </Col>
