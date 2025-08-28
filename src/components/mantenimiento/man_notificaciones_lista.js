@@ -8,38 +8,46 @@ import ManNotificacionesFiltro from './man_notificaciones_filtro';
 
 const ManNotificacionesLista = () => {
     const [token] = useCookies(['tec-token']);
+    const [user] = useCookies(['tec-user']);
     
     const [notas, setNotas]  = useState(null);
-    const [filtro, setFiltro] = useState(null);
+    const [filtro, setFiltro] = useState(`?empresa=${user['tec-user'].perfil.empresa.id}`);
+    const [filtroII, setFiltroII] = useState(`?empresa=${user['tec-user'].perfil.empresa.id}`);
     const [count, setCount] = useState(null);
-    const [pagTotal, setPagTotal] = useState(null);
+    const [buscando, setBuscando] = useState(false);
+    let filtroPag=(null);
 
     const actualizaFiltro = (str) => {
-        setFiltro(str);
+        setFiltroII(str);
     }
 
     const [datos, setDatos] = useState({
         pagina: 1,
+        total_pag:0,
     });
   
     useEffect(()=>{
-        filtro && axios.get(BACKEND_SERVER + '/api/mantenimiento/notificaciones/' + filtro ,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-                }
-        })
-        .then( res => {
-            setNotas(res.data.results);
-            setCount(res.data.count);
-            let pagT = res.data.count/20;
-            if (res.data.count % 20 !== 0){
-                pagT += 1;
-            }
-            setPagTotal(Math.trunc(pagT));
-        })
-        .catch( err => {
-            console.log(err);
-        });
+        filtroPag = (`&page=${datos.pagina}`);
+        if (!buscando){
+            setFiltro(filtroII + filtroPag);
+        }
+    },[buscando, filtroII, datos.pagina]);
+
+    useEffect(()=>{
+        if(filtro){
+            setBuscando(true);
+            axios.get(BACKEND_SERVER + '/api/mantenimiento/notificaciones/?' + filtro ,{
+                headers: {'Authorization': `token ${token['tec-token']}`}
+            })
+            .then( res => {
+                setNotas(res.data.results);
+                setCount(res.data.count);
+                setBuscando(false);
+            })
+            .catch( err => {
+                console.log(err);
+            });
+        }
     }, [token, filtro]);
 
     const comparar_finalizados = (x) => {
@@ -54,6 +62,23 @@ const ManNotificacionesLista = () => {
         }
     }
 
+    /* eslint-disable react-hooks/exhaustive-deps */
+    useEffect(()=>{
+        if(count % 20 === 0){
+            setDatos({
+                ...datos,
+                total_pag:Math.trunc(count/20),
+            })
+        }
+        else if(count % 20 !== 0){
+            setDatos({
+                ...datos,
+                total_pag:Math.trunc(count/20)+1,
+            })
+        }
+    }, [count, filtro]);
+    /* eslint-disable react-hooks/exhaustive-deps */
+            
     const cambioPagina = (pag) => {
         if(pag<=0){
             pag=1;
@@ -72,10 +97,7 @@ const ManNotificacionesLista = () => {
                 pagina: pag,
             })
         }
-        var filtro2=`&page=${datos.pagina}`;
-        const filtro3 = filtro + filtro2;
-        actualizaFiltro(filtro3);
-    }
+    } 
 
     return (
         <Container className='mt-5'>            
@@ -85,13 +107,9 @@ const ManNotificacionesLista = () => {
                 </Col>
             </ Row>
             <table>
-                <tbody>
-                    <tr>
-                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
-                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
-                        <th>Página {datos.pagina} de {pagTotal===0?1:pagTotal} - Número registros totales: {count}</th>
-                    </tr>
-                </tbody>
+                <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
+                <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
+                <th>Número páginas: {datos.pagina} / {datos.total_pag===0?1:datos.total_pag} - Registros: {count}</th>
             </table>
             <Row>                
                 <Col>
@@ -134,13 +152,9 @@ const ManNotificacionesLista = () => {
                 </Col>
             </Row>
             <table>
-                <tbody>
-                    <tr>
-                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
-                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
-                        <th>Página {datos.pagina} de {pagTotal===0?1:pagTotal} - Número registros totales: {count}</th>
-                    </tr>
-                </tbody>
+                <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
+                <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
+                <th>Número páginas: {datos.pagina} / {datos.total_pag===0?1:datos.total_pag} - Registros: {count}</th>
             </table>
         </Container>
     )
