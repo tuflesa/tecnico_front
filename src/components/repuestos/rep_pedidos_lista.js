@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback  } from 'react';
 import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
@@ -15,86 +15,73 @@ const PedLista = () => {
     const [user] = useCookies(['tec-user']);
     const [pedidos, setPedidos] = useState(null);
     const [show, setShow] = useState(false);
-    const [filtroII, setFiltroII] = useState(`?empresa=${user['tec-user'].perfil.empresa.id}&finalizado=${false}&creado_por=${user['tec-user'].perfil.usuario}`);
-    const [filtro, setFiltro] = useState('');
+    const [filtroBase, setFiltroBase] = useState(`?empresa=${user['tec-user'].perfil.empresa.id}&finalizado=${false}&creado_por=${user['tec-user'].perfil.usuario}`);
     const [buscando, setBuscando] = useState(false);
     const history = useHistory(); // para redirigir luego
     const [hoy] = useState(new Date());
     const nextMonth = new Date(hoy.getFullYear(), hoy.getMonth() + 1, hoy.getDate());
-    let filtroPag=(null);
     const [count, setCount] = useState(null);
+    const [pagina, setPagina] = useState(1);
+    const [totalPag, setTotalPag] = useState(0);
 
-    const [datos, setDatos] = useState({
-            pagina: 1,
-            total_pag:0,
-        });
-
-    useEffect(()=>{
-        filtroPag = (`&page=${datos.pagina}`);
-        if (!buscando){
-            setFiltro(filtroII + filtroPag);
-        }
-    },[buscando, filtroII, datos.pagina]);
-    
-    useEffect(()=>{
-        if (filtro){
-            setBuscando(true);
-            axios.get(BACKEND_SERVER + `/api/repuestos/lista_pedidos_fuera_fecha/` + filtro,{
+        // Función para hacer la búsqueda
+    const buscarPedidos = useCallback(async (filtroCompleto) => {
+        if (buscando) return;
+        
+        console.log('Ejecutando búsqueda con filtro:', filtroCompleto);
+        setBuscando(true);
+        
+        try {
+            const response = await axios.get(BACKEND_SERVER + `/api/repuestos/lista_pedidos_fuera_fecha/` + filtroCompleto, {
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
-            })
-            .then( res => {
-                setPedidos(res.data.results);
-                setCount(res.data.count);
-                setBuscando(false);
-            })
-            .catch( err => {
-                console.log(err);
             });
+            
+            setPedidos(response.data.results);
+            setCount(response.data.count);
+            
+            // Calcular total de páginas
+            const totalPaginas = response.data.count % 20 === 0 
+                ? Math.max(1, Math.trunc(response.data.count / 20))
+                : Math.trunc(response.data.count / 20) + 1;
+            setTotalPag(totalPaginas);
+            
+        } catch (err) {
+            console.log(err);
+        } finally {
+            setBuscando(false);
         }
-    },[filtro, token]); 
+    }, [token, buscando]);
 
-        /* eslint-disable react-hooks/exhaustive-deps */
     useEffect(()=>{
-        if(count % 20 === 0){
-            setDatos({
-                ...datos,
-                total_pag:Math.trunc(count/20),
-            })
-        }
-        else if(count % 20 !== 0){
-            setDatos({
-                ...datos,
-                total_pag:Math.trunc(count/20)+1,
-            })
-        }
-    }, [count, filtro]);
-    /* eslint-disable react-hooks/exhaustive-deps */
-
+        const filtroCompleto = `${filtroBase}&page=${pagina}`;
+        buscarPedidos(filtroCompleto);
+    },[filtroBase, pagina]);
     
     const cambioPagina = (pag) => {
         if(pag<=0){
             pag=1;
         }
-        if(pag>count/20){
-            if(count % 20 === 0){
-                pag=Math.trunc(count/20);
-            }
-            if(count % 20 !== 0){
-                pag=Math.trunc(count/20)+1;
-            }
+        let maxPag = 1;
+        if(count){
+            maxPag = count % 20 === 0 ? Math.trunc(count/20) : Math.trunc(count/20) + 1;
+            if (maxPag === 0) maxPag = 1;
         }
-        if(pag>0){
-            setDatos({
-                ...datos,
-                pagina: pag,
-            })
+        if(pag > maxPag){
+            pag = maxPag;
+        }
+        if(pag !==pagina && pag>0){
+            setPagina(pag);
         }
     } 
 
-    const actualizaFiltro = str => {
-        setFiltroII(str);
+    const actualizaFiltro = (nuevoFiltro) => {
+        console.log('Nuevo filtro recibido:', nuevoFiltro);
+        if (nuevoFiltro !== filtroBase) {
+            setFiltroBase(nuevoFiltro);
+            setPagina(1); // Reset a página 1 cuando cambia el filtro
+        }
     } 
     
     const BorrarP = (pedido)=>{
@@ -134,7 +121,9 @@ const PedLista = () => {
                     }
                 })
                 .then( res => {  
-                    //return alert('Se va a borrar el pedido'); 
+                    // Recargar datos después de borrar
+                    const filtroCompleto = `${filtroBase}&page=${pagina}`;
+                    buscarPedidos(filtroCompleto);
                 })
                 .catch( err => {
                     console.log(err);
@@ -253,9 +242,9 @@ const PedLista = () => {
                 </Col>
             </ Row>
             <table>
-                <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
-                <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
-                <th>Número páginas: {datos.pagina} / {datos.total_pag===0?1:datos.total_pag} - Registros: {count}</th>
+                <th><button type="button" className="btn btn-default" onClick={() => {cambioPagina(pagina-1)}}>Pág Anterior</button></th> 
+                <th><button type="button" className="btn btn-default" onClick={() => {cambioPagina(pagina+1)}}>Pág Siguiente</button></th> 
+                <th>Número páginas: {pagina} / {totalPag} - Registros: {count || 0}</th>
             </table>
             <Row>
                 <Col>
