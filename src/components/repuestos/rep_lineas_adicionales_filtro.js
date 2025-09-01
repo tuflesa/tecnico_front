@@ -21,7 +21,7 @@ const LineasAdicionalesFiltro = ({ actualizaFiltro }) => {
 
     useEffect(()=>{
         const debounceFiltro = debounce(() => {
-            const filtro = `?pedido__proveedor__nombre__icontains=${datos.nombre_proveedor}&pedido__finalizado=${datos.finalizado}&pedido__numero__icontains=${datos.numero}&pedido__empresa__id=${datos.empresa}&descripcion__icontains=${datos.descripcion}`;
+            const filtro = `?pedido__empresa__id=${datos.empresa}&pedido__proveedor__nombre__icontains=${datos.nombre_proveedor}&pedido__finalizado=${datos.finalizado}&pedido__numero__icontains=${datos.numero}&descripcion__icontains=${datos.descripcion}`;
             actualizaFiltro(filtro);
         }, 500);
         debounceFiltro();

@@ -11,7 +11,7 @@ const ManNotificacionesLista = () => {
     const [user] = useCookies(['tec-user']);
     
     const [notas, setNotas]  = useState(null);
-    const [filtroBase, setFiltroBase] = useState(`?empresa=${user['tec-user'].perfil.empresa.id}`);
+    const [filtroBase, setFiltroBase] = useState(`?empresa__id=${user['tec-user'].perfil.empresa.id}`);
     const [count, setCount] = useState(null);
     const [buscando, setBuscando] = useState(false);
     const [pagina, setPagina] = useState(1);
@@ -32,8 +32,6 @@ const ManNotificacionesLista = () => {
     // Función para hacer la búsqueda
     const buscarNotificaciones = useCallback(async (filtroCompleto) => {
         if (buscando) return;
-        
-        console.log('Ejecutando búsqueda con filtro:', filtroCompleto);
         setBuscando(true);
         
         try {

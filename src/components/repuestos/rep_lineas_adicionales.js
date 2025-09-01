@@ -8,10 +8,11 @@ import { Link } from 'react-router-dom';
 import LineasAdicionalesFiltro from './rep_lineas_adicionales_filtro';
 
 const LineaAdicional = () => {
-    
     const [token] = useCookies(['tec-token']);
+    const [user] = useCookies(['tec-user']);
+
     const [lineas_adicionales, setLineasAdicionales] = useState(null);
-    const [filtroBase, setFiltroBase] = useState( `?page=${1}`);
+    const [filtroBase, setFiltroBase] = useState( `?pedido__empresa__id=${user['tec-user'].perfil.empresa.id} & page=${1}`);
     const [buscando, setBuscando] = useState(false);
     const [count, setCount] = useState(null);
     const [pagina, setPagina] = useState(1);
@@ -39,10 +40,9 @@ const LineaAdicional = () => {
 
     const buscarLinea = useCallback(async (filtroCompleto) => {
         if (buscando) return;
-
         setBuscando(true);
         try{
-            const response = await axios.get(BACKEND_SERVER + '/api/repuestos/linea_adicional_detalle/?' + filtroCompleto,{
+            const response = await axios.get(BACKEND_SERVER + '/api/repuestos/linea_adicional_detalle/' + filtroCompleto,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
