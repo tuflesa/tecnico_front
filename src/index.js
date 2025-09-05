@@ -14,7 +14,7 @@ import Estructura from './components/estructura/estructura';
 import Repuestos from './components/repuestos/repuestos';
 import Login from './components/login';
 import Cargas from './components/cargas/cargas';
-import GraficoVelocidad from './components/velocidad/vel_grafico_velocidad';
+import Velocidad from './components/velocidad/velocidad';
 import Mantenimiento from './components/mantenimiento/mantenimiento';
 import Rodillos from './components/rodillos/rodillos';
 import { CookiesProvider, useCookies } from 'react-cookie';
@@ -53,7 +53,7 @@ const Render = () => {
           </Route>
 
           <Route path='/velocidad'>
-            {token['tec-token'] ? <GraficoVelocidad /> : <Redirect to="/" />}
+            {token['tec-token'] ? <Velocidad /> : <Redirect to="/" />}
           </Route>
 
           <Route path='/mantenimiento'>
