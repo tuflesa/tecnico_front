@@ -28,7 +28,7 @@ const ManLineasListado = () => {
     var unmesatras = new Date(haceunmes);
     var fechapasadaString = unmesatras.getFullYear() + '-' + ('0' + (unmesatras.getMonth()+1)).slice(-2) + '-' + ('0' + unmesatras.getDate()).slice(-2);
 
-    const [filtro, setFiltro] = useState(`?parte__empresa__id=${user['tec-user'].perfil.empresa.id}&fecha_plan__lte=${fechaenunmesString}&estado__in=1,2&exclude_estado=3,4`);
+    const [filtroBase, setFiltroBase] = useState(`?parte__empresa__id=${user['tec-user'].perfil.empresa.id}&fecha_plan__lte=${fechaenunmesString}&estado__in=1,2&exclude_estado=3,4`);
  
     const [linea_id, setLinea_id] = useState(null);
     const [show, setShow] = useState(false);
@@ -42,14 +42,15 @@ const ManLineasListado = () => {
     const [show_Observacion, setShowObservacion] = useState(false);
     const [linea_completa, setLinea_completa] = useState(null);
     const [parte, setParte] = useState(null);
+    const [paginaActual, setPaginaActual] = useState(1);
+    const [datos, setDatos] = useState({});
 
     const actualizaFiltro = (str) => {   
-        setFiltro(str);
+        if (str !== filtroBase) {
+            setFiltroBase(str);
+            setPaginaActual(1);
+        }
     }
-
-    const [datos, setDatos] = useState({
-        pagina: 1,
-    });
 
     useEffect(() => { //para mantener el modal abierto cuando regresamos de hacer una salida de almacén
         const datosStr  = sessionStorage.getItem('datos_salida')
@@ -70,7 +71,7 @@ const ManLineasListado = () => {
                     }));
                 }
                 if(datos.filtro){
-                    setFiltro(datos.filtro);
+                    setFiltroBase(datos.filtro);
                 }
             }
         }
@@ -78,12 +79,14 @@ const ManLineasListado = () => {
 
     // FUNCIÓN PARA ACTUALIZAR LA TABLA (similar a updateTarea en ManPorEquipos)
     const updateTarea = () => {
-        axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_activas/`+ filtro,{
+        const filtroConPaginacion = `${filtroBase}&page=${paginaActual}`;
+        axios.get(BACKEND_SERVER + `/api/mantenimiento/listado_lineas_activas/`+ filtroConPaginacion,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
                 }
         })
         .then( res => {
+            console.log('datos de fechas: ',res.data.results);
             res.data.results.forEach( r => {
                 //solo para poder utilizar los campos en el excel
                 r['priori']=r.tarea.prioridad;
@@ -95,9 +98,12 @@ const ManLineasListado = () => {
                 r['parte_tip']=r.parte.tipo_nombre;
                 r['especial']=r.tarea.especialidad_nombre;
                 r['periodo']=r.tarea.tipo_periodo?r.tarea.tipo_periodo.nombre:'';
-                r['equipoT']=r.parte.seccion?r.parte.seccion.siglas_zona +' - '+r.parte.seccion.nombre + (r.parte.equipo?' - ' + r.parte.equipo.nombre:''):null;
-                r['fecha_plani']=r.fecha_inicio?invertirFecha(String(r.fecha_plan)):'';
+                r['equipoT']=r.parte.seccion?r.parte.seccion.nombre + (r.parte.equipo?' - ' + r.parte.equipo.nombre:''):null;
+                r['maquina']=r.parte.seccion?r.parte.seccion.siglas_zona:null;
+                r['fecha_plani']=r.fecha_plan?invertirFecha(String(r.fecha_plan)):'';
                 r['fecha_ini']=r.fecha_inicio?invertirFecha(String(r.fecha_inicio)):'';
+                r['fecha_f']=r.fecha_fin?invertirFecha(String(r.fecha_fin)):'';
+                r['fecha_creaparte']=r.parte.fecha_creacion?invertirFecha(String(r.parte.fecha_creacion)):'';
             })
             setLineas([...res.data.results]);
             setCount(res.data.count);
@@ -127,9 +133,17 @@ const ManLineasListado = () => {
         updateTarea(); 
     }
 
+    useEffect(() => {
+        if (token['tec-token']) {
+            updateTarea(); 
+        }
+    }, [token, filtroBase, paginaActual, actualizar, actualizar_seg]);
+
     useEffect(()=>{
-        updateTarea(); 
-    }, [token, filtro, actualizar, actualizar_seg ]); 
+        if (token['tec-token']) {
+            updateTarea(); 
+        } 
+    }, [token, filtroBase, paginaActual, actualizar, actualizar_seg ]); 
 
     const listarTrabajadores = (linea_id)=>{
         setLinea_id(linea_id);
@@ -165,27 +179,15 @@ const ManLineasListado = () => {
         .catch(err => { console.log(err);})
     }
 
-    const cambioPagina = (pag) => {
-        if(pag<=0){
-            pag=1;
+    const cambioPagina = (nuevaPagina) => {
+        if(nuevaPagina<=0){
+            nuevaPagina =1;
         }
-        if(pag>count/20){
-            if(count % 20 === 0){
-                pag=Math.trunc(count/20);
-            }
-            if(count % 20 !== 0){
-                pag=Math.trunc(count/20)+1;
-            }
+        const maxPagina = Math.ceil(count / 20) || 1;
+        if(nuevaPagina >maxPagina){
+            nuevaPagina = maxPagina;
         }
-        if(pag>0){
-            setDatos({
-                ...datos,
-                pagina: pag,
-            })
-        }
-        var filtro2=`&page=${datos.pagina}`;
-        const filtro3 = filtro + filtro2;
-        actualizaFiltro(filtro3);
+        setPaginaActual(nuevaPagina);
     }
 
     const abroFiltro = () => {
@@ -223,9 +225,12 @@ const ManLineasListado = () => {
                             <ExcelColumn label="Tipo" value="parte_tip"/>
                             <ExcelColumn label="Especialidad" value="especial"/>
                             <ExcelColumn label="Periodo" value="periodo"/>
+                            <ExcelColumn label="Maquina" value="maquina"/>
                             <ExcelColumn label="Equipo" value="equipoT"/>  
                             <ExcelColumn label="Fecha Planificación" value="fecha_plani"/>
-                            <ExcelColumn label="Fecha Inicio" value="fecha_ini"/>        
+                            <ExcelColumn label="Fecha Inicio" value="fecha_ini"/>  
+                            <ExcelColumn label="Fecha Fin" value="fecha_f"/>
+                            <ExcelColumn label="Fecha Creación parte" value="fecha_creaparte"/>      
                         </ExcelSheet>
                     </ExcelFile> 
                 </Row>
@@ -233,9 +238,9 @@ const ManLineasListado = () => {
             <table>
                 <tbody>
                     <tr>
-                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
-                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
-                        <th>Página {datos.pagina} de {pagTotal===0?1:pagTotal} - Número registros totales: {count}</th>
+                        <th><button type="button" className="btn btn-default" onClick={() => cambioPagina(paginaActual - 1)} disabled={paginaActual <= 1}>Pág Anterior</button></th> 
+                        <th><button type="button" className="btn btn-default" onClick={() => cambioPagina(paginaActual + 1)} disabled={paginaActual >= (pagTotal || 1)}>Pág Siguiente</button></th> 
+                        <th>Página {paginaActual} de {pagTotal || 1} - Número registros totales: {count || 0}</th>
                     </tr>
                 </tbody>
             </table> 
@@ -303,9 +308,9 @@ const ManLineasListado = () => {
             <table>
                 <tbody>
                     <tr>
-                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
-                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
-                        <th>Página {datos.pagina} de {pagTotal===0?1:pagTotal} - Número registros totales: {count}</th>
+                        <th><button type="button" className="btn btn-default" onClick={() => cambioPagina(paginaActual - 1)} disabled={paginaActual <= 1}>Pág Anterior</button></th> 
+                        <th><button type="button" className="btn btn-default" onClick={() => cambioPagina(paginaActual + 1)} disabled={paginaActual >= (pagTotal || 1)}>Pág Siguiente</button></th> 
+                        <th>Página {paginaActual} de {pagTotal || 1} - Número registros totales: {count || 0}</th>
                     </tr>
                 </tbody>
             </table>
@@ -319,7 +324,7 @@ const ManLineasListado = () => {
                 onUpdateTarea={updateTarea}
                 showConsumibles={true}
                 showFinalizar={false}
-                filtro={filtro}
+                filtro={`${filtroBase}&page=${paginaActual}`}
             />
             
             <ListaDePersonal    show={show}

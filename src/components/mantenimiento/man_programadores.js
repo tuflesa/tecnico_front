@@ -16,7 +16,6 @@ const ManProgramadores = () => {
         })
         .then( res => {
             setLineaparte(res.data);
-            console.log('todas las lineas de partes: ', res.data)
             
         })
         .catch( err => {
@@ -30,7 +29,6 @@ const ManProgramadores = () => {
                 if(linea_parte[x].lineas.length!==0){
                     for(var y=0; y<linea_parte[x].lineas.length;y++){
                         if(linea_parte[x].lineas[y].fecha_inicio!==linea_parte[x].fecha_inicio){
-                            console.log('esta tiene fecha en la linea del parte pero null la fecha del trabajador----> : ',linea_parte[x].lineas[y]);
                         }
                     }
                 }

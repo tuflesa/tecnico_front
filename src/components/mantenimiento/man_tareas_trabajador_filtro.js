@@ -63,12 +63,11 @@ const FiltroTareasTrabajador = ({actualizaFiltro}) => {
         });
     }, [token]);
 
+    /* eslint-disable react-hooks/exhaustive-deps */
     useEffect(()=>{
         const filtro = (`?trabajador=${datos.nombre_persona}&linea__parte__empresa=${user['tec-user'].perfil.empresa.id}&fecha_inicio__lte=${datos.fecha_inicio_lte}&fecha_inicio__gte=${datos.fecha_inicio_gte}&linea__estado=${datos.estados}`);
         actualizaFiltro(filtro);
     },[ datos.nombre_persona, datos.fecha_inicio_gte, datos.fecha_inicio_lte, datos.estados, token]);
-    /* eslint-disable react-hooks/exhaustive-deps */
-    
 
     return(
         <Container className="mt-5">

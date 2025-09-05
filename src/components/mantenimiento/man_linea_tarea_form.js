@@ -138,10 +138,48 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
         });
     }
 
+    const cerrarDatos = () => {
+        if(datos.nombre!==linea_tarea.tarea.nombre || datos.prioridad!==linea_tarea.tarea.prioridad || datos.observaciones!==linea_tarea.tarea.observaciones || datos.observaciones_trab!==linea_tarea.observaciones_trab || datos.fecha_plan!==linea_tarea.fecha_plan || datos.fecha_fin!==linea_tarea.fecha_fin || datos.periodo!==linea_tarea.tarea.periodo || datos.tipo_periodo!==linea_tarea.tarea.tipo_periodo.id){
+            var hay_modificado = window.confirm('No has actualizado los cambios ¿Deseas guardar los datos?');
+            if(hay_modificado){
+                const datosActualizados = {...datos};
+                procesarDatos(datosActualizados);
+                window.close();
+            }
+            else{
+                window.close();
+            }
+        }
+        else{
+            window.close();
+        }
+    }
+
     const actualizarDatos = (event) => {
         event.preventDefault();
-        // Crea una copia del objeto datos para no modificar el original directamente
         const datosActualizados = {...datos};
+        procesarDatos(datosActualizados);
+        setLineaTarea(prev => ({
+            ...prev,
+            tarea: {
+                ...prev.tarea,
+                nombre: datosActualizados.nombre,
+                prioridad: datosActualizados.prioridad,
+                observaciones: datosActualizados.observaciones,
+                periodo: datosActualizados.periodo,
+                tipo_periodo: { id: datosActualizados.tipo_periodo }
+            },
+            observaciones_trab: datosActualizados.observaciones_trab,
+            fecha_plan: datosActualizados.fecha_plan,
+            fecha_fin: datosActualizados.fecha_fin,
+            fecha_inicio: datosActualizados.fecha_inicio ?? prev.fecha_inicio
+        }));
+
+    }
+
+    const procesarDatos = (datosActualizados) => {
+        // Crea una copia del objeto datos para no modificar el original directamente
+        // const datosActualizados = {...datos};
         // Solo establecer fecha_plan a null si realmente está vacío y antes tenía un valor
         if(datosActualizados.fecha_plan === ''){
             datosActualizados.fecha_plan = null;
@@ -327,7 +365,8 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                                                 name='fecha_fin' 
                                                 value={datos.fecha_fin}
                                                 onChange={handleInputChange} 
-                                                placeholder="Fecha Fin"/>
+                                                placeholder="Fecha Fin"
+                                                disabled/>
                                 </Form.Group>
                             </Col> 
                         </Row>                                    
@@ -348,7 +387,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                         <Row>                            
                             <Col>
                                 <Form.Group id="observaciones_trab">
-                                    <Form.Label>Conclusiones Personal Mantenmiento</Form.Label>
+                                    <Form.Label>Conclusiones Personal Mantenimiento</Form.Label>
                                     <Form.Control as="textarea" rows={4}
                                                 name='observaciones_trab' 
                                                 value={datos.observaciones_trab}
@@ -360,7 +399,8 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                         </Row>                    
                         <Form.Row className="justify-content-center">
                             <Button variant="info" type="button" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button>
-                            <Button variant="info" className={'mx-2'} onClick={() => window.close()}>Cerrar</Button>
+                            {/* <Button variant="info" className={'mx-2'} onClick={() => window.close()}>Cerrar</Button> */}
+                            <Button variant="info" className={'mx-2'} onClick={cerrarDatos}>Cerrar</Button>
                         </Form.Row>
                     </Form>
                 </Col>

@@ -3,6 +3,7 @@ import { Container, Row, Form, Col } from 'react-bootstrap';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
+import debounce from 'lodash.debounce';
 
 const ManLineasFiltro = ({actualizaFiltro}) => {
     const [token] = useCookies(['tec-token']);
@@ -220,23 +221,41 @@ const ManLineasFiltro = ({actualizaFiltro}) => {
     }, [token]);
 
     useEffect(()=>{
-        let filtro1 = `?tarea__nombre__icontains=${datos.nombre_tarea}&parte__nombre__icontains=${datos.nombre_parte}&tarea__especialidad=${datos.especialidad}&tarea__prioridad__lte=${datos.prioridad_menor}&tarea__prioridad__gte=${datos.prioridad_mayor}&parte__tipo=${datos.tipo}&parte__empresa=${datos.empresa}&finalizada=${datos.finalizada}&fecha_inicio__lte=${datos.fecha_inicio_lte}&fecha_inicio__gte=${datos.fecha_inicio_gte}&fecha_plan__lte=${datos.fecha_plan_lte}&fecha_plan__gte=${datos.fecha_plan_gte}&estado=${datos.estado === '5' ? '' : datos.estado}`;
-        if (datos.estado === '') {
-            filtro1 += `&estado__in=1,2&exclude_estado=3,4`;
-        }
-        let filtro2 = `&parte__empresa__id=${datos.empresa}`;
-        if (datos.empresa !== ''){
-            filtro2 = filtro2 + `&parte__zona__id=${datos.zona}`;
-            if (datos.zona !== ''){
-                filtro2 = filtro2 + `&parte__seccion__id=${datos.seccion}`;
-                if (datos.seccion !== ''){
-                    filtro2 = filtro2 + `&parte__equipo__id=${datos.equipo}`;
+        const generarFiltro = () => {
+            let filtro1 = `?tarea__nombre__icontains=${datos.nombre_tarea}&parte__nombre__icontains=${datos.nombre_parte}&tarea__especialidad=${datos.especialidad}&tarea__prioridad__lte=${datos.prioridad_menor}&tarea__prioridad__gte=${datos.prioridad_mayor}&parte__tipo=${datos.tipo}&parte__empresa=${datos.empresa}&finalizada=${datos.finalizada}&fecha_inicio__lte=${datos.fecha_inicio_lte}&fecha_inicio__gte=${datos.fecha_inicio_gte}&fecha_plan__lte=${datos.fecha_plan_lte}&fecha_plan__gte=${datos.fecha_plan_gte}&estado=${datos.estado === '5' ? '' : datos.estado}`;
+            if (datos.estado === '') {
+                filtro1 += `&estado__in=1,2&exclude_estado=3,4`;
+            }
+            let filtro2 = `&parte__empresa__id=${datos.empresa}`;
+            if (datos.empresa !== ''){
+                filtro2 = filtro2 + `&parte__zona__id=${datos.zona}`;
+                if (datos.zona !== ''){
+                    filtro2 = filtro2 + `&parte__seccion__id=${datos.seccion}`;
+                    if (datos.seccion !== ''){
+                        filtro2 = filtro2 + `&parte__equipo__id=${datos.equipo}`;
+                    }
                 }
             }
+            return filtro1 + filtro2;
+        };
+        const camposDebounce = [
+            datos.nombre_tarea,
+            datos.nombre_parte
+        ];
+        const debeHacerDebounce = camposDebounce.some(campo => campo !== '');
+        if (debeHacerDebounce) {
+            const debounceFiltro = debounce(() => {
+                const filtro = generarFiltro();
+                actualizaFiltro(filtro);
+            }, 500);
+
+            debounceFiltro();
+            return () => debounceFiltro.cancel();
+        } else {
+            const filtro = generarFiltro();
+            actualizaFiltro(filtro);
         }
-        const filtro = filtro1 + filtro2 ;
-        actualizaFiltro(filtro);
-    },[datos, token]);
+    }, [datos.nombre_tarea,datos.nombre_parte,datos.especialidad, datos.prioridad_menor,datos.prioridad_mayor,datos.tipo,datos.empresa, datos.zona,datos.seccion, datos.equipo,datos.finalizada, datos.fecha_inicio_lte,datos.fecha_inicio_gte, datos.fecha_plan_lte, datos.fecha_plan_gte,datos.estado,actualizaFiltro]);
     /* eslint-disable react-hooks/exhaustive-deps */
 
     const handleInputChange = (event) => {

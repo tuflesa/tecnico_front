@@ -8,6 +8,7 @@ import {invertirFecha} from '../utilidades/funciones_fecha';
 import RodCerrarRectificado from './rod_rectificado_cerrar';
 import logo from '../../assets/Bornay.svg';
 import logoTuf from '../../assets/logo_tuflesa.svg';
+import debounce from 'lodash.debounce';
 
 const RodInstanciasXaRectificar = () => {
     const [token] = useCookies(['tec-token']);
@@ -70,7 +71,18 @@ const RodInstanciasXaRectificar = () => {
     useEffect(()=>{
         const filtro = `?finalizado=${datos.finalizado}&instancia__id=${datos.id_instancia}&proveedor=${datos.proveedor}&instancia__rodillo__operacion__seccion__maquina__empresa__id=${datos.empresa}&instancia__rodillo__operacion__seccion__maquina__id=${datos.maquina}&instancia__rodillo__operacion__seccion__id=${datos.seccion}&instancia__rodillo__operacion__id=${datos.operacion}&instancia__nombre__icontains=${datos.nombre}&full_name=${datos.rectificado_por?datos.rectificado_por:''}`
         actualizaFiltro(filtro);
-    },[datos]);
+    },[datos.finalizado, datos.id_instancia, datos.proveedor, datos.empresa, datos.maquina, datos.seccion, datos.operacion]);
+
+    useEffect(() => {
+        const debounceFiltro = debounce(() => {
+            const filtro = `?finalizado=${datos.finalizado}&instancia__id=${datos.id_instancia}&proveedor=${datos.proveedor}&instancia__rodillo__operacion__seccion__maquina__empresa__id=${datos.empresa}&instancia__rodillo__operacion__seccion__maquina__id=${datos.maquina}&instancia__rodillo__operacion__seccion__id=${datos.seccion}&instancia__rodillo__operacion__id=${datos.operacion}&instancia__nombre__icontains=${datos.nombre}&full_name=${datos.rectificado_por || ''}`;
+            actualizaFiltro(filtro);
+        }, 500);
+
+        debounceFiltro();
+
+        return () => debounceFiltro.cancel();
+    }, [datos.nombre, datos.rectificado_por]);
 
     const actualizaFiltro = str => {
         setFiltro(str);

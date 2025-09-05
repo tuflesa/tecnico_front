@@ -207,6 +207,11 @@ const RepSalidas = ({alm}) => {
             })
             .then( res => { 
                 setSalida(res.data);
+                setNum_parte(null)
+                setLineaCompleta(null)
+                setID_parte(null);
+                sessionStorage.removeItem('parte'); // ← limpia almacenamiento
+                sessionStorage.removeItem('datos_salida'); // ← limpia almacenamiento
             })
             .catch(err => { console.log(err);})
         }
@@ -231,8 +236,8 @@ const RepSalidas = ({alm}) => {
     }
 
     const cancelar = ()=>{
-        //sessionStorage.removeItem('parte'); // ← limpia almacenamiento
-        //sessionStorage.removeItem('datos_salida'); // ← limpia almacenamiento
+        sessionStorage.removeItem('parte'); // ← limpia almacenamiento
+        sessionStorage.removeItem('datos_salida'); // ← limpia almacenamiento
         setNum_parte(null)
         setLineaCompleta(null)
         setID_parte(null);

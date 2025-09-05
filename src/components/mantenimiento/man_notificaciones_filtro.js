@@ -3,6 +3,7 @@ import { Container, Row, Form, Col } from 'react-bootstrap';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
+import debounce from 'lodash.debounce';
 
 const ManNotificacionesFiltro = ({actualizaFiltro}) => {
     const [token] = useCookies(['tec-token']);
@@ -77,14 +78,19 @@ const ManNotificacionesFiltro = ({actualizaFiltro}) => {
         }); 
     }, [token, datos.empresa, user]);
 
-    /* eslint-disable react-hooks/exhaustive-deps */
     useEffect(()=>{
-        const filtro1 = `?quien=${datos.quien}&finalizado=${datos.finalizado}&revisado=${datos.revisado}&descartado=${datos.descartado}&fecha_creacion__lte=${datos.fecha_creacion_lte}&fecha_creacion__gte=${datos.fecha_creacion_gte}&numero__icontains=${datos.numero}&zona__id=${datos.zona}&empresa__id=${datos.empresa}&seguridad=${datos.seguridad}`;
-        //let filtro2 = `&empresa__id=${datos.empresa}`;
-        //const filtro = filtro1 + filtro2;
-        actualizaFiltro(filtro1);
-    },[datos, token]);
-    /* eslint-disable react-hooks/exhaustive-deps */
+        const filtro1 = `?empresa__id=${datos.empresa}&seguridad=${datos.seguridad} & quien=${datos.quien}&finalizado=${datos.finalizado}&revisado=${datos.revisado}&descartado=${datos.descartado}&fecha_creacion__lte=${datos.fecha_creacion_lte}&fecha_creacion__gte=${datos.fecha_creacion_gte}&numero__icontains=${datos.numero}&zona__id=${datos.zona}`;
+        const camposTexto = [datos.numero]; 
+        if (camposTexto.some(campo => campo !== '' && campo !== null)) {
+            const debounceFiltro = debounce(() => {
+                actualizaFiltro(filtro1);
+            }, 500);
+            debounceFiltro();
+            return () => debounceFiltro.cancel();
+        }else{
+            actualizaFiltro(filtro1);
+        }
+    },[datos, actualizaFiltro, token]);
 
     const handleInputChange = (event) => {
         setDatos({

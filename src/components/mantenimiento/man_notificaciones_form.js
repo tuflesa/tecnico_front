@@ -21,6 +21,7 @@ const NotificacionForm = ({nota, setNota}) => {
     const [zonas, setZonas] = useState(null);
     const [reclamaciones, setReclamaciones] = useState(null);
     const [act_reclamaciones, setActReclamaciones] = useState(false);
+    const [errores, setErrores] = useState({}); // Estado para guardar errores
     
 
     const [datos, setDatos] = useState({
@@ -171,6 +172,9 @@ const NotificacionForm = ({nota, setNota}) => {
         event.preventDefault();
         if(datos.zona===null||datos.zona===''){
             setShowError(true);
+            setErrores({
+                "zona": ["This field may not be blank."]
+            });
         }
         else{
             axios.post(BACKEND_SERVER + `/api/mantenimiento/notificacion_nueva/`, {
@@ -198,13 +202,19 @@ const NotificacionForm = ({nota, setNota}) => {
             })
             .then( res => { 
                 setNota(res.data);
+                setErrores({}); // Reiniciar errores si la petición es exitosa
                 window.confirm('La notificación se ha creado correctamente');
                 window.location.href="javascript: history.go(-1)"
             })
             .catch(err => { 
-                setShowError(true);
-                console.log(err);
-            });
+                if (err.response && err.response.data) {
+                    setErrores(err.response.data); // Guardar los errores del backend
+                } else {
+                    console.log(err);
+                }
+                alert('Faltan datos, por favor, introduce todos los datos obligatorios.')
+                    console.log(err);
+                });
         }
     } 
 
@@ -354,7 +364,8 @@ const NotificacionForm = ({nota, setNota}) => {
                                                     value={datos.zona}
                                                     name='zona'
                                                     onChange={handleInputChange}
-                                                    disabled={desactivar_zona()}> 
+                                                    disabled={desactivar_zona()}
+                                                    className={`form-control ${errores.zona ? 'border-red' : ''}`}> 
                                                     <option key={0} value={''}>Sin Zona asignada</option>                                      
                                                     {zonas && zonas.map( zona => {
                                                         return (
@@ -377,6 +388,7 @@ const NotificacionForm = ({nota, setNota}) => {
                                                 onChange={handleInputChange} 
                                                 placeholder="Qué Sucede"
                                                 autoFocus
+                                                className={`form-control ${errores.que ? 'border-red' : ''}`}
                                     />
                                 </Form.Group>
                             </Col>  
@@ -390,6 +402,7 @@ const NotificacionForm = ({nota, setNota}) => {
                                                 value={datos.cuando}
                                                 onChange={handleInputChange} 
                                                 placeholder="Cuándo Sucede"
+                                                className={`form-control ${errores.cuando ? 'border-red' : ''}`}
                                     />
                                 </Form.Group>
                             </Col>
@@ -401,6 +414,7 @@ const NotificacionForm = ({nota, setNota}) => {
                                                 value={datos.donde}
                                                 onChange={handleInputChange} 
                                                 placeholder="Dónde Sucede"
+                                                className={`form-control ${errores.donde ? 'border-red' : ''}`}
                                     />
                                 </Form.Group>
                             </Col>
@@ -414,6 +428,7 @@ const NotificacionForm = ({nota, setNota}) => {
                                                 value={datos.como}
                                                 onChange={handleInputChange} 
                                                 placeholder="Cómo Sucede"
+                                                className={`form-control ${errores.como ? 'border-red' : ''}`}
                                     />
                                 </Form.Group>
                             </Col>
@@ -425,6 +440,7 @@ const NotificacionForm = ({nota, setNota}) => {
                                                 value={datos.cuanto}
                                                 onChange={handleInputChange} 
                                                 placeholder="Una vez al día, constantemente..."
+                                                className={`form-control ${errores.cuanto ? 'border-red' : ''}`}
                                     />
                                 </Form.Group>
                             </Col>
@@ -436,6 +452,7 @@ const NotificacionForm = ({nota, setNota}) => {
                                                 value={datos.porque}
                                                 onChange={handleInputChange} 
                                                 placeholder="Por que crees que ocurre"
+                                                className={`form-control ${errores.porque ? 'border-red' : ''}`}
                                     />
                                 </Form.Group>
                             </Col>
@@ -539,7 +556,7 @@ const NotificacionForm = ({nota, setNota}) => {
                 <Modal.Header closeButton>
                     <Modal.Title>Error</Modal.Title>
                 </Modal.Header>
-                <Modal.Body>Error al guardar formulario. Revise que todos los campos con asterisco esten cumplimentados</Modal.Body>
+                <Modal.Body>Error al guardar formulario. Revise la zona de la notificación</Modal.Body>
                 {/* <Modal.Footer>
                     <Button variant="secondary" onClick={handleCloseError}>Cerrar</Button>
                 </Modal.Footer> */}

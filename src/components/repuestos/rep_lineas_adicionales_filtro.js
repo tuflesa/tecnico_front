@@ -3,6 +3,7 @@ import { Container, Row, Col, Form } from 'react-bootstrap';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
+import debounce from 'lodash.debounce';
 
 const LineasAdicionalesFiltro = ({ actualizaFiltro }) => {
     const [empresas, setEmpresas] = useState(null);
@@ -19,8 +20,14 @@ const LineasAdicionalesFiltro = ({ actualizaFiltro }) => {
     });
 
     useEffect(()=>{
-        const filtro = `?pedido__proveedor__nombre__icontains=${datos.nombre_proveedor}&pedido__finalizado=${datos.finalizado}&pedido__numero__icontains=${datos.numero}&pedido__empresa__id=${datos.empresa}&descripcion__icontains=${datos.descripcion}`;
-        actualizaFiltro(filtro);
+        const debounceFiltro = debounce(() => {
+            const filtro = `?pedido__empresa__id=${datos.empresa}&pedido__proveedor__nombre__icontains=${datos.nombre_proveedor}&pedido__finalizado=${datos.finalizado}&pedido__numero__icontains=${datos.numero}&descripcion__icontains=${datos.descripcion}`;
+            actualizaFiltro(filtro);
+        }, 500);
+        debounceFiltro();
+        return () => {
+            debounceFiltro.cancel();
+        };
     },[datos, actualizaFiltro]);
 
     const handleInputChange = (event) => {

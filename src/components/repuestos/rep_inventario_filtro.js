@@ -3,6 +3,7 @@ import { Container, Row, Form, Col } from 'react-bootstrap';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
+import debounce from 'lodash.debounce';
 
 const RepInventarioFiltro = ({actualizaFiltro}) => {
     const [token] = useCookies(['tec-token']);
@@ -19,12 +20,21 @@ const RepInventarioFiltro = ({actualizaFiltro}) => {
         nombre_comun: '',
     });
 
-    /* eslint-disable react-hooks/exhaustive-deps */
     useEffect(()=>{  
         const filtro = `?repuesto__nombre__icontains=${datos.nombre}&repuesto__nombre_comun__icontains=${datos.nombre_comun}&repuesto__fabricante__icontains=${datos.fabricante}&almacen__id=${datos.almacen}&almacen__empresa__id=${datos.empresa}&repuesto__descatalogado=${false}`;      
         actualizaFiltro(filtro);
-    },[datos.nombre, datos.fabricante, datos.almacen, datos.nombre_comun, datos.id]);
-    /* eslint-disable react-hooks/exhaustive-deps */
+    },[datos.almacen, datos.empresa]);
+
+    useEffect(()=>{  
+        const debounceFiltro = debounce(() => {
+            const filtro = `?repuesto__nombre__icontains=${datos.nombre}&repuesto__nombre_comun__icontains=${datos.nombre_comun}&repuesto__fabricante__icontains=${datos.fabricante}&almacen__id=${datos.almacen}&almacen__empresa__id=${datos.empresa}&repuesto__descatalogado=${false}`;      
+            actualizaFiltro(filtro);
+        }, 500);
+        debounceFiltro();
+        return () => {
+            debounceFiltro.cancel();
+        };
+    },[datos.nombre, datos.nombre_comun, datos.fabricante, actualizaFiltro]);
 
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/repuestos/almacen/?empresa=${datos.empresa}`,{

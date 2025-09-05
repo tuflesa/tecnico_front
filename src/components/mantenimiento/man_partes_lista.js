@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback  } from 'react';
 import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
@@ -11,61 +11,69 @@ const ManListaPartes = () => {
     const [user] = useCookies(['tec-user']);
 
     const [partes, setPartes]  = useState(null);
-    const [filtro, setFiltro] = useState(`?estado=${''}&empresa__id=${user['tec-user'].perfil.empresa.id}&creado_por=${user['tec-user'].perfil.usuario}`);
+    const [filtroBase, setFiltroBase] = useState(`?estado=${''}&empresa__id=${user['tec-user'].perfil.empresa.id}&creado_por=${user['tec-user'].perfil.usuario}`);
     const [activos, setActivos] = useState(true);
     const [actualizar, setActualizar] = useState('');
     const [count, setCount] = useState(null);
-    const [pagTotal, setPagTotal] = useState(null);
+    const [buscando, setBuscando] = useState(false);
+    const [pagina, setPagina] = useState(1);
+    const [totalPag, setTotalPag] = useState(0);
 
-    const actualizaFiltro = (str, act) => {
-        setActivos(act);
-        setFiltro(str);
+    const actualizaFiltro = (nuevoFiltro, nuevosActivos) => {        
+        // Solo actualizar si algo realmente cambió
+        if (nuevoFiltro !== filtroBase || nuevosActivos !== activos) {
+            setActivos(nuevosActivos);
+            setFiltroBase(nuevoFiltro);
+            setPagina(1); // Reset a página 1 cuando cambia el filtro
+        }
     }
 
-    const [datos, setDatos] = useState({
-        pagina: 1,
-    });
-    
     useEffect(()=>{
-        //estamos filtrando y ordenando en el back
-        if(activos){
-            //opción partes activos, excluidos los finalizados y los pendientes
-            axios.get(BACKEND_SERVER + '/api/mantenimiento/parte_activos_trabajo/' + filtro ,{
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
+        const filtroCompleto = `${filtroBase}&page=${pagina}`;
+        buscarPartes(filtroCompleto);
+    },[filtroBase, pagina, activos, actualizar]);
+    
+    // Función para hacer la búsqueda
+    const buscarPartes = useCallback(async (filtroCompleto) => {
+        if (buscando) return;
+        
+        console.log('Ejecutando búsqueda con filtro:', filtroCompleto);
+        setBuscando(true);
+        
+        try {
+            let response;
+            
+            if (activos) {
+                // Opción partes activos, excluidos los finalizados y los pendientes
+                response = await axios.get(BACKEND_SERVER + `/api/mantenimiento/parte_activos_trabajo/?` + filtroCompleto, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
                     }
-            })
-            .then( res => {
-                    setPartes(res.data.results);
-                    setCount(res.data.count);
-                    let pagT = res.data.count/20;
-                    if (res.data.count % 20 !== 0){
-                        pagT += 1;
+                });
+            } else {
+                // Cuando activamos el filtro y queremos cualquier parte, llamamos desde aquí sin filtrar estado
+                response = await axios.get(BACKEND_SERVER + '/api/mantenimiento/parte_trabajo_detalle/' + filtroCompleto, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
                     }
-                    setPagTotal(Math.trunc(pagT));
-            })
+                });
+            }
+
+            setPartes(response.data.results);
+            setCount(response.data.count);
+            
+            // Calcular total de páginas
+            const totalPaginas = response.data.count % 20 === 0 
+                ? Math.max(1, Math.trunc(response.data.count / 20))
+                : Math.trunc(response.data.count / 20) + 1;
+            setTotalPag(totalPaginas);
+            
+        } catch (err) {
+            console.log(err);
+        } finally {
+            setBuscando(false);
         }
-        else{
-            //Cuando activamos el filtro y queremos cualquier parte, llamamos desde aquí sin filtrar estado
-            axios.get(BACKEND_SERVER + '/api/mantenimiento/parte_trabajo_detalle/' + filtro ,{
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                    }
-            })
-            .then( res => {
-                setPartes(res.data.results);
-                setCount(res.data.count);
-                let pagT = res.data.count/20;
-                if (res.data.count % 20 !== 0){
-                    pagT += 1;
-                }
-                setPagTotal(Math.trunc(pagT));
-            })
-            .catch( err => {
-                console.log(err);
-            });
-        }
-    }, [token, filtro, activos, actualizar]);
+    }, [token, buscando, activos]);
 
     const BorrarParte =(parte) =>{ 
         if(parte.tarea.length===0){
@@ -129,27 +137,21 @@ const ManListaPartes = () => {
         }         
     }
 
-    const cambioPagina = (pag) => {
-        if(pag<=0){
-            pag=1;
+    const cambioPagina = (nuevaPag) => {
+        if(nuevaPag<=0){
+            nuevaPag=1;
         }
-        if(pag>count/20){
-            if(count % 20 === 0){
-                pag=Math.trunc(count/20);
-            }
-            if(count % 20 !== 0){
-                pag=Math.trunc(count/20)+1;
-            }
+        let maxPag = 1;
+        if(count){
+            maxPag = count % 20 === 0 ? Math.trunc(count/20) : Math.trunc(count/20) + 1;
+            if (maxPag === 0) maxPag = 1;
         }
-        if(pag>0){
-            setDatos({
-                ...datos,
-                pagina: pag,
-            })
+        if(nuevaPag > maxPag){
+            nuevaPag = maxPag;
         }
-        var filtro2=`&page=${datos.pagina}`;
-        const filtro3 = filtro + filtro2;
-        actualizaFiltro(filtro3, activos);
+        if(nuevaPag !== pagina && nuevaPag > 0){
+            setPagina(nuevaPag);
+        }
     }
 
     return (
@@ -160,13 +162,9 @@ const ManListaPartes = () => {
                 </Col>
             </ Row>
             <table>
-                <tbody>
-                    <tr>
-                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
-                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
-                        <th>Página {datos.pagina} de {pagTotal===0?1:pagTotal} - Número registros totales: {count}</th>
-                    </tr>
-                </tbody>
+                <th><button type="button" className="btn btn-default" onClick={() => {cambioPagina(pagina-1)}}>Pág Anterior</button></th> 
+                <th><button type="button" className="btn btn-default" onClick={() => {cambioPagina(pagina+1)}}>Pág Siguiente</button></th> 
+                <th>Número páginas: {pagina} / {totalPag} - Registros: {count || 0}</th>
             </table> 
             <Row>                
                 <Col>
@@ -203,13 +201,9 @@ const ManListaPartes = () => {
                 </Col>
             </Row>
             <table>
-                <tbody>
-                    <tr>
-                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_anterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina-1)}}>Pág Anterior</button></th> 
-                        <th><button type="button" className="btn btn-default" value={datos.pagina} name='pagina_posterior' onClick={event => {cambioPagina(datos.pagina=datos.pagina+1)}}>Pág Siguiente</button></th> 
-                        <th>Página {datos.pagina} de {pagTotal===0?1:pagTotal} - Número registros totales: {count}</th>
-                    </tr>
-                </tbody>
+                <th><button type="button" className="btn btn-default" onClick={() => {cambioPagina(pagina-1)}}>Pág Anterior</button></th> 
+                <th><button type="button" className="btn btn-default" onClick={() => {cambioPagina(pagina+1)}}>Pág Siguiente</button></th> 
+                <th>Número páginas: {pagina} / {totalPag} - Registros: {count || 0}</th>
             </table>
         </Container>
     )

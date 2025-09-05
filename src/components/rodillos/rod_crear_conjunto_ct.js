@@ -4,6 +4,8 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { exit } from 'process';
+import debounce from 'lodash.debounce';
+
 
 const RodConjuntoCT = ({show, setShow, handleClose, operacion_marcada, elementos_formacion, dimensiones, bancada_id}) => {
     const [token] = useCookies(['tec-token']);
@@ -349,7 +351,13 @@ const RodConjuntoCT = ({show, setShow, handleClose, operacion_marcada, elementos
     }
 
     useEffect(() => {
-        setFiltro(`&nombre__icontains=${datos.dimension}`)
+        const debounceFiltro = debounce(() => {
+            setFiltro(`&nombre__icontains=${datos.dimension}`);
+        }, 500); 
+        debounceFiltro();
+        return () => {
+            debounceFiltro.cancel(); // Limpia contador al desmontar o cambiar valor
+        };
     }, [datos.dimension]);
     
     return(

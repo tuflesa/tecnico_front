@@ -5,11 +5,14 @@ import { BACKEND_SERVER } from '../../constantes';
 import Modal from 'react-bootstrap/Modal'
 import { Button, Row, Form, Col, Table } from 'react-bootstrap';
 import { ArrowDownCircle} from 'react-bootstrap-icons';
+import debounce from 'lodash.debounce';
 
 const BuscarRepuestosPedido = ({cerrarListRepuestos, show, proveedor_id, elegirRepuesto})=>{
     const [token] = useCookies(['tec-token']);
     const [filtro, setFiltro] = useState(null);
     const [repuestos, setRepuestos] = useState(null);
+    const [lineasPendientes, setLineasPendientes] = useState(null);
+
     const [datos, setDatos] = useState({
         id:'',
         nombre: '', 
@@ -41,9 +44,50 @@ const BuscarRepuestosPedido = ({cerrarListRepuestos, show, proveedor_id, elegirR
     }  
     
     useEffect(()=>{
-        const filtro = `?proveedores__id=${proveedor_id}&descripcion_proveedor__icontains=${datos.descripcion_proveedor}&repuesto__descatalogado=${false}&repuesto__nombre__icontains=${datos.nombre}&repuesto__id=${datos.id}&modelo_proveedor__icontains=${datos.modelo_proveedor}`;
-        actualizaFiltro(filtro);
+        const debounceFiltro = debounce(() => {
+            const filtro = `?proveedores__id=${proveedor_id}&descripcion_proveedor__icontains=${datos.descripcion_proveedor}&repuesto__descatalogado=${false}&repuesto__nombre__icontains=${datos.nombre}&repuesto__id=${datos.id}&modelo_proveedor__icontains=${datos.modelo_proveedor}`;
+            actualizaFiltro(filtro);
+        }, 500);
+
+        debounceFiltro();
+        return () => debounceFiltro.cancel();
     },[datos]);
+
+    useEffect(() => { //buscamos las lineas de los pedidos pendientes para mostrar en las lineas de los articulos fuera de stock
+        datos.empresa && axios.get(BACKEND_SERVER + `/api/repuestos/linea_pedido_pend/?pedido__finalizado=${'false'}&pedido__empresa=${datos.empresa}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( rs => {
+            setLineasPendientes(rs.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token]);
+
+    useEffect(()=>{
+        let pedido = false;
+        if(lineasPendientes && repuestos){
+            for(var y=0;y<lineasPendientes.length;y++){
+                for(var x=0; x<repuestos.length; x++){
+                    if(lineasPendientes[y].repuesto.id === repuestos[x].repuesto.id){                                      ;
+                        setRepuestos(prev => ({
+                            ...prev,
+                            [pedido]: true
+                        }));
+                    }
+                    else{
+                        setRepuestos(prev => ({
+                            ...prev,
+                            [pedido]: false
+                        }));
+                    }
+                }
+            }
+        }
+    },[lineasPendientes, repuestos]);
 
     return(
         <Modal show={show} backdrop="static" keyboard={ false } animation={false} size="xl">
@@ -114,13 +158,16 @@ const BuscarRepuestosPedido = ({cerrarListRepuestos, show, proveedor_id, elegirR
                             </thead>
                             <tbody>
                                 {repuestos && repuestos.map( rep => {  
+                                    const necesitaStock = rep.necesita_stock; // booleano
+                                    const tienepedido = rep.pedido; // booleano
+                                    const rowClass = tienepedido? 'text-success' : necesitaStock ? 'text-danger' : ''; // Pondrá la linea en rojo, verde o blanca
                                     return (                                                
-                                        <tr key={rep.id}>
+                                        <tr key={rep.id} className={rowClass}>
                                             <td>{rep.repuesto.nombre}</td> 
                                             <td>{rep.descripcion_proveedor}</td>
                                             <td>{rep.modelo_proveedor}</td> 
                                             <td>
-                                            <ArrowDownCircle className="mr-3 pencil" onClick={event => {elegirRepuesto(rep)}}/>
+                                                <ArrowDownCircle className="mr-3 pencil" onClick={event => {elegirRepuesto(rep)}}/>
                                             </td>                                                
                                         </tr>
                                     )})

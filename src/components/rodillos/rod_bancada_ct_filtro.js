@@ -3,6 +3,7 @@ import { Container, Row, Form, Col } from 'react-bootstrap';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
+import debounce from 'lodash.debounce';
 
 const RodBancadaCTFiltro = ({actualizaFiltro}) => {
     const [token] = useCookies(['tec-token']);
@@ -60,9 +61,20 @@ const RodBancadaCTFiltro = ({actualizaFiltro}) => {
     }, [token, datos.empresa]);
 
     useEffect(()=>{
+        if (datos.dimensiones !== '') return; //si hay texto en dimensiones no hagas nada aqui, ve al otro con el retardo
         const filtro = `?maquina__empresa__id=${datos.empresa}&id=${datos.id}&maquina=${datos.maquina}&pertenece_grupo=${false}&dimensiones=${datos.dimensiones}`
         actualizaFiltro(filtro);
-    },[datos]);
+    },[datos.empresa, datos.maquina, datos.id]);
+
+    useEffect(() => {
+    const debounceFiltro = debounce(() => {
+        const filtro = `?maquina__empresa__id=${datos.empresa}&id=${datos.id}&maquina=${datos.maquina}&pertenece_grupo=${false}&dimensiones=${datos.dimensiones}`;
+        actualizaFiltro(filtro);
+    }, 500);
+
+    debounceFiltro();
+    return () => debounceFiltro.cancel();
+}, [datos.dimensiones]);
 
     const handleInputChange = (event) => {
         setDatos({

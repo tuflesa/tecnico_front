@@ -3,6 +3,7 @@ import { Container, Row, Form, Col } from 'react-bootstrap';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
+import debounce from 'lodash.debounce';
 
 const RodRectificacionesFiltro = ({actualizaFiltro}) => {
     const [token] = useCookies(['tec-token']);
@@ -67,7 +68,20 @@ const RodRectificacionesFiltro = ({actualizaFiltro}) => {
     useEffect(()=>{
         const filtro = `?empresa=${datos.empresa}&numero__icontains=${datos.numero}&maquina__id=${user['tec-user'].perfil.zona?user['tec-user'].perfil.zona.id:datos.maquina}&full_name=${datos.creado_por?datos.creado_por:''}&finalizado=${datos.finalizado}&proveedor=${datos.proveedor}`
         actualizaFiltro(filtro);
-    },[datos]);   
+    },[datos.empresa, datos.maquina, datos.creado_por, datos.finalizado, datos.proveedor]);  
+    
+    useEffect(() => {
+        const debounceFiltro = debounce(() => {
+            const filtroNumero = `&numero__icontains=${datos.numero}`;
+            actualizaFiltro(prev => prev + filtroNumero);
+        }, 500);
+
+        debounceFiltro();
+
+        return () => {
+            debounceFiltro.cancel();
+        };
+    }, [datos.numero]);
 
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/repuestos/proveedor/?de_rectificado=${true}`,{

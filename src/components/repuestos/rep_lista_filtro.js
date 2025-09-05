@@ -3,6 +3,7 @@ import { Container, Row, Form, Col } from 'react-bootstrap';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
+import debounce from 'lodash.debounce';
 
 const RepListaFilto = ({actualizaFiltro}) => {
     const [token] = useCookies(['tec-token']);
@@ -169,26 +170,38 @@ const RepListaFilto = ({actualizaFiltro}) => {
             });
         }
     }, [token, datos.seccion]);
-    /* eslint-disable react-hooks/exhaustive-deps */
 
-    useEffect(()=>{
-        const filtro1 = `?precios__modelo_proveedor__icontains=${datos.modelo_proveedor}&nombre__icontains=${datos.nombre}&nombre_comun__icontains=${datos.nombre_comun}&precios__fabricante__icontains=${datos.fabricante}&id=${datos.id}&es_critico=${datos.critico}&descatalogado=${datos.descatalogado}&tipo_repuesto=${datos.tipo_repuesto}&proveedores__id=${datos.proveedor}&stocks_minimos__almacen__id=${datos.almacen}`;
+    useEffect(() => {
+        const filtro = construirFiltro(datos);
+        actualizaFiltro(filtro);
+    }, [ datos.empresa, datos.zona, datos.seccion, datos.equipo, datos.tipo_repuesto, datos.proveedor, datos.almacen, datos.critico, datos.descatalogado, datos.id, numeroBar]);
+
+    useEffect(() => {
+        const debounceFiltro = debounce(() => {
+            const filtro = construirFiltro(datos);
+            actualizaFiltro(filtro);
+        }, 500);
+
+        debounceFiltro();
+        return () => debounceFiltro.cancel();
+    }, [datos.nombre, datos.nombre_comun, datos.modelo_proveedor, datos.fabricante]);
+
+    const construirFiltro = (datos) => {
+        let filtro1 = `?precios__modelo_proveedor__icontains=${datos.modelo_proveedor}&nombre__icontains=${datos.nombre}&nombre_comun__icontains=${datos.nombre_comun}&precios__fabricante__icontains=${datos.fabricante}&id=${datos.id}&es_critico=${datos.critico}&descatalogado=${datos.descatalogado}&tipo_repuesto=${datos.tipo_repuesto}&proveedores__id=${datos.proveedor}&stocks_minimos__almacen__id=${datos.almacen}`;
+        
         let filtro2 = `&equipos__seccion__zona__empresa__id=${datos.empresa}`;
-        if (datos.empresa !== ''){
-            filtro2 = filtro2 + `&equipos__seccion__zona__id=${datos.zona}`;
-            if (datos.zona !== ''){
-                filtro2 = filtro2 + `&equipos__seccion__id=${datos.seccion}`;
-                if (datos.seccion !== ''){
-                    filtro2 = filtro2 + `&equipos__id=${datos.equipo}`
+        if (datos.empresa !== '') {
+            filtro2 += `&equipos__seccion__zona__id=${datos.zona}`;
+            if (datos.zona !== '') {
+                filtro2 += `&equipos__seccion__id=${datos.seccion}`;
+                if (datos.seccion !== '') {
+                    filtro2 += `&equipos__id=${datos.equipo}`;
                 }
             }
         }
-        
-        const filtro = filtro1 + filtro2;
-        
-        actualizaFiltro(filtro);
-    },[datos, numeroBar]);
 
+        return filtro1 + filtro2;
+    };
 
     const handleInputChange = (event) => {
         setDatos({
