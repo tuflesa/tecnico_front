@@ -164,7 +164,7 @@ const ListaTrazabilidad = ({repuesto, showTrazabilidad, handlerListCancelar, alm
                                             <tr key={movimiento.id}>                                            
                                                 <td>{invertirFecha(String(movimiento.fecha))}</td>
                                                 <td>{movimiento.usuario}</td>                                          
-                                                <td>{movimiento.linea_inventario?movimiento.albaran : movimiento.linea_salida?movimiento.albaran : movimiento.linea_pedido?movimiento.albaran : ''}</td>
+                                                <td>{movimiento.linea_inventario?movimiento.albaran : movimiento.linea_salida?(movimiento.albaran)+(movimiento.linea_salida.consumido_en?" / consumido en: ":'')+(movimiento.linea_salida.consumido_en?movimiento.linea_salida.consumido_en:''): movimiento.linea_pedido?movimiento.albaran : ''}</td>
                                                 <td>{movimiento.alm}</td>
                                                 <td>{movimiento.cantidad}</td>
                                                 <td>{movimiento.stock}</td>
