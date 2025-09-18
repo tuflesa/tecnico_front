@@ -98,6 +98,7 @@ const ManLineasListado = () => {
                 r['parte_tip']=r.parte.tipo_nombre;
                 r['especial']=r.tarea.especialidad_nombre;
                 r['periodo']=r.tarea.tipo_periodo?r.tarea.tipo_periodo.nombre:'';
+                r['frecu']=r.tarea.periodo?r.tarea.periodo:'';
                 r['equipoT']=r.parte.seccion?r.parte.seccion.nombre + (r.parte.equipo?' - ' + r.parte.equipo.nombre:''):null;
                 r['maquina']=r.parte.seccion?r.parte.seccion.siglas_zona:null;
                 r['fecha_plani']=r.fecha_plan?invertirFecha(String(r.fecha_plan)):'';
@@ -225,6 +226,7 @@ const ManLineasListado = () => {
                             <ExcelColumn label="Tipo" value="parte_tip"/>
                             <ExcelColumn label="Especialidad" value="especial"/>
                             <ExcelColumn label="Periodo" value="periodo"/>
+                            <ExcelColumn label="Frecuencia" value="frecu"/>
                             <ExcelColumn label="Maquina" value="maquina"/>
                             <ExcelColumn label="Equipo" value="equipoT"/>  
                             <ExcelColumn label="Fecha Planificación" value="fecha_plani"/>
