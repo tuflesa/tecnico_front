@@ -1,10 +1,13 @@
 import React from 'react';
-import { Form } from 'react-bootstrap';
+import { Form, Button } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 
 const EstadoActual = ({ estado, seleccionLinea }) => {
     return (
         <div>
-            <h4>{estado.zona.siglas}</h4>
+            <Link to={`/velocidad/estado/${estado.zona.id}`} target="_blank" rel="noopener noreferrer">
+                <Button>{estado.zona.siglas}</Button>
+            </Link>
             <h4>{estado.velocidad_actual && estado.velocidad_actual.toFixed(2)}</h4>
             <Form.Check type="checkbox" 
                         label="Ver"

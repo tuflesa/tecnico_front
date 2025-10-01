@@ -81,11 +81,20 @@ const GraficoVelocidad = () => {
                 const inicio = moment(filtro.fecha + ' ' + filtro.hora_inicio,'YYYY-MM-DD HH:mm');
                 const fin = moment(filtro.fecha + ' ' + filtro.hora_fin,'YYYY-MM-DD HH:mm');
                 const ahora = moment();
-                if (puntos.length>0 && ahora.isAfter(inicio) && ahora.isBefore(fin)) {
-                    puntos.push({
-                        x: new Date(),
-                        y: puntos[puntos.length -1].y
-                    });
+                if (puntos.length>0){
+                    if(ahora.isAfter(inicio) && ahora.isBefore(fin)) {
+                        console.log('Añadir punto ahora ...');
+                        puntos.push({
+                            x: new Date(),
+                            y: puntos[puntos.length -1].y
+                        });
+                    }
+                    else {
+                        puntos.push({
+                            x: new Date(fin.format("YYYY-MM-DD HH:mm:ss")),
+                            y: puntos[puntos.length -1].y
+                        });
+                    }
                 }
 
                 return (
@@ -107,7 +116,7 @@ const GraficoVelocidad = () => {
             // console.log(datos);   
             setRegistros(datos);
         });
-    },[filtro, estados, actualizar, token]);
+    },[filtro, actualizar, token]);
 
     useEffect(()=>{
         const hoy = moment().format('YYYY-MM-DD');
@@ -140,6 +149,11 @@ const GraficoVelocidad = () => {
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     },[token, filtro.empresa, lineas, actualizar]);
+
+    useEffect(()=>{
+        console.log('cambio de fecha, hora inicio o hora fin');
+
+    },[filtro.fecha, filtro.hora_inicio, filtro.hora_fin]);
 
     const actualizarGrafico = () => {
         // console.log(actualizar);

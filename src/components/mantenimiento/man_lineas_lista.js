@@ -256,6 +256,7 @@ const ManLineasListado = () => {
                             <tr>
                                 <th>Pr.</th>
                                 <th>+/-</th>
+                                <th>Id</th>
                                 <th>Parte</th>
                                 <th>Tarea</th>
                                 <th>Tipo</th>
@@ -278,6 +279,7 @@ const ManLineasListado = () => {
                                             <DashSquare className="mr-3 pencil"  onClick={event => {updateCantidad(-1, linea)}} />
                                             <HandThumbsUpFill className="mr-3 pencil" onClick= {async => {ActualizarPrioridad(linea)}}/>
                                         </td>
+                                        <td>{linea.id}</td>
                                         <td>{linea.parte.nombre}</td>
                                         <td>{linea.tarea.nombre}</td>
                                         <td>{linea.parte.tipo_nombre}</td>

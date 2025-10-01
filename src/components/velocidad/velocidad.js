@@ -7,7 +7,7 @@ const Velocidad = () => {
     return (
         <React.Fragment>
             <Switch>
-                <Route path='/velocidad/estado' component={GraficoEstado} />
+                <Route path='/velocidad/estado/:id' component={GraficoEstado} />
                 <Route path='/velocidad' component={GraficoVelocidad} />
             </Switch>
         </React.Fragment>
