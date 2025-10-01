@@ -11,7 +11,7 @@ const ManNotificacionesLista = () => {
     const [user] = useCookies(['tec-user']);
     
     const [notas, setNotas]  = useState(null);
-    const [filtroBase, setFiltroBase] = useState(`?empresa__id=${user['tec-user'].perfil.empresa.id}&finalizado=${false}&descartado=${false}`);
+    const [filtroBase, setFiltroBase] = useState(`?empresa__id=${user['tec-user'].perfil.empresa.id}&finalizado=${false}&descartado=${false}&zona__id=${user['tec-user'].perfil.zona?user['tec-user'].perfil.zona.id:''}`);
     const [count, setCount] = useState(null);
     const [buscando, setBuscando] = useState(false);
     const [pagina, setPagina] = useState(1);
