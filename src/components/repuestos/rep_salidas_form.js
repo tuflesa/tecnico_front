@@ -129,6 +129,7 @@ const RepSalidas = ({alm}) => {
                 repuesto: l.repuesto,
                 almacen: l.almacen,
                 cantidad: l.cantidad,
+                consumido_en: l.consumido_en,
             }, {
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
@@ -332,17 +333,32 @@ const RepSalidas = ({alm}) => {
                                 <th>Stock Actual</th>                                
                                 <th>Crítico</th>
                                 <th>Cantidad</th>
+                                <th>Consumido en:</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {lineasSalida.map(linea => {
+                            {lineasSalida.map((linea, index)  => {
                                 return (
                                         <tr>
                                             <td>{linea.nombre}</td>
                                             <td>{linea.stock}</td>
                                             <td>{linea.critico}</td> 
-                                            <td>{linea.cantidad}</td>    
+                                            <td>{linea.cantidad}</td> 
+                                            <td>
+                                                <Form.Control
+                                                    type="text"
+                                                    value={linea.consumido_en || ""}
+                                                    onChange={e => {
+                                                    const nuevasLineas = [...lineasSalida];
+                                                    nuevasLineas[index] = {
+                                                        ...nuevasLineas[index],
+                                                        consumido_en: e.target.value,
+                                                    };
+                                                    setLineasSalida(nuevasLineas);
+                                                    }}
+                                                />
+                                            </td>  
                                             <td>
                                                 <PlusSquare className="mr-3 pencil"  onClick={event => {updateCantidad(1, linea)}} />
                                                 <DashSquare className="mr-3 pencil"  onClick={event => {updateCantidad(-1, linea)}} />
