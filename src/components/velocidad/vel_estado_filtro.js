@@ -1,38 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React from 'react';
 import { useCookies } from 'react-cookie';
 import { Container, Row, Col, Form } from 'react-bootstrap';
-import { BACKEND_SERVER } from '../../constantes';
 
 const EstadoFiltro = ({ actualizaFiltro, filtro }) => {
-    const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
-    const [empresas, setEmpresas] = useState([]);
-    
-    useEffect(() => {
-        axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            //console.log(res.data);
-            setEmpresas(res.data);
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    }, [token]);
 
     const handleInputChange = (event) => {
         actualizaFiltro({
             ...filtro,
             [event.target.name] : event.target.value
         })
-    }
-
-    const handleDisabled = () => {
-        return user['tec-user'].perfil.nivel_acceso.nombre === 'local'
     }
 
     return (

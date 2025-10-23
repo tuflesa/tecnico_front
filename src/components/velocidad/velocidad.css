@@ -15,9 +15,16 @@
     height: 320px;
   }
 
-  rect {
+  rect.listener {
     pointer-events: all;
     fill-opacity: 0;
     stroke-opacity: 0;
     z-index: 1;
   }
+
+  rect.fleje {
+  fill-opacity: 1;
+  stroke: black;
+  stroke-width: 2;
+  stroke-opacity: 1;
+}

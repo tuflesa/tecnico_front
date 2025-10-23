@@ -26,30 +26,31 @@ const GraficoVelocidad = () => {
     const [actualizar, setActualizar] = useState(true);
     const [estados, setEstados] = useState(null);
 
-    useEffect(()=>{
+    useEffect(() => {
         // console.log('Leer empresas');
-        filtro && axios.get(BACKEND_SERVER + `/api/velocidad/lineas/?zona__empresa=${filtro.empresa}`,{
+        filtro && axios.get(BACKEND_SERVER + `/api/velocidad/lineas/?zona__empresa=${filtro.empresa}`, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
-              }
+            }
         })
         .then(res => {
-            // console.log(res.data);
-            const states = res.data.map(linea => {
-                return (
-                    {
-                        ...linea,
-                        seleccion: true,
-                        velocidad_actual: null    
-                    }
-                )
-            });
-            // console.log(states);
+            const states = res.data
+                .map(linea => ({
+                    ...linea,
+                    seleccion: true,
+                    velocidad_actual: null
+                }))
+                .sort((a, b) => {
+                    const siglaA = a.zona?.siglas?.toUpperCase() || '';
+                    const siglaB = b.zona?.siglas?.toUpperCase() || '';
+                    return siglaA.localeCompare(siglaB);
+                });
+
+            console.log(states);
             setEstados(states);
             setLineas(res.data);
         });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    },[token, filtro.empresa]);
+    }, [filtro, token]);
 
     useEffect(()=>{
         // console.log('Leer registros');
@@ -116,7 +117,7 @@ const GraficoVelocidad = () => {
             // console.log(datos);   
             setRegistros(datos);
         });
-    },[filtro, actualizar, token]);
+    },[filtro, actualizar, token, estados]);
 
     useEffect(()=>{
         const hoy = moment().format('YYYY-MM-DD');

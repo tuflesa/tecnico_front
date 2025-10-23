@@ -30,7 +30,7 @@ const useResizeObserver = (ref) => {
     return dimensions;
   };
 
-const LineChart = ({data, fecha, hora_inicio, hora_fin}) => {
+const StateChart = ({data, flejes, fecha, hora_inicio, hora_fin}) => {
     const svgRef = useRef();
     const wrapperRef = useRef();
     const dimensions = useResizeObserver(wrapperRef);
@@ -47,6 +47,7 @@ const LineChart = ({data, fecha, hora_inicio, hora_fin}) => {
         const svg =svgRef.current;
         
         // console.log(dimensions);
+        console.log(flejes);
 
         const inicio = moment(fecha + ' ' + hora_inicio)
         const fin = moment(fecha + ' ' + hora_fin)
@@ -57,7 +58,7 @@ const LineChart = ({data, fecha, hora_inicio, hora_fin}) => {
             .range([0, innerWidth]);
         
         const yScale = scaleLinear()
-            .domain([0, 100])
+            .domain([-40, 100])
             .range([innerHeight, 0]);
 
         const ejeX = axisBottom(xScale);
@@ -128,12 +129,25 @@ const LineChart = ({data, fecha, hora_inicio, hora_fin}) => {
             .attr("fill", value => value.color)
             .attr("class", value => 't-' + value.siglas)
             .text('');
+
+        // Dibujar Flejes
+        flejes && select(svg).select('.grafico')
+          .selectAll('rect.fleje')
+          .data(flejes)
+          .join('rect')
+          .attr("class", "fleje")
+          .attr("x", f => xScale(f.x_in))
+          .attr("y", f => yScale(f.y_in))
+          .attr("width", f => xScale(f.x_out) - xScale(f.x_in))
+          .attr("height", f => yScale(f.y_in) - yScale(f.y_out))
+          .attr("fill", f => f.color);
         
         // Lisening rectangles: para saber cuando entra y sale el ratón
         data && select(svg).select('.grafico')
-            .selectAll('rect')
+            .selectAll('rect.listener')
             .data(data)
             .join('rect')
+            .attr("class", "listener")
             .attr("width", dimensions.width)
             .attr("height", dimensions.height)
             .on("mousemove", event => {
@@ -203,4 +217,4 @@ const LineChart = ({data, fecha, hora_inicio, hora_fin}) => {
     );
 }
 
-export default LineChart;
+export default StateChart;
