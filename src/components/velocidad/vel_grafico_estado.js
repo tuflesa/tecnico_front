@@ -9,6 +9,7 @@ import { useParams } from 'react-router-dom';
 import EstadoFiltro from './vel_estado_filtro';
 import useInterval from '../utilidades/use_interval';
 import StateChart from './state_chart ';
+import FlejesAcu from "../trazabilidad/TR_FlejesAcu";
 
 const GraficoEstado = () => {
     const [token] = useCookies(['tec-token']);
@@ -48,12 +49,18 @@ const GraficoEstado = () => {
         if (!estado) return;
         console.log(estado);
         const datosVelocidad = (estado) => {
+            const inicio = moment(filtro.fecha + ' ' + filtro.hora_inicio,'YYYY-MM-DD HH:mm');
+            const fin = moment(filtro.fecha + ' ' + filtro.hora_fin,'YYYY-MM-DD HH:mm');
+            const ahora = moment();
             const siglas = estado.maquina.siglas;
             const color = 'red';
             const puntos = estado.velocidad.map( dato => {
                 const fecha = dato.fecha.split('-');
                 const hora = dato.hora.split(':');
-                const x = new Date(fecha[0], fecha[1]-1, fecha[2], hora[0], hora[1], hora[2]);
+                let x = new Date(fecha[0], fecha[1]-1, fecha[2], hora[0], hora[1], hora[2]);
+                if (moment(x).isBefore(inicio)) {
+                    x = inicio.toDate();
+                }
                 const y = dato.velocidad;
 
                 return ({
@@ -61,9 +68,7 @@ const GraficoEstado = () => {
                     y: y
                 });
             });
-            const inicio = moment(filtro.fecha + ' ' + filtro.hora_inicio,'YYYY-MM-DD HH:mm');
-            const fin = moment(filtro.fecha + ' ' + filtro.hora_fin,'YYYY-MM-DD HH:mm');
-            const ahora = moment();
+
             if (puntos.length>0){
                 if(ahora.isAfter(inicio) && ahora.isBefore(fin)) {
                     // console.log('Añadir punto ahora ...');
@@ -92,21 +97,27 @@ const GraficoEstado = () => {
         const datosFlejes = (estado) => {
             const puntos = estado.flejes.map( f => {
                 // console.log(f);
+                const inicio = moment(filtro.fecha + ' ' + filtro.hora_inicio,'YYYY-MM-DD HH:mm');
+                const fin = moment(filtro.fecha + ' ' + filtro.hora_fin,'YYYY-MM-DD HH:mm');
+                const ahora = moment();
                 const fecha_entrada = f.fecha_entrada.split('-');
                 const hora_entrada = f.hora_entrada.split(':');
-                const x_in = new Date(fecha_entrada[0], fecha_entrada[1]-1, fecha_entrada[2], hora_entrada[0], hora_entrada[1], hora_entrada[2]);
+                let x_in = moment(new Date(fecha_entrada[0], fecha_entrada[1]-1, fecha_entrada[2], hora_entrada[0], hora_entrada[1], hora_entrada[2]));
+                if (x_in.isBefore(inicio)) {
+                    x_in = inicio;
+                }
                 const y_in = -20;
                 let x_out;
                 const y_out = -10;
                 if (f.fecha_salida) {
                     const fecha_salida = f.fecha_salida.split('-');
                     const hora_salida = f.hora_salida.split(':');
-                    x_out = new Date(fecha_salida[0], fecha_salida[1]-1, fecha_salida[2], hora_salida[0], hora_salida[1], hora_salida[2]);
+                    x_out = moment(new Date(fecha_salida[0], fecha_salida[1]-1, fecha_salida[2], hora_salida[0], hora_salida[1], hora_salida[2]));
+                    if (x_out.isAfter(fin)) {
+                        x_out = fin;
+                    }
                 }
                 else {
-                    const inicio = moment(filtro.fecha + ' ' + filtro.hora_inicio,'YYYY-MM-DD HH:mm');
-                    const fin = moment(filtro.fecha + ' ' + filtro.hora_fin,'YYYY-MM-DD HH:mm');
-                    const ahora = moment();
                     if(ahora.isAfter(inicio) && ahora.isBefore(fin)) {
                         console.log('Añadir punto ahora ...');
                         x_out = new Date();
@@ -115,13 +126,24 @@ const GraficoEstado = () => {
                         x_out = new Date(fin.format("YYYY-MM-DD HH:mm:ss"));
                     }
                 }
+
+                // Color
+                let color = 'orange';
+                if ((f.metros_medido>f.metros_teorico) && (f.metros_medido<=f.metros_teorico*1.1)){
+                    color = 'green';
+                }
+                if (f.metros_medido > f.metros_teorico*1.1) {
+                    color = 'red';
+                }
                 
                 return ({
                     x_in: x_in,
                     y_in: y_in,
                     x_out: x_out,
                     y_out: y_out,
-                    color: 'grey'
+                    color: color,
+                    descripcion: f.descripcion,
+                    pos: f.pos
                 });
             });
 
@@ -156,6 +178,13 @@ const GraficoEstado = () => {
                                 hora_fin={filtro.hora_fin} />
                     </Col>
                 </Row> 
+                <Row>
+                    <Col>
+                        <div style={{ height: '200px', overflowY: 'auto' }}>
+                            <FlejesAcu Flejes={estado && estado.flejes} />
+                        </div>
+                    </Col>
+                </Row>
             </Container>
         </React.Fragment>
     )

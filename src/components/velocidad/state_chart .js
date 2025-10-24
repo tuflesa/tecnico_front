@@ -79,12 +79,13 @@ const StateChart = ({data, flejes, fecha, hora_inicio, hora_fin}) => {
         function make_x_gridlines() {
             return axisBottom(xScale)
                 .ticks(n_ticks_x)
-          }
+        }
 
         function make_y_gridlines() {
+            const ticks = yScale.ticks(10).filter(t => t > 0); // solo y > 0
             return axisLeft(yScale)
-                .ticks(10)
-          }
+              .tickValues(ticks);
+        }
 
         const myLine = line()
             .curve(curveStepAfter)
@@ -97,6 +98,8 @@ const StateChart = ({data, flejes, fecha, hora_inicio, hora_fin}) => {
                     return yScale(0);
                 }
             });
+        
+        const gridHeightYPositivos = yScale(0); // posición en píxeles de y = 0
 
         // console.log(data);
         data && select(svg).select('.grafico')
@@ -140,7 +143,34 @@ const StateChart = ({data, flejes, fecha, hora_inicio, hora_fin}) => {
           .attr("y", f => yScale(f.y_in))
           .attr("width", f => xScale(f.x_out) - xScale(f.x_in))
           .attr("height", f => yScale(f.y_in) - yScale(f.y_out))
-          .attr("fill", f => f.color);
+          .attr("fill", f => f.color)
+          .on("mouseover", function(event, f) {
+              select(svg).select('.grafico')
+                .append("text")
+                .attr("class", "fleje-label")
+                .attr("x", xScale(f.x_in) + 5)
+                .attr("y", yScale(f.y_in) - 5)
+                .attr("fill", "black")
+                .attr("font-size", "12px")
+                .text(f.descripcion);
+            })
+            .on("mouseout", function() {
+              select(svg).select('.grafico').selectAll(".fleje-label").remove();
+            });
+
+        // Texto centrado en cada rectángulo
+        flejes && select(svg).select('.grafico')
+          .selectAll('text.fleje-pos')
+          .data(flejes)
+          .join('text')
+          .attr("class", "fleje-pos")
+          .attr("x", f => xScale(f.x_in) + (xScale(f.x_out) - xScale(f.x_in)) / 2)
+          .attr("y", f => yScale(f.y_in) + ((yScale(f.y_in) - yScale(f.y_out)) / 2))
+          .attr("text-anchor", "middle")
+          .attr("dominant-baseline", "middle")
+          .attr("fill", "white") // o negro, según contraste
+          .attr("font-size", "12px")
+          .text(f => f.pos);
         
         // Lisening rectangles: para saber cuando entra y sale el ratón
         data && select(svg).select('.grafico')
@@ -148,8 +178,8 @@ const StateChart = ({data, flejes, fecha, hora_inicio, hora_fin}) => {
             .data(data)
             .join('rect')
             .attr("class", "listener")
-            .attr("width", dimensions.width)
-            .attr("height", dimensions.height)
+            .attr("width", innerWidth) //dimensions.width)
+            .attr("height", innerHeight - yScale(60)) //dimensions.height)
             .on("mousemove", event => {
               const [xCoord] = pointer(event, this);
               const bisectDate = bisector(d => d.x).left;
@@ -180,12 +210,13 @@ const StateChart = ({data, flejes, fecha, hora_inicio, hora_fin}) => {
 
         select(svg).select('.grid-x')
             // .attr("class","rejilla")
-            .attr('transform',`translate(${margin.left},${margin.top + innerHeight})`)
+            .attr('transform',`translate(${margin.left},${margin.top + yScale(0)})`)
             .style("stroke-dasharray",("3,3"))
             .call(make_x_gridlines()
-            .tickSize(-innerHeight)
-            .tickFormat("")
-            );
+              // .tickSize(-innerHeight)
+              .tickSize(-gridHeightYPositivos) // solo hasta y > 0
+              .tickFormat("")
+              );
 
         select(svg).select('.grid-y')
             // .attr("class","rejilla")
@@ -195,8 +226,7 @@ const StateChart = ({data, flejes, fecha, hora_inicio, hora_fin}) => {
               .tickSize(-innerWidth)
               .tickFormat("")
             );
-
-        
+            
     },[data, fecha, hora_fin, hora_inicio, dimensions]);
 
     return (

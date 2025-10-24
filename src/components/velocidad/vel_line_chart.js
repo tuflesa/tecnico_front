@@ -131,9 +131,10 @@ const LineChart = ({data, fecha, hora_inicio, hora_fin}) => {
         
         // Lisening rectangles: para saber cuando entra y sale el ratón
         data && select(svg).select('.grafico')
-            .selectAll('rect')
+            .selectAll('rect.listener')
             .data(data)
             .join('rect')
+            .attr("class", "listener")
             .attr("width", dimensions.width)
             .attr("height", dimensions.height)
             .on("mousemove", event => {
