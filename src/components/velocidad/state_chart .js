@@ -5,6 +5,7 @@ import {
     scaleLinear,
     axisBottom,
     axisLeft,
+    axisRight,
     line,
     curveStepAfter,
     pointer,
@@ -30,14 +31,14 @@ const useResizeObserver = (ref) => {
     return dimensions;
   };
 
-const StateChart = ({data, flejes, fecha, hora_inicio, hora_fin}) => {
+const StateChart = ({data, flejes, fecha, hora_inicio, hora_fin, maquina}) => {
     const svgRef = useRef();
     const wrapperRef = useRef();
     const dimensions = useResizeObserver(wrapperRef);
 
     // Cuando cambian los datos actualizamos el grafico
     useEffect(()=>{
-        if (!dimensions) return;
+        if (!dimensions || !maquina) return;
         const width = dimensions.width
             , height = dimensions.height
         const margin = {top: 20, right: 30, bottom: 20, left: 30};
@@ -58,12 +59,24 @@ const StateChart = ({data, flejes, fecha, hora_inicio, hora_fin}) => {
             .range([0, innerWidth]);
         
         const yScale = scaleLinear()
-            .domain([-40, 100])
+            .domain([-40, maquina.v_max])
             .range([innerHeight, 0]);
+
+        const yScalePotencia = scaleLinear().domain([0, maquina.hf_pmax]).range([yScale(0), 0]);
+        const yScaleFrecuencia = scaleLinear().domain([maquina.hf_fmin - 50, maquina.hf_fmax + 50]).range([yScale(0), 0]);
+        const yScalePresion = scaleLinear().domain([0, maquina.fuerza_max]).range([yScale(0), 0]);
 
         const ejeX = axisBottom(xScale);
         const ejeY = axisLeft(yScale)
           .tickValues(yScale.ticks(10).filter(t => t >= 0));
+
+        const ejePotencia = axisRight(yScalePotencia).ticks(5);
+        const ejeFrecuencia = axisRight(yScaleFrecuencia).ticks(5);
+        const ejePresion = axisRight(yScalePresion).ticks(5);
+
+        const offsetPotencia = margin.left + innerWidth;
+        const offsetFrecuencia = margin.left + innerWidth + 40;
+        const offsetPresion = margin.left + innerWidth + 80;
 
         select(svg).select('.grafico')
         .attr('transform', `translate(${margin.left},${margin.top})`);
@@ -75,6 +88,19 @@ const StateChart = ({data, flejes, fecha, hora_inicio, hora_fin}) => {
         select(svg).select('.eje-y')
         .attr('transform', `translate(${margin.left},${margin.top})`)
         .call(ejeY);
+
+        select(svg).select('.eje-potencia')
+        .attr('transform', `translate(${offsetPotencia},${margin.top})`)
+        .call(ejePotencia);
+
+      select(svg).select('.eje-frecuencia')
+        .attr('transform', `translate(${offsetFrecuencia},${margin.top})`)
+        .call(ejeFrecuencia);
+
+      select(svg).select('.eje-presion')
+        .attr('transform', `translate(${offsetPresion},${margin.top})`)
+        .call(ejePresion);
+
 
         function make_x_gridlines() {
             return axisBottom(xScale)
@@ -226,7 +252,57 @@ const StateChart = ({data, flejes, fecha, hora_inicio, hora_fin}) => {
               .tickSize(-innerWidth)
               .tickFormat("")
             );
-            
+        
+        // Añadir texto para Velocidad
+        select(svg).select('.eje-y')
+          .append('text')
+          .attr('x', 10)
+          .attr('y', -10)
+          .attr('text-anchor', 'middle')
+          .attr('fill', 'black')
+          .attr('font-size', '12px')
+          .text('V (m/min)');
+
+        // Añadir texto para Potencia
+        select(svg).select('.eje-potencia')
+          .append('text')
+          .attr('x', 0)
+          .attr('y', -10)
+          .attr('text-anchor', 'middle')
+          .attr('fill', 'black')
+          .attr('font-size', '12px')
+          .text('P (KW)');
+
+          // Añadir texto para Frecuencia
+          select(svg).select('.eje-frecuencia')
+            .append('text')
+            .attr('x', 10)
+            .attr('y', -10)
+            .attr('text-anchor', 'middle')
+            .attr('fill', 'black')
+            .attr('font-size', '12px')
+            .text('Fq (KHz)');
+
+          // Añadir texto para Presión
+          select(svg).select('.eje-presion')
+            .append('text')
+            .attr('x', 20)
+            .attr('y', -10)
+            .attr('text-anchor', 'middle')
+            .attr('fill', 'black')
+            .attr('font-size', '12px')
+            .text('F (KN)');
+
+        // Añadir texto para Flejes
+        select(svg).select('.eje-y')
+          .append('text')
+          .attr('x', -20)
+          .attr('y', yScale(-25))
+          .attr('text-anchor', 'middle')
+          .attr('fill', 'black')
+          .attr('font-size', '12px')
+          .text('Flejes');
+
     },[data, fecha, hora_fin, hora_inicio, dimensions]);
 
     return (
@@ -242,6 +318,9 @@ const StateChart = ({data, flejes, fecha, hora_inicio, hora_fin}) => {
                 <g className='grid-y grid'></g>
                 <g className='eje-x'></g>
                 <g className='eje-y'></g>  
+                <g class="eje-potencia"></g>
+                <g class="eje-frecuencia"></g>
+                <g class="eje-presion"></g>
             </svg>
         </div>
     );

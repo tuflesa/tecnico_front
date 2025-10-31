@@ -88,7 +88,7 @@ const GraficoEstado = () => {
             return (
                 [{
                     siglas: siglas,
-                    color: color,
+                    color: estado.maquina.color,
                     datos: puntos
                 }]
             )
@@ -175,7 +175,8 @@ const GraficoEstado = () => {
                                 flejes={flejes}
                                 fecha={filtro.fecha}
                                 hora_inicio={filtro.hora_inicio}
-                                hora_fin={filtro.hora_fin} />
+                                hora_fin={filtro.hora_fin}
+                                maquina = {estado&&estado.maquina} />
                     </Col>
                 </Row> 
                 <Row>
