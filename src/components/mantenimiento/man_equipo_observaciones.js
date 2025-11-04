@@ -4,19 +4,63 @@ import axios from 'axios';
 import { Modal, Button, Form, Container, Row, Col } from 'react-bootstrap';
 import { BACKEND_SERVER } from '../../constantes';
 
-const ObservacionesModal = ({ show, onHide, linea, filtro, parte, onUpdateTarea, showFinalizar = true, showConsumibles = true, // prop para mostrar/ocultar botón consumibles
+const ObservacionesModal = ({ show, onHide, linea, filtro, parte, onUpdateTarea, showFinalizar = true, showConsumibles = true, // para mostrar/ocultar botón consumibles
     
 }) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
     const [hoy] = useState(new Date());
     const [linea_completa, setLinea_completa] = useState(linea);
+    const [yaGuardado, setYaGuardado] = useState(false);
     
     const [datos, setDatos] = useState({
         fecha_fin: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
         observaciones: linea_completa?linea_completa.observaciones_trab:'',
         trabajador: user['tec-user'].perfil.usuario,
     });
+
+    useEffect(() => {
+        const datosRetorno = sessionStorage.getItem('datos_retorno_salida');
+        if (datosRetorno && !yaGuardado) {
+            const datosRecuperados = JSON.parse(datosRetorno);
+            
+            if (datosRecuperados.volverConObservacion) {
+                const lineaAGuardar = datosRecuperados.linea_completa;
+                const observacionesAGuardar = datosRecuperados.observaciones;
+                
+                setDatos(prevDatos => ({
+                    ...prevDatos,
+                    observaciones: observacionesAGuardar || ''
+                }));
+                
+                setLinea_completa(lineaAGuardar);
+                
+                // Guardar directamente en el backend si hay datos válidos
+                if (lineaAGuardar && lineaAGuardar.id && observacionesAGuardar) {
+                    setYaGuardado(true); // Marcar como guardado para evitar duplicados
+                    
+                    axios.patch(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_contrabajador/${lineaAGuardar.id}/`, {
+                        observaciones_trab: observacionesAGuardar,
+                    }, {
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                        }
+                    })
+                    .then(r => {
+                        setLinea_completa(r.data);
+                        if (onUpdateTarea) {
+                            onUpdateTarea();
+                        }
+                        alert('Observaciones guardadas correctamente');
+                    })
+                    .catch(err => {
+                        alert('Error al guardar observaciones');
+                    });
+                }
+                sessionStorage.removeItem('datos_retorno_salida');
+            }
+        }
+    }, [show]);
 
     // Actualizar observaciones cuando cambie linea_completa
     useEffect(() => {
@@ -70,7 +114,6 @@ const ObservacionesModal = ({ show, onHide, linea, filtro, parte, onUpdateTarea,
                     }
                 })
                 .then(r => {
-                    console.log('Trabajador finalizado', r.data);
                 })
                 .catch(err => {
                     console.log(err);
@@ -88,7 +131,7 @@ const ObservacionesModal = ({ show, onHide, linea, filtro, parte, onUpdateTarea,
             })
             .then(re => {
                 if (re.data.parte.tipo === 1 || re.data.parte.tipo === 7) {
-                    // Lógica para crear nueva línea preventiva
+                    // nueva línea preventiva
                     var fechaString = null;
                     var diaEnMilisegundos = 1000 * 60 * 60 * 24;
                     var fecha = Date.parse(re.data.fecha_fin);
@@ -117,7 +160,7 @@ const ObservacionesModal = ({ show, onHide, linea, filtro, parte, onUpdateTarea,
                         });
                     }
                 } else {
-                    // Lógica para verificar si todas las líneas del parte están terminadas
+                    // verificar si todas las líneas del parte están terminadas
                     axios.get(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_trabajo/?parte=${re.data.parte.id}`, {
                         headers: {
                             'Authorization': `token ${token['tec-token']}`
@@ -151,13 +194,6 @@ const ObservacionesModal = ({ show, onHide, linea, filtro, parte, onUpdateTarea,
                     });
                 }
                 handleClose();
-                /* // actualizar datos
-                if (onUpdateTarea) {
-                    onUpdateTarea();
-                }
-                
-                // Cerrar modal
-                onHide(); */
             })
             .catch(err => {
                 console.log(err);
@@ -172,7 +208,8 @@ const ObservacionesModal = ({ show, onHide, linea, filtro, parte, onUpdateTarea,
             linea_completa,
             volverConObservacion: true,
             observaciones_temp: datos.observaciones,
-            filtro: filtro
+            filtro: filtro,
+            linea: linea_completa
         };
         sessionStorage.setItem('datos_salida', JSON.stringify(dataToStore));
         window.location.href = `/repuestos/salidas/`;
@@ -207,7 +244,7 @@ const ObservacionesModal = ({ show, onHide, linea, filtro, parte, onUpdateTarea,
             animation={false}
         >
             <Modal.Header closeButton>
-                <Modal.Title>Conclusiones de la tarea</Modal.Title>
+                <Modal.Title>Añadir a la tarea</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Container>
@@ -230,13 +267,13 @@ const ObservacionesModal = ({ show, onHide, linea, filtro, parte, onUpdateTarea,
             </Modal.Body>
             <Modal.Footer>
                 {showConsumibles && (
-                    <Button variant="info" onClick={handlerConsumibles}>
-                        Consumibles
-                    </Button>
+                    <Form.Group id="observaciones">
+                        <Form.Label>Add comentarios, anotaciones, salidad de repuestos, gastos.</Form.Label>
+                        <Button variant="info" onClick={handlerConsumibles}>
+                            Add Comentarios y salidas
+                        </Button>
+                    </Form.Group>
                 )}
-                <Button variant="info" onClick={GuardarComentarios}>
-                    Guardar Comentarios
-                </Button>
             </Modal.Footer>
             <Modal.Footer>
                 {showFinalizar && (

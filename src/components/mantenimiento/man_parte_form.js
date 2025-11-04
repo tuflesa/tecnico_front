@@ -6,6 +6,7 @@ import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import LineaTareaNueva from './man_parte_lineatarea';
 import LineasPartesMov from './man_parte_lineas_mov';
+import { line } from 'd3';
 
 const ParteForm = ({parte, setParte, op}) => {
     const [token] = useCookies(['tec-token']);
@@ -30,6 +31,35 @@ const ParteForm = ({parte, setParte, op}) => {
     const [consumibles, setConsumibles] = useState([]);
     const [eliminar_consumible, setEliminarConsumible] = useState(false);
     const [errores, setErrores] = useState({}); // Estado para guardar errores
+    const [linea_GastoEditar, setLineaGastoEditar] = useState(null);
+
+    const calcularTotalConsumibles = () => {
+        if (!consumibles || consumibles.length === 0) return 0;
+        
+        return consumibles.reduce((total, consumible) => {
+            const precio = consumible.linea_salida.precio_ultima_compra || 0;
+            const descuento = consumible.linea_salida.descuento_ultima_compra || 0;
+            const cantidad = consumible.linea_salida.cantidad || 0;
+            
+            const subtotal = cantidad * precio;
+            const descuentoAplicado = subtotal * (descuento / 100);
+            const totalLinea = subtotal - descuentoAplicado;
+            
+            return total + totalLinea;
+        }, 0);
+    };
+
+    const calcularTotalGastos = () => {
+        if (!linea_GastoEditar || linea_GastoEditar.length === 0) return 0;
+        
+        return linea_GastoEditar.reduce((total, lineaGasto) => {
+            return total + (parseFloat(lineaGasto.total) || 0);
+        }, 0);
+    };
+
+    const totalConsumibles = calcularTotalConsumibles();
+    const totalGastos = calcularTotalGastos();
+    const totalGeneral = totalConsumibles + totalGastos;
 
     const [datos, setDatos] = useState({
         id: parte.id ? parte.id : null,
@@ -507,7 +537,6 @@ const ParteForm = ({parte, setParte, op}) => {
             setErrores({}); // Reiniciar errores si la petición es exitosa
         })
         .catch(err => { 
-            //setShowError(true);
             if (err.response && err.response.data) {
                 setErrores(err.response.data); // Guardar los errores del backend
             } else {
@@ -603,7 +632,6 @@ const ParteForm = ({parte, setParte, op}) => {
               }     
         })
         .then( res => { 
-            //if(cambio_fecha){
             if(parte.fecha_prevista_inicio!==datos.fecha_prevista_inicio){
                 actualizarLinea();
             }
@@ -736,12 +764,6 @@ const ParteForm = ({parte, setParte, op}) => {
         return (user['tec-user'].perfil.puesto.nombre==='Mantenimiento')
     }
 
-/*     const handlerConsumibles = () => {
-        const Parte = parte;
-        sessionStorage.setItem('parte', JSON.stringify(parte));
-        window.location.href = `/repuestos/salidas/`;
-    }; */
-
     const handlerConsumibles = () => {
         // Guardar datos en sessionStorage para RepSalidas
         const dataToStore = {
@@ -749,6 +771,18 @@ const ParteForm = ({parte, setParte, op}) => {
         };
         sessionStorage.setItem('datos_salida', JSON.stringify(dataToStore));
         window.location.href = `/repuestos/salidas/`;
+    };
+
+    const BorrarGasto = (lineaGasto) => {
+        axios.delete(BACKEND_SERVER + `/api/mantenimiento/lineas_gastos/${lineaGasto.id}/`,{            
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            } 
+        })
+        .then(r =>{
+            window.location.reload();
+        })
+        .catch (err=>{console.log((err));});
     };
 
     const BorrarConsumible = (consumible) => {
@@ -767,7 +801,7 @@ const ParteForm = ({parte, setParte, op}) => {
                 })
                 .then(res => {      
                     let id_stock = res.data[0].id;
-                    let stock_actual = res.data[0].stock_act + consumible.linea_salida.cantidad;
+                    let stock_actual = Number(res.data[0].stock_act) + Number(consumible.linea_salida.cantidad);
                     axios.patch(BACKEND_SERVER + `/api/repuestos/stocks_minimos/${id_stock}/`, {
                         stock_act: stock_actual
                     }, {
@@ -777,6 +811,7 @@ const ParteForm = ({parte, setParte, op}) => {
                     })
                     .then(rs => {
                         setEliminarConsumible(true);
+                        window.location.reload();
                     })
                     .catch(err => { 
                         console.log(err);
@@ -786,6 +821,18 @@ const ParteForm = ({parte, setParte, op}) => {
             .catch (err=>{console.log((err));});
         }
     };
+
+    useEffect(()=>{
+        parte && axios.get(BACKEND_SERVER + `/api/mantenimiento/lineas_gastos/?parte=${parte.id}`, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+                }     
+        })
+        .then( res => { 
+            setLineaGastoEditar(res.data);
+        })
+        .catch(err => { console.log(err);})
+    },[token]);
 
     return(
         <Container className='mt-5'>
@@ -1090,9 +1137,9 @@ const ParteForm = ({parte, setParte, op}) => {
                 </React.Fragment> 
             : null} 
             <Modal.Footer>                    
-                <Button variant="info" onClick={handlerConsumibles}> Consumibles </Button> 
+                <Button variant="info" onClick={handlerConsumibles}> Add Gastos y/o Comentarios </Button> 
             </Modal.Footer>
-            {parte.id ? 
+            {parte.id && consumibles?.length>0? 
                 <React.Fragment>
                     <Form.Row>
                         <Col>
@@ -1100,9 +1147,12 @@ const ParteForm = ({parte, setParte, op}) => {
                                 <thead>
                                     <tr>
                                         <th>Responsable</th>
-                                        <th>Almacén</th>
                                         <th>Descripción</th>
+                                        <th>Almacén</th>
                                         <th>Cantidad</th>
+                                        <th>Precio</th>
+                                        <th>Dto.</th>
+                                        <th>Total</th>
                                         {soyTecnico?<th>Acciones</th>:''}
                                     </tr>
                                 </thead>                                                                             
@@ -1111,18 +1161,89 @@ const ParteForm = ({parte, setParte, op}) => {
                                         return (
                                             <tr key={consumible.id}>
                                                 <td>{consumible.usuario.get_full_name}</td>
-                                                <td>{consumible.almacen.nombre}</td>
                                                 <td>{consumible.linea_salida.repuesto.nombre}</td>
+                                                <td>{consumible.almacen.nombre}</td>
                                                 <td>{consumible.linea_salida.cantidad}</td>
+                                                <td>{consumible.linea_salida.precio_ultima_compra? consumible.linea_salida.precio_ultima_compra + '€': 0.00+ '€'}</td>
+                                                <td>{consumible.linea_salida.descuento_ultima_compra? consumible.linea_salida.descuento_ultima_compra + '€': 0.00+ '%'}</td>
+                                                <td>{(consumible.linea_salida.cantidad * consumible.linea_salida.precio_ultima_compra)-(consumible.linea_salida.cantidad * consumible.linea_salida.precio_ultima_compra*consumible.linea_salida.descuento_ultima_compra/100) + '€'}</td>
                                                 {soyTecnico?<td>{<Trash className="mr-3 pencil"  onClick={event =>{BorrarConsumible(consumible)}} />}</td>:''}
                                             </tr>
                                         )})
                                     }
+                                    <tr style={{ fontWeight: 'bold', backgroundColor: '#e9ecef' }}>
+                                        <td colSpan={soyTecnico ? 6 : 6} style={{ textAlign: 'right' }}>
+                                            Subtotal Consumibles:
+                                        </td>
+                                        <td>{totalConsumibles.toFixed(2)} €</td>
+                                        {soyTecnico?<td></td>:''}
+                                    </tr>
                                 </tbody>
                             </Table>                                     
                         </Col>
                     </Form.Row>                                                
                 </React.Fragment> 
+            : null}
+            {parte.id && linea_GastoEditar?.length>0? 
+                <React.Fragment>
+                    <Form.Row>
+                        <Col>
+                            <Table striped bordered hover>
+                                <thead>
+                                    <tr>
+                                        <th style={{width:30}}>Responsable</th>
+                                        <th>Descripción</th>
+                                        <th style={{width:30}}>Cantidad</th>
+                                        <th style={{width:20}}>Precio</th>
+                                        <th style={{width:20}}>Dto.</th>
+                                        <th style={{width:30}}>Total</th>
+                                        {soyTecnico?<th>Acciones</th>:''}
+                                    </tr>
+                                </thead> 
+                                                                            
+                                <tbody>                                            
+                                    {linea_GastoEditar && linea_GastoEditar.map( lineaGastos => {
+                                        return (
+                                            <tr key={lineaGastos.id}>
+                                                <td>{lineaGastos.creado_por?.get_full_name}</td>
+                                                <td>{lineaGastos.descripcion}</td>
+                                                <td>{lineaGastos.cantidad}</td>
+                                                <td>{lineaGastos.precio+ '€'}</td>
+                                                <td>{lineaGastos.descuento + '%'}</td>
+                                                <td>{lineaGastos.total+ '€'}</td>
+                                                {soyTecnico?<td>{<Trash className="mr-3 pencil"  onClick={event =>{BorrarGasto(lineaGastos)}} />}</td>:''}
+                                            </tr>
+                                        )})
+                                    }
+                                    <tr style={{ fontWeight: 'bold', backgroundColor: '#e9ecef' }}>
+                                        <td colSpan={5} style={{ textAlign: 'right' }}>
+                                            Subtotal Gastos:
+                                        </td>
+                                        <td>{totalGastos.toFixed(2)} €</td>
+                                    </tr>
+                                </tbody>
+                            </Table>                                     
+                        </Col>
+                    </Form.Row>                                                
+                </React.Fragment> 
+            : null}
+            {parte.id && (consumibles.length > 0 || (linea_GastoEditar && linea_GastoEditar.length > 0))? 
+                <Row className="justify-content-end mt-4 mb-5">
+                    <Col xs={12} md={6} lg={4}>
+                        <Table bordered style={{ backgroundColor: '#d4edda' }}>
+                            <tbody>
+                                <tr style={{ fontWeight: 'bold', fontSize: '1.1em' }}>
+                                    <td style={{ textAlign: 'right', padding: '15px' }}>
+                                        TOTAL GENERAL:
+                                    </td>
+                                    <td style={{ textAlign: 'center', padding: '15px', fontSize: '1.2em' }}>
+                                        {totalGeneral.toFixed(2)} €
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </Table>
+                    </Col>
+                </Row>
             : null}
             <LineaTareaNueva     show={show_linea}
                                 handleCloseLinea ={cerrarAddLinea}
@@ -1135,17 +1256,6 @@ const ParteForm = ({parte, setParte, op}) => {
                                 tarea={lineaLineasTareas}
                                 parte={parte}
             />
-            {/* <Modal show={show_error} onHide={handleCloseError} backdrop="static" keyboard={ false } animation={false}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Error</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>Error al guardar formulario. Revise que todos los campos con asterisco esten cumplimentados</Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={handleCloseError}>
-                        Cerrar
-                    </Button>
-                </Modal.Footer>
-            </Modal> */}
         </Container>
     )
 }
