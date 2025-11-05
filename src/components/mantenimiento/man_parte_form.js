@@ -1142,6 +1142,9 @@ const ParteForm = ({parte, setParte, op}) => {
             {parte.id && consumibles?.length>0? 
                 <React.Fragment>
                     <Form.Row>
+                        <h5 className="pb-3 pt-1 mt-2">Consumibles:</h5>
+                    </Form.Row>
+                    <Form.Row>
                         <Col>
                             <Table bordered hover>
                                 <thead>
@@ -1153,7 +1156,7 @@ const ParteForm = ({parte, setParte, op}) => {
                                         <th>Precio</th>
                                         <th>Dto.</th>
                                         <th>Total</th>
-                                        {soyTecnico?<th>Acciones</th>:''}
+                                        {soyTecnico && <th style={{ width: "120px" }}>Acciones</th>}
                                     </tr>
                                 </thead>                                                                             
                                 <tbody>
@@ -1166,7 +1169,7 @@ const ParteForm = ({parte, setParte, op}) => {
                                                 <td>{consumible.linea_salida.cantidad}</td>
                                                 <td>{consumible.linea_salida.precio_ultima_compra? consumible.linea_salida.precio_ultima_compra + '€': 0.00+ '€'}</td>
                                                 <td>{consumible.linea_salida.descuento_ultima_compra? consumible.linea_salida.descuento_ultima_compra + '€': 0.00+ '%'}</td>
-                                                <td>{(consumible.linea_salida.cantidad * consumible.linea_salida.precio_ultima_compra)-(consumible.linea_salida.cantidad * consumible.linea_salida.precio_ultima_compra*consumible.linea_salida.descuento_ultima_compra/100) + '€'}</td>
+                                                <td>{(consumible.linea_salida.cantidad * consumible.linea_salida.precio_ultima_compra)-(consumible.linea_salida.cantidad * consumible.linea_salida.precio_ultima_compra*consumible.linea_salida.descuento_ultima_compra/100).toFixed(2) + '€'}</td>
                                                 {soyTecnico?<td>{<Trash className="mr-3 pencil"  onClick={event =>{BorrarConsumible(consumible)}} />}</td>:''}
                                             </tr>
                                         )})
@@ -1187,17 +1190,20 @@ const ParteForm = ({parte, setParte, op}) => {
             {parte.id && linea_GastoEditar?.length>0? 
                 <React.Fragment>
                     <Form.Row>
+                        <h5 className="pb-3 pt-1 mt-2">Gastos:</h5>
+                    </Form.Row>
+                    <Form.Row>
                         <Col>
-                            <Table striped bordered hover>
+                            <Table bordered hover>
                                 <thead>
                                     <tr>
-                                        <th style={{width:30}}>Responsable</th>
-                                        <th>Descripción</th>
-                                        <th style={{width:30}}>Cantidad</th>
-                                        <th style={{width:20}}>Precio</th>
-                                        <th style={{width:20}}>Dto.</th>
-                                        <th style={{width:30}}>Total</th>
-                                        {soyTecnico?<th>Acciones</th>:''}
+                                        <th >Responsable</th>
+                                        <th >Descripción</th>
+                                        <th >Cantidad</th>
+                                        <th >Precio</th>
+                                        <th >Dto.</th>
+                                        <th >Total</th>
+                                        {soyTecnico && <th style={{ width: "120px" }}>Acciones</th>}
                                     </tr>
                                 </thead> 
                                                                             
@@ -1208,18 +1214,19 @@ const ParteForm = ({parte, setParte, op}) => {
                                                 <td>{lineaGastos.creado_por?.get_full_name}</td>
                                                 <td>{lineaGastos.descripcion}</td>
                                                 <td>{lineaGastos.cantidad}</td>
-                                                <td>{lineaGastos.precio+ '€'}</td>
+                                                <td>{Number(lineaGastos.precio).toFixed(2) + '€'}</td>
                                                 <td>{lineaGastos.descuento + '%'}</td>
-                                                <td>{lineaGastos.total+ '€'}</td>
+                                                <td>{Number(lineaGastos.total).toFixed(2) + '€'}</td>
                                                 {soyTecnico?<td>{<Trash className="mr-3 pencil"  onClick={event =>{BorrarGasto(lineaGastos)}} />}</td>:''}
                                             </tr>
                                         )})
                                     }
                                     <tr style={{ fontWeight: 'bold', backgroundColor: '#e9ecef' }}>
-                                        <td colSpan={5} style={{ textAlign: 'right' }}>
+                                        <td colSpan={soyTecnico ? 5 : 5} style={{ textAlign: 'right' }}>
                                             Subtotal Gastos:
                                         </td>
                                         <td>{totalGastos.toFixed(2)} €</td>
+                                        {soyTecnico && <td></td>}
                                     </tr>
                                 </tbody>
                             </Table>                                     

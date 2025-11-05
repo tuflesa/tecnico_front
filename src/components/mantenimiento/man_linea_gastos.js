@@ -16,7 +16,7 @@ const LineaGastosMantenimiento = ({show, cerrarListMantenimiento, linea_mantenim
         descuento: linea_mantenimiento ? linea_mantenimiento.descuento : 0,
         total: linea_mantenimiento ? linea_mantenimiento.total : 0,
         num_parte: num_parte.id,
-        creado_por: linea_mantenimiento ? linea_mantenimiento.creado_por : user['tec-user'],
+        creado_por: linea_mantenimiento ? linea_mantenimiento.creado_por : user['tec-user'].full_name,
     });   
 
     useEffect(()=>{
@@ -27,9 +27,9 @@ const LineaGastosMantenimiento = ({show, cerrarListMantenimiento, linea_mantenim
             descuento: linea_mantenimiento ? linea_mantenimiento.descuento : 0,
             total: linea_mantenimiento ? linea_mantenimiento.total : 0,
             num_parte: num_parte.id,
-            creado_por: linea_mantenimiento ? linea_mantenimiento.creado_por : user['tec-user'],
+            creado_por: linea_mantenimiento ? linea_mantenimiento.creado_por : user['tec-user'].full_name,
         });
-    },[linea_mantenimiento, num_parte.id]);
+    },[linea_mantenimiento, num_parte.id, user]);
 
     useEffect(()=>{ 
         datos.cantidad=Number.parseFloat(datos.cantidad).toFixed(2);
@@ -89,7 +89,7 @@ const LineaGastosMantenimiento = ({show, cerrarListMantenimiento, linea_mantenim
             precio: parseFloat(datos.precio),
             descuento: parseFloat(datos.descuento),
             total: parseFloat(datos.total),
-            creado_por: datos.creado_por.id,
+            creado_por: datos.creado_por,
         };
 
         // Llamar a la función para actualizar en el estado del padre

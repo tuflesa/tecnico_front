@@ -257,7 +257,7 @@ const RepSalidas = ({alm}) => {
             const promises = lineasGastos.map(async (linea) => {
                 if (linea.esNueva) {
                     return axios.post(
-                        BACKEND_SERVER + `/api/mantenimiento/lineas_gastos/`,
+                        BACKEND_SERVER + `/api/mantenimiento/gastos/`,
                         {
                             parte: id_parte,
                             linea: linea_completa?linea_completa.id?linea_completa.id:'':'',
@@ -266,6 +266,7 @@ const RepSalidas = ({alm}) => {
                             precio: parseFloat(linea.precio),
                             descuento: parseFloat(linea.descuento),
                             total: parseFloat(linea.total),
+                            //creado_por: user['tec-user'].id,
                             creado_por: linea.creado_por,
                         },
                         {
@@ -273,11 +274,14 @@ const RepSalidas = ({alm}) => {
                                 'Authorization': `token ${token['tec-token']}`
                             }
                         }
-                    );
+                    )
+                    .then(res => {
+                        console.log(res.data)
+                    })
                 } else {
                     // Actualizar línea existente
                     return axios.patch(
-                        BACKEND_SERVER + `/api/mantenimiento/lineas_gastos/${linea.id}/`,
+                        BACKEND_SERVER + `/api/mantenimiento/gastos/${linea.id}/`,
                         {
                             parte: id_parte,
                             linea: linea_completa?linea_completa.id?linea_completa.id:'':'',
@@ -286,7 +290,8 @@ const RepSalidas = ({alm}) => {
                             precio: parseFloat(linea.precio),
                             descuento: parseFloat(linea.descuento),
                             total: parseFloat(linea.total),
-                            creado_por: linea.creado_por? linea.creado_por : user['tec-user'].id,
+                            //creado_por: linea.creado_por? linea.creado_por : user['tec-user'].id,
+                            creado_por: typeof linea.creado_por === 'object' ? linea.creado_por?.id : linea.creado_por || user['tec-user'].id,
                         },
                         {
                             headers: {
@@ -641,10 +646,9 @@ const RepSalidas = ({alm}) => {
                 <Row>
                     <Col>
                         <h5 className="mb-3 mt-3">Lista de Repuestos descontados anterioremente</h5>
-                        <Table striped bordered hover>
+                        <Table bordered hover>
                             <thead>
                                 <tr>
-                                    <th>Nombre</th>
                                     <th>Repuesto</th> 
                                     <th>Cantidad</th>
                                     <th>Precio</th>
@@ -656,12 +660,11 @@ const RepSalidas = ({alm}) => {
                                 {lineasSalida_anteriores.map((linea, index)  => {
                                         return (
                                             <tr key={index}>
-                                                <td>{linea.salida.responsable}</td>
                                                 <td>{linea.repuesto.nombre}</td>
                                                 <td>{linea.cantidad}</td> 
-                                                <td>{linea.precio_ultima_compra? linea.precio_ultima_compra + '€':0.00 + '€'}</td> 
+                                                <td>{linea.precio_ultima_compra? Number(linea.precio_ultima_compra).toFixed(2) + '€':0.00 + '€'}</td> 
                                                 <td>{linea.descuento_ultima_compra? linea.descuento_ultima_compra + '€':0.00 + '%'}</td>    
-                                                <td>{(linea.precio_ultima_compra * linea.cantidad)-(linea.precio_ultima_compra * linea.cantidad*linea.descuento_ultima_compra/100) + '€'}</td>                        
+                                                <td>{Number((linea.precio_ultima_compra * linea.cantidad)-(linea.precio_ultima_compra * linea.cantidad*linea.descuento_ultima_compra/100)).toFixed(2) + '€'}</td>                        
                                             </tr>
                                         )
                                     })
@@ -681,15 +684,15 @@ const RepSalidas = ({alm}) => {
                             <PlusCircle className="plus mr-2" size={30} onClick={abrirListMantenimiento}/>
                         </Col>
                     </Row>
-                    <Table striped bordered hover>
+                    <Table bordered hover>
                         <thead>
                             <tr>
                                 <th>Descripción</th>
-                                <th style={{width:100}}>Cantidad</th>
-                                <th style={{width:120}}>Precio</th>
-                                <th style={{width:100}}>Descuento</th>
-                                <th style={{width:120}}>Total</th>
-                                <th style={{width:120}}>Acciones</th>
+                                <th >Cantidad</th>
+                                <th >Precio</th>
+                                <th >Descuento</th>
+                                <th >Total</th>
+                                <th >Acciones</th>
                             </tr>
                         </thead> 
                         <tbody>
@@ -705,9 +708,9 @@ const RepSalidas = ({alm}) => {
                                         <tr key={lineaGasto.id}>
                                             <td>{lineaGasto.descripcion}</td>
                                             <td>{parseFloat(lineaGasto.cantidad).toFixed(2)}</td>
-                                            <td>{formatNumber(lineaGasto.precio)}</td>
+                                            <td>{Number(lineaGasto.precio).toFixed(2)}</td>
                                             <td>{lineaGasto.descuento}%</td>
-                                            <td>{formatNumber(lineaGasto.total)}</td>
+                                            <td>{Number(lineaGasto.total).toFixed(2)}</td>
                                             <td>
                                                 <PencilFill className="mr-3 pencil" onClick={() => editarLineaGasto(lineaGasto)}/>
                                                 <Trash className="trash" onClick={() => borrarLineaGasto(lineaGasto)} />
@@ -715,13 +718,6 @@ const RepSalidas = ({alm}) => {
                                         </tr>
                                     )
                                 })
-                            )}
-                            {lineasGastos.length > 0 && (
-                                <tr className="table-info">
-                                    <td colSpan="4" className="text-right"><strong>Total Gastos:</strong></td>
-                                    <td><strong>{formatNumber(calcularTotalGastos())}</strong></td>
-                                    <td></td>
-                                </tr>
                             )}
                         </tbody>
                     </Table>
