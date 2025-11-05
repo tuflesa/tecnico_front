@@ -19,7 +19,7 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
 
     const [datos, setDatos] = useState({
         id: grupo.id? grupo.id:null,
-        empresa: grupo.id?grupo.maquina.empresa_id:user['tec-user'].perfil.empresa.id,
+        empresa: grupo.id?grupo.maquina.empresa.id:user['tec-user'].perfil.empresa.id,
         zona: grupo.id?grupo.maquina.id:'',
         tubo_madre: grupo.id?grupo.tubo_madre:'',
         nombre: grupo.id?grupo.nombre:'',
@@ -27,6 +27,10 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
         espesor_1: grupo.id?grupo.espesor_1:'',
         espesor_2: grupo.id?grupo.espesor_2:'',
     });
+
+    useEffect(() => {
+        console.log('entra y esto es el grupo a mostrar',grupo);
+    }, [token]);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
