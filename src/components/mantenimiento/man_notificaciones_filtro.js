@@ -79,7 +79,7 @@ const ManNotificacionesFiltro = ({actualizaFiltro}) => {
     }, [token, datos.empresa, user]);
 
     useEffect(()=>{
-        const filtro1 = `?empresa__id=${datos.empresa}&seguridad=${datos.seguridad} & quien=${datos.quien}&finalizado=${datos.finalizado}&revisado=${datos.revisado}&descartado=${datos.descartado}&fecha_creacion__lte=${datos.fecha_creacion_lte}&fecha_creacion__gte=${datos.fecha_creacion_gte}&numero__icontains=${datos.numero}&zona__id=${datos.zona}`;
+        const filtro1 = `?empresa__id=${datos.empresa}${datos.seguridad !== '' ? `&seguridad=${datos.seguridad}` : ''}&quien=${datos.quien}&finalizado=${datos.finalizado}&revisado=${datos.revisado}&descartado=${datos.descartado}&fecha_creacion__lte=${datos.fecha_creacion_lte}&fecha_creacion__gte=${datos.fecha_creacion_gte}&numero__icontains=${datos.numero}&zona__id=${datos.zona}`;
         const camposTexto = [datos.numero]; 
         if (camposTexto.some(campo => campo !== '' && campo !== null)) {
             const debounceFiltro = debounce(() => {
