@@ -15,10 +15,11 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
     const [zonas, setZonas] = useState([]);
     const [mostrarRodBancada] = useState(mostrarBancada);
     const [errores, setErrores] = useState({}); // Estado para guardar errores
+    const [autoGenerarNombre, setAutoGenerarNombre] = useState(!grupo.id);
 
     const [datos, setDatos] = useState({
         id: grupo.id? grupo.id:null,
-        empresa: grupo.id?grupo.maquina.empresa_id:user['tec-user'].perfil.empresa.id,
+        empresa: grupo.id?grupo.maquina.empresa.id:user['tec-user'].perfil.empresa.id,
         zona: grupo.id?grupo.maquina.id:'',
         tubo_madre: grupo.id?grupo.tubo_madre:'',
         nombre: grupo.id?grupo.nombre:'',
@@ -26,6 +27,10 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
         espesor_1: grupo.id?grupo.espesor_1:'',
         espesor_2: grupo.id?grupo.espesor_2:'',
     });
+
+    useEffect(() => {
+        console.log('entra y esto es el grupo a mostrar',grupo);
+    }, [token]);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
@@ -42,13 +47,13 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
     }, [token]);
 
     useEffect(() => {
-        if (datos.tubo_madre && datos.espesor_1 && datos.espesor_2 && datos.nombre==="") {
-            setDatos({
-                ...datos,
-                nombre: 'Grupo-'+'Ø'+datos.tubo_madre+'-'+datos.espesor_1+'÷'+datos.espesor_2
-            });
-        }
-    }, [datos.tubo_madre, datos.espesor_1, datos.espesor_2, !datos.nombre]);
+        if (autoGenerarNombre && datos.tubo_madre && datos.espesor_1 && datos.espesor_2) {
+                setDatos(prevDatos => ({
+                    ...prevDatos,
+                    nombre: 'Grupo-'+'Ø'+datos.tubo_madre+'-'+datos.espesor_1+'÷'+datos.espesor_2
+                }));
+            }
+    }, [datos.tubo_madre, datos.espesor_1, datos.espesor_2, autoGenerarNombre]);
 
     useEffect(() => {
         if (datos.empresa === '') {
@@ -76,6 +81,11 @@ const RodGrupo = ({grupo, setGrupo, mostrarBancada}) => {
     }, [token, datos.empresa]);
 
     const handleInputChange = (event) => {
+        // Si el usuario está editando el nombre manualmente, desactivar auto-generación
+        if (event.target.name === 'nombre') {
+            setAutoGenerarNombre(false);
+        }
+        
         setDatos({
             ...datos,
             [event.target.name] : event.target.value

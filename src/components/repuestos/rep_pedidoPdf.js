@@ -281,6 +281,8 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
             flexDirection: 'row',
             flexGrow: 1,
             marginBottom: 3,
+            alignItems: 'flex-start',//añadimos a partir de aquí
+            flexWrap: 'nowrap', 
         },
         imagen: {
             fixed: true,
@@ -329,15 +331,19 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
             padding: 5,
             flex: 1,
             flexDirection: "column",
-            fontSize: 8
+            fontSize: 8,
         },
         section6: {
+            flexGrow: 4,
+            flexShrink: 1,
+            flexBasis: '35%',
             margin: 5,
             padding: 5,
-            flex: 8,
             flexDirection: "column",
             fontSize: 10,
-        },
+            textAlign: 'justify',
+            wordWrap: 'break-word',
+            },
         section7: {
             margin: 5,
             padding: 5,
