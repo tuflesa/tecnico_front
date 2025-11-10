@@ -31,7 +31,7 @@ const useResizeObserver = (ref) => {
     return dimensions;
   };
 
-const StateChart = ({data, flejes, fecha, hora_inicio, hora_fin, maquina}) => {
+const StateChart = ({data, flejes, fecha, hora_inicio, hora_fin, ver, maquina}) => {
     const svgRef = useRef();
     const wrapperRef = useRef();
     const dimensions = useResizeObserver(wrapperRef);
@@ -47,8 +47,7 @@ const StateChart = ({data, flejes, fecha, hora_inicio, hora_fin, maquina}) => {
 
         const svg =svgRef.current;
         
-        // console.log(dimensions);
-        console.log(flejes);
+        // console.log(flejes);
 
         const inicio = moment(fecha + ' ' + hora_inicio)
         const fin = moment(fecha + ' ' + hora_fin)
@@ -63,7 +62,7 @@ const StateChart = ({data, flejes, fecha, hora_inicio, hora_fin, maquina}) => {
             .range([innerHeight, 0]);
 
         const yScalePotencia = scaleLinear().domain([0, maquina.hf_pmax]).range([yScale(0), 0]);
-        const yScaleFrecuencia = scaleLinear().domain([maquina.hf_fmin - 50, maquina.hf_fmax + 50]).range([yScale(0), 0]);
+        const yScaleFrecuencia = scaleLinear().domain([0 , maquina.hf_fmax + 50]).range([yScale(0), 0]);
         const yScalePresion = scaleLinear().domain([0, maquina.fuerza_max]).range([yScale(0), 0]);
 
         const ejeX = axisBottom(xScale);
@@ -124,19 +123,92 @@ const StateChart = ({data, flejes, fecha, hora_inicio, hora_fin, maquina}) => {
                     return yScale(0);
                 }
             });
+
+        const myLinePower = line()
+            .curve(curveStepAfter)
+            .x( d => xScale(d.x))
+            .y( d => {
+                if (d.potencia>0) {
+                    return yScalePotencia(d.potencia);
+                }
+                else {
+                    return yScalePotencia(0);
+                }
+            });
+
+        const myLineFrequency = line()
+            .curve(curveStepAfter)
+            .x( d => xScale(d.x))
+            .y( d => {
+                if (d.frecuencia>0) {
+                    return yScaleFrecuencia(d.frecuencia);
+                }
+                else {
+                    return yScaleFrecuencia(0);
+                }
+            });
+
+        const myLineForce = line()
+            .curve(curveStepAfter)
+            .x( d => xScale(d.x))
+            .y( d => {
+                if (d.fuerza>0) {
+                    return yScalePresion(d.fuerza);
+                }
+                else {
+                    return yScalePresion(0);
+                }
+            });
         
         const gridHeightYPositivos = yScale(0); // posición en píxeles de y = 0
 
-        // console.log(data);
+        // Velocidad
         data && select(svg).select('.grafico')
-            .selectAll('path')
+            .selectAll('path.velocidad')
             .data(data)
             .join('path')
+            .attr("class", "velocidad")
             .attr('fill', 'none')
             .attr('stroke', value => value.color)
             .style("stroke-width", 2)
             .transition()
-            .attr('d', value => myLine(value.datos));
+            .attr('d', value => ver.velocidad ? myLine(value.registros) : '');
+
+        // Potencia
+        data && select(svg).select('.grafico')
+            .selectAll('path.power')
+            .data(data)
+            .join('path')
+            .attr("class", "power")
+            .attr('fill', 'none')
+            .attr('stroke', 'brown')
+            .style("stroke-width", 2)
+            .transition()
+            .attr('d', value => ver.potencia ? myLinePower(value.registros) : '');
+
+        // Frecuencia
+        data && select(svg).select('.grafico')
+            .selectAll('path.frequency')
+            .data(data)
+            .join('path')
+            .attr("class", "frequency")
+            .attr('fill', 'none')
+            .attr('stroke', 'teal')
+            .style("stroke-width", 2)
+            .transition()
+            .attr('d', value => ver.frecuencia ? myLineFrequency(value.registros) : '');    
+
+        // Fuerza
+        data && select(svg).select('.grafico')
+            .selectAll('path.force')
+            .data(data)
+            .join('path')
+            .attr("class", "frequency")
+            .attr('fill', 'none')
+            .attr('stroke', 'deepskyblue')
+            .style("stroke-width", 2)
+            .transition()
+            .attr('d', value => ver.fuerza ? myLineForce(value.registros) : '');    
 
         // Circulos para señalizar el cursor
         data && select(svg).select('.grafico')
@@ -205,15 +277,15 @@ const StateChart = ({data, flejes, fecha, hora_inicio, hora_fin, maquina}) => {
             .join('rect')
             .attr("class", "listener")
             .attr("width", innerWidth) //dimensions.width)
-            .attr("height", innerHeight - yScale(60)) //dimensions.height)
+            .attr("height", innerHeight - yScale(40)) //dimensions.height)
             .on("mousemove", event => {
               const [xCoord] = pointer(event, this);
               const bisectDate = bisector(d => d.x).left;
               const x0 = xScale.invert(xCoord);
               data.map(maquina => {
-                const i = bisectDate(maquina.datos, x0, 1);
-                const d0 = maquina.datos[i - 1];
-                const d1 = maquina.datos[i];
+                const i = bisectDate(maquina.registros, x0, 1);
+                const d0 = maquina.registros[i - 1];
+                const d1 = maquina.registros[i];
                 if(d0&&d1){
                   const d = x0 - d0.x > d1.x - x0 ? d1 : d0;
                   const xPos = xScale(d.x);
@@ -227,9 +299,13 @@ const StateChart = ({data, flejes, fecha, hora_inicio, hora_fin, maquina}) => {
                     .attr("r", 5);
 
                   select(svg).select('.grafico').select('.t-' + maquina.siglas)
-                    .attr("x", xPos)
-                    .attr("y", yPos - 20)
-                    .text(d.x.toLocaleTimeString() + ' - ' + d.y.toFixed(1) + ' m/min');
+                    .attr("x", (xScale(fin) - xScale(inicio))/2 - 100)
+                    .attr("y", -10)
+                    .attr('fill', 'black')
+                    .attr('font-size', '12px')
+                    .text(d.x.toLocaleTimeString() + ' - ' + d.y.toFixed(1) + ' m/min '
+                        + d.potencia.toFixed(0) + ' KW ' + d.frecuencia.toFixed(0) + ' KHz '
+                        + d.fuerza.toFixed(0) + ' KN');
                   }
               });
             });
@@ -303,7 +379,7 @@ const StateChart = ({data, flejes, fecha, hora_inicio, hora_fin, maquina}) => {
           .attr('font-size', '12px')
           .text('Flejes');
 
-    },[data, fecha, hora_fin, hora_inicio, dimensions]);
+    },[data, fecha, hora_fin, hora_inicio, dimensions, ver]);
 
     return (
         <div ref={wrapperRef} id='speedChart'>

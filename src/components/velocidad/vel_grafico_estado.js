@@ -3,7 +3,7 @@ import axios from 'axios';
 import moment from 'moment';
 import { BACKEND_SERVER } from '../../constantes';
 import VelocidadNavBar from './vel_nav_bar';
-import { Container, Row, Col } from 'react-bootstrap';
+import { Container, Row, Col, Form } from 'react-bootstrap';
 import { useCookies } from 'react-cookie';
 import { useParams } from 'react-router-dom';
 import EstadoFiltro from './vel_estado_filtro';
@@ -16,7 +16,7 @@ const GraficoEstado = () => {
     const { id } = useParams();
 
     const [estado, setEstado] = useState(null);
-    const [registrosVelocidad, setRegistrosVelocidad] = useState(null);
+    const [registros, setRegistros] = useState(null);
     const [flejes, setFlejes] = useState(null);
     const hoy = new Date();
     const [filtro, setFiltro] = useState({
@@ -24,6 +24,12 @@ const GraficoEstado = () => {
             hora_inicio: '06:00',
             hora_fin: '22:00'
         });
+    const [ver, setVer] = useState({
+        velocidad: true,
+        potencia: false,
+        frecuencia: false,
+        fuerza: false
+    })
     const [actualizar, setActualizar] = useState(true);
 
     useEffect(()=>{
@@ -48,13 +54,14 @@ const GraficoEstado = () => {
     useEffect(()=>{
         if (!estado) return;
         console.log(estado);
-        const datosVelocidad = (estado) => {
+        const datosRegistros = (estado) => {
             const inicio = moment(filtro.fecha + ' ' + filtro.hora_inicio,'YYYY-MM-DD HH:mm');
             const fin = moment(filtro.fecha + ' ' + filtro.hora_fin,'YYYY-MM-DD HH:mm');
             const ahora = moment();
-            const siglas = estado.maquina.siglas;
-            const color = 'red';
-            const puntos = estado.velocidad.map( dato => {
+            const siglas = estado.maquina.zona.siglas;
+
+            // Registros de velocidad
+            const datos = estado.registros.map( dato => {
                 const fecha = dato.fecha.split('-');
                 const hora = dato.hora.split(':');
                 let x = new Date(fecha[0], fecha[1]-1, fecha[2], hora[0], hora[1], hora[2]);
@@ -62,25 +69,37 @@ const GraficoEstado = () => {
                     x = inicio.toDate();
                 }
                 const y = dato.velocidad;
+                const potencia = dato.potencia?dato.potencia:0.0;
+                const frecuencia = dato.frecuencia?dato.frecuencia:0.0;
+                const fuerza = dato.presion?dato.presion:0.0;
 
                 return ({
                     x: x,
-                    y: y
+                    y: y,
+                    potencia: potencia,
+                    frecuencia: frecuencia,
+                    fuerza: fuerza
                 });
             });
 
-            if (puntos.length>0){
+            if (datos.length>0){
                 if(ahora.isAfter(inicio) && ahora.isBefore(fin)) {
                     // console.log('Añadir punto ahora ...');
-                    puntos.push({
+                    datos.push({
                         x: new Date(),
-                        y: puntos[puntos.length -1].y
+                        y: datos[datos.length -1].y,
+                        potencia: datos[datos.length -1].potencia,
+                        frecuencia: datos[datos.length -1].frecuencia,
+                        fuerza: datos[datos.length -1].fuerza
                     });
                 }
                 else {
-                    puntos.push({
+                    datos.push({
                         x: new Date(fin.format("YYYY-MM-DD HH:mm:ss")),
-                        y: puntos[puntos.length -1].y
+                        y: datos[datos.length -1].y,
+                        potencia: datos[datos.length -1].potencia,
+                        frecuencia: datos[datos.length -1].frecuencia,
+                        fuerza: datos[datos.length -1].fuerza
                     });
                 }
             }
@@ -89,7 +108,7 @@ const GraficoEstado = () => {
                 [{
                     siglas: siglas,
                     color: estado.maquina.color,
-                    datos: puntos
+                    registros: datos
                 }]
             )
         }
@@ -150,8 +169,7 @@ const GraficoEstado = () => {
             return puntos
         }
 
-        // console.log(datosLinea(estado))
-        setRegistrosVelocidad(datosVelocidad(estado));
+        setRegistros(datosRegistros(estado));
         setFlejes(datosFlejes(estado));
     },[estado]);
 
@@ -161,6 +179,13 @@ const GraficoEstado = () => {
 
     useInterval(actualizarGrafico, 5000);
 
+    const handleSwitchChange = (event) => {
+        setVer({
+            ...ver,
+            [event.target.id] : event.target.checked
+            });
+    };
+
     return (
         <React.Fragment>
             <VelocidadNavBar />
@@ -168,14 +193,52 @@ const GraficoEstado = () => {
                 <Row>
                     <EstadoFiltro actualizaFiltro={setFiltro}
                                 filtro = {filtro}/>
+                </Row>
+                <Row className="mb-4">
+                    <Col className="d-flex justify-content-center">
+                        <Form.Check
+                            inline
+                            type="switch"
+                            id="velocidad"
+                            label="velocidad"
+                            checked={ver.velocidad}
+                            onChange={handleSwitchChange}
+
+                        />
+                        <Form.Check
+                            inline
+                            type="switch"
+                            id="potencia"
+                            label="potencia"
+                            checked={ver.potencia}
+                            onChange={handleSwitchChange}
+                        />
+                        <Form.Check
+                            inline
+                            type="switch"
+                            id="frecuencia"
+                            label="frecuencia"
+                            checked={ver.frecuencia}
+                            onChange={handleSwitchChange}
+                        />
+                        <Form.Check
+                            inline
+                            type="switch"
+                            id="fuerza"
+                            label="fuerza"
+                            checked={ver.fuerza}
+                            onChange={handleSwitchChange}
+                        />
+                    </Col>
                 </Row> 
                 <Row>
                     <Col className="col-12">
-                        <StateChart data={registrosVelocidad}
+                        <StateChart data={registros}
                                 flejes={flejes}
                                 fecha={filtro.fecha}
                                 hora_inicio={filtro.hora_inicio}
                                 hora_fin={filtro.hora_fin}
+                                ver={ver}
                                 maquina = {estado&&estado.maquina} />
                     </Col>
                 </Row> 
