@@ -190,11 +190,111 @@ const GraficoEstado = () => {
         <React.Fragment>
             <VelocidadNavBar />
             <Container>
+                <Row className="mt-3 mb-3">
+                    <Col sm={1}>
+                        <Row>
+                            <Col>
+                                Máquina:
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <span className="destacado">{estado && estado.maquina.zona.siglas}</span>
+                            </Col>
+                        </Row>
+                    </Col>
+                    <Col sm={1}>
+                        <Row>
+                            <Col>
+                                m/min:
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <span className="destacado">
+                                    {estado && estado.estado_act.velocidad.toFixed(1)}
+                                </span>
+                            </Col>
+                        </Row>
+                    </Col>
+                    <Col sm={1}>
+                        <Row>
+                            <Col>
+                                Kw:
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <span className="destacado">
+                                    {estado && estado.estado_act.potencia.toFixed(0)}
+                                </span>
+                            </Col>
+                        </Row>
+                    </Col>
+                    <Col sm={1}>
+                        <Row>
+                            <Col>
+                                KHz:
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <span className="destacado">
+                                    {estado && estado.estado_act.frecuencia.toFixed(0)}
+                                </span>
+                            </Col>
+                        </Row>
+                    </Col>
+                    <Col sm={1}>
+                        <Row>
+                            <Col>
+                                KN:
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <span className="destacado">
+                                    {estado && estado.estado_act.fuerza.toFixed(0)}
+                                </span>
+                            </Col>
+                        </Row>
+                    </Col>
+                    <Col sm={2}>
+                        <Row>
+                            <Col>
+                                OF:
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <span className="destacado">
+                                    {estado && estado.estado_act.of}
+                                </span>
+                            </Col>
+                        </Row>
+                    </Col>
+                    <Col>
+                        <Row>
+                            <Col>
+                                Bobina:
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <span className="destacado">
+                                    {estado && estado.estado_act.fleje_descripcion}
+                                </span>
+                            </Col>
+                        </Row>
+                    </Col>
+                </Row>
+                
                 <Row>
                     <EstadoFiltro actualizaFiltro={setFiltro}
                                 filtro = {filtro}/>
                 </Row>
-                <Row className="mb-4">
+
+                <Row className="mb-2">
                     <Col className="d-flex justify-content-center">
                         <Form.Check
                             inline

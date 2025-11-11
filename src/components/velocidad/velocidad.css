@@ -15,16 +15,21 @@
     height: 320px;
   }
 
-  rect.listener {
+rect.listener {
     pointer-events: all;
     fill-opacity: 0;
     stroke-opacity: 0;
     z-index: 1;
   }
 
-  rect.fleje {
+rect.fleje {
   fill-opacity: 1;
   stroke: black;
   stroke-width: 1;
   stroke-opacity: 1;
-}
+  }
+
+.destacado {
+  font-weight: bold;
+  font-size: 1.9rem;
+  }
