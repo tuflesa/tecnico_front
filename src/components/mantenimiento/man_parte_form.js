@@ -32,6 +32,12 @@ const ParteForm = ({parte, setParte, op}) => {
     const [eliminar_consumible, setEliminarConsumible] = useState(false);
     const [errores, setErrores] = useState({}); // Estado para guardar errores
     const [linea_GastoEditar, setLineaGastoEditar] = useState(null);
+    const [show_modal_consumible, setShowModalConsumible] = useState(false);
+    const [consumibleEditar, setConsumibleEditar] = useState(null);
+    const [datosConsumible, setDatosConsumible] = useState({
+        precio: 0,
+        descuento: 0
+    });
 
     const calcularTotalConsumibles = () => {
         if (!consumibles || consumibles.length === 0) return 0;
@@ -822,6 +828,61 @@ const ParteForm = ({parte, setParte, op}) => {
         }
     };
 
+    const ModificarConsumible = (consumible) => {
+        setConsumibleEditar(consumible);
+        setDatosConsumible({
+            precio: consumible.linea_salida.precio_ultima_compra || 0,
+            descuento: consumible.linea_salida.descuento_ultima_compra || 0
+        });
+        setShowModalConsumible(true);
+    }
+
+    const cerrarModalConsumible = () => {
+        setShowModalConsumible(false);
+        setConsumibleEditar(null);
+        setDatosConsumible({ precio: 0, descuento: 0 });
+    };
+
+    const handleInputChangeConsumible = (event) => {
+        setDatosConsumible({
+            ...datosConsumible,
+            [event.target.name]: event.target.value
+        });
+    };
+
+    const guardarCambiosConsumible = () => {
+        if (!consumibleEditar) return;
+
+        axios.patch(BACKEND_SERVER + `/api/repuestos/lineas_salidas/${consumibleEditar.linea_salida.id}/`, {
+            precio_ultima_compra: parseFloat(datosConsumible.precio),
+            descuento_ultima_compra: parseFloat(datosConsumible.descuento)
+        }, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then(res => {
+            alert('Consumible actualizado correctamente');
+            cerrarModalConsumible();
+            // Volver a cargar los consumibles
+            axios.get(BACKEND_SERVER + `/api/repuestos/movimiento_trazabilidad/?linea_salida__salida__num_parte=${parte.id}`, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }
+            })
+            .then(res => {
+                setConsumibles(res.data);
+            })
+            .catch(err => {
+                console.log(err);
+            });
+        })
+        .catch(err => {
+            console.log(err);
+            alert('Error al actualizar el consumible');
+        });
+    };
+
     useEffect(()=>{
         parte && axios.get(BACKEND_SERVER + `/api/mantenimiento/lineas_gastos/?parte=${parte.id}`, {
             headers: {
@@ -1168,9 +1229,11 @@ const ParteForm = ({parte, setParte, op}) => {
                                                 <td>{consumible.almacen.nombre}</td>
                                                 <td>{consumible.linea_salida.cantidad}</td>
                                                 <td>{consumible.linea_salida.precio_ultima_compra? consumible.linea_salida.precio_ultima_compra + '€': 0.00+ '€'}</td>
-                                                <td>{consumible.linea_salida.descuento_ultima_compra? consumible.linea_salida.descuento_ultima_compra + '€': 0.00+ '%'}</td>
+                                                <td>{consumible.linea_salida.descuento_ultima_compra? consumible.linea_salida.descuento_ultima_compra + '%': 0.00+ '%'}</td>
                                                 <td>{(consumible.linea_salida.cantidad * consumible.linea_salida.precio_ultima_compra)-(consumible.linea_salida.cantidad * consumible.linea_salida.precio_ultima_compra*consumible.linea_salida.descuento_ultima_compra/100).toFixed(2) + '€'}</td>
-                                                {soyTecnico?<td>{<Trash className="mr-3 pencil"  onClick={event =>{BorrarConsumible(consumible)}} />}</td>:''}
+                                                <td>{soyTecnico?<PencilFill className="mr-3 pencil"  onClick={event =>{ModificarConsumible(consumible)}} />:''}
+                                                    {soyTecnico?<Trash className="mr-3 pencil"  onClick={event =>{BorrarConsumible(consumible)}} />:''}
+                                                </td>
                                             </tr>
                                         )})
                                     }
@@ -1263,6 +1326,70 @@ const ParteForm = ({parte, setParte, op}) => {
                                 tarea={lineaLineasTareas}
                                 parte={parte}
             />
+            <Modal show={show_modal_consumible} onHide={cerrarModalConsumible}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Modificar Precio Consumible</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {consumibleEditar && (
+                        <Form>
+                            <Form.Group>
+                                <Form.Label><strong>Repuesto:</strong></Form.Label>
+                                <Form.Control 
+                                    type="text" 
+                                    value={consumibleEditar.linea_salida.repuesto.nombre}
+                                    disabled
+                                />
+                            </Form.Group>
+                            <Form.Group>
+                                <Form.Label><strong>Cantidad:</strong></Form.Label>
+                                <Form.Control 
+                                    type="text" 
+                                    value={consumibleEditar.linea_salida.cantidad}
+                                    disabled
+                                />
+                            </Form.Group>
+                            <Form.Group>
+                                <Form.Label>Precio (€) *</Form.Label>
+                                <Form.Control 
+                                    type="number" 
+                                    step="0.01"
+                                    name="precio"
+                                    value={datosConsumible.precio}
+                                    onChange={handleInputChangeConsumible}
+                                    placeholder="0.00"
+                                />
+                            </Form.Group>
+                            <Form.Group>
+                                <Form.Label>Descuento (%) *</Form.Label>
+                                <Form.Control 
+                                    type="number" 
+                                    step="0.01"
+                                    name="descuento"
+                                    value={datosConsumible.descuento}
+                                    onChange={handleInputChangeConsumible}
+                                    placeholder="0.00"
+                                />
+                            </Form.Group>
+                            <Alert variant="info" className="mt-3">
+                                <strong>Total: </strong>
+                                {(
+                                    (datosConsumible.precio * consumibleEditar.linea_salida.cantidad) - 
+                                    (datosConsumible.precio * consumibleEditar.linea_salida.cantidad * datosConsumible.descuento / 100)
+                                ).toFixed(2)} €
+                            </Alert>
+                        </Form>
+                    )}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={cerrarModalConsumible}>
+                        Cancelar
+                    </Button>
+                    <Button variant="primary" onClick={guardarCambiosConsumible}>
+                        Guardar Cambios
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </Container>
     )
 }
