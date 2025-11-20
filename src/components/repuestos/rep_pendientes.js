@@ -336,10 +336,10 @@ const RepPendientes = () => {
                                     </tr>
                                 </tbody>
                             </table>                    
-                            <Table striped bordered hover>
+                            <Table striped bordered hover style={{tableLayout: 'fixed', width: '100%'}}>
                                 <thead>
                                     <tr>
-                                        <th style={{ width: 130 }}>Num-Pedido</th>
+                                        <th style={{width:140, whiteSpace: 'nowrap'}}>Num-Pedido</th>
                                         <th>Empresa</th>
                                         <th>Proveedor</th>
                                         <th>Descripción</th>

@@ -23,15 +23,12 @@ const Programadores = () => {
         })
         .then( res => { 
             setLineaStock(res.data);
-            console.log('stocks: ',res.data);
         })
         .catch(err => { console.log(err);})
     }
 
     const cambiar_stocks = () => {
-        console.log('esto vale linea_stock: ', linea_stock);
         for(var x=0; x<linea_stock.length; x++){
-            console.log('DENTRO DEL FOR')
             axios.patch(BACKEND_SERVER + `/api/repuestos/stocks_minimos/${linea_stock[x].id}/`,{
                 cantidad: 0,
                 cantidad_aconsejable: linea_stock[x].cantidad,
@@ -42,7 +39,6 @@ const Programadores = () => {
                 }
             })
             .then( r => {
-                console.log('cambios realizados en: ', r.data)
             })
             .catch( err => {
                 console.log(err);
