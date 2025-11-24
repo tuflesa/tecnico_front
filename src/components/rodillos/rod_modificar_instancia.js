@@ -112,14 +112,13 @@ const RodModificarInstancia = ({show, handlerClose, instancia, instancia_activa,
                         }     
                     })
                     .then(rs => {
+                        window.location.href = `/rodillos/editar/${rodillo.id}`;
                     })
                     .catch(err => { 
                         console.log(err);
                     });
-                    window.location.href = `/rodillos/editar/${rodillo.id}`;
                 })
                 .catch(err => { 
-                    alert('NO SE GUARDA LA INSTANCIA, REVISAR');
                     console.log(err);
                 });
             } else {
