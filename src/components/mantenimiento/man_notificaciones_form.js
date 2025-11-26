@@ -376,7 +376,7 @@ const NotificacionForm = ({nota, setNota}) => {
                                                     value={datos.zona}
                                                     name='zona'
                                                     onChange={handleInputChange}
-                                                    disabled={desactivar_zona()}
+                                                    disabled={nota.zona && nota.zona.id ? true: desactivar_zona()}
                                                     className={`form-control ${errores.zona ? 'border-red' : ''}`}> 
                                                     <option key={0} value={''}>Sin Zona asignada</option>                                      
                                                     {zonas && zonas.map( zona => {
