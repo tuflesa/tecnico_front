@@ -6,7 +6,7 @@ const EstadoActual = ({ estado, seleccionLinea }) => {
     return (
         <div>
             <Link to={`/velocidad/estado/${estado.zona.id}`} target="_blank" rel="noopener noreferrer">
-                <Button>{estado.zona.siglas}</Button>
+                <Button style={{ backgroundColor: estado.color, color: "white" }}>{estado.zona.siglas}</Button>
             </Link>
             <h4>{estado.velocidad_actual && estado.velocidad_actual.toFixed(2)}</h4>
             <Form.Check type="checkbox" 
