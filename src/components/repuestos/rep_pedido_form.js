@@ -760,7 +760,7 @@ const PedidoForm = ({pedido, setPedido}) => {
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button> :
                                 <Button variant="info" type="submit" className={'mx-2'} onClick={crearPedido}>Guardar</Button>                                
                             }
-                            <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
+                            <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)" onClick={() => window.close()}>Cerrar / Volver</Button>
                             {pedido ? 
                                 <Button variant="danger" type="button" className={'mx-2'} onClick={abrirModal}>Recepcionar todo</Button> :''                               
                             }

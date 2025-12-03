@@ -45,7 +45,16 @@ const LineaGastosMantenimiento = ({show, cerrarListMantenimiento, linea_mantenim
         })
     }
 
-    const handlerCancelar = () => {      
+    const handlerCancelar = () => {  
+        setDatos({
+            descripcion: '',
+            cantidad: 0,
+            precio: 0,
+            descuento: 0,
+            total: 0,
+            num_parte: num_parte.id,
+            creado_por: user['tec-user'].full_name,
+        })    
         cerrarListMantenimiento();
     } 
 

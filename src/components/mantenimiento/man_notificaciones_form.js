@@ -25,46 +25,46 @@ const NotificacionForm = ({nota, setNota}) => {
     
 
     const [datos, setDatos] = useState({
-        id: nota.id || null,  // Si nota.id no está definido, usa null
-        que: nota.que || "",  // Si nota.que está undefined, usa una cadena vacía
-        cuando: nota.cuando || "", 
-        donde: nota.donde || "",
-        quien: nota.quien || "", 
-        como: nota.como || "", 
-        cuanto: nota.cuanto || "", 
-        porque: nota.porque || "", 
-        fecha_creacion: nota.fecha_creacion || (hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0') + '-' + String(hoy.getDate()).padStart(2, '0')),
-        revisado: nota.revisado || false,
-        descartado: nota.descartado || false,
-        finalizado: nota.finalizado || false,
-        conclusion: nota.conclusion || "",
-        empresa: nota.empresa || "",
-        zona: nota.zona?.id || null,
-        numero: nota.numero || "",
-        peligrosidad: nota.peligrosidad || false,
-        seguridad: nota.seguridad || false,
+        id: nota.id ?? null,  // Si nota.id no está definido, usa null
+        que: nota.que ?? "",  // Si nota.que está undefined, usa una cadena vacía
+        cuando: nota.cuando ?? "", 
+        donde: nota.donde ?? "",
+        quien: nota.quien ?? "", 
+        como: nota.como ?? "", 
+        cuanto: nota.cuanto ?? "", 
+        porque: nota.porque ?? "", 
+        fecha_creacion: nota.fecha_creacion ?? (hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0') + '-' + String(hoy.getDate()).padStart(2, '0')),
+        revisado: nota.revisado ?? false,
+        descartado: nota.descartado ?? false,
+        finalizado: nota.finalizado ?? false,
+        conclusion: nota.conclusion ?? "",
+        empresa: nota.empresa ?? "",
+        zona: nota.zona?.id ?? null,
+        numero: nota.numero ?? "",
+        peligrosidad: nota.peligrosidad ?? false,
+        seguridad: nota.seguridad ?? false,
     });
 
     useEffect(()=>{
         setDatos({
-            id: nota.id || null,  // Si nota.id no está definido, usa null
-            que: nota.que || "",  // Si nota.que está undefined, usa una cadena vacía
-            cuando: nota.cuando || "", 
-            donde: nota.donde || "",
-            quien: nota.quien || "", 
-            como: nota.como || "", 
-            cuanto: nota.cuanto || "", 
-            porque: nota.porque || "", 
-            fecha_creacion: nota.fecha_creacion || (hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0') + '-' + String(hoy.getDate()).padStart(2, '0')),
-            revisado: nota.revisado || false,
-            descartado: nota.descartado || false,
-            finalizado: nota.finalizado || false,
-            conclusion: nota.conclusion || "",
-            empresa: nota.empresa || "",
-            zona: nota.zona?.id || null,
-            numero: nota.numero || "",
-            peligrosidad: nota.peligrosidad || false,
-            seguridad: nota.seguridad || false,
+            id: nota.id ?? null,  // Si nota.id no está definido, usa null
+            que: nota.que ?? "",  // Si nota.que está undefined, usa una cadena vacía
+            cuando: nota.cuando ?? "", 
+            donde: nota.donde ?? "",
+            quien: nota.quien ?? "", 
+            como: nota.como ?? "", 
+            cuanto: nota.cuanto ?? "", 
+            porque: nota.porque ?? "", 
+            fecha_creacion: nota.fecha_creacion ?? (hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0') + '-' + String(hoy.getDate()).padStart(2, '0')),
+            revisado: nota.revisado ?? false,
+            descartado: nota.descartado ?? false,
+            finalizado: nota.finalizado ?? false,
+            conclusion: nota.conclusion ?? "",
+            empresa: nota.empresa ?? "",
+            zona: nota.zona?.id ?? null,
+            numero: nota.numero ?? "",
+            peligrosidad: nota.peligrosidad ?? false,
+            seguridad: nota.seguridad ?? false,
         });
     },[nota, hoy]);
 
@@ -168,56 +168,68 @@ const NotificacionForm = ({nota, setNota}) => {
         })
     }
 
+    const validarNota = () => {
+        const nuevosErrores = {};
+        
+        if (!datos.que || datos.que.trim() === '') nuevosErrores.que = ["Campo requerido"];
+        if (!datos.cuando || datos.cuando.trim() === '') nuevosErrores.cuando = ["Campo requerido"];
+        if (!datos.donde || datos.donde.trim() === '') nuevosErrores.donde = ["Campo requerido"];
+        if (!datos.como || datos.como.trim() === '') nuevosErrores.como = ["Campo requerido"];
+        if (!datos.cuanto || datos.cuanto.trim() === '') nuevosErrores.cuanto = ["Campo requerido"];
+        if (!datos.porque || datos.porque.trim() === '') nuevosErrores.porque = ["Campo requerido"];
+        if (datos.zona === null || datos.zona === '') nuevosErrores.zona = ["Campo requerido"];
+        
+        if (Object.keys(nuevosErrores).length > 0) {
+            setErrores(nuevosErrores);
+            setShowError(true);
+            return false;
+        }
+        return true;
+    };
+
     const crearNota = (event) => {
         event.preventDefault();
-        if(datos.zona===null||datos.zona===''){
-            setShowError(true);
-            setErrores({
-                "zona": ["This field may not be blank."]
-            });
-        }
-        else{
-            axios.post(BACKEND_SERVER + `/api/mantenimiento/notificacion_nueva/`, {
-                que: datos.que,
-                cuando: datos.cuando,
-                donde: datos.donde,
-                //para: datos.para,
-                quien: user['tec-user'].perfil.usuario,
-                como: datos.como,
-                cuanto: datos.cuanto,
-                porque: datos.porque,
-                fecha_creacion: datos.fecha_creacion,            
-                revisado: datos.revisado,
-                descartado: datos.descartado,
-                finalizado: datos.finalizado,
-                conclusion: datos.conclusion,
-                empresa: datos.empresa,
-                zona: datos.zona,
-                peligrosidad: datos.peligrosidad,
-                seguridad: datos.seguridad,
-            }, {
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                }     
-            })
-            .then( res => { 
-                setNota(res.data);
-                setErrores({}); // Reiniciar errores si la petición es exitosa
-                window.confirm('La notificación se ha creado correctamente');
-                window.location.href="javascript: history.go(-1)"
-            })
-            .catch(err => { 
-                if (err.response && err.response.data) {
-                    setErrores(err.response.data); // Guardar los errores del backend
-                } else {
-                    console.log(err);
-                }
-                alert('Faltan datos, por favor, introduce todos los datos obligatorios.')
-                    console.log(err);
-                });
-        }
-    } 
 
+        if (!validarNota()) return;
+        axios.post(BACKEND_SERVER + `/api/mantenimiento/notificacion_nueva/`, {
+            que: datos.que,
+            cuando: datos.cuando,
+            donde: datos.donde,
+            //para: datos.para,
+            quien: user['tec-user'].perfil.usuario,
+            como: datos.como,
+            cuanto: datos.cuanto,
+            porque: datos.porque,
+            fecha_creacion: datos.fecha_creacion,            
+            revisado: datos.revisado,
+            descartado: datos.descartado,
+            finalizado: datos.finalizado,
+            conclusion: datos.conclusion,
+            empresa: datos.empresa,
+            zona: datos.zona,
+            peligrosidad: datos.peligrosidad,
+            seguridad: datos.seguridad,
+        }, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }     
+        })
+        .then( res => { 
+            setNota(res.data);
+            setErrores({}); // Reiniciar errores si la petición es exitosa
+            window.confirm('La notificación se ha creado correctamente');
+            window.location.href="javascript: history.go(-1)"
+        })
+        .catch(err => { 
+            if (err.response && err.response.data) {
+                setErrores(err.response.data); // Guardar los errores del backend
+            } else {
+                console.log(err);
+            }
+            alert('Faltan datos, por favor, introduce todos los datos obligatorios.')
+                console.log(err);
+        });
+    }
     const actualizarNota = (event) => {
         event.preventDefault();
         axios.patch(BACKEND_SERVER + `/api/mantenimiento/notificacion_nueva/${nota.id}/`, {
@@ -364,7 +376,7 @@ const NotificacionForm = ({nota, setNota}) => {
                                                     value={datos.zona}
                                                     name='zona'
                                                     onChange={handleInputChange}
-                                                    disabled={desactivar_zona()}
+                                                    disabled={nota.zona && nota.zona.id ? true: desactivar_zona()}
                                                     className={`form-control ${errores.zona ? 'border-red' : ''}`}> 
                                                     <option key={0} value={''}>Sin Zona asignada</option>                                      
                                                     {zonas && zonas.map( zona => {

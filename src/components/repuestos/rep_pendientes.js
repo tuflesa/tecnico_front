@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef  } from 'react';
 import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
-import { Container, Row, Col, Table, Button, Tabs, Tab } from 'react-bootstrap';
+import { Container, Row, Col, Table, Tabs, Tab } from 'react-bootstrap';
 import {invertirFecha} from '../utilidades/funciones_fecha';
 import { PencilFill, Receipt } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
@@ -18,9 +18,10 @@ const RepPendientes = () => {
     const [pedfueradefecha, setPedFueradeFecha] = useState(null);
     const [show, setShow] = useState(false);
     const [repuesto_id, setRepuesto_id] = useState(null);
+
     var fecha = new Date();
-    const stock_por_empresa = [];
     const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Técnico'?false:true;
+
     const [count, setCount] = useState(null);
     const [count2, setCount2] = useState(null);
     const [count3, setCount3] = useState(null);
@@ -31,177 +32,108 @@ const RepPendientes = () => {
         pagina: 1,
         pagina2: 1,
         pagina3: 1,
-        total_pag:0,
-        total_pag2:0,
-        total_pag3:0,
     });
 
-    const [filtro, setFiltro] = useState(`&page=${datos.pagina}&finalizado=${false}&fecha_prevista_entrega__lte=${datos.hoy}&creado_por=${nosoyTecnico?user['tec-user'].perfil.usuario:''}`);
-    const [filtro2, setFiltro2] = useState(`?almacen__empresa__id=${user['tec-user'].perfil.empresa.id}&repuesto__descatalogado=${false}&page=${datos.pagina}&repuesto__tipo_repuesto=${1}`);
-    const [filtro3, setFiltro3] = useState(`?almacen__empresa__id=${user['tec-user'].perfil.empresa.id}&repuesto__descatalogado=${false}&page=${datos.pagina}&repuesto__tipo_repuesto=${2}`);
+    //const stockPorEmpresaRef = useRef({});
 
-    useEffect(() => {
-        setFiltro3(`?almacen__empresa__id=${user['tec-user'].perfil.empresa.id}&repuesto__descatalogado=${false}&page=${datos.pagina2}&repuesto__tipo_repuesto=${2}`);
-    },[datos.pagina3, token]);
+    const filtro = `&page=${datos.pagina}&finalizado=${false}&fecha_prevista_entrega__lte=${datos.hoy}&creado_por=${nosoyTecnico?user['tec-user'].perfil.usuario:''}`;
+    const filtro2 = `?almacen__empresa__id=${user['tec-user'].perfil.empresa.id}&repuesto__descatalogado=${false}&page=${datos.pagina2}&repuesto__tipo_repuesto=${1}`;
+    const filtro3 = `?almacen__empresa__id=${user['tec-user'].perfil.empresa.id}&repuesto__descatalogado=${false}&page=${datos.pagina3}&repuesto__tipo_repuesto=${2}`;
 
-    useEffect(() => {
-        setFiltro2(`?almacen__empresa__id=${user['tec-user'].perfil.empresa.id}&repuesto__descatalogado=${false}&page=${datos.pagina2}&repuesto__tipo_repuesto=${1}`);
-    },[datos.pagina2, token]);
+    const total_pag = count === 0 ? 1 : Math.ceil(count/20);
+    const total_pag2 = count2 === 0 ? 1 : Math.ceil(count2/20);
+    const total_pag3 = count3 === 0 ? 1 : Math.ceil(count3/20);
 
-    useEffect(() => {
-        setFiltro(`&page=${datos.pagina}&finalizado=${false}&fecha_prevista_entrega__lte=${datos.hoy}&creado_por=${nosoyTecnico?user['tec-user'].perfil.usuario:''}`);
-    },[datos.pagina, datos.empresa, datos.hoy, token]);
+    const procesarArticulos  = useCallback(async(resultados, tipo_rep) => {
+        const promesas = resultados.map(async (item) => {
+            try {
+                const repuesto_nombre = item.repuesto.nombre_comun || item.repuesto.nombre;
+                const repuesto_tipo = item.repuesto.tipo_repuesto;
+                const repuesto_critico = item.repuesto.es_critico;
+                const id = item.repuesto.id;
+                
+                const response = await axios.get(
+                    `${BACKEND_SERVER}/api/repuestos/stocks_minimo_detalle/?repuesto=${id}&almacen__empresa__id=${datos.empresa}`,
+                    {
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                        }
+                    }
+                );
+                
+                const stock_empresa = response.data.reduce((a, b) => a + parseFloat(b.stock_act), 0);
+                const stock_minimo_empresa = response.data.reduce((a, b) => a + parseFloat(b.cantidad), 0);
+                const stock_aconsejado_empresa = response.data.reduce((a, b) => a + parseFloat(b.cantidad_aconsejable), 0);
+                
+                if (stock_empresa < stock_minimo_empresa || stock_empresa < stock_aconsejado_empresa) {
+                    return{
+                        id,
+                        articulo: repuesto_nombre,
+                        tipo: repuesto_tipo,
+                        critico: repuesto_critico,
+                        stock: stock_empresa,
+                        stock_minimo: stock_minimo_empresa,
+                        stock_aconsejado: stock_aconsejado_empresa
+                    };
+                }
+                return null;
+            } catch (err) {
+                console.error('Error procesando artículo:', err);
+            }
+        });
+        const resultadosProcesados = await Promise.all(promesas);
+        const articulosValidos = resultadosProcesados.filter(art => art !== null);
+        // Ordenar alfabéticamente
+        const articulosOrdenados = articulosValidos.sort((a, b) => 
+            a.articulo.localeCompare(b.articulo)
+        );
+        
+        if (tipo_rep === 1) {
+            setRepuestosPendientes(articulosOrdenados);
+        } else if (tipo_rep === 2) {
+            setConsumiblesPendientes(articulosOrdenados);
+        }
+
+    }, [datos.empresa, token]);
     
     useEffect(() => { //buscamos articulos con stock por debajo del stock mínimo
+        let isMounted = true;
         axios.get(BACKEND_SERVER + `/api/repuestos/articulos_fuera_stock/` + filtro2,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
         .then( res => { 
-            repuestos_consumibles(res.data.count, res.data.results, res.data.results[0].repuesto.tipo_repuesto);
+            if (isMounted && res.data.results.length > 0) {
+                setCount2(res.data.count);
+                procesarArticulos(res.data.results, 1);
+            }
         })
         .catch( err => {
             console.log(err);
         });
-    }, [token, filtro2]);  
+        return () => { isMounted = false; };
+    }, [token, filtro2, procesarArticulos]);  
 
     useEffect(() => { //buscamos articulos con stock por debajo del stock mínimo
+        let isMounted = true;
         axios.get(BACKEND_SERVER + `/api/repuestos/articulos_fuera_stock/` + filtro3,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
               }
         })
         .then( res => { 
-            repuestos_consumibles(res.data.count, res.data.results, res.data.results[0].repuesto.tipo_repuesto);
+            if (isMounted && res.data.results.length > 0) {
+                setCount3(res.data.count);
+                procesarArticulos(res.data.results, 2);
+            }
         })
         .catch( err => {
             console.log(err);
         });
-    }, [token, filtro3]); 
+        return () => { isMounted = false; };
+    }, [token, filtro3, procesarArticulos]); 
 
-    const repuestos_consumibles = (res_data_count, res_data_results, tipo_rep)=>{        
-        for(var x=0;x<res_data_results.length; x++){
-            let repuesto_nombre = res_data_results[x].repuesto.nombre_comun?res_data_results[x].repuesto.nombre_comun:res_data_results[x].repuesto.nombre;
-            let repuesto_tipo = res_data_results[x].repuesto.tipo_repuesto;
-            let repuesto_critico = res_data_results[x].repuesto.es_critico;
-            let id = res_data_results[x].repuesto.id;
-            axios.get(BACKEND_SERVER + `/api/repuestos/stocks_minimo_detalle/?repuesto=${res_data_results[x].repuesto.id}&almacen__empresa__id=${datos.empresa}`, {
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                }     
-            })
-            .then( r => {
-                const stock_empresa = r.data.reduce((a, b) => a + parseFloat(b.stock_act), 0);
-                const stock_minimo_empresa = r.data.reduce((a, b) => a + parseFloat(b.cantidad), 0);
-                const stock_aconsejado_empresa = r.data.reduce((a, b) => a + parseFloat(b.cantidad_aconsejable), 0);
-                if(stock_empresa<stock_minimo_empresa || stock_empresa<stock_aconsejado_empresa){
-                    if(res_data_results.length>0){
-                        stock_por_empresa.push({id: id, articulo: repuesto_nombre, tipo:repuesto_tipo, critico: repuesto_critico, stock: stock_empresa, stock_minimo: stock_minimo_empresa, stock_aconsejado: stock_aconsejado_empresa});            
-                    }
-                    if(stock_por_empresa){
-                        let hash = {};
-                        let sinduplicados = stock_por_empresa;
-                        let sinduplicadosRep = stock_por_empresa;
-                        let sinduplicadosCon = stock_por_empresa;
-                        sinduplicadosRep = sinduplicadosRep.filter(o => o.tipo === 1 && (hash[o.id] ? false : hash[o.id] = true));
-                        sinduplicadosCon = sinduplicadosCon.filter(o => o.tipo === 2 && (hash[o.id] ? false : hash[o.id] = true));
-                        setPendientes(sinduplicados.sort(function(a, b){
-                            if(a.articulo > b.articulo){
-                                return 1;
-                            }
-                            if(a.articulo < b.articulo){
-                                return -1;
-                            }
-                            return 0;
-                        }));
-                        if(tipo_rep===1){
-                            setRepuestosPendientes(sinduplicadosRep.sort(function(a, b){
-                                if(a.articulo > b.articulo){
-                                    return 1;
-                                }
-                                if(a.articulo < b.articulo){
-                                    return -1;
-                                }
-                                return 0;
-                            }));
-                            if(res_data_count>=20 && count2===null){
-                                setCount2(res_data_count-(20-sinduplicadosRep.length));
-                            }
-                            else if(count2===null && res_data_count<20){
-                                setCount2(res_data_count-(res_data_count-sinduplicadosRep.length));
-                            }
-                            
-                        }
-                        if(tipo_rep===2){
-                            setConsumiblesPendientes(sinduplicadosCon.sort(function(a, b){
-                                if(a.articulo > b.articulo){
-                                    return 1;
-                                }
-                                if(a.articulo < b.articulo){
-                                    return -1;
-                                }
-                                return 0;
-                            }));
-                            if(res_data_count>=20 && count3===null){
-                                setCount3(res_data_count-(20-sinduplicadosCon.length));
-                            }
-                            else if(res_data_count<20 && count3===null){
-                                setCount3(res_data_count-(res_data_count-sinduplicadosCon.length));
-                            }
-                        }
-                    }
-                }
-            })
-            .catch(err => { console.log(err);})
-        }
-    }
-
-    useEffect(()=>{
-        if(count % 20 === 0){
-            setDatos({
-                ...datos,
-                total_pag:Math.trunc(count/20),
-            })
-        }
-        else if(count % 20 !== 0){
-            setDatos({
-                ...datos,
-                total_pag:Math.trunc(count/20)+1,
-            })
-        }
-    }, [count, filtro]);
-
-    useEffect(()=>{
-        if(count2 % 20 === 0){
-            setDatos({
-                ...datos,
-                total_pag2:Math.trunc(count2/20),
-            })
-        }
-        else if(count2 % 20 !== 0){
-            setDatos({
-                ...datos,
-                total_pag2:Math.trunc(count2/20)+1,
-            })
-        }
-    }, [count2, filtro2]);
-
-    useEffect(()=>{
-        if(count3 % 20 === 0){
-            setDatos({
-                ...datos,
-                total_pag3:Math.trunc(count3/20),
-            })
-        }
-        else if(count3 % 20 !== 0){
-            setDatos({
-                ...datos,
-                total_pag3:Math.trunc(count3/20)+1,
-            })
-        }
-    }, [count3, filtro3]);
-     
     useEffect(()=>{ //buscamos pedidos pasados de fecha de entrega
         axios.get(BACKEND_SERVER + `/api/repuestos/lista_pedidos_fuera_fecha/?empresa__id=${user['tec-user'].perfil.empresa.id}` + filtro,{
             headers: {
@@ -218,18 +150,20 @@ const RepPendientes = () => {
     },[token, filtro]); 
 
     useEffect(() => { //buscamos las lineas de los pedidos pendientes para mostrar en las lineas de los articulos fuera de stock
-        datos.empresa && axios.get(BACKEND_SERVER + `/api/repuestos/linea_pedido_pend/?pedido__finalizado=${'false'}&pedido__empresa=${datos.empresa}`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-            }
-        })
-        .then( rs => {
-            setLineasPendientes(rs.data);
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    }, [token]);
+        if (datos.empresa) {
+            axios.get(BACKEND_SERVER + `/api/repuestos/linea_pedido_pend/?pedido__finalizado=${'false'}&pedido__empresa=${datos.empresa}`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }
+            })
+            .then( rs => {
+                setLineasPendientes(rs.data);
+            })
+            .catch( err => {
+                console.log(err);
+            });
+        }
+    }, [datos.empresa, token]);
 
     const listarPedidos = (repuesto)=>{
         setRepuesto_id(repuesto);
@@ -242,90 +176,35 @@ const RepPendientes = () => {
 
     const comparar = (x) => {
         if(lineasPendientes){
-            for(var y=0;y<lineasPendientes.length;y++){
-                if(lineasPendientes[y].repuesto.id === x.id){                                      ;
-                    return( "table-success");
-                }
-            }
+            return lineasPendientes.some(linea => linea.repuesto.id === x.id) ? "table-success" : "";
         }
+        return "";
     }
 
     const comparar2 = (x) => {
-        if(lineasPendientes){
-            if(x.critico){
-                for(var y=0;y<lineasPendientes.length;y++){
-                    if(lineasPendientes[y].repuesto.id===x.id){
-                        if(pedfueradefecha){
-                            for(var z=0;z<pedfueradefecha.length;z++){
-                                if(pedfueradefecha[z].id===lineasPendientes[y].pedido.id){
-                                    return("table-success");
-                                }
-                            }
-                        }
-                    }              
-                }
+        if (lineasPendientes && x.critico && pedfueradefecha) {
+            const tieneLineaPendiente = lineasPendientes.find(linea => linea.repuesto.id === x.id);
+            if (tieneLineaPendiente) {
+                const pedidoVencido = pedfueradefecha.find(ped => ped.id === tieneLineaPendiente.pedido.id);
+                if (pedidoVencido) return "table-success";
             }
         }
+        return "";
     }
 
-    const cambioPagina = (pag) => {
-        if(pag<=0){
-            pag=1;
-        }
-        if(pag>count/20){
-            if(count % 20 === 0){
-                pag=Math.trunc(count/20);
-            }
-            if(count % 20 !== 0){
-                pag=Math.trunc(count/20)+1;
-            }
-        }
-        if(pag>0){
-            setDatos({
-                ...datos,
-                pagina: pag,
-            })
-        }
+    const cambioPagina = (nuevaPag) => {
+        const pag = Math.max(1, Math.min(nuevaPag, total_pag));
+        setDatos(prev => ({ ...prev, pagina: pag }));
     } 
 
-    const cambioPagina2 = (pag) => {
-        if(pag<=0){
-            pag=1;
-        }
-        if(pag>count2/20){
-            if(count2 % 20 === 0){
-                pag=Math.trunc(count2/20);
-            }
-            if(count2 % 20 !== 0){
-                pag=Math.trunc(count2/20)+1;
-            }
-        }
-        if(pag>0){
-            setDatos({
-                ...datos,
-                pagina2: pag,
-            })
-        }
+    const cambioPagina2 = (nuevaPag) => {
+        const pag = Math.max(1, Math.min(nuevaPag, total_pag2));
+        setDatos(prev => ({ ...prev, pagina2: pag }));
     } 
 
-    const cambioPagina3 = (pag) => {
-        if(pag<=0){
-            pag=1;
-        }
-        if(pag>count3/20){
-            if(count3 % 20 === 0){
-                pag=Math.trunc(count3/20);
-            }
-            if(count3 % 20 !== 0){
-                pag=Math.trunc(count3/20)+1;
-            }
-        }
-        if(pag>0){
-            setDatos({
-                ...datos,
-                pagina3: pag,
-            })
-        }
+    const cambioPagina3 = (nuevaPag) => {
+        const pag = Math.max(1, Math.min(nuevaPag, total_pag3));
+        setDatos(prev => ({ ...prev, pagina3: pag }));
     }
 
     const formatearNumero = (numero) => {
@@ -343,9 +222,9 @@ const RepPendientes = () => {
                             <table>
                                 <tbody>
                                     <tr>
-                                        <th><button type="button" className="btn btn-default" onClick={() => cambioPagina2(datos.pagina2=datos.pagina2-1)}>Pág Anterior</button></th> 
-                                        <th><button type="button" className="btn btn-default" onClick={() => cambioPagina2(datos.pagina2=datos.pagina2+1)}>Pág Siguiente</button></th> 
-                                        <th>Número páginas: {datos.pagina2} / {datos.total_pag2===0?1:datos.total_pag2} - Registros: {count2}</th>
+                                        <th><button type="button" className="btn btn-default" onClick={() => cambioPagina2(datos.pagina2 - 1)}>Pág Anterior</button></th> 
+                                        <th><button type="button" className="btn btn-default" onClick={() => cambioPagina2(datos.pagina2 + 1)}>Pág Siguiente</button></th> 
+                                        <th>Número páginas: {datos.pagina2} / {total_pag2} - Registros: {count2}</th>
                                     </tr>
                                 </tbody>
                             </table>               
@@ -362,32 +241,27 @@ const RepPendientes = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {repuestosPendientes && lineasPendientes && repuestosPendientes
-                                        .filter(pendiente => pendiente.tipo === 1) //primero filtro solo los que sean REPUESTOS
-                                        .map(pendiente => (
-                                            <tr key={pendiente.id} className={comparar2(pendiente) ? "table-warning" : (comparar(pendiente)) ? "table-success" : pendiente.critico ? "table-danger" : ""}>
-                                                <td>{pendiente.articulo}</td>
-                                                <td>{pendiente.critico ? 'Si' : 'No'}</td>
-                                                <td>{formatearNumero(pendiente.stock)}</td>
-                                                <td>{formatearNumero(pendiente.stock_minimo)}</td> 
-                                                <td>{formatearNumero(pendiente.stock_aconsejado)}</td> 
-                                                <td>{formatearNumero(
-                                                    lineasPendientes && lineasPendientes.map(linea => {
-                                                        let suma = 0;
-                                                        if (linea.repuesto.id === pendiente.id) {                                        
-                                                            suma += parseFloat(linea.por_recibir);
-                                                        }
-                                                        return suma;
-                                                    }).reduce((partialSum, a) => partialSum + a, 0)
-                                                )}</td>
-                                                <td>
-                                                    <Receipt className="mr-3 pencil" onClick={() => listarPedidos(pendiente.id)} />
-                                                    <Link to={`/repuestos/${pendiente.id}`}>
-                                                        <PencilFill className="mr-3 pencil" />
-                                                    </Link>
-                                                </td>
-                                            </tr>
-                                    ))}
+                                    {repuestosPendientes && lineasPendientes && repuestosPendientes.map(pendiente => {
+                                        const cantidadPorRecibir = lineasPendientes
+                                            .filter(linea => linea.repuesto.id === pendiente.id) //primero filtro solo los que sean REPUESTOS
+                                            .reduce((sum, linea) => sum + parseFloat(linea.por_recibir), 0);
+                                        return(
+                                                <tr key={pendiente.id} className={comparar2(pendiente) ? "table-warning" : (comparar(pendiente)) ? "table-success" : pendiente.critico ? "table-danger" : ""}>
+                                                    <td>{pendiente.articulo}</td>
+                                                    <td>{pendiente.critico ? 'Si' : 'No'}</td>
+                                                    <td>{formatearNumero(pendiente.stock)}</td>
+                                                    <td>{formatearNumero(pendiente.stock_minimo)}</td> 
+                                                    <td>{formatearNumero(pendiente.stock_aconsejado)}</td> 
+                                                    <td>{formatearNumero(cantidadPorRecibir)}</td>
+                                                    <td>
+                                                        <Receipt className="mr-3 pencil" onClick={() => listarPedidos(pendiente.id)} />
+                                                        <Link to={`/repuestos/${pendiente.id}`}>
+                                                            <PencilFill className="mr-3 pencil" />
+                                                        </Link>
+                                                    </td>
+                                                </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </Table>
                         </Col>
@@ -402,9 +276,9 @@ const RepPendientes = () => {
                             <table>
                                 <tbody>
                                     <tr>
-                                        <th><button type="button" className="btn btn-default" onClick={() => cambioPagina3(datos.pagina3=datos.pagina3-1)}>Pág Anterior</button></th> 
-                                        <th><button type="button" className="btn btn-default" onClick={() => cambioPagina3(datos.pagina3=datos.pagina3+1)}>Pág Siguiente</button></th> 
-                                        <th>Número páginas: {datos.pagina3} / {datos.total_pag3===0?1:datos.total_pag3} - Registros: {count3}</th>
+                                        <th><button type="button" className="btn btn-default" onClick={() => cambioPagina3(datos.pagina3-1)}>Pág Anterior</button></th> 
+                                        <th><button type="button" className="btn btn-default" onClick={() => cambioPagina3(datos.pagina3+1)}>Pág Siguiente</button></th> 
+                                        <th>Número páginas: {datos.pagina3} / {total_pag3} - Registros: {count3}</th>
                                     </tr>
                                 </tbody>
                             </table>               
@@ -421,23 +295,18 @@ const RepPendientes = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {consumiblesPendientes && consumiblesPendientes
-                                        .filter(pendiente => pendiente.tipo === 2) //primero filtro solo los que sean CONSUMIBLES
-                                        .map(pendiente => (
+                                    {consumiblesPendientes && lineasPendientes && consumiblesPendientes.map(pendiente => {
+                                        const cantidadPorRecibir = lineasPendientes
+                                            .filter(linea => linea.repuesto.id === pendiente.id) //primero filtro solo los que sean CONSUMIBLES
+                                            .reduce((sum, linea) => sum + parseFloat(linea.por_recibir), 0);
+                                        return(
                                             <tr key={pendiente.id} className={comparar2(pendiente) ? "table-warning" : (comparar(pendiente)) ? "table-success" : pendiente.critico ? "table-danger" : ""}>
                                                 <td>{pendiente.articulo}</td>
                                                 <td>{pendiente.critico ? 'Si' : 'No'}</td>
-                                                <td>{pendiente.stock}</td>
-                                                <td>{pendiente.stock_minimo}</td> 
-                                                <td>{pendiente.stock_aconsejado}</td>
-                                                <td>{lineasPendientes && lineasPendientes.map(linea => {
-                                                    let suma = 0;
-                                                    if (linea.repuesto.id === pendiente.id) {                                        
-                                                        suma += parseInt(linea.por_recibir);
-                                                    }
-                                                    return suma;
-                                                }).reduce((partialSum, a) => partialSum + a, 0)}
-                                                </td>
+                                                <td>{formatearNumero(pendiente.stock)}</td>
+                                                <td>{formatearNumero(pendiente.stock_minimo)}</td> 
+                                                <td>{formatearNumero(pendiente.stock_aconsejado)}</td>
+                                                <td>{formatearNumero(cantidadPorRecibir)}</td>
                                                 <td>
                                                     <Receipt className="mr-3 pencil" onClick={() => listarPedidos(pendiente.id)} />
                                                     <Link to={`/repuestos/${pendiente.id}`}>
@@ -445,7 +314,8 @@ const RepPendientes = () => {
                                                     </Link>
                                                 </td>
                                             </tr>
-                                    ))}
+                                        );
+                                    })}
                                 </tbody>
                             </Table>
                         </Col>
@@ -460,16 +330,16 @@ const RepPendientes = () => {
                             <table>
                                 <tbody>
                                     <tr>
-                                        <th><button type="button" className="btn btn-default" onClick={() => cambioPagina(datos.pagina=datos.pagina-1)}>Pág Anterior</button></th> 
-                                        <th><button type="button" className="btn btn-default" onClick={() => cambioPagina(datos.pagina=datos.pagina+1)}>Pág Siguiente</button></th> 
-                                        <th>Número páginas: {datos.pagina} / {datos.total_pag===0?1:datos.total_pag} - Registros: {count}</th>
+                                        <th><button type="button" className="btn btn-default" onClick={() => cambioPagina(datos.pagina-1)}>Pág Anterior</button></th> 
+                                        <th><button type="button" className="btn btn-default" onClick={() => cambioPagina(datos.pagina+1)}>Pág Siguiente</button></th> 
+                                        <th>Número páginas: {datos.pagina} / {total_pag} - Registros: {count}</th>
                                     </tr>
                                 </tbody>
                             </table>                    
-                            <Table striped bordered hover>
+                            <Table striped bordered hover style={{tableLayout: 'fixed', width: '100%'}}>
                                 <thead>
                                     <tr>
-                                        <th style={{ width: 130 }}>Num-Pedido</th>
+                                        <th style={{width:140, whiteSpace: 'nowrap'}}>Num-Pedido</th>
                                         <th>Empresa</th>
                                         <th>Proveedor</th>
                                         <th>Descripción</th>

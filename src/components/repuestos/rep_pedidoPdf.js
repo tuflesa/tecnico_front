@@ -269,8 +269,9 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
         page2:{
             marginLeft: 30,
             marginRight: 30,
-            marginBottom: 3,
+            marginBottom: 1,
         },
+
         page3:{
             marginLeft: 30,
             marginRight: 30,
@@ -303,11 +304,16 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
             flexDirection: "column",
         },
         section3: {
-            margin: 5,
+            //margin: 5,
+            marginLeft: 5,
+            marginRight: 5,
+            marginBottom: 1,
+            //marginTop: 0,
             padding: 5,
             flex: 1,
             flexDirection: "column",
             fontSize: 10,
+            lineHeight: 1.8,
         },
         section44: {
             margin: 3,
@@ -327,11 +333,15 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
             fontSize: 10
         },
         section5: {
-            margin: 5,
+            //margin: 5,
+            marginLeft: 5,
+            marginRight: 5,
+            marginBottom: 1,
             padding: 5,
             flex: 1,
             flexDirection: "column",
             fontSize: 8,
+            lineHeight: 1.6,
         },
         section6: {
             flexGrow: 4,
@@ -399,9 +409,11 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
             right: 15,
             textAlign: 'justify',
             color: 'grey',
+            lineHeight: 1.6,
         },
         textWithMargin: {
             marginBottom: 5,
+            lineHeight: 1.6,
         },
     });
     return(     
@@ -433,7 +445,7 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
                                 <Text>{proveedor.direccion}</Text>
                                 <Text>{proveedor.poblacion}</Text>
                                 <Text>{proveedor.pais}</Text>
-                                <Text style={{marginTop: 15}}>Asunto:   Pedido</Text>
+                                <Text style={{marginTop: 7}}>Asunto:   Pedido</Text>
                                 <Text>Creado por:   {pedido.creado_por.get_full_name}</Text>
                                 <Text>Email: {pedido.creado_por.email}</Text>
                             </View>
@@ -510,7 +522,7 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
                             </View>
                         </View>
                     </View>
-                    <View style={styles.page2}>
+                    <View style={styles.page3}>
                         <View style={styles.section}>
                             <View style={styles.section3}>
                                 <Text style={styles.textWithMargin}>Nota: Por favor indicar en nº de pedido en el albarán de entrega.</Text>

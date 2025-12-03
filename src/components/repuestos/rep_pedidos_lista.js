@@ -249,10 +249,10 @@ const PedLista = () => {
             <Row>
                 <Col>
                     <h5 className="mb-3 mt-3">Lista de Pedidos</h5>
-                    <Table striped bordered hover>
+                    <Table striped bordered hover style={{tableLayout: 'fixed', width: '100%'}}>
                         <thead>
                             <tr>
-                                <th style={{width:130}}>Num-Pedido</th>
+                                <th style={{width:140, whiteSpace: 'nowrap'}}>Num-Pedido</th>
                                 <th>Creado por</th>
                                 <th>Empresa</th>
                                 <th>Proveedor</th>

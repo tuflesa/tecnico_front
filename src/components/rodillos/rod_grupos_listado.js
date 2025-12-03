@@ -21,37 +21,50 @@ const RodGruposListado = () => {
     const [conjuntos, setConjuntos] = useState(null);
     const [empresas, setEmpresas] = useState(null);
     const [zonas, setZonas] = useState(null);
-    const [filtro, setFiltro] = useState(`?tubo_madre=${0}&nombre__icontains=${''}&maquina__id=${''}&maquina__empresa=${user['tec-user'].perfil.empresa.id}`);
+    const [filtro, setFiltro] = useState(`?tubo_madre=${null}&nombre__icontains=${''}&maquina__id=${''}&maquina__empresa=${user['tec-user'].perfil.empresa.id}`);
     const [count, setCount] = useState(null);
 
     const [datos, setDatos] = useState({
         empresa: user['tec-user'].perfil.empresa.id,
         zona: '',
-        tubo_madre: '',
+        tubo_madre: null,
         nombre: '',
         maquina: '',
         pagina: 1,
         total_pag:0,
     });
 
-    useEffect(()=>{
-        setFiltro(`?tubo_madre=${datos.tubo_madre}&nombre__icontains=${datos.nombre}&maquina__id=${datos.maquina}&maquina__empresa=${datos.empresa}&page=${datos.pagina}`);
-    },[datos.tubo_madre, datos.maquina, datos.empresa, datos.pagina]);
-
     useEffect(() => {
-        const debounceFiltro = debounce(() => {
-            setFiltro(prev => {
-                return `?tubo_madre=${datos.tubo_madre}&nombre__icontains=${datos.nombre}&maquina__id=${datos.maquina}&maquina__empresa=${datos.empresa}&page=${datos.pagina}`;
-            });
-        }, 500);
+        const buildFiltro = () => {
+            let filtro = `?maquina__id=${datos.maquina}&maquina__empresa=${datos.empresa}&page=${datos.pagina}`;
 
-        debounceFiltro();
+            // si hay tubo_madre, aplicar rango
+            if (datos.tubo_madre !== null && datos.tubo_madre !== '') {
+                filtro += `&tubo_madre__gte=${datos.tubo_madre}&tubo_madre__lte=${datos.tubo_madre}`;
+            }
 
-        return () => {
-            debounceFiltro.cancel();
+            // si hay nombre, aplicar icontains
+            if (datos.nombre) {
+                filtro += `&nombre__icontains=${datos.nombre}`;
+            }
+
+            return filtro;
         };
-    }, [datos.nombre]);
 
+        // si cambia nombre → usamos debounce
+        if (datos.nombre) {
+            const debounceFiltro = debounce(() => {
+                setFiltro(buildFiltro());
+            }, 500);
+
+            debounceFiltro();
+            return () => debounceFiltro.cancel();
+        }
+
+        // si cambia otra cosa → filtro
+        setFiltro(buildFiltro());
+
+    }, [datos.tubo_madre, datos.nombre, datos.maquina, datos.empresa, datos.pagina]);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + `/api/rodillos/grupo/` + filtro,{
@@ -70,15 +83,32 @@ const RodGruposListado = () => {
 
     useEffect(() => {
         if (show && celdas && elementos) {
-            // Aplanar la estructura para obtener un solo arreglo de objetos
+            // Relacionamos cada conjunto con su celda
+            const conjuntoToCelda = {};
+            celdas.forEach(bancadaCeldas => {
+                if (bancadaCeldas) {
+                    bancadaCeldas.forEach(celda => {
+                        if (celda && celda.conjunto) {
+                            conjuntoToCelda[celda.conjunto.id] = celda;
+                        }
+                    });
+                }
+            });
+
+            // Creamos un solo arreglo con todos los datos
             const conjuntosTabla = elementos
                 .flatMap(e => e ? e.flatMap(c => c ? c : []) : [])
                 .filter(Boolean)
-                .map(d => ({
-                    elemento: d,
-                    seccionOrden: d.conjunto.operacion.seccion.orden,
-                    operacionOrden: d.conjunto.operacion.orden
-                }));    
+                .map(d => {
+                    const celda = conjuntoToCelda[d.conjunto.id]; //celda como objeto con operación
+                    return {
+                        elemento: d,
+                        celda: celda,
+                        seccionOrden: celda?.operacion?.seccion?.orden || 0,
+                        operacionOrden: celda?.operacion?.orden || 0
+                    };
+                });
+            
             // Ordenar el arreglo basado en seccionOrden y operacionOrden
             const sortedConjuntos = conjuntosTabla.sort((a, b) => {
                 if (a.seccionOrden !== b.seccionOrden) {
@@ -88,17 +118,18 @@ const RodGruposListado = () => {
                 }
             }).map(d => (
                 <tr key={d.elemento.id}>
-                    <td>{d.elemento.conjunto.operacion.nombre}</td>
+                    <td>{d.celda?.operacion?.nombre || 'N/A'}</td>
                     <td>{d.elemento.rodillo.grupo.tubo_madre}</td>
                     <td>{d.elemento.rodillo.nombre}</td>
                 </tr>
-            ));    
+            ));
+            
             setConjuntos(sortedConjuntos);
         } else {
             setConjuntos(null);
         }
     }, [show, celdas, elementos]);
-    
+        
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
             headers: {
@@ -144,7 +175,7 @@ const RodGruposListado = () => {
         try {
             // Hacer las solicitudes a las celdas de todas las bancadas y lo guarda en solicitudesCeldas
             const solicitudesCeldas = linea.bancadas.map(bancadaId => {
-                return axios.get(BACKEND_SERVER + `/api/rodillos/celda_select/?bancada__id=${bancadaId.id}`, {
+                return axios.get(BACKEND_SERVER + `/api/rodillos/celda_program/?bancada__id=${bancadaId.id}`, {
                     headers: {
                         'Authorization': `token ${token['tec-token']}`
                     }
