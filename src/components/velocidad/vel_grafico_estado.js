@@ -16,6 +16,7 @@ const GraficoEstado = () => {
     const { id } = useParams();
 
     const [estado, setEstado] = useState(null);
+    const [paradas, setParadas] = useState(null);
     const [registros, setRegistros] = useState(null);
     const [flejes, setFlejes] = useState(null);
     const hoy = new Date();
@@ -169,6 +170,36 @@ const GraficoEstado = () => {
             return puntos
         }
 
+        const datosParadas = (estado) => {
+            const inicio = moment(filtro.fecha + ' ' + filtro.hora_inicio,'YYYY-MM-DD HH:mm');
+            const fin = moment(filtro.fecha + ' ' + filtro.hora_fin,'YYYY-MM-DD HH:mm');
+
+            const puntos = estado.paradas.map( p => {
+                let x_in = moment(p.inicio);
+                if (x_in.isBefore(inicio)) {
+                    x_in = inicio;
+                }
+                const y_in = -40;
+                let x_out = moment(p.fin);
+                if (x_out.isAfter(fin)) {
+                    x_out = fin;
+                }
+                const y_out = -30;
+                const color = p.color;
+
+                return ({
+                    x_in: x_in,
+                    y_in: y_in,
+                    x_out: x_out,
+                    y_out: y_out,
+                    color: color,
+                });
+            });
+
+            return puntos
+        }
+
+        setParadas(datosParadas(estado));
         setRegistros(datosRegistros(estado));
         setFlejes(datosFlejes(estado));
     },[estado]);
@@ -334,6 +365,7 @@ const GraficoEstado = () => {
                 <Row>
                     <Col className="col-12">
                         <StateChart data={registros}
+                                paradas={paradas}
                                 flejes={flejes}
                                 fecha={filtro.fecha}
                                 hora_inicio={filtro.hora_inicio}

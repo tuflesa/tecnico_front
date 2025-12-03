@@ -31,7 +31,7 @@ const useResizeObserver = (ref) => {
     return dimensions;
   };
 
-const StateChart = ({data, flejes, fecha, hora_inicio, hora_fin, ver, maquina}) => {
+const StateChart = ({data, flejes, fecha, hora_inicio, hora_fin, ver, maquina, paradas}) => {
     const svgRef = useRef();
     const wrapperRef = useRef();
     const dimensions = useResizeObserver(wrapperRef);
@@ -58,7 +58,7 @@ const StateChart = ({data, flejes, fecha, hora_inicio, hora_fin, ver, maquina}) 
             .range([0, innerWidth]);
         
         const yScale = scaleLinear()
-            .domain([-40, maquina.v_max])
+            .domain([-60, maquina.v_max])
             .range([innerHeight, 0]);
 
         const yScalePotencia = scaleLinear().domain([0, maquina.hf_pmax]).range([yScale(0), 0]);
@@ -269,6 +269,18 @@ const StateChart = ({data, flejes, fecha, hora_inicio, hora_fin, ver, maquina}) 
           .attr("fill", "white") // o negro, según contraste
           .attr("font-size", "12px")
           .text(f => f.pos);
+
+        // Dibujar Paradas
+        paradas && select(svg).select('.grafico')
+          .selectAll('rect.parada')
+          .data(paradas)
+          .join('rect')
+          .attr("class", "parada")
+          .attr("x", p => xScale(p.x_in))
+          .attr("y", p => yScale(p.y_in))
+          .attr("width", p => xScale(p.x_out) - xScale(p.x_in))
+          .attr("height", p => yScale(p.y_in) - yScale(p.y_out))
+          .attr("fill", p => p.color)
         
         // Lisening rectangles: para saber cuando entra y sale el ratón
         data && select(svg).select('.grafico')
@@ -378,6 +390,16 @@ const StateChart = ({data, flejes, fecha, hora_inicio, hora_fin, ver, maquina}) 
           .attr('fill', 'black')
           .attr('font-size', '12px')
           .text('Flejes');
+
+        // Añadir texto para Paradas
+        select(svg).select('.eje-y')
+          .append('text')
+          .attr('x', -25)
+          .attr('y', yScale(-47))
+          .attr('text-anchor', 'middle')
+          .attr('fill', 'black')
+          .attr('font-size', '12px')
+          .text('Paradas');
 
     },[data, fecha, hora_fin, hora_inicio, dimensions, ver]);
 

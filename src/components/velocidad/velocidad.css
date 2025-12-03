@@ -31,5 +31,12 @@ rect.fleje {
 
 .destacado {
   font-weight: bold;
-  font-size: 1.9rem;
+  font-size: 1.5rem;
+  }
+
+rect.parada {
+  fill-opacity: 1;
+  stroke: black;
+  stroke-width: 1;
+  stroke-opacity: 1;
   }
