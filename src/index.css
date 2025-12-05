@@ -103,3 +103,126 @@ code {
 .border-red {
   border: 2px solid red;
 }
+
+/*======================BOTONES CON EFECTO BRILLO==============================================*/
+
+
+/* ===== Glow ROJO (danger) ===== */
+@keyframes glowTexRed {
+  0%, 100% {
+    text-shadow:
+      0 0 5px #dc3545,
+      0 0 10px #dc3545;
+  }
+  50% {
+    text-shadow:
+      0 0 20px #dc3545,
+      0 0 30px #dc3545,
+      0 0 40px #dc3545;
+  }
+}
+
+.text-glow-red {
+  animation: glowTexRed 1.5s infinite;
+}
+
+/* ===== Glow AMARILLO (warning) ===== */
+@keyframes glowYellow {
+  0%, 100% {
+    box-shadow:
+      0 0 5px #ffc107,
+      0 0 10px #ffc107;
+  }
+  50% {
+    box-shadow:
+      0 0 20px #ffc107,
+      0 0 30px #ffc107,
+      0 0 40px #ffc107;
+  }
+}
+
+.btn-glow-yellow,
+.glow-yellow {
+  animation: glowYellow 1.5s infinite;
+}
+
+/* ===== Glow VERDE (success) ===== */
+@keyframes glowGreen {
+  0%, 100% {
+    box-shadow:
+      0 0 5px #198754,
+      0 0 10px #198754;
+  }
+  50% {
+    box-shadow:
+      0 0 20px #198754,
+      0 0 30px #198754,
+      0 0 40px #198754;
+  }
+}
+
+.btn-glow-green,
+.glow-green {
+  animation: glowGreen 1.5s infinite;
+}
+
+/* ===== Glow AZUL (primary) ===== */
+@keyframes glowBlue {
+  0%, 100% {
+    box-shadow:
+      0 0 5px #0d6efd,
+      0 0 10px #0d6efd;
+  }
+  50% {
+    box-shadow:
+      0 0 20px #0d6efd,
+      0 0 30px #0d6efd,
+      0 0 40px #0d6efd;
+  }
+}
+
+.btn-glow-blue,
+.glow-blue {
+  animation: glowBlue 1.5s infinite;
+}
+
+/* ===== Opcionales para elementos no botón =====
+   Útiles para spans/divs/títulos: crean halo visible alrededor del texto */
+.text-glow-red,
+.glow-yellow,
+.glow-green,
+.glow-blue {
+  display: inline-block;    /* importante para ver el box-shadow */
+  border-radius: 6px;       /* opcional: redondea el halo */
+  padding: 2px 6px;         /* opcional: espacio para que el halo se note */
+}
+
+/* ===== Pausa al hacer hover (común para todos) ===== */
+.btn-glow-yellow:hover,
+.btn-glow-green:hover,
+.btn-glow-blue:hover,
+.text-glow-red:hover,
+.glow-yellow:hover,
+.glow-green:hover,
+.glow-blue:hover {
+  animation-play-state: paused;
+}
+
+/*=================BOTON CON EFECTO MÁS SUAVE===========================*/
+/*className="btn btn-primary btn-lg btn-pausable"*/
+@keyframes continuousBlink {
+  0%, 100% { 
+    opacity: 1; 
+  }
+  50% { 
+    opacity: 0.4; 
+  }
+}
+
+.btn-pausable {
+  animation: continuousBlink 1s infinite;
+}
+
+.btn-pausable:hover {
+  animation-play-state: paused;
+}
