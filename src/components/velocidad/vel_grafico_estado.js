@@ -50,7 +50,7 @@ const GraficoEstado = () => {
             }
         })
         .then(res => {
-            console.log(res.data);
+            // console.log(res.data);
             setEstado(res.data);
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -58,7 +58,7 @@ const GraficoEstado = () => {
 
     useEffect(()=>{
         if (!estado) return;
-        console.log(estado);
+        // console.log(estado);
         const datosRegistros = (estado) => {
             const inicio = moment(filtro.fecha + ' ' + filtro.hora_inicio,'YYYY-MM-DD HH:mm');
             const fin = moment(filtro.fecha + ' ' + filtro.hora_fin,'YYYY-MM-DD HH:mm');
@@ -143,7 +143,7 @@ const GraficoEstado = () => {
                 }
                 else {
                     if(ahora.isAfter(inicio) && ahora.isBefore(fin)) {
-                        console.log('Añadir punto ahora ...');
+                        // console.log('Añadir punto ahora ...');
                         x_out = new Date();
                     }
                     else {
@@ -209,6 +209,7 @@ const GraficoEstado = () => {
         setFlejes(datosFlejes(estado));
         const existe = estado.paradas.some(p => p.codigo === 'Desconocido');
         setExisteDesconocido (existe);
+        console.log('Estado paradas: ', estado.paradas)
     },[estado, paradasSeleccionadas]);
 
     const actualizarGrafico = () => {
@@ -422,7 +423,10 @@ const GraficoEstado = () => {
                                 <Row>
                                     <Col>
                                         <div style={{ height: '200px', overflowY: 'auto' }}>
-                                            <ParadasAcu Paradas={estado && estado.paradas} />
+                                            <ParadasAcu Paradas={estado && estado.paradas} 
+                                                        paradasSeleccionadas={paradasSeleccionadas}
+                                                        setParadasSeleccionadas={setParadasSeleccionadas}
+                                            />
                                         </div>
                                     </Col>
                                 </Row>
@@ -432,7 +436,10 @@ const GraficoEstado = () => {
                                 <Row>
                                     <Col>
                                         <div style={{ height: '200px', overflowY: 'auto' }}>
-                                            <ParadasAcu Paradas={estado && estado.paradas} />
+                                            <ParadasAcu Paradas={estado && estado.paradas}
+                                                        paradasSeleccionadas={paradasSeleccionadas}
+                                                        setParadasSeleccionadas={setParadasSeleccionadas}
+                                            />
                                         </div>
                                     </Col>
                                 </Row>

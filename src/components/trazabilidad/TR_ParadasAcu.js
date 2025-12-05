@@ -1,13 +1,11 @@
-import axios from 'axios';
-import React, {useState, useEffect} from 'react';
+import {useEffect} from 'react';
 import { Form, Table} from 'react-bootstrap';
-import { useCookies } from 'react-cookie';
 import { PencilFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 
 const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas}) => {
-    const [token] = useCookies(['tec-token']);
-    // const [paradasSeleccionadas, setParadasSeleccionadas] = useState([]);
+
+    useEffect(()=>{console.log('Paradas ',Paradas)},[Paradas]);
     
     const formatearFechaHoraLocal = (s) => {
         if (!s || typeof s !== 'string') return { fecha: '—', hora: '—' };
@@ -22,9 +20,6 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas}) =>
     };
 
     const handleChange = (event) => {
-        // console.log('parada id: ', event.target.id);
-        // console.log(event.target.checked);
-        console.log('PS: ', paradasSeleccionadas)
         const nuevaSeleccion = [...paradasSeleccionadas];
         if (event.target.checked) {
             nuevaSeleccion.push({
