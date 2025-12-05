@@ -2,7 +2,7 @@ import axios from 'axios';
 import { Form, Table} from 'react-bootstrap';
 import { useCookies } from 'react-cookie';
 
-const ParadasAcu = ({Paradas}) => {
+const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas}) => {
     const [token] = useCookies(['tec-token']);
     
     const formatearFechaHoraLocal = (s) => {
@@ -16,6 +16,24 @@ const ParadasAcu = ({Paradas}) => {
         const hora = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         return { fecha, hora };
     };
+
+    const handleChange = (event) => {
+        // console.log('parada id: ', event.target.id);
+        // console.log(event.target.checked);
+        const nuevaSeleccion = [...paradasSeleccionadas];
+        if (event.target.checked) {
+            nuevaSeleccion.push({
+                id: event.target.id,
+                checked: event.target.checked
+            });
+        }
+        else {
+            const filtrada = nuevaSeleccion.filter(p => p.id !== event.target.id);
+            setParadasSeleccionadas(filtrada);
+            return; 
+        }
+        setParadasSeleccionadas(nuevaSeleccion);
+    }
 
     return (
         <Table striped bordered hover>
@@ -44,10 +62,10 @@ const ParadasAcu = ({Paradas}) => {
                             <td>
                                 <Form.Check
                                     inline
-                                    name="group1"
+                                    name="grupo2"
                                     type={'checkbox'}
                                     id={pdb.id}
-                                    //onChange ={handleChange}
+                                    onChange ={handleChange}
                                 />
                             </td>
                         </tr>

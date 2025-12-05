@@ -19,6 +19,7 @@ const GraficoEstado = () => {
 
     const [estado, setEstado] = useState(null);
     const [paradas, setParadas] = useState(null);
+    const [paradasSeleccionadas, setParadasSeleccionadas] = useState([]);
     const [registros, setRegistros] = useState(null);
     const [flejes, setFlejes] = useState(null);
     const hoy = new Date();
@@ -129,9 +130,9 @@ const GraficoEstado = () => {
                 if (x_in.isBefore(inicio)) {
                     x_in = inicio;
                 }
-                const y_in = -20;
+                const y_in = -15;
                 let x_out;
-                const y_out = -10;
+                const y_out = -5;
                 if (f.fecha_salida) {
                     const fecha_salida = f.fecha_salida.split('-');
                     const hora_salida = f.hora_salida.split(':');
@@ -182,15 +183,17 @@ const GraficoEstado = () => {
                 if (x_in.isBefore(inicio)) {
                     x_in = inicio;
                 }
-                const y_in = -10;
+                const y_in = -30;
                 let x_out = moment(p.fin);
                 if (x_out.isAfter(fin)) {
                     x_out = fin;
                 }
-                const y_out = 0;
-                const color = p.color;
+                const y_out = -20;
+                const seleccionado = paradasSeleccionadas.some(el => el.id == p.id);
+                const color = seleccionado ? 'gold' : p.color;
 
                 return ({
+                    id: p.id,
                     x_in: x_in,
                     y_in: y_in,
                     x_out: x_out,
@@ -206,7 +209,7 @@ const GraficoEstado = () => {
         setFlejes(datosFlejes(estado));
         const existe = estado.paradas.some(p => p.codigo === 'Desconocido');
         setExisteDesconocido (existe);
-    },[estado]);
+    },[estado, paradasSeleccionadas]);
 
     const actualizarGrafico = () => {
         setActualizar(!actualizar);
@@ -394,7 +397,9 @@ const GraficoEstado = () => {
                             <Row>
                                 <Col>
                                     <div style={{ height: '200px', overflowY: 'auto' }}>
-                                        <ParadasAcu Paradas={estado && estado.paradas} />
+                                        <ParadasAcu Paradas={estado && estado.paradas.filter(p => p.codigo === 'Desconocido')}
+                                                    paradasSeleccionadas = {paradasSeleccionadas}
+                                                    setParadasSeleccionadas = {setParadasSeleccionadas} />
                                     </div>
                                 </Col>
                             </Row>
