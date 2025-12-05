@@ -1,9 +1,13 @@
 import axios from 'axios';
+import React, {useState, useEffect} from 'react';
 import { Form, Table} from 'react-bootstrap';
 import { useCookies } from 'react-cookie';
+import { PencilFill } from 'react-bootstrap-icons';
+import { Link } from 'react-router-dom';
 
 const ParadasAcu = ({Paradas}) => {
     const [token] = useCookies(['tec-token']);
+    const [paradasSeleccionadas, setParadasSeleccionadas] = useState([]);
     
     const formatearFechaHoraLocal = (s) => {
         if (!s || typeof s !== 'string') return { fecha: '—', hora: '—' };
@@ -16,6 +20,18 @@ const ParadasAcu = ({Paradas}) => {
         const hora = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         return { fecha, hora };
     };
+
+    
+    const handleChange = (event) => {
+        const id = event.target.id;        // si arriba usas String(pdb.id), aquí será string
+        const isChecked = event.target.checked;
+
+        setParadasSeleccionadas(prev =>
+        isChecked ? [...prev, id] : prev.filter(item => item !== id)
+        );
+    };
+
+    console.log('Paradas seleccionadas:', paradasSeleccionadas);
 
     return (
         <Table striped bordered hover>
@@ -46,9 +62,12 @@ const ParadasAcu = ({Paradas}) => {
                                     inline
                                     name="group1"
                                     type={'checkbox'}
-                                    id={pdb.id}
-                                    //onChange ={handleChange}
+                                    id={String(pdb.id)}
+                                    disabled={Number(pdb.duracion)<10 || pdb.codigo==="Desconocido"?false:true}
+                                    checked={paradasSeleccionadas.includes(String(pdb.id))}
+                                    onChange={handleChange}
                                 />
+                               { pdb.codigo==="Desconocido"? <Link to={``}><PencilFill className="mr-3 pencil"/></Link> : ''}
                             </td>
                         </tr>
                     )
