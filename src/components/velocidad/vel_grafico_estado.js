@@ -413,7 +413,7 @@ const GraficoEstado = () => {
                                 <Col>
                                     <div style={{ height: '200px', overflowY: 'auto' }}>
                                         <ParadasAcu Paradas={estado && estado.paradas.filter(p => p.codigo === 'Desconocido')}
-                                                    paradasSeleccionadas = {paradasSeleccionadas}
+                                                    paradasSeleccionadas = {paradasSeleccionadas ? paradasSeleccionadas : []}
                                                     setParadasSeleccionadas = {setParadasSeleccionadas} />
                                     </div>
                                 </Col>
