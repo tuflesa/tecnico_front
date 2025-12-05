@@ -33,7 +33,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     const [select_Archivo, setSelectArchivo] = useState('');
 
     const [datos, setDatos] = useState({
-        empresa: rodillo.id?rodillo.operacion.seccion.maquina.empresa_id:user['tec-user'].perfil.empresa.id,
+        empresa: rodillo.id?rodillo.operacion.seccion.maquina.empresa.id:user['tec-user'].perfil.empresa.id,
         empresa_nombre: rodillo.id?rodillo.operacion.seccion.maquina.empresa.nombre:'',
         zona: rodillo.id?rodillo.operacion.seccion.maquina.id:'',
         zona_siglas: rodillo.id?rodillo.operacion.seccion.maquina.siglas:'',
@@ -104,20 +104,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     }, [datos.operacion, datos.tipo_rodillo, datos.zona]);
 
     useEffect(() => {
-        axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }
-        })
-        .then( res => {
-            setEmpresas(res.data);
-        })
-        .catch( err => {
-            console.log(err);
-        });
-    }, [token]);
-
-    useEffect(() => {
+        console.log('QUE ENTRA EN RODILLO: ', rodillo);
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -160,7 +147,7 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
     }, [datos.operacion]);
 
     useEffect(() => {
-        if (datos.empresa === '') {
+        if (datos.empresa === '' || datos.empresa === 'null') {
             setZonas([]);
             setDatos({
                 ...datos,
@@ -169,9 +156,10 @@ const RodRodilloForm = ({rodillo, setRodillo}) => {
                 operacion: '',
                 grupo: '',
             });
-        }
+        }        
         else {
-            axios.get(BACKEND_SERVER + `/api/estructura/zona/?empresa=${datos.empresa}&es_maquina_tubo=${true}`,{
+            console.log('que vale empresa: ', datos.empresa)
+            axios.get(BACKEND_SERVER + `/api/estructura/zona/?empresa__id=${datos.empresa}&es_maquina_tubo=${true}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
