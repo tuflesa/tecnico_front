@@ -179,12 +179,12 @@ const GraficoEstado = () => {
                 if (x_in.isBefore(inicio)) {
                     x_in = inicio;
                 }
-                const y_in = -40;
+                const y_in = -10;
                 let x_out = moment(p.fin);
                 if (x_out.isAfter(fin)) {
                     x_out = fin;
                 }
-                const y_out = -30;
+                const y_out = 0;
                 const color = p.color;
 
                 return ({
