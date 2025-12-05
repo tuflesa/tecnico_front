@@ -3,7 +3,7 @@ import axios from 'axios';
 import moment from 'moment';
 import { BACKEND_SERVER } from '../../constantes';
 import VelocidadNavBar from './vel_nav_bar';
-import { Container, Row, Col, Form, Tab, Tabs } from 'react-bootstrap';
+import { Container, Row, Col, Form, Tab, Button, Nav } from 'react-bootstrap';
 import { useCookies } from 'react-cookie';
 import { useParams } from 'react-router-dom';
 import EstadoFiltro from './vel_estado_filtro';
@@ -382,18 +382,33 @@ const GraficoEstado = () => {
                     </Col>
                 </Row> 
                 {/* ================================================================================= */}
-                <Tabs defaultActiveKey="flejes"id="uncontrolled-tab-example"className="mb-3">
-                    <Tab eventKey="flejes" title="Flejes">
-                        <Row>
-                            <Col>
-                                <div style={{ height: '600px', overflowY: 'auto' }}>
-                                    <FlejesAcu Flejes={estado && estado.flejes} />
-                                </div>
-                            </Col>
-                        </Row>
-                    </Tab>
-                    {existeDesconocido?(
-                        <Tab eventKey="paradas" title={<span className="glow-green">Paradas</span>}>
+                <Tab.Container defaultActiveKey="flejes">
+                    <div className="d-flex align-items-center mb-3">
+                        <Nav variant="tabs" className="flex-grow-1">
+                            <Nav.Item>
+                                <Nav.Link eventKey="flejes">Flejes</Nav.Link>
+                            </Nav.Item>
+
+                            <Nav.Item>
+                                <Nav.Link eventKey="paradas">
+                                {existeDesconocido ? (
+                                    <span className="glow-green">Paradas</span>
+                                ) : (
+                                    'Paradas'
+                                )}
+                                </Nav.Link>
+                            </Nav.Item>
+                        </Nav>
+                        <Button
+                            variant="primary"
+                            className="ms-2"
+                            onClick={() => console.log('Acción')}
+                            >
+                            Agrupar tramos
+                        </Button>
+                    </div>
+                    <Tab.Content>
+                        <Tab.Pane eventKey="flejes" title="Flejes">
                             <Row>
                                 <Col>
                                     <div style={{ height: '200px', overflowY: 'auto' }}>
@@ -403,19 +418,30 @@ const GraficoEstado = () => {
                                     </div>
                                 </Col>
                             </Row>
-                        </Tab>
-                    ):(
-                        <Tab eventKey="paradas" title="Paradas">
-                            <Row>
-                                <Col>
-                                    <div style={{ height: '200px', overflowY: 'auto' }}>
-                                        <ParadasAcu Paradas={estado && estado.paradas} />
-                                    </div>
-                                </Col>
-                            </Row>
-                        </Tab>
-                    )}
-                </Tabs>
+                        </Tab.Pane>
+                        {existeDesconocido?(
+                            <Tab.Pane eventKey="paradas" title={<span className="glow-green">Paradas</span>}>
+                                <Row>
+                                    <Col>
+                                        <div style={{ height: '200px', overflowY: 'auto' }}>
+                                            <ParadasAcu Paradas={estado && estado.paradas} />
+                                        </div>
+                                    </Col>
+                                </Row>
+                            </Tab.Pane>
+                        ):(
+                            <Tab.Pane eventKey="paradas" title="Paradas">
+                                <Row>
+                                    <Col>
+                                        <div style={{ height: '200px', overflowY: 'auto' }}>
+                                            <ParadasAcu Paradas={estado && estado.paradas} />
+                                        </div>
+                                    </Col>
+                                </Row>
+                            </Tab.Pane>
+                        )}
+                    </Tab.Content>
+                </Tab.Container>
             </Container>
         </React.Fragment>
     )

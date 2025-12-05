@@ -1,9 +1,13 @@
 import axios from 'axios';
+import React, {useState, useEffect} from 'react';
 import { Form, Table} from 'react-bootstrap';
 import { useCookies } from 'react-cookie';
+import { PencilFill } from 'react-bootstrap-icons';
+import { Link } from 'react-router-dom';
 
 const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas}) => {
     const [token] = useCookies(['tec-token']);
+    const [paradasSeleccionadas, setParadasSeleccionadas] = useState([]);
     
     const formatearFechaHoraLocal = (s) => {
         if (!s || typeof s !== 'string') return { fecha: '—', hora: '—' };
@@ -64,9 +68,17 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas}) =>
                                     inline
                                     name="grupo2"
                                     type={'checkbox'}
+<<<<<<< HEAD
                                     id={pdb.id}
                                     onChange ={handleChange}
+=======
+                                    id={String(pdb.id)}
+                                    disabled={Number(pdb.duracion)<10 || pdb.codigo==="Desconocido"?false:true}
+                                    checked={paradasSeleccionadas.includes(String(pdb.id))}
+                                    onChange={handleChange}
+>>>>>>> 46478d40f087d695233803e89e22c99d5b26fd95
                                 />
+                               { pdb.codigo==="Desconocido"? <Link to={``}><PencilFill className="mr-3 pencil"/></Link> : ''}
                             </td>
                         </tr>
                     )
