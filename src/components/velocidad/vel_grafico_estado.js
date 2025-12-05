@@ -3,13 +3,15 @@ import axios from 'axios';
 import moment from 'moment';
 import { BACKEND_SERVER } from '../../constantes';
 import VelocidadNavBar from './vel_nav_bar';
-import { Container, Row, Col, Form } from 'react-bootstrap';
+import { Container, Row, Col, Form, Tab, Tabs } from 'react-bootstrap';
 import { useCookies } from 'react-cookie';
 import { useParams } from 'react-router-dom';
 import EstadoFiltro from './vel_estado_filtro';
 import useInterval from '../utilidades/use_interval';
 import StateChart from './state_chart ';
 import FlejesAcu from "../trazabilidad/TR_FlejesAcu";
+import ParadasAcu from '../trazabilidad/TR_ParadasAcu';
+import '../../index';
 
 const GraficoEstado = () => {
     const [token] = useCookies(['tec-token']);
@@ -32,6 +34,7 @@ const GraficoEstado = () => {
         fuerza: false
     })
     const [actualizar, setActualizar] = useState(true);
+    const [existeDesconocido, setExisteDesconocido] = useState(false);
 
     useEffect(()=>{
         // console.log('Leer estado de la máquina id=', id);
@@ -198,10 +201,11 @@ const GraficoEstado = () => {
 
             return puntos
         }
-
         setParadas(datosParadas(estado));
         setRegistros(datosRegistros(estado));
         setFlejes(datosFlejes(estado));
+        const existe = estado.paradas.some(p => p.codigo === 'Desconocido');
+        setExisteDesconocido (existe);
     },[estado]);
 
     const actualizarGrafico = () => {
@@ -374,13 +378,39 @@ const GraficoEstado = () => {
                                 maquina = {estado&&estado.maquina} />
                     </Col>
                 </Row> 
-                <Row>
-                    <Col>
-                        <div style={{ height: '200px', overflowY: 'auto' }}>
-                            <FlejesAcu Flejes={estado && estado.flejes} />
-                        </div>
-                    </Col>
-                </Row>
+                {/* ================================================================================= */}
+                <Tabs defaultActiveKey="flejes"id="uncontrolled-tab-example"className="mb-3">
+                    <Tab eventKey="flejes" title="Flejes">
+                        <Row>
+                            <Col>
+                                <div style={{ height: '600px', overflowY: 'auto' }}>
+                                    <FlejesAcu Flejes={estado && estado.flejes} />
+                                </div>
+                            </Col>
+                        </Row>
+                    </Tab>
+                    {existeDesconocido?(
+                        <Tab eventKey="paradas" title={<span className="glow-green">Paradas</span>}>
+                            <Row>
+                                <Col>
+                                    <div style={{ height: '200px', overflowY: 'auto' }}>
+                                        <ParadasAcu Paradas={estado && estado.paradas} />
+                                    </div>
+                                </Col>
+                            </Row>
+                        </Tab>
+                    ):(
+                        <Tab eventKey="paradas" title="Paradas">
+                            <Row>
+                                <Col>
+                                    <div style={{ height: '200px', overflowY: 'auto' }}>
+                                        <ParadasAcu Paradas={estado && estado.paradas} />
+                                    </div>
+                                </Col>
+                            </Row>
+                        </Tab>
+                    )}
+                </Tabs>
             </Container>
         </React.Fragment>
     )
