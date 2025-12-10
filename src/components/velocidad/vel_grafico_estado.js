@@ -404,6 +404,7 @@ const GraficoEstado = () => {
                             variant="primary"
                             className="ms-2"
                             onClick={() => console.log('Acción')}
+                            disabled={paradasSeleccionadas.length === 0}
                             >
                             Agrupar tramos
                         </Button>

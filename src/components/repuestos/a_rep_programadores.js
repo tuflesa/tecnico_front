@@ -46,8 +46,43 @@ const Programadores = () => {
         }
     }
 
+    const generarAnual = async () => {
+        const confirmar = window.confirm("¿Deseas generar todos los horarios del año actual?");
+        if (!confirmar) return;
+
+        try {
+            await axios.post(BACKEND_SERVER + `/api/velocidad/horarios/generar/`, {}, { 
+                headers: {
+                    'Authorization': `token ${token['tec-token']}` 
+                }
+            });
+            alert("Año generado correctamente");
+            //cargarSemana();
+        } catch (error) {
+            console.error("Error generando el año:", error);
+            alert("Hubo un error generando el año: " + (error.response?.data?.mensaje || error.message));
+        }
+    };
+
     return (
         <Container className='mt-5'>
+            <Row>
+                <button
+                        onClick={generarAnual}
+                        style={{
+                            marginBottom: "20px",
+                            backgroundColor: "#16a34a",
+                            color: "white",
+                            padding: "8px 16px",
+                            borderRadius: "6px",
+                            border: "none",
+                            cursor: "pointer",
+                            fontWeight: "600"
+                        }}
+                    >
+                        Generar año actual
+                    </button>
+            </Row>
             <Row>
                 <Col>
                     

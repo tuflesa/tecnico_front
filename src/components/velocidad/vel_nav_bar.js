@@ -5,6 +5,7 @@ import { useCookies } from 'react-cookie';
 
 const VelocidadNavBar = () => {
     const [user] = useCookies(['tec-user']);
+    const soyProgramador = user['tec-user'].perfil.destrezas.filter(s => s === 7);
 
     return (
         <React.Fragment>
@@ -15,6 +16,13 @@ const VelocidadNavBar = () => {
                     <Nav className="m-auto">
                         <Navbar.Text>Control de velocidad</Navbar.Text>
                     </Nav> 
+                    {soyProgramador?
+                        <Form inline>
+                            <Link to="/velocidad/horario">
+                                <Button variant="info">Horarios</Button>
+                            </Link>
+                        </Form>
+                    :''}
                     <Navbar.Text className="mr-4" >
                         Usuario: {user['tec-user'].get_full_name}
                     </Navbar.Text>   
