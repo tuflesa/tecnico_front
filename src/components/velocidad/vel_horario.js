@@ -1,169 +1,307 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { BACKEND_SERVER } from '../../constantes';
-import { useCookies } from 'react-cookie'; 
-import { Link } from 'react-router-dom';
-import { Button } from 'react-bootstrap';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { BACKEND_SERVER } from "../../constantes";
+import { useCookies } from "react-cookie";
+import { Modal, Button, Form } from "react-bootstrap";
 
-const HorarioSemanal = () => {
-  const [diasSemana, setDiasSemana] = useState([]);
-  const [token] = useCookies(['tec-token']);  
+const HorarioCalendario = () => {
+  const [token] = useCookies(["tec-token"]);
+  const [user] = useCookies(['tec-user']);
+
+  const [dias, setDias] = useState([]);
+  const [diaSeleccionado, setDiaSeleccionado] = useState(null);
+  const [mostrarModal, setMostrarModal] = useState(false);
+  const [modoFestivos, setModoFestivos] = useState(false);
+  const [festivosSeleccionados, setFestivosSeleccionados] = useState({});
+  const [zonaId, setZonaId] = useState(null);
+  const [zonas, setZonas] = useState(null);
+  const [empresaId, setEmpresaId] = useState(user['tec-user'].perfil.empresa.id);
 
   useEffect(() => {
-    cargarSemana();
-  }, []);
+    if(zonaId){
+      cargarDias();
+    }
+  }, [zonaId]);
 
-  const cargarSemana = async () => {
-    try {
-        const res = await axios.get(BACKEND_SERVER + `/api/velocidad/horarios/semana/`, {
+  useEffect(() => {
+    if (empresaId === '') {
+        setZonas([]);
+    }
+    else {
+        empresaId && axios.get(BACKEND_SERVER + `/api/estructura/zona/?empresa=${empresaId}&es_maquina_tubo=${true}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }
-        });
-        setDiasSemana(res.data);
+        })
+        .then( res => {
+            setZonas(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });            
+    }
+    }, [token]);
+
+  const cargarDias = async () => {
+    try {
+      const res = await axios.get(
+        BACKEND_SERVER + `/api/velocidad/horarios/anual/?zona=${zonaId}`,
+        { headers: { Authorization: `token ${token["tec-token"]}` } }
+      );
+      setDias(res.data);
     } catch (error) {
-        console.error("Error cargando semana:", error);
+      console.error("Error cargando días:", error);
     }
   };
 
-  const manejarCambioHora = (claveDia, campo, valor) => {
-    const nuevos = diasSemana.map(d =>
-        d.fecha === claveDia ? { ...d, [campo]: valor } : d
+  const abrirModal = (dia) => {
+    if (modoFestivos) return; // en modo festivos no abrir modal
+    setDiaSeleccionado({ ...dia });
+    setMostrarModal(true);
+  };
+
+  const cerrarModal = () => setMostrarModal(false);
+
+  const guardarDia = async () => {
+    try {
+      await axios.put(
+        BACKEND_SERVER + `/api/velocidad/horarios/${diaSeleccionado.fecha}/`,
+        {
+          inicio: diaSeleccionado.inicio,
+          fin: diaSeleccionado.fin,
+          zona_id:zonaId,
+        },
+        { headers: { Authorization: `token ${token["tec-token"]}` } }
+      );
+      alert("Guardado correctamente");
+      setMostrarModal(false);
+      cargarDias();
+    } catch (error) {
+      alert("Error guardando");
+      console.error(error);
+    }
+  };
+
+  const toggleFestivo = (fecha) => {
+    setFestivosSeleccionados((prev) => ({
+      ...prev,
+      [fecha]: !prev[fecha],
+    }));
+  };
+
+  const guardarFestivos = async () => {
+    const fechas = Object.keys(festivosSeleccionados).filter(
+      (f) => festivosSeleccionados[f]
     );
-    setDiasSemana(nuevos);
-  };
-
-  const guardar = async (dia) => {
     try {
-        await axios.put(BACKEND_SERVER + `/api/velocidad/horarios/${dia.fecha}/`, {
-            inicio: dia.inicio,
-            fin: dia.fin
-        }, {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-            }
-        });
-        alert("Horario guardado correctamente");
+      // aquí envias las fechas al backend para marcar como festivos
+      await axios.post(
+        BACKEND_SERVER + "/api/velocidad/horarios/festivos/",
+        { fechas, zona_id: zonaId },
+        { headers: { Authorization: `token ${token["tec-token"]}` } }
+      );
+      alert("Festivos guardados correctamente");
+      setFestivosSeleccionados({});
+      cargarDias();
     } catch (error) {
-        console.error("Error guardando:", error);
-        alert("Error al guardar el horario");
+      console.error(error);
+      alert("Error guardando festivos");
     }
   };
 
-  /* const generarAnual = async () => {
-    const confirmar = window.confirm("¿Deseas generar todos los horarios del año actual?");
-    if (!confirmar) return;
+  // Agrupar días por mes
+  const meses = {};
+  dias.forEach((dia) => {
+    const mes = new Date(dia.fecha).getMonth();
+    if (!meses[mes]) meses[mes] = [];
+    meses[mes].push(dia);
+  });
 
-    try {
-        await axios.post(BACKEND_SERVER + `/api/velocidad/horarios/generar/`, {}, { 
-            headers: {
-                'Authorization': `token ${token['tec-token']}` 
-            }
-        });
-        alert("Año generado correctamente");
-        cargarSemana();
-    } catch (error) {
-        console.error("Error generando el año:", error);
-        alert("Hubo un error generando el año: " + (error.response?.data?.mensaje || error.message));
-    }
-  }; */
+  const nombreMes = (n) => {
+    const nombres = [
+      "Enero", "Febrero", "Marzo", "Abril",
+      "Mayo", "Junio", "Julio", "Agosto",
+      "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    ];
+    return nombres[n];
+  };
 
   return (
-    <div style={{ padding: '20px', backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-            <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', padding: '20px' }}>
-                {/* <button
-                    onClick={generarAnual}
-                    style={{
-                        marginBottom: "20px",
-                        backgroundColor: "#16a34a",
-                        color: "white",
-                        padding: "8px 16px",
-                        borderRadius: "6px",
-                        border: "none",
+    <div style={{ padding: "20px" }}>
+      <h1 style={{ marginBottom: "20px" }}>Calendario 2025</h1>
+      {/* Seleccionar máquina */}
+      <div style={{ marginTop: "10px", marginBottom: "20px" }}>
+        <strong>Zonas:</strong>
+
+        {zonas && zonas.length > 0 ? (
+          <div style={{ display: "flex", gap: "15px", flexWrap: "wrap", marginTop: "10px" }}>
+            {zonas.map((z) => (
+              <Form.Check
+                key={z.id}
+                inline
+                type="radio"
+                name="zona-check"
+                label={z.nombre}
+                checked={zonaId === z.id}
+                onChange={() => setZonaId(z.id)}
+              />
+            ))}
+          </div>
+        ) : (
+          <p style={{ fontSize: "14px", color: "#888" }}>No hay zonas registradas.</p>
+        )}
+      </div>
+      {/* Check para activar modo festivos */}
+      <Form.Check
+        inline
+        type="switch"
+        id="modo-festivos"
+        label="Modo Festivos"
+        checked={modoFestivos}
+        onChange={() => setModoFestivos(!modoFestivos)}
+      />
+
+      {modoFestivos && (
+        <Button
+          style={{ marginLeft: "10px" }}
+          variant="success"
+          onClick={guardarFestivos}
+        >
+          Guardar Festivos
+        </Button>
+      )}
+
+      {/* Contenedor de meses 4x3 */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(4, 1fr)",
+          gap: "20px",
+          marginTop: "20px",
+        }}
+      >
+        {Object.keys(meses).map((mesKey) => {
+          const mes = meses[mesKey].sort(
+            (a, b) => new Date(a.fecha) - new Date(b.fecha)
+          );
+
+          const primerDiaSemana = new Date(mes[0].fecha).getDay();
+          const huecos = primerDiaSemana === 0 ? 6 : primerDiaSemana - 1;
+
+          return (
+            <div
+              key={mesKey}
+              style={{
+                border: "1px solid #ccc",
+                borderRadius: "8px",
+                padding: "10px",
+                background: "#fafafa"
+              }}
+            >
+              <h3 style={{ textAlign: "center", marginBottom: "10px" }}>
+                {nombreMes(Number(mesKey))}
+              </h3>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(7, 1fr)",
+                  textAlign: "center",
+                  fontSize: "12px",
+                  marginBottom: "5px",
+                  fontWeight: "bold"
+                }}
+              >
+                {["L", "M", "X", "J", "V", "S", "D"].map((d) => (
+                  <div key={d}>{d}</div>
+                ))}
+              </div>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(7, 1fr)",
+                  gap: "3px"
+                }}
+              >
+                {Array.from({ length: huecos }).map((_, i) => (
+                  <div key={"hueco-" + i}></div>
+                ))}
+
+                {mes.map((dia) => {
+                  const marcado = festivosSeleccionados[dia.fecha] || dia.es_fin_de_semana;
+                  return (
+                    <div
+                      key={dia.fecha}
+                      onClick={() =>
+                        modoFestivos ? toggleFestivo(dia.fecha) : abrirModal(dia)
+                      }
+                      style={{
+                        height: "30px",
+                        fontSize: "12px",
+                        borderRadius: "4px",
+                        background: marcado ? "#ffdede" : "#ffffff",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                         cursor: "pointer",
-                        fontWeight: "600"
-                    }}
-                >
-                    Generar año actual
-                </button> */}
-
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span style={{ fontSize: '24px' }}>📅</span>
-                        <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: 0 }}>Configurar Horarios</h1>
-                        <Link to="/velocidad">
-                            <Button variant="info">Volver</Button>
-                        </Link>
+                        border: "1px solid #ddd"
+                      }}
+                    >
+                      {new Date(dia.fecha).getDate()}
                     </div>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {diasSemana.map(dia => (
-                        <div 
-                            key={dia.fecha}
-                            style={{
-                                display: 'flex',
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                gap: '15px',
-                                padding: '12px',
-                                borderRadius: '6px',
-                                border: '1px solid #e5e7eb',
-                                backgroundColor: dia.es_fin_de_semana ? '#f3f4f6' : 'white'
-                            }}
-                        >
-                        <span style={{ fontWeight: '600', minWidth: '80px' }}>{dia.nombreDia}</span>
-                        <span style={{ fontSize: '14px', color: '#6b7280', minWidth: '70px' }}>{dia.fecha}</span>
-                          <>
-                              <span style={{ fontSize: '14px', color: '#6b7280' }}>Inicio</span>
-                              <input
-                                  type="time"
-                                  value={dia.inicio}
-                                  onChange={(e) => manejarCambioHora(dia.fecha, 'inicio', e.target.value)}
-                                  style={{
-                                      border: '1px solid #d1d5db',
-                                      borderRadius: '4px',
-                                      padding: '6px 8px',
-                                      fontSize: '14px'
-                                  }}
-                              />
-
-                              <span style={{ fontSize: '14px', color: '#6b7280' }}>Fin</span>
-                              <input
-                                  type="time"
-                                  value={dia.fin}
-                                  onChange={(e) => manejarCambioHora(dia.fecha, 'fin', e.target.value)}
-                                  style={{
-                                      border: '1px solid #d1d5db',
-                                      borderRadius: '4px',
-                                      padding: '6px 8px',
-                                      fontSize: '14px'
-                                  }}
-                              />
-
-                              <button
-                                  onClick={() => guardar(dia)}
-                                  style={{
-                                      marginLeft: '15px',
-                                      backgroundColor: '#2563eb',
-                                      color: 'white',
-                                      padding: '6px 14px',
-                                      borderRadius: '6px',
-                                      border: 'none',
-                                      cursor: 'pointer'
-                                  }}
-                              >
-                                  Guardar
-                              </button>
-                            </>
-                        </div>
-                    ))}
-                </div>
+                  );
+                })}
+              </div>
             </div>
-        </div>
+          );
+        })}
+      </div>
+
+      {/* Modal edición horas */}
+      <Modal show={mostrarModal} onHide={cerrarModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Editar horario</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body>
+          {diaSeleccionado && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <p><strong>Día:</strong> {diaSeleccionado.nombreDia}</p>
+              <p><strong>Fecha:</strong> {diaSeleccionado.fecha}</p>
+
+              <label>Hora inicio</label>
+              <input
+                type="time"
+                value={diaSeleccionado.inicio}
+                onChange={(e) =>
+                  setDiaSeleccionado({ ...diaSeleccionado, inicio: e.target.value })
+                }
+              />
+
+              <label>Hora fin</label>
+              <input
+                type="time"
+                value={diaSeleccionado.fin}
+                onChange={(e) =>
+                  setDiaSeleccionado({ ...diaSeleccionado, fin: e.target.value })
+                }
+              />
+            </div>
+          )}
+        </Modal.Body>
+
+        <Modal.Footer>
+          <Button variant="secondary" onClick={cerrarModal}>
+            Cancelar
+          </Button>
+          <Button variant="primary" onClick={guardarDia}>
+            Guardar
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
 
-export default HorarioSemanal;
+export default HorarioCalendario;
