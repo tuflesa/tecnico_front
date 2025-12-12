@@ -41,7 +41,7 @@ const HorarioCalendario = () => {
         });            
     }
     }, [token]);
-
+//--------------------------------------------------------------------------------------//
   const cargarDias = async () => {
     try {
       const res = await axios.get(
@@ -227,9 +227,17 @@ const HorarioCalendario = () => {
                 {Array.from({ length: huecos }).map((_, i) => (
                   <div key={"hueco-" + i}></div>
                 ))}
-
+                {console.log('que trae en mes: ---->',mes)}
                 {mes.map((dia) => {
                   const marcado = festivosSeleccionados[dia.fecha] || dia.es_fin_de_semana;
+                  let colorFondo = "#ffffff"; // color por defecto
+                  if (dia.es_fin_de_semana && dia.inicio !== "00:00:00") {
+                    // fines de semana que se trabaja
+                    colorFondo = "#e0bb5eff"; 
+                  } else if (dia.inicio === "00:00:00") {
+                    // festivos y fines de semana normales
+                    colorFondo = "#ffdede"; 
+                  }
                   return (
                     <div
                       key={dia.fecha}
@@ -240,7 +248,7 @@ const HorarioCalendario = () => {
                         height: "30px",
                         fontSize: "12px",
                         borderRadius: "4px",
-                        background: marcado ? "#ffdede" : "#ffffff",
+                        background: colorFondo,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
