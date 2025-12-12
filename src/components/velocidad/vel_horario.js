@@ -231,6 +231,9 @@ const HorarioCalendario = () => {
                 {mes.map((dia) => {
                   const marcado = festivosSeleccionados[dia.fecha] || dia.es_fin_de_semana;
                   let colorFondo = "#ffffff"; // color por defecto
+                  if (modoFestivos && festivosSeleccionados[dia.fecha]) {
+                    colorFondo = "#fff3a1"; // amarillo para indicar selección, no están todavía grabados
+                  }
                   if (dia.es_fin_de_semana && dia.inicio !== "00:00:00") {
                     // fines de semana que se trabaja
                     colorFondo = "#e0bb5eff"; 
