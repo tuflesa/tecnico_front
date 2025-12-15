@@ -128,7 +128,7 @@ const HorarioCalendario = () => {
 
   return (
     <div style={{ padding: "20px" }}>
-      <h1 style={{ marginBottom: "20px" }}>Calendario 2025</h1>
+      <h1 style={{ marginBottom: "20px" }}>Calendario {new Date().getFullYear()}</h1>
       {/* Seleccionar máquina */}
       <div style={{ marginTop: "10px", marginBottom: "20px" }}>
         <strong>Zonas:</strong>
@@ -229,12 +229,12 @@ const HorarioCalendario = () => {
                 ))}
                 {console.log('que trae en mes: ---->',mes)}
                 {mes.map((dia) => {
-                  const marcado = festivosSeleccionados[dia.fecha] || dia.es_fin_de_semana;
+                  const marcado = festivosSeleccionados[dia.fecha] || dia.es_festivo;
                   let colorFondo = "#ffffff"; // color por defecto
                   if (modoFestivos && festivosSeleccionados[dia.fecha]) {
                     colorFondo = "#fff3a1"; // amarillo para indicar selección, no están todavía grabados
                   }
-                  if (dia.es_fin_de_semana && dia.inicio !== "00:00:00") {
+                  if (dia.es_festivo && dia.inicio !== "00:00:00") {
                     // fines de semana que se trabaja
                     colorFondo = "#e0bb5eff"; 
                   } else if (dia.inicio === "00:00:00") {
