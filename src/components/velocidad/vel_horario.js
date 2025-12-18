@@ -3,6 +3,7 @@ import axios from "axios";
 import { BACKEND_SERVER } from "../../constantes";
 import { useCookies } from "react-cookie";
 import { Modal, Button, Form } from "react-bootstrap";
+import VelocidadNavBar from './vel_nav_bar';
 
 const HorarioCalendario = () => {
   const [token] = useCookies(["tec-token"]);
@@ -16,6 +17,10 @@ const HorarioCalendario = () => {
   const [zonaId, setZonaId] = useState(null);
   const [zonas, setZonas] = useState(null);
   const [empresaId, setEmpresaId] = useState(user['tec-user'].perfil.empresa.id);
+  const soyProgramador = user['tec-user'].perfil.destrezas.filter(s => s === 7);
+  const [mostrarModalNuevoCalen, setMostrarModalNuevoCalen] = useState(false);
+  const [yearSeleccionado, setYearSeleccionado] = useState(new Date().getFullYear());
+  const [cargando, setCargando] = useState(false);
 
   useEffect(() => {
     if(zonaId){
@@ -41,7 +46,7 @@ const HorarioCalendario = () => {
         });            
     }
     }, [token]);
-//--------------------------------------------------------------------------------------//
+
   const cargarDias = async () => {
     try {
       const res = await axios.get(
@@ -62,7 +67,7 @@ const HorarioCalendario = () => {
 
   const cerrarModal = () => setMostrarModal(false);
 
-  const guardarDia = async () => {
+  const modificarDia = async () => {
     try {
       await axios.put(
         BACKEND_SERVER + `/api/velocidad/horarios/${diaSeleccionado.fecha}/`,
@@ -126,191 +131,276 @@ const HorarioCalendario = () => {
     return nombres[n];
   };
 
+  //-------------------------Crear nuevo calendario--------------------------//
+  const abrirModalYear = () => {
+      setYearSeleccionado(new Date().getFullYear());
+      setMostrarModalNuevoCalen(true);
+  };
+
+  const cerrarModalYear = () => {
+      setMostrarModalNuevoCalen(false);
+  };
+
+  const generarAnual = async () => {
+      if (!yearSeleccionado){
+          alert("Por favor introduce un año válido");
+          return;
+      }
+      const confirmar = window.confirm(`¿Deseas generar todos los horarios del año ${yearSeleccionado}?`);
+      if (!confirmar) return;
+      setCargando(true);
+      try {
+          const response = await axios.post(BACKEND_SERVER + `/api/velocidad/horarios/generar/`, {
+              year: yearSeleccionado
+          }, { 
+              headers: {
+                  'Authorization': `token ${token['tec-token']}` 
+              }
+          });
+          alert("Año generado correctamente");
+      } catch (error) {
+          alert("Hubo un error generando el año: " + (error.response?.data?.mensaje || error.message));
+      } finally {
+          setCargando(false);
+      }
+  };
+
   return (
-    <div style={{ padding: "20px" }}>
-      <h1 style={{ marginBottom: "20px" }}>Calendario {new Date().getFullYear()}</h1>
-      {/* Seleccionar máquina */}
-      <div style={{ marginTop: "10px", marginBottom: "20px" }}>
-        <strong>Zonas:</strong>
+    <div>
+      <VelocidadNavBar/>
+      <div style={{ padding: "20px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+          <h1 style={{ margin: 0 }}>Calendario {new Date().getFullYear()}</h1>
+          {soyProgramador? 
+            <Button variant="primary" onClick={abrirModalYear}>
+              Crear calendario
+            </Button> : ''}
+        </div>
+        {/* Seleccionar máquina */}
+        <div style={{ marginTop: "10px", marginBottom: "20px" }}>
+          <strong>Zonas:</strong>
 
-        {zonas && zonas.length > 0 ? (
-          <div style={{ display: "flex", gap: "15px", flexWrap: "wrap", marginTop: "10px" }}>
-            {zonas.map((z) => (
-              <Form.Check
-                key={z.id}
-                inline
-                type="radio"
-                name="zona-check"
-                label={z.nombre}
-                checked={zonaId === z.id}
-                onChange={() => setZonaId(z.id)}
-              />
-            ))}
-          </div>
-        ) : (
-          <p style={{ fontSize: "14px", color: "#888" }}>No hay zonas registradas.</p>
-        )}
-      </div>
-      {/* Check para activar modo festivos */}
-      <Form.Check
-        inline
-        type="switch"
-        id="modo-festivos"
-        label="Modo Festivos"
-        checked={modoFestivos}
-        onChange={() => setModoFestivos(!modoFestivos)}
-      />
-
-      {modoFestivos && (
-        <Button
-          style={{ marginLeft: "10px" }}
-          variant="success"
-          onClick={guardarFestivos}
-        >
-          Guardar Festivos
-        </Button>
-      )}
-
-      {/* Contenedor de meses 4x3 */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
-          gap: "20px",
-          marginTop: "20px",
-        }}
-      >
-        {Object.keys(meses).map((mesKey) => {
-          const mes = meses[mesKey].sort(
-            (a, b) => new Date(a.fecha) - new Date(b.fecha)
-          );
-
-          const primerDiaSemana = new Date(mes[0].fecha).getDay();
-          const huecos = primerDiaSemana === 0 ? 6 : primerDiaSemana - 1;
-
-          return (
-            <div
-              key={mesKey}
-              style={{
-                border: "1px solid #ccc",
-                borderRadius: "8px",
-                padding: "10px",
-                background: "#fafafa"
-              }}
-            >
-              <h3 style={{ textAlign: "center", marginBottom: "10px" }}>
-                {nombreMes(Number(mesKey))}
-              </h3>
-
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(7, 1fr)",
-                  textAlign: "center",
-                  fontSize: "12px",
-                  marginBottom: "5px",
-                  fontWeight: "bold"
-                }}
-              >
-                {["L", "M", "X", "J", "V", "S", "D"].map((d) => (
-                  <div key={d}>{d}</div>
-                ))}
-              </div>
-
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(7, 1fr)",
-                  gap: "3px"
-                }}
-              >
-                {Array.from({ length: huecos }).map((_, i) => (
-                  <div key={"hueco-" + i}></div>
-                ))}
-                {console.log('que trae en mes: ---->',mes)}
-                {mes.map((dia) => {
-                  const marcado = festivosSeleccionados[dia.fecha] || dia.es_festivo;
-                  let colorFondo = "#ffffff"; // color por defecto
-                  if (modoFestivos && festivosSeleccionados[dia.fecha]) {
-                    colorFondo = "#fff3a1"; // amarillo para indicar selección, no están todavía grabados
-                  }
-                  if (dia.es_festivo && dia.inicio !== "00:00:00") {
-                    // fines de semana que se trabaja
-                    colorFondo = "#e0bb5eff"; 
-                  } else if (dia.inicio === "00:00:00") {
-                    // festivos y fines de semana normales
-                    colorFondo = "#ffdede"; 
-                  }
-                  return (
-                    <div
-                      key={dia.fecha}
-                      onClick={() =>
-                        modoFestivos ? toggleFestivo(dia.fecha) : abrirModal(dia)
-                      }
-                      style={{
-                        height: "30px",
-                        fontSize: "12px",
-                        borderRadius: "4px",
-                        background: colorFondo,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        cursor: "pointer",
-                        border: "1px solid #ddd"
-                      }}
-                    >
-                      {new Date(dia.fecha).getDate()}
-                    </div>
-                  );
-                })}
-              </div>
+          {zonas && zonas.length > 0 ? (
+            <div style={{ display: "flex", gap: "15px", flexWrap: "wrap", marginTop: "10px" }}>
+              {zonas.map((z) => (
+                <Form.Check
+                  key={z.id}
+                  inline
+                  type="radio"
+                  name="zona-check"
+                  label={z.nombre}
+                  checked={zonaId === z.id}
+                  onChange={() => setZonaId(z.id)}
+                />
+              ))}
             </div>
-          );
-        })}
-      </div>
-
-      {/* Modal edición horas */}
-      <Modal show={mostrarModal} onHide={cerrarModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>Editar horario</Modal.Title>
-        </Modal.Header>
-
-        <Modal.Body>
-          {diaSeleccionado && (
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              <p><strong>Día:</strong> {diaSeleccionado.nombreDia}</p>
-              <p><strong>Fecha:</strong> {diaSeleccionado.fecha}</p>
-
-              <label>Hora inicio</label>
-              <input
-                type="time"
-                value={diaSeleccionado.inicio}
-                onChange={(e) =>
-                  setDiaSeleccionado({ ...diaSeleccionado, inicio: e.target.value })
-                }
-              />
-
-              <label>Hora fin</label>
-              <input
-                type="time"
-                value={diaSeleccionado.fin}
-                onChange={(e) =>
-                  setDiaSeleccionado({ ...diaSeleccionado, fin: e.target.value })
-                }
-              />
-            </div>
+          ) : (
+            <p style={{ fontSize: "14px", color: "#888" }}>No hay zonas registradas.</p>
           )}
-        </Modal.Body>
+        </div>
+        {/* Check para activar modo festivos */}
+        <Form.Check
+          inline
+          type="switch"
+          id="modo-festivos"
+          label="Modo Festivos"
+          checked={modoFestivos}
+          onChange={() => setModoFestivos(!modoFestivos)}
+        />
 
-        <Modal.Footer>
+        {modoFestivos && (
+          <Button
+            style={{ marginLeft: "10px" }}
+            variant="success"
+            onClick={guardarFestivos}
+          >
+            Guardar Festivos
+          </Button>
+        )}
+
+        {/* Contenedor de meses 4x3 */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(4, 1fr)",
+            gap: "20px",
+            marginTop: "20px",
+          }}
+        >
+          {Object.keys(meses).map((mesKey) => {
+            const mes = meses[mesKey].sort(
+              (a, b) => new Date(a.fecha) - new Date(b.fecha)
+            );
+
+            const primerDiaSemana = new Date(mes[0].fecha).getDay();
+            const huecos = primerDiaSemana === 0 ? 6 : primerDiaSemana - 1;
+
+            return (
+              <div
+                key={mesKey}
+                style={{
+                  border: "1px solid #ccc",
+                  borderRadius: "8px",
+                  padding: "10px",
+                  background: "#fafafa"
+                }}
+              >
+                <h3 style={{ textAlign: "center", marginBottom: "10px" }}>
+                  {nombreMes(Number(mesKey))}
+                </h3>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(7, 1fr)",
+                    textAlign: "center",
+                    fontSize: "12px",
+                    marginBottom: "5px",
+                    fontWeight: "bold"
+                  }}
+                >
+                  {["L", "M", "X", "J", "V", "S", "D"].map((d) => (
+                    <div key={d}>{d}</div>
+                  ))}
+                </div>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(7, 1fr)",
+                    gap: "3px"
+                  }}
+                >
+                  {Array.from({ length: huecos }).map((_, i) => (
+                    <div key={"hueco-" + i}></div>
+                  ))}
+                  {mes.map((dia) => {
+                    const marcado = festivosSeleccionados[dia.fecha] || dia.es_festivo;
+                    let colorFondo = "#ffffff"; // color por defecto
+                    if (modoFestivos && festivosSeleccionados[dia.fecha]) {
+                      colorFondo = "#fff3a1"; // amarillo para indicar selección, no están todavía grabados
+                    /* }
+                    if (dia.es_festivo && dia.inicio !== "00:00:00") {
+                      // fines de semana que se trabaja
+                      colorFondo = "#e0bb5eff";  */
+                    } else if (dia.inicio === "00:00:00") {
+                      // festivos y fines de semana normales
+                      colorFondo = "#ffdede"; 
+                    }
+                    return (
+                      <div
+                        key={dia.fecha}
+                        onClick={() =>
+                          modoFestivos ? toggleFestivo(dia.fecha) : abrirModal(dia)
+                        }
+                        style={{
+                          height: "30px",
+                          fontSize: "12px",
+                          borderRadius: "4px",
+                          background: colorFondo,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: "pointer",
+                          border: "1px solid #ddd"
+                        }}
+                      >
+                        {new Date(dia.fecha).getDate()}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Modal para modificar las horas de un día */}
+      <Modal show={mostrarModal} onHide={cerrarModal}>
+          <Modal.Header closeButton>
+            <Modal.Title>Editar horario</Modal.Title>
+          </Modal.Header>
+
+          <Modal.Body>
+            {diaSeleccionado && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <p><strong>Día:</strong> {diaSeleccionado.nombreDia}</p>
+                <p><strong>Fecha:</strong> {diaSeleccionado.fecha}</p>
+
+                <label>Hora inicio</label>
+                <input
+                  type="time"
+                  value={diaSeleccionado.inicio}
+                  onChange={(e) =>
+                    setDiaSeleccionado({ ...diaSeleccionado, inicio: e.target.value })
+                  }
+                />
+
+                <label>Hora fin</label>
+                <input
+                  type="time"
+                  value={diaSeleccionado.fin}
+                  onChange={(e) =>
+                    setDiaSeleccionado({ ...diaSeleccionado, fin: e.target.value })
+                  }
+                />
+              </div>
+            )}
+          </Modal.Body>
+
+          <Modal.Footer>
           <Button variant="secondary" onClick={cerrarModal}>
-            Cancelar
-          </Button>
-          <Button variant="primary" onClick={guardarDia}>
-            Guardar
-          </Button>
-        </Modal.Footer>
-      </Modal>
+              Cancelar
+            </Button>
+            <Button variant="primary" onClick={modificarDia}>
+              Guardar
+            </Button>
+          </Modal.Footer>
+        </Modal>
+        {/* Modal para seleccionar año y crearlo */}
+        <Modal show={mostrarModalNuevoCalen} onHide={cerrarModalYear}>
+            <Modal.Header closeButton>
+                <Modal.Title>Generar Horarios Anuales</Modal.Title>
+            </Modal.Header>
+
+            <Modal.Body>
+                <p>Selecciona el año para el que deseas generar los horarios:</p>
+                
+                <Form.Group>
+                    <Form.Label>Año</Form.Label>
+                    <Form.Control
+                        type="number"
+                        min="2025"
+                        max="2200"
+                        value={yearSeleccionado}
+                        onChange={(e) => setYearSeleccionado(parseInt(e.target.value))}
+                        disabled={cargando}
+                    />
+                    <Form.Text className="text-muted">
+                        Se generarán horarios para todas las máquinas de tubo
+                    </Form.Text>
+                </Form.Group>
+
+                {cargando && (
+                    <div className="mt-3 text-center">
+                        <div className="spinner-border text-primary" role="status">
+                            <span className="sr-only">Generando...</span>
+                        </div>
+                        <p className="mt-2">Generando horarios, por favor espera...</p>
+                    </div>
+                )}
+            </Modal.Body>
+
+            <Modal.Footer>
+                <Button variant="secondary" onClick={cerrarModalYear} disabled={cargando}>
+                    Cancelar
+                </Button>
+                <Button variant="primary" onClick={generarAnual} disabled={cargando}>
+                    {cargando ? 'Generando...' : 'Generar Año'}
+                </Button>
+            </Modal.Footer>
+        </Modal>
+      </div>
     </div>
   );
 };
