@@ -3,7 +3,7 @@ import axios from 'axios';
 import moment from 'moment';
 import { BACKEND_SERVER } from '../../constantes';
 import VelocidadNavBar from './vel_nav_bar';
-import { Container, Row, Col, Form, Tab, Button, Nav } from 'react-bootstrap';
+import { Container, Row, Col, Form, Tab, Button, Nav, Modal, Table } from 'react-bootstrap';
 import { useCookies } from 'react-cookie';
 import { useParams } from 'react-router-dom';
 import EstadoFiltro from './vel_estado_filtro';
@@ -19,6 +19,8 @@ const GraficoEstado = () => {
 
     const [estado, setEstado] = useState(null);
     const [paradas, setParadas] = useState(null);
+    const [tipoParadas, setTipoParadas] = useState(null);
+    const [codigoParada, setCodigoParada] = useState(null);
     const [paradasSeleccionadas, setParadasSeleccionadas] = useState([]);
     const [registros, setRegistros] = useState(null);
     const [flejes, setFlejes] = useState(null);
@@ -36,6 +38,13 @@ const GraficoEstado = () => {
     })
     const [actualizar, setActualizar] = useState(true);
     const [existeDesconocido, setExisteDesconocido] = useState(false);
+    const [mostrarModalTramos, setMostrarModalTramos] = useState(false);
+    const [seleTipoParada, setseleTipoParada] = useState(null);
+    const [codigo_seleccionado, setCodigoSeleccionado] = useState(null);
+
+    const abrirModalTramos = () => {
+        setMostrarModalTramos(true);
+    };
 
     useEffect(()=>{
         // console.log('Leer estado de la máquina id=', id);
@@ -55,6 +64,35 @@ const GraficoEstado = () => {
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     },[filtro, actualizar]);
+
+    useEffect(()=>{
+        axios.get(BACKEND_SERVER + `/api/velocidad/tipoparada/?para_informar=${true}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( res => {
+            setTipoParadas(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });  
+    },[token]);
+
+    useEffect(()=>{
+        seleTipoParada && axios.get(BACKEND_SERVER + `/api/velocidad/obtener_codigos/?tipo_parada=${seleTipoParada}&zona=${id}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( res => {
+            setCodigoParada(res.data);
+            console.log('Estos son los codigos de los tipos de paradas: ', res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });  
+    },[seleTipoParada]);
 
     useEffect(()=>{
         if (!estado) return;
@@ -224,6 +262,18 @@ const GraficoEstado = () => {
             [event.target.id] : event.target.checked
             });
     };
+
+    const handleInputChange = (event) => {
+        setseleTipoParada(event.target.value)
+    }
+
+    const handleInputChangeCodigo = (event) => {
+        setCodigoSeleccionado(event.target.value)
+    }
+
+    const guardartipoparada = () => {
+        console.log(paradasSeleccionadas);
+    }
 
     return (
         <React.Fragment>
@@ -403,7 +453,7 @@ const GraficoEstado = () => {
                         <Button
                             variant="primary"
                             className="ms-2"
-                            onClick={() => console.log('Acción')}
+                            onClick={abrirModalTramos}
                             disabled={paradasSeleccionadas.length === 0}
                             >
                             Agrupar tramos
@@ -448,6 +498,93 @@ const GraficoEstado = () => {
                         )}
                     </Tab.Content>
                 </Tab.Container>
+                <Modal show={mostrarModalTramos} onHide={() => setMostrarModalTramos(false)} size="lg">
+                <Modal.Header closeButton>
+                    <Modal.Title>Tramos Agrupados</Modal.Title>
+                </Modal.Header>
+
+                <Modal.Body>
+                    <Row>
+                        <Col>
+                            <Form.Group controlId="tipoparada">
+                                <Form.Label>Tipo Parada</Form.Label>
+                                <Form.Control as="select"  
+                                            name='tipoparada' 
+                                            value={seleTipoParada}
+                                            onChange={handleInputChange}
+                                            placeholder="Tipo parada">
+                                            <option key={0} value={''}>Selecciona una opción</option>
+                                            {tipoParadas && tipoParadas.map( tipo => {
+                                                return (
+                                                <option key={tipo.id} value={tipo.id}>
+                                                    {tipo.nombre}
+                                                </option>
+                                                )
+                                            })}
+                                </Form.Control>
+                            </Form.Group>
+                        </Col>
+                        <Col>
+                            <Form.Group controlId="codigoparada">
+                                <Form.Label>Codigo Parada</Form.Label>
+                                <Form.Control as="select"  
+                                            name='codigoparada' 
+                                            value={codigo_seleccionado}
+                                            onChange={handleInputChangeCodigo}
+                                            placeholder="Codigo parada"
+                                            disabled={seleTipoParada?false:true}>
+                                            <option key={0} value={''}>Selecciona una opción</option>
+                                            {codigoParada && codigoParada.map( codigo => {
+                                                return (
+                                                <option key={codigo.id} value={codigo.id}>
+                                                    {codigo.nombre}
+                                                </option>
+                                                )
+                                            })}
+                                </Form.Control>
+                            </Form.Group>
+                        </Col>
+                    </Row>
+            
+                    <Table striped bordered hover>
+                    <thead>
+                        <tr>
+                        <th>#</th>
+                        <th>Fecha Inicio - Hora Inicio</th>
+                        <th>Fecha Fin - Hora Fin</th>
+                        <th>Duración</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {paradasSeleccionadas.length > 0 ? (
+                        paradasSeleccionadas.map((tramo, index) => (
+                            <tr key={index}>
+                            <td>{index + 1}</td>
+                            <td>{tramo.fechaInicio + ' - ' + tramo.horaInicio} </td>
+                            <td>{tramo.fechaFin + ' - ' + tramo.horaFin}</td>
+                            <td>{Number(tramo.duracion).toFixed(2)}</td>
+                            </tr>
+                        ))
+                        ) : (
+                        <tr>
+                            <td colSpan="5" className="text-center">
+                            No hay tramos disponibles
+                            </td>
+                        </tr>
+                        )}
+                    </tbody>
+                    </Table>
+                </Modal.Body>
+
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setMostrarModalTramos(false)}>
+                    Cancelar
+                    </Button>
+                    <Button variant="primary" onClick={() => guardartipoparada()}>
+                    Guardar
+                    </Button>
+                </Modal.Footer>
+                </Modal>
             </Container>
         </React.Fragment>
     )

@@ -1,3 +1,4 @@
+import { duration } from 'moment';
 import {useEffect} from 'react';
 import { Form, Table} from 'react-bootstrap';
 import { PencilFill } from 'react-bootstrap-icons';
@@ -19,12 +20,17 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas}) =>
         return { fecha, hora };
     };
 
-    const handleChange = (event) => {
+    const handleChange = (event, fechaInicio, horaInicio, fechaFin, horaFin, duracion) => {
         const nuevaSeleccion = [...paradasSeleccionadas];
         if (event.target.checked) {
             nuevaSeleccion.push({
                 id: event.target.id,
-                checked: event.target.checked
+                checked: event.target.checked,
+                fechaInicio,
+                fechaFin,
+                horaInicio,
+                horaFin,
+                duracion,
             });
         }
         else {
@@ -33,6 +39,16 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas}) =>
             return; 
         }
         setParadasSeleccionadas(nuevaSeleccion);
+    }
+    
+    const estaseleccionado =(id)=>{
+        let resultado = false;
+        paradasSeleccionadas.map(p =>{
+            if (p.id == id) {
+                resultado = true;
+            }
+        });
+        return resultado;
     }
 
     return (
@@ -65,7 +81,8 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas}) =>
                                     name="grupo2"
                                     type={'checkbox'}
                                     id={pdb.id}
-                                    onChange ={handleChange}
+                                    checked={estaseleccionado(pdb.id)}
+                                    onChange={(event) => handleChange(event, fechaInicio, horaInicio, fechaFin, horaFin, pdb.duracion)}
                                 />
                                { pdb.codigo==="Desconocido"? <Link to={``}><PencilFill className="mr-3 pencil"/></Link> : ''}
                             </td>
