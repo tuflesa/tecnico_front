@@ -272,7 +272,62 @@ const GraficoEstado = () => {
     }
 
     const guardartipoparada = () => {
-        console.log(paradasSeleccionadas);
+        console.log('paradasSeleccionadas: ', paradasSeleccionadas);
+        if (!seleTipoParada) {
+            alert('Debe seleccionar un tipo de parada');
+            return;
+        }
+        
+        if (!codigo_seleccionado) {
+            alert('Debe seleccionar un código de parada');
+            return;
+        }
+
+        if (paradasSeleccionadas.length === 0) {
+            alert('No hay paradas seleccionadas');
+            return;
+        }
+        try {
+            // Revisar si podemos mandar directamente paradasSeleccionadas
+            const datos = {
+                zona_id: id,
+                tipo_parada_id: seleTipoParada,
+                codigo_parada_id: codigo_seleccionado,
+                paradas: paradasSeleccionadas.map(p => ({
+                    id: p.id,
+                    fecha_inicio: p.fechaInicio,
+                    hora_inicio: p.horaInicio,
+                    fecha_fin: p.fechaFin,
+                    hora_fin: p.horaFin,
+                    duracion: p.duracion
+                }))
+            };
+            const response = axios.post(
+                `${BACKEND_SERVER}/api/velocidad/guardar_paradas_agrupadas/`,
+                datos,
+                {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+            if (response.status === 200 || response.status === 201) {
+                alert('Paradas guardadas correctamente');
+        
+                // Limpiar variables
+                setParadasSeleccionadas([]);
+                setseleTipoParada(null);
+                setCodigoSeleccionado(null);
+                
+                setMostrarModalTramos(false);
+                
+                setActualizar(!actualizar);
+            }
+        } catch (error) {
+            console.error('Error al guardar paradas:', error);
+            alert('Error al guardar las paradas: ' + (error.response?.data?.error || error.message));
+        }
     }
 
     return (
