@@ -12,6 +12,7 @@ import StateChart from './state_chart ';
 import FlejesAcu from "../trazabilidad/TR_FlejesAcu";
 import ParadasAcu from '../trazabilidad/TR_ParadasAcu';
 import '../../index';
+import ordenarLista from '../utilidades/ordenar_paradas';
 
 const GraficoEstado = () => {
     const [token] = useCookies(['tec-token']);
@@ -87,7 +88,7 @@ const GraficoEstado = () => {
         })
         .then( res => {
             setCodigoParada(res.data);
-            console.log('Estos son los codigos de los tipos de paradas: ', res.data);
+            // console.log('Estos son los codigos de los tipos de paradas: ', res.data);
         })
         .catch( err => {
             console.log(err);
@@ -247,7 +248,7 @@ const GraficoEstado = () => {
         setFlejes(datosFlejes(estado));
         const existe = estado.paradas.some(p => p.codigo === 'Desconocido');
         setExisteDesconocido (existe);
-        console.log('Estado paradas: ', estado.paradas)
+        // console.log('Estado paradas: ', estado.paradas)
     },[estado, paradasSeleccionadas]);
 
     const actualizarGrafico = () => {
@@ -263,9 +264,138 @@ const GraficoEstado = () => {
             });
     };
 
-    const handleInputChange = (event) => {
-        setseleTipoParada(event.target.value)
-    }
+    const handleInputChangeTipo = (event) => {
+    setseleTipoParada(event.target.value);
+    const nombre = event.target.options[event.target.selectedIndex].dataset.nombre;
+
+    // 🔹 Construcción de parámetros (común)
+    const fecha_inicio = moment(paradasSeleccionadas[0].fechaInicio, 'DD/MM/YYYY').format('YYYY-MM-DD');
+    const hora_inicio = paradasSeleccionadas[0].horaInicio;
+    const fin = paradasSeleccionadas.length - 1;
+    const fecha_fin = moment(paradasSeleccionadas[fin].fechaInicio, 'DD/MM/YYYY').format('YYYY-MM-DD');
+    const hora_fin = paradasSeleccionadas[fin].horaFin;
+
+    const params = {
+        fecha_inicio,
+        hora_inicio,
+        fecha_fin,
+        hora_fin,
+        zona: id
+    };
+
+    const headers = {
+        'Authorization': `token ${token['tec-token']}`
+    };
+
+    // 🔹 Llamada única a axios
+    axios.get(`${BACKEND_SERVER}/api/velocidad/leer_paradas/`, { params, headers })
+        .then(res => {
+            const paradas = res.data;
+
+            if (nombre === 'Cambio') {
+                // Caso "Cambio"
+                const nuevas_paradas = paradas.map(p => {
+                    const inicio_dt = new Date(p.inicio);
+                    const fin_dt = new Date(p.fin);
+                    return {
+                        id: p.id.toString(),
+                        checked: true,
+                        fechaInicio: inicio_dt.toLocaleDateString("es-ES"),
+                        fechaFin: fin_dt.toLocaleDateString("es-ES"),
+                        horaInicio: p.inicio.split("T")[1].replace("Z", ""),
+                        horaFin: p.fin.split("T")[1].replace("Z", ""),
+                        duracion: p.duracion
+                    };
+                });
+
+                const nuevas_paradas_seleccionadas = [...paradasSeleccionadas, ...nuevas_paradas];
+                setParadasSeleccionadas(ordenarLista(nuevas_paradas_seleccionadas));
+
+            } else {
+                // Caso distinto de "Cambio"
+                const ids = paradas.map(p => p.id.toString());
+                const nuevas_paradas_seleccionadas = paradasSeleccionadas.filter(p => !ids.includes(p.id));
+                setParadasSeleccionadas(ordenarLista(nuevas_paradas_seleccionadas));
+            }
+        });
+};
+
+    // const handleInputChangeTipo = (event) => {
+    //     setseleTipoParada(event.target.value)
+    //     const nombre = event.target.options[event.target.selectedIndex].dataset.nombre;
+    //     if (nombre === 'Cambio') {
+    //         const fecha_inicio = moment(paradasSeleccionadas[0].fechaInicio, 'DD/MM/YYYY').format('YYYY-MM-DD')
+    //         const hora_inicio = paradasSeleccionadas[0].horaInicio
+    //         const fin = paradasSeleccionadas.length - 1;
+    //         const fecha_fin = moment(paradasSeleccionadas[fin].fechaInicio, 'DD/MM/YYYY').format('YYYY-MM-DD')
+    //         const hora_fin = paradasSeleccionadas[fin].horaFin
+    //         axios.get(BACKEND_SERVER + `/api/velocidad/leer_paradas/`,{
+    //             params: {
+    //                 fecha_inicio: fecha_inicio,
+    //                 hora_inicio: hora_inicio,
+    //                 fecha_fin: fecha_fin,
+    //                 hora_fin: hora_fin,
+    //                 zona: id
+    //             },
+    //             headers: {
+    //                 'Authorization': `token ${token['tec-token']}`
+    //             }
+    //         })
+    //         .then(res => {
+    //             // console.log(res.data);
+    //             const paradas = res.data;
+    //             const nuevas_paradas = [];
+    //             for (var i = 0; i < paradas.length; i++) {
+    //                 const inicio_dt = new Date(paradas[i].inicio);
+    //                 const fechaInicio = inicio_dt.toLocaleDateString("es-ES");
+    //                 const fin_dt = new Date(paradas[i].fin);
+    //                 const fechaFin = fin_dt.toLocaleDateString("es-ES");
+
+    //                 nuevas_paradas.push({
+    //                     id: paradas[i].id.toString(),
+    //                     checked: true,
+    //                     fechaInicio: fechaInicio,
+    //                     fechaFin: fechaFin,
+    //                     horaInicio: paradas[i].inicio.split("T")[1].replace("Z", ""),
+    //                     horaFin: paradas[i].fin.split("T")[1].replace("Z", ""),
+    //                     duracion: paradas[i].duracion
+    //                 });
+    //             }
+    //             const nuevas_paradas_seleccionadas = [...paradasSeleccionadas].concat(nuevas_paradas);
+    //             setParadasSeleccionadas(ordenarLista(nuevas_paradas_seleccionadas));
+    //         });
+    //     }
+    //     else {
+    //         const fecha_inicio = moment(paradasSeleccionadas[0].fechaInicio, 'DD/MM/YYYY').format('YYYY-MM-DD')
+    //         const hora_inicio = paradasSeleccionadas[0].horaInicio
+    //         const fin = paradasSeleccionadas.length - 1;
+    //         const fecha_fin = moment(paradasSeleccionadas[fin].fechaInicio, 'DD/MM/YYYY').format('YYYY-MM-DD')
+    //         const hora_fin = paradasSeleccionadas[fin].horaFin
+    //         axios.get(BACKEND_SERVER + `/api/velocidad/leer_paradas/`,{
+    //             params: {
+    //                 fecha_inicio: fecha_inicio,
+    //                 hora_inicio: hora_inicio,
+    //                 fecha_fin: fecha_fin,
+    //                 hora_fin: hora_fin,
+    //                 zona: id
+    //             },
+    //             headers: {
+    //                 'Authorization': `token ${token['tec-token']}`
+    //             }
+    //         })
+    //         .then(res => {
+    //             const paradas = res.data;
+    //             const ids = []
+    //             for (var i=0; i< paradas.length; i++){
+    //                 ids.push(paradas[i].id.toString());
+    //             }
+    //             console.log(paradas);
+    //             console.log(ids);
+    //             const nuevas_paradas_seleccionadas = [...paradasSeleccionadas].filter(p => {return !ids.includes(p.id)});
+    //             setParadasSeleccionadas(ordenarLista(nuevas_paradas_seleccionadas));
+    //         });
+    //     }
+    // }
 
     const handleInputChangeCodigo = (event) => {
         setCodigoSeleccionado(event.target.value)
@@ -302,7 +432,7 @@ const GraficoEstado = () => {
                     duracion: p.duracion
                 }))
             };
-            const response = axios.post(
+            axios.post(
                 `${BACKEND_SERVER}/api/velocidad/guardar_paradas_agrupadas/`,
                 datos,
                 {
@@ -311,19 +441,19 @@ const GraficoEstado = () => {
                         'Content-Type': 'application/json'
                     }
                 }
-            );
-            if (response.status === 200 || response.status === 201) {
-                alert('Paradas guardadas correctamente');
-        
-                // Limpiar variables
-                setParadasSeleccionadas([]);
-                setseleTipoParada(null);
-                setCodigoSeleccionado(null);
-                
-                setMostrarModalTramos(false);
-                
-                setActualizar(!actualizar);
-            }
+            )
+            .then(res => {
+                console.log(res);
+                if (res.status === 200) {
+                    // Limpiar variables
+                    setParadasSeleccionadas([]);
+                    setseleTipoParada(null);
+                    setCodigoSeleccionado(null);
+                    setMostrarModalTramos(false);
+                    setActualizar(!actualizar);
+                }
+            });
+            
         } catch (error) {
             console.error('Error al guardar paradas:', error);
             alert('Error al guardar las paradas: ' + (error.response?.data?.error || error.message));
@@ -529,7 +659,7 @@ const GraficoEstado = () => {
                                 <Row>
                                     <Col>
                                         <div style={{ height: '200px', overflowY: 'auto' }}>
-                                            <ParadasAcu Paradas={estado && estado.paradas.filter(p => p.codigo === 'Desconocido' || (p.codigo === 'Running' && p.duracion<5))} 
+                                            <ParadasAcu Paradas={estado && estado.paradas.filter(p => p.codigo === 'Desconocido')} 
                                                         paradasSeleccionadas={paradasSeleccionadas}
                                                         setParadasSeleccionadas={setParadasSeleccionadas}
                                             />
@@ -566,12 +696,16 @@ const GraficoEstado = () => {
                                 <Form.Control as="select"  
                                             name='tipoparada' 
                                             value={seleTipoParada}
-                                            onChange={handleInputChange}
+                                            onChange={handleInputChangeTipo}
                                             placeholder="Tipo parada">
                                             <option key={0} value={''}>Selecciona una opción</option>
                                             {tipoParadas && tipoParadas.map( tipo => {
                                                 return (
-                                                <option key={tipo.id} value={tipo.id}>
+                                                <option
+                                                    key={tipo.id}
+                                                    value={tipo.id}
+                                                    data-nombre={tipo.nombre}   // 👈 atributo extra
+                                                >
                                                     {tipo.nombre}
                                                 </option>
                                                 )

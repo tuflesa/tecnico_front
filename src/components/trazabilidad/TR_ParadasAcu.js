@@ -3,10 +3,11 @@ import {useEffect} from 'react';
 import { Form, Table} from 'react-bootstrap';
 import { PencilFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
+import ordenarLista from '../utilidades/ordenar_paradas';
 
 const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas}) => {
 
-    useEffect(()=>{console.log('Paradas ',Paradas)},[Paradas]);
+    // useEffect(()=>{console.log('Paradas ',Paradas)},[Paradas]);
     
     const formatearFechaHoraLocal = (s) => {
         if (!s || typeof s !== 'string') return { fecha: '—', hora: '—' };
@@ -21,7 +22,8 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas}) =>
     };
 
     const handleChange = (event, fechaInicio, horaInicio, fechaFin, horaFin, duracion) => {
-        const nuevaSeleccion = [...paradasSeleccionadas];
+        let nuevaSeleccion = [...paradasSeleccionadas];
+
         if (event.target.checked) {
             nuevaSeleccion.push({
                 id: event.target.id,
@@ -32,14 +34,14 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas}) =>
                 horaFin,
                 duracion,
             });
-        }
-        else {
+        } else {
             const filtrada = nuevaSeleccion.filter(p => p.id !== event.target.id);
-            setParadasSeleccionadas(filtrada);
-            return; 
+            setParadasSeleccionadas(ordenarLista(filtrada));
+            return;
         }
-        setParadasSeleccionadas(nuevaSeleccion);
-    }
+        // console.log('nueva seleccion: ', nuevaSeleccion);
+        setParadasSeleccionadas(ordenarLista(nuevaSeleccion));
+    };
     
     const estaseleccionado =(id)=>{
         let resultado = false;
