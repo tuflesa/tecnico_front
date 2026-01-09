@@ -7,7 +7,7 @@ import ordenarLista from '../utilidades/ordenar_paradas';
 
 const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas}) => {
 
-    // useEffect(()=>{console.log('Paradas ',Paradas)},[Paradas]);
+    // useEffect(()=>{console.log('Paradas seleccionadas ',paradasSeleccionadas)},[paradasSeleccionadas]);
     
     const formatearFechaHoraLocal = (s) => {
         if (!s || typeof s !== 'string') return { fecha: '—', hora: '—' };

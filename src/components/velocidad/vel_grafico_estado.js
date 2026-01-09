@@ -268,7 +268,6 @@ const GraficoEstado = () => {
         setseleTipoParada(event.target.value);
         const nombre = event.target.options[event.target.selectedIndex].dataset.nombre;
 
-        // 🔹 Construcción de parámetros (común)
         const fecha_inicio = moment(paradasSeleccionadas[0].fechaInicio, 'DD/MM/YYYY').format('YYYY-MM-DD');
         const hora_inicio = paradasSeleccionadas[0].horaInicio;
         const fin = paradasSeleccionadas.length - 1;
@@ -287,8 +286,7 @@ const GraficoEstado = () => {
             'Authorization': `token ${token['tec-token']}`
         };
 
-        // 🔹 Llamada única a axios
-        axios.get(`${BACKEND_SERVER}/api/velocidad/leer_paradas/`, { params, headers })
+        axios.get(`${BACKEND_SERVER}/api/velocidad/leer_paradas_run/`, { params, headers })
             .then(res => {
                 const paradas = res.data;
 
@@ -312,7 +310,6 @@ const GraficoEstado = () => {
                     setParadasSeleccionadas(ordenarLista(nuevas_paradas_seleccionadas));
 
                 } else {
-                    // Caso distinto de "Cambio"
                     const ids = paradas.map(p => p.id.toString());
                     const nuevas_paradas_seleccionadas = paradasSeleccionadas.filter(p => !ids.includes(p.id));
                     setParadasSeleccionadas(ordenarLista(nuevas_paradas_seleccionadas));
