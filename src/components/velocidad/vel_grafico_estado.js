@@ -291,15 +291,14 @@ const GraficoEstado = () => {
                 const paradas = res.data;
 
                 if (nombre === 'Cambio') {
-                    // Caso "Cambio"
                     const nuevas_paradas = paradas.map(p => {
                         const inicio_dt = new Date(p.inicio);
                         const fin_dt = new Date(p.fin);
                         return {
                             id: p.id.toString(),
                             checked: true,
-                            fechaInicio: inicio_dt.toLocaleDateString("es-ES"),
-                            fechaFin: fin_dt.toLocaleDateString("es-ES"),
+                            fechaInicio: inicio_dt.toLocaleDateString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit' }),
+                            fechaFin: fin_dt.toLocaleDateString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit' }),
                             horaInicio: p.inicio.split("T")[1].replace("Z", ""),
                             horaFin: p.fin.split("T")[1].replace("Z", ""),
                             duracion: p.duracion
