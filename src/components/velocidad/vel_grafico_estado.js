@@ -25,6 +25,7 @@ const GraficoEstado = () => {
     const [paradasSeleccionadas, setParadasSeleccionadas] = useState([]);
     const [registros, setRegistros] = useState(null);
     const [flejes, setFlejes] = useState(null);
+    const [tabActiva, setTabActiva] = useState('flejes');
     const hoy = new Date();
     const [filtro, setFiltro] = useState({
             fecha: moment(hoy).format('YYYY-MM-DD'),
@@ -379,6 +380,17 @@ const GraficoEstado = () => {
         }
     }
 
+    const cerrar_modal =()=>{
+        // Limpiar variables
+            setParadasSeleccionadas([]);
+            setseleTipoParada(null);
+            setCodigoSeleccionado(null);
+            setActualizar(!actualizar);
+            
+            setMostrarModalTramos(false);
+
+    }
+
     return (
         <React.Fragment>
             <VelocidadNavBar />
@@ -537,7 +549,7 @@ const GraficoEstado = () => {
                     </Col>
                 </Row> 
                 {/* ================================================================================= */}
-                <Tab.Container defaultActiveKey="flejes">
+                <Tab.Container defaultActiveKey="flejes" activeKey={tabActiva} onSelect={(k)=> setTabActiva(k)}>
                     <div className="d-flex align-items-center mb-3">
                         <Nav variant="tabs" className="flex-grow-1">
                             <Nav.Item>
@@ -547,21 +559,33 @@ const GraficoEstado = () => {
                             <Nav.Item>
                                 <Nav.Link eventKey="paradas">
                                 {existeDesconocido ? (
-                                    <span className="glow-green">Paradas</span>
+                                    <span>Paradas</span>
                                 ) : (
                                     'Paradas'
                                 )}
                                 </Nav.Link>
                             </Nav.Item>
+
+                            <Nav.Item>
+                                <Nav.Link eventKey="paradas_pendientes">
+                                {existeDesconocido ? (
+                                    <span className="glow-green">Paradas Pendientes</span>
+                                ) : (
+                                    'Paradas Pendientes'
+                                )}
+                                </Nav.Link>
+                            </Nav.Item>
                         </Nav>
-                        <Button
-                            variant="primary"
-                            className="ms-2"
-                            onClick={abrirModalTramos}
-                            disabled={paradasSeleccionadas.length === 0}
-                            >
-                            Agrupar tramos
-                        </Button>
+                        {tabActiva === 'paradas_pendientes' && (
+                            <Button
+                                variant="primary"
+                                className="ms-2"
+                                onClick={abrirModalTramos}
+                                disabled={paradasSeleccionadas.length === 0}
+                                >
+                                Agrupar tramos
+                            </Button>
+                        )}
                     </div>
                     <Tab.Content>
                         <Tab.Pane eventKey="flejes" title="Flejes">
@@ -574,32 +598,47 @@ const GraficoEstado = () => {
                             </Row>
                         </Tab.Pane>
                         {existeDesconocido?(
-                            <Tab.Pane eventKey="paradas" title={<span className="glow-green">Paradas</span>}>
+                            <Tab.Pane eventKey="paradas_pendientes" title={<span className="glow-green">paradas Pendientes</span>}>
                                 <Row>
                                     <Col>
                                         <div style={{ height: '200px', overflowY: 'auto' }}>
                                             <ParadasAcu Paradas={estado && estado.paradas.filter(p => p.codigo === 'Desconocido')} 
                                                         paradasSeleccionadas={paradasSeleccionadas}
                                                         setParadasSeleccionadas={setParadasSeleccionadas}
+                                                        acciones={true}
                                             />
                                         </div>
                                     </Col>
                                 </Row>
                             </Tab.Pane>
                         ):(
-                            <Tab.Pane eventKey="paradas" title="Paradas">
+                            <Tab.Pane eventKey="paradas_pendientes" title="paradas_pendientes">
                                 <Row>
                                     <Col>
                                         <div style={{ height: '200px', overflowY: 'auto' }}>
                                             <ParadasAcu Paradas={estado && estado.paradas.filter(p => p.codigo !== 'Running')}
                                                         paradasSeleccionadas={paradasSeleccionadas}
                                                         setParadasSeleccionadas={setParadasSeleccionadas}
+                                                        acciones={true}
                                             />
                                         </div>
                                     </Col>
                                 </Row>
                             </Tab.Pane>
                         )}
+                        <Tab.Pane eventKey="paradas" title={<span className="glow-green">paradas</span>}>
+                            <Row>
+                                <Col>
+                                    <div style={{ height: '200px', overflowY: 'auto' }}>
+                                        <ParadasAcu Paradas={estado && estado.paradas} 
+                                                    paradasSeleccionadas={paradasSeleccionadas}
+                                                    setParadasSeleccionadas={setParadasSeleccionadas}
+                                                    acciones={false}
+                                        />
+                                    </div>
+                                </Col>
+                            </Row>
+                        </Tab.Pane>
                     </Tab.Content>
                 </Tab.Container>
                 <Modal show={mostrarModalTramos} onHide={() => setMostrarModalTramos(false)} size="lg">
@@ -685,7 +724,7 @@ const GraficoEstado = () => {
                 </Modal.Body>
 
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setMostrarModalTramos(false)}>
+                    <Button variant="secondary" onClick={cerrar_modal}>
                     Cancelar
                     </Button>
                     <Button variant="primary" onClick={() => guardartipoparada()}>

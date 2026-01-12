@@ -4,7 +4,7 @@ import { PencilFill } from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import ordenarLista from '../utilidades/ordenar_paradas';
 
-const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas}) => {
+const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acciones}) => {
 
     // useEffect(()=>{console.log('Paradas seleccionadas ',paradasSeleccionadas)},[paradasSeleccionadas]);
     
@@ -61,7 +61,7 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas}) =>
                 <th>Fecha Fin - Hora Fin</th>
                 <th>Duración</th>
                 <th>Descripción</th>
-                <th>Acciones</th>
+                {acciones?<th>Acciones</th>:''}
                 </tr>
             </thead>
             <tbody>
@@ -76,7 +76,7 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas}) =>
                             <td>{fechaFin +' - '+ horaFin}</td>
                             <td>{Number(pdb.duracion).toFixed(2)}</td>
                             <td>{pdb.codigo}</td>
-                            <td>
+                            {acciones?<td>
                                 <Form.Check
                                     inline
                                     name="grupo2"
@@ -85,8 +85,8 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas}) =>
                                     checked={estaseleccionado(pdb.id)}
                                     onChange={(event) => handleChange(event, fechaInicio, horaInicio, fechaFin, horaFin, pdb.duracion)}
                                 />
-                               { pdb.codigo==="Desconocido"? <Link to={``}><PencilFill className="mr-3 pencil"/></Link> : ''}
-                            </td>
+                               {/* { pdb.codigo==="Desconocido"? <Link to={``}><PencilFill className="mr-3 pencil"/></Link> : ''} */}
+                            </td>:''}
                         </tr>
                     )
                 })}
