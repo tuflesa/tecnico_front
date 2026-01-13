@@ -31,7 +31,7 @@ const useResizeObserver = (ref) => {
     return dimensions;
   };
 
-const StateChart = ({data, flejes, fecha, hora_inicio, hora_fin, ver, maquina, paradas}) => {
+const StateChart = ({data, flejes, fecha, fecha_fin, hora_inicio, hora_fin, ver, maquina, paradas}) => {
     const svgRef = useRef();
     const wrapperRef = useRef();
     const dimensions = useResizeObserver(wrapperRef);
@@ -50,7 +50,7 @@ const StateChart = ({data, flejes, fecha, hora_inicio, hora_fin, ver, maquina, p
         // console.log(flejes);
 
         const inicio = moment(fecha + ' ' + hora_inicio)
-        const fin = moment(fecha + ' ' + hora_fin)
+        const fin = moment(fecha_fin + ' ' + hora_fin)
         const n_ticks_x = fin.diff(inicio, 'hours');
                 
         const xScale = scaleTime()
@@ -401,7 +401,7 @@ const StateChart = ({data, flejes, fecha, hora_inicio, hora_fin, ver, maquina, p
           .attr('font-size', '12px')
           .text('Paradas');
 
-    },[data, fecha, hora_fin, hora_inicio, dimensions, ver]);
+    },[data, fecha, fecha_fin, hora_fin, hora_inicio, dimensions, ver]);
 
     return (
         <div ref={wrapperRef} id='speedChart'>

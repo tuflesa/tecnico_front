@@ -19,10 +19,19 @@ const EstadoFiltro = ({ actualizaFiltro, filtro }) => {
                     <Row>
                         <Col sm='6' md='3'>
                             <Form.Group controlId="fecha_inicio">
-                                <Form.Label>Fecha</Form.Label>
+                                <Form.Label>Fecha Inicio</Form.Label>
                                 <Form.Control type="date" 
                                                 name='fecha'
                                                 value={filtro.fecha}
+                                                onChange={handleInputChange}  />
+                            </Form.Group>
+                        </Col>
+                        <Col sm='6' md='3'>
+                            <Form.Group controlId="fecha_fin">
+                                <Form.Label>Fecha Fin</Form.Label>
+                                <Form.Control type="date" 
+                                                name='fecha_fin'
+                                                value={filtro.fecha_fin}
                                                 onChange={handleInputChange}  />
                             </Form.Group>
                         </Col>

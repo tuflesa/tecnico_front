@@ -29,6 +29,7 @@ const GraficoEstado = () => {
     const hoy = new Date();
     const [filtro, setFiltro] = useState({
             fecha: moment(hoy).format('YYYY-MM-DD'),
+            fecha_fin: moment(hoy).format('YYYY-MM-DD'),
             hora_inicio: '06:00',
             hora_fin: '22:00'
         });
@@ -53,6 +54,7 @@ const GraficoEstado = () => {
         axios.get(BACKEND_SERVER + `/api/velocidad/estado/${id}`,{
             params: {
                 fecha: filtro.fecha,
+                fecha_fin: filtro.fecha_fin,
                 hora_inicio: filtro.hora_inicio,
                 hora_fin: filtro.hora_fin
             },
@@ -101,7 +103,7 @@ const GraficoEstado = () => {
         // console.log(estado);
         const datosRegistros = (estado) => {
             const inicio = moment(filtro.fecha + ' ' + filtro.hora_inicio,'YYYY-MM-DD HH:mm');
-            const fin = moment(filtro.fecha + ' ' + filtro.hora_fin,'YYYY-MM-DD HH:mm');
+            const fin = moment(filtro.fecha_fin + ' ' + filtro.hora_fin,'YYYY-MM-DD HH:mm');
             const ahora = moment();
             const siglas = estado.maquina.zona.siglas;
 
@@ -162,7 +164,7 @@ const GraficoEstado = () => {
             const puntos = estado.flejes.map( f => {
                 // console.log(f);
                 const inicio = moment(filtro.fecha + ' ' + filtro.hora_inicio,'YYYY-MM-DD HH:mm');
-                const fin = moment(filtro.fecha + ' ' + filtro.hora_fin,'YYYY-MM-DD HH:mm');
+                const fin = moment(filtro.fecha_fin + ' ' + filtro.hora_fin,'YYYY-MM-DD HH:mm');
                 const ahora = moment();
                 const fecha_entrada = f.fecha_entrada.split('-');
                 const hora_entrada = f.hora_entrada.split(':');
@@ -216,7 +218,7 @@ const GraficoEstado = () => {
 
         const datosParadas = (estado) => {
             const inicio = moment(filtro.fecha + ' ' + filtro.hora_inicio,'YYYY-MM-DD HH:mm');
-            const fin = moment(filtro.fecha + ' ' + filtro.hora_fin,'YYYY-MM-DD HH:mm');
+            const fin = moment(filtro.fecha_fin + ' ' + filtro.hora_fin,'YYYY-MM-DD HH:mm');
 
             const puntos = estado.paradas.map( p => {
                 let x_in = moment(p.inicio);
@@ -542,6 +544,7 @@ const GraficoEstado = () => {
                                 paradas={paradas}
                                 flejes={flejes}
                                 fecha={filtro.fecha}
+                                fecha_fin={filtro.fecha_fin}
                                 hora_inicio={filtro.hora_inicio}
                                 hora_fin={filtro.hora_fin}
                                 ver={ver}
