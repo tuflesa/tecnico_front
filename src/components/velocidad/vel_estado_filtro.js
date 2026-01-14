@@ -26,21 +26,21 @@ const EstadoFiltro = ({ actualizaFiltro, filtro }) => {
                                                 onChange={handleInputChange}  />
                             </Form.Group>
                         </Col>
-                        <Col sm='6' md='3'>
-                            <Form.Group controlId="fecha_fin">
-                                <Form.Label>Fecha Fin</Form.Label>
-                                <Form.Control type="date" 
-                                                name='fecha_fin'
-                                                value={filtro.fecha_fin}
-                                                onChange={handleInputChange}  />
-                            </Form.Group>
-                        </Col>
                         <Col xs='6' sm='3' md='3'>
                             <Form.Group controlId="hora_inicio">
                                 <Form.Label>Hora inicio</Form.Label>
                                 <Form.Control type="time" 
                                                 name='hora_inicio'
                                                 value={filtro.hora_inicio}
+                                                onChange={handleInputChange}  />
+                            </Form.Group>
+                        </Col>
+                        <Col sm='6' md='3'>
+                            <Form.Group controlId="fecha_fin">
+                                <Form.Label>Fecha Fin</Form.Label>
+                                <Form.Control type="date" 
+                                                name='fecha_fin'
+                                                value={filtro.fecha_fin}
                                                 onChange={handleInputChange}  />
                             </Form.Group>
                         </Col>

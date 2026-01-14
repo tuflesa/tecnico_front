@@ -44,12 +44,13 @@ const GraficoEstado = () => {
     const [mostrarModalTramos, setMostrarModalTramos] = useState(false);
     const [seleTipoParada, setseleTipoParada] = useState(null);
     const [codigo_seleccionado, setCodigoSeleccionado] = useState(null);
+    const [observaciones, setObservaciones] = useState('');
 
     const abrirModalTramos = () => {
         setMostrarModalTramos(true);
     };
 
-    useEffect(()=>{
+    useEffect(()=>{ //
         // console.log('Leer estado de la máquina id=', id);
         axios.get(BACKEND_SERVER + `/api/velocidad/estado/${id}`,{
             params: {
@@ -319,12 +320,7 @@ const GraficoEstado = () => {
             });
     };
 
-    const handleInputChangeCodigo = (event) => {
-        setCodigoSeleccionado(event.target.value)
-    }
-
     const guardartipoparada = () => {
-        console.log('paradasSeleccionadas: ', paradasSeleccionadas);
         if (!seleTipoParada) {
             alert('Debe seleccionar un tipo de parada');
             return;
@@ -345,6 +341,7 @@ const GraficoEstado = () => {
                 zona_id: id,
                 tipo_parada_id: seleTipoParada,
                 codigo_parada_id: codigo_seleccionado,
+                observaciones: observaciones,
                 paradas: paradasSeleccionadas.map(p => ({
                     id: p.id,
                     fecha_inicio: p.fechaInicio,
@@ -373,6 +370,7 @@ const GraficoEstado = () => {
                     setCodigoSeleccionado(null);
                     setMostrarModalTramos(false);
                     setActualizar(!actualizar);
+                    setObservaciones('');
                 }
             });
             
@@ -665,7 +663,7 @@ const GraficoEstado = () => {
                                                 <option
                                                     key={tipo.id}
                                                     value={tipo.id}
-                                                    data-nombre={tipo.nombre}   // 👈 atributo extra
+                                                    data-nombre={tipo.nombre}
                                                 >
                                                     {tipo.nombre}
                                                 </option>
@@ -680,7 +678,7 @@ const GraficoEstado = () => {
                                 <Form.Control as="select"  
                                             name='codigoparada' 
                                             value={codigo_seleccionado}
-                                            onChange={handleInputChangeCodigo}
+                                            onChange={(e) => setCodigoSeleccionado(e.target.value)}
                                             placeholder="Codigo parada"
                                             disabled={seleTipoParada?false:true}>
                                             <option key={0} value={''}>Selecciona una opción</option>
@@ -695,6 +693,21 @@ const GraficoEstado = () => {
                             </Form.Group>
                         </Col>
                     </Row>
+                    {/* <Row>
+                        <Col>
+                            <Form.Group id="observaciones">
+                                <Form.Label>Observaciones</Form.Label>
+                                <Form.Control 
+                                    as="textarea" 
+                                    rows={2}
+                                    name='observaciones' 
+                                    value={observaciones}
+                                    onChange={(e) => setObservaciones(e.target.value)}
+                                    placeholder="Escriba aquí las observaciones, si las hay"
+                                />
+                            </Form.Group>
+                        </Col>
+                    </Row> */}
             
                     <Table striped bordered hover>
                     <thead>
