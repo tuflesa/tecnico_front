@@ -17,6 +17,13 @@ import ordenarLista from '../utilidades/ordenar_paradas';
 const GraficoEstado = () => {
     const [token] = useCookies(['tec-token']);
     const { id } = useParams();
+    const [user] = useCookies(['tec-user']);
+    const tieneEscrituraParadas = user['tec-user'].perfil.destrezas_velocidad.some(
+        destreza => destreza.nombre === 'escritura_paradas'
+    );
+    const tieneEdionParadas = user['tec-user'].perfil.destrezas_velocidad.some(
+        destreza => destreza.nombre === 'edicion_paradas'
+    );
 
     const [estado, setEstado] = useState(null);
     const [paradas, setParadas] = useState(null);
@@ -50,8 +57,7 @@ const GraficoEstado = () => {
         setMostrarModalTramos(true);
     };
 
-    useEffect(()=>{ //
-        // console.log('Leer estado de la máquina id=', id);
+    useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/velocidad/estado/${id}`,{
             params: {
                 fecha: filtro.fecha,
@@ -64,7 +70,6 @@ const GraficoEstado = () => {
             }
         })
         .then(res => {
-            // console.log(res.data);
             setEstado(res.data);
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -92,7 +97,6 @@ const GraficoEstado = () => {
         })
         .then( res => {
             setCodigoParada(res.data);
-            // console.log('Estos son los codigos de los tipos de paradas: ', res.data);
         })
         .catch( err => {
             console.log(err);
@@ -101,7 +105,6 @@ const GraficoEstado = () => {
 
     useEffect(()=>{
         if (!estado) return;
-        // console.log(estado);
         const datosRegistros = (estado) => {
             const inicio = moment(filtro.fecha + ' ' + filtro.hora_inicio,'YYYY-MM-DD HH:mm');
             const fin = moment(filtro.fecha_fin + ' ' + filtro.hora_fin,'YYYY-MM-DD HH:mm');
@@ -132,7 +135,6 @@ const GraficoEstado = () => {
 
             if (datos.length>0){
                 if(ahora.isAfter(inicio) && ahora.isBefore(fin)) {
-                    // console.log('Añadir punto ahora ...');
                     datos.push({
                         x: new Date(),
                         y: datos[datos.length -1].y,
@@ -163,7 +165,6 @@ const GraficoEstado = () => {
 
         const datosFlejes = (estado) => {
             const puntos = estado.flejes.map( f => {
-                // console.log(f);
                 const inicio = moment(filtro.fecha + ' ' + filtro.hora_inicio,'YYYY-MM-DD HH:mm');
                 const fin = moment(filtro.fecha_fin + ' ' + filtro.hora_fin,'YYYY-MM-DD HH:mm');
                 const ahora = moment();
@@ -186,7 +187,6 @@ const GraficoEstado = () => {
                 }
                 else {
                     if(ahora.isAfter(inicio) && ahora.isBefore(fin)) {
-                        // console.log('Añadir punto ahora ...');
                         x_out = new Date();
                     }
                     else {
@@ -236,6 +236,7 @@ const GraficoEstado = () => {
                 const color = seleccionado ? 'gold' : p.color;
 
                 return ({
+                    ...p,  //aquí incluimos todos los campos de Parada
                     id: p.id,
                     x_in: x_in,
                     y_in: y_in,
@@ -252,7 +253,6 @@ const GraficoEstado = () => {
         setFlejes(datosFlejes(estado));
         const existe = estado.paradas.some(p => p.codigo === 'Desconocido');
         setExisteDesconocido (existe);
-        // console.log('Estado paradas: ', estado.paradas)
     },[estado, paradasSeleccionadas]);
 
     const actualizarGrafico = () => {
@@ -362,7 +362,6 @@ const GraficoEstado = () => {
                 }
             )
             .then(res => {
-                console.log(res);
                 if (res.status === 200) {
                     // Limpiar variables
                     setParadasSeleccionadas([]);
@@ -567,15 +566,17 @@ const GraficoEstado = () => {
                                 </Nav.Link>
                             </Nav.Item>
 
-                            <Nav.Item>
-                                <Nav.Link eventKey="paradas_pendientes">
-                                {existeDesconocido ? (
-                                    <span className="glow-green">Paradas Pendientes</span>
-                                ) : (
-                                    'Paradas Pendientes'
-                                )}
-                                </Nav.Link>
-                            </Nav.Item>
+                            {tieneEscrituraParadas?
+                                <Nav.Item>
+                                    <Nav.Link eventKey="paradas_pendientes">
+                                    {existeDesconocido ? (
+                                        <span className="glow-green">Paradas Pendientes</span>
+                                    ) : (
+                                        'Paradas Pendientes'
+                                    )}
+                                    </Nav.Link>
+                                </Nav.Item>
+                            :''}
                         </Nav>
                         {tabActiva === 'paradas_pendientes' && (
                             <Button
@@ -693,7 +694,7 @@ const GraficoEstado = () => {
                             </Form.Group>
                         </Col>
                     </Row>
-                    {/* <Row>
+                    <Row>
                         <Col>
                             <Form.Group id="observaciones">
                                 <Form.Label>Observaciones</Form.Label>
@@ -707,7 +708,7 @@ const GraficoEstado = () => {
                                 />
                             </Form.Group>
                         </Col>
-                    </Row> */}
+                    </Row>
             
                     <Table striped bordered hover>
                     <thead>
