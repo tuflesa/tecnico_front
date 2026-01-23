@@ -1,29 +1,33 @@
 import {useState} from 'react';
-import { Form, Table, Modal, Button, Container} from 'react-bootstrap';
-import { PencilFill, Receipt } from 'react-bootstrap-icons';
-import { Link } from 'react-router-dom';
+import { Form, Table, Container} from 'react-bootstrap';
+import { PencilFill, Receipt, PlusSquare, Trash } from 'react-bootstrap-icons';
 import ordenarLista from '../utilidades/ordenar_paradas';
 import ModalEditarParada from './TR_ModalEditarParada';
+import ModalAñadirParada from './TR_ModalAñadirParada';
+import ModalObservacionesParada from './TR_ModalObservacionesParada';
 import { useCookies } from 'react-cookie';
 
 const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acciones}) => {
-    const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
-    const tieneEscrituraParadas = user['tec-user'].perfil.destrezas_velocidad.some(
-        destreza => destreza.nombre === 'escritura_paradas'
-    );
     const tieneEdionParadas = user['tec-user'].perfil.destrezas_velocidad.some(
         destreza => destreza.nombre === 'edicion_paradas'
     );
 
     const [showModal, setShowModal] = useState(false);
+    const [paradasModal, setParadaModal] = useState(null);
     const [showModalObs, setShowModalObs] = useState(false);
     const [observacionActual, setObservacionActual] = useState('');
-    const [paradasModal, setParadaModal] = useState(null);
+    const [showModalEditar, setShowModalEditar] = useState(false);
+    const [paradasModalEditar, setParadaModalEditar] = useState(null);
 
-    const handleOpenModal = (parada) => {
+    const handleOpenModalAñadir = (parada) => {
         setParadaModal(parada);
         setShowModal(true);
+    };
+
+    const handleOpenModalEditar = (parada) => {
+        setParadaModalEditar(parada);
+        setShowModalEditar(true);
     };
 
     const handleOpenModalObs = (obs) => {
@@ -32,6 +36,8 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acc
     };
 
     const handleCloseModal = () => setShowModal(false);
+
+    const handleCloseModalEditar = () => setShowModalEditar(false);
 
     const handleCloseModalObs = () => setShowModalObs(false);
     
@@ -118,7 +124,14 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acc
                                 ):(
                                     <td>
                                         {tieneEdionParadas?(
-                                            <PencilFill style={{ cursor: 'pointer', color: '#007bff' }} onClick={() => handleOpenModal(paradaParaModal)}/>
+                                            <>
+                                                <PlusSquare style={{ cursor: 'pointer', color: '#007bff', marginRight: '15px'}} onClick={() => handleOpenModalAñadir(paradaParaModal)}/>
+                                                <PencilFill style={{ cursor: pdb.codigo==='Desconocido'?'not-allowed':'pointer', color: pdb.codigo==='Desconocido'?'gray':'#007bff', marginRight: '15px'}} onClick={() => handleOpenModalEditar(paradaParaModal)}/>
+                                                <Trash style={{ 
+                                                    cursor: pdb.codigo==='Desconocido'?'not-allowed':'pointer', 
+                                                    color:pdb.codigo==='Desconocido'?'gray':'#007bff'}} 
+                                                    /* onClick={pdb.codigo==='Desconocido'? undefined:() => handleOpenModalEditar(paradaParaModal)} *//>
+                                            </>
                                         ):
                                             <Receipt style={{ cursor: 'pointer', color: pdb.observaciones && pdb.observaciones.trim() !== '' ? '#007bff' : 'gray' }} onClick={() => handleOpenModalObs(pdb.observaciones)}/>
                                         }
@@ -129,11 +142,22 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acc
                     })}
                 </tbody>
             </Table>
-            <ModalEditarParada
+            
+            <ModalAñadirParada
                 show={showModal}    
                 onHide={handleCloseModal}
-                observacion={observacionActual}
                 parada={paradasModal}
+            />
+            <ModalEditarParada
+                show={showModalEditar}    
+                onHide={handleCloseModalEditar}
+                observacion={observacionActual}
+                parada={paradasModalEditar}
+                showObs={showModalObs}
+                onHideObs={handleCloseModalObs}
+            />
+            <ModalObservacionesParada
+                observacion={observacionActual}
                 showObs={showModalObs}
                 onHideObs={handleCloseModalObs}
             />
