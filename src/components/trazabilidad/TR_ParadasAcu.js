@@ -151,10 +151,7 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acc
             <ModalEditarParada
                 show={showModalEditar}    
                 onHide={handleCloseModalEditar}
-                observacion={observacionActual}
                 parada={paradasModalEditar}
-                showObs={showModalObs}
-                onHideObs={handleCloseModalObs}
             />
             <ModalObservacionesParada
                 observacion={observacionActual}

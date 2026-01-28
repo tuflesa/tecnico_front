@@ -1,12 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, Container, Form, Row, Col } from 'react-bootstrap';
+import { BACKEND_SERVER } from '../../constantes';
+import axios from 'axios';
+import { useCookies } from 'react-cookie';
 
 const ModalEditarParada = ({ show, onHide, parada }) => {
+    const [token] = useCookies(['tec-token']);
     const [tipoRegistro, setTipoRegistro] = useState(null); 
     const [fechaInicioReg, setFechaInicioReg] = useState('');
     const [fechaFinReg, setFechaFinReg] = useState('');
     const [horaInicioReg, setHoraInicioReg] = useState('');
     const [horaFinReg, setHoraFinReg] = useState('');
+    const [codigoSel, setCodigoSel] = useState('');
+    const [codigoParada, setCodigoParada] = useState(null);
+    const [nuevaObs, setNuevaObs] = useState('');
+
+    let tipo_nuevaparada = '';
 
     // --- FUNCIÓN DE UTILIDAD PARA EL INPUT DATE ---
     const convertirAFormatoISO = (fechaEspanol) => {
@@ -26,72 +35,81 @@ const ModalEditarParada = ({ show, onHide, parada }) => {
         }
     }, [parada]);
 
+    useEffect(()=>{
+        if(tipoRegistro==='averia'){
+            tipo_nuevaparada=2;
+        }
+        else if(tipoRegistro==='incidencia'){
+            tipo_nuevaparada=3;
+        }
+        tipo_nuevaparada && axios.get(BACKEND_SERVER + `/api/velocidad/obtener_codigos/?tipo_parada=${tipo_nuevaparada}&zona=${parada?.zona_id}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( res => {
+            setCodigoParada(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });  
+    },[tipoRegistro]);
+
     if (!parada && show) return null;
 
     const generarTramosParaBD = (datos, paradaOriginal) => {
-        // Usamos 'paradaOriginal.inicio' porque es donde viene el string "2025-12-09 15:55:20"
-        // Añadimos una validación de seguridad (el ?)
-        const tInicioTotal = new Date(paradaOriginal.inicio?.replace(' ', 'T')).getTime();
-        const tFinTotal = new Date(paradaOriginal.fin?.replace(' ', 'T')).getTime();
+        if (!paradaOriginal || !paradaOriginal.inicio) return [];
 
-        if (!tInicioTotal || !tFinTotal) {
-            console.error("Error: Las fechas de la parada original no son válidas");
-            return [];
-        }
-
-        if (!datos.detallesTiempo) {
-            return [{ 
-                inicio: paradaOriginal.inicio, 
-                fin: paradaOriginal.fin, 
-                tipo: 'normal', 
-                observaciones: datos.observaciones 
-            }];
-        }
-
-        // Convertir detalles de la incidencia (vienen en DD/MM/YYYY)
-        const transformarISO = (f, h) => {
-            if(!f || !h) return null;
-            return `${f.split('/').reverse().join('-')}T${h}`;
+        const timestampAString = (ts) => {
+            const d = new Date(ts);
+            return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}T${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}:${String(d.getUTCSeconds()).padStart(2, '0')}Z`;
         };
 
-        const isoIncInicio = transformarISO(datos.detallesTiempo.fechaInicio, datos.detallesTiempo.horaInicio);
-        const isoIncFin = transformarISO(datos.detallesTiempo.fechaFin, datos.detallesTiempo.horaFin);
-
-        const tInicioInc = new Date(isoIncInicio).getTime();
-        const tFinInc = new Date(isoIncFin).getTime();
-
-        // Array de puntos temporales ordenados
-        const puntos = [tInicioTotal, tInicioInc, tFinInc, tFinTotal].sort((a, b) => a - b);
+        const tInicioOrig = new Date(paradaOriginal.inicio.replace(' ', 'T') + 'Z').getTime();
+        const tFinOrig = new Date(paradaOriginal.fin.replace(' ', 'T') + 'Z').getTime();
+        const tInicioInc = new Date(`${datos.detallesTiempo.fechaInicio.split('/').reverse().join('-')}T${datos.detallesTiempo.horaInicio}Z`).getTime();
+        const tFinInc = new Date(`${datos.detallesTiempo.fechaFin.split('/').reverse().join('-')}T${datos.detallesTiempo.horaFin}Z`).getTime();
 
         const tramos = [];
-        for (let i = 0; i < puntos.length - 1; i++) {
-            const inicio = puntos[i];
-            const fin = puntos[i + 1];
 
-            if (inicio === fin) continue; 
-
-            let tipoTramo = 'normal';
-            // Si el tramo coincide con el rango de la incidencia, le asignamos su tipo
-            if (inicio >= tInicioInc && fin <= tFinInc) {
-                tipoTramo = datos.tipo;
-            }
-
+        // TRAMO 1: Trozo inicial (mantiene el ID original para el PATCH)
+        if (tInicioInc > tInicioOrig) {
             tramos.push({
-                idPadre: paradaOriginal.id,
-                zona_id: paradaOriginal.zona_id, // Añadimos la zona que necesitas para el backend
-                inicio: new Date(inicio).toLocaleString('sv-SE').replace('T', ' '),
-                fin: new Date(fin).toLocaleString('sv-SE').replace('T', ' '),
-                tipo: tipoTramo,
-                observaciones: tipoTramo === datos.tipo ? datos.observaciones : 'Tramo recuperado'
+                id: paradaOriginal.id, // Mantenemos el ID para saber que este es el que se actualiza
+                inicio: timestampAString(tInicioOrig),
+                fin: timestampAString(tInicioInc),
+                codigo: parseInt(paradaOriginal.codigo_id || paradaOriginal.codigo),
+                zona: parseInt(paradaOriginal.zona_id || paradaOriginal.zona),
+                observaciones: paradaOriginal.observaciones || ""
             });
         }
-        return tramos;
-    };
 
-    const handleGuardar = () => {
+        // TRAMO 2: La nueva incidencia/avería (Sin ID para el POST)
+        tramos.push({
+            inicio: timestampAString(tInicioInc),
+            fin: timestampAString(tFinInc),
+            codigo: parseInt(datos.codigo_nuevo), // ID numérico limpio
+            zona: parseInt(paradaOriginal.zona_id || paradaOriginal.zona),
+            observaciones: datos.observaciones || ""
+        });
+
+        // TRAMO 3: Trozo final (Sin ID para el POST)
+        if (tFinInc < tFinOrig) {
+            tramos.push({
+                inicio: timestampAString(tFinInc),
+                fin: timestampAString(tFinOrig),
+                codigo: parseInt(paradaOriginal.codigo_id || paradaOriginal.codigo),
+                zona: parseInt(paradaOriginal.zona_id || paradaOriginal.zona),
+                observaciones: paradaOriginal.observaciones || ""
+            });
+        }
+
+        return tramos.sort((a, b) => new Date(a.inicio).getTime() - new Date(b.inicio).getTime());
+    };
+    const handleGuardar = async () => {
         //<-------------------VALIDACIONES ------------------------>
         if (tipoRegistro) { 
-            // Límites originales de la parada
+            // Horas originales de la parada
             const [dI, mI, aI] = parada.fechaInicio.split('/');
             const limiteInicio = new Date(`${aI}-${mI}-${dI}T${parada.horaInicio}`);
             const [dF, mF, aF] = parada.fechaFin.split('/');
@@ -118,7 +136,10 @@ const ModalEditarParada = ({ show, onHide, parada }) => {
         const datosBase = {
             idParada: parada.id, 
             zona_id: parada.zona_id,
-            codigo_id: parada.codigo_id,  // El código (averia, inicidencia....?????)
+            codigo_id: parada.codigo_id,  // El código del tramo principal (averia, inicidencia....?????)
+            tipo_nuevo: tipo_nuevaparada,
+            codigo_nuevo: codigoSel,
+            observaciones: nuevaObs,
             tipoAccion: tipoRegistro,     // averia o incidencia nueva metida por el usuario
             
             inicioOriginal: parada.inicio, 
@@ -134,31 +155,82 @@ const ModalEditarParada = ({ show, onHide, parada }) => {
         // Función para ordenar todos las fechas y horas
         const tramosFinales = generarTramosParaBD(datosBase, parada);
         // Guardamos en la BD
-        console.log("Tramos que enviamos para generar nueva parada:", tramosFinales);
-        console.log("Datos que enviamos para generar nueva parada:", datosBase);
-        console.log("parada:", parada);
-        onHide();
+        if (tramosFinales.length === 0) return; 
+        try {
+            const config = { headers: { 'Authorization': `token ${token['tec-token']}` } };
+
+            // 1. TRAMO 1: PATCH a la parada actual (ID original)
+            const t1 = tramosFinales[0];
+            await axios.patch(`${BACKEND_SERVER}/api/velocidad/paradas_crear/${parada.id}/`, {
+                codigo: t1.codigo,
+                zona: t1.zona,
+                observaciones: t1.observaciones,
+                periodos: [{ inicio: t1.inicio, fin: t1.fin, velocidad: 0 }] 
+            }, config);
+
+            // 2. TRAMOS RESTANTES: POST para nuevas paradas
+            if (tramosFinales.length > 1) {
+                const promesas = tramosFinales.slice(1).map(t => {
+                    return axios.post(`${BACKEND_SERVER}/api/velocidad/paradas_crear/`, {
+                        codigo: t.codigo,
+                        zona: t.zona,
+                        observaciones: t.observaciones,
+                        periodos: [{ inicio: t.inicio, fin: t.fin, velocidad: 0 }]
+                    }, config);
+                });
+                await Promise.all(promesas);
+            }
+
+            alert("Parada y periodos actualizados correctamente");
+            cerrar_limpiar();
+        } catch (error) {
+            console.error("Error al guardar:", error.response?.data || error.message);
+            alert("Error al guardar.");
+        }
     };
 
-    // --- DIBUJO DEL TRAMO DE LA NUEVA PARADA ---
+    // --- DIBUJO DEL TRAMO DE LA NUEVA PARADA (CORREGIDO) ---
     let xUsuario = 0;
     let anchoUsuario = 0;
 
     if (tipoRegistro && fechaInicioReg && horaInicioReg && fechaFinReg && horaFinReg) {
-        const [dI, mI, aI] = parada.fechaInicio.split('/');
-        const [dF, mF, aF] = parada.fechaFin.split('/');
-        
-        const T_inicio_parada = new Date(`${aI}-${mI}-${dI}T${parada.horaInicio}`).getTime();
-        const T_fin_parada = new Date(`${aF}-${mF}-${dF}T${parada.horaFin}`).getTime();
+        // 1. Convertimos los límites de la parada original (usando el formato ISO para evitar errores)
+        const T_inicio_parada = new Date(parada.inicio.replace(' ', 'T')).getTime();
+        const T_fin_parada = new Date(parada.fin.replace(' ', 'T')).getTime();
         const T_total = T_fin_parada - T_inicio_parada;
 
+        // 2. Tiempos que el usuario está marcando en el modal
         const T_inicio_usuario = new Date(`${fechaInicioReg}T${horaInicioReg}`).getTime();
         const T_fin_usuario = new Date(`${fechaFinReg}T${horaFinReg}`).getTime();
 
-        if (T_total > 0) {
+        // 3. Solo calculamos si el tiempo total es válido
+        if (T_total > 0 && T_fin_usuario >= T_inicio_usuario) {
+            // Calculamos posición relativa
             xUsuario = ((T_inicio_usuario - T_inicio_parada) / T_total) * 100;
             anchoUsuario = ((T_fin_usuario - T_inicio_usuario) / T_total) * 100;
+
+            // --- PROTECCIONES ---
+            // Evitamos que el rectángulo se salga por la izquierda (x < 0)
+            xUsuario = Math.max(0, xUsuario);
+            
+            // Evitamos que el ancho sea negativo o que se salga por la derecha
+            anchoUsuario = Math.max(0, anchoUsuario);
+            if (xUsuario + anchoUsuario > 100) {
+                anchoUsuario = 100 - xUsuario;
+            }
+        } else {
+            // Si el usuario pone una hora de fin menor a la de inicio, reseteamos a 0
+            xUsuario = 0;
+            anchoUsuario = 0;
         }
+    }
+
+    const cerrar_limpiar =()=>{
+        setNuevaObs('');
+        tipo_nuevaparada='';
+        setTipoRegistro('');
+        setCodigoSel('');
+        onHide();
     }
 
     const esAveria = tipoRegistro === 'averia';
@@ -202,9 +274,36 @@ const ModalEditarParada = ({ show, onHide, parada }) => {
                         <div style={{ marginTop: '20px', padding: '15px', border: `2px solid ${colorBorde}`, borderRadius: '8px', background: esAveria ? '#fff5f5' : '#fffdf5' }}>
                             <h6 style={{ color: colorBorde }}>{tituloForm}</h6>
                             <Row>
+                                <Col>
+                                    <Form.Group controlId="codigoparada">
+                                        <Form.Label>Codigo Parada</Form.Label>
+                                        <Form.Control as="select"  
+                                                    name='codigoparada' 
+                                                    value={codigoSel}
+                                                    onChange={(e) => setCodigoSel(e.target.value)}
+                                                    placeholder="Codigo parada"
+                                                    //disabled={tipoSel?false:true}
+                                                    >
+                                                    <option key={0} value={''}>Selecciona una opción</option>
+                                                    {codigoParada && codigoParada.map( codigo => {
+                                                        return (
+                                                        <option key={codigo.id} value={codigo.id}>
+                                                            {codigo.nombre}
+                                                        </option>
+                                                        )
+                                                    })}
+                                        </Form.Control>
+                                    </Form.Group>
+                                    <Form.Group className="mb-3">
+                                        <Form.Label><strong>Observaciones:</strong></Form.Label>
+                                        <Form.Control as="textarea" rows={2} value={nuevaObs} onChange={(e) => setNuevaObs(e.target.value)} />
+                                    </Form.Group>
+                                </Col>
+                            </Row>
+                            <Row>
                                 <Col md={6}>
                                     <Form.Group className="mb-2">
-                                        <Form.Label>Fecha Inicio</Form.Label>
+                                        <Form.Label>Fecha Inicioooo</Form.Label>
                                         <Form.Control type="date" value={fechaInicioReg} onChange={(e) => setFechaInicioReg(e.target.value)} />
                                     </Form.Group>
                                 </Col>
