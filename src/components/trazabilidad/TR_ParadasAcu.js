@@ -2,9 +2,9 @@ import {useState} from 'react';
 import { Form, Table, Container} from 'react-bootstrap';
 import { PencilFill, Receipt, PlusSquare, Trash } from 'react-bootstrap-icons';
 import ordenarLista from '../utilidades/ordenar_paradas';
-import ModalEditarParada from './TR_ModalEditarParada';
-import ModalAñadirParada from './TR_ModalAñadirParada';
-import ModalObservacionesParada from './TR_ModalObservacionesParada';
+import ModalEditarParada from '../velocidad/vel_modal_editar_parada';
+import ModalAñadirParada from '../velocidad/vel_modal_añadir_parada';
+import ModalObservacionesParada from '../velocidad/vel_modal_observaciones_parada';
 import { useCookies } from 'react-cookie';
 
 const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acciones}) => {

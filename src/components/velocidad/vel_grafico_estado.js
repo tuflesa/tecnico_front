@@ -246,7 +246,7 @@ const GraficoEstado = () => {
                 });
             });
             puntos.sort((a, b) => a.x_in - b.x_in);
-            console.log('puntos: ', puntos);
+            //console.log('puntos: ', puntos);
             return puntos
         }
         setParadas(datosParadas(estado));
