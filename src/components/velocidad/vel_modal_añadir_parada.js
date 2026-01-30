@@ -5,7 +5,7 @@ import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import moment from 'moment';
 
-const ModalAñadirParada = ({ show, onHide, parada }) => {
+const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
     const [token] = useCookies(['tec-token']);
     const [tipoRegistro, setTipoRegistro] = useState(null); 
     const [fechaInicioReg, setFechaInicioReg] = useState('');
@@ -202,7 +202,8 @@ const ModalAñadirParada = ({ show, onHide, parada }) => {
 
             alert("Parada dividida y guardada correctamente.");
             cerrar_limpiar();
-            window.location.reload(); // O puedes usar un callback prop si prefieres
+            onSaved?.(); //avisa a TR_ParadasAcu que tiene que refrescar
+            onHide(); //cierra el modal
             
         } catch (error) {
             console.error("Error en el proceso:", error.response?.data || error.message);

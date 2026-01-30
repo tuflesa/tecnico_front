@@ -259,6 +259,10 @@ const GraficoEstado = () => {
     const actualizarGrafico = () => {
         setActualizar(!actualizar);
     }
+    
+    const handleParadaGuardada = () => {
+        setActualizar(a => !a);   // refresca datos sin perder filtros
+    };
 
     useInterval(actualizarGrafico, 5000);
 
@@ -609,6 +613,7 @@ const GraficoEstado = () => {
                                                         paradasSeleccionadas={paradasSeleccionadas}
                                                         setParadasSeleccionadas={setParadasSeleccionadas}
                                                         acciones={true}
+                                                        onSaved={handleParadaGuardada}
                                             />
                                         </div>
                                     </Col>
@@ -623,6 +628,7 @@ const GraficoEstado = () => {
                                                         paradasSeleccionadas={paradasSeleccionadas}
                                                         setParadasSeleccionadas={setParadasSeleccionadas}
                                                         acciones={true}
+                                                        onSaved={handleParadaGuardada}
                                             />
                                         </div>
                                     </Col>
@@ -637,6 +643,7 @@ const GraficoEstado = () => {
                                                     paradasSeleccionadas={paradasSeleccionadas}
                                                     setParadasSeleccionadas={setParadasSeleccionadas}
                                                     acciones={false}
+                                                    onSaved={handleParadaGuardada}
                                         />
                                     </div>
                                 </Col>

@@ -7,7 +7,7 @@ import ModalAñadirParada from '../velocidad/vel_modal_añadir_parada';
 import ModalObservacionesParada from '../velocidad/vel_modal_observaciones_parada';
 import { useCookies } from 'react-cookie';
 
-const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acciones}) => {
+const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acciones, onSaved}) => {
     const [user] = useCookies(['tec-user']);
     const tieneEdionParadas = user['tec-user'].perfil.destrezas_velocidad.some(
         destreza => destreza.nombre === 'edicion_paradas'
@@ -147,6 +147,7 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acc
                 show={showModal}    
                 onHide={handleCloseModal}
                 parada={paradasModal}
+                onSaved={onSaved}
             />
             <ModalEditarParada
                 show={showModalEditar}    
