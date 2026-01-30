@@ -97,7 +97,7 @@ const ModalAñadirParada = ({ show, onHide, parada }) => {
                 return;
             }
 
-            // 2. BUSCAR EL PERIODO DE INACTIVIDAD QUE CONTIENE ESTE RANGO
+            // 2. BUSCAR EL PERIODO DE INACTIVIDAD QUE CONTIENE EL RANGO INTRO POR EL USUARIO
             pContenedor = periodos.find(p => {
                 const tP_inicio = moment.utc(p.inicio).valueOf();
                 const tP_fin = moment.utc(p.fin).valueOf();
@@ -131,30 +131,24 @@ const ModalAñadirParada = ({ show, onHide, parada }) => {
 
             // --- CASO 1: TODO EL PERIODO ES UNA AVERÍA/INCIDENCIA ---
             if (esInicioExacto && esFinExacto) {                
-                // 1. Crear la nueva parada CON el periodo
-                await axios.post(`${BACKEND_SERVER}/api/velocidad/paradas_crear/`, {
+                // 1. Crear la nueva parada SIN el periodo
+                const crearParadaResp = await axios.post(`${BACKEND_SERVER}/api/velocidad/paradas_crear/`, {
                     codigo: parseInt(codigoSel),
                     zona: parada.zona_id,
                     observaciones: nuevaObs || "",
-                    periodos: [{
-                        inicio: moment.utc(T_u_inicio).toISOString(),
-                        fin: moment.utc(T_u_fin).toISOString(),
-                        velocidad: 0
-                    }]
                 }, config);
+                const nuevaParadaId = crearParadaResp.data.id;
 
-                console.log("Nueva parada creada con su periodo");
-
-                // 2. Eliminar el periodo contenedor (ahora pertenece a la nueva parada)
-                await axios.delete(`${BACKEND_SERVER}/api/velocidad/periodo/${pContenedor.id}/`, config);
-
-                console.log("Periodo antiguo eliminado");
+                // 2. Modifica la parada nueva en el periodo que teníamos
+                await axios.patch(`${BACKEND_SERVER}/api/velocidad/periodo/${pContenedor.id}/`,
+                    {
+                        parada: nuevaParadaId
+                    }, config
+                );
             }
 
             // --- CASO 2: AVERÍA AL PRINCIPIO O AL FINAL DE UN PERIODO---
-            else if (esInicioExacto || esFinExacto) {
-                console.log("CASO 2: Avería al principio o al final");
-                
+            else if (esInicioExacto || esFinExacto) {                
                 // 1. Crear la nueva parada CON su periodo
                 await axios.post(`${BACKEND_SERVER}/api/velocidad/paradas_crear/`, {
                     codigo: parseInt(codigoSel),
