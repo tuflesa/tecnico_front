@@ -1,4 +1,6 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
+import { BACKEND_SERVER } from '../../constantes';
+import axios from 'axios';
 import { Form, Table, Container} from 'react-bootstrap';
 import { PencilFill, Receipt, PlusSquare, Trash } from 'react-bootstrap-icons';
 import ordenarLista from '../utilidades/ordenar_paradas';
@@ -9,6 +11,7 @@ import { useCookies } from 'react-cookie';
 
 const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acciones, onSaved}) => {
     const [user] = useCookies(['tec-user']);
+    const [token] = useCookies(['tec-token']);
     const tieneEdionParadas = user['tec-user'].perfil.destrezas_velocidad.some(
         destreza => destreza.nombre === 'edicion_paradas'
     );
@@ -19,6 +22,7 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acc
     const [observacionActual, setObservacionActual] = useState('');
     const [showModalEditar, setShowModalEditar] = useState(false);
     const [paradasModalEditar, setParadaModalEditar] = useState(null);
+    const [periodos, setPeriodos] = useState('');
 
     const handleOpenModalAñadir = (parada) => {
         setParadaModal(parada);
@@ -78,6 +82,59 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acc
         return paradasSeleccionadas.some(p => String(p.id) === String(id));
     }
 
+    const InicializarParada = async (parada) => {
+        if (!parada) return;
+
+        try {
+            // 1. Buscamos los periodos de esa parada
+            const resPeriodos = await axios.get(`${BACKEND_SERVER}/api/velocidad/periodo/?parada=${parada.id}`, {
+                headers: { 'Authorization': `token ${token['tec-token']}` }
+            });
+            const periodos = resPeriodos.data;
+
+            // 2. Actualizamos la parada original a código 1 = Desconocido
+            const periodo0 = periodos[0];
+            const codigoP0 = (periodo0.velocidad > 0)? 2 : 1;
+            await axios.patch(`${BACKEND_SERVER}/api/velocidad/paradas/${parada.id}/`, 
+                { codigo: codigoP0 }, 
+                { headers: { 'Authorization': `token ${token['tec-token']}` } }
+            );
+
+            // 3. Si hay más de un periodo....
+            if (periodos.length > 1) {
+                // Empezamos desde el índice 1, porque el índice 0 se queda con la parada original
+                for (let i = 1; i < periodos.length; i++) {
+                    const periodoActual = periodos[i];
+                    const codigoParaEstePeriodo = (periodoActual.velocidad > 0) ? 2 : 1;
+                    // Crear una nueva parada para este periodo
+                    const resNuevaParada = await axios.post(`${BACKEND_SERVER}/api/velocidad/paradas/`, {
+                        codigo: codigoParaEstePeriodo,
+                        zona: parada.zona_id,
+                        observaciones: parada.observaciones,
+                    }, {
+                        headers: { 'Authorization': `token ${token['tec-token']}` }
+                    });
+
+                    const nuevaParadaId = resNuevaParada.data.id;
+
+                    // Vincular el periodo actual a la nueva parada
+                    await axios.patch(`${BACKEND_SERVER}/api/velocidad/periodo/${periodoActual.id}/`, 
+                        { parada: nuevaParadaId }, 
+                        { headers: { 'Authorization': `token ${token['tec-token']}` } }
+                    );
+                }
+            }
+            
+            // Refrescar la lista
+            if (onSaved) onSaved(); 
+            alert("Parada deshecha con éxito");
+
+        } catch (err) {
+            console.error("Error en el proceso:", err);
+            alert("Hubo un error al procesar la parada.");
+        }
+    };
+
     return (
         <Container>
             <Table striped bordered hover>
@@ -130,7 +187,7 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acc
                                                 <Trash style={{ 
                                                     cursor: pdb.codigo==='Desconocido'?'not-allowed':'pointer', 
                                                     color:pdb.codigo==='Desconocido'?'gray':'#007bff'}} 
-                                                    /* onClick={pdb.codigo==='Desconocido'? undefined:() => handleOpenModalEditar(paradaParaModal)} *//>
+                                                    onClick={pdb.codigo==='Desconocido'? undefined:() => InicializarParada(paradaParaModal)}/>
                                             </>
                                         ):
                                             <Receipt style={{ cursor: 'pointer', color: pdb.observaciones && pdb.observaciones.trim() !== '' ? '#007bff' : 'gray' }} onClick={() => handleOpenModalObs(pdb.observaciones)}/>
