@@ -262,9 +262,9 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
                         width={`${Math.max(0.5, ancho)}%`} 
                         height="30" 
                         // Si hay velocidad: Verde. Si no: Gris o transparente
-                        fill={estaEnMarcha ? "#28a745" : "#adb0bd"} 
+                        fill={estaEnMarcha ? "#28a745" : parada.color} 
                         fillOpacity={estaEnMarcha ? "0.8" : "0.3"}
-                        stroke={estaEnMarcha ? "#1e7e34" : "#6c757d"}
+                        stroke={estaEnMarcha ? "#1e7e34" : parada.color}
                         strokeWidth="0.5"
                         rx="2"
                         style={{ cursor: 'pointer' }}

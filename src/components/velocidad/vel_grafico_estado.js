@@ -624,7 +624,9 @@ const GraficoEstado = () => {
                                 <Row>
                                     <Col>
                                         <div style={{ height: '200px', overflowY: 'auto' }}>
-                                            <ParadasAcu Paradas={estado && estado.paradas.filter(p => p.codigo !== 'Running')}
+                                            <ParadasAcu 
+                                                        //Paradas={estado && estado.paradas.filter(p => p.codigo !== 'Running')}
+                                                        Paradas = {[]}
                                                         paradasSeleccionadas={paradasSeleccionadas}
                                                         setParadasSeleccionadas={setParadasSeleccionadas}
                                                         acciones={true}

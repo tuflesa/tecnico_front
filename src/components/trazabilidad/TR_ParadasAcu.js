@@ -126,7 +126,7 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acc
                                         {tieneEdionParadas?(
                                             <>
                                                 <PlusSquare style={{ cursor: 'pointer', color: '#007bff', marginRight: '15px'}} onClick={() => handleOpenModalAñadir(paradaParaModal)}/>
-                                                <PencilFill style={{ cursor: pdb.codigo==='Desconocido'?'not-allowed':'pointer', color: pdb.codigo==='Desconocido'?'gray':'#007bff', marginRight: '15px'}} onClick={() => handleOpenModalEditar(paradaParaModal)}/>
+                                                <PencilFill style={{ color:'#007bff', marginRight: '15px'}} onClick={() => handleOpenModalEditar(paradaParaModal)}/>
                                                 <Trash style={{ 
                                                     cursor: pdb.codigo==='Desconocido'?'not-allowed':'pointer', 
                                                     color:pdb.codigo==='Desconocido'?'gray':'#007bff'}} 
