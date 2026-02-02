@@ -29,6 +29,13 @@ rect.fleje {
   stroke-opacity: 1;
   }
 
+rect.OF {
+  fill-opacity: 1;
+  stroke: black;
+  stroke-width: 1;
+  stroke-opacity: 1;
+  }
+
 .destacado {
   font-weight: bold;
   font-size: 1.5rem;

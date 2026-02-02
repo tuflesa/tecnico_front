@@ -31,11 +31,11 @@ const useResizeObserver = (ref) => {
     return dimensions;
   };
 
-const StateChart = ({data, flejes, fecha, fecha_fin, hora_inicio, hora_fin, ver, maquina, paradas}) => {
+const StateChart = ({data, flejes, OFs, fecha, fecha_fin, hora_inicio, hora_fin, ver, maquina, paradas}) => {
     const svgRef = useRef();
     const wrapperRef = useRef();
     const dimensions = useResizeObserver(wrapperRef);
-
+    
     // Cuando cambian los datos actualizamos el grafico
     useEffect(()=>{
         if (!dimensions || !maquina) return;
@@ -46,8 +46,6 @@ const StateChart = ({data, flejes, fecha, fecha_fin, hora_inicio, hora_fin, ver,
         const innerHeight = height - margin.top - margin.bottom;
 
         const svg =svgRef.current;
-        
-        // console.log(flejes);
 
         const inicio = moment(fecha + ' ' + hora_inicio)
         const fin = moment(fecha_fin + ' ' + hora_fin)
@@ -270,6 +268,32 @@ const StateChart = ({data, flejes, fecha, fecha_fin, hora_inicio, hora_fin, ver,
           .attr("font-size", "12px")
           .text(f => f.pos);
 
+        // Dibujar OFs
+        OFs && select(svg).select('.grafico')
+          .selectAll('rect.OF')
+          .data(OFs)
+          .join('rect')
+          .attr("class", "OF")
+          .attr("x", of => xScale(of.x_in))
+          .attr("y", of => yScale(of.y_in))
+          .attr("width", of => xScale(of.x_out) - xScale(of.x_in))
+          .attr("height", of => yScale(of.y_in) - yScale(of.y_out))
+          .attr("fill", of => of.color)
+
+        // OFs Texto centrado en cada rectángulo
+        OFs && select(svg).select('.grafico')
+          .selectAll('text.OF-pos')
+          .data(OFs)
+          .join('text')
+          .attr("class", "OF-pos")
+          .attr("x", of => xScale(of.x_in) + (xScale(of.x_out) - xScale(of.x_in)) / 2)
+          .attr("y", of => yScale(of.y_in) + ((yScale(of.y_in) - yScale(of.y_out)) / 2))
+          .attr("text-anchor", "middle")
+          .attr("dominant-baseline", "middle")
+          .attr("fill", "white") // o negro, según contraste
+          .attr("font-size", "12px")
+          .text(of => of.numero);
+
         // Dibujar Paradas
         paradas && select(svg).select('.grafico')
           .selectAll('rect.parada')
@@ -385,7 +409,7 @@ const StateChart = ({data, flejes, fecha, fecha_fin, hora_inicio, hora_fin, ver,
         select(svg).select('.eje-y')
           .append('text')
           .attr('x', -20)
-          .attr('y', yScale(-22.5))
+          .attr('y',  yScale(-52.5))
           .attr('text-anchor', 'middle')
           .attr('fill', 'black')
           .attr('font-size', '12px')
@@ -395,11 +419,21 @@ const StateChart = ({data, flejes, fecha, fecha_fin, hora_inicio, hora_fin, ver,
         select(svg).select('.eje-y')
           .append('text')
           .attr('x', -25)
-          .attr('y', yScale(-37.5))
+          .attr('y', yScale(-22.5))
           .attr('text-anchor', 'middle')
           .attr('fill', 'black')
           .attr('font-size', '12px')
           .text('Paradas');
+
+         // Añadir texto para OFs
+        select(svg).select('.eje-y')
+          .append('text')
+          .attr('x', -20)
+          .attr('y',  yScale(-37.5))
+          .attr('text-anchor', 'middle')
+          .attr('fill', 'black')
+          .attr('font-size', '12px')
+          .text('OFs');
 
     },[data, fecha, fecha_fin, hora_fin, hora_inicio, dimensions, ver]);
 

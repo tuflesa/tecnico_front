@@ -32,6 +32,7 @@ const GraficoEstado = () => {
     const [paradasSeleccionadas, setParadasSeleccionadas] = useState([]);
     const [registros, setRegistros] = useState(null);
     const [flejes, setFlejes] = useState(null);
+    const [OFs, setOFs] = useState(null);
     const [tabActiva, setTabActiva] = useState('flejes');
     const hoy = new Date();
     const [filtro, setFiltro] = useState({
@@ -70,6 +71,7 @@ const GraficoEstado = () => {
             }
         })
         .then(res => {
+            // console.log(res.data);
             setEstado(res.data);
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -174,9 +176,9 @@ const GraficoEstado = () => {
                 if (x_in.isBefore(inicio)) {
                     x_in = inicio;
                 }
-                const y_in = -15;
+                const y_in = -45;
                 let x_out;
-                const y_out = -5;
+                const y_out = -35;
                 if (f.fecha_salida) {
                     const fecha_salida = f.fecha_salida.split('-');
                     const hora_salida = f.hora_salida.split(':');
@@ -226,12 +228,12 @@ const GraficoEstado = () => {
                 if (x_in.isBefore(inicio)) {
                     x_in = inicio;
                 }
-                const y_in = -30;
+                const y_in = -15;
                 let x_out = moment(p.fin);
                 if (x_out.isAfter(fin)) {
                     x_out = fin;
                 }
-                const y_out = -20;
+                const y_out = -5;
                 const seleccionado = paradasSeleccionadas.some(el => el.id == p.id);
                 const color = seleccionado ? 'gold' : p.color;
 
@@ -246,12 +248,63 @@ const GraficoEstado = () => {
                 });
             });
             puntos.sort((a, b) => a.x_in - b.x_in);
-            console.log('puntos: ', puntos);
+            // console.log('puntos: ', puntos);
             return puntos
         }
+
+        const datosOFs = (estado) => {
+            const inicio = moment(filtro.fecha + ' ' + filtro.hora_inicio,'YYYY-MM-DD HH:mm');
+            const fin = moment(filtro.fecha_fin + ' ' + filtro.hora_fin,'YYYY-MM-DD HH:mm');
+            const puntos = estado.OFs.map( of => {
+                const ahora = moment();
+                let iso = of.inicio;
+                let d = new Date(iso);
+                console.log(iso);
+                let x_in = moment(iso).local();
+                console.log(x_in);
+                if (x_in.isBefore(inicio)) {
+                    x_in = inicio;
+                }
+                const y_in = -30;
+                let x_out;
+                const y_out = -20;
+                if (of.fin) {
+                    iso = of.fin;
+                    d = new Date(iso);
+                    x_out = moment(iso).local();
+                    if (x_out.isAfter(fin)) {
+                        x_out = fin;
+                    }
+                }
+                else {
+                    if(ahora.isAfter(inicio) && ahora.isBefore(fin)) {
+                        x_out = new Date();
+                    }
+                    else {
+                        x_out = new Date(fin.format("YYYY-MM-DD HH:mm:ss"));
+                    }
+                }
+
+                // Color
+                let color = 'peru';
+                
+                return ({
+                    x_in: x_in,
+                    y_in: y_in,
+                    x_out: x_out,
+                    y_out: y_out,
+                    color: color,
+                    numero: of.numero
+                });
+            });
+
+            return puntos;
+        }
+
         setParadas(datosParadas(estado));
         setRegistros(datosRegistros(estado));
         setFlejes(datosFlejes(estado));
+        setOFs(datosOFs(estado));
         const existe = estado.paradas.some(p => p.codigo === 'Desconocido');
         setExisteDesconocido (existe);
     },[estado, paradasSeleccionadas]);
@@ -450,7 +503,7 @@ const GraficoEstado = () => {
                             </Col>
                         </Row>
                     </Col>
-                    <Col sm={1}>
+                    {/* <Col sm={1}>
                         <Row>
                             <Col>
                                 KN:
@@ -463,7 +516,7 @@ const GraficoEstado = () => {
                                 </span>
                             </Col>
                         </Row>
-                    </Col>
+                    </Col> */}
                     <Col sm={2}>
                         <Row>
                             <Col>
@@ -481,13 +534,13 @@ const GraficoEstado = () => {
                     <Col>
                         <Row>
                             <Col>
-                                Bobina:
+                                Tubo:
                             </Col>
                         </Row>
                         <Row>
                             <Col>
                                 <span className="destacado">
-                                    {estado && estado.estado_act.fleje_descripcion}
+                                    {estado && estado.estado_act.tubo_descripcion}
                                 </span>
                             </Col>
                         </Row>
@@ -541,6 +594,7 @@ const GraficoEstado = () => {
                         <StateChart data={registros}
                                 paradas={paradas}
                                 flejes={flejes}
+                                OFs={OFs}
                                 fecha={filtro.fecha}
                                 fecha_fin={filtro.fecha_fin}
                                 hora_inicio={filtro.hora_inicio}
