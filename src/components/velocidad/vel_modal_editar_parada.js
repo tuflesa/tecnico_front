@@ -35,7 +35,7 @@ const ModalEditarParada = ({ show, onHide, parada}) => {
     },[tipoSel]);
 
     useEffect(()=>{
-        axios.get(BACKEND_SERVER + `/api/velocidad/tipoparada/?para_informar=${true}`,{
+        axios.get(BACKEND_SERVER + `/api/velocidad/tipoparada`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }
@@ -95,10 +95,9 @@ const ModalEditarParada = ({ show, onHide, parada}) => {
                                         <Form.Control as="select"  
                                                     name='tipoparada' 
                                                     value={tipoSel}
-                                                    //onChange={handleInputChangeTipo}
                                                     onChange={(e) => setTipoSel(e.target.value)}
                                                     placeholder="Tipo parada">
-                                                    <option key={0} value={''}>Selecciona una opción</option>
+                                                    <option key={-0} value={''}>Selecciona una opción</option>
                                                     {tipoParadas && tipoParadas.map( tipo => {
                                                         return (
                                                         <option

@@ -249,6 +249,7 @@ const GraficoEstado = () => {
             });
             puntos.sort((a, b) => a.x_in - b.x_in);
             // console.log('puntos: ', puntos);
+            //console.log('puntos: ', puntos);
             return puntos
         }
 
@@ -312,6 +313,10 @@ const GraficoEstado = () => {
     const actualizarGrafico = () => {
         setActualizar(!actualizar);
     }
+    
+    const handleParadaGuardada = () => {
+        setActualizar(a => !a);   // refresca datos sin perder filtros
+    };
 
     useInterval(actualizarGrafico, 5000);
 
@@ -663,6 +668,7 @@ const GraficoEstado = () => {
                                                         paradasSeleccionadas={paradasSeleccionadas}
                                                         setParadasSeleccionadas={setParadasSeleccionadas}
                                                         acciones={true}
+                                                        onSaved={handleParadaGuardada}
                                             />
                                         </div>
                                     </Col>
@@ -673,10 +679,13 @@ const GraficoEstado = () => {
                                 <Row>
                                     <Col>
                                         <div style={{ height: '200px', overflowY: 'auto' }}>
-                                            <ParadasAcu Paradas={estado && estado.paradas.filter(p => p.codigo !== 'Running')}
+                                            <ParadasAcu 
+                                                        //Paradas={estado && estado.paradas.filter(p => p.codigo !== 'Running')}
+                                                        Paradas = {[]}
                                                         paradasSeleccionadas={paradasSeleccionadas}
                                                         setParadasSeleccionadas={setParadasSeleccionadas}
                                                         acciones={true}
+                                                        onSaved={handleParadaGuardada}
                                             />
                                         </div>
                                     </Col>
@@ -691,6 +700,7 @@ const GraficoEstado = () => {
                                                     paradasSeleccionadas={paradasSeleccionadas}
                                                     setParadasSeleccionadas={setParadasSeleccionadas}
                                                     acciones={false}
+                                                    onSaved={handleParadaGuardada}
                                         />
                                     </div>
                                 </Col>
