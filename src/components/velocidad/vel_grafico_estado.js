@@ -29,6 +29,7 @@ const GraficoEstado = () => {
     const [paradas, setParadas] = useState(null);
     const [tipoParadas, setTipoParadas] = useState(null);
     const [codigoParada, setCodigoParada] = useState(null);
+    const [palabrasClave, setPalabrasClave] = useState(null);
     const [paradasSeleccionadas, setParadasSeleccionadas] = useState([]);
     const [registros, setRegistros] = useState(null);
     const [flejes, setFlejes] = useState(null);
@@ -51,8 +52,11 @@ const GraficoEstado = () => {
     const [existeDesconocido, setExisteDesconocido] = useState(false);
     const [mostrarModalTramos, setMostrarModalTramos] = useState(false);
     const [seleTipoParada, setseleTipoParada] = useState(null);
+    const [nombreTipoParada, setNombreTipoParada] = useState(null);
     const [codigo_seleccionado, setCodigoSeleccionado] = useState(null);
+    const [palabra_seleccionado, setPalabraSeleccionado] = useState(null);
     const [observaciones, setObservaciones] = useState('');
+    const [esCambio, setEsCambio] = useState(false);
 
     const abrirModalTramos = () => {
         setMostrarModalTramos(true);
@@ -71,7 +75,6 @@ const GraficoEstado = () => {
             }
         })
         .then(res => {
-            // console.log(res.data);
             setEstado(res.data);
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -92,7 +95,7 @@ const GraficoEstado = () => {
     },[token]);
 
     useEffect(()=>{
-        seleTipoParada && axios.get(BACKEND_SERVER + `/api/velocidad/obtener_codigos/?tipo_parada=${seleTipoParada}&zona=${id}`,{
+        seleTipoParada && palabra_seleccionado && axios.get(BACKEND_SERVER + `/api/velocidad/obtener_codigos/?tipo_parada=${seleTipoParada}&zona=${id}&palabra_clave=${palabra_seleccionado}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }
@@ -103,6 +106,34 @@ const GraficoEstado = () => {
         .catch( err => {
             console.log(err);
         });  
+    },[palabra_seleccionado]);
+
+    useEffect(()=>{ //recogemos las palabras clave
+        const tipo = tipoParadas?.find(t => t.id === Number(seleTipoParada));
+        
+        (tipo?.nombre==='Incidencia' || tipo?.nombre==='Avería') && axios.get(BACKEND_SERVER + `/api/velocidad/obtener_palabraclave/?zona=${id}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( res => {
+            setPalabrasClave(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+        tipo?.nombre!=='Incidencia' && tipo?.nombre!=='Avería' && seleTipoParada && axios.get(BACKEND_SERVER + `/api/velocidad/obtener_codigos_resto/?tipo_parada=${seleTipoParada}&zona=${id}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( res => {
+            setCodigoParada(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+
     },[seleTipoParada]);
 
     useEffect(()=>{
@@ -248,8 +279,6 @@ const GraficoEstado = () => {
                 });
             });
             puntos.sort((a, b) => a.x_in - b.x_in);
-            // console.log('puntos: ', puntos);
-            //console.log('puntos: ', puntos);
             return puntos
         }
 
@@ -260,9 +289,7 @@ const GraficoEstado = () => {
                 const ahora = moment();
                 let iso = of.inicio;
                 let d = new Date(iso);
-                console.log(iso);
                 let x_in = moment(iso).local();
-                console.log(x_in);
                 if (x_in.isBefore(inicio)) {
                     x_in = inicio;
                 }
@@ -328,7 +355,13 @@ const GraficoEstado = () => {
     };
 
     const handleInputChangeTipo = (event) => {
+        
         setseleTipoParada(event.target.value);
+        
+        setPalabraSeleccionado(null);
+        setPalabrasClave(null);
+        setCodigoSeleccionado(null);
+        setCodigoParada(null);
         const nombre = event.target.options[event.target.selectedIndex].dataset.nombre;
 
         const fecha_inicio = moment(paradasSeleccionadas[0].fechaInicio, 'DD/MM/YYYY').format('YYYY-MM-DD');
@@ -426,6 +459,7 @@ const GraficoEstado = () => {
                     setParadasSeleccionadas([]);
                     setseleTipoParada(null);
                     setCodigoSeleccionado(null);
+                    setPalabraSeleccionado(null);
                     setMostrarModalTramos(false);
                     setActualizar(!actualizar);
                     setObservaciones('');
@@ -443,6 +477,7 @@ const GraficoEstado = () => {
             setParadasSeleccionadas([]);
             setseleTipoParada(null);
             setCodigoSeleccionado(null);
+            setPalabraSeleccionado(null);
             setActualizar(!actualizar);
             
             setMostrarModalTramos(false);
@@ -738,6 +773,28 @@ const GraficoEstado = () => {
                                 </Form.Control>
                             </Form.Group>
                         </Col>
+                        {seleTipoParada && seleTipoParada!=='4'? //cuando no sea cambio o nulo
+                            <Col>
+                                <Form.Group controlId="palabraclave">
+                                    <Form.Label>Palabra clave</Form.Label>
+                                    <Form.Control as="select"  
+                                                name='palabraclave' 
+                                                value={palabra_seleccionado}
+                                                onChange={(e) => setPalabraSeleccionado(e.target.value)}
+                                                placeholder="Palabra clave"
+                                                disabled={seleTipoParada?false:true}>
+                                                <option key={0} value={''}>Selecciona una opción</option>
+                                                {palabrasClave && palabrasClave.map( codigo => {
+                                                    return (
+                                                    <option key={codigo.id} value={codigo.id}>
+                                                        {codigo.nombre}
+                                                    </option>
+                                                    )
+                                                })}
+                                    </Form.Control>
+                                </Form.Group>
+                            </Col>
+                        :''}
                         <Col>
                             <Form.Group controlId="codigoparada">
                                 <Form.Label>Codigo Parada</Form.Label>
