@@ -52,11 +52,9 @@ const GraficoEstado = () => {
     const [existeDesconocido, setExisteDesconocido] = useState(false);
     const [mostrarModalTramos, setMostrarModalTramos] = useState(false);
     const [seleTipoParada, setseleTipoParada] = useState(null);
-    const [nombreTipoParada, setNombreTipoParada] = useState(null);
     const [codigo_seleccionado, setCodigoSeleccionado] = useState(null);
     const [palabra_seleccionado, setPalabraSeleccionado] = useState(null);
     const [observaciones, setObservaciones] = useState('');
-    const [esCambio, setEsCambio] = useState(false);
 
     const abrirModalTramos = () => {
         setMostrarModalTramos(true);
