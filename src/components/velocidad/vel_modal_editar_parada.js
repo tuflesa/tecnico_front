@@ -8,20 +8,25 @@ const ModalEditarParada = ({ show, onHide, parada}) => {
     const [token] = useCookies(['tec-token']);
     const [nuevaObs, setNuevaObs] = useState('');
     const [codigoSel, setCodigoSel] = useState('');
-    const [tipoSel, setTipoSel] = useState('');
+    const [seleTipoParada, setseleTipoParada] = useState('');
     const [tipoParadas, setTipoParadas] = useState(null);
     const [codigoParada, setCodigoParada] = useState(null);
+    const [palabra_seleccionada, setPalabraSeleccionada] = useState(null);
+    const [palabrasClave, setPalabrasClave] = useState(null);
+    const [tipoNombre, setTipoNombre] = useState('');
 
     useEffect(() => {
         if (show && parada) {
             setNuevaObs(parada.observaciones || '');
             setCodigoSel(parada.codigo_id || '');
-            setTipoSel(parada.tipo_parada_id || '');
+            setseleTipoParada(parada.tipo_parada_id || '');
+            setPalabraSeleccionada(parada.palabraclave_id || '');
+            setTipoNombre(parada.tipo_parada_nombre);
         }
     }, [parada, show]);
 
     useEffect(()=>{
-        tipoSel && axios.get(BACKEND_SERVER + `/api/velocidad/obtener_codigos/?tipo_parada=${tipoSel}&zona=${parada.zona_id}`,{
+        seleTipoParada && palabra_seleccionada && axios.get(BACKEND_SERVER + `/api/velocidad/obtener_codigos/?tipo_parada=${seleTipoParada}&zona=${parada.zona_id}&palabra_clave=${palabra_seleccionada}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }
@@ -32,7 +37,33 @@ const ModalEditarParada = ({ show, onHide, parada}) => {
         .catch( err => {
             console.log(err);
         });  
-    },[tipoSel]);
+    },[palabra_seleccionada]);
+
+    useEffect(()=>{ //recogemos las palabras clave   
+        (tipoNombre==='Incidencia' || tipoNombre==='Avería') && axios.get(BACKEND_SERVER + `/api/velocidad/obtener_palabraclave/?zona=${parada.zona_id}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( res => {
+            setPalabrasClave(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+        tipoNombre!=='Incidencia' && tipoNombre!=='Avería' && seleTipoParada && axios.get(BACKEND_SERVER + `/api/velocidad/obtener_codigos_resto/?tipo_parada=${seleTipoParada}&zona=${parada.zona_id}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( res => {
+            setCodigoParada(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+
+    },[seleTipoParada]);
 
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/velocidad/tipoparada`,{
@@ -68,6 +99,28 @@ const ModalEditarParada = ({ show, onHide, parada}) => {
         
     };
 
+    const handleCerrar = () => {
+        setTipoNombre('');
+        setseleTipoParada('');
+        setPalabraSeleccionada(null);
+        setPalabrasClave(null);
+        setCodigoParada(null);
+        onHide();
+    }
+
+    const handleInputChangeTipo = (e) => {
+        const { value } = e.target;
+        if (value) {
+            const [id, nombre] = value.split('|');
+            setseleTipoParada(id);
+            setTipoNombre(nombre);
+        };
+        
+        setPalabraSeleccionada(null);
+        setPalabrasClave(null);
+        setCodigoParada(null);
+    }
+
     return (
         <Container>
             <Modal show={show} onHide={onHide} centered size="lg">
@@ -90,28 +143,48 @@ const ModalEditarParada = ({ show, onHide, parada}) => {
                     <Form>
                         <Row>
                             <Col>
-                                    <Form.Group controlId="tipoparada">
-                                        <Form.Label>Tipo Parada</Form.Label>
-                                        <Form.Control as="select"  
-                                                    name='tipoparada' 
-                                                    value={tipoSel}
-                                                    onChange={(e) => setTipoSel(e.target.value)}
-                                                    placeholder="Tipo parada">
-                                                    <option key={-0} value={''}>Selecciona una opción</option>
-                                                    {tipoParadas && tipoParadas.map( tipo => {
-                                                        return (
-                                                        <option
-                                                            key={tipo.id}
-                                                            value={tipo.id}
-                                                            data-nombre={tipo.nombre}
-                                                        >
-                                                            {tipo.nombre}
-                                                        </option>
-                                                        )
-                                                    })}
+                                <Form.Group controlId="tipoparada">
+                                    <Form.Label>Tipo Parada</Form.Label>
+                                    <Form.Control as="select"  
+                                                name='tipoparada' 
+                                                value={`${seleTipoParada}|${tipoNombre}`}
+                                                onChange={handleInputChangeTipo}>
+                                                <option key={-0} value={''}>Selecciona una opción</option>
+                                                {tipoParadas && tipoParadas.map( tipo => {
+                                                    return (
+                                                    <option
+                                                        key={tipo.id}
+                                                        value={`${tipo.id}|${tipo.nombre}`}
+                                                    >
+                                                        {tipo.nombre}
+                                                    </option>
+                                                    )
+                                                })}
                                         </Form.Control>
                                     </Form.Group>
                                 </Col>
+                                {(tipoNombre==='Incidencia' || tipoNombre==='Avería')?
+                                    <Col>
+                                        <Form.Group controlId="palabraclave">
+                                            <Form.Label>Palabra clave</Form.Label>
+                                            <Form.Control as="select"  
+                                                        name='palabraclave' 
+                                                        value={palabra_seleccionada}
+                                                        onChange={(e) => setPalabraSeleccionada(e.target.value)}
+                                                        placeholder="Palabra clave"
+                                                        disabled={seleTipoParada?false:true}>
+                                                        <option key={0} value={''}>Selecciona una opción</option>
+                                                        {palabrasClave && palabrasClave.map( codigo => {
+                                                            return (
+                                                            <option key={codigo.id} value={codigo.id}>
+                                                                {codigo.nombre}
+                                                            </option>
+                                                            )
+                                                        })}
+                                            </Form.Control>
+                                        </Form.Group>
+                                    </Col>
+                                :''}
                                 <Col>
                                     <Form.Group controlId="codigoparada">
                                         <Form.Label>Codigo Parada</Form.Label>
@@ -119,8 +192,7 @@ const ModalEditarParada = ({ show, onHide, parada}) => {
                                                     name='codigoparada' 
                                                     value={codigoSel}
                                                     onChange={(e) => setCodigoSel(e.target.value)}
-                                                    placeholder="Codigo parada"
-                                                    disabled={tipoSel?false:true}>
+                                                    placeholder="Codigo parada">
                                                     <option key={0} value={''}>Selecciona una opción</option>
                                                     {codigoParada && codigoParada.map( codigo => {
                                                         return (
@@ -141,7 +213,7 @@ const ModalEditarParada = ({ show, onHide, parada}) => {
                 </Modal.Body>
                 
                 <Modal.Footer className="d-flex justify-content-between">
-                    <Button variant="secondary" onClick={onHide}>Cerrar</Button>
+                    <Button variant="secondary" onClick={handleCerrar}>Cerrar</Button>
                     <div>
                         <Button variant="primary" onClick={handleGuardar}>Guardar cambios</Button>
                     </div>

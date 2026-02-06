@@ -16,6 +16,8 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
     const [codigoParada, setCodigoParada] = useState(null);
     const [nuevaObs, setNuevaObs] = useState('');
     const [periodos, setPeriodos] = useState('');
+    const [palabra_seleccionada, setPalabraSeleccionada] = useState(null);
+    const [palabrasClave, setPalabrasClave] = useState(null);
 
     let tipo_nuevaparada = '';
 
@@ -51,14 +53,33 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
         }
     }, [parada]);
 
-    useEffect(()=>{ //recogemos los códigos de parada según elijamos avería o incidencia
+    useEffect(()=>{ //limpiamos 
+        setPalabraSeleccionada('');
+        setCodigoParada('');
+    },[tipoRegistro]);
+
+    useEffect(()=>{ //recogemos los códigos, aquí son los mismos para las dos
+        parada && axios.get(BACKEND_SERVER + `/api/velocidad/obtener_palabraclave/?zona=${parada.zona_id}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( res => {
+            setPalabrasClave(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        }); 
+    },[parada]);
+
+    useEffect(()=>{ //recogemos los códigos de parada según elijamos la palabra clave
         if(tipoRegistro==='averia'){
             tipo_nuevaparada=2;
         }
         else if(tipoRegistro==='incidencia'){
             tipo_nuevaparada=3;
         }
-        tipo_nuevaparada && axios.get(BACKEND_SERVER + `/api/velocidad/obtener_codigos/?tipo_parada=${tipo_nuevaparada}&zona=${parada?.zona_id}`,{
+        palabra_seleccionada && tipo_nuevaparada && axios.get(BACKEND_SERVER + `/api/velocidad/obtener_codigos/?tipo_parada=${tipo_nuevaparada}&zona=${parada?.zona_id}&palabra_clave=${palabra_seleccionada}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }
@@ -69,7 +90,7 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
         .catch( err => {
             console.log(err);
         });  
-    },[tipoRegistro]);
+    },[palabra_seleccionada]);
 
     if (!parada && show) return null;
 
@@ -291,12 +312,28 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
         setHoraInicioReg('');
         setHoraFinReg('');
         onHide();
+        setPalabraSeleccionada('');
+        setPalabrasClave('');
     };
 
     const esAveria = tipoRegistro === 'averia';
     const esIncidencia = tipoRegistro === 'incidencia';
     const colorBorde = esAveria ? '#dc3545' : '#ffc107';
     const tituloForm = esAveria ? 'Datos de la Avería' : 'Datos de la Incidencia';
+    /* const añadimos = () => {
+        if(esIncidencia){
+            setTipoRegistro(null);
+        }
+        else{
+            setTipoRegistro('Incidencia');
+        }
+        if(esAveria){
+            setTipoRegistro(null);
+        }
+        else{
+            setTipoRegistro('averia');
+        }
+    } */
 
     return (
         <Container>
@@ -346,6 +383,27 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
                             <h6 style={{ color: colorBorde }}>{tituloForm}</h6>
                             <Row>
                                 <Col>
+                                    <Form.Group controlId="palabraclave">
+                                        <Form.Label>Palabra clave</Form.Label>
+                                        <Form.Control as="select"  
+                                                    name='palabraclave' 
+                                                    value={palabra_seleccionada}
+                                                    onChange={(e) => setPalabraSeleccionada(e.target.value)}
+                                                    placeholder="Palabra clave">
+                                                    <option key={0} value={''}>Selecciona una opción</option>
+                                                    {palabrasClave && palabrasClave.map( codigo => {
+                                                        return (
+                                                        <option key={codigo.id} value={codigo.id}>
+                                                            {codigo.nombre}
+                                                        </option>
+                                                        )
+                                                    })}
+                                        </Form.Control>
+                                    </Form.Group>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col>
                                     <Form.Group controlId="codigoparada">
                                         <Form.Label>Codigo Parada</Form.Label>
                                         <Form.Control as="select"  
@@ -353,7 +411,7 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
                                                     value={codigoSel}
                                                     onChange={(e) => setCodigoSel(e.target.value)}
                                                     placeholder="Codigo parada"
-                                                    >
+                                                    disabled={palabra_seleccionada?false:true}>
                                                     <option key={0} value={''}>Selecciona una opción</option>
                                                     {codigoParada && codigoParada.map( codigo => {
                                                         return (
@@ -409,12 +467,14 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
                             variant={esIncidencia ? "warning" : "outline-warning"} 
                             className="me-2"
                             onClick={() => setTipoRegistro(esIncidencia ? null : 'incidencia')}
+                            //onClick={añadimos()}
                         >
                             {esIncidencia ? "Quitar Incidencia" : "Añadir Incidencia"}
                         </Button>
                         <Button 
                             variant={esAveria ? "danger" : "outline-danger"} 
                             className="me-2"
+                            //onClick={añadimos()}
                             onClick={() => setTipoRegistro(esAveria ? null : 'averia')}
                         >
                             {esAveria ? "Quitar Avería" : "Añadir Avería"}
