@@ -287,9 +287,16 @@ const GraficoEstado = () => {
             const fin = moment(filtro.fecha_fin + ' ' + filtro.hora_fin,'YYYY-MM-DD HH:mm');
             const puntos = estado.OFs.map( of => {
                 const ahora = moment();
-                let iso = of.inicio;
-                let d = new Date(iso);
-                let x_in = moment(iso).local();
+                let x_in = moment.parseZone(of.inicio);
+                const hora_i = x_in.format('HH:mm:ss');
+                const fecha_i = x_in.format('YYYY-MM-DD');
+                x_in = moment(fecha_i + ' ' + hora_i, 'YYYY-MM-DD HH:mm');
+                // let x_in = moment.parseZone(of.inicio).utc(true);
+                // console.log('x_in: ', x_in.format('HH:mm:ss'));
+                // console.log('x_in: ', x_in.format('HH:mm:ss'));
+                // console.log("RAW:", JSON.stringify(of.inicio));
+                // console.log("PARSED:", moment.parseZone(of.inicio).toString());
+
                 if (x_in.isBefore(inicio)) {
                     x_in = inicio;
                 }
@@ -297,9 +304,10 @@ const GraficoEstado = () => {
                 let x_out;
                 const y_out = -20;
                 if (of.fin) {
-                    iso = of.fin;
-                    d = new Date(iso);
-                    x_out = moment(iso).local();
+                    x_out = moment.parseZone(of.fin);
+                    const hora_f = x_out.format('HH:mm:ss');
+                    const fecha_f = x_out.format('YYYY-MM-DD');
+                    x_out = moment(fecha_f + ' ' + hora_f, 'YYYY-MM-DD HH:mm');
                     if (x_out.isAfter(fin)) {
                         x_out = fin;
                     }
@@ -336,6 +344,36 @@ const GraficoEstado = () => {
         const existe = estado.paradas.some(p => p.codigo === 'Desconocido');
         setExisteDesconocido (existe);
     },[estado, paradasSeleccionadas]);
+
+    // useEffect(()=>{
+    //     console.log('actualizar ...');
+    //     axios.get(BACKEND_SERVER + `/api/velocidad/paradasII/?id=${8675}`,{
+    //         headers: {
+    //             'Authorization': `token ${token['tec-token']}`
+    //         }
+    //     })
+    //     .then( res => {
+    //         // console.log(res.data[0].periodos);
+    //         const periodos = res.data[0].periodos;
+    //         let t = 0;
+    //         periodos.map( p => {
+    //             // console.log(p.inicio);
+    //             const fecha1 = new Date(p.inicio);
+    //             const fecha2 = new Date(p.fin);
+
+    //             const diffMs = fecha2 - fecha1;
+
+    //             // Convertir a minutos
+    //             const diffMin = diffMs / 1000 / 60;
+    //             t += diffMin;
+    //             if (t>600) console.log(p);
+    //         });
+    //         console.log('t: ', t);
+    //     })
+    //     .catch( err => {
+    //         console.log(err);
+    //     });
+    // },[actualizar]);
 
     const actualizarGrafico = () => {
         setActualizar(!actualizar);
