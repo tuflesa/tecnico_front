@@ -343,36 +343,6 @@ const GraficoEstado = () => {
         setExisteDesconocido (existe);
     },[estado, paradasSeleccionadas]);
 
-    // useEffect(()=>{
-    //     console.log('actualizar ...');
-    //     axios.get(BACKEND_SERVER + `/api/velocidad/paradasII/?id=${8675}`,{
-    //         headers: {
-    //             'Authorization': `token ${token['tec-token']}`
-    //         }
-    //     })
-    //     .then( res => {
-    //         // console.log(res.data[0].periodos);
-    //         const periodos = res.data[0].periodos;
-    //         let t = 0;
-    //         periodos.map( p => {
-    //             // console.log(p.inicio);
-    //             const fecha1 = new Date(p.inicio);
-    //             const fecha2 = new Date(p.fin);
-
-    //             const diffMs = fecha2 - fecha1;
-
-    //             // Convertir a minutos
-    //             const diffMin = diffMs / 1000 / 60;
-    //             t += diffMin;
-    //             if (t>600) console.log(p);
-    //         });
-    //         console.log('t: ', t);
-    //     })
-    //     .catch( err => {
-    //         console.log(err);
-    //     });
-    // },[actualizar]);
-
     const actualizarGrafico = () => {
         setActualizar(!actualizar);
     }
