@@ -24,6 +24,8 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acc
     const [paradasModalEditar, setParadaModalEditar] = useState(null);
     const [periodos, setPeriodos] = useState('');
 
+    console.log('paradas: ', Paradas);
+
     const handleOpenModalAñadir = (parada) => {
         setParadaModal(parada);
         setShowModal(true);
@@ -166,7 +168,7 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acc
                                 <td>{fechaInicio +' - '+ horaInicio}</td>
                                 <td>{fechaFin +' - '+ horaFin}</td>
                                 <td>{Number(pdb.duracion).toFixed(2)}</td>
-                                <td>{pdb.codigo}</td>
+                                <td>{pdb.palabra_clave !== '' ? pdb.palabra_clave + ' - ' + pdb.codigo : pdb.codigo}</td>
                                 {acciones?(
                                     <td>
                                         <Form.Check
