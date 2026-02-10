@@ -21,6 +21,12 @@ const HorarioCalendario = () => {
   const [mostrarModalNuevoCalen, setMostrarModalNuevoCalen] = useState(false);
   const [yearSeleccionado, setYearSeleccionado] = useState(new Date().getFullYear());
   const [cargando, setCargando] = useState(false);
+  const [turnos, setTurnos] = useState(null);
+  const [turno_mañana, setTurnoMañana] = useState(null);
+  const [turno_tarde, setTurnoTarde] = useState(null);
+  const [turno_noche, setTurnoNoche] = useState(null);
+  const [cambio_turno_1, setCambioTurno1] = useState(null);
+  const [cambio_turno_2, setCambioTurno2] = useState(null);
 
   useEffect(() => {
     if(zonaId){
@@ -45,7 +51,23 @@ const HorarioCalendario = () => {
             console.log(err);
         });            
     }
-    }, [token]);
+  }, [token]);
+  
+  useEffect(() => {
+    zonaId && axios.get(BACKEND_SERVER + `/api/velocidad/turnos/?zona=${zonaId}`,{
+        headers: {
+            'Authorization': `token ${token['tec-token']}`
+        }
+    })
+    .then( res => {
+        setTurnos(res.data);
+        console.log('estos son los turnos',res.data);
+
+    })
+    .catch( err => {
+        console.log(err);
+    });    
+  }, [token, zonaId]);
 
   const cargarDias = async () => {
     try {
@@ -65,7 +87,15 @@ const HorarioCalendario = () => {
     setMostrarModal(true);
   };
 
-  const cerrarModal = () => setMostrarModal(false);
+  const cerrarModal = () => {
+    console.log('que vale turno_mañana antes de borrarlo', turno_mañana);
+    console.log('que vale turno_tarde antes de borrarlo', turno_tarde);
+    console.log('que vale turno_noche antes de borrarlo', turno_noche);
+    setMostrarModal(false);
+    setTurnoMañana('');
+    setTurnoNoche('');
+    setTurnoTarde('');
+  }
 
   const modificarDia = async () => {
     try {
@@ -75,6 +105,9 @@ const HorarioCalendario = () => {
           inicio: diaSeleccionado.inicio,
           fin: diaSeleccionado.fin,
           zona_id:zonaId,
+          turno_mañana: turno_mañana,
+          turno_tarde: turno_tarde,
+          turno_noche: turno_noche,
         },
         { headers: { Authorization: `token ${token["tec-token"]}` } }
       );
@@ -316,14 +349,13 @@ const HorarioCalendario = () => {
         </div>
 
         {/* Modal para modificar las horas de un día */}
-      <Modal show={mostrarModal} onHide={cerrarModal}>
-          <Modal.Header closeButton>
+      <Modal show={mostrarModal} onHide={cerrarModal} size="lg">
+          <Modal.Header closeButton className="bg-light">
             <Modal.Title>Editar horario</Modal.Title>
           </Modal.Header>
-
           <Modal.Body>
             {diaSeleccionado && (
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <div style={{ display: "grid", flexDirection: "column", gap: "12px" }}>
                 <p><strong>Día:</strong> {diaSeleccionado.nombreDia}</p>
                 <p><strong>Fecha:</strong> {diaSeleccionado.fecha}</p>
 
@@ -344,6 +376,90 @@ const HorarioCalendario = () => {
                     setDiaSeleccionado({ ...diaSeleccionado, fin: e.target.value })
                   }
                 />
+                <Form.Group controlId="turno_mañana">
+                  <Form.Label>Turno de mañana</Form.Label>
+
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <Form.Control
+                      as="select"
+                      name="turno_mañana"
+                      value={turno_mañana}
+                      onChange={(e) => setTurnoMañana(e.target.value)}
+                      style={{ width: "200px" }}   // <-- opcional, para que no se expanda
+                    >
+                      <option value="">Selecciona una opción</option>
+                      {turnos?.map((turno) => (
+                        <option key={turno.id} value={turno.id}>
+                          {turno.turno}
+                        </option>
+                      ))}
+                    </Form.Control>
+
+                    <span style={{ fontWeight: "bold" }}>
+                      {turnos.find((t) => String(t.id) === String(turno_mañana))?.maquinista?.get_full_name ?? ""}
+                    </span>
+                  </div>
+                </Form.Group>
+                <label>Hora cambio de turno 1</label>
+                <input
+                  type="time"
+                  value={cambio_turno_1}
+                  onChange={(e) => setCambioTurno1(e.target.value)}
+                />
+                <Form.Group controlId="turno_tarde">
+                  <Form.Label>Turno de tarde</Form.Label>
+
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <Form.Control
+                      as="select"
+                      name="turno_tarde"
+                      value={turno_tarde}
+                      onChange={(e) => setTurnoTarde(e.target.value)}
+                      style={{ width: "200px" }}   // <-- opcional, para que no se expanda
+                    >
+                      <option value="">Selecciona una opción</option>
+                      {turnos?.map((turno) => (
+                        <option key={turno.id} value={turno.id}>
+                          {turno.turno}
+                        </option>
+                      ))}
+                    </Form.Control>
+
+                    <span style={{ fontWeight: "bold" }}>
+                      {turnos.find((t) => String(t.id) === String(turno_tarde))?.maquinista?.get_full_name ?? ""}
+                    </span>
+                  </div>
+                </Form.Group>
+                <label>Hora cambio de turno 2</label>
+                <input
+                  type="time"
+                  value={cambio_turno_2}
+                  onChange={(e) => setCambioTurno2(e.target.value)}
+                />
+                <Form.Group controlId="turno_noche">
+                  <Form.Label>Turno de noche</Form.Label>
+
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <Form.Control
+                      as="select"
+                      name="turno_noche"
+                      value={turno_noche}
+                      onChange={(e) => setTurnoNoche(e.target.value)}
+                      style={{ width: "200px" }}   // <-- opcional, para que no se expanda
+                    >
+                      <option value="">Selecciona una opción</option>
+                      {turnos?.map((turno) => (
+                        <option key={turno.id} value={turno.id}>
+                          {turno.turno}
+                        </option>
+                      ))}
+                    </Form.Control>
+
+                    <span style={{ fontWeight: "bold" }}>
+                      {turnos.find((t) => String(t.id) === String(turno_noche))?.maquinista?.get_full_name ?? ""}
+                    </span>
+                  </div>
+                </Form.Group>
               </div>
             )}
           </Modal.Body>
