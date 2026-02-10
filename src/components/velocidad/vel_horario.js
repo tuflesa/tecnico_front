@@ -4,12 +4,14 @@ import { BACKEND_SERVER } from "../../constantes";
 import { useCookies } from "react-cookie";
 import { Modal, Button, Form } from "react-bootstrap";
 import VelocidadNavBar from './vel_nav_bar';
+import ModalTurnos from "./vel_horario_modal_turnos";
 
 const HorarioCalendario = () => {
   const [token] = useCookies(["tec-token"]);
   const [user] = useCookies(['tec-user']);
 
   const [dias, setDias] = useState([]);
+  const hoy = new Date().toISOString().split("T")[0];
   const [diaSeleccionado, setDiaSeleccionado] = useState(null);
   const [mostrarModal, setMostrarModal] = useState(false);
   const [modoFestivos, setModoFestivos] = useState(false);
@@ -19,20 +21,40 @@ const HorarioCalendario = () => {
   const [empresaId, setEmpresaId] = useState(user['tec-user'].perfil.empresa.id);
   const soyProgramador = user['tec-user'].perfil.destrezas.filter(s => s === 7);
   const [mostrarModalNuevoCalen, setMostrarModalNuevoCalen] = useState(false);
+  const [mostrarModalTurnos, setMostrarModaTurnos] = useState(false);
   const [yearSeleccionado, setYearSeleccionado] = useState(new Date().getFullYear());
   const [cargando, setCargando] = useState(false);
   const [turnos, setTurnos] = useState(null);
+  const [datos_dia, setDatosDia] = useState(null);
+  const [turno_inicio, setTurnoInicio] = useState(null);
   const [turno_mañana, setTurnoMañana] = useState(null);
   const [turno_tarde, setTurnoTarde] = useState(null);
   const [turno_noche, setTurnoNoche] = useState(null);
   const [cambio_turno_1, setCambioTurno1] = useState(null);
   const [cambio_turno_2, setCambioTurno2] = useState(null);
 
-  useEffect(() => {
+    useEffect(() => {
     if(zonaId){
       cargarDias();
     }
   }, [zonaId]);
+
+  useEffect(() => {
+        zonaId && axios.get(BACKEND_SERVER + `/api/velocidad/horariodia/?zona=${zonaId}&fecha=${hoy}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( res => {
+          console.log(res.data)
+            setDatosDia(res.data);
+            setTurnoInicio(res.data[0].turno_mañana);
+
+        })
+        .catch( err => {
+            console.log(err);
+        });    
+    }, [token, zonaId]);
 
   useEffect(() => {
     if (empresaId === '') {
@@ -61,8 +83,6 @@ const HorarioCalendario = () => {
     })
     .then( res => {
         setTurnos(res.data);
-        console.log('estos son los turnos',res.data);
-
     })
     .catch( err => {
         console.log(err);
@@ -173,6 +193,14 @@ const HorarioCalendario = () => {
   const cerrarModalYear = () => {
       setMostrarModalNuevoCalen(false);
   };
+  
+  const abrirModalTurnos = () => {
+      setMostrarModaTurnos(true);
+  };
+
+  const cerrarModalTurnos = () => {
+      setMostrarModaTurnos(false);
+  };
 
   const generarAnual = async () => {
       if (!yearSeleccionado){
@@ -198,6 +226,8 @@ const HorarioCalendario = () => {
       }
   };
 
+
+
   return (
     <div>
       <VelocidadNavBar/>
@@ -205,9 +235,11 @@ const HorarioCalendario = () => {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
           <h1 style={{ margin: 0 }}>Calendario {new Date().getFullYear()}</h1>
           {soyProgramador? 
-            <Button variant="primary" onClick={abrirModalYear}>
-              Crear calendario
-            </Button> : ''}
+            <Button variant="primary" onClick={abrirModalYear}> Crear calendario </Button> : ''
+          }
+          {zonaId && yearSeleccionado? 
+            <Button variant="primary" onClick={abrirModalTurnos}> Turnos </Button> : ''
+          }
         </div>
         {/* Seleccionar máquina */}
         <div style={{ marginTop: "10px", marginBottom: "20px" }}>
@@ -358,6 +390,7 @@ const HorarioCalendario = () => {
               <div style={{ display: "grid", flexDirection: "column", gap: "12px" }}>
                 <p><strong>Día:</strong> {diaSeleccionado.nombreDia}</p>
                 <p><strong>Fecha:</strong> {diaSeleccionado.fecha}</p>
+                <p><strong>Semana:</strong> {diaSeleccionado.semana}</p>
 
                 <label>Hora inicio</label>
                 <input
@@ -516,6 +549,14 @@ const HorarioCalendario = () => {
                 </Button>
             </Modal.Footer>
         </Modal>
+        <ModalTurnos
+            mostrarModalTurnos={mostrarModalTurnos}    
+            cerrarModalTurnos={cerrarModalTurnos}
+            zonaId={zonaId}
+            yearSeleccionado={yearSeleccionado}
+            turno_inicio = {turno_inicio}
+            setTurnoInicio = {setTurnoInicio}
+        />
       </div>
     </div>
   );

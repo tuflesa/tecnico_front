@@ -580,7 +580,7 @@ const GraficoEstado = () => {
                     <Col>
                         <Row>
                             <Col>
-                                Tubo:
+                                Último tubo fabricado:
                             </Col>
                         </Row>
                         <Row>
