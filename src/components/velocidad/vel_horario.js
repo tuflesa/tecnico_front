@@ -46,7 +46,6 @@ const HorarioCalendario = () => {
             }
         })
         .then( res => {
-          console.log(res.data)
             setDatosDia(res.data);
             setTurnoInicio(res.data[0].turno_mañana);
 
@@ -108,9 +107,6 @@ const HorarioCalendario = () => {
   };
 
   const cerrarModal = () => {
-    console.log('que vale turno_mañana antes de borrarlo', turno_mañana);
-    console.log('que vale turno_tarde antes de borrarlo', turno_tarde);
-    console.log('que vale turno_noche antes de borrarlo', turno_noche);
     setMostrarModal(false);
     setTurnoMañana('');
     setTurnoNoche('');
@@ -234,12 +230,14 @@ const HorarioCalendario = () => {
       <div style={{ padding: "20px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
           <h1 style={{ margin: 0 }}>Calendario {new Date().getFullYear()}</h1>
-          {soyProgramador? 
-            <Button variant="primary" onClick={abrirModalYear}> Crear calendario </Button> : ''
-          }
-          {zonaId && yearSeleccionado? 
-            <Button variant="primary" onClick={abrirModalTurnos}> Turnos </Button> : ''
-          }
+          <div style={{ display: "flex", gap: "10px" }}>
+            {soyProgramador? 
+              <Button variant="primary" onClick={abrirModalYear}> Crear calendario </Button> : ''
+            }
+            {zonaId && yearSeleccionado? 
+              <Button variant="primary" onClick={abrirModalTurnos}> Turnos </Button> : ''
+            }
+          </div>
         </div>
         {/* Seleccionar máquina */}
         <div style={{ marginTop: "10px", marginBottom: "20px" }}>
@@ -554,8 +552,8 @@ const HorarioCalendario = () => {
             cerrarModalTurnos={cerrarModalTurnos}
             zonaId={zonaId}
             yearSeleccionado={yearSeleccionado}
-            turno_inicio = {turno_inicio}
-            setTurnoInicio = {setTurnoInicio}
+            turno_ini = {turno_inicio?.id}
+            turno_nombre = {turno_inicio?.turno}
         />
       </div>
     </div>
