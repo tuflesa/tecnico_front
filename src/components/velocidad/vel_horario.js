@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { BACKEND_SERVER } from "../../constantes";
 import { useCookies } from "react-cookie";
-import { Modal, Button, Form } from "react-bootstrap";
+import { Modal, Button, Form, Col, Row } from "react-bootstrap";
 import VelocidadNavBar from './vel_nav_bar';
 import ModalTurnos from "./vel_horario_modal_turnos";
+import ModalModificarHorario from "./vel_horario_modal_modificar";
 
 const HorarioCalendario = () => {
   const [token] = useCookies(["tec-token"]);
@@ -13,7 +14,7 @@ const HorarioCalendario = () => {
   const [dias, setDias] = useState([]);
   const hoy = new Date().toISOString().split("T")[0];
   const [diaSeleccionado, setDiaSeleccionado] = useState(null);
-  const [mostrarModal, setMostrarModal] = useState(false);
+  const [mostrarModalModificar, setMostrarModalModificar] = useState(false);
   const [modoFestivos, setModoFestivos] = useState(false);
   const [festivosSeleccionados, setFestivosSeleccionados] = useState({});
   const [zonaId, setZonaId] = useState(null);
@@ -24,37 +25,30 @@ const HorarioCalendario = () => {
   const [mostrarModalTurnos, setMostrarModaTurnos] = useState(false);
   const [yearSeleccionado, setYearSeleccionado] = useState(new Date().getFullYear());
   const [cargando, setCargando] = useState(false);
-  const [turnos, setTurnos] = useState(null);
   const [datos_dia, setDatosDia] = useState(null);
   const [turno_inicio, setTurnoInicio] = useState(null);
-  const [turno_mañana, setTurnoMañana] = useState(null);
-  const [turno_tarde, setTurnoTarde] = useState(null);
-  const [turno_noche, setTurnoNoche] = useState(null);
-  const [cambio_turno_1, setCambioTurno1] = useState(null);
-  const [cambio_turno_2, setCambioTurno2] = useState(null);
 
-    useEffect(() => {
+  useEffect(() => {
     if(zonaId){
       cargarDias();
     }
   }, [zonaId]);
 
   useEffect(() => {
-        zonaId && axios.get(BACKEND_SERVER + `/api/velocidad/horariodia/?zona=${zonaId}&fecha=${hoy}`,{
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-            }
-        })
-        .then( res => {
-          console.log(res.data)
-            setDatosDia(res.data);
-            setTurnoInicio(res.data[0].turno_mañana);
+    zonaId && axios.get(BACKEND_SERVER + `/api/velocidad/horariodia/?zona=${zonaId}&fecha=${hoy}`,{
+        headers: {
+            'Authorization': `token ${token['tec-token']}`
+        }
+    })
+    .then( res => {
+      setDatosDia(res.data);
+      setTurnoInicio(res.data[0].turno_mañana);
 
-        })
-        .catch( err => {
-            console.log(err);
-        });    
-    }, [token, zonaId]);
+    })
+    .catch( err => {
+      console.log(err);
+    });    
+  }, [token, zonaId]);
 
   useEffect(() => {
     if (empresaId === '') {
@@ -74,20 +68,6 @@ const HorarioCalendario = () => {
         });            
     }
   }, [token]);
-  
-  useEffect(() => {
-    zonaId && axios.get(BACKEND_SERVER + `/api/velocidad/turnos/?zona=${zonaId}`,{
-        headers: {
-            'Authorization': `token ${token['tec-token']}`
-        }
-    })
-    .then( res => {
-        setTurnos(res.data);
-    })
-    .catch( err => {
-        console.log(err);
-    });    
-  }, [token, zonaId]);
 
   const cargarDias = async () => {
     try {
@@ -101,44 +81,15 @@ const HorarioCalendario = () => {
     }
   };
 
-  const abrirModal = (dia) => {
+  const abrirModalModificar = (dia) => {
     if (modoFestivos) return; // en modo festivos no abrir modal
     setDiaSeleccionado({ ...dia });
-    setMostrarModal(true);
+    setMostrarModalModificar(true);
   };
 
-  const cerrarModal = () => {
-    console.log('que vale turno_mañana antes de borrarlo', turno_mañana);
-    console.log('que vale turno_tarde antes de borrarlo', turno_tarde);
-    console.log('que vale turno_noche antes de borrarlo', turno_noche);
-    setMostrarModal(false);
-    setTurnoMañana('');
-    setTurnoNoche('');
-    setTurnoTarde('');
+  const cerrarModalModificar = () => {
+    setMostrarModalModificar(false);
   }
-
-  const modificarDia = async () => {
-    try {
-      await axios.put(
-        BACKEND_SERVER + `/api/velocidad/horarios/${diaSeleccionado.fecha}/`,
-        {
-          inicio: diaSeleccionado.inicio,
-          fin: diaSeleccionado.fin,
-          zona_id:zonaId,
-          turno_mañana: turno_mañana,
-          turno_tarde: turno_tarde,
-          turno_noche: turno_noche,
-        },
-        { headers: { Authorization: `token ${token["tec-token"]}` } }
-      );
-      alert("Guardado correctamente");
-      setMostrarModal(false);
-      cargarDias();
-    } catch (error) {
-      alert("Error guardando");
-      console.error(error);
-    }
-  };
 
   const toggleFestivo = (fecha) => {
     setFestivosSeleccionados((prev) => ({
@@ -234,12 +185,14 @@ const HorarioCalendario = () => {
       <div style={{ padding: "20px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
           <h1 style={{ margin: 0 }}>Calendario {new Date().getFullYear()}</h1>
-          {soyProgramador? 
-            <Button variant="primary" onClick={abrirModalYear}> Crear calendario </Button> : ''
-          }
-          {zonaId && yearSeleccionado? 
-            <Button variant="primary" onClick={abrirModalTurnos}> Turnos </Button> : ''
-          }
+          <div style={{ display: "flex", gap: "10px" }}>
+            {soyProgramador? 
+              <Button variant="primary" onClick={abrirModalYear}> Crear calendario </Button> : ''
+            }
+            {zonaId && yearSeleccionado? 
+              <Button variant="primary" onClick={abrirModalTurnos}> Turnos </Button> : ''
+            }
+          </div>
         </div>
         {/* Seleccionar máquina */}
         <div style={{ marginTop: "10px", marginBottom: "20px" }}>
@@ -356,7 +309,7 @@ const HorarioCalendario = () => {
                       <div
                         key={dia.fecha}
                         onClick={() =>
-                          modoFestivos ? toggleFestivo(dia.fecha) : abrirModal(dia)
+                          modoFestivos ? toggleFestivo(dia.fecha) : abrirModalModificar(dia)
                         }
                         style={{
                           height: "30px",
@@ -379,133 +332,7 @@ const HorarioCalendario = () => {
             );
           })}
         </div>
-
-        {/* Modal para modificar las horas de un día */}
-      <Modal show={mostrarModal} onHide={cerrarModal} size="lg">
-          <Modal.Header closeButton className="bg-light">
-            <Modal.Title>Editar horario</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            {diaSeleccionado && (
-              <div style={{ display: "grid", flexDirection: "column", gap: "12px" }}>
-                <p><strong>Día:</strong> {diaSeleccionado.nombreDia}</p>
-                <p><strong>Fecha:</strong> {diaSeleccionado.fecha}</p>
-                <p><strong>Semana:</strong> {diaSeleccionado.semana}</p>
-
-                <label>Hora inicio</label>
-                <input
-                  type="time"
-                  value={diaSeleccionado.inicio}
-                  onChange={(e) =>
-                    setDiaSeleccionado({ ...diaSeleccionado, inicio: e.target.value })
-                  }
-                />
-
-                <label>Hora fin</label>
-                <input
-                  type="time"
-                  value={diaSeleccionado.fin}
-                  onChange={(e) =>
-                    setDiaSeleccionado({ ...diaSeleccionado, fin: e.target.value })
-                  }
-                />
-                <Form.Group controlId="turno_mañana">
-                  <Form.Label>Turno de mañana</Form.Label>
-
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <Form.Control
-                      as="select"
-                      name="turno_mañana"
-                      value={turno_mañana}
-                      onChange={(e) => setTurnoMañana(e.target.value)}
-                      style={{ width: "200px" }}   // <-- opcional, para que no se expanda
-                    >
-                      <option value="">Selecciona una opción</option>
-                      {turnos?.map((turno) => (
-                        <option key={turno.id} value={turno.id}>
-                          {turno.turno}
-                        </option>
-                      ))}
-                    </Form.Control>
-
-                    <span style={{ fontWeight: "bold" }}>
-                      {turnos.find((t) => String(t.id) === String(turno_mañana))?.maquinista?.get_full_name ?? ""}
-                    </span>
-                  </div>
-                </Form.Group>
-                <label>Hora cambio de turno 1</label>
-                <input
-                  type="time"
-                  value={cambio_turno_1}
-                  onChange={(e) => setCambioTurno1(e.target.value)}
-                />
-                <Form.Group controlId="turno_tarde">
-                  <Form.Label>Turno de tarde</Form.Label>
-
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <Form.Control
-                      as="select"
-                      name="turno_tarde"
-                      value={turno_tarde}
-                      onChange={(e) => setTurnoTarde(e.target.value)}
-                      style={{ width: "200px" }}   // <-- opcional, para que no se expanda
-                    >
-                      <option value="">Selecciona una opción</option>
-                      {turnos?.map((turno) => (
-                        <option key={turno.id} value={turno.id}>
-                          {turno.turno}
-                        </option>
-                      ))}
-                    </Form.Control>
-
-                    <span style={{ fontWeight: "bold" }}>
-                      {turnos.find((t) => String(t.id) === String(turno_tarde))?.maquinista?.get_full_name ?? ""}
-                    </span>
-                  </div>
-                </Form.Group>
-                <label>Hora cambio de turno 2</label>
-                <input
-                  type="time"
-                  value={cambio_turno_2}
-                  onChange={(e) => setCambioTurno2(e.target.value)}
-                />
-                <Form.Group controlId="turno_noche">
-                  <Form.Label>Turno de noche</Form.Label>
-
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <Form.Control
-                      as="select"
-                      name="turno_noche"
-                      value={turno_noche}
-                      onChange={(e) => setTurnoNoche(e.target.value)}
-                      style={{ width: "200px" }}   // <-- opcional, para que no se expanda
-                    >
-                      <option value="">Selecciona una opción</option>
-                      {turnos?.map((turno) => (
-                        <option key={turno.id} value={turno.id}>
-                          {turno.turno}
-                        </option>
-                      ))}
-                    </Form.Control>
-
-                    <span style={{ fontWeight: "bold" }}>
-                      {turnos.find((t) => String(t.id) === String(turno_noche))?.maquinista?.get_full_name ?? ""}
-                    </span>
-                  </div>
-                </Form.Group>
-              </div>
-            )}
-          </Modal.Body>
-
-          <Modal.Footer>
-          <Button variant="secondary" onClick={cerrarModal}>
-              Cancelar
-            </Button>
-            <Button variant="primary" onClick={modificarDia}>
-              Guardar
-            </Button>
-          </Modal.Footer>
-        </Modal>
+      
         {/* Modal para seleccionar año y crearlo */}
         <Modal show={mostrarModalNuevoCalen} onHide={cerrarModalYear}>
             <Modal.Header closeButton>
@@ -554,8 +381,15 @@ const HorarioCalendario = () => {
             cerrarModalTurnos={cerrarModalTurnos}
             zonaId={zonaId}
             yearSeleccionado={yearSeleccionado}
-            turno_inicio = {turno_inicio}
-            setTurnoInicio = {setTurnoInicio}
+            turno_ini = {turno_inicio?.id}
+            turno_nombre = {turno_inicio?.turno}
+        />
+        <ModalModificarHorario
+            mostrarModal={mostrarModalModificar}    
+            cerrarModal={cerrarModalModificar}
+            zonaId={zonaId}
+            diaSelec={diaSeleccionado}
+            onActualizar={cargarDias}
         />
       </div>
     </div>

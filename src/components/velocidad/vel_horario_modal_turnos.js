@@ -4,7 +4,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 
-const ModalTurnos = ({ zonaId, yearSeleccionado, mostrarModalTurnos, cerrarModalTurnos, turno_inicio, setTurnoInicio }) => {
+const ModalTurnos = ({ zonaId, yearSeleccionado, mostrarModalTurnos, cerrarModalTurnos, turno_ini, turno_nombre }) => {
     const [token] = useCookies(["tec-token"]);
 
     const hoy = new Date().toISOString().split("T")[0];
@@ -22,10 +22,17 @@ const ModalTurnos = ({ zonaId, yearSeleccionado, mostrarModalTurnos, cerrarModal
     const [datos_dia, setDatosDia] = useState(null);
     const [hora_cambio_1, setHoraCambio_1] = useState("14:00");
     const [hora_cambio_2, setHoraCambio_2] = useState('');
-    const [nombre_turno, setNombreTurno] = useState('');
+    const [nombre_turno, setNombreTurno] = useState(turno_nombre | '');
+    const [turno_inicio, setTurnoInicio] = useState(turno_ini | '');
 
     useEffect(() => {
+        if (turno_ini && turno_nombre) {
+            setTurnoInicio(turno_ini);
+            setNombreTurno(turno_nombre);
+        }
+    }, [turno_ini, turno_nombre]);
 
+    useEffect(() => {
         zonaId && axios.get(BACKEND_SERVER + `/api/velocidad/turnos/?zona=${zonaId}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -33,7 +40,6 @@ const ModalTurnos = ({ zonaId, yearSeleccionado, mostrarModalTurnos, cerrarModal
         })
         .then( res => {
             setTurnos(res.data);
-
         })
         .catch( err => {
             console.log(err);
@@ -41,14 +47,15 @@ const ModalTurnos = ({ zonaId, yearSeleccionado, mostrarModalTurnos, cerrarModal
     }, [token, zonaId]);
 
     useEffect(() => {
-        fecha_inicio_turnos && axios.get(BACKEND_SERVER + `/api/velocidad/horariodia/?zona=${zonaId}&fecha=${fecha_inicio_turnos}`,{
+        zonaId && fecha_inicio_turnos && axios.get(BACKEND_SERVER + `/api/velocidad/horariodia/?zona=${zonaId}&fecha=${fecha_inicio_turnos}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }
         })
         .then( res => {
             setDatosDia(res.data);
-            setTurnoInicio(res.data[0].turno_mañana);
+            setTurnoInicio(res.data[0]?.turno_mañana?.id);
+            setNombreTurno(res.data[0]?.turno_mañana?.turno);
 
         })
         .catch( err => {
@@ -57,16 +64,6 @@ const ModalTurnos = ({ zonaId, yearSeleccionado, mostrarModalTurnos, cerrarModal
     }, [token, fecha_inicio_turnos]);
 
     const ModificarTurnos = () => {
-        // console.log('QUE DATOS NOS LLEGAN: ');
-        // console.log('fecha_inicio_turnos', fecha_inicio_turnos);
-        // console.log('fecha_fin_turnos', fecha_fin_turnos);
-        console.log('turno_inicio', turno_inicio);
-        console.log('Nombre turno: ', nombre_turno);
-        // console.log('numTurnos', numTurnos);
-        // console.log('zonaId', zonaId);
-        // console.log('Hora del cambio: ', hora_cambio_1);
-        // console.log('Hora del cambio_2: ', hora_cambio_2);
-
         const datos = {
             fecha_inicio_turnos,
             fecha_fin_turnos,
@@ -91,19 +88,23 @@ const ModalTurnos = ({ zonaId, yearSeleccionado, mostrarModalTurnos, cerrarModal
                 if (res.status === 200) {
                     console.log(res.data);
                 }
+                handleCerrar();
             })
             .catch (err => {
                 console.log(err)
             });
     }
 
-    const handleInputChangeTurno = (e) => {
-        const { value } = e.target;
-        if (value) {
-            const [id, nombre] = value.split('|');
-            setTurnoInicio(id);
-            setNombreTurno(nombre);
-        };
+    const handleCerrar = () => {
+        cerrarModalTurnos();
+
+        setFechaInicioTurnos(hoy);
+        setFechaFinTurnos(ultimoDiaAñoActual);
+        setTurnoInicio(turno_ini);
+        setNombreTurno(turno_nombre);
+        setNumeroTurnos('2');
+        setHoraCambio_1("14:00");
+        setHoraCambio_2('');
     }
 
     return (
@@ -135,13 +136,19 @@ const ModalTurnos = ({ zonaId, yearSeleccionado, mostrarModalTurnos, cerrarModal
                         <Form.Control
                             as="select"
                             name="turno_inicio"
-                            value={`${turno_inicio}|${nombre_turno}`}
-                            onChange={handleInputChangeTurno}
+                            value={turno_inicio || ""}
+                            onChange={(e) => {
+                                const selectedId = e.target.value;
+                                setTurnoInicio(selectedId);
+                                // Encuentra el turno seleccionado y guarda su nombre
+                                const selectedTurno = turnos?.find(t => String(t.id) === selectedId);
+                                setNombreTurno(selectedTurno?.turno || "");
+                            }}
                             style={{ width: "200px" }}   // <-- opcional, para que no se expanda
                         >
                             <option value="">Selecciona una opción</option>
                             {turnos?.map((turno) => (
-                            <option key={turno.id} value={`${turno.id}|${turno.turno}`}>
+                            <option key={turno.id} value={turno.id}>
                                 {turno.turno} - {turno?.maquinista?.get_full_name}
                             </option>
                             ))}
@@ -180,13 +187,10 @@ const ModalTurnos = ({ zonaId, yearSeleccionado, mostrarModalTurnos, cerrarModal
                             />
                         </Form.Group>
                     :''}
-                    <p>zona_id {zonaId}</p>
-                    <p>año {yearSeleccionado}</p>
-                    <p>Mostramos los datos para el generar nuevos turnos</p>
                 </Modal.Body>
 
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={cerrarModalTurnos}>
+                    <Button variant="secondary" onClick={handleCerrar}>
                         Cancelar
                     </Button>
                     <Button variant="primary" onClick={ModificarTurnos}>
