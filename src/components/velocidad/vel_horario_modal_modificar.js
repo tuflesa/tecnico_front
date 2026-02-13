@@ -33,9 +33,9 @@ const ModalModificarHorario = ({ zonaId, mostrarModal, cerrarModal, diaSelec, on
             if(diaSelec.turno_mañana && diaSelec.turno_tarde && diaSelec.turno_noche){
                 setNumeroTurnos('3');
             }
-            /* else{
+            else{
                 setNumeroTurnos('2');
-            } */
+            }
         }
     }, [diaSelec]);
     
@@ -66,11 +66,21 @@ const ModalModificarHorario = ({ zonaId, mostrarModal, cerrarModal, diaSelec, on
         }
     }, [numero_turnos]);
 
-    const modificarDia = async () => { // Función auxiliar para convertir tiempo "HH:MM" a minutos
+    const modificarDia = async () => { 
+        // Función auxiliar para convertir tiempo "HH:MM" a minutos
         const timeToMinutes = (time) => {
             if (!time) return null;
-            const [hours, minutes] = time.split(':').map(Number);
+            // Eliminar segundos si existen
+            const timeParts = time.split(':');
+            const hours = parseInt(timeParts[0]);
+            const minutes = parseInt(timeParts[1]);
             return hours * 60 + minutes;
+        };
+        //normalizar formato de hora
+        const normalizeTime = (time) => {
+            if (!time) return null;
+            // Extraer solo HH:MM (sin segundos)
+            return time.substring(0, 5);
         };
 
         // Validación 1: Verificar que los turnos necesarios estén asignados
@@ -126,32 +136,47 @@ const ModalModificarHorario = ({ zonaId, mostrarModal, cerrarModal, diaSelec, on
         }
 
         // Validación 5: Cambios de turno deben estar dentro del rango inicio-fin
+        const inicioNormalizado = normalizeTime(diaSeleccionado.inicio);
+        const finNormalizado = normalizeTime(diaSeleccionado.fin);
         const inicioMin = timeToMinutes(diaSeleccionado.inicio);
         const finMin = timeToMinutes(diaSeleccionado.fin);
-        
-        if (cambio_turno_1) {
-            const cambio1Min = timeToMinutes(cambio_turno_1);
-            if (cambio1Min <= inicioMin || cambio1Min >= finMin) {
-                alert(`El cambio de turno de la tarde (${cambio_turno_1}) debe estar entre ${diaSeleccionado.inicio} y ${diaSeleccionado.fin}`);
-                return;
+        // Si es turno de 24h (inicio == fin), permitir cualquier hora de cambio
+        if (numero_turnos === '3' && inicioNormalizado === finNormalizado) {
+            // Solo validar que cambio_turno_2 sea posterior a cambio_turno_1
+            if (cambio_turno_1 && cambio_turno_2) {
+                const cambio1Min = timeToMinutes(cambio_turno_1);
+                const cambio2Min = timeToMinutes(cambio_turno_2);
+                if (cambio2Min <= cambio1Min) {
+                    alert('El cambio de turno de la noche debe ser posterior al cambio de turno de la tarde.');
+                    return;
+                }
             }
-        }
-        
-        if (cambio_turno_2) {
-            const cambio2Min = timeToMinutes(cambio_turno_2);
-            if (cambio2Min <= inicioMin || cambio2Min >= finMin) {
-                alert(`El cambio de turno de la noche (${cambio_turno_2}) debe estar entre ${diaSeleccionado.inicio} y ${diaSeleccionado.fin}`);
-                return;
+        } else {
+             // Validación normal: cambios de turno dentro del rango inicio-fin
+            if (cambio_turno_1) {
+                const cambio1Min = timeToMinutes(cambio_turno_1);
+                if (cambio1Min <= inicioMin || cambio1Min >= finMin) {
+                    alert(`El cambio de turno de la tarde (${cambio_turno_1}) debe estar entre ${diaSeleccionado.inicio} y ${diaSeleccionado.fin}`);
+                    return;
+                }
             }
-        }
+            
+            if (cambio_turno_2) {
+                const cambio2Min = timeToMinutes(cambio_turno_2);
+                if (cambio2Min <= inicioMin || cambio2Min >= finMin) {
+                    alert(`El cambio de turno de la noche (${cambio_turno_2}) debe estar entre ${diaSeleccionado.inicio} y ${diaSeleccionado.fin}`);
+                    return;
+                }
+            }
 
-        // Validación 6: cambio_turno_2 debe ser posterior a cambio_turno_1
-        if (cambio_turno_1 && cambio_turno_2) {
-            const cambio1Min = timeToMinutes(cambio_turno_1);
-            const cambio2Min = timeToMinutes(cambio_turno_2);
-            if (cambio2Min <= cambio1Min) {
-                alert('El cambio de turno de la noche debe ser posterior al cambio de turno de la tarde.');
-                return;
+            // Validación 6: cambio_turno_2 debe ser posterior a cambio_turno_1
+            if (cambio_turno_1 && cambio_turno_2) {
+                const cambio1Min = timeToMinutes(cambio_turno_1);
+                const cambio2Min = timeToMinutes(cambio_turno_2);
+                if (cambio2Min <= cambio1Min) {
+                    alert('El cambio de turno de la noche debe ser posterior al cambio de turno de la tarde.');
+                    return;
+                }
             }
         }
         try {
