@@ -24,6 +24,18 @@ const ModalModificarHorario = ({ zonaId, mostrarModal, cerrarModal, diaSelec, on
             setTurnoNoche(diaSelec.turno_noche);
             setCambioTurno1(diaSelec.cambio_turno_1);
             setCambioTurno2(diaSelec.cambio_turno_2);
+            if(diaSelec.turno_mañana && !diaSelec.turno_tarde && !diaSelec.turno_noche){
+                setNumeroTurnos('1');
+            }
+            if(diaSelec.turno_mañana && diaSelec.turno_tarde && !diaSelec.turno_noche){
+                setNumeroTurnos('2');
+            }
+            if(diaSelec.turno_mañana && diaSelec.turno_tarde && diaSelec.turno_noche){
+                setNumeroTurnos('3');
+            }
+            /* else{
+                setNumeroTurnos('2');
+            } */
         }
     }, [diaSelec]);
     
@@ -41,7 +53,107 @@ const ModalModificarHorario = ({ zonaId, mostrarModal, cerrarModal, diaSelec, on
         });    
     }, [token, zonaId]);
 
-    const modificarDia = async () => {
+    useEffect(() => { 
+        //limpiar datos según el numero de turno que pongamos
+        if (numero_turnos === '1') {
+            setTurnoTarde('');
+            setTurnoNoche('');
+            setCambioTurno1('');
+            setCambioTurno2('');
+        } else if (numero_turnos === '2') {
+            setTurnoNoche('');
+            setCambioTurno2('');
+        }
+    }, [numero_turnos]);
+
+    const modificarDia = async () => { // Función auxiliar para convertir tiempo "HH:MM" a minutos
+        const timeToMinutes = (time) => {
+            if (!time) return null;
+            const [hours, minutes] = time.split(':').map(Number);
+            return hours * 60 + minutes;
+        };
+
+        // Validación 1: Verificar que los turnos necesarios estén asignados
+        if (numero_turnos === '1') {
+            if (!turno_mañana && !turno_tarde && !turno_noche) {
+                alert('Debes asignar al menos un turno.');
+                return;
+            }
+        }
+
+        if (numero_turnos === '2') {
+            if (!turno_mañana || !turno_tarde) {
+                alert('Debes asignar los 2 turnos (mañana y tarde).');
+                return;
+            }
+        }
+
+        if (numero_turnos === '3') {
+            if (!turno_mañana || !turno_tarde || !turno_noche) {
+                alert('Debes asignar los 3 turnos (mañana, tarde y noche).');
+                return;
+            }
+        }
+
+        // Validación 2: Los turnos asignados deben ser diferentes entre sí
+        const turnosActivos = [];
+        if (turno_mañana) turnosActivos.push(turno_mañana);
+        if (turno_tarde) turnosActivos.push(turno_tarde);
+        if (turno_noche) turnosActivos.push(turno_noche);
+        
+        const turnosUnicos = new Set(turnosActivos);
+        if (turnosActivos.length !== turnosUnicos.size) {
+            alert('Los turnos asignados deben ser diferentes. No puedes asignar el mismo turno a varios períodos del día.');
+            return;
+        }
+
+        // Validación 3: Si hay 2 turnos, debe existir cambio_turno_1
+        if (numero_turnos === '2' && !cambio_turno_1) {
+            alert('Debes especificar la hora de cambio entre los dos turnos.');
+            return;
+        }
+
+        // Validación 4: Si hay 3 turnos, deben existir cambio_turno_1 y cambio_turno_2
+        if (numero_turnos === '3') {
+            if (!cambio_turno_1) {
+                alert('Debes especificar la hora de cambio al turno de tarde.');
+                return;
+            }
+            if (!cambio_turno_2) {
+                alert('Debes especificar la hora de cambio al turno de noche.');
+                return;
+            }
+        }
+
+        // Validación 5: Cambios de turno deben estar dentro del rango inicio-fin
+        const inicioMin = timeToMinutes(diaSeleccionado.inicio);
+        const finMin = timeToMinutes(diaSeleccionado.fin);
+        
+        if (cambio_turno_1) {
+            const cambio1Min = timeToMinutes(cambio_turno_1);
+            if (cambio1Min <= inicioMin || cambio1Min >= finMin) {
+                alert(`El cambio de turno de la tarde (${cambio_turno_1}) debe estar entre ${diaSeleccionado.inicio} y ${diaSeleccionado.fin}`);
+                return;
+            }
+        }
+        
+        if (cambio_turno_2) {
+            const cambio2Min = timeToMinutes(cambio_turno_2);
+            if (cambio2Min <= inicioMin || cambio2Min >= finMin) {
+                alert(`El cambio de turno de la noche (${cambio_turno_2}) debe estar entre ${diaSeleccionado.inicio} y ${diaSeleccionado.fin}`);
+                return;
+            }
+        }
+
+        // Validación 6: cambio_turno_2 debe ser posterior a cambio_turno_1
+        if (cambio_turno_1 && cambio_turno_2) {
+            const cambio1Min = timeToMinutes(cambio_turno_1);
+            const cambio2Min = timeToMinutes(cambio_turno_2);
+            if (cambio2Min <= cambio1Min) {
+                alert('El cambio de turno de la noche debe ser posterior al cambio de turno de la tarde.');
+                return;
+            }
+        }
         try {
         await axios.put(
             BACKEND_SERVER + `/api/velocidad/horarios/${diaSeleccionado.fecha}/`,
@@ -52,7 +164,7 @@ const ModalModificarHorario = ({ zonaId, mostrarModal, cerrarModal, diaSelec, on
             turno_mañana: turno_mañana,
             turno_tarde: turno_tarde,
             turno_noche: turno_noche,
-            cambio_turno_1: cambio_turno_1,
+            cambio_turno_1: cambio_turno_1 || '14:00:00',
             cambio_turno_2: cambio_turno_2,
             },
             { headers: { Authorization: `token ${token["tec-token"]}` } }
@@ -73,6 +185,8 @@ const ModalModificarHorario = ({ zonaId, mostrarModal, cerrarModal, diaSelec, on
         setTurnoMañana('');
         setTurnoNoche('');
         setTurnoTarde('');
+        setCambioTurno1('');
+        setCambioTurno2('');
     }
 
     return (
@@ -127,76 +241,83 @@ const ModalModificarHorario = ({ zonaId, mostrarModal, cerrarModal, diaSelec, on
                         <Row className="g-1 justify-content-start">
                         <Col xs="auto">
                             <Form.Group controlId="turno_mañana">
-                            <Form.Label>Turno de mañana</Form.Label>
-                            <Form.Control
-                                as="select"
-                                name="turno_mañana"
-                                value={turno_mañana}
-                                onChange={(e) => setTurnoMañana(e.target.value)}
-                                style={{ width: "300px" }}   // <-- opcional, para que no se expanda
-                                >
-                                <option value="">Selecciona una opción</option>
-                                {turnos?.map((turno) => (
-                                    <option key={turno.id} value={turno.id}>
-                                    {turno.turno} - {turno?.maquinista?.get_full_name}
-                                    </option>
-                                ))}
-                            </Form.Control>
+                                <Form.Label>Turno de mañana</Form.Label>
+                                <Form.Control
+                                    as="select"
+                                    name="turno_mañana"
+                                    value={turno_mañana}
+                                    onChange={(e) => setTurnoMañana(e.target.value)}
+                                    style={{ width: "300px" }}   // <-- opcional, para que no se expanda
+                                    >
+                                    <option value="">Selecciona una opción</option>
+                                    {turnos?.map((turno) => (
+                                        <option key={turno.id} value={turno.id}>
+                                        {turno.turno} - {turno?.maquinista?.get_full_name}
+                                        </option>
+                                    ))}
+                                </Form.Control>
                             </Form.Group>
+                            {numero_turnos !== '1'?
                             <Form.Group controlId="turno_tarde">
-                            <Form.Label>Turno de tarde</Form.Label>
-                            <Form.Control
-                                as="select"
-                                name="turno_tarde"
-                                value={turno_tarde}
-                                onChange={(e) => setTurnoTarde(e.target.value)}
-                                style={{ width: "300px" }}   // <-- opcional, para que no se expanda
-                            >
-                                <option value="">Selecciona una opción</option>
-                                {turnos?.map((turno) => (
-                                <option key={turno.id} value={turno.id}>
-                                    {turno.turno} - {turno?.maquinista?.get_full_name}
-                                </option>
-                                ))}
-                            </Form.Control>
-                            </Form.Group>
+                                <Form.Label>Turno de tarde</Form.Label>
+                                <Form.Control
+                                    as="select"
+                                    name="turno_tarde"
+                                    value={turno_tarde}
+                                    onChange={(e) => setTurnoTarde(e.target.value)}
+                                    style={{ width: "300px" }}   // <-- opcional, para que no se expanda
+                                >
+                                    <option value="">Selecciona una opción</option>
+                                    {turnos?.map((turno) => (
+                                    <option key={turno.id} value={turno.id}>
+                                        {turno.turno} - {turno?.maquinista?.get_full_name}
+                                    </option>
+                                    ))}
+                                </Form.Control>
+                            </Form.Group> :''}
+                            {numero_turnos==='3'?
                             <Form.Group controlId="turno_noche">
-                            <Form.Label>Turno de noche</Form.Label>
-                            <Form.Control
-                                as="select"
-                                name="turno_noche"
-                                value={turno_noche}
-                                onChange={(e) => setTurnoNoche(e.target.value)}
-                                style={{ width: "300px" }}   // <-- opcional, para que no se expanda
-                            >
-                                <option value="">Selecciona una opción</option>
-                                {turnos?.map((turno) => (
-                                <option key={turno.id} value={turno.id}>
-                                    {turno.turno} - {turno?.maquinista?.get_full_name}
-                                </option>
-                                ))}
-                            </Form.Control>
+                                <Form.Label>Turno de noche</Form.Label>
+                                <Form.Control
+                                    as="select"
+                                    name="turno_noche"
+                                    value={turno_noche}
+                                    onChange={(e) => setTurnoNoche(e.target.value)}
+                                    style={{ width: "300px" }}   // <-- opcional, para que no se expanda
+                                >
+                                    <option value="">Selecciona una opción</option>
+                                    {turnos?.map((turno) => (
+                                    <option key={turno.id} value={turno.id}>
+                                        {turno.turno} - {turno?.maquinista?.get_full_name}
+                                    </option>
+                                    ))}
+                                </Form.Control>
                             </Form.Group>
+                            :''}
                         </Col>
                         <Col xs="auto"> 
+                            {numero_turnos !== '1'?
                             <Form.Group>
-                            <Form.Label>Hora de cambio al turno de tarde</Form.Label>
-                            <Form.Control
-                                type="time"
-                                value={cambio_turno_1}
-                                onChange={(e) => setCambioTurno1(e.target.value)}
-                                style={{ width: "300px" }}
-                            />
+                                <Form.Label>Hora de cambio al turno de tarde</Form.Label>
+                                <Form.Control
+                                    type="time"
+                                    value={cambio_turno_1}
+                                    onChange={(e) => setCambioTurno1(e.target.value)}
+                                    style={{ width: "300px" }}
+                                />
                             </Form.Group>
+                            :''}
+                            {numero_turnos==='3'?
                             <Form.Group>
-                            <Form.Label>Hora de cambio al turno de noche</Form.Label>
-                            <Form.Control
-                                type="time"
-                                value={cambio_turno_2}
-                                onChange={(e) => setCambioTurno2(e.target.value)}
-                                style={{ width: "300px" }}
-                            />
+                                <Form.Label>Hora de cambio al turno de noche</Form.Label>
+                                <Form.Control
+                                    type="time"
+                                    value={cambio_turno_2}
+                                    onChange={(e) => setCambioTurno2(e.target.value)}
+                                    style={{ width: "300px" }}
+                                />
                             </Form.Group>
+                            :''}
                         </Col>
                         </Row>
                     </div>
