@@ -22,9 +22,6 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acc
     const [observacionActual, setObservacionActual] = useState('');
     const [showModalEditar, setShowModalEditar] = useState(false);
     const [paradasModalEditar, setParadaModalEditar] = useState(null);
-    const [periodos, setPeriodos] = useState('');
-
-    console.log('paradas: ', Paradas);
 
     const handleOpenModalAñadir = (parada) => {
         setParadaModal(parada);

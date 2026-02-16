@@ -128,7 +128,6 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
                     T_u_fin <= tP_fin
                 );
             });
-
             if (!pContenedor) {
                 alert("El rango seleccionado debe estar totalmente dentro de un periodo de INACTIVIDAD.");
                 return;
@@ -178,14 +177,15 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
                     periodos: [{
                         inicio: moment.utc(T_u_inicio).toISOString(),
                         fin: moment.utc(T_u_fin).toISOString(),
-                        velocidad: 0
+                        velocidad: 0,
+                        turno: pContenedor.turno,
                     }]
                 }, config);
 
-                // 2. Actualizar el periodo contenedor (solo cambiamos las horas, NO TOCAMOS LA PARADA)
+                // 2. Actualizar el periodo ORIGINAL (solo cambiamos las horas, NO TOCAMOS LA PARADA NI EL TURNO)
                 const nuevoInicio = esInicioExacto ? T_u_fin : tP_inicio;
                 const nuevoFin = esInicioExacto ? tP_fin : T_u_inicio;
-
+                
                 await axios.patch(`${BACKEND_SERVER}/api/velocidad/periodo/${pContenedor.id}/`, {
                     inicio: moment.utc(nuevoInicio).toISOString(),
                     fin: moment.utc(nuevoFin).toISOString()
@@ -202,7 +202,8 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
                     periodos: [{
                         inicio: moment.utc(T_u_inicio).toISOString(),
                         fin: moment.utc(T_u_fin).toISOString(),
-                        velocidad: 0
+                        velocidad: 0,
+                        turno: pContenedor.turno,
                     }]
                 }, config);
 
@@ -211,10 +212,11 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
                     inicio: moment.utc(T_u_fin).toISOString(),
                     fin: moment.utc(tP_fin).toISOString(),
                     velocidad: 0,
-                    parada: pContenedor.parada
+                    parada: pContenedor.parada,
+                    turno: pContenedor.turno,
                 }, config);
 
-                // 3. Actualizar el periodo contenedor, el inicial, solo actualizamos horas sin cambiar parada.
+                // 3. Actualizar el periodo ORIGINAL, el inicial, solo actualizamos horas sin cambiar parada, ni turno.
                 await axios.patch(`${BACKEND_SERVER}/api/velocidad/periodo/${pContenedor.id}/`, {
                     inicio: moment.utc(tP_inicio).toISOString(),
                     fin: moment.utc(T_u_inicio).toISOString()
