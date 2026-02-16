@@ -33,7 +33,7 @@ const ModalModificarHorario = ({ zonaId, mostrarModal, cerrarModal, diaSelec, on
             if(diaSelec.turno_mañana && diaSelec.turno_tarde && diaSelec.turno_noche){
                 setNumeroTurnos('3');
             }
-            else{
+            if(!diaSelec.turno_mañana && !diaSelec.turno_tarde && !diaSelec.turno_noche){
                 setNumeroTurnos('2');
             }
         }
