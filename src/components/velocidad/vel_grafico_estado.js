@@ -328,7 +328,8 @@ const GraficoEstado = () => {
                     x_out: x_out,
                     y_out: y_out,
                     color: color,
-                    numero: of.numero
+                    numero: of.numero,
+                    grupo: of.grupo
                 });
             });
 

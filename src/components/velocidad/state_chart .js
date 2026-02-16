@@ -292,7 +292,7 @@ const StateChart = ({data, flejes, OFs, fecha, fecha_fin, hora_inicio, hora_fin,
           .attr("dominant-baseline", "middle")
           .attr("fill", "white") // o negro, según contraste
           .attr("font-size", "12px")
-          .text(of => of.numero);
+          .text(of => of.grupo ? (of.numero + ' - ' + of.grupo) : of.numero);
 
         // Dibujar Paradas
         paradas && select(svg).select('.grafico')
