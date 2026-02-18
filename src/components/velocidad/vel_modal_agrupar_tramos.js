@@ -16,7 +16,9 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
     const [palabrasClave, setPalabrasClave] = useState(null);
 
     const [seleTipoParada, setseleTipoParada] = useState(null);
+    const [seleTipoNombre, setseleTipoNombre] = useState(null);
     const [codigo_seleccionado, setCodigoSeleccionado] = useState(null);
+    const [seleSiglasParada, setSiglasParada] = useState(null);
     const [palabra_seleccionado, setPalabraSeleccionado] = useState('');
     const [observaciones, setObservaciones] = useState('');
     const [paradasSeleccionadas, setParadasSeleccionadas] = useState(paradas || []);
@@ -82,16 +84,35 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
         });
 
     },[seleTipoParada]);
+
+    useEffect(()=>{
+        seleTipoParada && axios.get(BACKEND_SERVER + `/api/velocidad/buscar_montajes_of/?zona_id=${id}&tipo_parada_siglas=${seleSiglasParada}`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( res => {
+            console.log(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });  
+    },[seleTipoParada]);
  
-    const handleInputChangeTipo = (event) => {
-        
-        setseleTipoParada(event.target.value);
-        
+    const handleInputChangeTipo = (e) => {
+        const { value } = e.target;
+        if (value) {
+            const [id, siglas, nombre] = value.split('|');
+            setseleTipoParada(id);
+            setSiglasParada(siglas);
+            setseleTipoNombre(nombre);
+        };
+                
         setPalabraSeleccionado(null);
         setPalabrasClave(null);
         setCodigoSeleccionado(null);
         setCodigoParada(null);
-        const nombre = event.target.options[event.target.selectedIndex].dataset.nombre;
+        //const nombre = event.target.options[event.target.selectedIndex].dataset.nombre;
 
         const fecha_inicio = moment(paradasSeleccionadas[0].fechaInicio, 'DD/MM/YYYY').format('YYYY-MM-DD');
         const hora_inicio = paradasSeleccionadas[0].horaInicio;
@@ -115,7 +136,7 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
             .then(res => {
                 const paradas = res.data;
 
-                if (nombre === 'Cambio') {
+                if (seleTipoNombre === 'Cambio') {
                     const nuevas_paradas = paradas.map(p => {
                         const inicio_dt = new Date(p.inicio);
                         const fin_dt = new Date(p.fin);
@@ -226,7 +247,7 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
                                 <Form.Label>Tipo Parada</Form.Label>
                                 <Form.Control as="select"  
                                             name='tipoparada' 
-                                            value={seleTipoParada}
+                                            value={ `${seleTipoParada}|${seleSiglasParada}|${seleTipoNombre}`}
                                             onChange={handleInputChangeTipo}
                                             placeholder="Tipo parada">
                                             <option key={0} value={''}>Selecciona una opción</option>
@@ -234,7 +255,7 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
                                                 return (
                                                 <option
                                                     key={tipo.id}
-                                                    value={tipo.id}
+                                                    value={`${tipo.id}|${tipo.siglas}|${tipo.nombre}`}
                                                     data-nombre={tipo.nombre}
                                                 >
                                                     {tipo.nombre}
