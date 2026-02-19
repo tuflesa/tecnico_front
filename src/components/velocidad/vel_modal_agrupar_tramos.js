@@ -15,6 +15,10 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
     const [codigoParada, setCodigoParada] = useState(null);
     const [palabrasClave, setPalabrasClave] = useState(null);
 
+    const [idPos, setIdPos] = useState(null);
+    const [IdOF, setIdOF] = useState(null);
+    const [listado_ordenes, setListadoOrdenes] = useState(null);
+    const [orden_select, setOrdenSelect] = useState(null);
     const [seleTipoParada, setseleTipoParada] = useState(null);
     const [seleTipoNombre, setseleTipoNombre] = useState(null);
     const [codigo_seleccionado, setCodigoSeleccionado] = useState(null);
@@ -92,7 +96,9 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
             }
         })
         .then( res => {
-            console.log(res.data);
+            setListadoOrdenes(res.data.montajes);
+            setIdOF(res.data.xIdOF);
+            setIdPos(res.data.xIdPos);
         })
         .catch( err => {
             console.log(err);
@@ -112,7 +118,9 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
         setPalabrasClave(null);
         setCodigoSeleccionado(null);
         setCodigoParada(null);
-        //const nombre = event.target.options[event.target.selectedIndex].dataset.nombre;
+        setOrdenSelect(null);
+        setIdOF(null);
+        setIdPos(null);
 
         const fecha_inicio = moment(paradasSeleccionadas[0].fechaInicio, 'DD/MM/YYYY').format('YYYY-MM-DD');
         const hora_inicio = paradasSeleccionadas[0].horaInicio;
@@ -184,6 +192,9 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
                 tipo_parada_id: seleTipoParada,
                 codigo_parada_id: codigo_seleccionado,
                 observaciones: observaciones,
+                orden_select: orden_select,
+                idPos: idPos,
+                IdOF: IdOF,
                 paradas: paradasSeleccionadas.map(p => ({
                     id: p.id,
                     fecha_inicio: p.fechaInicio,
@@ -230,6 +241,10 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
             setCodigoSeleccionado(null);
             setPalabraSeleccionado(null);
             cerrarModalTramos();
+            setListadoOrdenes(null);
+            setOrdenSelect(null);
+            setIdOF(null);
+            setIdPos(null);
             onLimpiar && onLimpiar();
     }
 
@@ -286,7 +301,28 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
                                     </Form.Control>
                                 </Form.Group>
                             </Col>
-                        :''}
+                        :
+                            <Col>
+                                <Form.Group controlId="ordenes">
+                                    <Form.Label>Listado de Ordenes</Form.Label>
+                                    <Form.Control as="select"  
+                                                name='ordenes' 
+                                                value={orden_select}
+                                                onChange={(e) => setOrdenSelect(e.target.value)}
+                                                placeholder="Ordenes"
+                                                disabled={seleTipoParada?false:true}>
+                                                <option key="__default__" value={''}>Selecciona una opción</option>
+                                                {Array.isArray(listado_ordenes) && listado_ordenes.map( orden => {
+                                                    return (
+                                                    <option key={orden.xIdParada} value={orden.xIdParada}>
+                                                        {orden.xDescripcion}
+                                                    </option>
+                                                    )
+                                                })}
+                                    </Form.Control>
+                                </Form.Group>
+                            </Col>
+                        }
                         <Col>
                             <Form.Group controlId="codigoparada">
                                 <Form.Label>Codigo Parada</Form.Label>
