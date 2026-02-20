@@ -15,10 +15,12 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
     const [codigoParada, setCodigoParada] = useState(null);
     const [palabrasClave, setPalabrasClave] = useState(null);
 
+    const [descripcionProdDB, setdescripcionProdDB] = useState(null);
     const [idPos, setIdPos] = useState(null);
     const [IdOF, setIdOF] = useState(null);
+    const [codigoProdDB, setCodigoProdDB] = useState(null);
+    const [codigo_R_ProdDB, setCodigo_R_ProdDB] = useState(null);
     const [listado_ordenes, setListadoOrdenes] = useState(null);
-    const [orden_select, setOrdenSelect] = useState(null);
     const [seleTipoParada, setseleTipoParada] = useState(null);
     const [seleTipoNombre, setseleTipoNombre] = useState(null);
     const [codigo_seleccionado, setCodigoSeleccionado] = useState(null);
@@ -104,6 +106,22 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
             console.log(err);
         });  
     },[seleTipoParada]);
+
+    useEffect(()=>{
+        if(seleSiglasParada!=="R"){
+            codigoProdDB && axios.get(BACKEND_SERVER + `/api/velocidad/buscar_descripcion_paradaProdDB/?Id_codigoProdDB=${codigoProdDB}&tipo_parada_siglas=${seleSiglasParada}`,{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }
+            })
+            .then( res => {
+                setdescripcionProdDB(res.data);
+            })
+            .catch( err => {
+                console.log(err);
+            }); 
+        } 
+    },[codigoProdDB]);
  
     const handleInputChangeTipo = (e) => {
         const { value } = e.target;
@@ -118,7 +136,6 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
         setPalabrasClave(null);
         setCodigoSeleccionado(null);
         setCodigoParada(null);
-        setOrdenSelect(null);
         setIdOF(null);
         setIdPos(null);
 
@@ -170,6 +187,24 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
             });
     };
 
+    const handleInputChangeCodigo = (e) => {
+        const { value } = e.target;
+        if (value) {
+            const [id, codigoBD ] = value.split('|');
+            setCodigoSeleccionado(id);
+            setCodigoProdDB(codigoBD);
+        };
+    };
+
+    const handleInputChangeOrdenes = (e) => {
+        const { value } = e.target;
+        if (value) {
+            const [codigoBD, descripcionBD ] = value.split('|');
+            setCodigo_R_ProdDB(codigoBD);
+            setdescripcionProdDB(descripcionBD);
+        };
+    };
+
     const guardartipoparada = () => {
         if (!seleTipoParada) {
             alert('Debe seleccionar un tipo de parada');
@@ -188,13 +223,21 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
         try {
             // Revisar si podemos mandar directamente paradasSeleccionadas
             const datos = {
+                xIdOF: IdOF,
+                xIdTipo: seleSiglasParada,
+                xIdPos: idPos,
+                xIdParada: codigoProdDB,
+                xIdParada_R: codigo_R_ProdDB, // código de cambio rodillo
+                xDescripcion: descripcionProdDB,
+                //xFecha ???falta la fecha y el tiempo (duración) que lo tenemos en paradas
+                //xTiempo ???
+                xObservaciones: observaciones,
+                //xTurno
+                //xIgnorar = false siempre
+
                 zona_id: id,
                 tipo_parada_id: seleTipoParada,
                 codigo_parada_id: codigo_seleccionado,
-                observaciones: observaciones,
-                orden_select: orden_select,
-                idPos: idPos,
-                IdOF: IdOF,
                 paradas: paradasSeleccionadas.map(p => ({
                     id: p.id,
                     fecha_inicio: p.fechaInicio,
@@ -204,6 +247,8 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
                     duracion: p.duracion
                 }))
             };
+            console.log('QUE VALE DATOS: ', datos);
+
             axios.post(
                 `${BACKEND_SERVER}/api/velocidad/guardar_paradas_agrupadas/`,
                 datos,
@@ -221,6 +266,8 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
                     setseleTipoParada(null);
                     setCodigoSeleccionado(null);
                     setPalabraSeleccionado(null);
+                    setCodigoProdDB(null);
+                    setCodigo_R_ProdDB(null);
                     onSaved && onSaved();
                     onLimpiar && onLimpiar();
                     setObservaciones('');
@@ -242,9 +289,10 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
             setPalabraSeleccionado(null);
             cerrarModalTramos();
             setListadoOrdenes(null);
-            setOrdenSelect(null);
             setIdOF(null);
             setIdPos(null);
+            setCodigo_R_ProdDB(null);
+            setObservaciones('');
             onLimpiar && onLimpiar();
     }
 
@@ -307,14 +355,14 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
                                     <Form.Label>Listado de Ordenes</Form.Label>
                                     <Form.Control as="select"  
                                                 name='ordenes' 
-                                                value={orden_select}
-                                                onChange={(e) => setOrdenSelect(e.target.value)}
+                                                value={ `${codigo_R_ProdDB}|${descripcionProdDB}`}
+                                                onChange={handleInputChangeOrdenes}
                                                 placeholder="Ordenes"
                                                 disabled={seleTipoParada?false:true}>
                                                 <option key="__default__" value={''}>Selecciona una opción</option>
                                                 {Array.isArray(listado_ordenes) && listado_ordenes.map( orden => {
                                                     return (
-                                                    <option key={orden.xIdParada} value={orden.xIdParada}>
+                                                    <option key={orden.xIdParada} value={`${orden.xIdParada}|${orden.xDescripcion}`}>
                                                         {orden.xDescripcion}
                                                     </option>
                                                     )
@@ -328,14 +376,14 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
                                 <Form.Label>Codigo Parada</Form.Label>
                                 <Form.Control as="select"  
                                             name='codigoparada' 
-                                            value={codigo_seleccionado}
-                                            onChange={(e) => setCodigoSeleccionado(e.target.value)}
+                                            value={ `${codigo_seleccionado}|${codigoProdDB}`}
+                                            onChange={handleInputChangeCodigo}
                                             placeholder="Codigo parada"
                                             disabled={seleTipoParada?false:true}>
                                             <option key={0} value={''}>Selecciona una opción</option>
                                             {codigoParada && codigoParada.map( codigo => {
                                                 return (
-                                                <option key={codigo.id} value={codigo.id}>
+                                                <option key={codigo.id} value={`${codigo.id}|${codigo.codigoProdDB}`}>
                                                     {codigo.nombre}
                                                 </option>
                                                 )
