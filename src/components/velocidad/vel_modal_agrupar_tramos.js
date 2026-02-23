@@ -16,6 +16,7 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
     const [palabrasClave, setPalabrasClave] = useState(null);
 
     const [descripcionProdDB, setdescripcionProdDB] = useState(null);
+    const [descripcion, setDescripcion] = useState(null);
     const [idPos, setIdPos] = useState(null);
     const [IdOF, setIdOF] = useState(null);
     const [codigoProdDB, setCodigoProdDB] = useState(null);
@@ -125,13 +126,12 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
  
     const handleInputChangeTipo = (e) => {
         const { value } = e.target;
-        if (value) {
-            const [id, siglas, nombre] = value.split('|');
-            setseleTipoParada(id);
-            setSiglasParada(siglas);
-            setseleTipoNombre(nombre);
-        };
-                
+        if (!value) return;
+        const [tipoId, siglas, nombre] = value.split('|');
+        setseleTipoParada(tipoId);
+        setSiglasParada(siglas);
+        setseleTipoNombre(nombre);
+            
         setPalabraSeleccionado(null);
         setPalabrasClave(null);
         setCodigoSeleccionado(null);
@@ -139,19 +139,14 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
         setIdOF(null);
         setIdPos(null);
 
-        const fecha_inicio = moment(paradasSeleccionadas[0].fechaInicio, 'DD/MM/YYYY').format('YYYY-MM-DD');
-        const hora_inicio = paradasSeleccionadas[0].horaInicio;
-        const fin = paradasSeleccionadas.length - 1;
-        const fecha_fin = moment(paradasSeleccionadas[fin].fechaInicio, 'DD/MM/YYYY').format('YYYY-MM-DD');
-        const hora_fin = paradasSeleccionadas[fin].horaFin;
+        const base = paradas;
+        const fecha_inicio = moment(base[0].fechaInicio, 'DD/MM/YYYY').format('YYYY-MM-DD');
+        const hora_inicio = base[0].horaInicio;
+        const fin = base.length - 1;
+        const fecha_fin = moment(base[fin].fechaInicio, 'DD/MM/YYYY').format('YYYY-MM-DD');
+        const hora_fin = base[fin].horaFin;
 
-        const params = {
-            fecha_inicio,
-            hora_inicio,
-            fecha_fin,
-            hora_fin,
-            zona: id
-        };
+        const params = {fecha_inicio, hora_inicio, fecha_fin, hora_fin, zona: id };
 
         const headers = {
             'Authorization': `token ${token['tec-token']}`
@@ -160,8 +155,6 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
         axios.get(`${BACKEND_SERVER}/api/velocidad/leer_paradas_run/`, { params, headers })
             .then(res => {
                 const paradas = res.data;
-
-                if (seleTipoNombre === 'Cambio') {
                     const nuevas_paradas = paradas.map(p => {
                         const inicio_dt = new Date(p.inicio);
                         const fin_dt = new Date(p.fin);
@@ -176,23 +169,19 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
                         };
                     });
 
-                    const nuevas_paradas_seleccionadas = [...paradasSeleccionadas, ...nuevas_paradas];
-                    setParadasSeleccionadas(ordenarLista(nuevas_paradas_seleccionadas));
-
-                } else {
-                    const ids = paradas.map(p => p.id.toString());
-                    const nuevas_paradas_seleccionadas = paradasSeleccionadas.filter(p => !ids.includes(p.id));
-                    setParadasSeleccionadas(ordenarLista(nuevas_paradas_seleccionadas));
-                }
+                    const idsBase = base.map(p => p.id.toString());
+                    const nuevasSinDuplicados = nuevas_paradas.filter(p => !idsBase.includes(p.id));
+                    setParadasSeleccionadas(ordenarLista([...base, ...nuevasSinDuplicados]));
             });
     };
 
     const handleInputChangeCodigo = (e) => {
         const { value } = e.target;
         if (value) {
-            const [id, codigoBD ] = value.split('|');
+            const [id, codigoBD, descripcion ] = value.split('|');
             setCodigoSeleccionado(id);
             setCodigoProdDB(codigoBD);
+            setDescripcion(descripcion)
         };
     };
 
@@ -229,10 +218,10 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
                 xIdParada: codigoProdDB,
                 xIdParada_R: codigo_R_ProdDB, // código de cambio rodillo
                 xDescripcion: descripcionProdDB,
-                //xFecha ???falta la fecha y el tiempo (duración) que lo tenemos en paradas
-                //xTiempo ???
-                xObservaciones: observaciones,
-                //xTurno
+                //xFecha: la obtenemos en el backend en duraciones_por_turno
+                //xTiempo la obtenemos en el backend en duraciones_por_turno
+                xObservaciones: observaciones + '--' + descripcion,
+                //xTurno: la obtenemos en el backend en duraciones_por_turno
                 //xIgnorar = false siempre
 
                 zona_id: id,
@@ -248,7 +237,7 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
                 }))
             };
             console.log('QUE VALE DATOS: ', datos);
-
+            //return;
             axios.post(
                 `${BACKEND_SERVER}/api/velocidad/guardar_paradas_agrupadas/`,
                 datos,
@@ -286,6 +275,7 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
             setParadasSeleccionadas([]);
             setseleTipoParada(null);
             setCodigoSeleccionado(null);
+            setseleTipoNombre(null);
             setPalabraSeleccionado(null);
             cerrarModalTramos();
             setListadoOrdenes(null);
@@ -376,14 +366,14 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
                                 <Form.Label>Codigo Parada</Form.Label>
                                 <Form.Control as="select"  
                                             name='codigoparada' 
-                                            value={ `${codigo_seleccionado}|${codigoProdDB}`}
+                                            value={ `${codigo_seleccionado}|${codigoProdDB}|${descripcion}`}
                                             onChange={handleInputChangeCodigo}
                                             placeholder="Codigo parada"
                                             disabled={seleTipoParada?false:true}>
                                             <option key={0} value={''}>Selecciona una opción</option>
                                             {codigoParada && codigoParada.map( codigo => {
                                                 return (
-                                                <option key={codigo.id} value={`${codigo.id}|${codigo.codigoProdDB}`}>
+                                                <option key={codigo.id} value={`${codigo.id}|${codigo.codigoProdDB}|${codigo.nombre}`}>
                                                     {codigo.nombre}
                                                 </option>
                                                 )
