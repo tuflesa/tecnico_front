@@ -153,9 +153,12 @@ const ModalModificarHorario = ({ zonaId, mostrarModal, cerrarModal, diaSelec, on
             }
         } else {
              // Validación normal: cambios de turno dentro del rango inicio-fin
+            if (numero_turnos === '1') {
+                setCambioTurno1(diaSeleccionado.fin);
+            }
             if (cambio_turno_1) {
                 const cambio1Min = timeToMinutes(cambio_turno_1);
-                if (cambio1Min <= inicioMin || cambio1Min >= finMin) {
+                if (cambio1Min < inicioMin || cambio1Min > finMin) {
                     alert(`El cambio de turno de la tarde (${cambio_turno_1}) debe estar entre ${diaSeleccionado.inicio} y ${diaSeleccionado.fin}`);
                     return;
                 }
@@ -163,7 +166,7 @@ const ModalModificarHorario = ({ zonaId, mostrarModal, cerrarModal, diaSelec, on
             
             if (cambio_turno_2) {
                 const cambio2Min = timeToMinutes(cambio_turno_2);
-                if (cambio2Min <= inicioMin || cambio2Min >= finMin) {
+                if (cambio2Min < inicioMin || cambio2Min > finMin) {
                     alert(`El cambio de turno de la noche (${cambio_turno_2}) debe estar entre ${diaSeleccionado.inicio} y ${diaSeleccionado.fin}`);
                     return;
                 }
@@ -321,7 +324,6 @@ const ModalModificarHorario = ({ zonaId, mostrarModal, cerrarModal, diaSelec, on
                             :''}
                         </Col>
                         <Col xs="auto"> 
-                            {numero_turnos !== '1'?
                             <Form.Group>
                                 <Form.Label>Hora de cambio al turno de tarde</Form.Label>
                                 <Form.Control
@@ -331,7 +333,6 @@ const ModalModificarHorario = ({ zonaId, mostrarModal, cerrarModal, diaSelec, on
                                     style={{ width: "300px" }}
                                 />
                             </Form.Group>
-                            :''}
                             {numero_turnos==='3'?
                             <Form.Group>
                                 <Form.Label>Hora de cambio al turno de noche</Form.Label>
