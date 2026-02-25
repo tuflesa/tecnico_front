@@ -86,14 +86,18 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acc
 
     const InicializarParada = async (parada) => {
         if (!parada) return;
-
+        
         try {
             // 1. Buscamos los periodos de esa parada
             const resPeriodos = await axios.get(`${BACKEND_SERVER}/api/velocidad/periodo/?parada=${parada.id}`, {
                 headers: { 'Authorization': `token ${token['tec-token']}` }
             });
             const periodos = resPeriodos.data;
-
+            // Buscamos las paradas que tiene en producción
+            const paradas_produccion = await axios.get(`${BACKEND_SERVER}/api/velocidad/parada_produccion_db/?parada=${parada.id}`, {
+                headers: { 'Authorization': `token ${token['tec-token']}` }
+            });
+            console.log('Esto sale en paradas_produccion: ', paradas_produccion);
             // 2. Actualizamos la parada original a código 1 = Desconocido
             const periodo0 = periodos[0];
             const codigoP0 = (periodo0.velocidad > 0)? 2 : 1;
@@ -101,7 +105,6 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acc
                 { codigo: codigoP0 }, 
                 { headers: { 'Authorization': `token ${token['tec-token']}` } }
             );
-
             // 3. Si hay más de un periodo....
             if (periodos.length > 1) {
                 // Empezamos desde el índice 1, porque el índice 0 se queda con la parada original

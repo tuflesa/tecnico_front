@@ -93,12 +93,16 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
     },[seleTipoParada]);
 
     useEffect(()=>{
+        console.log('Llamada al back para leer cambios ...');
+        console.log('Tipo parada siglas ', seleSiglasParada);
         seleTipoParada && axios.get(BACKEND_SERVER + `/api/velocidad/buscar_montajes_of/?zona_id=${id}&tipo_parada_siglas=${seleSiglasParada}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }
         })
         .then( res => {
+            console.log('Lectura recibida ...');
+            console.log(res.data.montajes);
             setListadoOrdenes(res.data.montajes);
             setIdOF(res.data.xIdOF);
             setIdPos(res.data.xIdPos);
@@ -109,7 +113,10 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
     },[seleTipoParada]);
 
     useEffect(()=>{
+        if (!codigoProdDB) return;
         if(seleSiglasParada!=="R"){
+            console.log('codigo produccion DB ', codigoProdDB);
+            console.log('siglas ', seleSiglasParada);
             codigoProdDB && axios.get(BACKEND_SERVER + `/api/velocidad/buscar_descripcion_paradaProdDB/?Id_codigoProdDB=${codigoProdDB}&tipo_parada_siglas=${seleSiglasParada}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
@@ -128,6 +135,7 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
         const { value } = e.target;
         if (!value) return;
         const [tipoId, siglas, nombre] = value.split('|');
+        console.log(tipoId, siglas, nombre);
         setseleTipoParada(tipoId);
         setSiglasParada(siglas);
         setseleTipoNombre(nombre);
@@ -239,7 +247,7 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
                 }))
             };
             console.log('QUE VALE DATOS: ', datos);
-            //return;
+            // return;
             axios.post(
                 `${BACKEND_SERVER}/api/velocidad/guardar_paradas_agrupadas/`,
                 datos,
@@ -251,6 +259,8 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
                 }
             )
             .then(res => {
+                console.log('Despues de guardar ...');
+                console.log(res.data);
                 if (res.status === 200) {
                     // Limpiar variables
                     setParadasSeleccionadas([]);
@@ -259,6 +269,7 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
                     setPalabraSeleccionado(null);
                     setCodigoProdDB(null);
                     setCodigo_R_ProdDB(null);
+                    setDescripcion(null);
                     onSaved && onSaved();
                     onLimpiar && onLimpiar();
                     setObservaciones('');
@@ -285,6 +296,8 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
             setIdPos(null);
             setCodigo_R_ProdDB(null);
             setObservaciones('');
+            setDescripcion(null);
+            setdescripcionProdDB(null);
             onLimpiar && onLimpiar();
     }
 
