@@ -7,7 +7,7 @@ import moment from 'moment';
 import ordenarLista from '../utilidades/ordenar_paradas';
 import { useParams } from 'react-router-dom';
 
-const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, onSaved, onLimpiar }) => {
+const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, onSaved, onLimpiar, modo }) => {
     const { id } = useParams();
 
     const [token] = useCookies(['tec-token']);
@@ -138,21 +138,21 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
         setCodigoParada(null);
         setIdOF(null);
         setIdPos(null);
+        if(modo==='agrupar'){
+            const base = paradas;
+            const fecha_inicio = moment(base[0].fechaInicio, 'DD/MM/YYYY').format('YYYY-MM-DD');
+            const hora_inicio = base[0].horaInicio;
+            const fin = base.length - 1;
+            const fecha_fin = moment(base[fin].fechaInicio, 'DD/MM/YYYY').format('YYYY-MM-DD');
+            const hora_fin = base[fin].horaFin;
 
-        const base = paradas;
-        const fecha_inicio = moment(base[0].fechaInicio, 'DD/MM/YYYY').format('YYYY-MM-DD');
-        const hora_inicio = base[0].horaInicio;
-        const fin = base.length - 1;
-        const fecha_fin = moment(base[fin].fechaInicio, 'DD/MM/YYYY').format('YYYY-MM-DD');
-        const hora_fin = base[fin].horaFin;
+            const params = {fecha_inicio, hora_inicio, fecha_fin, hora_fin, zona: id };
 
-        const params = {fecha_inicio, hora_inicio, fecha_fin, hora_fin, zona: id };
+            const headers = {
+                'Authorization': `token ${token['tec-token']}`
+            };
 
-        const headers = {
-            'Authorization': `token ${token['tec-token']}`
-        };
-
-        axios.get(`${BACKEND_SERVER}/api/velocidad/leer_paradas_run/`, { params, headers })
+            axios.get(`${BACKEND_SERVER}/api/velocidad/leer_paradas_run/`, { params, headers })
             .then(res => {
                 const paradas = res.data;
                     const nuevas_paradas = paradas.map(p => {
@@ -173,6 +173,7 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
                     const nuevasSinDuplicados = nuevas_paradas.filter(p => !idsBase.includes(p.id));
                     setParadasSeleccionadas(ordenarLista([...base, ...nuevasSinDuplicados]));
             });
+        }
     };
 
     const handleInputChangeCodigo = (e) => {
@@ -227,6 +228,7 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
                 zona_id: id,
                 tipo_parada_id: seleTipoParada,
                 codigo_parada_id: codigo_seleccionado,
+                modo: modo,
                 paradas: paradasSeleccionadas.map(p => ({
                     id: p.id,
                     fecha_inicio: p.fechaInicio,
@@ -290,7 +292,7 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
         <Container>
             <Modal show={mostrarModalTramos} onHide={cerrar_modal} size="lg">
                 <Modal.Header closeButton>
-                    <Modal.Title>Tramos Agrupados</Modal.Title>
+                    {modo==='agrupar'?<Modal.Title>Tramos Agrupados</Modal.Title>:<Modal.Title>Identificar varios tramos</Modal.Title>}
                 </Modal.Header>
 
                 <Modal.Body>

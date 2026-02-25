@@ -226,3 +226,8 @@ code {
 .btn-pausable:hover {
   animation-play-state: paused;
 }
+
+/* separación entre botones */
+.action-buttons > .btn + .btn {
+  margin-left: 12px !important;
+}

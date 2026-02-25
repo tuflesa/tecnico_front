@@ -21,7 +21,7 @@ const GraficoEstado = () => {
     const tieneEscrituraParadas = user['tec-user'].perfil.destrezas_velocidad.some(
         destreza => destreza.nombre === 'escritura_paradas'
     );
-
+    const [modoModal, setModoModal] = useState('agrupar'); // 'agrupar' o 'identificar'
     const [estado, setEstado] = useState(null);
     const [paradas, setParadas] = useState(null);
     const [paradasSeleccionadas, setParadasSeleccionadas] = useState([]);
@@ -300,6 +300,15 @@ const GraficoEstado = () => {
         setParadasSeleccionadas([]);
     };
 
+    const abrirModalAgrupar = () => { 
+        setModoModal('agrupar'); 
+        setMostrarModalTramos(true); 
+    };
+    const abrirModalIdentificar = () => { 
+        setModoModal('identificar'); 
+        setMostrarModalTramos(true); 
+    };
+
     return (
         <React.Fragment>
             <VelocidadNavBar />
@@ -490,14 +499,24 @@ const GraficoEstado = () => {
                             :''}
                         </Nav>
                         {tabActiva === 'paradas_pendientes' && (
-                            <Button
-                                variant="primary"
-                                className="ms-2"
-                                onClick={abrirModalTramos}
-                                disabled={paradasSeleccionadas.length === 0}
-                                >
-                                Agrupar tramos
-                            </Button>
+                            <div className="action-buttons">
+                                <Button
+                                    variant="primary"
+                                    className="me-3"
+                                    onClick={abrirModalIdentificar}
+                                    disabled={paradasSeleccionadas.length === 0}
+                                    >
+                                    Identificar tramos
+                                </Button>
+                                <Button
+                                    variant="primary"
+                                    className="me-3"
+                                    onClick={abrirModalAgrupar}
+                                    disabled={paradasSeleccionadas.length === 0}
+                                    >
+                                    Agrupar tramos
+                                </Button>
+                            </div>
                         )}
                     </div>
                     <Tab.Content>
@@ -565,6 +584,7 @@ const GraficoEstado = () => {
                     paradas={paradasSeleccionadas}
                     onSaved={handleParadaGuardada} 
                     onLimpiar={limpiarParadasSeleccionadas}
+                    modo={modoModal}
                 />
             </Container>
         </React.Fragment>
