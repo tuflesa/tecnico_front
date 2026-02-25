@@ -506,7 +506,7 @@ const GraficoEstado = () => {
                                     onClick={abrirModalIdentificar}
                                     disabled={paradasSeleccionadas.length === 0}
                                     >
-                                    Identificar tramos
+                                    Multiples paradas
                                 </Button>
                                 <Button
                                     variant="primary"
@@ -514,7 +514,7 @@ const GraficoEstado = () => {
                                     onClick={abrirModalAgrupar}
                                     disabled={paradasSeleccionadas.length === 0}
                                     >
-                                    Agrupar tramos
+                                    Agrupar paradas
                                 </Button>
                             </div>
                         )}
