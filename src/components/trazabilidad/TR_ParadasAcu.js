@@ -202,13 +202,13 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acc
                                                     onClick={() => handleOpenModalAñadir(paradaParaModal)}/>
                                                 <PencilFill style={{ color:'#007bff', marginRight: '15px'}} onClick={() => handleOpenModalEditar(paradaParaModal)}/>
                                                 <Trash style={{ 
+                                                    marginRight: '15px',
                                                     cursor: pdb.codigo==='Desconocido'?'not-allowed':'pointer', 
                                                     color:pdb.codigo==='Desconocido'?'gray':'#007bff'}} 
                                                     onClick={pdb.codigo==='Desconocido'? undefined:() => InicializarParada(paradaParaModal)}/>
                                             </>
-                                        ):
-                                            <Receipt style={{ cursor: 'pointer', color: pdb.observaciones && pdb.observaciones.trim() !== '' ? '#007bff' : 'gray' }} onClick={() => handleOpenModalObs(pdb.observaciones)}/>
-                                        }
+                                        ):''}
+                                        <Receipt style={{ cursor: 'pointer', color: pdb.observaciones && pdb.observaciones.trim() !== '' ? '#007bff' : 'gray' }} onClick={() => handleOpenModalObs(pdb.observaciones)}/>
                                     </td>
                                 )}
                             </tr>
