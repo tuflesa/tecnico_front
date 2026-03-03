@@ -14,6 +14,7 @@ const ModalEditarParada = ({ show, onHide, parada}) => {
     const [palabra_seleccionada, setPalabraSeleccionada] = useState(null);
     const [palabrasClave, setPalabrasClave] = useState(null);
     const [tipoNombre, setTipoNombre] = useState('');
+    const [tipoSiglas, setTipoSiglas] = useState('');
 
     useEffect(() => {
         if (show && parada) {
@@ -82,6 +83,21 @@ const ModalEditarParada = ({ show, onHide, parada}) => {
     if (!parada) return null;
 
     const handleGuardar = async () => {
+        await axios.put( BACKEND_SERVER + `/api/velocidad/actualizar_parada/`,{
+            parada: parada.id,
+            tipoSiglas: tipoSiglas,
+            codigo: parseInt(codigoSel),
+            nuevaObs: nuevaObs,
+            codigoSel: codigoSel,
+            },
+            { headers: { Authorization: `token ${token["tec-token"]}` } }
+        )
+        .then(res => {
+            console.log('patch hecho: ', res.data);
+        })
+        .catch (err => {
+            console.log(err);
+        })
         axios.patch(BACKEND_SERVER + `/api/velocidad/paradas/${parada.id}/`, {
             observaciones: nuevaObs,
             codigo: parseInt(codigoSel)
@@ -101,6 +117,7 @@ const ModalEditarParada = ({ show, onHide, parada}) => {
 
     const handleCerrar = () => {
         setTipoNombre('');
+        setTipoSiglas(null);
         setseleTipoParada('');
         setPalabraSeleccionada(null);
         setPalabrasClave(null);
@@ -111,9 +128,10 @@ const ModalEditarParada = ({ show, onHide, parada}) => {
     const handleInputChangeTipo = (e) => {
         const { value } = e.target;
         if (value) {
-            const [id, nombre] = value.split('|');
+            const [id, nombre, siglas] = value.split('|');
             setseleTipoParada(id);
             setTipoNombre(nombre);
+            setTipoSiglas(siglas);
         };
         
         setPalabraSeleccionada(null);
@@ -147,14 +165,14 @@ const ModalEditarParada = ({ show, onHide, parada}) => {
                                     <Form.Label>Tipo Parada</Form.Label>
                                     <Form.Control as="select"  
                                                 name='tipoparada' 
-                                                value={`${seleTipoParada}|${tipoNombre}`}
+                                                value={`${seleTipoParada}|${tipoNombre}|${tipoSiglas}`}
                                                 onChange={handleInputChangeTipo}>
                                                 <option key={-0} value={''}>Selecciona una opción</option>
                                                 {tipoParadas && tipoParadas.map( tipo => {
                                                     return (
                                                     <option
                                                         key={tipo.id}
-                                                        value={`${tipo.id}|${tipo.nombre}`}
+                                                        value={`${tipo.id}|${tipo.nombre}|${tipo.siglas}`}
                                                     >
                                                         {tipo.nombre}
                                                     </option>

@@ -183,9 +183,7 @@ const ModalModificarHorario = ({ zonaId, mostrarModal, cerrarModal, diaSelec, on
             }
         }
         try {
-        await axios.put(
-            BACKEND_SERVER + `/api/velocidad/horarios/${diaSeleccionado.fecha}/`,
-            {
+        await axios.put( BACKEND_SERVER + `/api/velocidad/horarios/${diaSeleccionado.fecha}/`,{
             inicio: diaSeleccionado.inicio,
             fin: diaSeleccionado.fin,
             zona_id: zonaId,
