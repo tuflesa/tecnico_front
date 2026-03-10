@@ -18,6 +18,8 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
     const [periodos, setPeriodos] = useState('');
     const [palabra_seleccionada, setPalabraSeleccionada] = useState(null);
     const [palabrasClave, setPalabrasClave] = useState(null);
+    const [codigoProdDB, setCodigoProdDB] = useState(null);
+    const [descripcion, setDescripcion] = useState(null);
 
     let tipo_nuevaparada = '';
 
@@ -96,7 +98,6 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
 
     const handleGuardar = async () => {
         let T_u_inicio, T_u_fin, pContenedor;
-        
         //<-------------------VALIDACIONES ------------------------>
         if (tipoRegistro) {
             if (!horaInicioReg || !horaFinReg) {
@@ -146,6 +147,45 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
         const esInicioExacto = T_u_inicio === tP_inicio;
         const esFinExacto = T_u_fin === tP_fin;
 
+                // -------------------------- GUARDAMOS EN PROD-BD ----------------------------------
+        
+        // Convertimos las horas elegidas del nuevo tramo
+        const inicio = moment.utc(horaInicioReg, "HH:mm:ss").valueOf();
+        const fin    = moment.utc(horaFinReg,    "HH:mm:ss").valueOf();
+        let posicion;
+
+        const datos = {
+            periodo: pContenedor,
+            xIdOF: parada.of,
+            xIdTipo: tipoRegistro==='Avería'?'A':'I',
+            Tipo_anterior: parada.tipo_parada_nombre==='Cambio'?'R':parada.tipo_parada_nombre==='Incidencia'?'I':'A',
+            //xIdPos: idPos, lo buscamos en el backend ????
+            xIdParada: codigoProdDB,
+            //xDescripcion: descripcionProdDB, la buscamos tambien en el backend????
+            xFecha: pContenedor.inicio,
+            xTiempo: (fin - inicio) / 1000 / 60,
+            xObservaciones: nuevaObs?nuevaObs + '--' + descripcion: '*'+descripcion,
+            xTurno_id: pContenedor.turno, //solo hay un turno pues solo puede estar dentro de un periodo
+            //xIgnorar = false siempre,
+            parada_id: parada.id,
+        };
+        try{
+            const res = await axios.post(`${BACKEND_SERVER}/api/velocidad/crear_parada_ProdBD/`,
+                datos,
+                {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+            posicion=res.data.xIdPos;
+        } catch (error){
+            console.error('Error al guardar en ProdBD', error);
+            alert('Error al guardar en ProdBD:'+ (error.response?.data.mensaje || error.message));
+            return;
+        }
+        //return
         try {
             const config = { headers: { 'Authorization': `token ${token['tec-token']}` } };
 
@@ -156,6 +196,7 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
                     codigo: parseInt(codigoSel),
                     zona: parada.zona_id,
                     observaciones: nuevaObs || "",
+                    of: parada.of,
                 }, config);
                 const nuevaParadaId = crearParadaResp.data.id;
 
@@ -165,15 +206,20 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
                         parada: nuevaParadaId
                     }, config
                 );
+                await axios.post(`${BACKEND_SERVER}/api/velocidad/parada_produccion_db/`, {
+                    parada: nuevaParadaId,
+                    pos: posicion,
+                }, config);
             }
 
             // --- CASO 2: AVERÍA AL PRINCIPIO O AL FINAL DE UN PERIODO---
             else if (esInicioExacto || esFinExacto) {                
                 // 1. Crear la nueva parada CON su periodo
-                await axios.post(`${BACKEND_SERVER}/api/velocidad/paradas_crear/`, {
+                const nueva_parada = await axios.post(`${BACKEND_SERVER}/api/velocidad/paradas_crear/`, {
                     codigo: parseInt(codigoSel),
                     zona: parada.zona_id,
                     observaciones: nuevaObs || "",
+                    of: parada.of,
                     periodos: [{
                         inicio: moment.utc(T_u_inicio).toISOString(),
                         fin: moment.utc(T_u_fin).toISOString(),
@@ -190,15 +236,21 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
                     inicio: moment.utc(nuevoInicio).toISOString(),
                     fin: moment.utc(nuevoFin).toISOString()
                 }, config);
+
+                await axios.post(`${BACKEND_SERVER}/api/velocidad/parada_produccion_db/`, {
+                    parada: nueva_parada.id,
+                    pos: posicion,
+                }, config);
             }
 
             // --- CASO 3: AVERÍA EN EL MEDIO (DIVIDIR EN 3) ---
             else {                
                 // 1. Crear la nueva parada CON su periodo (la parte del medio)
-                await axios.post(`${BACKEND_SERVER}/api/velocidad/paradas_crear/`, {
+                const nueva_parada = await axios.post(`${BACKEND_SERVER}/api/velocidad/paradas_crear/`, {
                     codigo: parseInt(codigoSel),
                     zona: parada.zona_id,
                     observaciones: nuevaObs || "",
+                    of: parada.of,
                     periodos: [{
                         inicio: moment.utc(T_u_inicio).toISOString(),
                         fin: moment.utc(T_u_fin).toISOString(),
@@ -220,6 +272,11 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
                 await axios.patch(`${BACKEND_SERVER}/api/velocidad/periodo/${pContenedor.id}/`, {
                     inicio: moment.utc(tP_inicio).toISOString(),
                     fin: moment.utc(T_u_inicio).toISOString()
+                }, config);
+
+                await axios.post(`${BACKEND_SERVER}/api/velocidad/parada_produccion_db/`, {
+                    parada: nueva_parada.id,
+                    pos: posicion,
                 }, config);
             }
 
@@ -322,20 +379,16 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
     const esIncidencia = tipoRegistro === 'incidencia';
     const colorBorde = esAveria ? '#dc3545' : '#ffc107';
     const tituloForm = esAveria ? 'Datos de la Avería' : 'Datos de la Incidencia';
-    /* const añadimos = () => {
-        if(esIncidencia){
-            setTipoRegistro(null);
-        }
-        else{
-            setTipoRegistro('Incidencia');
-        }
-        if(esAveria){
-            setTipoRegistro(null);
-        }
-        else{
-            setTipoRegistro('averia');
-        }
-    } */
+
+    const handleInputChangeCodigo = (e) => {
+        const { value } = e.target;
+        if (value) {
+            const [id, codigoBD, descripcion ] = value.split('|');
+            setCodigoSel(id);
+            setCodigoProdDB(codigoBD);
+            setDescripcion(descripcion)
+        };
+    };
 
     return (
         <Container>
@@ -379,7 +432,6 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
                             )}
                         </svg>
                     </div>
-
                     {tipoRegistro && (
                         <div style={{ marginTop: '20px', padding: '15px', border: `2px solid ${colorBorde}`, borderRadius: '8px', background: esAveria ? '#fff5f5' : '#fffdf5' }}>
                             <h6 style={{ color: colorBorde }}>{tituloForm}</h6>
@@ -410,14 +462,16 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
                                         <Form.Label>Codigo Parada</Form.Label>
                                         <Form.Control as="select"  
                                                     name='codigoparada' 
-                                                    value={codigoSel}
-                                                    onChange={(e) => setCodigoSel(e.target.value)}
+                                                    value={ `${codigoSel}|${codigoProdDB}|${descripcion}`}
+                                                    //value={codigoSel}
+                                                    //onChange={(e) => setCodigoSel(e.target.value)}
+                                                    onChange={handleInputChangeCodigo}
                                                     placeholder="Codigo parada"
                                                     disabled={palabra_seleccionada?false:true}>
                                                     <option key={0} value={''}>Selecciona una opción</option>
                                                     {codigoParada && codigoParada.map( codigo => {
                                                         return (
-                                                        <option key={codigo.id} value={codigo.id}>
+                                                        <option key={codigo.id} value={`${codigo.id}|${codigo.codigoProdDB}|${codigo.nombre}`}>
                                                             {codigo.nombre}
                                                         </option>
                                                         )
