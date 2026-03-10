@@ -21,6 +21,9 @@ const GraficoEstado = () => {
     const tieneEscrituraParadas = user['tec-user'].perfil.destrezas_velocidad.some(
         destreza => destreza.nombre === 'escritura_paradas'
     );
+    const programador = user['tec-user'].perfil.destrezas_velocidad.some(
+        destreza => destreza.nombre === 'programador'
+    );
     const [modoModal, setModoModal] = useState('agrupar'); // 'agrupar' o 'identificar'
     const [estado, setEstado] = useState(null);
     const [paradas, setParadas] = useState(null);
@@ -29,6 +32,7 @@ const GraficoEstado = () => {
     const [flejes, setFlejes] = useState(null);
     const [OFs, setOFs] = useState(null);
     const [tabActiva, setTabActiva] = useState('flejes');
+    const [turno_actual, setTurnoActual] = useState(null);
     const hoy = new Date();
     const [filtro, setFiltro] = useState({
             fecha: moment(hoy).format('YYYY-MM-DD'),
@@ -74,6 +78,58 @@ const GraficoEstado = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     },[filtro, actualizar]);
 
+    useEffect(() => {
+    if (!estado?.maquina?.zona?.id) return;
+
+    let timeoutId;
+
+    const obtenerTurno = () => {
+        const hoy = moment().format('YYYY-MM-DD');
+        const horaActual = moment();
+
+        axios.get(BACKEND_SERVER + `/api/velocidad/horariodia/?zona=${estado.maquina.zona.id}&fecha=${hoy}`, {
+            headers: { 'Authorization': `token ${token['tec-token']}` }
+        })
+        .then(res => {
+            const horario = res.data[0];
+            if (!horario) return;
+
+            const cambio1 = moment(horario.cambio_turno_1, 'HH:mm:ss');
+            const cambio2 = horario.cambio_turno_2 ? moment(horario.cambio_turno_2, 'HH:mm:ss') : null;
+
+            // turno actual
+            let turnoActual;
+            if (cambio2 && horaActual.isSameOrAfter(cambio2)) {
+                turnoActual = horario.turno_noche;
+            } else if (horaActual.isSameOrAfter(cambio1)) {
+                turnoActual = horario.turno_tarde;
+            } else {
+                turnoActual = horario.turno_mañana;
+            }
+            setTurnoActual(turnoActual);
+
+            // Calcular ms hasta el próximo cambio
+            let msHastaProximoCambio = null;
+            if (horaActual.isBefore(cambio1)) {
+                msHastaProximoCambio = cambio1.diff(horaActual);
+            } else if (cambio2 && horaActual.isBefore(cambio2)) {
+                msHastaProximoCambio = cambio2.diff(horaActual);
+            }
+
+            // Programar la siguiente llamada justo en el cambio
+            if (msHastaProximoCambio) {
+                timeoutId = setTimeout(obtenerTurno, msHastaProximoCambio);
+            }
+        })
+        .catch(err => console.log(err));
+        };
+
+        obtenerTurno();
+
+        return () => clearTimeout(timeoutId); // limpieza al desmontar
+
+    }, [token, estado?.maquina?.zona?.id]);
+
     useEffect(()=>{
         if (!estado) return;
         const datosRegistros = (estado) => {
@@ -81,7 +137,7 @@ const GraficoEstado = () => {
             const fin = moment(filtro.fecha_fin + ' ' + filtro.hora_fin,'YYYY-MM-DD HH:mm');
             const ahora = moment();
             const siglas = estado.maquina.zona.siglas;
-
+            
             // Registros de velocidad
             const datos = estado.registros.map( dato => {
                 const fecha = dato.fecha.split('-');
@@ -385,6 +441,20 @@ const GraficoEstado = () => {
                     <Col sm={2}>
                         <Row>
                             <Col>
+                                Turno:
+                            </Col>
+                        </Row>
+                        <Row>
+                            <Col>
+                                <span className="destacado">
+                                    {turno_actual?turno_actual.turno:''}
+                                </span>
+                            </Col>
+                        </Row>
+                    </Col>
+                    <Col sm={2}>
+                        <Row>
+                            <Col>
                                 OF:
                             </Col>
                         </Row>
@@ -475,7 +545,17 @@ const GraficoEstado = () => {
                             <Nav.Item>
                                 <Nav.Link eventKey="flejes">Flejes</Nav.Link>
                             </Nav.Item>
-
+                            {programador?
+                                <Nav.Item>
+                                    <Nav.Link eventKey="todas_paradas">
+                                    {existeDesconocido ? (
+                                        <span>Todas las Paradas</span>
+                                    ) : (
+                                        'Todas las Paradas'
+                                    )}
+                                    </Nav.Link>
+                                </Nav.Item>
+                            :''}
                             <Nav.Item>
                                 <Nav.Link eventKey="paradas">
                                 {existeDesconocido ? (
@@ -571,6 +651,21 @@ const GraficoEstado = () => {
                                                     setParadasSeleccionadas={setParadasSeleccionadas}
                                                     acciones={false}
                                                     onSaved={handleParadaGuardada}
+                                        />
+                                    </div>
+                                </Col>
+                            </Row>
+                        </Tab.Pane>
+                        <Tab.Pane eventKey="todas_paradas" title={<span className="glow-green">todas_paradas</span>}>
+                            <Row>
+                                <Col>
+                                    <div style={{ height: '200px', overflowY: 'auto' }}>
+                                        <ParadasAcu Paradas={estado && estado.paradas}
+                                                    paradasSeleccionadas={paradasSeleccionadas}
+                                                    setParadasSeleccionadas={setParadasSeleccionadas}
+                                                    acciones={false}
+                                                    onSaved={handleParadaGuardada}
+                                                    programador={programador}
                                         />
                                     </div>
                                 </Col>

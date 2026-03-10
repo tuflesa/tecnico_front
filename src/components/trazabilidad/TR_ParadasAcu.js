@@ -9,7 +9,7 @@ import ModalAñadirParada from '../velocidad/vel_modal_añadir_parada';
 import ModalObservacionesParada from '../velocidad/vel_modal_observaciones_parada';
 import { useCookies } from 'react-cookie';
 
-const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acciones, onSaved}) => {
+const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acciones, onSaved, programador}) => {
     const [user] = useCookies(['tec-user']);
     const [token] = useCookies(['tec-token']);
     const tieneEdionParadas = user['tec-user'].perfil.destrezas_velocidad.some(
@@ -108,7 +108,7 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acc
             const periodo0 = periodos[0];
             const codigoP0 = (periodo0.velocidad > 0)? 2 : 1;
             await axios.patch(`${BACKEND_SERVER}/api/velocidad/paradas/${parada.id}/`, 
-                { codigo: codigoP0 }, 
+                { codigo: codigoP0, observaciones: "", of:""}, 
                 { headers: { 'Authorization': `token ${token['tec-token']}` } }
             );
             // 3. Si hay más de un periodo....
@@ -130,7 +130,7 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acc
 
                     // Vincular el periodo actual a la nueva parada
                     await axios.patch(`${BACKEND_SERVER}/api/velocidad/periodo/${periodoActual.id}/`, 
-                        { parada: nuevaParadaId }, 
+                        { parada: nuevaParadaId, observaciones: "", of:"" }, 
                         { headers: { 'Authorization': `token ${token['tec-token']}` } }
                     );
                 }
@@ -156,7 +156,9 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acc
                     <th>Fecha Fin - Hora Fin</th>
                     <th>Duración</th>
                     <th>Descripción</th>
-                    {acciones || tieneEdionParadas?<th>Acciones</th>:<th>Observaciones</th>}
+                    {!programador && (
+                        acciones || tieneEdionParadas ? <th>Acciones</th> : <th>Observaciones</th>
+                    )}
                     </tr>
                 </thead>
                 <tbody>
@@ -178,35 +180,37 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acc
                                 <td>{fechaFin +' - '+ horaFin}</td>
                                 <td>{Number(pdb.duracion).toFixed(2)}</td>
                                 <td>{pdb.palabra_clave !== '' ? pdb.palabra_clave + ' - ' + pdb.codigo : pdb.codigo}</td>
-                                {acciones?(
-                                    <td>
-                                        <Form.Check
-                                            inline
-                                            name="grupo2"
-                                            type={'checkbox'}
-                                            id={pdb.id}
-                                            checked={estaseleccionado(pdb.id)}
-                                            onChange={(event) => handleChange(event, fechaInicio, horaInicio, fechaFin, horaFin, pdb.duracion, pdb.observaciones)}
-                                        />
-                                    </td>
-                                ):(
-                                    <td>
-                                        {tieneEdionParadas?(
-                                            <>
-                                                <PlusSquare style={{ marginRight: '15px',
-                                                    cursor: pdb.codigo==='Desconocido'?'not-allowed':'pointer', 
-                                                    color:pdb.codigo==='Desconocido'?'gray':'#007bff'}}
-                                                    onClick={() => handleOpenModalAñadir(paradaParaModal)}/>
-                                                <PencilFill style={{ color:'#007bff', marginRight: '15px'}} onClick={() => handleOpenModalEditar(paradaParaModal)}/>
-                                                <Trash style={{ 
-                                                    marginRight: '15px',
-                                                    cursor: pdb.codigo==='Desconocido'?'not-allowed':'pointer', 
-                                                    color:pdb.codigo==='Desconocido'?'gray':'#007bff'}} 
-                                                    onClick={pdb.codigo==='Desconocido'? undefined:() => InicializarParada(paradaParaModal)}/>
-                                            </>
-                                        ):''}
-                                        <Receipt style={{ cursor: 'pointer', color: pdb.observaciones && pdb.observaciones.trim() !== '' ? '#007bff' : 'gray' }} onClick={() => handleOpenModalObs(pdb.observaciones)}/>
-                                    </td>
+                                {!programador && (
+                                    acciones?(
+                                        <td>
+                                            <Form.Check
+                                                inline
+                                                name="grupo2"
+                                                type={'checkbox'}
+                                                id={pdb.id}
+                                                checked={estaseleccionado(pdb.id)}
+                                                onChange={(event) => handleChange(event, fechaInicio, horaInicio, fechaFin, horaFin, pdb.duracion, pdb.observaciones)}
+                                            />
+                                        </td>
+                                    ):(
+                                        <td>
+                                            {tieneEdionParadas && !programador?(
+                                                <>
+                                                    <PlusSquare style={{ marginRight: '15px',
+                                                        cursor: pdb.codigo==='Desconocido'?'not-allowed':'pointer', 
+                                                        color:pdb.codigo==='Desconocido'?'gray':'#007bff'}}
+                                                        onClick={() => handleOpenModalAñadir(paradaParaModal)}/>
+                                                    <PencilFill style={{ color:'#007bff', marginRight: '15px'}} onClick={() => handleOpenModalEditar(paradaParaModal)}/>
+                                                    <Trash style={{ 
+                                                        marginRight: '15px',
+                                                        cursor: pdb.codigo==='Desconocido'?'not-allowed':'pointer', 
+                                                        color:pdb.codigo==='Desconocido'?'gray':'#007bff'}} 
+                                                        onClick={pdb.codigo==='Desconocido'? undefined:() => InicializarParada(paradaParaModal)}/>
+                                                </>
+                                            ):''}
+                                            <Receipt style={{ cursor: 'pointer', color: pdb.observaciones && pdb.observaciones.trim() !== '' ? '#007bff' : 'gray' }} onClick={() => handleOpenModalObs(pdb.observaciones)}/>
+                                        </td>
+                                    )
                                 )}
                             </tr>
                         )
