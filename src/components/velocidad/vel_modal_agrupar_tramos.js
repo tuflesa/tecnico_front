@@ -29,6 +29,7 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
     const [palabra_seleccionado, setPalabraSeleccionado] = useState('');
     const [observaciones, setObservaciones] = useState('');
     const [paradasSeleccionadas, setParadasSeleccionadas] = useState(paradas || []);
+    const [cargandoOF, setCargandoOF] = useState(false);
 
     useEffect(() => {
         if (paradas) {
@@ -93,6 +94,8 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
     },[seleTipoParada]);
 
     useEffect(()=>{
+        if (!seleTipoParada) return;
+        setCargandoOF(true);  // ← empieza a cargar
         seleTipoParada && axios.get(BACKEND_SERVER + `/api/velocidad/buscar_montajes_of/?zona_id=${id}&tipo_parada_siglas=${seleSiglasParada}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -105,6 +108,9 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
         })
         .catch( err => {
             console.log(err);
+        })
+        .finally(()=>{
+            setCargandoOF(false);
         });  
     },[seleTipoParada]);
 
@@ -437,7 +443,7 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
                     <Button variant="secondary" onClick={cerrar_modal}>
                     Cancelar
                     </Button>
-                    <Button variant="primary" onClick={() => guardartipoparada()}>
+                    <Button variant="primary" onClick={() => guardartipoparada()} disabled={cargandoOF}>
                     Guardar
                     </Button>
                 </Modal.Footer>

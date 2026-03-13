@@ -83,18 +83,12 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acc
 
     const InicializarParada = async (parada) => {
         if (!parada) return;
-        await axios.delete( BACKEND_SERVER + `/api/velocidad/eliminar_paradaDB/`,{
-            data: { parada: parada.id },
-            headers: { Authorization: `Token ${token["tec-token"]}` 
-            } }
-        )
-        .then(res => {
-            console.log('eliminación hecha: ', res.data);
-        })
-        .catch (err => {
-            console.log(err);
-        })
+        
         try {
+            await axios.delete( BACKEND_SERVER + `/api/velocidad/eliminar_paradaDB/${parada.id}/`,{
+                headers: { Authorization: `Token ${token["tec-token"]}`} 
+            });
+            console.log("Parada eliminada correctamente");
             // 1. Buscamos los periodos de esa parada
             const resPeriodos = await axios.get(`${BACKEND_SERVER}/api/velocidad/periodo/?parada=${parada.id}`, {
                 headers: { 'Authorization': `token ${token['tec-token']}` }

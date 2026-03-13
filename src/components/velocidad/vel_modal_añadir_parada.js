@@ -153,7 +153,7 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
         const inicio = moment.utc(horaInicioReg, "HH:mm:ss").valueOf();
         const fin    = moment.utc(horaFinReg,    "HH:mm:ss").valueOf();
         let posicion;
-
+        console.log('QUE VALE PARADA: ', parada);
         const datos = {
             periodo: pContenedor,
             xIdOF: parada.of,
@@ -168,6 +168,7 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
             xTurno_id: pContenedor.turno, //solo hay un turno pues solo puede estar dentro de un periodo
             //xIgnorar = false siempre,
             parada_id: parada.id,
+            parada_duracion: parada.duracion,
         };
         try{
             const res = await axios.post(`${BACKEND_SERVER}/api/velocidad/crear_parada_ProdBD/`,
@@ -185,10 +186,9 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
             alert('Error al guardar en ProdBD:'+ (error.response?.data.mensaje || error.message));
             return;
         }
-        //return
+        
         try {
             const config = { headers: { 'Authorization': `token ${token['tec-token']}` } };
-
             // --- CASO 1: TODO EL PERIODO ES UNA AVERÍA/INCIDENCIA ---
             if (esInicioExacto && esFinExacto) {                
                 // 1. Crear la nueva parada SIN el periodo
@@ -209,6 +209,7 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
                 await axios.post(`${BACKEND_SERVER}/api/velocidad/parada_produccion_db/`, {
                     parada: nuevaParadaId,
                     pos: posicion,
+                    turno: pContenedor.turno,
                 }, config);
             }
 
@@ -236,10 +237,10 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
                     inicio: moment.utc(nuevoInicio).toISOString(),
                     fin: moment.utc(nuevoFin).toISOString()
                 }, config);
-
                 await axios.post(`${BACKEND_SERVER}/api/velocidad/parada_produccion_db/`, {
-                    parada: nueva_parada.id,
+                    parada: nueva_parada.data.id,
                     pos: posicion,
+                    turno: pContenedor.turno,
                 }, config);
             }
 
@@ -273,10 +274,10 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
                     inicio: moment.utc(tP_inicio).toISOString(),
                     fin: moment.utc(T_u_inicio).toISOString()
                 }, config);
-
                 await axios.post(`${BACKEND_SERVER}/api/velocidad/parada_produccion_db/`, {
-                    parada: nueva_parada.id,
+                    parada: nueva_parada.data.id,
                     pos: posicion,
+                    turno: pContenedor.turno,
                 }, config);
             }
 
@@ -288,6 +289,20 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
         } catch (error) {
             console.error("Error en el proceso:", error.response?.data || error.message);
             alert("Hubo un error al guardar los cambios: " + (error.response?.data?.detail || error.message));
+        }
+    };
+
+    const turno_en_Paradas_Prod_dB = async () => {
+        //####### BUCLE PARA RELLENAR EL NUEVO CAMPO DE Paradas_Prod_dB ###############
+        try {
+            const res = await axios.post(`${BACKEND_SERVER}/api/velocidad/rellenar_turnos_ProdBD/`, {}, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+        } catch (error) {
+            console.log('ERROR:', error);
         }
     };
 
@@ -536,6 +551,7 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
                             {esAveria ? "Quitar Avería" : "Añadir Avería"}
                         </Button>
                         <Button variant="primary" onClick={handleGuardar}>Guardar</Button>
+                        <Button variant="primary" onClick={turno_en_Paradas_Prod_dB}>Poner turno en paradas_prod</Button>
                     </div>
                 </Modal.Footer>
             </Modal>
