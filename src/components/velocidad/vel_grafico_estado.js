@@ -438,7 +438,7 @@ const GraficoEstado = () => {
                             </Col>
                         </Row>
                     </Col> */}
-                    <Col sm={2}>
+                    <Col sm={1}>
                         <Row>
                             <Col>
                                 Turno:
