@@ -23,6 +23,7 @@ const ModalEditarParada = ({ show, onHide, parada}) => {
             setseleTipoParada(parada.tipo_parada_id || '');
             setPalabraSeleccionada(parada.palabraclave_id || '');
             setTipoNombre(parada.tipo_parada_nombre);
+            setTipoSiglas(parada.tipo_parada_nombre === 'Incidencia'?'I':parada.tipo_parada_nombre === 'Avería'?'A':parada.tipo_parada_nombre === 'Cambio'?'R':'');
         }
     }, [parada, show]);
 
@@ -118,7 +119,7 @@ const ModalEditarParada = ({ show, onHide, parada}) => {
     const handleCerrar = () => {
         setTipoNombre('');
         setTipoSiglas(null);
-        setseleTipoParada('');
+        setseleTipoParada(null);
         setPalabraSeleccionada(null);
         setPalabrasClave(null);
         setCodigoParada(null);

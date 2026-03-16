@@ -153,11 +153,10 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
         const inicio = moment.utc(horaInicioReg, "HH:mm:ss").valueOf();
         const fin    = moment.utc(horaFinReg,    "HH:mm:ss").valueOf();
         let posicion;
-        console.log('QUE VALE PARADA: ', parada);
         const datos = {
             periodo: pContenedor,
             xIdOF: parada.of,
-            xIdTipo: tipoRegistro==='Avería'?'A':'I',
+            xIdTipo: tipoRegistro==='averia'?'A':'I',
             Tipo_anterior: parada.tipo_parada_nombre==='Cambio'?'R':parada.tipo_parada_nombre==='Incidencia'?'I':'A',
             //xIdPos: idPos, lo buscamos en el backend ????
             xIdParada: codigoProdDB,
@@ -289,20 +288,6 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
         } catch (error) {
             console.error("Error en el proceso:", error.response?.data || error.message);
             alert("Hubo un error al guardar los cambios: " + (error.response?.data?.detail || error.message));
-        }
-    };
-
-    const turno_en_Paradas_Prod_dB = async () => {
-        //####### BUCLE PARA RELLENAR EL NUEVO CAMPO DE Paradas_Prod_dB ###############
-        try {
-            const res = await axios.post(`${BACKEND_SERVER}/api/velocidad/rellenar_turnos_ProdBD/`, {}, {
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-        } catch (error) {
-            console.log('ERROR:', error);
         }
     };
 
@@ -551,7 +536,6 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
                             {esAveria ? "Quitar Avería" : "Añadir Avería"}
                         </Button>
                         <Button variant="primary" onClick={handleGuardar}>Guardar</Button>
-                        <Button variant="primary" onClick={turno_en_Paradas_Prod_dB}>Poner turno en paradas_prod</Button>
                     </div>
                 </Modal.Footer>
             </Modal>
