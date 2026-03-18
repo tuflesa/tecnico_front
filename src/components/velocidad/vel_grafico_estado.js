@@ -549,9 +549,9 @@ const GraficoEstado = () => {
                                 <Nav.Item>
                                     <Nav.Link eventKey="todas_paradas">
                                     {existeDesconocido ? (
-                                        <span>Todas las Paradas</span>
+                                        <span>Cambio de Estado</span>
                                     ) : (
-                                        'Todas las Paradas'
+                                        'Cambio de Estado'
                                     )}
                                     </Nav.Link>
                                 </Nav.Item>
