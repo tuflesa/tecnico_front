@@ -26,6 +26,10 @@
   margin-bottom: 1.25rem;
 }
 
+.campoFull {
+  grid-column: span 2;
+}
+
 .campo {
   display: flex;
   flex-direction: column;

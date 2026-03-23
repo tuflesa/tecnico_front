@@ -67,6 +67,7 @@ function BobinaDetalle({ bobinaId, posicionId, altura, columna, token, onClose, 
               <Campo label="Colada"     value={bobina.colada} />
               <Campo label="Proveedor"  value={bobina.proveedor} full />
               <Campo label="F. entrada" value={fmtDate(bobina.fecha_entrada)} />
+              <Campo label="Espesor" value={bobina.espesor_mm != null ? `${fmt(bobina.espesor_mm)} mm` : '—'} />
               {bobina.observaciones && <Campo label="Notas" value={bobina.observaciones} full />}
             </div>
           )}

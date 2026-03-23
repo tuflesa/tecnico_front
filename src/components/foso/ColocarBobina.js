@@ -1,21 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import Modal from './Modal';
 import styles from './ColocarBobina.module.css';
 
 const empty = {
-  codigo: '', material: '', peso_kg: '', diametro_mm: '',
-  ancho_mm: '', colada: '', proveedor: '', observaciones: '',
+  codigo: '', material: '', diametro_mm: '',
+  ancho_mm: '', espesor_mm:'', colada: '', proveedor: '', observaciones: '',
 };
 
 function ColocarBobina({ posicionId, altura, columna, token, onClose, onColocada }) {
-  const [form,      setForm]      = useState(empty);
-  const [error,     setError]     = useState('');
-  const [guardando, setGuardando] = useState(false);
+  const [form,        setForm]       = useState(empty);
+  const [error,       setError]      = useState('');
+  const [guardando,   setGuardando]  = useState(false);
+  const [materiales,  setMateriales] = useState([]);
+  const [proveedores, setProveedores] = useState([]);
 
   const headers = { Authorization: `token ${token}` };
   const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }));
+
+  useEffect(() => {
+    axios.get(`${BACKEND_SERVER}/api/foso/materiales/`, { headers })
+      .then(r => setMateriales(r.data))
+      .catch(() => {});
+    axios.get(`${BACKEND_SERVER}/api/foso/proveedores/`, { headers })
+      .then(r => setProveedores(r.data))
+      .catch(() => {});
+  }, []); // eslint-disable-line
 
   const handleGuardar = async () => {
     if (!form.codigo.trim()) { setError('El código es obligatorio.'); return; }
@@ -24,24 +35,32 @@ function ColocarBobina({ posicionId, altura, columna, token, onClose, onColocada
     try {
       const payload = {
         codigo:        form.codigo.trim(),
-        material:      form.material      || undefined,
-        peso_kg:       form.peso_kg       ? parseFloat(form.peso_kg)       : undefined,
-        diametro_mm:   form.diametro_mm   ? parseFloat(form.diametro_mm)   : undefined,
-        ancho_mm:      form.ancho_mm      ? parseFloat(form.ancho_mm)      : undefined,
-        colada:        form.colada        || undefined,
-        proveedor:     form.proveedor     || undefined,
-        observaciones: form.observaciones || undefined,
+        material:      form.material      || null,
+        diametro_mm:   form.diametro_mm   ? parseFloat(form.diametro_mm)   : null,
+        ancho_mm:      form.ancho_mm      ? parseFloat(form.ancho_mm)      : null,
+        colada:        form.colada        || null,
+        proveedor:     form.proveedor     || null,
+        observaciones: form.observaciones || null,
+        espesor_mm: form.espesor_mm ? parseFloat(form.espesor_mm) : null,
       };
       const bobina = await axios.post(`${BACKEND_SERVER}/api/foso/bobinas/`, payload, { headers });
-      await axios.post(`${BACKEND_SERVER}/api/foso/ocupaciones/colocar/`,
+      await axios.post(
+        `${BACKEND_SERVER}/api/foso/ocupaciones/colocar/`,
         { bobina_id: bobina.data.id, posicion_id: posicionId },
         { headers }
       );
       onColocada();
     } catch (e) {
-      const msg = e?.response?.data?.codigo?.[0]
-               || e?.response?.data?.detail
-               || 'Error al guardar.';
+      const errores = {
+        'This field must be unique.':'Este código ya existe.',
+        'Bobina with this codigo already exists.':'Ya existe una bobina con este código.',
+      };
+
+      const msgRaw = e?.response?.data?.codigo?.[0]
+                  || e?.response?.data?.detail
+                  || 'Error al guardar.';
+
+      const msg = errores[msgRaw] || msgRaw;
       setError(msg);
     } finally {
       setGuardando(false);
@@ -49,33 +68,51 @@ function ColocarBobina({ posicionId, altura, columna, token, onClose, onColocada
   };
 
   return (
-    <Modal title="Nueva bobina" onClose={onClose} width={500}>
+    <Modal title="Nueva bobina" onClose={onClose} width={680}>
       <div className={styles.badge}>Alt. {altura} · Col. {columna}</div>
 
       {error && <div className={styles.error}>{error}</div>}
 
       <div className={styles.grid}>
+
         <Campo label="Código *" full>
           <input value={form.codigo} onChange={set('codigo')} placeholder="Ej: B-015" autoFocus />
         </Campo>
+
         <Campo label="Material">
-          <input value={form.material} onChange={set('material')} placeholder="Acero S235" />
+          <select value={form.material} onChange={set('material')}>
+            <option value="">— Selecciona —</option>
+            {materiales.map(m => (
+              <option key={m.id} value={m.id}>{m.nombre}</option>
+            ))}
+          </select>
         </Campo>
+
+        <Campo label="Proveedor">
+          <select value={form.proveedor} onChange={set('proveedor')}>
+            <option value="">— Selecciona —</option>
+            {proveedores.map(p => (
+              <option key={p.id} value={p.id}>{p.nombre}</option>
+            ))}
+          </select>
+        </Campo>
+
         <Campo label="Colada">
           <input value={form.colada} onChange={set('colada')} placeholder="C-2024-015" />
         </Campo>
-        <Campo label="Peso (kg)">
-          <input value={form.peso_kg} onChange={set('peso_kg')} type="number" placeholder="2500" />
-        </Campo>
+
         <Campo label="Diámetro (mm)">
           <input value={form.diametro_mm} onChange={set('diametro_mm')} type="number" placeholder="1200" />
         </Campo>
+
         <Campo label="Ancho (mm)">
           <input value={form.ancho_mm} onChange={set('ancho_mm')} type="number" placeholder="1000" />
         </Campo>
-        <Campo label="Proveedor" full>
-          <input value={form.proveedor} onChange={set('proveedor')} placeholder="Nombre del proveedor" />
+
+        <Campo label="Espesor (mm)">
+          <input value={form.espesor_mm} onChange={set('espesor_mm')} type="number" placeholder="2.5" step="0.01" />
         </Campo>
+
         <Campo label="Observaciones" full>
           <textarea
             value={form.observaciones}
@@ -85,6 +122,7 @@ function ColocarBobina({ posicionId, altura, columna, token, onClose, onColocada
             style={{ resize: 'vertical' }}
           />
         </Campo>
+
       </div>
 
       <div className={styles.actions}>

@@ -101,11 +101,11 @@ function FosoPage() {
         </Navbar.Collapse>
       </Navbar>
 
-      <Container fluid className="pt-5 mt-4 px-3" style={{ height: 'calc(100vh - 56px)', display: 'flex', flexDirection: 'column' }}>
+      <Container fluid className="pt-2 mt-4 px-3" style={{ height: 'calc(100vh - 56px)', display: 'flex', flexDirection: 'column' }}>
         {loading && <p className={styles.loadMsg}>Cargando foso...</p>}
 
         {!loading && fosoData && (
-          <div className={styles.fosoWrap} style={{ flex: 1, overflow: 'auto' }}>
+          <div className={styles.fosoWrap} style={{ flex: 1, overflow: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
             <FosoGrid
               alturas={fosoData.alturas}
               onClickBobina={handleClickBobina}
