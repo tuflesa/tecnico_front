@@ -1,0 +1,69 @@
+.scrollWrap { overflow-x: auto; overflow-y: visible; padding: 0 0 1rem; }
+
+.canvas { position: relative; margin-left: 60px; }
+
+.colNum {
+  position: absolute;
+  font-size: 10px;
+  color: #adb5bd;
+  width: 16px;
+  text-align: center;
+}
+
+.alturaLbl {
+  position: absolute;
+  left: -58px;
+  font-size: 10px;
+  color: #6c757d;
+  white-space: nowrap;
+}
+
+.bobina {
+  position: absolute;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform .12s;
+  user-select: none;
+}
+
+.ocupada {
+  background: #cfe2ff;
+  border: 2px solid #0d6efd;
+  cursor: pointer;
+}
+.ocupada:hover { transform: scale(1.1); }
+
+.vaciaClic {
+  background: #fff;
+  border: 1.5px dashed #adb5bd;
+  cursor: pointer;
+}
+.vaciaClic:hover {
+  background: #f8f9fa;
+  border-color: #0d6efd;
+  transform: scale(1.06);
+}
+
+.vaciaBloq {
+  background: #f8f9fa;
+  border: 1px dashed #dee2e6;
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.cod {
+  font-size: 8px;
+  font-weight: 600;
+  color: #084298;
+  text-align: center;
+  line-height: 1.2;
+  max-width: 48px;
+  overflow: hidden;
+  word-break: break-all;
+  padding: 2px;
+}
+
+.plusIcon { font-size: 18px; color: #adb5bd; line-height: 1; }
+.lockIcon { font-size: 14px; color: #dee2e6; line-height: 1; }

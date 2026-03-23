@@ -1,0 +1,44 @@
+.navLinea {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 1.5rem;
+}
+.navLabel {
+  font-size: 13px;
+  color: #555;
+  white-space: nowrap;
+}
+.navSelect {
+  font-size: 13px;
+  padding: 4px 10px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  background: #fff;
+  color: #333;
+  width: auto;
+}
+.navStats {
+  display: flex;
+  gap: 16px;
+  margin-left: 1.5rem;
+  align-items: center;
+}
+.statItem {
+  font-size: 13px;
+  color: #555;
+}
+
+.loadMsg {
+  color: #888;
+  font-size: 13px;
+  padding: 2rem 0;
+}
+
+.fosoWrap {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 1.5rem 1.5rem 1.5rem 2rem;
+  overflow-x: auto;
+}
