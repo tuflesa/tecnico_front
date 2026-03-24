@@ -16,6 +16,7 @@ function FosoPage() {
   const [loading,  setLoading]  = useState(false);
   const [detalle,  setDetalle]  = useState(null);
   const [colocar,  setColocar]  = useState(null);
+  const [moviendo, setMoviendo] = useState(null);
 
   const authHeader = { headers: { Authorization: `token ${token['tec-token']}` } };
 
@@ -27,6 +28,20 @@ function FosoPage() {
         if (activas.length) setLineaId(activas[0].id);
       });
   }, []); // eslint-disable-line
+
+  const handleMover = async (posicionDestinoId) => {
+    try {
+      await axios.post(
+        `${BACKEND_SERVER}/api/foso/ocupaciones/colocar/`,
+        { bobina_id: moviendo.bobinaId, posicion_id: posicionDestinoId },
+        { headers: { Authorization: `token ${token['tec-token']}` } }
+      );
+      setMoviendo(null);
+      cargarFoso(lineaId);
+    } catch {
+      alert('Error al mover la bobina.');
+    }
+  };
 
   const cargarFoso = useCallback((id) => {
     setLoading(true);
@@ -104,12 +119,37 @@ function FosoPage() {
       <Container fluid className="pt-2 mt-4 px-3" style={{ height: 'calc(100vh - 56px)', display: 'flex', flexDirection: 'column' }}>
         {loading && <p className={styles.loadMsg}>Cargando foso...</p>}
 
+        {moviendo && (
+          <div style={{
+            background: '#fff3cd', border: '1px solid #ffc107',
+            borderRadius: 6, padding: '10px 16px', marginBottom: 12, marginTop: 18,
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+          }}>
+            <span style={{ fontSize: 13 }}>
+              Selecciona la posición destino para mover <strong>{moviendo.codigo}</strong>
+            </span>
+            <button
+              onClick={() => setMoviendo(null)}
+              style={{ background: 'none', border: '1px solid #aaa', borderRadius: 4, padding: '4px 12px', fontSize: 12, cursor: 'pointer' }}
+            >
+              Cancelar
+            </button>
+          </div>
+        )}
+
         {!loading && fosoData && (
           <div className={styles.fosoWrap} style={{ flex: 1, overflow: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
             <FosoGrid
               alturas={fosoData.alturas}
               onClickBobina={handleClickBobina}
-              onClickVacia={handleClickVacia}
+              onClickVacia={(posicionId, altura, columna) => {
+                if (moviendo) {
+                  handleMover(posicionId);
+                } else {
+                  setColocar({ posicionId, altura, columna });
+                }
+              }}
+              modoMoviendo={moviendo}
             />
           </div>
         )}
@@ -124,6 +164,10 @@ function FosoPage() {
           token={token['tec-token']}
           onClose={() => setDetalle(null)}
           onRetirada={() => { setDetalle(null); if (lineaId) cargarFoso(lineaId); }}
+          onMover={(bobinaId, ocupacionId, codigo) => {
+            setDetalle(null);
+            setMoviendo({ bobinaId, ocupacionId, codigo });
+          }}
         />
       )}
 

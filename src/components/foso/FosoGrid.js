@@ -11,7 +11,7 @@ function soportes(altura, col) {
   return [`${altura - 1}-${col - 1}`, `${altura - 1}-${col}`];
 }
 
-function FosoGrid({ alturas, onClickBobina, onClickVacia }) {
+function FosoGrid({ alturas, onClickBobina, onClickVacia, modoMoviendo }) {
   const [D, setD] = useState(70);
 
   // Recalcula D según el ancho de ventana
@@ -78,9 +78,10 @@ function FosoGrid({ alturas, onClickBobina, onClickVacia }) {
             const bloq   = !tieneB && !puede;
 
             let cls = styles.bobina;
-            if (tieneB)     cls += ' ' + styles.ocupada;
+            if (tieneB) cls += ' ' + styles.ocupada;
+            else if (modoMoviendo && puede) cls += ' ' + styles.vaciaMover;
             else if (puede) cls += ' ' + styles.vaciaClic;
-            else            cls += ' ' + styles.vaciaBloq;
+            else cls += ' ' + styles.vaciaBloq;
 
             return (
               <div

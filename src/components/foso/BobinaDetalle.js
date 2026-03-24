@@ -4,7 +4,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import Modal from './Modal';
 import styles from './BobinaDetalle.module.css';
 
-function BobinaDetalle({ bobinaId, posicionId, altura, columna, token, onClose, onRetirada }) {
+function BobinaDetalle({ bobinaId, posicionId, altura, columna, token, onClose, onRetirada, onMover }) {
   const [bobina,    setBobina]   = useState(null);
   const [historial, setHistorial] = useState([]);
   const [loading,   setLoading]  = useState(true);
@@ -81,7 +81,12 @@ function BobinaDetalle({ bobinaId, posicionId, altura, columna, token, onClose, 
                       <span className={o.activo ? styles.badgeVerde : styles.badgeGris}>
                         {o.activo ? 'activa' : 'retirada'}
                       </span>
-                      <span className={styles.histPos}>Posición {o.posicion}</span>
+                      <span className={styles.histPos}>
+                        {o.posicion_detalle
+                          ? `L${o.posicion_detalle.linea} · A${o.posicion_detalle.altura} · C${o.posicion_detalle.columna}`
+                          : `Pos. ${o.posicion}`
+                        }
+                      </span>
                       <span className={styles.histDate}>
                         {fmtDate(o.fecha_inicio)} → {o.fecha_fin ? fmtDate(o.fecha_fin) : 'hoy'}
                       </span>
@@ -94,6 +99,12 @@ function BobinaDetalle({ bobinaId, posicionId, altura, columna, token, onClose, 
           <div className={styles.actions}>
             <button className={styles.btnRetirar} onClick={handleRetirar} disabled={retirando}>
               {retirando ? 'Retirando...' : 'Retirar del foso'}
+            </button>
+            <button className={styles.btnMover} onClick={() => {
+              const ocupActiva = historial.find(o => o.activo && o.posicion === posicionId);
+              if (ocupActiva) onMover(bobinaId, ocupActiva.id, bobina.codigo);
+            }}>
+              Mover
             </button>
             <button className={styles.btnCerrar} onClick={onClose}>Cerrar</button>
           </div>

@@ -114,3 +114,14 @@
   transition: background .12s; cursor: pointer;
 }
 .btnCerrar:hover { background: #f8f9fa; }
+.btnMover {
+  background: #fff3cd;
+  color: #664d03;
+  border: 1px solid #ffc107;
+  border-radius: 4px;
+  padding: 7px 16px;
+  font-size: 13px;
+  transition: background .12s;
+  cursor: pointer;
+}
+.btnMover:hover { background: #ffe69c; }
