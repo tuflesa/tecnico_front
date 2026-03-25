@@ -15,6 +15,7 @@ function BobinaDetalle({ bobinaId, posicionId, altura, columna, token, onClose, 
   const [materiales, setMateriales] = useState([]);
   const [proveedores,setProveedores]= useState([]);
   const [guardando,  setGuardando]  = useState(false);
+  const [tieneCarga, setTieneCarga] = useState(false);
 
   const headers = { Authorization: `token ${token}` };
 
@@ -25,6 +26,32 @@ function BobinaDetalle({ bobinaId, posicionId, altura, columna, token, onClose, 
     ]).then(([b, h]) => {
       setBobina(b.data);
       setHistorial(h.data);
+
+      // Comprueba si hay bobinas apoyadas encima
+      if (b.data.posicion_actual) {
+        const { altura, columna, linea } = b.data.posicion_actual;
+        axios.get(`${BACKEND_SERVER}/api/foso/lineas/${linea}/foso/`, { headers })
+          .then(foso => {
+            const altSup = foso.data.alturas.find(a => a.altura === altura + 1);
+            if (!altSup) { setTieneCarga(false); return; }
+
+            // Posiciones de la altura superior que apoyan sobre esta bobina
+            // Altura superior impar: col-1 apoya en col-1 y col → nos afecta col c
+            // Altura superior par:   col   apoya en col   y col+1 → nos afecta col c-1
+            const posicionesQueApoyan = altSup.columnas.filter(cel => {
+              if ((altura + 1) % 2 === 0) {
+                // altura+1 es par: cel.columna apoya en cel.columna y cel.columna+1
+                return cel.columna === columna || cel.columna === columna - 1;
+              } else {
+                // altura+1 es impar: cel.columna apoya en cel.columna-1 y cel.columna
+                return cel.columna === columna || cel.columna === columna + 1;
+              }
+            });
+
+            const hayCarga = posicionesQueApoyan.some(cel => cel.bobina_id != null);
+            setTieneCarga(hayCarga);
+          });
+      }
     }).finally(() => setLoading(false));
   }, [bobinaId]); // eslint-disable-line
 
@@ -209,16 +236,27 @@ function BobinaDetalle({ bobinaId, posicionId, altura, columna, token, onClose, 
             {!editando && (
               <>
                 {puedeRetirar && (
-                  <button className={styles.btnRetirar} onClick={handleRetirar} disabled={retirando}>
-                    {retirando ? 'Retirando...' : 'Retirar del foso'}
+                  <button
+                    className={styles.btnRetirar}
+                    onClick={handleRetirar}
+                    disabled={retirando || tieneCarga}
+                    title={tieneCarga ? 'Hay bobinas apoyadas encima — retíralas primero' : ''}
+                  >
+                    {retirando ? 'Retirando...' : tieneCarga ? 'Con carga encima' : 'Retirar del foso'}
                   </button>
                 )}
+
                 {puedeMover && (
-                  <button className={styles.btnMover} onClick={() => {
-                    const ocupActiva = historial.find(o => o.activo && o.posicion === posicionId);
-                    if (ocupActiva) onMover(bobinaId, ocupActiva.id, bobina.codigo);
-                  }}>
-                    Mover
+                  <button
+                    className={styles.btnMover}
+                    onClick={() => {
+                      const ocupActiva = historial.find(o => o.activo && o.posicion === posicionId);
+                      if (ocupActiva) onMover(bobinaId, ocupActiva.id, bobina.codigo);
+                    }}
+                    disabled={tieneCarga}
+                    title={tieneCarga ? 'Hay bobinas apoyadas encima — muévelas primero' : ''}
+                  >
+                    {tieneCarga ? 'Con carga encima' : 'Mover'}
                   </button>
                 )}
                 {puedeEditar && (

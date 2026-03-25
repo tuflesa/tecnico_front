@@ -151,3 +151,9 @@
 }
 .btnGuardar:hover:not(:disabled) { background: #0a58ca; }
 .btnGuardar:disabled { opacity: .5; cursor: not-allowed; }
+
+.btnRetirar:disabled,
+.btnMover:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
