@@ -1,81 +1,148 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { BACKEND_SERVER } from '../../constantes';
 import styles from './PanelBusqueda.module.css';
 
+const filtrosVacios = {
+  codigo:       '',
+  ref_proveedor:'',
+  colada:       '',
+  material:     '',
+  proveedor:    '',
+  ancho_mm:     '',
+  espesor_mm:   '',
+};
+
 function PanelBusqueda({ token, onClose, onSeleccionar }) {
-  const [texto,      setTexto]      = useState('');
+  const [filtros,    setFiltros]    = useState(filtrosVacios);
   const [resultados, setResultados] = useState([]);
   const [buscando,   setBuscando]   = useState(false);
   const [buscado,    setBuscado]    = useState(false);
+  const [materiales, setMateriales] = useState([]);
+  const [proveedores,setProveedores]= useState([]);
 
   const headers = { Authorization: `token ${token}` };
+  const set = (k) => (e) => setFiltros(f => ({ ...f, [k]: e.target.value }));
 
-  const buscar = useCallback(async (valor) => {
-    if (!valor.trim()) { setResultados([]); setBuscado(false); return; }
+  useEffect(() => {
+    axios.get(`${BACKEND_SERVER}/api/foso/materiales/`,  { headers }).then(r => setMateriales(r.data)).catch(() => {});
+    axios.get(`${BACKEND_SERVER}/api/foso/proveedores/`, { headers }).then(r => setProveedores(r.data)).catch(() => {});
+  }, []); // eslint-disable-line
+
+  const hayFiltros = Object.values(filtros).some(v => v !== '');
+
+  const buscar = async () => {
+    if (!hayFiltros) return;
     setBuscando(true);
     try {
-        const r = await axios.get(
-        `${BACKEND_SERVER}/api/foso/bobinas/?search=${encodeURIComponent(valor)}`,
-        { headers }
-        );
-        const todos = r.data.results ?? r.data;
-        const v = valor.toLowerCase();
+      const r = await axios.get(`${BACKEND_SERVER}/api/foso/bobinas/`, { headers });
+      const todos = r.data.results ?? r.data;
+      const v = (campo, valor) => valor === '' || campo?.toString().toLowerCase().includes(valor.toLowerCase());
 
-        // Filtra en cliente: startswith para código, colada y material — contains para proveedor
-        const filtrados = todos.filter(b =>
-        b.codigo?.toLowerCase().startsWith(v) ||
-        b.colada?.toLowerCase().startsWith(v) ||
-        b.material_nombre?.toLowerCase().startsWith(v) ||
-        b.proveedor_nombre?.toLowerCase().includes(v)
-        );
+      const filtrados = todos.filter(b =>
+        (filtros.codigo        === '' || b.codigo?.toLowerCase().startsWith(filtros.codigo.toLowerCase())) &&
+        (filtros.ref_proveedor === '' || b.ref_proveedor?.toLowerCase().startsWith(filtros.ref_proveedor.toLowerCase())) &&
+        (filtros.colada        === '' || b.colada?.toLowerCase().startsWith(filtros.colada.toLowerCase())) &&
+        (filtros.material      === '' || String(b.material) === filtros.material) &&
+        (filtros.proveedor     === '' || String(b.proveedor) === filtros.proveedor) &&
+        (filtros.ancho_mm      === '' || parseFloat(b.ancho_mm)   === parseFloat(filtros.ancho_mm)) &&
+        (filtros.espesor_mm    === '' || parseFloat(b.espesor_mm) === parseFloat(filtros.espesor_mm))
+      );
 
-        setResultados(filtrados);
-        setBuscado(true);
+      setResultados(filtrados);
+      setBuscado(true);
     } catch {
-        setResultados([]);
+      setResultados([]);
     } finally {
-        setBuscando(false);
+      setBuscando(false);
     }
-    }, []); // eslint-disable-line
+  };
 
-  const handleChange = (e) => {
-    const v = e.target.value;
-    setTexto(v);
-    if (v.length >= 2) buscar(v);
-    else { setResultados([]); setBuscado(false); }
+  const limpiar = () => {
+    setFiltros(filtrosVacios);
+    setResultados([]);
+    setBuscado(false);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') buscar();
   };
 
   return (
     <>
-      {/* Fondo oscuro */}
       <div className={styles.backdrop} onClick={onClose} />
-
-      {/* Panel */}
       <div className={styles.panel}>
+
         <div className={styles.panelHeader}>
           <span className={styles.panelTitle}>Buscar bobina</span>
           <button className={styles.closeBtn} onClick={onClose}>✕</button>
         </div>
 
-        <div className={styles.searchWrap}>
-          <input
-            autoFocus
-            value={texto}
-            onChange={handleChange}
-            placeholder="Código, material, proveedor, colada..."
-            className={styles.searchInput}
-          />
+        <div className={styles.filtros}>
+
+          <div className={styles.filtroFila}>
+            <div className={styles.filtroGrupo}>
+              <label className={styles.filtroLbl}>Código</label>
+              <input value={filtros.codigo} onChange={set('codigo')} onKeyDown={handleKeyDown} placeholder="Ej: 260046755B" />
+            </div>
+            <div className={styles.filtroGrupo}>
+              <label className={styles.filtroLbl}>Ref. proveedor</label>
+              <input value={filtros.ref_proveedor} onChange={set('ref_proveedor')} onKeyDown={handleKeyDown} placeholder="Ref." />
+            </div>
+          </div>
+
+          <div className={styles.filtroFila}>
+            <div className={styles.filtroGrupo}>
+              <label className={styles.filtroLbl}>Colada</label>
+              <input value={filtros.colada} onChange={set('colada')} onKeyDown={handleKeyDown} placeholder="Colada" />
+            </div>
+          </div>
+
+          <div className={styles.filtroGrupo}>
+            <label className={styles.filtroLbl}>Material</label>
+            <select value={filtros.material} onChange={set('material')}>
+              <option value="">— Todos —</option>
+              {materiales.map(m => <option key={m.id} value={m.id}>{m.nombre}</option>)}
+            </select>
+          </div>
+
+          <div className={styles.filtroGrupo}>
+            <label className={styles.filtroLbl}>Proveedor</label>
+            <select value={filtros.proveedor} onChange={set('proveedor')}>
+              <option value="">— Todos —</option>
+              {proveedores.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+            </select>
+          </div>
+
+          <div className={styles.filtroFila}>
+            <div className={styles.filtroGrupo}>
+              <label className={styles.filtroLbl}>Ancho (mm)</label>
+              <input value={filtros.ancho_mm} onChange={set('ancho_mm')} onKeyDown={handleKeyDown} type="number" placeholder="1250" />
+            </div>
+            <div className={styles.filtroGrupo}>
+              <label className={styles.filtroLbl}>Espesor (mm)</label>
+              <input value={filtros.espesor_mm} onChange={set('espesor_mm')} onKeyDown={handleKeyDown} type="number" placeholder="1.5" />
+            </div>
+          </div>
+
+          <div className={styles.btnFila}>
+            <button className={styles.btnLimpiar} onClick={limpiar}>Limpiar</button>
+            <button className={styles.btnBuscar} onClick={buscar} disabled={!hayFiltros || buscando}>
+              {buscando ? 'Buscando...' : 'Buscar'}
+            </button>
+          </div>
+
         </div>
 
         <div className={styles.resultados}>
-          {buscando && <p className={styles.msg}>Buscando...</p>}
-
-          {!buscando && buscado && resultados.length === 0 && (
+          {buscado && resultados.length === 0 && (
             <p className={styles.msg}>Sin resultados.</p>
           )}
+          {!buscado && !buscando && (
+            <p className={styles.msg}>Rellena los filtros y pulsa Buscar.</p>
+          )}
 
-          {!buscando && resultados.map(b => (
+          {resultados.map(b => (
             <div
               key={b.id}
               className={styles.item}
@@ -97,15 +164,23 @@ function PanelBusqueda({ token, onClose, onSeleccionar }) {
               <div className={styles.itemInfo}>
                 {[b.material_nombre, b.proveedor_nombre].filter(Boolean).join(' · ')}
               </div>
+              <div className={styles.itemDetalle}>
+                {[
+                  b.ancho_mm    ? `${b.ancho_mm} mm ancho`    : null,
+                  b.espesor_mm  ? `${b.espesor_mm} mm espesor` : null,
+                  b.ref_proveedor ? `Ref: ${b.ref_proveedor}`  : null,
+                ].filter(Boolean).join(' · ')}
+              </div>
               <div className={styles.itemUbicacion}>
                 {b.posicion_actual
-                  ? `L${b.posicion_actual.linea} · A${b.posicion_actual.altura} · C${b.posicion_actual.columna}`
+                  ? `L${b.posicion_actual.linea_nombre ?? b.posicion_actual.linea} · A${b.posicion_actual.altura} · C${b.posicion_actual.columna}`
                   : <span className={styles.fuera}>Fuera del foso</span>
                 }
               </div>
             </div>
           ))}
         </div>
+
       </div>
     </>
   );
