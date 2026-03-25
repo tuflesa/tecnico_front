@@ -84,3 +84,17 @@
   70%  { box-shadow: 0 0 0 8px rgba(10, 54, 34, 0); }
   100% { box-shadow: 0 0 0 0 rgba(10, 54, 34, 0); }
 }
+
+.resaltada {
+  background: #fff3cd;
+  border: 2px solid #ffc107;
+  cursor: pointer;
+  animation: resaltarPulse 1s infinite;
+}
+.resaltada:hover { transform: scale(1.1); }
+
+@keyframes resaltarPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.6); }
+  70%  { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+}

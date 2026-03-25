@@ -59,13 +59,13 @@ function BobinaDetalle({ bobinaId, posicionId, altura, columna, token, onClose, 
 
           {tab === 'datos' && (
             <div className={styles.grid}>
-              <Campo label="Código"     value={bobina.codigo} />
-              <Campo label="Material"   value={bobina.material} />
-              <Campo label="Peso"       value={bobina.peso_kg     != null ? `${fmt(bobina.peso_kg)} kg`     : '—'} />
-              <Campo label="Diámetro"   value={bobina.diametro_mm != null ? `${fmt(bobina.diametro_mm)} mm` : '—'} />
-              <Campo label="Ancho"      value={bobina.ancho_mm    != null ? `${fmt(bobina.ancho_mm)} mm`    : '—'} />
-              <Campo label="Colada"     value={bobina.colada} />
-              <Campo label="Proveedor"  value={bobina.proveedor} full />
+              <Campo label="Código" value={bobina.codigo} />
+              <Campo label="Material" value={bobina.material_nombre} />
+              <Campo label="Peso" value={bobina.peso_kg     != null ? `${fmt(bobina.peso_kg)} kg`     : '—'} />
+              <Campo label="Diámetro" value={bobina.diametro_mm != null ? `${fmt(bobina.diametro_mm)} mm` : '—'} />
+              <Campo label="Ancho" value={bobina.ancho_mm    != null ? `${fmt(bobina.ancho_mm)} mm`    : '—'} />
+              <Campo label="Colada" value={bobina.colada} />
+              <Campo label="Proveedor" value={bobina.proveedor_nombre} full />
               <Campo label="F. entrada" value={fmtDate(bobina.fecha_entrada)} />
               <Campo label="Espesor" value={bobina.espesor_mm != null ? `${fmt(bobina.espesor_mm)} mm` : '—'} />
               {bobina.observaciones && <Campo label="Notas" value={bobina.observaciones} full />}

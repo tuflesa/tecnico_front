@@ -7,6 +7,7 @@ import FosoGrid from './FosoGrid';
 import BobinaDetalle from './BobinaDetalle';
 import ColocarBobina from './ColocarBobina';
 import styles from './FosoPage.module.css';
+import PanelBusqueda from './PanelBusqueda';
 
 function FosoPage() {
   const [token] = useCookies(['tec-token']);
@@ -17,8 +18,18 @@ function FosoPage() {
   const [detalle,  setDetalle]  = useState(null);
   const [colocar,  setColocar]  = useState(null);
   const [moviendo, setMoviendo] = useState(null);
+  const [panelBusqueda, setPanelBusqueda] = useState(false);
+  const [resaltado, setResaltado] = useState(null);
+  const [pendienteDetalle, setPendienteDetalle] = useState(null);
 
   const authHeader = { headers: { Authorization: `token ${token['tec-token']}` } };
+
+  useEffect(() => {
+    if (fosoData && pendienteDetalle) {
+      setDetalle(pendienteDetalle);
+      setPendienteDetalle(null);
+    }
+  }, [fosoData, pendienteDetalle]);
 
   useEffect(() => {
     axios.get(`${BACKEND_SERVER}/api/foso/lineas/`, authHeader)
@@ -112,6 +123,14 @@ function FosoPage() {
         )}
 
         <Navbar.Collapse className="justify-content-end">
+          <button onClick={() => setPanelBusqueda(true)}style={{
+              background: 'none', border: '1px solid #ced4da',
+              borderRadius: 4, padding: '4px 14px', fontSize: 13,
+              cursor: 'pointer', marginRight: 8
+            }}
+          >
+            Buscar bobina
+          </button>
           <Button variant="info" onClick={() => window.location.href = '/home'}>Home</Button>
         </Navbar.Collapse>
       </Navbar>
@@ -150,6 +169,7 @@ function FosoPage() {
                 }
               }}
               modoMoviendo={moviendo}
+              resaltado={resaltado} 
             />
           </div>
         )}
@@ -162,8 +182,8 @@ function FosoPage() {
           altura={detalle.altura}
           columna={detalle.columna}
           token={token['tec-token']}
-          onClose={() => setDetalle(null)}
-          onRetirada={() => { setDetalle(null); if (lineaId) cargarFoso(lineaId); }}
+          onClose={() => {setDetalle(null); setResaltado(null);}}
+          onRetirada={() => {setDetalle(null); if (lineaId) cargarFoso(lineaId); }}
           onMover={(bobinaId, ocupacionId, codigo) => {
             setDetalle(null);
             setMoviendo({ bobinaId, ocupacionId, codigo });
@@ -181,6 +201,23 @@ function FosoPage() {
           onColocada={() => { setColocar(null); if (lineaId) cargarFoso(lineaId); }}
         />
       )}
+      {panelBusqueda && (
+        <PanelBusqueda
+          token={token['tec-token']}
+          onClose={() => setPanelBusqueda(false)}
+          onSeleccionar={(bobinaId, posicionId, altura, columna, lineaDestino) => {
+            console.log('bobinaId:', bobinaId);
+            console.log('posicionId:', posicionId);
+            console.log('lineaDestino:', lineaDestino);
+            console.log('lineaId actual:', lineaId);
+            setPanelBusqueda(false);
+            setResaltado(posicionId);
+            if (lineaDestino) {
+              setLineaId(Number(lineaDestino));
+            }
+          }}
+        />
+        )}
     </React.Fragment>
   );
 }
