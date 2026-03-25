@@ -11,6 +11,8 @@ import PanelBusqueda from './PanelBusqueda';
 
 function FosoPage() {
   const [token] = useCookies(['tec-token']);
+  const [user]  = useCookies(['tec-user']);
+
   const [lineas,   setLineas]   = useState([]);
   const [lineaId,  setLineaId]  = useState(null);
   const [fosoData, setFosoData] = useState(null);
@@ -23,6 +25,11 @@ function FosoPage() {
   const [pendienteDetalle, setPendienteDetalle] = useState(null);
 
   const authHeader = { headers: { Authorization: `token ${token['tec-token']}` } };
+  const puedeEditar = user['tec-user']?.perfil?.destrezas_foso?.some(d => d.nombre === 'edicion') ?? false;
+  const puedeMover   = user['tec-user']?.perfil?.destrezas_foso?.some(d => d.nombre === 'mover')    ?? false;
+  const puedeRetirar = user['tec-user']?.perfil?.destrezas_foso?.some(d => d.nombre === 'retirar')  ?? false;
+  const puedeAnadir  = user['tec-user']?.perfil?.destrezas_foso?.some(d => d.nombre === 'añadir')   ?? false;
+  console.log('Mi perfil: ', user['tec-user']?.perfil)
 
   useEffect(() => {
     if (fosoData && pendienteDetalle) {
@@ -164,12 +171,13 @@ function FosoPage() {
               onClickVacia={(posicionId, altura, columna) => {
                 if (moviendo) {
                   handleMover(posicionId);
-                } else {
+                } else if(puedeAnadir) {
                   setColocar({ posicionId, altura, columna });
                 }
               }}
               modoMoviendo={moviendo}
               resaltado={resaltado} 
+              puedeAnadir={puedeAnadir}
             />
           </div>
         )}
@@ -177,6 +185,9 @@ function FosoPage() {
 
       {detalle && (
         <BobinaDetalle
+          puedeEditar={puedeEditar}
+          puedeMover={puedeMover}
+          puedeRetirar={puedeRetirar}
           bobinaId={detalle.bobinaId}
           posicionId={detalle.posicionId}
           altura={detalle.altura}

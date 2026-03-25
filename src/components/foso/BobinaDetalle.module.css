@@ -125,3 +125,29 @@
   cursor: pointer;
 }
 .btnMover:hover { background: #ffe69c; }
+
+.btnEditar {
+  background: #e8f4fd;
+  color: #084298;
+  border: 1px solid #084298;
+  border-radius: 4px;
+  padding: 7px 16px;
+  font-size: 13px;
+  transition: background .12s;
+  cursor: pointer;
+}
+.btnEditar:hover { background: #cfe2ff; }
+
+.btnGuardar {
+  background: #0d6efd;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 7px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background .12s;
+  cursor: pointer;
+}
+.btnGuardar:hover:not(:disabled) { background: #0a58ca; }
+.btnGuardar:disabled { opacity: .5; cursor: not-allowed; }

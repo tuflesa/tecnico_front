@@ -11,7 +11,7 @@ function soportes(altura, col) {
   return [`${altura - 1}-${col - 1}`, `${altura - 1}-${col}`];
 }
 
-function FosoGrid({ alturas, onClickBobina, onClickVacia, modoMoviendo, resaltado }) {
+function FosoGrid({ alturas, onClickBobina, onClickVacia, modoMoviendo, resaltado, puedeAnadir }) {
   const [D, setD] = useState(70);
 
   // Recalcula D según el ancho de ventana
@@ -96,7 +96,8 @@ function FosoGrid({ alturas, onClickBobina, onClickVacia, modoMoviendo, resaltad
               if (tieneB && resaltado && celda.posicion_id === resaltado) cls += ' ' + styles.resaltada;
               else if (tieneB) cls += ' ' + styles.ocupada;
               else if (modoMoviendo && puede) cls += ' ' + styles.vaciaMover;
-              else if (puede) cls += ' ' + styles.vaciaClic;
+              else if (puede && puedeAnadir) cls += ' ' + styles.vaciaClic;
+              else if (puede && !puedeAnadir) cls += ' ' + styles.vaciaBloq;
               else cls += ' ' + styles.vaciaBloq;
 
             return (
@@ -113,7 +114,8 @@ function FosoGrid({ alturas, onClickBobina, onClickVacia, modoMoviendo, resaltad
                 }}
               >
                 {tieneB  && <span className={styles.cod} style={{ fontSize }}>{celda.bobina_codigo}</span>}
-                {puede   && <span className={styles.plusIcon} style={{ fontSize: D * 0.35 }}>+</span>}
+                {puede && puedeAnadir  && <span className={styles.plusIcon} style={{ fontSize: D * 0.35 }}>+</span>}
+                {puede && !puedeAnadir && <span className={styles.lockIcon} style={{ fontSize: D * 0.28 }}>○</span>}
                 {bloq    && <span className={styles.lockIcon} style={{ fontSize: D * 0.28 }}>○</span>}
               </div>
             );
