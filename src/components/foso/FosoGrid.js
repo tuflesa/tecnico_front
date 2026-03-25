@@ -42,7 +42,22 @@ function FosoGrid({ alturas, onClickBobina, onClickVacia, modoMoviendo, resaltad
 
   const puedeColocar = (altura, col) => {
     if (altura === 1) return true;
-    return soportes(altura, col).every(k => mapa[k]?.bobina_id != null);
+    const maxColInferior = COLS_POR_ALTURA[altura - 1];
+
+    if (altura % 2 === 0) {
+      // Altura par: apoya en col y col+1 de la altura inferior
+      return mapa[`${altura-1}-${col}`]?.bobina_id != null &&
+            mapa[`${altura-1}-${col+1}`]?.bobina_id != null;
+    } else {
+      // Altura impar: apoya en col-1 y col de la altura inferior
+      const soporteIzq = col === 1 ? true : mapa[`${altura-1}-${col-1}`]?.bobina_id != null;
+      const soporteDer = col > maxColInferior ? true : mapa[`${altura-1}-${col}`]?.bobina_id != null;
+      // Necesita al menos uno real (no puede apoyar en dos paredes)
+      const tieneAlMenosUnoReal = 
+        (col > 1 && mapa[`${altura-1}-${col-1}`]?.bobina_id != null) ||
+        (col <= maxColInferior && mapa[`${altura-1}-${col}`]?.bobina_id != null);
+      return soporteIzq && soporteDer && tieneAlMenosUnoReal;
+    }
   };
 
   const colX = (altura, col) =>
