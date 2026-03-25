@@ -31,6 +31,10 @@ function BobinaDetalle({ bobinaId, posicionId, altura, columna, token, onClose, 
       if (ocupActiva) {
         await axios.post(`${BACKEND_SERVER}/api/foso/ocupaciones/${ocupActiva.id}/retirar/`, {}, { headers });
       }
+      await axios.patch(`${BACKEND_SERVER}/api/foso/bobinas/${bobinaId}/`,
+        { fecha_salida: new Date().toISOString().split('T')[0] },
+        { headers }
+      );
       onRetirada();
     } catch {
       alert('Error al retirar la bobina.');
@@ -62,7 +66,7 @@ function BobinaDetalle({ bobinaId, posicionId, altura, columna, token, onClose, 
               <Campo label="Código" value={bobina.codigo} />
               <Campo label="Material" value={bobina.material_nombre} />
               <Campo label="Peso" value={bobina.peso_kg     != null ? `${fmt(bobina.peso_kg)} kg`     : '—'} />
-              <Campo label="Diámetro" value={bobina.diametro_mm != null ? `${fmt(bobina.diametro_mm)} mm` : '—'} />
+              <Campo label="Ref. proveedor" value={bobina.ref_proveedor} />
               <Campo label="Ancho" value={bobina.ancho_mm    != null ? `${fmt(bobina.ancho_mm)} mm`    : '—'} />
               <Campo label="Colada" value={bobina.colada} />
               <Campo label="Proveedor" value={bobina.proveedor_nombre} full />

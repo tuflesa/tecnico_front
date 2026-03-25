@@ -4,8 +4,7 @@ import { BACKEND_SERVER } from '../../constantes';
 import Modal from './Modal';
 import styles from './ColocarBobina.module.css';
 
-const empty = {
-  codigo: '', material: '', diametro_mm: '',
+const empty = { codigo: '', material: '', ref_proveedor: '',
   ancho_mm: '', espesor_mm:'', colada: '', proveedor: '', observaciones: '',
 };
 
@@ -36,7 +35,7 @@ function ColocarBobina({ posicionId, altura, columna, token, onClose, onColocada
       const payload = {
         codigo:        form.codigo.trim(),
         material:      form.material      || null,
-        diametro_mm:   form.diametro_mm   ? parseFloat(form.diametro_mm)   : null,
+        ref_proveedor: form.ref_proveedor || null,
         ancho_mm:      form.ancho_mm      ? parseFloat(form.ancho_mm)      : null,
         colada:        form.colada        || null,
         proveedor:     form.proveedor     || null,
@@ -101,8 +100,8 @@ function ColocarBobina({ posicionId, altura, columna, token, onClose, onColocada
           <input value={form.colada} onChange={set('colada')} placeholder="C-2024-015" />
         </Campo>
 
-        <Campo label="Diámetro (mm)">
-          <input value={form.diametro_mm} onChange={set('diametro_mm')} type="number" placeholder="1200" />
+        <Campo label="Ref. proveedor">
+          <input value={form.ref_proveedor} onChange={set('ref_proveedor')} placeholder="Ref. del proveedor" />
         </Campo>
 
         <Campo label="Ancho (mm)">
