@@ -8,6 +8,7 @@ import BobinaDetalle from './BobinaDetalle';
 import ColocarBobina from './ColocarBobina';
 import styles from './FosoPage.module.css';
 import PanelBusqueda from './PanelBusqueda';
+import ColocarBobinaExistente from './ColocarBobinaExistente';
 
 function FosoPage() {
   const [token] = useCookies(['tec-token']);
@@ -23,6 +24,7 @@ function FosoPage() {
   const [panelBusqueda, setPanelBusqueda] = useState(false);
   const [resaltado, setResaltado] = useState(null);
   const [pendienteDetalle, setPendienteDetalle] = useState(null);
+  const [colocarExistente, setColocarExistente] = useState(null);
 
   const authHeader = { headers: { Authorization: `token ${token['tec-token']}` } };
   const puedeEditar = user['tec-user']?.perfil?.destrezas_foso?.some(d => d.nombre === 'edicion') ?? false;
@@ -217,17 +219,31 @@ function FosoPage() {
           token={token['tec-token']}
           onClose={() => setPanelBusqueda(false)}
           onSeleccionar={(bobinaId, posicionId, altura, columna, lineaDestino) => {
-            console.log('bobinaId:', bobinaId);
-            console.log('posicionId:', posicionId);
-            console.log('lineaDestino:', lineaDestino);
-            console.log('lineaId actual:', lineaId);
             setPanelBusqueda(false);
             setResaltado(posicionId);
-            if (lineaDestino) {
+            // Sin setDetalle — solo va a la posición
+            if (lineaDestino && Number(lineaDestino) !== Number(lineaId)) {
               setLineaId(Number(lineaDestino));
             }
           }}
+          onColocarFuera={(bobinaId, codigo) => {   // ← AÑADIR
+            setPanelBusqueda(false);
+            setColocarExistente({ bobinaId, codigo });
+          }}
         />
+        )}
+        {colocarExistente && (
+          <ColocarBobinaExistente
+            bobinaId={colocarExistente.bobinaId}
+            codigo={colocarExistente.codigo}
+            token={token['tec-token']}
+            fosoData={fosoData}
+            lineas={lineas}
+            lineaId={lineaId}
+            onLineaChange={(id) => setLineaId(id)}
+            onClose={() => setColocarExistente(null)}
+            onColocada={() => { setColocarExistente(null); if (lineaId) cargarFoso(lineaId); }}
+          />
         )}
     </React.Fragment>
   );

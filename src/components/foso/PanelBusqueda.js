@@ -13,13 +13,14 @@ const filtrosVacios = {
   espesor_mm:   '',
 };
 
-function PanelBusqueda({ token, onClose, onSeleccionar }) {
+function PanelBusqueda({ token, onClose, onSeleccionar, onColocarFuera }) {
   const [filtros,    setFiltros]    = useState(filtrosVacios);
   const [resultados, setResultados] = useState([]);
   const [buscando,   setBuscando]   = useState(false);
   const [buscado,    setBuscado]    = useState(false);
   const [materiales, setMateriales] = useState([]);
   const [proveedores,setProveedores]= useState([]);
+  const [incluyeFuera, setIncluyeFuera] = useState(false);
 
   const headers = { Authorization: `token ${token}` };
   const set = (k) => (e) => setFiltros(f => ({ ...f, [k]: e.target.value }));
@@ -40,6 +41,7 @@ function PanelBusqueda({ token, onClose, onSeleccionar }) {
       const v = (campo, valor) => valor === '' || campo?.toString().toLowerCase().includes(valor.toLowerCase());
 
       const filtrados = todos.filter(b =>
+        (incluyeFuera || b.posicion_actual != null) &&
         (filtros.codigo        === '' || b.codigo?.toLowerCase().startsWith(filtros.codigo.toLowerCase())) &&
         (filtros.ref_proveedor === '' || b.ref_proveedor?.toLowerCase().startsWith(filtros.ref_proveedor.toLowerCase())) &&
         (filtros.colada        === '' || b.colada?.toLowerCase().startsWith(filtros.colada.toLowerCase())) &&
@@ -124,7 +126,18 @@ function PanelBusqueda({ token, onClose, onSeleccionar }) {
               <input value={filtros.espesor_mm} onChange={set('espesor_mm')} onKeyDown={handleKeyDown} type="number" placeholder="1.5" />
             </div>
           </div>
-
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              type="checkbox"
+              id="incluyeFuera"
+              checked={incluyeFuera}
+              onChange={e => setIncluyeFuera(e.target.checked)}
+              style={{ width: 'auto' }}
+            />
+            <label htmlFor="incluyeFuera" style={{ fontSize: 13, color: '#6c757d', margin: 0, cursor: 'pointer' }}>
+              Incluir bobinas fuera del foso
+            </label>
+          </div>
           <div className={styles.btnFila}>
             <button className={styles.btnLimpiar} onClick={limpiar}>Limpiar</button>
             <button className={styles.btnBuscar} onClick={buscar} disabled={!hayFiltros || buscando}>
@@ -147,10 +160,7 @@ function PanelBusqueda({ token, onClose, onSeleccionar }) {
               key={b.id}
               className={styles.item}
               onClick={() => {
-                if (!b.posicion_actual) {
-                  alert('Esta bobina no está en el foso actualmente.');
-                  return;
-                }
+                if (!b.posicion_actual) return;
                 onSeleccionar(
                   b.id,
                   b.posicion_actual.id,
@@ -173,8 +183,15 @@ function PanelBusqueda({ token, onClose, onSeleccionar }) {
               </div>
               <div className={styles.itemUbicacion}>
                 {b.posicion_actual
-                  ? `L${b.posicion_actual.linea_nombre ?? b.posicion_actual.linea} · A${b.posicion_actual.altura} · C${b.posicion_actual.columna}`
-                  : <span className={styles.fuera}>Fuera del foso</span>
+                  ? <span>
+                      {`L${b.posicion_actual.linea_nombre ?? b.posicion_actual.linea} · A${b.posicion_actual.altura} · C${b.posicion_actual.columna}`}
+                    </span>
+                  : <button
+                      className={styles.btnColocar}
+                      onClick={(e) => { e.stopPropagation(); onColocarFuera(b.id, b.codigo); }}
+                    >
+                      + Colocar en foso
+                    </button>
                 }
               </div>
             </div>
