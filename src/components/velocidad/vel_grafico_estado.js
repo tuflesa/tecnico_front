@@ -61,6 +61,7 @@ const GraficoEstado = () => {
     };
 
     useEffect(()=>{
+        if (!filtro.fecha || !filtro.fecha_fin || !filtro.hora_inicio || !filtro.hora_fin) return;
         axios.get(BACKEND_SERVER + `/api/velocidad/estado/${id}`,{
             params: {
                 fecha: filtro.fecha,

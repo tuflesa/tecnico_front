@@ -15,6 +15,39 @@ const ModalEditarParada = ({ show, onHide, parada}) => {
     const [palabrasClave, setPalabrasClave] = useState(null);
     const [tipoNombre, setTipoNombre] = useState('');
     const [tipoSiglas, setTipoSiglas] = useState('');
+    const [listado_ordenes, setListadoOrdenes] = useState(null);
+    const [IdOF, setIdOF] = useState(null);
+    const [idPos, setIdPos] = useState(null);
+    const [codigo_R_ProdDB, setCodigo_R_ProdDB] = useState('');
+    const [descripcionProdDB, setdescripcionProdDB] = useState('');
+
+    useEffect(() => {
+        if (!seleTipoParada || !parada?.zona_id) return;
+
+        Promise.all([
+            axios.get(BACKEND_SERVER + `/api/velocidad/buscar_montajes_of/?zona_id=${parada.zona_id}&tipo_parada_siglas=${tipoSiglas}`, {
+                headers: { 'Authorization': `token ${token['tec-token']}` }
+            }),
+            axios.get(BACKEND_SERVER + `/api/velocidad/parada_produccion_db/?parada=${parada.id}`, {
+                headers: { 'Authorization': `token ${token['tec-token']}` }
+            })
+        ])
+        .then(([resMontajes, resProdDB]) => {
+            setListadoOrdenes(resMontajes.data.montajes);
+            setIdOF(resMontajes.data.xIdOF);
+            setIdPos(resMontajes.data.xIdPos);
+
+            const ordenOf = resProdDB.data?.[0]?.orden_of;
+            if (ordenOf && resMontajes.data.montajes) {
+                const ordenExistente = resMontajes.data.montajes.find(o => o.xIdParada === ordenOf);
+                if (ordenExistente) {
+                    setCodigo_R_ProdDB(ordenExistente.xIdParada);
+                    setdescripcionProdDB(ordenExistente.xDescripcion);
+                }
+            }
+        })
+        .catch(err => console.log(err));
+    }, [seleTipoParada, tipoSiglas]);
 
     useEffect(() => {
         if (show && parada) {
@@ -90,6 +123,7 @@ const ModalEditarParada = ({ show, onHide, parada}) => {
             codigo: parseInt(codigoSel),
             nuevaObs: nuevaObs,
             codigoSel: codigoSel,
+            xIdParada_R: codigo_R_ProdDB,
             },
             { headers: { Authorization: `token ${token["tec-token"]}` } }
         )
@@ -124,6 +158,11 @@ const ModalEditarParada = ({ show, onHide, parada}) => {
         setPalabrasClave(null);
         setCodigoParada(null);
         onHide();
+        setListadoOrdenes(null);
+        setIdOF(null);
+        setIdPos(null);
+        setCodigo_R_ProdDB('');
+        setdescripcionProdDB('');
     }
 
     const handleInputChangeTipo = (e) => {
@@ -138,7 +177,21 @@ const ModalEditarParada = ({ show, onHide, parada}) => {
         setPalabraSeleccionada(null);
         setPalabrasClave(null);
         setCodigoParada(null);
+        setListadoOrdenes(null);
+        setIdOF(null);
+        setIdPos(null);
+        setCodigo_R_ProdDB('');
+        setdescripcionProdDB('');
     }
+
+    const handleInputChangeOrdenes = (e) => {
+        const { value } = e.target;
+        if (value) {
+            const [codigoBD, descripcionBD] = value.split('|');
+            setCodigo_R_ProdDB(codigoBD);
+            setdescripcionProdDB(descripcionBD);
+        }
+    };
 
     return (
         <Container>
@@ -203,7 +256,25 @@ const ModalEditarParada = ({ show, onHide, parada}) => {
                                             </Form.Control>
                                         </Form.Group>
                                     </Col>
-                                :''}
+                                :tipoNombre === 'Cambio' ? 
+                                    <Col>
+                                        <Form.Group controlId="ordenes">
+                                            <Form.Label>Listado de Ordenes</Form.Label>
+                                            <Form.Control as="select"
+                                                        name='ordenes'
+                                                        value={`${codigo_R_ProdDB}|${descripcionProdDB}`}
+                                                        onChange={handleInputChangeOrdenes}
+                                                        disabled={!seleTipoParada}>
+                                                        <option key="__default__" value=''>Selecciona una opción</option>
+                                                        {Array.isArray(listado_ordenes) && listado_ordenes.map(orden => (
+                                                            <option key={orden.xIdParada} value={`${orden.xIdParada}|${orden.xDescripcion}`}>
+                                                                {orden.xDescripcion}
+                                                            </option>
+                                                        ))}
+                                            </Form.Control>
+                                        </Form.Group>
+                                    </Col>
+                                : ''}
                                 <Col>
                                     <Form.Group controlId="codigoparada">
                                         <Form.Label>Codigo Parada</Form.Label>
