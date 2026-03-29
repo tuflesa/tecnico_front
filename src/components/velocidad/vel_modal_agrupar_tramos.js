@@ -102,6 +102,7 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
             }
         })
         .then( res => {
+            console.log(res.data);
             setListadoOrdenes(res.data.montajes);
             setIdOF(res.data.xIdOF);
             setIdPos(res.data.xIdPos);

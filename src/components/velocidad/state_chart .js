@@ -31,7 +31,7 @@ const useResizeObserver = (ref) => {
     return dimensions;
   };
 
-const StateChart = ({data, flejes, OFs, fecha, fecha_fin, hora_inicio, hora_fin, ver, maquina, paradas}) => {
+const StateChart = ({data, flejes, OFs, montajes, fecha, fecha_fin, hora_inicio, hora_fin, ver, maquina, paradas}) => {
     const svgRef = useRef();
     const wrapperRef = useRef();
     const dimensions = useResizeObserver(wrapperRef);
@@ -56,7 +56,7 @@ const StateChart = ({data, flejes, OFs, fecha, fecha_fin, hora_inicio, hora_fin,
             .range([0, innerWidth]);
         
         const yScale = scaleLinear()
-            .domain([-60, maquina.v_max])
+            .domain([-80, maquina.v_max])
             .range([innerHeight, 0]);
 
         const yScalePotencia = scaleLinear().domain([0, maquina.hf_pmax]).range([yScale(0), 0]);
@@ -268,6 +268,32 @@ const StateChart = ({data, flejes, OFs, fecha, fecha_fin, hora_inicio, hora_fin,
           .attr("font-size", "12px")
           .text(f => f.pos);
 
+        // Dibujar Montajes 
+        montajes && select(svg).select('.grafico')
+          .selectAll('rect.CT')
+          .data(montajes)
+          .join('rect')
+          .attr('class', 'CT')
+          .attr("x", ct => xScale(ct.x_in))
+          .attr("y", ct => yScale(ct.y_in))
+          .attr("width", ct => xScale(ct.x_out) - xScale(ct.x_in))
+          .attr("height", ct => yScale(ct.y_in) - yScale(ct.y_out))
+          .attr("fill", ct => ct.color)
+
+        // Montajes Texto centrado en cada rectángulo
+        montajes && select(svg).select('.grafico')
+          .selectAll('text.CT-pos')
+          .data(montajes)
+          .join('text')
+          .attr("class", "CT-pos")
+          .attr("x", ct => xScale(ct.x_in) + (xScale(ct.x_out) - xScale(ct.x_in)) / 2)
+          .attr("y", ct => yScale(ct.y_in) + ((yScale(ct.y_in) - yScale(ct.y_out)) / 2))
+          .attr("text-anchor", "middle")
+          .attr("dominant-baseline", "middle")
+          .attr("fill", "white") // o negro, según contraste
+          .attr("font-size", "12px")
+          .text(ct => ct.nombre);
+
         // Dibujar OFs
         OFs && select(svg).select('.grafico')
           .selectAll('rect.OF')
@@ -405,11 +431,21 @@ const StateChart = ({data, flejes, OFs, fecha, fecha_fin, hora_inicio, hora_fin,
             .attr('font-size', '12px')
             .text('F (KN)');
 
-        // Añadir texto para Flejes
+        // Añadir texto para Montajes (CTs)
         select(svg).select('.eje-y')
           .append('text')
           .attr('x', -20)
           .attr('y',  yScale(-52.5))
+          .attr('text-anchor', 'middle')
+          .attr('fill', 'black')
+          .attr('font-size', '12px')
+          .text('CTs');
+
+        // Añadir texto para Flejes
+        select(svg).select('.eje-y')
+          .append('text')
+          .attr('x', -25)
+          .attr('y',  yScale(-67.5))
           .attr('text-anchor', 'middle')
           .attr('fill', 'black')
           .attr('font-size', '12px')

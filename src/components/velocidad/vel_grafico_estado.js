@@ -31,6 +31,7 @@ const GraficoEstado = () => {
     const [registros, setRegistros] = useState(null);
     const [flejes, setFlejes] = useState(null);
     const [OFs, setOFs] = useState(null);
+    const [montajes, setMontajes] = useState(null);
     const [tabActiva, setTabActiva] = useState('flejes');
     const [turno_actual, setTurnoActual] = useState(null);
     const hoy = new Date();
@@ -73,6 +74,7 @@ const GraficoEstado = () => {
             }
         })
         .then(res => {
+            // console.log(res.data);
             setEstado(res.data);
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -201,9 +203,9 @@ const GraficoEstado = () => {
                 if (x_in.isBefore(inicio)) {
                     x_in = inicio;
                 }
-                const y_in = -45;
+                const y_in = -60;
                 let x_out;
-                const y_out = -35;
+                const y_out = -50;
                 if (f.fecha_salida) {
                     const fecha_salida = f.fecha_salida.split('-');
                     const hora_salida = f.hora_salida.split(':');
@@ -327,6 +329,78 @@ const GraficoEstado = () => {
             return puntos;
         }
 
+        const datosMontajes = (estado) => {
+            const inicio = moment(filtro.fecha + ' ' + filtro.hora_inicio,'YYYY-MM-DD HH:mm');
+            const fin = moment(filtro.fecha_fin + ' ' + filtro.hora_fin,'YYYY-MM-DD HH:mm');
+            const puntos = estado.montajes.map( m => {
+                const ahora = moment();
+                let x_in = moment.parseZone(m.inicio);
+                const hora_i = x_in.format('HH:mm:ss');
+                const fecha_i = x_in.format('YYYY-MM-DD');
+                x_in = moment(fecha_i + ' ' + hora_i, 'YYYY-MM-DD HH:mm');
+
+                if (x_in.isBefore(inicio)) {
+                    x_in = inicio;
+                }
+                const y_in = -45;
+
+                let x_out;
+                const y_out = -35;
+                if (m.fin) {
+                    x_out = moment.parseZone(m.fin);
+                    const hora_f = x_out.format('HH:mm:ss');
+                    const fecha_f = x_out.format('YYYY-MM-DD');
+                    x_out = moment(fecha_f + ' ' + hora_f, 'YYYY-MM-DD HH:mm');
+                    if (x_out.isAfter(fin)) {
+                        x_out = fin;
+                    }
+                }
+                else {
+                    if(ahora.isAfter(inicio) && ahora.isBefore(fin)) {
+                        x_out = new Date();
+                    }
+                    else {
+                        x_out = new Date(fin.format("YYYY-MM-DD HH:mm:ss"));
+                    }
+                }
+
+                // Color
+                let color = 'plum';
+
+                // nombre del montaje
+                let nombre = '';
+                const forma = m.xIdMontaje[0];
+                const dim1 = Number(m.xIdMontaje.substring(1,4));
+                const dim2 = Number(m.xIdMontaje.substring(4,7));
+                switch (forma){
+                    case '2':
+                        nombre += 'Red. ' + String(dim2);
+                        break;
+                    case '3':
+                        nombre += 'Perfil. ' + String(dim1) + 'x' + String(dim2);
+                        break;
+                    case '4':
+                        nombre += 'Cuad. ' + String(dim1) + 'x' + String(dim2);
+                        break;
+                    case '5':
+                        nombre += 'Rect. ' + String(dim1) + 'x' + String(dim2);
+                }
+
+                return ({
+                    x_in: x_in,
+                    y_in: y_in,
+                    x_out: x_out,
+                    y_out: y_out,
+                    color: color,
+                    xIdMontaje: m.xIdMontaje,
+                    nombre: nombre
+                });
+
+            });
+
+            return puntos;
+        }
+        setMontajes(datosMontajes(estado));
         setParadas(datosParadas(estado));
         setRegistros(datosRegistros(estado));
         setFlejes(datosFlejes(estado));
@@ -530,6 +604,7 @@ const GraficoEstado = () => {
                                 paradas={paradas}
                                 flejes={flejes}
                                 OFs={OFs}
+                                montajes={montajes}
                                 fecha={filtro.fecha}
                                 fecha_fin={filtro.fecha_fin}
                                 hora_inicio={filtro.hora_inicio}
