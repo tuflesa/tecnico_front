@@ -62,6 +62,7 @@ const GraficoEstado = () => {
     };
 
     useEffect(()=>{
+        if (!filtro.fecha || !filtro.fecha_fin || !filtro.hora_inicio || !filtro.hora_fin) return;
         axios.get(BACKEND_SERVER + `/api/velocidad/estado/${id}`,{
             params: {
                 fecha: filtro.fecha,
@@ -624,9 +625,9 @@ const GraficoEstado = () => {
                                 <Nav.Item>
                                     <Nav.Link eventKey="todas_paradas">
                                     {existeDesconocido ? (
-                                        <span>Todas las Paradas</span>
+                                        <span>Cambio de Estado</span>
                                     ) : (
-                                        'Todas las Paradas'
+                                        'Cambio de Estado'
                                     )}
                                     </Nav.Link>
                                 </Nav.Item>

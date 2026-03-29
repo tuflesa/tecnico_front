@@ -272,13 +272,50 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
                     setObservaciones('');
                     cerrarModalTramos();
                 }
+            })
+            .catch(error => {
+
+                // 1. Error ≥ 10 minutos avisamos y no continuamos
+                if (error.response?.data?.error) {
+                    const errorDetails = (error.response.data.detalles || [])
+                        .map(d => `• Tramo de actividad de: ${d.duracion_min} min`)
+                        .join("\n");
+
+                    alert(
+                        error.response.data.error +
+                        "\n\n" + errorDetails
+                    );
+                    return;
+                }
+
+                // 2. Aviso con confirmación (≥ 5 y < 10 minutos) preguntamos si queremos continuar
+                if (error.response?.data?.warning) {
+                    const detalles = error.response.data.detalles
+                        .map(d => `Tramo de actividad de: ${d.duracion_min} min`)
+                        .join("\n");
+
+                    if (window.confirm(
+                        error.response.data.warning +
+                        "\n\n" + detalles +
+                        "\n\n¿Desea continuar igualmente?"
+                    )) {
+                        axios.post(
+                            `${BACKEND_SERVER}/api/velocidad/guardar_paradas_agrupadas/`,
+                            { ...datos, forzar: true },
+                            { headers: { 'Authorization': `token ${token['tec-token']}` } }
+                        );
+                    }
+                    return;
+                }
+                // Otros errores
+                alert("Error inesperado: " + error.message);
             });
-            
+        
         } catch (error) {
-            console.error('Error al guardar paradas:', error);
-            alert('Error al guardar las paradas: ' + (error.response?.data?.error || error.message));
+            console.error("Error en guardartipoparada:", error);
+            alert("Error inesperado: " + error.message);
         }
-    }
+    };
 
     const cerrar_modal =()=>{
         // Limpiar variables
