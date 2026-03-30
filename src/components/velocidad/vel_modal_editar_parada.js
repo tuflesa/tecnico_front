@@ -220,7 +220,8 @@ const ModalEditarParada = ({ show, onHide, parada}) => {
                                     <Form.Control as="select"  
                                                 name='tipoparada' 
                                                 value={`${seleTipoParada}|${tipoNombre}|${tipoSiglas}`}
-                                                onChange={handleInputChangeTipo}>
+                                                onChange={handleInputChangeTipo}
+                                                disabled={tipoNombre==='Cambio'?true:false}>
                                                 <option key={-0} value={''}>Selecciona una opción</option>
                                                 {tipoParadas && tipoParadas.map( tipo => {
                                                     return (
