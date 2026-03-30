@@ -81,6 +81,11 @@ const GraficoEstado = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     },[filtro, actualizar]);
 
+    useEffect(()=>{
+        if (!estado?.maquina?.zona?.siglas) return;
+        document.title = 'Tecnico - Estado - ' + estado.maquina.zona.siglas.toUpperCase();
+    },[estado?.maquina?.zona?.siglas])
+
     useEffect(() => {
     if (!estado?.maquina?.zona?.id) return;
 
