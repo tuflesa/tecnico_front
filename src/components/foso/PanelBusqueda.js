@@ -85,7 +85,7 @@ function PanelBusqueda({ token, onClose, onSeleccionar, onColocarFuera }) {
           <div className={styles.filtroFila}>
             <div className={styles.filtroGrupo}>
               <label className={styles.filtroLbl}>Código</label>
-              <input value={filtros.codigo} onChange={set('codigo')} onKeyDown={handleKeyDown} placeholder="Ej: 260046755B" />
+              <input value={filtros.codigo} autoFocus onChange={set('codigo')} onKeyDown={handleKeyDown} placeholder="Ej: 260046755B" />
             </div>
             <div className={styles.filtroGrupo}>
               <label className={styles.filtroLbl}>Ref. proveedor</label>

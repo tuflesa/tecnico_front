@@ -9,6 +9,7 @@ import ColocarBobina from './ColocarBobina';
 import styles from './FosoPage.module.css';
 import PanelBusqueda from './PanelBusqueda';
 import ColocarBobinaExistente from './ColocarBobinaExistente';
+import PanelRecepcionBobinas from './PanelRecepcionBobinas';
 
 function FosoPage() {
   const [token] = useCookies(['tec-token']);
@@ -21,10 +22,15 @@ function FosoPage() {
   const [detalle,  setDetalle]  = useState(null);
   const [colocar,  setColocar]  = useState(null);
   const [moviendo, setMoviendo] = useState(null);
-  const [panelBusqueda, setPanelBusqueda] = useState(false);
+  //const [panelBusqueda, setPanelBusqueda] = useState(false);
   const [resaltado, setResaltado] = useState(null);
   const [pendienteDetalle, setPendienteDetalle] = useState(null);
   const [colocarExistente, setColocarExistente] = useState(null);
+
+  //const [panelRecepcion, setPanelRecepcion] = useState(false);
+  const [panelLateral, setPanelLateral] = useState(null);
+  const [colaRecepcion, setColaRecepcion] = useState([]);
+  const [colocandoRecepcion, setColocandoRecepcion] = useState(null);
 
   const authHeader = { headers: { Authorization: `token ${token['tec-token']}` } };
   const puedeEditar = user['tec-user']?.perfil?.destrezas_foso?.some(d => d.nombre === 'edicion') ?? false;
@@ -132,7 +138,9 @@ function FosoPage() {
         )}
 
         <Navbar.Collapse className="justify-content-end">
-          <button onClick={() => setPanelBusqueda(true)}style={{
+          <button 
+            onClick={() => setPanelLateral('busqueda')}
+            style={{
               background: 'none', border: '1px solid #ced4da',
               borderRadius: 4, padding: '4px 14px', fontSize: 13,
               cursor: 'pointer', marginRight: 8
@@ -140,6 +148,14 @@ function FosoPage() {
           >
             Buscar bobina
           </button>
+          
+          <button 
+              onClick={() => setPanelLateral('recepcion')}
+              style={{ background: 'none', border: '1px solid #ced4da', borderRadius: 4, padding: '4px 14px', fontSize: 13, cursor: 'pointer', marginRight: 8}}
+            >
+              Recepción
+            </button>
+
           <Button variant="info" onClick={() => window.location.href = '/home'}>Home</Button>
         </Navbar.Collapse>
       </Navbar>
@@ -214,12 +230,12 @@ function FosoPage() {
           onColocada={() => { setColocar(null); if (lineaId) cargarFoso(lineaId); }}
         />
       )}
-      {panelBusqueda && (
+      {panelLateral === 'busqueda' && (
         <PanelBusqueda
           token={token['tec-token']}
-          onClose={() => setPanelBusqueda(false)}
+          onClose={() => setPanelLateral(null)}
           onSeleccionar={(bobinaId, posicionId, altura, columna, lineaDestino) => {
-            setPanelBusqueda(false);
+            setPanelLateral(null);
             setResaltado(posicionId);
             // Sin setDetalle — solo va a la posición
             if (lineaDestino && Number(lineaDestino) !== Number(lineaId)) {
@@ -227,7 +243,7 @@ function FosoPage() {
             }
           }}
           onColocarFuera={(bobinaId, codigo) => {   // ← AÑADIR
-            setPanelBusqueda(false);
+            setPanelLateral(null);
             setColocarExistente({ bobinaId, codigo });
           }}
         />
@@ -245,6 +261,33 @@ function FosoPage() {
             onColocada={() => { setColocarExistente(null); if (lineaId) cargarFoso(lineaId); }}
           />
         )}
+        {panelLateral === 'recepcion' && (
+          <PanelRecepcionBobinas
+            token={token['tec-token']}
+            cola={colaRecepcion}
+            setCola={setColaRecepcion}
+            onColocar={setColocandoRecepcion}
+            onClose={() => setPanelLateral(null)}
+          />
+        )}
+        {colocandoRecepcion && (
+          <ColocarBobinaExistente
+            bobinaId={colocandoRecepcion.id}
+            codigo={colocandoRecepcion.codigo}
+            token={token['tec-token']}
+            lineas={lineas}
+            lineaId={lineaId}
+            onLineaChange={id => setLineaId(id)}
+            onClose={() => setColocandoRecepcion(null)}
+            onColocada={() => {
+              // quitar de la cola
+              setColaRecepcion(c =>
+                c.filter(b => b.id !== colocandoRecepcion.id)
+              );
+              setColocandoRecepcion(null);
+            }}
+        />
+      )}
     </React.Fragment>
   );
 }
