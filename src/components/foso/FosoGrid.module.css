@@ -48,7 +48,7 @@
 
 .vaciaBloq {
   background: #f8f9fa;
-  border: 1px dashed #dee2e6;
+  border: 1px dashed #969899;
   cursor: not-allowed;
   opacity: 0.4;
 }
@@ -97,4 +97,11 @@
   0%   { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.6); }
   70%  { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
   100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+}
+
+.vaciaAnulada {
+  background: #e9ecef;
+  border: 2px solid #6c757d;
+  opacity: 0.6;
+  cursor: not-allowed;
 }

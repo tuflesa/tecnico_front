@@ -46,11 +46,11 @@ function PanelRecepcionBobinas({ token, cola, setCola, onColocar, onClose }) {
           'Esta bobina ya existe.';
         const msg = traducciones[msgRaw] || msgRaw;
         setError(msg);
-        setRepetidas(r =>
-            r.includes(cod) ? r : [...r, cod]
+        setRepetidas(re =>
+            re.includes(cod) ? re : [...re, cod]
         );
         // 👉 limpiar input para seguir leyendo
-        setCodigo('')
+        setCodigo('');
 
     } finally {
       setCreando(false);

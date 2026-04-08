@@ -37,7 +37,6 @@ function FosoPage() {
   const puedeMover   = user['tec-user']?.perfil?.destrezas_foso?.some(d => d.nombre === 'mover')    ?? false;
   const puedeRetirar = user['tec-user']?.perfil?.destrezas_foso?.some(d => d.nombre === 'retirar')  ?? false;
   const puedeAnadir  = user['tec-user']?.perfil?.destrezas_foso?.some(d => d.nombre === 'añadir')   ?? false;
-  console.log('Mi perfil: ', user['tec-user']?.perfil)
 
   useEffect(() => {
     if (fosoData && pendienteDetalle) {

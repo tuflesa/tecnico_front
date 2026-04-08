@@ -32,18 +32,24 @@ function ColocarBobinaExistente({ bobinaId, codigo, token, lineas, lineaId, onLi
     a.columnas.forEach(c => { mapa[`${a.altura}-${c.columna}`] = c; });
   });
 
+  const tieneSoporte = (key) => {
+    const celda = mapa[key];
+    if (!celda) return false;
+    return celda.bobina_id != null || celda.habilitada === false;
+  };
+
   const puedeColocar = (altura, col) => {
     if (altura === 1) return true;
     const maxColInf = COLS_POR_ALTURA[altura - 1];
     if (altura % 2 === 0) {
-      return mapa[`${altura-1}-${col}`]?.bobina_id != null &&
-             mapa[`${altura-1}-${col+1}`]?.bobina_id != null;
+      return tieneSoporte(`${altura-1}-${col}`) &&
+            tieneSoporte(`${altura-1}-${col+1}`);
     } else {
-      const izq = col === 1           ? true : mapa[`${altura-1}-${col-1}`]?.bobina_id != null;
-      const der = col > maxColInf     ? true : mapa[`${altura-1}-${col}`]?.bobina_id   != null;
+      const izq = col === 1        ? true : tieneSoporte(`${altura-1}-${col-1}`);
+      const der = col > maxColInf  ? true : tieneSoporte(`${altura-1}-${col}`);
       const tieneReal =
-        (col > 1        && mapa[`${altura-1}-${col-1}`]?.bobina_id != null) ||
-        (col <= maxColInf && mapa[`${altura-1}-${col}`]?.bobina_id != null);
+        (col > 1          && tieneSoporte(`${altura-1}-${col-1}`)) ||
+        (col <= maxColInf && tieneSoporte(`${altura-1}-${col}`));
       return izq && der && tieneReal;
     }
   };
@@ -138,15 +144,17 @@ function MiniGrid({ alturas, mapa, puedeColocar, posSelec, onSelect }) {
           return Array.from({length:COLS[h]},(_,j)=>j+1).map(c => {
             const key   = `${h}-${c}`;
             const celda = mapa[key];
+            const deshabilitada = celda?.habilitada === false;
             const tieneB = celda?.bobina_id != null;
-            const puede  = !tieneB && puedeColocar(h, c);
+            const puede  = !tieneB && !deshabilitada && puedeColocar(h, c);
             const selec  = posSelec?.posicion_id === celda?.posicion_id;
 
             let bg, border, cursor;
-            if (tieneB)        { bg='#cfe2ff'; border='2px solid #0d6efd'; cursor='default'; }
-            else if (selec)    { bg='#ffc107'; border='2px solid #664d03'; cursor='pointer'; }
-            else if (puede)    { bg='#d1e7dd'; border='2px solid #0a3622'; cursor='pointer'; }
-            else               { bg='#f8f9fa'; border='1px dashed #dee2e6'; cursor='not-allowed'; }
+            if      (deshabilitada) { bg='#adb5bd'; border='2px solid #6c757d';    cursor='not-allowed'; }
+            else if (tieneB)        { bg='#cfe2ff'; border='2px solid #0d6efd';    cursor='default';     }
+            else if (selec)         { bg='#ffc107'; border='2px solid #664d03';    cursor='pointer';     }
+            else if (puede)         { bg='#d1e7dd'; border='2px solid #0a3622';    cursor='pointer';     }
+            else                    { bg='#f8f9fa'; border='1px dashed #dee2e6';   cursor='not-allowed'; }
 
             return (
               <div
@@ -165,9 +173,10 @@ function MiniGrid({ alturas, mapa, puedeColocar, posSelec, onSelect }) {
                   else if (selec) onSelect(null);
                 }}
               >
-                {tieneB && <span>{celda.bobina_codigo?.substring(0,6)}</span>}
-                {puede  && !selec && <span style={{fontSize:14}}>+</span>}
-                {selec  && <span style={{fontSize:10}}>✓</span>}
+                {deshabilitada              && <span style={{fontSize:14, color:'#495057'}}>✕</span>}
+                {tieneB && !deshabilitada   && <span>{celda.bobina_codigo?.substring(0,6)}</span>}
+                {puede  && !selec           && <span style={{fontSize:14}}>+</span>}
+                {selec                      && <span style={{fontSize:10}}>✓</span>}
               </div>
             );
           });

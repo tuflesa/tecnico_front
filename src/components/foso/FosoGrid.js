@@ -40,22 +40,27 @@ function FosoGrid({ alturas, onClickBobina, onClickVacia, modoMoviendo, resaltad
     return m;
   }, [alturas]);
 
-  const puedeColocar = (altura, col) => {
+  const tieneSoporte = (key) => {
+    const celda = mapa[key];
+    if (!celda) return false;
+    // Posición deshabilitada actúa como soporte físico sólido
+    return celda.bobina_id != null || celda.habilitada === false;
+  };
+
+  const puedeColocar = (celda, altura, col) => {
+    if (celda?.habilitada === false) return false;
     if (altura === 1) return true;
     const maxColInferior = COLS_POR_ALTURA[altura - 1];
 
     if (altura % 2 === 0) {
-      // Altura par: apoya en col y col+1 de la altura inferior
-      return mapa[`${altura-1}-${col}`]?.bobina_id != null &&
-            mapa[`${altura-1}-${col+1}`]?.bobina_id != null;
+      return tieneSoporte(`${altura-1}-${col}`) &&
+            tieneSoporte(`${altura-1}-${col+1}`);
     } else {
-      // Altura impar: apoya en col-1 y col de la altura inferior
-      const soporteIzq = col === 1 ? true : mapa[`${altura-1}-${col-1}`]?.bobina_id != null;
-      const soporteDer = col > maxColInferior ? true : mapa[`${altura-1}-${col}`]?.bobina_id != null;
-      // Necesita al menos uno real (no puede apoyar en dos paredes)
-      const tieneAlMenosUnoReal = 
-        (col > 1 && mapa[`${altura-1}-${col-1}`]?.bobina_id != null) ||
-        (col <= maxColInferior && mapa[`${altura-1}-${col}`]?.bobina_id != null);
+      const soporteIzq = col === 1            ? true : tieneSoporte(`${altura-1}-${col-1}`);
+      const soporteDer = col > maxColInferior  ? true : tieneSoporte(`${altura-1}-${col}`);
+      const tieneAlMenosUnoReal =
+        (col > 1             && tieneSoporte(`${altura-1}-${col-1}`)) ||
+        (col <= maxColInferior && tieneSoporte(`${altura-1}-${col}`));
       return soporteIzq && soporteDer && tieneAlMenosUnoReal;
     }
   };
@@ -89,15 +94,15 @@ function FosoGrid({ alturas, onClickBobina, onClickVacia, modoMoviendo, resaltad
             const key   = `${h}-${c}`;
             const celda = mapa[key];
             const tieneB = celda?.bobina_id != null;
-            const puede  = !tieneB && puedeColocar(h, c);
+            const puede  = !tieneB && puedeColocar(celda, h, c);
             const bloq   = !tieneB && !puede;
 
             let cls = styles.bobina;
-              if (tieneB && resaltado && celda.posicion_id === resaltado) cls += ' ' + styles.resaltada;
+              if (celda?.habilitada === false) cls += ' ' + styles.vaciaAnulada;
+              else if (tieneB && resaltado && celda.posicion_id === resaltado) cls += ' ' + styles.resaltada;
               else if (tieneB) cls += ' ' + styles.ocupada;
               else if (modoMoviendo && puede) cls += ' ' + styles.vaciaMover;
               else if (puede && puedeAnadir) cls += ' ' + styles.vaciaClic;
-              else if (puede && !puedeAnadir) cls += ' ' + styles.vaciaBloq;
               else cls += ' ' + styles.vaciaBloq;
 
             return (
@@ -105,7 +110,7 @@ function FosoGrid({ alturas, onClickBobina, onClickVacia, modoMoviendo, resaltad
                 key={key}
                 className={cls}
                 style={{ left: colX(h, c), top: rowY(h), width: D, height: D }}
-                title={bloq ? `Requiere apoyos: ${soportes(h, c).join(' y ')}` : undefined}
+                title={celda?.habilitada === false? 'Posición anulada': bloq ? `Requiere apoyos: ${soportes(h, c).join(' y ')}` : undefined}
                 onClick={() => {
                   if (tieneB && celda.posicion_id != null)
                     onClickBobina(celda.posicion_id, celda.bobina_id, celda.bobina_codigo ?? '', h, c);
