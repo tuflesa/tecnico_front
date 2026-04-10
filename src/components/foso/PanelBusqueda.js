@@ -161,12 +161,14 @@ function PanelBusqueda({ token, onClose, onSeleccionar, onColocarFuera }) {
               className={styles.item}
               onClick={() => {
                 if (!b.posicion_actual) return;
+                //console.log('posicion_actual:', b.posicion_actual);
                 onSeleccionar(
                   b.id,
                   b.posicion_actual.id,
                   b.posicion_actual.altura,
                   b.posicion_actual.columna,
-                  b.posicion_actual.linea
+                  b.posicion_actual.linea_id,
+                  b.posicion_actual.foso_id
                 );
               }}
             >

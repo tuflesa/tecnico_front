@@ -18,7 +18,6 @@ function BobinaDetalle({ bobinaId, posicionId, altura, columna, token, onClose, 
   const [tieneCarga, setTieneCarga] = useState(false);
 
   const headers = { Authorization: `token ${token}` };
-
   useEffect(() => {
     Promise.all([
       axios.get(`${BACKEND_SERVER}/api/foso/bobinas/${bobinaId}/`, { headers }),
@@ -28,9 +27,9 @@ function BobinaDetalle({ bobinaId, posicionId, altura, columna, token, onClose, 
       setHistorial(h.data);
 
       // Comprueba si hay bobinas apoyadas encima
-      if (b.data.posicion_actual) {
-        const { altura, columna, linea } = b.data.posicion_actual;
-        axios.get(`${BACKEND_SERVER}/api/foso/lineas/${linea}/foso/`, { headers })
+      if (b.data.posicion_actual?.linea_id) {
+        const { altura, columna, linea_id } = b.data.posicion_actual;
+        axios.get(`${BACKEND_SERVER}/api/foso/lineas/${linea_id}/grid/`, { headers })
           .then(foso => {
             const altSup = foso.data.alturas.find(a => a.altura === altura + 1);
             if (!altSup) { setTieneCarga(false); return; }

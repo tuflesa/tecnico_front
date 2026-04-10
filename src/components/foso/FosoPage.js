@@ -15,6 +15,8 @@ function FosoPage() {
   const [token] = useCookies(['tec-token']);
   const [user]  = useCookies(['tec-user']);
 
+  const [fosos,   setFosos]   = useState([]);
+  const [fosoId,  setFosoId]  = useState(null);
   const [lineas,   setLineas]   = useState([]);
   const [lineaId,  setLineaId]  = useState(null);
   const [fosoData, setFosoData] = useState(null);
@@ -22,12 +24,9 @@ function FosoPage() {
   const [detalle,  setDetalle]  = useState(null);
   const [colocar,  setColocar]  = useState(null);
   const [moviendo, setMoviendo] = useState(null);
-  //const [panelBusqueda, setPanelBusqueda] = useState(false);
   const [resaltado, setResaltado] = useState(null);
   const [pendienteDetalle, setPendienteDetalle] = useState(null);
   const [colocarExistente, setColocarExistente] = useState(null);
-
-  //const [panelRecepcion, setPanelRecepcion] = useState(false);
   const [panelLateral, setPanelLateral] = useState(null);
   const [colaRecepcion, setColaRecepcion] = useState([]);
   const [colocandoRecepcion, setColocandoRecepcion] = useState(null);
@@ -38,21 +37,41 @@ function FosoPage() {
   const puedeRetirar = user['tec-user']?.perfil?.destrezas_foso?.some(d => d.nombre === 'retirar')  ?? false;
   const puedeAnadir  = user['tec-user']?.perfil?.destrezas_foso?.some(d => d.nombre === 'añadir')   ?? false;
 
+  // Mostrar detalle pendiente tras cargar nuevo fosoData
   useEffect(() => {
-    if (fosoData && pendienteDetalle) {
-      setDetalle(pendienteDetalle);
+    if (fosoData && pendienteDetalle) {     
+      const { bobinaId, posicionId, altura, columna } = pendienteDetalle;
+      setDetalle({ bobinaId, posicionId, altura, columna });
       setPendienteDetalle(null);
     }
   }, [fosoData, pendienteDetalle]);
 
+  // 1. Cargar fosos al inicio
   useEffect(() => {
-    axios.get(`${BACKEND_SERVER}/api/foso/lineas/`, authHeader)
+    axios.get(`${BACKEND_SERVER}/api/foso/fosos/`, authHeader)
+      .then(r => {
+        const activos = r.data.filter(f => f.activo).sort((a, b) => a.id - b.id);
+        setFosos(activos);
+        if (activos.length) setFosoId(activos[0].id);
+      });
+  }, []); // eslint-disable-line
+
+  // 2. Cuando cambia el foso, cargar sus líneas
+  useEffect(() => {
+    if (fosoId == null) return;
+    setLineaId(null);
+    setFosoData(null);
+    axios.get(`${BACKEND_SERVER}/api/foso/lineas/?foso=${fosoId}`, authHeader)
       .then(r => {
         const activas = r.data.filter(l => l.activa).sort((a, b) => a.id - b.id);
         setLineas(activas);
-        if (activas.length) setLineaId(activas[0].id);
+        if (pendienteDetalle?.lineaDestino) {
+            setLineaId(Number(pendienteDetalle.lineaDestino));
+          } else if (activas.length) {
+            setLineaId(activas[0].id);
+          }
       });
-  }, []); // eslint-disable-line
+  }, [fosoId]); // eslint-disable-line
 
   const handleMover = async (posicionDestinoId) => {
     try {
@@ -70,11 +89,12 @@ function FosoPage() {
 
   const cargarFoso = useCallback((id) => {
     setLoading(true);
-    axios.get(`${BACKEND_SERVER}/api/foso/lineas/${id}/foso/`, authHeader)
+    axios.get(`${BACKEND_SERVER}/api/foso/lineas/${id}/grid/`, authHeader)
       .then(r => setFosoData(r.data))
       .finally(() => setLoading(false));
   }, []); // eslint-disable-line
 
+  // 3. Cuando cambia la línea, cargar su grid
   useEffect(() => {
     if (lineaId != null) cargarFoso(lineaId);
   }, [lineaId, cargarFoso]);
@@ -105,7 +125,28 @@ function FosoPage() {
       <Navbar bg="light" fixed="top">
         <Navbar.Brand>Gestión de Foso</Navbar.Brand>
 
-        {/* Selector de línea en la navbar */}
+        {/* Selector de foso */}
+        {fosos.length > 0 && (
+          <div className={styles.navLinea}>
+            <label className={styles.navLabel}>Foso:</label>
+            <select
+              className={styles.navSelect}
+              value={fosoId ?? ''}
+              onChange={e => {
+                setFosoId(Number(e.target.value));
+                setMoviendo(null);
+                setDetalle(null);
+                setColocar(null);
+              }}
+            >
+              {fosos.map(f => (
+                <option key={f.id} value={f.id}>{f.nombre}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* Selector de línea */}
         {lineas.length > 0 && (
           <div className={styles.navLinea}>
             <label className={styles.navLabel}>Línea:</label>
@@ -137,7 +178,7 @@ function FosoPage() {
         )}
 
         <Navbar.Collapse className="justify-content-end">
-          <button 
+          <button
             onClick={() => setPanelLateral('busqueda')}
             style={{
               background: 'none', border: '1px solid #ced4da',
@@ -147,13 +188,13 @@ function FosoPage() {
           >
             Buscar bobina
           </button>
-          
-          <button 
-              onClick={() => setPanelLateral('recepcion')}
-              style={{ background: 'none', border: '1px solid #ced4da', borderRadius: 4, padding: '4px 14px', fontSize: 13, cursor: 'pointer', marginRight: 8}}
-            >
-              Recepción
-            </button>
+
+          <button
+            onClick={() => setPanelLateral('recepcion')}
+            style={{ background: 'none', border: '1px solid #ced4da', borderRadius: 4, padding: '4px 14px', fontSize: 13, cursor: 'pointer', marginRight: 8 }}
+          >
+            Recepción
+          </button>
 
           <Button variant="info" onClick={() => window.location.href = '/home'}>Home</Button>
         </Navbar.Collapse>
@@ -181,19 +222,19 @@ function FosoPage() {
         )}
 
         {!loading && fosoData && (
-          <div className={styles.fosoWrap} style={{ flex: 1, overflow: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+          <div className={styles.fosoWrap} style={{ flex: 1, overflow: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <FosoGrid
               alturas={fosoData.alturas}
               onClickBobina={handleClickBobina}
               onClickVacia={(posicionId, altura, columna) => {
                 if (moviendo) {
                   handleMover(posicionId);
-                } else if(puedeAnadir) {
+                } else if (puedeAnadir) {
                   setColocar({ posicionId, altura, columna });
                 }
               }}
               modoMoviendo={moviendo}
-              resaltado={resaltado} 
+              resaltado={resaltado}
               puedeAnadir={puedeAnadir}
             />
           </div>
@@ -210,8 +251,8 @@ function FosoPage() {
           altura={detalle.altura}
           columna={detalle.columna}
           token={token['tec-token']}
-          onClose={() => {setDetalle(null); setResaltado(null);}}
-          onRetirada={() => {setDetalle(null); if (lineaId) cargarFoso(lineaId); }}
+          onClose={() => { setDetalle(null); setResaltado(null); }}
+          onRetirada={() => { setDetalle(null); if (lineaId) cargarFoso(lineaId); }}
           onMover={(bobinaId, ocupacionId, codigo) => {
             setDetalle(null);
             setMoviendo({ bobinaId, ocupacionId, codigo });
@@ -229,62 +270,74 @@ function FosoPage() {
           onColocada={() => { setColocar(null); if (lineaId) cargarFoso(lineaId); }}
         />
       )}
+
       {panelLateral === 'busqueda' && (
         <PanelBusqueda
           token={token['tec-token']}
           onClose={() => setPanelLateral(null)}
-          onSeleccionar={(bobinaId, posicionId, altura, columna, lineaDestino) => {
+          onSeleccionar={(bobinaId, posicionId, altura, columna, lineaDestino, fosoDestino) => {
             setPanelLateral(null);
-            setResaltado(posicionId);
-            // Sin setDetalle — solo va a la posición
+            setResaltado(posicionId);      
+            if (fosoDestino && Number(fosoDestino) !== Number(fosoId)) {
+                setFosoId(Number(fosoDestino));
+                // Esperamos a que cambie el foso y cargue líneas
+                setPendienteDetalle({
+                  bobinaId,
+                  posicionId,
+                  altura,
+                  columna,
+                  lineaDestino,
+                });
+                return;
+              }
             if (lineaDestino && Number(lineaDestino) !== Number(lineaId)) {
               setLineaId(Number(lineaDestino));
             }
           }}
-          onColocarFuera={(bobinaId, codigo) => {   // ← AÑADIR
+          onColocarFuera={(bobinaId, codigo) => {
             setPanelLateral(null);
             setColocarExistente({ bobinaId, codigo });
           }}
         />
-        )}
-        {colocarExistente && (
-          <ColocarBobinaExistente
-            bobinaId={colocarExistente.bobinaId}
-            codigo={colocarExistente.codigo}
-            token={token['tec-token']}
-            fosoData={fosoData}
-            lineas={lineas}
-            lineaId={lineaId}
-            onLineaChange={(id) => setLineaId(id)}
-            onClose={() => setColocarExistente(null)}
-            onColocada={() => { setColocarExistente(null); if (lineaId) cargarFoso(lineaId); }}
-          />
-        )}
-        {panelLateral === 'recepcion' && (
-          <PanelRecepcionBobinas
-            token={token['tec-token']}
-            cola={colaRecepcion}
-            setCola={setColaRecepcion}
-            onColocar={setColocandoRecepcion}
-            onClose={() => setPanelLateral(null)}
-          />
-        )}
-        {colocandoRecepcion && (
-          <ColocarBobinaExistente
-            bobinaId={colocandoRecepcion.id}
-            codigo={colocandoRecepcion.codigo}
-            token={token['tec-token']}
-            lineas={lineas}
-            lineaId={lineaId}
-            onLineaChange={id => setLineaId(id)}
-            onClose={() => setColocandoRecepcion(null)}
-            onColocada={() => {
-              // quitar de la cola
-              setColaRecepcion(c =>
-                c.filter(b => b.id !== colocandoRecepcion.id)
-              );
-              setColocandoRecepcion(null);
-            }}
+      )}
+
+      {colocarExistente && (
+        <ColocarBobinaExistente
+          bobinaId={colocarExistente.bobinaId}
+          codigo={colocarExistente.codigo}
+          token={token['tec-token']}
+          fosoData={fosoData}
+          lineas={lineas}
+          lineaId={lineaId}
+          onLineaChange={(id) => setLineaId(id)}
+          onClose={() => setColocarExistente(null)}
+          onColocada={() => { setColocarExistente(null); if (lineaId) cargarFoso(lineaId); }}
+        />
+      )}
+
+      {panelLateral === 'recepcion' && (
+        <PanelRecepcionBobinas
+          token={token['tec-token']}
+          cola={colaRecepcion}
+          setCola={setColaRecepcion}
+          onColocar={setColocandoRecepcion}
+          onClose={() => setPanelLateral(null)}
+        />
+      )}
+
+      {colocandoRecepcion && (
+        <ColocarBobinaExistente
+          bobinaId={colocandoRecepcion.id}
+          codigo={colocandoRecepcion.codigo}
+          token={token['tec-token']}
+          lineas={lineas}
+          lineaId={lineaId}
+          onLineaChange={id => setLineaId(id)}
+          onClose={() => setColocandoRecepcion(null)}
+          onColocada={() => {
+            setColaRecepcion(c => c.filter(b => b.id !== colocandoRecepcion.id));
+            setColocandoRecepcion(null);
+          }}
         />
       )}
     </React.Fragment>
