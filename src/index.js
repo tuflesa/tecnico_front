@@ -20,6 +20,7 @@ import Rodillos from './components/rodillos/rodillos';
 import { CookiesProvider, useCookies } from 'react-cookie';
 import QS from './components/qs/qs';
 import TR from './components/trazabilidad/tr';
+import FosoPage from './components/foso/FosoPage';
 
 const Render = () => {
   const [token] = useCookies(['tec-token']);
@@ -71,6 +72,11 @@ const Render = () => {
           <Route path='/trazabilidad'>
             {token['tec-token'] ? <TR /> : <Redirect to="/" />}
           </Route>
+
+          <Route path='/foso'>                                         
+            {token['tec-token'] ? <FosoPage /> : <Redirect to="/" />} 
+          </Route> 
+
         </Switch>
       </BrowserRouter>
   )

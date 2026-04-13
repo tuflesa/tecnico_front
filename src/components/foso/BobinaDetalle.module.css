@@ -1,0 +1,159 @@
+.loading { color: #6c757d; padding: 1rem 0; text-align: center; }
+.empty   { color: #6c757d; font-size: 13px; }
+
+.badge {
+  display: inline-block;
+  background: #cfe2ff;
+  color: #084298;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  border: 1px solid #084298;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #dee2e6;
+}
+.tab, .tabActive {
+  background: none;
+  border: none;
+  padding: 6px 14px;
+  font-size: 13px;
+  color: #6c757d;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  cursor: pointer;
+  transition: color .12s, border-color .12s;
+}
+.tabActive {
+  color: #0d6efd;
+  border-bottom-color: #0d6efd;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 1.25rem;
+}
+
+.campo {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 8px 12px;
+}
+.campoLbl {
+  display: block;
+  font-size: 10px;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-bottom: 3px;
+}
+.campoVal {
+  font-size: 13px;
+  color: #212529;
+  font-weight: 500;
+}
+
+.historial {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 1.25rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.histItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 7px 12px;
+  font-size: 12px;
+}
+.histPos  { color: #212529; flex: 1; }
+.histDate { color: #6c757d; font-size: 11px; }
+
+.badgeVerde {
+  background: #d1e7dd; color: #0a3622;
+  font-size: 10px; padding: 2px 7px;
+  border-radius: 4px; border: 1px solid #0a3622;
+  white-space: nowrap;
+}
+.badgeGris {
+  background: #e2e3e5; color: #41464b;
+  font-size: 10px; padding: 2px 7px;
+  border-radius: 4px; border: 1px solid #41464b;
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex; gap: 8px; justify-content: flex-end;
+  padding-top: 1rem; border-top: 1px solid #dee2e6;
+}
+.btnRetirar {
+  background: #f8d7da; color: #842029;
+  border: 1px solid #842029; border-radius: 4px;
+  padding: 7px 16px; font-size: 13px;
+  transition: background .12s; cursor: pointer;
+}
+.btnRetirar:hover:not(:disabled) { background: #f1aeb5; }
+.btnRetirar:disabled { opacity: .5; cursor: not-allowed; }
+.btnCerrar {
+  background: #fff; color: #333;
+  border: 1px solid #ced4da; border-radius: 4px;
+  padding: 7px 16px; font-size: 13px;
+  transition: background .12s; cursor: pointer;
+}
+.btnCerrar:hover { background: #f8f9fa; }
+.btnMover {
+  background: #fff3cd;
+  color: #664d03;
+  border: 1px solid #ffc107;
+  border-radius: 4px;
+  padding: 7px 16px;
+  font-size: 13px;
+  transition: background .12s;
+  cursor: pointer;
+}
+.btnMover:hover { background: #ffe69c; }
+
+.btnEditar {
+  background: #e8f4fd;
+  color: #084298;
+  border: 1px solid #084298;
+  border-radius: 4px;
+  padding: 7px 16px;
+  font-size: 13px;
+  transition: background .12s;
+  cursor: pointer;
+}
+.btnEditar:hover { background: #cfe2ff; }
+
+.btnGuardar {
+  background: #0d6efd;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 7px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background .12s;
+  cursor: pointer;
+}
+.btnGuardar:hover:not(:disabled) { background: #0a58ca; }
+.btnGuardar:disabled { opacity: .5; cursor: not-allowed; }
+
+.btnRetirar:disabled,
+.btnMover:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
