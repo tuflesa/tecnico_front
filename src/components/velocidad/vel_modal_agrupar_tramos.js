@@ -96,13 +96,28 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
     useEffect(()=>{
         if (!seleTipoParada) return;
         setCargandoOF(true);  // ← empieza a cargar
-        seleTipoParada && axios.get(BACKEND_SERVER + `/api/velocidad/buscar_montajes_of/?zona_id=${id}&tipo_parada_siglas=${seleSiglasParada}`,{
+        // Calcular intervalo desde las paradas seleccionadas
+        const base = paradasSeleccionadas;
+        const fecha_inicio = base.length > 0
+            ? moment(base[0].fechaInicio, 'DD/MM/YYYY').format('YYYY-MM-DD') + 'T' + base[0].horaInicio
+            : null;
+        const fin = base.length - 1;
+        const fecha_fin = base.length > 0
+            ? moment(base[fin].fechaInicio, 'DD/MM/YYYY').format('YYYY-MM-DD') + 'T' + base[fin].horaFin
+            : null;
+        seleTipoParada && axios.get(BACKEND_SERVER + `/api/velocidad/buscar_montajes_of/`,{
+            params: {
+                zona_id: id,
+                tipo_parada_siglas: seleSiglasParada,
+                fecha_inicio,
+                fecha_fin,
+            },
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }
         })
         .then( res => {
-            console.log(res.data);
+            console.log('que devuelve el buscar montaje: ',res.data);
             setListadoOrdenes(res.data.montajes);
             setIdOF(res.data.xIdOF);
             setIdPos(res.data.xIdPos);
