@@ -75,7 +75,7 @@ const GraficoEstado = () => {
             }
         })
         .then(res => {
-            // console.log(res.data);
+            console.log(res.data);
             setEstado(res.data);
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps

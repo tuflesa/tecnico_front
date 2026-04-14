@@ -117,13 +117,16 @@ const ModalEditarParada = ({ show, onHide, parada}) => {
     if (!parada) return null;
 
     const handleGuardar = async () => {
+        console.log('QUE TENEMOS EN el nombre nuevo: ',tipoNombre)
         await axios.put( BACKEND_SERVER + `/api/velocidad/actualizar_parada/`,{
             parada: parada.id,
+            parada_nombre: parada.tipo_parada_nombre,
             tipoSiglas: tipoSiglas,
             codigo: parseInt(codigoSel),
             nuevaObs: nuevaObs,
             codigoSel: codigoSel,
             xIdParada_R: codigo_R_ProdDB,
+            nueva_parada_nombre: tipoNombre,
             },
             { headers: { Authorization: `token ${token["tec-token"]}` } }
         )
@@ -133,9 +136,11 @@ const ModalEditarParada = ({ show, onHide, parada}) => {
         .catch (err => {
             console.log(err);
         })
+        console.log('OF: ', IdOF);
         axios.patch(BACKEND_SERVER + `/api/velocidad/paradas/${parada.id}/`, {
             observaciones: nuevaObs,
-            codigo: parseInt(codigoSel)
+            codigo: parseInt(codigoSel),
+            of: IdOF
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -172,6 +177,7 @@ const ModalEditarParada = ({ show, onHide, parada}) => {
             setseleTipoParada(id);
             setTipoNombre(nombre);
             setTipoSiglas(siglas);
+            console.log('que llega a nombre: ', nombre);
         };
         
         setPalabraSeleccionada(null);

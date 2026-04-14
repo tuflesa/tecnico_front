@@ -169,125 +169,127 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
             parada_id: parada.id,
             parada_duracion: parada.duracion,
         };
-        try{
-            const res = await axios.post(`${BACKEND_SERVER}/api/velocidad/crear_parada_ProdBD/`,
-                datos,
-                {
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`,
-                        'Content-Type': 'application/json'
-                    }
-                }
-            );
-            posicion=res.data.xIdPos;
-        } catch (error){
-            console.error('Error al guardar en ProdBD', error);
-            alert('Error al guardar en ProdBD:'+ (error.response?.data.mensaje || error.message));
-            return;
-        }
-        
-        try {
-            const config = { headers: { 'Authorization': `token ${token['tec-token']}` } };
-            // --- CASO 1: TODO EL PERIODO ES UNA AVERÍA/INCIDENCIA ---
-            if (esInicioExacto && esFinExacto) {                
-                // 1. Crear la nueva parada SIN el periodo
-                const crearParadaResp = await axios.post(`${BACKEND_SERVER}/api/velocidad/paradas_crear/`, {
-                    codigo: parseInt(codigoSel),
-                    zona: parada.zona_id,
-                    observaciones: nuevaObs || "",
-                    of: parada.of,
-                }, config);
-                const nuevaParadaId = crearParadaResp.data.id;
-
-                // 2. Modifica la parada nueva en el periodo que teníamos
-                await axios.patch(`${BACKEND_SERVER}/api/velocidad/periodo/${pContenedor.id}/`,
+        if(parada.tipo_parada_nombre==="Incidencia" || parada.tipo_parada_nombre==="Avería" || parada.tipo_parada_nombre==="Cambio"){
+            try{
+                const res = await axios.post(`${BACKEND_SERVER}/api/velocidad/crear_parada_ProdBD/`,
+                    datos,
                     {
-                        parada: nuevaParadaId
-                    }, config
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`,
+                            'Content-Type': 'application/json'
+                        }
+                    }
                 );
-                await axios.post(`${BACKEND_SERVER}/api/velocidad/parada_produccion_db/`, {
-                    parada: nuevaParadaId,
-                    pos: posicion,
-                    turno: pContenedor.turno,
-                }, config);
+                posicion=res.data.xIdPos;
+            } catch (error){
+                console.error('Error al guardar en ProdBD', error);
+                alert('Error al guardar en ProdBD:'+ (error.response?.data.mensaje || error.message));
+                return;
             }
+        
+            try {
+                const config = { headers: { 'Authorization': `token ${token['tec-token']}` } };
+                // --- CASO 1: TODO EL PERIODO ES UNA AVERÍA/INCIDENCIA ---
+                if (esInicioExacto && esFinExacto) {                
+                    // 1. Crear la nueva parada SIN el periodo
+                    const crearParadaResp = await axios.post(`${BACKEND_SERVER}/api/velocidad/paradas_crear/`, {
+                        codigo: parseInt(codigoSel),
+                        zona: parada.zona_id,
+                        observaciones: nuevaObs || "",
+                        of: parada.of,
+                    }, config);
+                    const nuevaParadaId = crearParadaResp.data.id;
 
-            // --- CASO 2: AVERÍA AL PRINCIPIO O AL FINAL DE UN PERIODO---
-            else if (esInicioExacto || esFinExacto) {                
-                // 1. Crear la nueva parada CON su periodo
-                const nueva_parada = await axios.post(`${BACKEND_SERVER}/api/velocidad/paradas_crear/`, {
-                    codigo: parseInt(codigoSel),
-                    zona: parada.zona_id,
-                    observaciones: nuevaObs || "",
-                    of: parada.of,
-                    periodos: [{
-                        inicio: moment.utc(T_u_inicio).toISOString(),
-                        fin: moment.utc(T_u_fin).toISOString(),
-                        velocidad: 0,
+                    // 2. Modifica la parada nueva en el periodo que teníamos
+                    await axios.patch(`${BACKEND_SERVER}/api/velocidad/periodo/${pContenedor.id}/`,
+                        {
+                            parada: nuevaParadaId
+                        }, config
+                    );
+                    await axios.post(`${BACKEND_SERVER}/api/velocidad/parada_produccion_db/`, {
+                        parada: nuevaParadaId,
+                        pos: posicion,
                         turno: pContenedor.turno,
-                    }]
-                }, config);
+                    }, config);
+                }
 
-                // 2. Actualizar el periodo ORIGINAL (solo cambiamos las horas, NO TOCAMOS LA PARADA NI EL TURNO)
-                const nuevoInicio = esInicioExacto ? T_u_fin : tP_inicio;
-                const nuevoFin = esInicioExacto ? tP_fin : T_u_inicio;
+                // --- CASO 2: AVERÍA AL PRINCIPIO O AL FINAL DE UN PERIODO---
+                else if (esInicioExacto || esFinExacto) {                
+                    // 1. Crear la nueva parada CON su periodo
+                    const nueva_parada = await axios.post(`${BACKEND_SERVER}/api/velocidad/paradas_crear/`, {
+                        codigo: parseInt(codigoSel),
+                        zona: parada.zona_id,
+                        observaciones: nuevaObs || "",
+                        of: parada.of,
+                        periodos: [{
+                            inicio: moment.utc(T_u_inicio).toISOString(),
+                            fin: moment.utc(T_u_fin).toISOString(),
+                            velocidad: 0,
+                            turno: pContenedor.turno,
+                        }]
+                    }, config);
+
+                    // 2. Actualizar el periodo ORIGINAL (solo cambiamos las horas, NO TOCAMOS LA PARADA NI EL TURNO)
+                    const nuevoInicio = esInicioExacto ? T_u_fin : tP_inicio;
+                    const nuevoFin = esInicioExacto ? tP_fin : T_u_inicio;
+                    
+                    await axios.patch(`${BACKEND_SERVER}/api/velocidad/periodo/${pContenedor.id}/`, {
+                        inicio: moment.utc(nuevoInicio).toISOString(),
+                        fin: moment.utc(nuevoFin).toISOString()
+                    }, config);
+                    await axios.post(`${BACKEND_SERVER}/api/velocidad/parada_produccion_db/`, {
+                        parada: nueva_parada.data.id,
+                        pos: posicion,
+                        turno: pContenedor.turno,
+                    }, config);
+                }
+
+                // --- CASO 3: AVERÍA EN EL MEDIO (DIVIDIR EN 3) ---
+                else {                
+                    // 1. Crear la nueva parada CON su periodo (la parte del medio)
+                    const nueva_parada = await axios.post(`${BACKEND_SERVER}/api/velocidad/paradas_crear/`, {
+                        codigo: parseInt(codigoSel),
+                        zona: parada.zona_id,
+                        observaciones: nuevaObs || "",
+                        of: parada.of,
+                        periodos: [{
+                            inicio: moment.utc(T_u_inicio).toISOString(),
+                            fin: moment.utc(T_u_fin).toISOString(),
+                            velocidad: 0,
+                            turno: pContenedor.turno,
+                        }]
+                    }, config);
+
+                    // 2. Crear el periodo para la parte final (poniendo como parada la PARADA ORIGINAL del periodoContenedor)
+                    await axios.post(`${BACKEND_SERVER}/api/velocidad/periodo/`, {
+                        inicio: moment.utc(T_u_fin).toISOString(),
+                        fin: moment.utc(tP_fin).toISOString(),
+                        velocidad: 0,
+                        parada: pContenedor.parada,
+                        turno: pContenedor.turno,
+                    }, config);
+
+                    // 3. Actualizar el periodo ORIGINAL, el inicial, solo actualizamos horas sin cambiar parada, ni turno.
+                    await axios.patch(`${BACKEND_SERVER}/api/velocidad/periodo/${pContenedor.id}/`, {
+                        inicio: moment.utc(tP_inicio).toISOString(),
+                        fin: moment.utc(T_u_inicio).toISOString()
+                    }, config);
+                    await axios.post(`${BACKEND_SERVER}/api/velocidad/parada_produccion_db/`, {
+                        parada: nueva_parada.data.id,
+                        pos: posicion,
+                        turno: pContenedor.turno,
+                    }, config);
+                }
+
+                alert("Parada dividida y guardada correctamente.");
+                cerrar_limpiar();
+                onSaved?.(); //avisa a TR_ParadasAcu que tiene que refrescar
+                onHide(); //cierra el modal
                 
-                await axios.patch(`${BACKEND_SERVER}/api/velocidad/periodo/${pContenedor.id}/`, {
-                    inicio: moment.utc(nuevoInicio).toISOString(),
-                    fin: moment.utc(nuevoFin).toISOString()
-                }, config);
-                await axios.post(`${BACKEND_SERVER}/api/velocidad/parada_produccion_db/`, {
-                    parada: nueva_parada.data.id,
-                    pos: posicion,
-                    turno: pContenedor.turno,
-                }, config);
+            } catch (error) {
+                console.error("Error en el proceso:", error.response?.data || error.message);
+                alert("Hubo un error al guardar los cambios: " + (error.response?.data?.detail || error.message));
             }
-
-            // --- CASO 3: AVERÍA EN EL MEDIO (DIVIDIR EN 3) ---
-            else {                
-                // 1. Crear la nueva parada CON su periodo (la parte del medio)
-                const nueva_parada = await axios.post(`${BACKEND_SERVER}/api/velocidad/paradas_crear/`, {
-                    codigo: parseInt(codigoSel),
-                    zona: parada.zona_id,
-                    observaciones: nuevaObs || "",
-                    of: parada.of,
-                    periodos: [{
-                        inicio: moment.utc(T_u_inicio).toISOString(),
-                        fin: moment.utc(T_u_fin).toISOString(),
-                        velocidad: 0,
-                        turno: pContenedor.turno,
-                    }]
-                }, config);
-
-                // 2. Crear el periodo para la parte final (poniendo como parada la PARADA ORIGINAL del periodoContenedor)
-                await axios.post(`${BACKEND_SERVER}/api/velocidad/periodo/`, {
-                    inicio: moment.utc(T_u_fin).toISOString(),
-                    fin: moment.utc(tP_fin).toISOString(),
-                    velocidad: 0,
-                    parada: pContenedor.parada,
-                    turno: pContenedor.turno,
-                }, config);
-
-                // 3. Actualizar el periodo ORIGINAL, el inicial, solo actualizamos horas sin cambiar parada, ni turno.
-                await axios.patch(`${BACKEND_SERVER}/api/velocidad/periodo/${pContenedor.id}/`, {
-                    inicio: moment.utc(tP_inicio).toISOString(),
-                    fin: moment.utc(T_u_inicio).toISOString()
-                }, config);
-                await axios.post(`${BACKEND_SERVER}/api/velocidad/parada_produccion_db/`, {
-                    parada: nueva_parada.data.id,
-                    pos: posicion,
-                    turno: pContenedor.turno,
-                }, config);
-            }
-
-            alert("Parada dividida y guardada correctamente.");
-            cerrar_limpiar();
-            onSaved?.(); //avisa a TR_ParadasAcu que tiene que refrescar
-            onHide(); //cierra el modal
-            
-        } catch (error) {
-            console.error("Error en el proceso:", error.response?.data || error.message);
-            alert("Hubo un error al guardar los cambios: " + (error.response?.data?.detail || error.message));
         }
     };
 
