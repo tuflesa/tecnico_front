@@ -169,7 +169,7 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
             parada_id: parada.id,
             parada_duracion: parada.duracion,
         };
-        if(parada.tipo_parada_nombre==="Incidencia" || parada.tipo_parada_nombre==="Avería" || parada.tipo_parada_nombre==="Cambio"){
+        if(parada.tipo_parada_nombre==="Incidencia" || parada.tipo_parada_nombre==="Avería" || parada.tipo_parada_nombre==="Cambio" || parada.tipo_parada_nombre==="Desconocido"){
             try{
                 const res = await axios.post(`${BACKEND_SERVER}/api/velocidad/crear_parada_ProdBD/`,
                     datos,
