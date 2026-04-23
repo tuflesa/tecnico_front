@@ -693,7 +693,7 @@ const GraficoEstado = () => {
                             <Tab.Pane eventKey="paradas_pendientes" title={<span className="glow-green">paradas Pendientes</span>}>
                                 <Row>
                                     <Col>
-                                        <div style={{ height: '200px', overflowY: 'auto' }}>
+                                        <div style={{ height: '600px', overflowY: 'auto' }}>
                                             <ParadasAcu Paradas={estado && estado.paradas.filter(p => p.codigo === 'Desconocido')} 
                                                         paradasSeleccionadas={paradasSeleccionadas}
                                                         setParadasSeleccionadas={setParadasSeleccionadas}
