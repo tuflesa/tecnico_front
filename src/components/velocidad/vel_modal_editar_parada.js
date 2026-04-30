@@ -126,6 +126,7 @@ const ModalEditarParada = ({ show, onHide, parada}) => {
             codigoSel: codigoSel,
             xIdParada_R: codigo_R_ProdDB,
             nueva_parada_nombre: tipoNombre,
+            xDescripcion: descripcionProdDB,
             },
             { headers: { Authorization: `token ${token["tec-token"]}` } }
         )
@@ -138,7 +139,7 @@ const ModalEditarParada = ({ show, onHide, parada}) => {
         axios.patch(BACKEND_SERVER + `/api/velocidad/paradas/${parada.id}/`, {
             observaciones: nuevaObs,
             codigo: parseInt(codigoSel),
-            of: IdOF
+            //of: IdOF
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`

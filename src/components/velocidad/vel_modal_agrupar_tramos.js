@@ -317,7 +317,25 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
                             `${BACKEND_SERVER}/api/velocidad/guardar_paradas_agrupadas/`,
                             { ...datos, forzar: true },
                             { headers: { 'Authorization': `token ${token['tec-token']}` } }
-                        );
+                        )
+                        .then(res => {
+                            if (res.status === 200) {
+                                setParadasSeleccionadas([]);
+                                setseleTipoParada(null);
+                                setCodigoSeleccionado(null);
+                                setPalabraSeleccionado(null);
+                                setCodigoProdDB(null);
+                                setCodigo_R_ProdDB(null);
+                                setDescripcion(null);
+                                onSaved && onSaved();
+                                onLimpiar && onLimpiar();
+                                setObservaciones('');
+                                cerrarModalTramos();
+                            }
+                        })
+                        .catch(error => {
+                            alert("Error inesperado: " + error.message);
+                        });
                     }
                     return;
                 }
