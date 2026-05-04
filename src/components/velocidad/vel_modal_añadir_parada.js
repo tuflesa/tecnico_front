@@ -98,6 +98,7 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
 
     const handleGuardar = async () => {
         let T_u_inicio, T_u_fin, pContenedor;
+        let periodosCruce = null;
         //<-------------------VALIDACIONES ------------------------>
         if (tipoRegistro) {
             if (!horaInicioReg || !horaFinReg) {
@@ -130,10 +131,142 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
                 );
             });
             if (!pContenedor) {
-                alert("El rango seleccionado debe estar totalmente dentro de un periodo de INACTIVIDAD.");
-                return;
+                const inactivos = periodos
+                    .filter(p => p.velocidad <= 0)
+                    .sort((a, b) => moment.utc(a.inicio).valueOf() - moment.utc(b.inicio).valueOf());
+
+                for (let i = 0; i < inactivos.length - 1; i++) {
+                    const p1 = inactivos[i];
+                    const p2 = inactivos[i + 1];
+                    const tP1_inicio = moment.utc(p1.inicio).valueOf();
+                    const tP1_fin    = moment.utc(p1.fin).valueOf();
+                    const tP2_inicio = moment.utc(p2.inicio).valueOf();
+                    const tP2_fin    = moment.utc(p2.fin).valueOf();
+
+                    const sonConsecutivos  = tP1_fin === tP2_inicio;
+                    const sonDistintoTurno = p1.turno !== p2.turno;
+                    const rangoEnCruce     = T_u_inicio >= tP1_inicio && T_u_inicio < tP1_fin
+                                          && T_u_fin > tP2_inicio    && T_u_fin <= tP2_fin;
+
+                    if (sonConsecutivos && sonDistintoTurno && rangoEnCruce) {
+                        periodosCruce = { p1, p2 };
+                        break;
+                    }
+                }
+
+                if (!periodosCruce) {
+                    alert("El rango seleccionado debe estar totalmente dentro de un periodo de INACTIVIDAD.");
+                    return;
+                }
             }
-            
+            // =====================================================================
+            // CASO ESPECIAL: El rango cruza un cambio de turno → 2 paradas
+            // =====================================================================
+            if (periodosCruce) {
+                const { p1, p2 } = periodosCruce;
+                const tP1_inicio = moment.utc(p1.inicio).valueOf();
+                const tP1_fin    = moment.utc(p1.fin).valueOf();
+                const tP2_inicio = moment.utc(p2.inicio).valueOf();
+                const tP2_fin    = moment.utc(p2.fin).valueOf();
+
+                const minutos1 = (tP1_fin - T_u_inicio) / 1000 / 60;   // duración tramo 1
+                const minutos2 = (T_u_fin - tP2_inicio) / 1000 / 60;   // duración tramo 2
+
+                const config = { headers: { 'Authorization': `token ${token['tec-token']}` } };
+
+                const datosBase = {
+                    xIdOF: parada.of,
+                    xIdTipo: tipoRegistro === 'averia' ? 'A' : 'I',
+                    Tipo_anterior: parada.tipo_parada_nombre === 'Cambio' ? 'R'
+                                 : parada.tipo_parada_nombre === 'Incidencia' ? 'I' : 'A',
+                    xIdParada: codigoProdDB,
+                    xObservaciones: nuevaObs ? nuevaObs + '--' + descripcion : '*' + descripcion,
+                    parada_id: parada.id,
+                    parada_duracion: parada.duracion,
+                };
+                if (parada.tipo_parada_nombre === "Incidencia" || parada.tipo_parada_nombre === "Avería" ||
+                    parada.tipo_parada_nombre === "Cambio"     || parada.tipo_parada_nombre === "Desconocido") {
+                    try {
+                        // ── PARADA 1 (turno de p1) ──────────────────────────────
+                        const resProdBD1 = await axios.post(
+                            `${BACKEND_SERVER}/api/velocidad/crear_parada_ProdBD/`,
+                            { ...datosBase, periodo: p1, xFecha: p1.inicio, xTiempo: minutos1, xTurno_id: p1.turno },
+                            { headers: { ...config.headers, 'Content-Type': 'application/json' } }
+                        );
+                        const posicion1 = resProdBD1.data.xIdPos;
+
+                        const nuevaParada1 = await axios.post(`${BACKEND_SERVER}/api/velocidad/paradas_crear/`, {
+                            codigo: parseInt(codigoSel),
+                            zona: parada.zona_id,
+                            observaciones: nuevaObs || "",
+                            of: parada.of,
+                            periodos: [{
+                                inicio: moment.utc(T_u_inicio).toISOString(),
+                                fin:    moment.utc(tP1_fin).toISOString(),
+                                velocidad: 0,
+                                turno: p1.turno,
+                            }]
+                        }, config);
+                        await axios.post(`${BACKEND_SERVER}/api/velocidad/parada_produccion_db/`, {
+                            parada: nuevaParada1.data.id,
+                            pos: posicion1,
+                            turno: p1.turno,
+                        }, config);
+
+                        // Recortar p1 original si el usuario no empieza justo al inicio
+                        if (T_u_inicio > tP1_inicio) {
+                            await axios.patch(`${BACKEND_SERVER}/api/velocidad/periodo/${p1.id}/`, {
+                                inicio: moment.utc(tP1_inicio).toISOString(),
+                                fin:    moment.utc(T_u_inicio).toISOString(),
+                            }, config);
+                        }
+                        
+                        // ── PARADA 2 (turno de p2) ──────────────────────────────
+                        const resProdBD2 = await axios.post(
+                            `${BACKEND_SERVER}/api/velocidad/crear_parada_ProdBD/`,
+                            { ...datosBase, periodo: p2, xFecha: p2.inicio, xTiempo: minutos2, xTurno_id: p2.turno },
+                            { headers: { ...config.headers, 'Content-Type': 'application/json' } }
+                        );
+                        const posicion2 = resProdBD2.data.xIdPos;
+                        const nuevaParada2 = await axios.post(`${BACKEND_SERVER}/api/velocidad/paradas_crear/`, {
+                            codigo: parseInt(codigoSel),
+                            zona: parada.zona_id,
+                            observaciones: nuevaObs || "",
+                            of: parada.of,
+                            periodos: [{
+                                inicio: moment.utc(tP2_inicio).toISOString(),
+                                fin:    moment.utc(T_u_fin).toISOString(),
+                                velocidad: 0,
+                                turno: p2.turno,
+                            }]
+                        }, config);
+
+                        await axios.post(`${BACKEND_SERVER}/api/velocidad/parada_produccion_db/`, {
+                            parada: nuevaParada2.data.id,
+                            pos: posicion2,
+                            turno: p2.turno,
+                        }, config);
+                        // Recortar p2 original si el usuario no llega justo al final
+                        if (T_u_fin < tP2_fin) {
+                            await axios.patch(`${BACKEND_SERVER}/api/velocidad/periodo/${p2.id}/`, {
+                                inicio: moment.utc(T_u_fin).toISOString(),
+                                fin:    moment.utc(tP2_fin).toISOString(),
+                            }, config);
+                        }
+                        // Si T_u_fin === tP2_fin el periodo p2 queda vacío (igual que p1)
+
+                        alert("Paradas divididas por cambio de turno y guardadas correctamente.");
+                        cerrar_limpiar();
+                        onSaved?.();
+                        onHide();
+
+                    } catch (error) {
+                        console.error("Error en cruce de turno:", error.response?.data || error.message);
+                        alert("Error al guardar el cruce de turno: " + (error.response?.data?.detail || error.message));
+                    }
+                }
+                return; // Salimos para no ejecutar el flujo normal
+            }
         } else {
             alert("Por favor, seleccione si desea añadir una Avería o Incidencia.");
             return;
