@@ -114,7 +114,7 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acc
                     const resNuevaParada = await axios.post(`${BACKEND_SERVER}/api/velocidad/paradas/`, {
                         codigo: codigoParaEstePeriodo,
                         zona: parada.zona_id,
-                        observaciones: parada.observaciones,
+                        observaciones: "",
                     }, {
                         headers: { 'Authorization': `token ${token['tec-token']}` }
                     });

@@ -243,7 +243,7 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
                 xDescripcion: descripcionProdDB,
                 //xFecha: la obtenemos en el backend en duraciones_por_turno
                 //xTiempo la obtenemos en el backend en duraciones_por_turno
-                xObservaciones: observaciones + '--' + descripcion,
+                xObservaciones: observaciones,
                 //xTurno: la obtenemos en el backend en duraciones_por_turno
                 //xIgnorar = false siempre
 
