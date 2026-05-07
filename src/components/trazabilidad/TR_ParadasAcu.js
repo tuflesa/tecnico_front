@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useRef } from 'react';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { Form, Table, Container} from 'react-bootstrap';
@@ -70,7 +70,7 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acc
                 duracion,
             });
         } else {
-            const filtrada = nuevaSeleccion.filter(p => p.id !== event.target.id);
+            const filtrada = nuevaSeleccion.filter(p => String(p.id) !== String(event.target.id));
             setParadasSeleccionadas(ordenarLista(filtrada));
             return;
         }
@@ -139,6 +139,37 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acc
         }
     };
 
+    const handleSeleccionarTodas = (event) => {
+        // Si está en indeterminate o todas marcadas -> limpiar todo
+        if (checkboxTodasRef.current?.indeterminate || todasSeleccionadas) {
+            setParadasSeleccionadas([]);
+        } else {
+            const todasLasParadas = Paradas.map((pdb) => {
+                const { fecha: fechaInicio, hora: horaInicio } = formatearFechaHoraLocal(pdb.inicio);
+                const { fecha: fechaFin, hora: horaFin } = formatearFechaHoraLocal(pdb.fin);
+                return {
+                    id: pdb.id,
+                    checked: true,
+                    fechaInicio,
+                    fechaFin,
+                    horaInicio,
+                    horaFin,
+                    duracion: pdb.duracion,
+                };
+            });
+            setParadasSeleccionadas(ordenarLista(todasLasParadas));
+        }
+    };
+    const checkboxTodasRef = useRef(null);
+    const todasSeleccionadas = Paradas && Paradas.length > 0 && Paradas.every(pdb => estaseleccionado(pdb.id));
+    const algunaSeleccionada = Paradas && Paradas.some(pdb => estaseleccionado(pdb.id));
+    
+    useEffect(() => {
+        if (checkboxTodasRef.current) {
+            checkboxTodasRef.current.indeterminate = algunaSeleccionada && !todasSeleccionadas;
+        }
+    }, [algunaSeleccionada, todasSeleccionadas]);
+
     return (
         <Container>
             <Table striped bordered hover>
@@ -150,7 +181,20 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acc
                     <th>Duración</th>
                     <th>Descripción</th>
                     {!programador && (
-                        acciones || tieneEdionParadas ? <th>Acciones</th> : <th>Observaciones</th>
+                        acciones || tieneEdionParadas 
+                            ? <th>
+                                {acciones && ( 
+                                    <Form.Check
+                                        ref={checkboxTodasRef}
+                                        type="checkbox"
+                                        label="Todas"
+                                        checked={todasSeleccionadas}
+                                        onChange={handleSeleccionarTodas}
+                                    />
+                                )}
+                                {!acciones && 'Acciones'}
+                            </th> 
+                            : <th>Observaciones</th>
                     )}
                     </tr>
                 </thead>
