@@ -11,6 +11,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
     const [user] = useCookies(['tec-user']);
     const [hoy] = useState(new Date());
     const nosoyTecnico = user['tec-user'].perfil.puesto.nombre==='Operador'||user['tec-user'].perfil.puesto.nombre==='Mantenimiento'?true:false;
+    const [enviando, setEnviando] = useState(false);
 
     const [datos, setDatos] = useState({
         id: linea_tarea.id,
@@ -71,7 +72,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
     }
     
     const actualizaTarea = (datosActualizados) => {
-        axios.patch(BACKEND_SERVER + `/api/mantenimiento/tarea_nueva/${linea_tarea.tarea.id}/`, {
+        return axios.patch(BACKEND_SERVER + `/api/mantenimiento/tarea_nueva/${linea_tarea.tarea.id}/`, {
             nombre: datosActualizados.nombre,
             prioridad: datosActualizados.prioridad,
             observaciones: datosActualizados.observaciones,
@@ -89,7 +90,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
     }    
 
     const actualizarLinea = (datosActualizados) => {
-        axios.patch(BACKEND_SERVER + `/api/mantenimiento/linea_nueva/${linea_tarea.id}/`, {
+        return axios.patch(BACKEND_SERVER + `/api/mantenimiento/linea_nueva/${linea_tarea.id}/`, {
             fecha_inicio: datosActualizados.fecha_inicio,
             fecha_fin: datosActualizados.fecha_fin,
             fecha_plan: datosActualizados.fecha_plan,
@@ -116,7 +117,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
         fechaPorSemanas = new Date(suma);
         fechaString = fechaPorSemanas.getFullYear() + '-' + ('0' + (fechaPorSemanas.getMonth()+1)).slice(-2) + '-' + ('0' + fechaPorSemanas.getDate()).slice(-2);
         
-        fechaString && axios.post(BACKEND_SERVER + `/api/mantenimiento/linea_nueva/`,{
+        return fechaString && axios.post(BACKEND_SERVER + `/api/mantenimiento/linea_nueva/`,{
             parte: linea_tarea.parte.id,
             tarea: linea_tarea.tarea.id,
             fecha_inicio:null,
@@ -139,7 +140,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
     }
 
     const cerrarDatos = () => {
-        if(datos.nombre!==linea_tarea.tarea.nombre || datos.prioridad!==linea_tarea.tarea.prioridad || datos.observaciones!==linea_tarea.tarea.observaciones || datos.observaciones_trab!==linea_tarea.observaciones_trab || datos.fecha_plan!==linea_tarea.fecha_plan || datos.fecha_fin!==linea_tarea.fecha_fin || datos.periodo!==linea_tarea.tarea.periodo || datos.tipo_periodo!==linea_tarea.tarea.tipo_periodo.id){
+        if(datos.nombre!==linea_tarea.tarea.nombre || datos.prioridad!==linea_tarea.tarea.prioridad || datos.observaciones!==linea_tarea.tarea.observaciones || datos.observaciones_trab!==linea_tarea.observaciones_trab || datos.fecha_plan!==linea_tarea.fecha_plan || datos.fecha_fin!==linea_tarea.fecha_fin || datos.periodo!==linea_tarea.tarea.periodo || datos.tipo_periodo!==linea_tarea.tarea.tipo_periodo?.id){
             var hay_modificado = window.confirm('No has actualizado los cambios ¿Deseas guardar los datos?');
             if(hay_modificado){
                 const datosActualizados = {...datos};
@@ -157,6 +158,8 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
 
     const actualizarDatos = (event) => {
         event.preventDefault();
+        if (enviando) return;
+        setEnviando(true);
         const datosActualizados = {...datos};
         procesarDatos(datosActualizados);
         setLineaTarea(prev => ({
@@ -174,10 +177,10 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
             fecha_fin: datosActualizados.fecha_fin,
             fecha_inicio: datosActualizados.fecha_inicio ?? prev.fecha_inicio
         }));
-
+        setEnviando(false);
     }
 
-    const procesarDatos = (datosActualizados) => {
+    const procesarDatos = async (datosActualizados) => {
         // Crea una copia del objeto datos para no modificar el original directamente
         // const datosActualizados = {...datos};
         // Solo establecer fecha_plan a null si realmente está vacío y antes tenía un valor
@@ -194,12 +197,14 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                         String(hoy.getMonth()+1).padStart(2,'0') + '-' + 
                         String(hoy.getDate()).padStart(2,'0'));
                 }
-                crearLineaNueva();
-                actualizarLinea(datosActualizados);
+                await crearLineaNueva();
+                await actualizarLinea(datosActualizados);
+                setEnviando(false);
                 return;
             } else {
-                actualizarLinea(datosActualizados);
-                actualizaTarea(datosActualizados);
+                await actualizarLinea(datosActualizados);
+                await actualizaTarea(datosActualizados);
+                setEnviando(false);
                 return;
             }
         } else if(datosActualizados.fecha_inicio !== null){
@@ -209,8 +214,9 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
         } else if(datosActualizados.fecha_plan === null){
             datosActualizados.estado = 4;
         }
-        actualizarLinea(datosActualizados);
-        actualizaTarea(datosActualizados);
+        await actualizarLinea(datosActualizados);
+        await actualizaTarea(datosActualizados);
+        setEnviando(false);
     }
 
     const handleDisabledObservaciones = () => { //inhabilitar observaciones si no eres técnico
@@ -398,9 +404,8 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                             </Col>
                         </Row>                    
                         <Form.Row className="justify-content-center">
-                            <Button variant="info" type="button" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button>
-                            {/* <Button variant="info" className={'mx-2'} onClick={() => window.close()}>Cerrar</Button> */}
-                            <Button variant="info" className={'mx-2'} onClick={cerrarDatos}>Cerrar</Button>
+                            <Button variant="info" type="button" className={'mx-2'} onClick={actualizarDatos} disabled={enviando} >Actualizar</Button>
+                            <Button variant="info" className={'mx-2'} onClick={cerrarDatos}  >Cerrar</Button>
                         </Form.Row>
                     </Form>
                 </Col>

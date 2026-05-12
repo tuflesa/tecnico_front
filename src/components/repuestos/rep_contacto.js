@@ -7,6 +7,7 @@ import { useCookies } from 'react-cookie';
 const ContactoForm = ({show, proveedor_id, handleCloseContacto, updateProveedorCont,contacto, AnularContacto}) => {
 
     const [token] = useCookies(['tec-token']);
+    const [enviando, setEnviando] = useState(false);
     
     const [datos, setDatos] = useState({  
         nombre: '',
@@ -50,6 +51,8 @@ const ContactoForm = ({show, proveedor_id, handleCloseContacto, updateProveedorC
     } 
 
     const handlerGuardar = () => {
+        if (enviando) return;
+        setEnviando(true);
         axios.post(BACKEND_SERVER + `/api/repuestos/contacto/`,{
             nombre: datos.nombre,
             telefono: datos.telefono,
@@ -66,11 +69,15 @@ const ContactoForm = ({show, proveedor_id, handleCloseContacto, updateProveedorC
             updateProveedorCont();    
             handlerCancelar();
         })
-        .catch( err => {           
+        .catch( err => {   
+            console.log(err);
+            setEnviando(false);        
             handlerCancelar();
         });
     }
     const ActualizarContacto = (id) =>{
+        if (enviando) return;
+        setEnviando(true);
         axios.put(BACKEND_SERVER + `/api/repuestos/contacto/${contacto.id}/`,{              
             nombre: datos.nombre,
             departamento: datos.departamento,
@@ -86,7 +93,10 @@ const ContactoForm = ({show, proveedor_id, handleCloseContacto, updateProveedorC
             updateProveedorCont();
             handlerCancelar();
         })
-        .catch (err=>{console.log((err));});
+        .catch (err=>{
+            console.log((err));
+            setEnviando(false);
+        });
     }
 
     return (
@@ -142,10 +152,10 @@ const ContactoForm = ({show, proveedor_id, handleCloseContacto, updateProveedorC
                 </Modal.Body>                
                 <Modal.Footer> 
                     {contacto ?  
-                        <Button variant="info" onClick={event => {ActualizarContacto(contacto.id)}}> Actualizar </Button> :
-                        <Button variant="info" onClick={handlerGuardar}> Guardar </Button>
+                        <Button variant="info" onClick={ActualizarContacto} disabled={enviando} > Actualizar </Button> :
+                        <Button variant="info" onClick={handlerGuardar} disabled={enviando} > Guardar </Button>
                     }                    
-                    <Button variant="waring" onClick={handlerCancelar}>
+                    <Button variant="warning" onClick={handlerCancelar} disabled={enviando} >
                         Cancelar
                     </Button>
                     {/* </Link> */}

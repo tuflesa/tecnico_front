@@ -30,6 +30,7 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
     const [show_listalmacen, setShowListAlmacen] = useState(null);
     const [almacenes_empresa, setAlmacenesEmpresa] = useState(null);
     const [datos_precio, setDatosPrecio] = useState(null);
+    const [enviando, setEnviando] = useState(false);
 
     const [datos, setDatos] = useState({
         id: repuesto.id ? repuesto.id : null,
@@ -231,39 +232,46 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         }
     };
 
-    const actualizarDatos = (event) => {
-        validarStocksMinimos();
+    const actualizarDatos = async (event) => {
         event.preventDefault();
-        if(user['tec-user'].perfil.puesto.nombre!=='Operador'){
-            axios.put(BACKEND_SERVER + `/api/repuestos/detalle/${datos.id}/`, {
-                nombre: datos.nombre,
-                nombre_comun: datos.nombre_comun,
-                fabricante: datos.fabricante,
-                modelo: datos.modelo,
-                es_critico: datos.es_critico,
-                descatalogado: datos.descatalogado,
-                tipo_repuesto: datos.tipo_repuesto,
-                tipo_unidad: datos.tipo_unidad,
-                stocks_minimos: datos.stocks_minimos? datos.stocks_minimos:null,
-                observaciones: datos.observaciones
-            }, {
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                }     
-            })
-            .then( res => { 
-                setRepuesto(res.data);
-                alert('Repuesto actualizado');
-            })
-            .catch(err => { console.log(err);})
+        if (enviando) return;
+        if (user['tec-user'].perfil.puesto.nombre === 'Operador') {
+            alert('No tienes permisos para modificar');
+            return;
         }
-        else{
-            alert('No tienes permisos para modificar, no se guardará ningún cambio efectuado');
-        }
+        setEnviando(true);
+        await validarStocksMinimos();  //Esperar a que termine
+        axios.put(BACKEND_SERVER + `/api/repuestos/detalle/${datos.id}/`, {
+            nombre: datos.nombre,
+            nombre_comun: datos.nombre_comun,
+            fabricante: datos.fabricante,
+            modelo: datos.modelo,
+            es_critico: datos.es_critico,
+            descatalogado: datos.descatalogado,
+            tipo_repuesto: datos.tipo_repuesto,
+            tipo_unidad: datos.tipo_unidad,
+            stocks_minimos: datos.stocks_minimos? datos.stocks_minimos:null,
+            observaciones: datos.observaciones
+        }, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }     
+        })
+        .then( res => { 
+            setRepuesto(res.data);
+            alert('Repuesto actualizado');
+            setEnviando(false);
+        })
+        .catch(err => { 
+            console.log(err);
+            setEnviando(false);
+        })
     }
 
     const crearDatos = (event) => {
         event.preventDefault();
+        if (enviando) return;
+        setEnviando(true);
         axios.post(BACKEND_SERVER + `/api/repuestos/detalle/`, {
             nombre: datos.nombre,
             nombre_comun: datos.nombre_comun,
@@ -283,7 +291,10 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
             setRepuesto(res.data);            
             setShowStock(true);
         })
-        .catch(err => { console.log(err);})
+        .catch(err => { 
+            console.log(err);
+            setEnviando(false);
+        })
     }
 
     const handleCloseStock = () => {
@@ -599,10 +610,10 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
                         {!nosoyTecnico?
                             <Form.Row className="justify-content-center">
                                 {repuesto.id? 
-                                    <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button> :
-                                    <Button variant="info" type="submit" className={'mx-2'} onClick={crearDatos}>Guardar</Button>
+                                    <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos} disabled={enviando}>Actualizar</Button> :
+                                    <Button variant="info" type="submit" className={'mx-2'} onClick={crearDatos} disabled={enviando}>Guardar</Button>
                                 }
-                                <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>
+                                <Button variant="info" type="submit" className={'mx-2'} onClick={() => window.close()}>Cancelar / Volver</Button>
                                 {datos.id && <Button variant='info' className={'mx-2'} onClick={ImprimirBarcode}>Imprimir Etiqueta</Button>}
                             </Form.Row>
                         :

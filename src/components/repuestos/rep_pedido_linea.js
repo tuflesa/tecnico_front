@@ -11,6 +11,7 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
     const [repuestos, setRepuestos]= useState(null);
     const [show_listrepuestos, setShowListRepuestos] = useState(null);
     const [tipo_unidad, setTipoUnidad]=useState([])
+    const [enviando, setEnviando] = useState(false);
 
     const [datos, setDatos] = useState({  
         repuesto: linea ? linea.repuesto : '',
@@ -123,6 +124,8 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
     } 
 
     const handlerGuardar = () => {
+        if (enviando) return;
+        setEnviando(true);
         axios.post(BACKEND_SERVER + `/api/repuestos/linea_pedido/`,{
             repuesto: datos.repuesto,
             cantidad: datos.cantidad,
@@ -141,28 +144,25 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
             }
         })
         .then( res => {
+            const haCambiado = datos.precio !== datos.precio_recibido ||
+                datos.descuento !== datos.descuento_recibido ||
+                datos.descripcion_proveedor !== datos.descripcion_proveedor_recibida ||
+                datos.modelo_proveedor !== datos.modelo_proveedor_recibida;
+            if (haCambiado) {
+                cambiarPrecio(); // Solo una vez
+            }
             updatePedido();
             handlerCancelar();
-            if(datos.precio!==datos.precio_recibido){
-                cambiarPrecio();
-            }
-            if(datos.descuento!==datos.descuento_recibido){
-                cambiarPrecio();
-            }
-            if(datos.descripcion_proveedor!==datos.descripcion_proveedor_recibida){
-                cambiarPrecio();
-            }
-            if(datos.modelo_proveedor!==datos.modelo_proveedor_recibida){
-                cambiarPrecio();
-            }
         })
         .catch( err => {
-            console.log(err);            
+            console.log(err);
+            setEnviando(false);            
             handlerCancelar();
         });
     }
      
-    const handlerEditar = async () => {   
+    const handlerEditar = async () => {  
+        if (enviando) return; 
         if (parseFloat(datos.cantidad)<(parseFloat(linea.cantidad) - parseFloat(linea.por_recibir)) ||parseFloat( datos.por_recibir)<0){            
             alert('Cantidad erronea, revisa cantidad recibida');            
             handlerCancelar();
@@ -186,22 +186,18 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
                 }
             })
             .then( res => {
+                const haCambiado = datos.precio !== datos.precio_recibido ||
+                    datos.descuento !== datos.descuento_recibido ||
+                    datos.descripcion_proveedor !== datos.descripcion_proveedor_recibida ||
+                    datos.modelo_proveedor !== datos.modelo_proveedor_recibida;
+                if (haCambiado) {
+                    buscarLinea(); // Solo una vez
+                }
                 updatePedido();
                 handlerCancelar();
-                if(datos.precio!==datos.precio_recibido){
-                    buscarLinea();
-                }
-                if(datos.descuento!==datos.descuento_recibido){
-                    buscarLinea();
-                }
-                if(datos.descripcion_proveedor!==datos.descripcion_proveedor_recibida){
-                    buscarLinea();
-                }
-                if(datos.modelo_proveedor!==datos.modelo_proveedor_recibida){
-                    buscarLinea();
-                }
             })
             .catch( err => {           
+                setEnviando(false);
                 handlerCancelar();
             });
         }
@@ -320,10 +316,10 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
                 </Modal.Body>
                 <Modal.Footer>
                     { linea ?                     
-                        <Button variant="info" tabIndex={6} onClick={handlerEditar}> Editar </Button> :
-                        <Button variant="info" tabIndex={5} onClick={handlerGuardar}> Guardar </Button>
+                        <Button variant="info" tabIndex={6} onClick={handlerEditar}disabled={enviando} > Editar </Button> :
+                        <Button variant="info" tabIndex={5} onClick={handlerGuardar} disabled={enviando} > Guardar </Button>
                     }        
-                    <Button variant="waring" tabIndex={7} onClick={handlerCancelar}>
+                    <Button variant="warning" tabIndex={7} onClick={handlerCancelar} disabled={enviando} >
                         Cancelar
                     </Button>
                 </Modal.Footer>

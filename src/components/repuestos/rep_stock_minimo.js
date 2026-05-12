@@ -20,6 +20,7 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_escritico, repuesto_i
     const [empresas, setEmpresas] = useState([]);
     const [almacenes, setAlmacenes] = useState([]);
     const [guardarDisabled, setGuardarDisabled] = useState(false);
+    const [enviando, setEnviando] = useState(false);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/estructura/empresa/',{
@@ -99,107 +100,85 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_escritico, repuesto_i
        
     }
 
-    const handleGuardar = () => {
-        if (datos.stock_minimo_cantidad !== datos.stock_minimo_inicial){
-            // Stock mínimo
-            if (datos.stock_minimo) { // Actualizar stock mínimo
-                // datos.stock_minimo.cantidad = parseInt(datos.stock_minimo_cantidad);
-                axios.patch(BACKEND_SERVER + `/api/repuestos/stocks_minimos/${datos.stock_minimo.id}/`, {
-                    cantidad: datos.stock_minimo_cantidad,
-                    cantidad_aconsejable: datos.stock_aconsejado,
-                }, {
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`
-                      }     
-                })
-                .then( res => { 
-                        updateRepuesto();
-                        setShowStock(false);
-                    }
-                )
-                .catch(err => { console.log(err);})
-            }
-            else { // Crear stock mínimo
-                axios.post(BACKEND_SERVER + `/api/repuestos/stocks_minimos/`, {
-                    repuesto: repuesto_id,
-                    almacen: datos.almacen,
-                    cantidad: datos.stock_minimo_cantidad ? datos.stock_minimo_cantidad : 0,
-                    cantidad_aconsejable: datos.stock_aconsejado? datos.stock_aconsejado : 0,
-                    stock_act: 0,
-                    localizacion: datos.localizacion, 
-                }, {
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`
-                      }     
-                })
-                .then( res => { 
-                        if (!datos.stock_actual) {
-                            console.log('no hay valor inicial de stock ...')
-                        }
-                        updateRepuesto();
-                        setShowStock(false);
-                    }
-                )
-                .catch(err => { console.log(err);})
-            }
-        }
-
-        // Ajustar Stock
-        if (datos.stock_actual !== datos.stock_actual_inicial || !datos.stock_actual){ // Si hay cambios o se deja sin valor el campo stock
-            // 1 Crear un inventario
-            // 2 Añadir una línea de inventario
-            // 3 Generar un movimiento correspondiente al inventario
-
-            const hoy = new Date();
-            var dd = String(hoy.getDate()).padStart(2, '0');
-            var mm = String(hoy.getMonth() + 1).padStart(2, '0'); //Enero es 0!
-            var yyyy = hoy.getFullYear();
-            
-            axios.post(BACKEND_SERVER + `/api/repuestos/inventario/`, {
-                nombre : datos.stock_actual_inicial ? 'Ajuste de stock' : 'Ajuste Inicial',
-                fecha_creacion : yyyy + '-' + mm + '-' + dd,
-                responsable : user['tec-user'].id
-            }, {
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                  }     
-            })
-            .then( res => { 
-                    const inventario = res.data
-                    axios.post(BACKEND_SERVER + `/api/repuestos/lineainventario/`, {
-                        inventario : inventario.id,
-                        repuesto : repuesto_id,
-                        almacen : datos.almacen,
-                        cantidad : datos.stock_actual ? datos.stock_actual : 0 
+    const handleGuardar = async () => {
+        if (enviando) return;
+        setEnviando(true);
+        try {
+            if (datos.stock_minimo_cantidad !== datos.stock_minimo_inicial){
+                // Stock mínimo
+                if (datos.stock_minimo) { // Actualizar stock mínimo
+                    await axios.patch(BACKEND_SERVER + `/api/repuestos/stocks_minimos/${datos.stock_minimo.id}/`, {
+                        cantidad: datos.stock_minimo_cantidad,
+                        cantidad_aconsejable: datos.stock_aconsejado,
+                    }, {
+                        headers: {'Authorization': `token ${token['tec-token']}`} 
+                    });
+                } else { // Crear stock mínimo
+                    await axios.post(BACKEND_SERVER + `/api/repuestos/stocks_minimos/`, {
+                        repuesto: repuesto_id,
+                        almacen: datos.almacen,
+                        cantidad: datos.stock_minimo_cantidad ? datos.stock_minimo_cantidad : 0,
+                        cantidad_aconsejable: datos.stock_aconsejado? datos.stock_aconsejado : 0,
+                        stock_act: 0,
+                        localizacion: datos.localizacion, 
                     }, {
                         headers: {
                             'Authorization': `token ${token['tec-token']}`
-                          }     
-                    })
-                    .then( res => {
-                        axios.post(BACKEND_SERVER + `/api/repuestos/movimiento/`, {
-                            fecha : yyyy + '-' + mm + '-' + dd,
-                            cantidad : datos.stock_actual_inicial ? (parseInt(datos.stock_actual) - parseInt(datos.stock_actual_inicial)) : datos.stock_actual ? datos.stock_actual : 0,
-                            almacen : datos.almacen,
-                            usuario : user['tec-user'].id,
-                            linea_inventario : res.data.id
-                        }, {
-                            headers: {
-                                'Authorization': `token ${token['tec-token']}`
-                              }     
-                        })
-                        .then( res => {
-                            updateRepuesto();
-                        })
-                        .catch( err => {console.log(err);})
-                    })
-                    .catch( err => {console.log(err);})
+                        }     
+                    });
                 }
-            )
-            .catch(err => { console.log(err);})
-        }
-        
-        handleCancelar();
+                setShowStock(false);
+            }
+
+            // Ajustar Stock
+            if (datos.stock_actual !== datos.stock_actual_inicial || !datos.stock_actual){ // Si hay cambios o se deja sin valor el campo stock
+                // 1 Crear un inventario
+                // 2 Añadir una línea de inventario
+                // 3 Generar un movimiento correspondiente al inventario
+
+                const hoy = new Date();
+                const dd = String(hoy.getDate()).padStart(2, '0');
+                const mm = String(hoy.getMonth() + 1).padStart(2, '0'); //Enero es 0!
+                const yyyy = hoy.getFullYear();
+                const fecha = yyyy + '-' + mm + '-' + dd;
+                
+                const invRes = await axios.post(BACKEND_SERVER + `/api/repuestos/inventario/`, {
+                    nombre : datos.stock_actual_inicial ? 'Ajuste de stock' : 'Ajuste Inicial',
+                    fecha_creacion : fecha,
+                    responsable : user['tec-user'].id
+                }, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                    }     
+                });
+                const lineaRes = await axios.post(BACKEND_SERVER + `/api/repuestos/lineainventario/`, {
+                    inventario : invRes.data.id,
+                    repuesto : repuesto_id,
+                    almacen : datos.almacen,
+                    cantidad : datos.stock_actual ? datos.stock_actual : 0 
+                }, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                        }     
+                });
+                await axios.post(BACKEND_SERVER + `/api/repuestos/movimiento/`, {
+                    fecha : fecha,
+                    cantidad : datos.stock_actual_inicial ? (parseInt(datos.stock_actual) - parseInt(datos.stock_actual_inicial)) : datos.stock_actual ? datos.stock_actual : 0,
+                    almacen : datos.almacen,
+                    usuario : user['tec-user'].id,
+                    linea_inventario : lineaRes.data.id
+                }, {
+                    headers: {
+                        'Authorization': `token ${token['tec-token']}`
+                        }     
+                });
+            }
+            updateRepuesto();
+            handleCancelar();
+            } catch(err) { 
+                console.log(err);
+                setEnviando(false)
+            }
     }
 
     return (
@@ -306,10 +285,10 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_escritico, repuesto_i
                 <Modal.Footer>
                     <Button variant="info" 
                         onClick={handleGuardar}
-                        disabled = {guardarDisabled}>
+                        disabled={guardarDisabled || enviando}>
                         Guardar
                     </Button>
-                    <Button variant="waring" onClick={handleCancelar}>
+                    <Button variant="warning" onClick={handleCancelar}disabled={enviando}>
                         Cancelar
                     </Button>
                 </Modal.Footer>

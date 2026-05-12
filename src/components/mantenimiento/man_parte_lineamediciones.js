@@ -9,6 +9,7 @@ const LineaMedicionNueva = ({show, handleCloseLinea, tareaAsignadas, parte, upda
     const [token] = useCookies(['tec-token']);
     const [especialidades, setEspecialidades] = useState(null);
     const [listaAsignadas, setListaAsignadas] = useState([]);
+    const [enviando, setEnviando] = useState(false);
     
     const [datos, setDatos] = useState({  
         id: null,
@@ -63,22 +64,26 @@ const LineaMedicionNueva = ({show, handleCloseLinea, tareaAsignadas, parte, upda
         handleCloseLinea();
     }    
 
-    const handlerGuardar = () => {
-        axios.post(BACKEND_SERVER + `/api/mantenimiento/tarea_nueva/`,{
-            nombre: datos.nombre,
-            especialidad: datos.especialidad,
-            prioridad: datos.prioridad,
-            trabajo: datos.trabajo,
-            observaciones: datos.observaciones,
-        },
-        {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-            }
-        })
-        .then( res => {
+    const handlerGuardar = async () => {
+        if (enviando) return;
+        setEnviando(true);
+        try{
+            // 1. Crear la tarea
+            const res = await axios.post(BACKEND_SERVER + `/api/mantenimiento/tarea_nueva/`,{
+                nombre: datos.nombre,
+                especialidad: datos.especialidad,
+                prioridad: datos.prioridad,
+                trabajo: datos.trabajo,
+                observaciones: datos.observaciones,
+            },
+            {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }
+            });
             const newTareaParte = [...listaAsignadas, parseInt(res.data.id)];
-            axios.post(BACKEND_SERVER + `/api/mantenimiento/linea_nueva/`,{
+            // 2. Crear la línea
+            await axios.post(BACKEND_SERVER + `/api/mantenimiento/linea_nueva/`,{
                 parte: parte.id,
                 tarea: res.data.id,
                 fecha_inicio:null,
@@ -91,50 +96,25 @@ const LineaMedicionNueva = ({show, handleCloseLinea, tareaAsignadas, parte, upda
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
-            })
-            .then( r => {
-                var estado=null;
-                if(parte.estado===3){
-                    estado=1;
-                }
-                else{
-                    estado=parte.estado;
-                }
-                axios.patch(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${parte.id}/`,{
-                    tarea: newTareaParte,
-                    fecha_finalizacion: null,
-                    estado: estado,
-                },
-                {
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`
-                    }
-                })
-                .then( re => {
-                    updateParte();
-                    handlerCancelar(); 
-                    datos.nombre='';
-                    datos.especialidad='';
-                    datos.prioridad='';
-                    datos.observaciones='';
-                    datos.trabajo='';
-                    datos.fecha_plan=null;
-                })
-                .catch( err => {
-                    console.log(err);            
-                    handlerCancelar();
-                });
-            })
-            .catch( err => {
-                console.log(err);            
-                handlerCancelar();
             });
-            
-        })
-        .catch( err => {
-            console.log(err);            
+            // 3. Actualizar el parte
+            var estado = parte.estado === 3 ? 1 : parte.estado;
+            await axios.patch(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${parte.id}/`,{
+                tarea: newTareaParte,
+                fecha_finalizacion: null,
+                estado: estado,
+            },{
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }
+            });
+            updateParte();
             handlerCancelar();
-        });              
+        } catch(err) {
+            console.log(err);
+            setEnviando(false); // Liberar si falla
+            handlerCancelar();
+        }
     }
     
     return (        
@@ -234,10 +214,8 @@ const LineaMedicionNueva = ({show, handleCloseLinea, tareaAsignadas, parte, upda
                 </Form>
             </Modal.Body>
             <Modal.Footer>                    
-                <Button variant="info" onClick={handlerGuardar}> Guardar </Button>                         
-                <Button variant="waring" onClick={handlerCancelar}>
-                    Cancelar
-                </Button>
+                <Button variant="info" onClick={handlerGuardar} disabled={enviando} > Guardar </Button>                         
+                <Button variant="waring" onClick={handlerCancelar} disabled={enviando} >Cancelar</Button>
             </Modal.Footer>
         </Modal>
     );

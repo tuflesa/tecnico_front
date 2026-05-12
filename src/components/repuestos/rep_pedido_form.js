@@ -44,6 +44,7 @@ const PedidoForm = ({pedido, setPedido}) => {
     var total_pedido= 0;
     const [errores, setErrores] = useState({}); // Estado para guardar errores
     const [show_cerrar, setShowCerrar] = useState(false);
+    const [enviando, setEnviando] = useState(false);
 
     const [datos, setDatos] = useState({
         id: pedido ? pedido.id : null,
@@ -331,6 +332,8 @@ const PedidoForm = ({pedido, setPedido}) => {
 
     const crearPedido = (event) => {
         event.preventDefault();
+        if (enviando) return;
+        setEnviando(true);
         axios.post(BACKEND_SERVER + `/api/repuestos/pedido/`, {
             proveedor: datos.proveedor,
             empresa: datos.empresa_id,
@@ -353,16 +356,13 @@ const PedidoForm = ({pedido, setPedido}) => {
         })
         .then( res => { 
             setPedido(res.data);
-            axios.get(BACKEND_SERVER + `/api/repuestos/pedido_detalle/${res.data.id}/`,{
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                  }     
-            })
-            .then( res => {
-                setPedido(res.data);
-                setErrores({}); // Reiniciar errores si la petición es exitosa
-            })
-            .catch(err => { console.log(err);})
+            return axios.get(BACKEND_SERVER + `/api/repuestos/pedido_detalle/${res.data.id}/`, {
+                headers: { 'Authorization': `token ${token['tec-token']}` }     
+            })    
+        })
+        .then( res => {
+            setPedido(res.data);
+            setErrores({}); // Reiniciar errores si la petición es exitosa
         })
         .catch(err => { 
             if (err.response && err.response.data) {
@@ -371,11 +371,14 @@ const PedidoForm = ({pedido, setPedido}) => {
                 console.log(err);
             }
             alert('Faltan datos, por favor, introduce todos los datos obligatorios.')
+            setEnviando(false);
         })
     }
 
     const actualizarDatos = (event) => {
         event.preventDefault();
+        if (enviando) return; 
+        setEnviando(true);
         axios.patch(BACKEND_SERVER + `/api/repuestos/pedido/${pedido.id}/`, {
             proveedor: datos.proveedor,
             empresa: datos.empresa_id,
@@ -398,9 +401,13 @@ const PedidoForm = ({pedido, setPedido}) => {
         .then( res => { 
             setPedido(res.data);
             updatePedido();
+            setEnviando(false);
             //window.location.href = "/repuestos/pedidos";
         })
-        .catch(err => { console.log(err);})
+        .catch(err => { 
+            console.log(err);
+            setEnviando(false);
+        })
 
     }
 
@@ -757,12 +764,12 @@ const PedidoForm = ({pedido, setPedido}) => {
                         </Row>                     
                         <Form.Row className="justify-content-center">
                             {pedido ? 
-                                <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button> :
-                                <Button variant="info" type="submit" className={'mx-2'} onClick={crearPedido}>Guardar</Button>                                
+                                <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos} disabled={enviando} >Actualizar</Button> :
+                                <Button variant="info" type="submit" className={'mx-2'} onClick={crearPedido} disabled={enviando} >Guardar</Button>                                
                             }
                             <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)" onClick={() => window.close()}>Cerrar / Volver</Button>
                             {pedido ? 
-                                <Button variant="danger" type="button" className={'mx-2'} onClick={abrirModal}>Recepcionar todo</Button> :''                               
+                                <Button variant="danger" type="button" className={'mx-2'} onClick={abrirModal} disabled={enviando}>Recepcionar todo</Button> :''                               
                             }
                         </Form.Row> 
                         <Form className="justify-content-center">

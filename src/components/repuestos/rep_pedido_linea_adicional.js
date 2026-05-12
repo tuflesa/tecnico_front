@@ -7,9 +7,7 @@ import { useCookies } from 'react-cookie';
 const LineaAdicionalForm = ({show, pedido_id, handleCloseLineaAdicional, updatePedido, linea_adicional}) => {
     
     const [token] = useCookies(['tec-token']);
-
-    //const [repuestos, setRepuestos]= useState(null);
-    //const[unidades, setUnidades]=useState(null);
+    const [enviando, setEnviando] = useState(false);
     
     const [datos, setDatos] = useState({  
         descripcion: linea_adicional ? linea_adicional.descripcion : '',
@@ -39,8 +37,6 @@ const LineaAdicionalForm = ({show, pedido_id, handleCloseLineaAdicional, updateP
         datos.precio=Number.parseFloat(datos.precio).toFixed(4);
         datos.descuento=Number.parseFloat(datos.descuento).toFixed(2);
         datos.total = Number.parseFloat((datos.precio*datos.cantidad)-(datos.precio*datos.cantidad*datos.descuento/100)).toFixed(4);
-        //datos.total=Number.parseFloat(datos.total).toFixed(2);
-        //datos.por_recibir = linea_adicional ? (linea_adicional.por_recibir+(datos.cantidad-linea_adicional.cantidad)) : datos.cantidad;
         datos.por_recibir = linea_adicional ? parseFloat(parseFloat(linea_adicional.por_recibir)+(parseFloat(datos.cantidad)-parseFloat(linea_adicional.cantidad))).toFixed(2) : parseFloat(datos.cantidad);
     },[datos.cantidad, datos.precio, datos.descuento]);
     
@@ -56,6 +52,8 @@ const LineaAdicionalForm = ({show, pedido_id, handleCloseLineaAdicional, updateP
     } 
 
     const handlerGuardar = () => {
+        if (enviando) return;
+        setEnviando(true);
         axios.post(BACKEND_SERVER + `/api/repuestos/linea_adicional_pedido/`,{
             descripcion: datos.descripcion,
             cantidad: datos.cantidad,
@@ -75,7 +73,8 @@ const LineaAdicionalForm = ({show, pedido_id, handleCloseLineaAdicional, updateP
             handlerCancelar();
         })
         .catch( err => {
-            console.log(err);            
+            console.log(err);   
+            setEnviando(false);         
             handlerCancelar();
         });
     }
@@ -85,6 +84,7 @@ const LineaAdicionalForm = ({show, pedido_id, handleCloseLineaAdicional, updateP
     }   
     
     const handlerEditar = async () => {   
+        if (enviando) return; 
         if (parseFloat(datos.cantidad)<(parseFloat(linea_adicional.cantidad) - parseFloat(linea_adicional.por_recibir)) || parseFloat(datos.por_recibir)<0){            
             alert('Cantidad erronea, revisa cantidad recibida');            
             handlerCancelar();
@@ -108,7 +108,8 @@ const LineaAdicionalForm = ({show, pedido_id, handleCloseLineaAdicional, updateP
                 updatePedido();
                 handlerCancelar();
             })
-            .catch( err => {           
+            .catch( err => {   
+                setEnviando(false);        
                 handlerCancelar();
             });
         }
@@ -168,10 +169,10 @@ const LineaAdicionalForm = ({show, pedido_id, handleCloseLineaAdicional, updateP
                 </Modal.Body>
                 <Modal.Footer>
                     { linea_adicional ?                     
-                        <Button variant="info" onClick={handlerEditar}> Editar </Button> :
-                        <Button variant="info" onClick={handlerGuardar}> Guardar </Button>
+                        <Button variant="info" onClick={handlerEditar} disabled={enviando} > Editar </Button> :
+                        <Button variant="info" onClick={handlerGuardar} disabled={enviando} > Guardar </Button>
                     }        
-                    <Button variant="waring" onClick={handlerCancelar}>
+                    <Button variant="warning" onClick={handlerCancelar} disabled={enviando} >
                         Cancelar
                     </Button>
                 </Modal.Footer>

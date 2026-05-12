@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 /* import { linkVertical } from 'd3-shape'; */
 
 const RepAlmacenForm = ({nombre, empresa, almacen_id}) => {
+    const [enviando, setEnviando] = useState(false); 
     const [token] = useCookies(['tec-token']);
 
     const [datos, setDatos] = useState({
@@ -38,6 +39,8 @@ const RepAlmacenForm = ({nombre, empresa, almacen_id}) => {
     }
     const actualizarDatos = (event) => {
         event.preventDefault()
+        if (enviando) return;
+        setEnviando(true);
         axios.put(BACKEND_SERVER + `/api/repuestos/almacen/${almacen_id}/`, {
             nombre: datos.nombre,
             empresa: datos.empresa
@@ -49,11 +52,16 @@ const RepAlmacenForm = ({nombre, empresa, almacen_id}) => {
         .then( res => { 
             window.location.href = "/repuestos/almacenes/";
         })
-        .catch(err => { console.log(err);})
+        .catch(err => { 
+            console.log(err);
+            setEnviando(false); //Si falla, permitir reintentar
+        })
         
     }
     const nuevoDatos = (event) => {
         event.preventDefault()
+        if (enviando) return; //Si ya está enviando, ignorar clic
+        setEnviando(true); 
         axios.post(BACKEND_SERVER + `/api/repuestos/almacen/`, {
             nombre: datos.nombre,
             empresa: datos.empresa
@@ -65,7 +73,10 @@ const RepAlmacenForm = ({nombre, empresa, almacen_id}) => {
         .then( res => { 
             window.location.href = "/repuestos/almacenes/";
         })
-        .catch(err => { console.log(err);})
+        .catch(err => { 
+            console.log(err);
+            setEnviando(false); //Si falla, permitir reintentar
+        })
         
     }
 
@@ -120,8 +131,8 @@ const RepAlmacenForm = ({nombre, empresa, almacen_id}) => {
             </Row>
             <Form.Row className="justify-content-center">                
                 {almacen_id ?
-                    <Button variant="info" type="submit" className={'mr-1'} onClick={actualizarDatos}>Actualizar</Button> :
-                    <Button variant="info" type="submit" className={'mr-1'} onClick={nuevoDatos}>Guardar</Button>
+                    <Button variant="info" type="submit" className={'mr-1'} onClick={actualizarDatos} disabled={enviando}>Actualizar</Button> :
+                    <Button variant="info" type="submit" className={'mr-1'} onClick={nuevoDatos} disabled={enviando}>Guardar</Button>
                 }                       
                 <Link to='/repuestos/almacenes'>
                     <Button variant="warning" className={'ml-1'} >

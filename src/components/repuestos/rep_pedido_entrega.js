@@ -13,6 +13,7 @@ const EntregaForm = ({show, updatePedido, linea_adicional, handleCloseEntrega}) 
     const hoy = new Date();
     const fechaString = hoy.getFullYear() + '-' + ('0' + (hoy.getMonth()+1)).slice(-2) + '-' + ('0' + hoy.getDate()).slice(-2);
     const [, setEntrega]=useState(null)
+    const [enviando, setEnviando] = useState(false);
 
     const [datos, setDatos] = useState({  
         linea_adicional:linea_adicional ? linea_adicional.id : '',
@@ -64,6 +65,8 @@ const EntregaForm = ({show, updatePedido, linea_adicional, handleCloseEntrega}) 
 
     const guardarMovimiento = (event) => {
         event.preventDefault();
+        if (enviando) return; // Bloquear doble clic
+        setEnviando(true);
         axios.post(BACKEND_SERVER + `/api/repuestos/entrega/`, {
             fecha: datos.fecha,
             cantidad: datos.recibido,
@@ -76,13 +79,16 @@ const EntregaForm = ({show, updatePedido, linea_adicional, handleCloseEntrega}) 
                 'Authorization': `token ${token['tec-token']}`
               }     
         })
-        .then( res => { 
+        .then( async res => { 
             setEntrega(res.data); 
-            actualizarRecibir();           
+            await actualizarRecibir();          
             handlerCancelar();
             
         })
-        .catch(err => { console.log(err);})
+        .catch(err => { 
+            console.log(err);
+            setEnviando(false);
+        })
     }
 
     const handleInputChange = (event) => {
@@ -195,8 +201,8 @@ const EntregaForm = ({show, updatePedido, linea_adicional, handleCloseEntrega}) 
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>                        
-                <Button variant="info" onClick={guardarMovimiento}> Guardar </Button>                
-                    <Button variant="waring" onClick={handlerCancelar}>
+                <Button variant="info" onClick={guardarMovimiento} disabled={enviando}> Guardar </Button>                
+                    <Button variant="waring" onClick={handlerCancelar} disabled={enviando}>
                         Cancelar
                     </Button>
                 </Modal.Footer>

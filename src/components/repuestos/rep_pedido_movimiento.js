@@ -13,6 +13,7 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
     const fechaString = hoy.getFullYear() + '-' + ('0' + (hoy.getMonth()+1)).slice(-2) + '-' + ('0' + hoy.getDate()).slice(-2);
     const [almacenes, setAlmacenes]=useState(null)
     const [movimiento, setMovimiento]=useState(null)
+    const [enviando, setEnviando] = useState(false); 
 
     const [datos, setDatos] = useState({  
         linea_pedido:linea ? linea.id : '',
@@ -94,7 +95,7 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
         else{
             datos.por_recibir = parseFloat(parseFloat(linea.por_recibir) - parseFloat(datos.recibido)).toFixed(2);
         }
-        axios.patch(BACKEND_SERVER + `/api/repuestos/linea_pedido/${linea.id}/`, {
+        return axios.patch(BACKEND_SERVER + `/api/repuestos/linea_pedido/${linea.id}/`, {
             por_recibir: datos.por_recibir,  
             cantidad: datos.cantidad,    
 
@@ -111,14 +112,17 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
         .catch(err => { console.log(err);})
     }
  
-    const guardarMovimiento = (event) => { 
+    const guardarMovimiento = async (event) => { 
+        event.preventDefault();
+
         if(linea?.tipo_unidad !== linea?.repuesto?.tipo_unidad){
             if(datos.guardar===''){
                 alert('Se debe rellenar la cantidad que debemos almacenar en almacen.');
                 return;
             }
         }  
-        event.preventDefault();
+        if (enviando) return;
+        setEnviando(true);
         axios.post(BACKEND_SERVER + `/api/repuestos/movimiento/`, {
             fecha: datos.fecha,
             cantidad: datos.guardar?datos.guardar:datos.recibido,
@@ -132,13 +136,16 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
                 'Authorization': `token ${token['tec-token']}`
             }     
         })
-        .then( res => { 
+        .then( async res => { 
             setMovimiento(res.data); 
-            actualizarRecibir();           
+            await actualizarRecibir();           
             handlerCancelar();
             
         })
-        .catch(err => { console.log(err);})
+        .catch(err => { 
+            console.log(err);
+            setEnviando(false);
+        })
     }
 
     const handleInputChange = (event) => {
@@ -306,8 +313,8 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>                        
-                <Button variant="info" onClick={guardarMovimiento}> Guardar </Button>                
-                    <Button variant="waring" onClick={handlerCancelar}>
+                <Button variant="info" onClick={guardarMovimiento} disabled={enviando} > Guardar </Button>                
+                    <Button variant="warning" onClick={handlerCancelar} disabled={enviando} >
                         Cancelar
                     </Button>
                 </Modal.Footer>

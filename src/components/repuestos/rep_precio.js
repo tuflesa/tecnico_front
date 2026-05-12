@@ -9,7 +9,7 @@ const RepPrecio = ()=>{
     const [proveedores, setProveedores] = useState(null);
     const [precios, setPrecios] = useState(null);
     const prueba = [{}];
-    
+    const [enviando, setEnviando] = useState(false);    
 
     const [datos, setDatos] = useState({
         id:'',
@@ -129,73 +129,39 @@ const RepPrecio = ()=>{
         })
     }
 
-    const handlerGuardar =()=>{
-        for(var x=0; x<precios.length; x++){
-            var precios_nuevos = precios[x].precio_n;
-            var descuento_nuevo = precios[x].descuento_n;
-            var descripcion_nueva = precios[x].descripcion_proveedor_n;
-            var modelo_nuevo = precios[x].modelo_proveedor_n;
-            var ids=precios[x].ids; //es el id de la línea no del repuesto
-            if(precios_nuevos!==0){
-                axios.patch(BACKEND_SERVER + `/api/repuestos/repuesto_precio/${ids}/`,{
-                    precio: precios_nuevos,
-                }, { 
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`
-                    }    
-                })
-                .then( res => {
-                    //window.location.href = "/repuestos/precio";
-                })
-                .catch(err => { console.log(err);})
-            }
-            if(descuento_nuevo!==0){
-                axios.patch(BACKEND_SERVER + `/api/repuestos/repuesto_precio/${ids}/`,{
-                    descuento: descuento_nuevo,
-                }, { 
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`
-                    }    
-                })
-                .then( res => {
-                    //window.location.href = "/repuestos/precio";
-                })
-                .catch(err => { console.log(err);})
-            }
-            if(descripcion_nueva!==''){
-                axios.patch(BACKEND_SERVER + `/api/repuestos/repuesto_precio/${ids}/`,{
-                    descripcion_proveedor: descripcion_nueva,
-                }, { 
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`
-                    }    
-                })
-                .then( res => {
-                    //window.location.href = "/repuestos/precio";
-                })
-                .catch(err => { console.log(err);})
-            }
-            if(modelo_nuevo!==''){
-                axios.patch(BACKEND_SERVER + `/api/repuestos/repuesto_precio/${ids}/`,{
-                    modelo_proveedor: modelo_nuevo,
-                }, { 
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`
-                    }    
-                })
-                .then( res => {
-                    //window.location.href = "/repuestos/precio";
-                })
-                .catch(err => { console.log(err);})
-            }
-        }
-        window.location.href = "/repuestos/precio";
-    }
+    const handlerGuardar = async ()=>{
+        if (enviando) return;             // Bloquear doble clic
+        setEnviando(true);
+        try{
+            for(var x=0; x<precios.length; x++){
+                const precios_nuevos = precios[x].precio_n;
+                const descuento_nuevo = precios[x].descuento_n;
+                const descripcion_nueva = precios[x].descripcion_proveedor_n;
+                const modelo_nuevo = precios[x].modelo_proveedor_n;
+                const ids=precios[x].ids; //es el id de la línea no del repuesto
+                //Un solo PATCH por fila con todos los campos que cambiaron
+                const cambios = {};
+                if (precios_nuevos !== 0) cambios.precio = precios_nuevos;
+                if (descuento_nuevo !== 0) cambios.descuento = descuento_nuevo;
+                if (descripcion_nueva !== '') cambios.descripcion_proveedor = descripcion_nueva;
+                if (modelo_nuevo !== '') cambios.modelo_proveedor = modelo_nuevo;
 
+                if (Object.keys(cambios).length > 0) {  // Solo si hay algo que cambiar
+                    await axios.patch(BACKEND_SERVER + `/api/repuestos/repuesto_precio/${ids}/`, cambios, {
+                        headers: { 'Authorization': `token ${token['tec-token']}` }
+                    });
+                }
+            }
+            window.location.href = "/repuestos/precio";
+        } catch (err) {
+            console.log(err);
+            alert('Error al guardar los precios, inténtalo de nuevo.');
+            setEnviando(false); // Liberar si falla
+        }
+    }
     const retroceder =()=>{
         window.location.href = "/repuestos/precio";
     }
-
     return(
         <Container className='mt-5'>
             <Row>
@@ -351,10 +317,10 @@ const RepPrecio = ()=>{
                                 }
                             </tbody>
                             <td>
-                                <Button variant="info" onClick={handlerGuardar}>Guardar</Button>
+                                <Button variant="info" onClick={handlerGuardar} disabled={enviando}>Guardar</Button>
                             </td>
                             <td>
-                                <Button variant="info" onClick={retroceder}>Cancelar</Button>
+                                <Button variant="info" onClick={retroceder} disabled={enviando}>Cancelar</Button>
                             </td>
                         </Table>
                     </React.Fragment> : null}

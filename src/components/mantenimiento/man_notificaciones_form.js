@@ -22,6 +22,8 @@ const NotificacionForm = ({nota, setNota}) => {
     const [reclamaciones, setReclamaciones] = useState(null);
     const [act_reclamaciones, setActReclamaciones] = useState(false);
     const [errores, setErrores] = useState({}); // Estado para guardar errores
+    const [enviando, setEnviando] = useState(false); //para crear/actualizar
+    const [reclamando, setReclamando] = useState(false); //para reclamar
     
 
     const [datos, setDatos] = useState({
@@ -189,8 +191,9 @@ const NotificacionForm = ({nota, setNota}) => {
 
     const crearNota = (event) => {
         event.preventDefault();
-
+        if (enviando) return;
         if (!validarNota()) return;
+        setEnviando(true);
         axios.post(BACKEND_SERVER + `/api/mantenimiento/notificacion_nueva/`, {
             que: datos.que,
             cuando: datos.cuando,
@@ -218,7 +221,7 @@ const NotificacionForm = ({nota, setNota}) => {
             setNota(res.data);
             setErrores({}); // Reiniciar errores si la petición es exitosa
             window.confirm('La notificación se ha creado correctamente');
-            window.location.href="javascript: history.go(-1)"
+            window.history.go(-1);
         })
         .catch(err => { 
             if (err.response && err.response.data) {
@@ -227,11 +230,14 @@ const NotificacionForm = ({nota, setNota}) => {
                 console.log(err);
             }
             alert('Faltan datos, por favor, introduce todos los datos obligatorios.')
-                console.log(err);
+            console.log(err);
+            setEnviando(false);
         });
     }
     const actualizarNota = (event) => {
         event.preventDefault();
+        if (enviando) return;
+        setEnviando(true);
         axios.patch(BACKEND_SERVER + `/api/mantenimiento/notificacion_nueva/${nota.id}/`, {
             que: datos.que,
             cuando: datos.cuando,
@@ -257,16 +263,20 @@ const NotificacionForm = ({nota, setNota}) => {
         })
         .then( res => { 
             setNota(res.data);
+            setEnviando(false); 
         })
         .catch(err => { 
             setShowError(true);
             console.log(err);
+            setEnviando(false); 
         })
     } 
 
     const reclamar_nota = (event) => {
-        var ya_reclame = reclamaciones.filter (r=>r.fecha===hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0'));
         event.preventDefault();
+        if (reclamando) return;
+        
+        var ya_reclame = reclamaciones.filter (r=>r.fecha===hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0'));
         if(ya_reclame.length===0){
             axios.post(BACKEND_SERVER + `/api/mantenimiento/reclamos/`, {
                 notificacion: nota.id,
@@ -280,9 +290,11 @@ const NotificacionForm = ({nota, setNota}) => {
             .then( res => { 
                 alert('Se ha notificado el reclamo de esta notificación, gracias.');
                 setActReclamaciones(true);
+                setReclamando(false);
             })
             .catch(err => { 
                 console.log(err);
+                setReclamando(false);
             })
         }
         else{
@@ -551,14 +563,14 @@ const NotificacionForm = ({nota, setNota}) => {
                         </Row>                                      
                         <Form.Row className="justify-content-center">
                             {nota.id ? 
-                                <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarNota}>Actualizar</Button> :
-                                <Button variant="info" type="submit" className={'mx-2'} onClick={crearNota}>Guardar</Button>
+                                <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarNota} disabled={enviando}>Actualizar</Button> :
+                                <Button variant="info" type="submit" className={'mx-2'} onClick={crearNota} disabled={enviando}>Guardar</Button>
                             }
                             {nota.id ? 
                                 <Button variant="info" className={'mx-2'} onClick={() => window.close()}>Cerrar</Button> :
-                                <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar</Button>
+                                <Button variant="info" type="submit" className={'mx-2'} onClick={() => window.history.go(-1)}>Cancelar</Button>
                             }
-                            <Button variant="danger" type="submit" className={'mx-2'} onClick={reclamar_nota}>Reclamar</Button>
+                            <Button variant="danger" type="submit" className={'mx-2'} onClick={reclamar_nota} disabled={reclamando}>Reclamar</Button>
                             <Button variant="danger" className="mr-3 trash" onClick={event => {listado_reclamaciones()}}>R / {reclamaciones?reclamaciones.length:0}</Button>
                         </Form.Row>
                     </Form>
@@ -605,7 +617,7 @@ const NotificacionForm = ({nota, setNota}) => {
                     </Row>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="waring" onClick={handleClose}>
+                    <Button variant="warning" onClick={handleClose}>
                         Cancelar
                     </Button>
                 </Modal.Footer>

@@ -23,6 +23,7 @@ const PedLista = () => {
     const [count, setCount] = useState(null);
     const [pagina, setPagina] = useState(1);
     const [totalPag, setTotalPag] = useState(0);
+    const [copiando, setCopiando] = useState(false);
 
         // Función para hacer la búsqueda
     const buscarPedidos = useCallback(async (filtroCompleto) => {
@@ -135,6 +136,7 @@ const PedLista = () => {
     }
 
     const copiarPedido = async (pedido) => {
+        if (copiando) return;
         var duplicar = window.confirm('Va a duplicar el pedido, ¿desea continuar?');
         if(duplicar){    
             try {
@@ -147,24 +149,28 @@ const PedLista = () => {
                 const original = response.data;
 
                 // Paso 2: Crear nuevo pedido (cabecera)
-                const nuevoPedidoPayload = {
-                    proveedor: original.proveedor.id,
-                    empresa: original.empresa.id,
-                    descripcion: original.descripcion,
-                    fecha_entrega: null,
-                    fecha_prevista_entrega: `${nextMonth.getFullYear()}-${String(nextMonth.getMonth() + 1).padStart(2, '0')}-${String(nextMonth.getDate()).padStart(2, '0')}`,
-                    fecha_creacion: hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0'),
-                    finalizado: false,
-                    creado_por: user['tec-user'].id,
-                    direccion_envio: original.direccion_envio?.id || null,
-                    contacto: original.contacto?.id|| null,
-                    observaciones: original.observaciones,
-                    observaciones2: original.observaciones2,
-                    intervencion: original.intervencion,
-                    revisado: original.revisado,
-                };
-
-                let nuevoPedido = null;
+                const nuevoPedidoRes = await axios.post(  //Sin try/catch interno, si falla lo captura el exterior
+                    `${BACKEND_SERVER}/api/repuestos/pedido/`,
+                    {
+                        proveedor: original.proveedor.id,
+                        empresa: original.empresa.id,
+                        descripcion: original.descripcion,
+                        fecha_entrega: null,
+                        fecha_prevista_entrega: `${nextMonth.getFullYear()}-${String(nextMonth.getMonth() + 1).padStart(2, '0')}-${String(nextMonth.getDate()).padStart(2, '0')}`,
+                        fecha_creacion: hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0'),
+                        finalizado: false,
+                        creado_por: user['tec-user'].id,
+                        direccion_envio: original.direccion_envio?.id || null,
+                        contacto: original.contacto?.id|| null,
+                        observaciones: original.observaciones,
+                        observaciones2: original.observaciones2,
+                        intervencion: original.intervencion,
+                        revisado: original.revisado,
+                    },
+                    { headers: { 'Authorization': `token ${token['tec-token']}` } }
+                );
+                const nuevoPedido = nuevoPedidoRes.data;
+                /* let nuevoPedido = null;
 
                 try {
                     const nuevoPedidoRes = await axios.post(
@@ -179,10 +185,10 @@ const PedLista = () => {
                     nuevoPedido = nuevoPedidoRes.data;
                     }catch( err ) {
                         console.log(err);
-                    }
+                    } */
                 // Paso 3: Clonar líneas
                 for (const linea of original.lineas_pedido) {
-                    const nuevaLineaPayload = {
+                    await axios.post(`${BACKEND_SERVER}/api/repuestos/linea_pedido/`, {
                         pedido: nuevoPedido.id,
                         repuesto: linea.repuesto.id,
                         cantidad: linea.cantidad || 0,
@@ -194,20 +200,11 @@ const PedLista = () => {
                         descuento: linea.descuento || 0,
                         total: linea.total,
                         tipo_unidad: linea.tipo_unidad,
-                    };
-                    try {
-                        await axios.post(`${BACKEND_SERVER}/api/repuestos/linea_pedido/`, nuevaLineaPayload, {
-                            headers: {
-                                'Authorization': `token ${token['tec-token']}`
-                            }
-                        });
-                    }catch( err ) {
-                        console.log(err);
-                    }
+                    }, { headers: { 'Authorization': `token ${token['tec-token']}` } });
                 }
                 // Paso 4: Clonar líneasAdicionales
                 for (const linea_adicional of original.lineas_adicionales) {
-                    const nuevaLineaadicionalPayload = {
+                    await axios.post(`${BACKEND_SERVER}/api/repuestos/linea_adicional_pedido/`, {
                         pedido: nuevoPedido.id,
                         descripcion: linea_adicional.descripcion,
                         cantidad: linea_adicional.cantidad,
@@ -215,21 +212,13 @@ const PedLista = () => {
                         por_recibir: linea_adicional.cantidad,
                         descuento: linea_adicional.descuento || 0,
                         total: linea_adicional.total,
-                    };
-                    try {
-                        await axios.post(`${BACKEND_SERVER}/api/repuestos/linea_adicional_pedido/`, nuevaLineaadicionalPayload, {
-                            headers: {
-                                'Authorization': `token ${token['tec-token']}`
-                            }
-                        });
-                    } catch (err) {
-                        console.log(err);
-                    }
+                    }, { headers: { 'Authorization': `token ${token['tec-token']}` } });
                 }
                 alert("Pedido duplicado correctamente.");
                 history.push(`/repuestos/pedido_detalle/${nuevoPedido.id}`);
             } catch (error) {
                 console.log(error);
+                setCopiando(false); 
             }
         }
     };
@@ -285,7 +274,7 @@ const PedLista = () => {
                                             <svg
                                                 className="bi bi-copy mr-3"
                                                 onClick={() => copiarPedido(pedido)}
-                                                style={{ cursor: 'pointer' }}
+                                                style={{ cursor: copiando ? 'not-allowed' : 'pointer', opacity: copiando ? 0.5 : 1 }}
                                                 xmlns="http://www.w3.org/2000/svg"
                                                 width="16"
                                                 height="16"

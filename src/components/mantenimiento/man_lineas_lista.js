@@ -18,6 +18,7 @@ const ManLineasListado = () => {
     const ExcelFile = ReactExport.ExcelFile;
     const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
     const ExcelColumn = ReactExport.ExcelFile.ExcelColumn;
+    const [actualizandoPrioridad, setActualizandoPrioridad] = useState({});
 
     var fecha_hoy=Date.parse(new Date());
     var mesEnMilisegundos = 1000 * 60 * 60 * 24 * 30;
@@ -167,6 +168,8 @@ const ManLineasListado = () => {
     }
 
     const ActualizarPrioridad = (linea) => {
+        if (actualizandoPrioridad[linea.tarea.id]) return; // Bloquear doble clic por fila
+        setActualizandoPrioridad(prev => ({ ...prev, [linea.tarea.id]: true }));
         axios.patch(BACKEND_SERVER + `/api/mantenimiento/tareas/${linea.tarea.id}/`, {
             prioridad : linea.tarea.prioridad,
         },{
@@ -176,8 +179,12 @@ const ManLineasListado = () => {
         })
         .then( res => { 
             setActualizar(linea);
+            setActualizandoPrioridad(prev => ({ ...prev, [linea.tarea.id]: false })); // Liberar
         })
-        .catch(err => { console.log(err);})
+        .catch(err => { 
+            console.log(err);
+            setActualizandoPrioridad(prev => ({ ...prev, [linea.tarea.id]: false })); // Liberar
+        })
     }
 
     const cambioPagina = (nuevaPagina) => {
@@ -279,7 +286,10 @@ const ManLineasListado = () => {
                                         <td>
                                             <PlusSquare className="mr-3 pencil"  onClick={event => {updateCantidad(1, linea)}} />
                                             <DashSquare className="mr-3 pencil"  onClick={event => {updateCantidad(-1, linea)}} />
-                                            <HandThumbsUpFill className="mr-3 pencil" onClick= {async => {ActualizarPrioridad(linea)}}/>
+                                            <HandThumbsUpFill className="mr-3 pencil" onClick={() => ActualizarPrioridad(linea)}
+                                                style={{  opacity: actualizandoPrioridad[linea.tarea.id] ? 0.5 : 1,
+                                                    cursor: actualizandoPrioridad[linea.tarea.id] ? 'not-allowed' : 'pointer'
+                                                }}/>
                                         </td>
                                         <td>{linea.id}</td>
                                         <td>{linea.parte.nombre}</td>

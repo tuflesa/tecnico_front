@@ -27,6 +27,7 @@ const RepSalidas = ({alm}) => {
     const [linea_GastoEditar, setLineaGastoEditar] = useState(null);
     const [show_linea_mantenimiento, setShowLineaMantenimiento] = useState(false);
     const [lineasSalida_anteriores, setLineasSalidasAnteriores] = useState([]);
+    const [procesando, setProcesando] = useState(false);
 
     const [numeroBar, setNumeroBar] = useState({
         id: '',
@@ -311,6 +312,8 @@ const RepSalidas = ({alm}) => {
     }
    
     const GenerarSalida = async () => {
+        if (procesando) return;
+        setProcesando(true);
         try {
             // 1. Grabar líneas de gastos si existen
             if (num_parte && lineasGastos.length > 0) {
@@ -406,10 +409,13 @@ const RepSalidas = ({alm}) => {
         } catch (err) {
             console.log(err);
             alert("Error al procesar la operación: " + (err.response?.data?.detail || err.message));
+            setProcesando(false);
         }
     }
 
     const aceptar = async () => {
+        if (procesando) return;
+        setProcesando(true);
         try {
             // 1. Grabar líneas de gastos si existen
             if (num_parte && lineasGastos.length > 0) {
@@ -439,6 +445,7 @@ const RepSalidas = ({alm}) => {
         } catch (err) {
             console.log(err);
             alert("Error al guardar los datos: " + (err.response?.data?.detail || err.message));
+            setProcesando(false);
         }
     }
 
@@ -726,10 +733,10 @@ const RepSalidas = ({alm}) => {
 
             <Form.Row className="justify-content-center mt-4">
                 {(lineasSalida.length > 0 || lineasGastos.length > 0) ? 
-                    <Button variant="info" type="submit" className={'mx-2'} onClick={GenerarSalida}>
+                    <Button variant="info" type="submit" className={'mx-2'} onClick={GenerarSalida} disabled={procesando}>
                         {num_parte ? 'Hacer Salida / Guardar Todo' : 'Hacer Salida'}
                     </Button> :
-                    num_parte ? <Button variant="warning" type="submit" className={'mx-2'} onClick={aceptar}>Aceptar</Button> : ''
+                    num_parte ? <Button variant="warning" type="submit" className={'mx-2'} onClick={aceptar} disabled={procesando}>Aceptar</Button> : ''
                 }
                 <Button variant="warning" onClick={cancelar}>Cancelar</Button>               
             </Form.Row>

@@ -19,6 +19,7 @@ const RepTraspasoAlmacen = ({alm}) => {
     const [salida, setSalida] = useState(null);
     //const [movimientos, setMovimientos] = useState([]);
     const [almacenentrega, setAlmacenEntrega]=useState(null);
+    const [procesando, setProcesando] = useState(false); 
 
     const [numeroBar, setNumeroBar] = useState({
         id: '',
@@ -115,57 +116,6 @@ const RepTraspasoAlmacen = ({alm}) => {
         });
     }, [token, cambioCodigo]);
 
-    useEffect(()=>{
-        let contador =0;
-        lineasSalida.length>0 && lineasSalida.forEach(l => {
-            axios.post(BACKEND_SERVER + `/api/repuestos/lineasalida/`, {
-                salida: salida.id,
-                repuesto: l.repuesto,
-                almacen: l.almacen,
-                cantidad: l.cantidad,
-            }, {
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                    }     
-            })
-            .then( res => { 
-                axios.post(BACKEND_SERVER + `/api/repuestos/movimiento/`,{
-                    cantidad : -res.data.cantidad,
-                    almacen : res.data.almacen,
-                    usuario : salida.responsable,
-                    linea_salida: res.data.id
-                    }, {
-                        headers: {
-                            'Authorization': `token ${token['tec-token']}`
-                            }     
-                })
-                .then( res => { 
-                    /* contador+=1; */
-                    
-                })
-                .catch( err => {console.log(err)});
-                axios.post(BACKEND_SERVER + `/api/repuestos/movimiento/`,{
-                    cantidad : res.data.cantidad,
-                    almacen : datos.almacen_entre,
-                    usuario : salida.responsable,
-                    linea_salida: res.data.id
-                    }, {
-                        headers: {
-                            'Authorization': `token ${token['tec-token']}`
-                            }     
-                })
-                .then( res => { 
-                    contador+=1;
-                    if(lineasSalida.length===contador){
-                        alert("Traspaso realizado con exito!!!!");
-                        window.location.href = "javascript: history.go(-1)";
-                    }
-                })
-                .catch( err => {console.log(err)});
-            })  
-        });
-    },[salida]);
-
     const handleInputChange = (event) => { 
         setNumeroBar ({
             ...numeroBar,
@@ -201,27 +151,66 @@ const RepTraspasoAlmacen = ({alm}) => {
         setLineasSalida(newLineas);
     }
 
-    const GenerarSalida = () => {
-        if (lineasSalida.length > 0 && datos.almacen_entre!=='') {
-            axios.post(BACKEND_SERVER + `/api/repuestos/salida/`, {
+    const GenerarSalida = async () => {
+        if (procesando) return;
+        if (lineasSalida.length === 0 || datos.almacen_entre === '') {
+            alert('Revisa que tengas suficiente cantidad para el traspaso y seleccionado el almacén de entrega');
+            return;
+        }
+        setProcesando(true);
+        try {
+            // 1. Crear la salida
+            const salidaRes = await axios.post(BACKEND_SERVER + `/api/repuestos/salida/`, {
                 nombre: 'Traspaso de almacen',
                 responsable: user['tec-user'].id
             }, {
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                   }     
-            })
-            .then( res => { 
-                setSalida(res.data);
-            })
-            .catch(err => { 
-                console.log(err);
-            })
+            });
+            const salida = salidaRes.data;
+
+            // 2. Procesar líneas en secuencia con await en vez de forEach
+            for (const l of lineasSalida) {
+                const lineaRes = await axios.post(BACKEND_SERVER + `/api/repuestos/lineasalida/`, {
+                    salida: salida.id,
+                    repuesto: l.repuesto,
+                    almacen: l.almacen,
+                    cantidad: l.cantidad,
+                }, {
+                    headers: { 'Authorization': `token ${token['tec-token']}` }
+                });
+
+                // Movimiento de salida (negativo)
+                await axios.post(BACKEND_SERVER + `/api/repuestos/movimiento/`, {
+                    cantidad: -lineaRes.data.cantidad,
+                    almacen: lineaRes.data.almacen,
+                    usuario: salida.responsable,
+                    linea_salida: lineaRes.data.id
+                }, {
+                    headers: { 'Authorization': `token ${token['tec-token']}` }
+                });
+
+                // Movimiento de entrada (positivo)
+                await axios.post(BACKEND_SERVER + `/api/repuestos/movimiento/`, {
+                    cantidad: lineaRes.data.cantidad,
+                    almacen: datos.almacen_entre,
+                    usuario: salida.responsable,
+                    linea_salida: lineaRes.data.id
+                }, {
+                    headers: { 'Authorization': `token ${token['tec-token']}` }
+                });
+            }
+
+            alert("Traspaso realizado con éxito!!!!");
+            window.history.go(-1); // 👈 Mejor que javascript: history.go(-1)
+
+        } catch (err) {
+            console.log(err);
+            alert('Error al realizar el traspaso, inténtalo de nuevo.');
+            setProcesando(false); // 🔓 Solo liberar si falla
         }
-        else{
-            alert('Revisa que tengas suficiente cantidad para el traspaso y seleccionado el almacén de entrega');
-        }
-    }    
+    } 
 
     const abrirListRepuestos = () => {
         setShowListRepuestos(true);
@@ -351,7 +340,7 @@ const RepTraspasoAlmacen = ({alm}) => {
             }
             <Form.Row className="justify-content-center">
                 {lineasSalida.length>0 ? 
-                    <Button variant="info" type="submit" className={'mx-2'} onClick={GenerarSalida}>Hacer Traspaso</Button> :
+                    <Button variant="info" type="submit" className={'mx-2'} onClick={GenerarSalida} disabled={procesando}>Hacer Traspaso</Button> :
                     null
                 }
                 <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>                   

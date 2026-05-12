@@ -11,6 +11,7 @@ const RepProveedorForm = ({proveedor}) => {
     const [show_contacto, setShowContacto] = useState(false);
     const [contactoEditar, setContactoEditar]=useState(null);
     const [newProveedor, setNewProveedor]=useState(null);
+    const [enviando, setEnviando] = useState(false);
     
     const [datos, setDatos] = useState({     
         nombre: proveedor.nombre,
@@ -33,7 +34,9 @@ const RepProveedorForm = ({proveedor}) => {
     }
 
     const actualizarDatos = (event) => {
-        event.preventDefault()       
+        event.preventDefault()    
+        if (enviando) return;
+        setEnviando(true);   
         axios.patch(BACKEND_SERVER + `/api/repuestos/proveedor/${proveedor.id}/`, {
             nombre: datos.nombre,
             cif: datos.cif,
@@ -51,8 +54,12 @@ const RepProveedorForm = ({proveedor}) => {
         })
         .then( res => { 
             alert('Proveedor actualizado.');
+            setEnviando(false);
         })
-        .catch(err => { console.log(err);})
+        .catch(err => { 
+            console.log(err);
+            setEnviando(false);
+        })
         
     }
     const updateProveedorCont = () => {
@@ -69,6 +76,8 @@ const RepProveedorForm = ({proveedor}) => {
 
     const nuevoDatos = (event) => {
         event.preventDefault()
+        if (enviando) return;
+        setEnviando(true);
         axios.post(BACKEND_SERVER + `/api/repuestos/proveedor/`, {
             nombre: datos.nombre,
             cif: datos.cif,
@@ -89,7 +98,10 @@ const RepProveedorForm = ({proveedor}) => {
             window.location.href = `/repuestos/proveedor/${res.data.id}`;
            // window.location.href = "/repuestos/proveedores";
         })
-        .catch(err => { console.log(err);})
+        .catch(err => { 
+            console.log(err);
+            setEnviando(false);
+        })
         
     }
     const abrirAddContacto =() =>{
@@ -242,8 +254,8 @@ const RepProveedorForm = ({proveedor}) => {
                         </Row>
                         <Form.Row className="justify-content-center">                
                             {proveedor.id?
-                                <Button variant="info" type="submit" className={'mr-1'} onClick={actualizarDatos}>Actualizar</Button> :
-                                <Button variant="info" type="submit" className={'mr-1'} onClick={nuevoDatos}>Guardar</Button>
+                                <Button variant="info" type="submit" className={'mr-1'} onClick={actualizarDatos} disabled={enviando}>Actualizar</Button> :
+                                <Button variant="info" type="submit" className={'mr-1'} onClick={nuevoDatos} disabled={enviando}>Guardar</Button>
                             }    
                             <Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>  
                         </Form.Row>

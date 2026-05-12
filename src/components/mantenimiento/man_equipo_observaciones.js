@@ -12,6 +12,7 @@ const ObservacionesModal = ({ show, onHide, linea, filtro, parte, onUpdateTarea,
     const [hoy] = useState(new Date());
     const [linea_completa, setLinea_completa] = useState(linea);
     const [yaGuardado, setYaGuardado] = useState(false);
+    const [enviando, setEnviando] = useState(false);
     
     const [datos, setDatos] = useState({
         fecha_fin: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
@@ -20,6 +21,11 @@ const ObservacionesModal = ({ show, onHide, linea, filtro, parte, onUpdateTarea,
     });
 
     useEffect(() => {
+        if (!show) {
+            setYaGuardado(false); //resetear al cerrar el modal
+            setEnviando(false); //por si quedó bloqueado
+            return;
+        }
         const datosRetorno = sessionStorage.getItem('datos_retorno_salida');
         if (datosRetorno && !yaGuardado) {
             const datosRecuperados = JSON.parse(datosRetorno);
@@ -81,6 +87,7 @@ const ObservacionesModal = ({ show, onHide, linea, filtro, parte, onUpdateTarea,
     };
 
     const GuardarComentarios = () => {
+        if (enviando) return;
         if (linea_completa && datos.observaciones) {
             axios.patch(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_contrabajador/${linea_completa.id}/`, {
                 observaciones_trab: datos.observaciones,
@@ -97,13 +104,18 @@ const ObservacionesModal = ({ show, onHide, linea, filtro, parte, onUpdateTarea,
             })
             .catch(err => {
                 console.log(err);
+            })
+            .finally(() => {
+                setEnviando(false);
             });
         }
     };
 
     const FinalizarTarea = () => {
+        if (enviando) return;
         var Finalizar_Tarea = window.confirm('Vas a finalizar la tarea ¿Desea continuar?');
         if (Finalizar_Tarea && linea_completa) {
+            setEnviando(true);
             // Finalizar trabajadores
             for (var x = 0; x < linea_completa.lineas.length; x++) {
                 axios.patch(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea/${linea_completa.lineas[x].id}/`, {
@@ -197,6 +209,9 @@ const ObservacionesModal = ({ show, onHide, linea, filtro, parte, onUpdateTarea,
             })
             .catch(err => {
                 console.log(err);
+            })
+            .finally(() => {
+                setEnviando(false); // 🔒 siempre libera
             });
         }
     };
@@ -277,11 +292,11 @@ const ObservacionesModal = ({ show, onHide, linea, filtro, parte, onUpdateTarea,
             </Modal.Footer>
             <Modal.Footer>
                 {showFinalizar && (
-                    <Button variant="secondary" onClick={FinalizarTarea}>
+                    <Button variant="secondary" onClick={FinalizarTarea} disabled={enviando}>
                         Finalizar Tarea
                     </Button>
                 )}
-                <Button variant="secondary" onClick={handleClose}>
+                <Button variant="secondary" onClick={handleClose} disabled={enviando}>
                     Cerrar
                 </Button>
             </Modal.Footer>

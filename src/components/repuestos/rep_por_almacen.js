@@ -19,6 +19,7 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
     const [showBorrar, setShowBorrar] = useState(false);
     const [pedidos_pendientes, setPedidosPendientes] = useState(null);
     const [editandoFila, setEditandoFila] = useState({});
+    const [guardando, setGuardando] = useState({});
 
     const nosoyTecnico = user['tec-user'].perfil.puesto.nombre!=='Mantenimiento'&&user['tec-user'].perfil.puesto.nombre!=='Operador'?false:true;
 
@@ -63,21 +64,23 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
     }
     
     const ActualizaStock = (r) =>{ 
+        if (guardando[r.id]) return;
+        setGuardando(prev => ({ ...prev, [r.id]: true }));
+        
         let r_id = r.id;
         let r_almacen = r.almacen.id;
+        
         axios.patch(BACKEND_SERVER + `/api/repuestos/stocks_minimos/${r_id}/`, {
             cantidad: datos.stock_minimo ? datos.stock_minimo : repuesto.stocks_minimos.cantidad, 
             cantidad_aconsejable: datos.stock_aconsejable ? datos.stock_aconsejable : repuesto.stocks_minimos.cantidad_aconsejable,  
             stock_act: datos.stock_actual ? 0 : repuesto.stocks_minimos.stock_act,
             localizacion: datos.localizaciones ? datos.localizaciones : repuesto.stocks_minimos.localizacion,
         }, {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }     
+            headers: { 'Authorization': `token ${token['tec-token']}` }     
         })
-        .then( res => { 
+        .then(res => { 
             habilitar_linea(r);
-            const updatedStock = { //actualiza la variable repuesto.stocks_minimos para mostrar el cambio y no el dato anterior.
+            const updatedStock = {
                 ...r,
                 cantidad: datos.stock_minimo ? datos.stock_minimo : r.cantidad,
                 cantidad_aconsejable: datos.stock_aconsejable ? datos.stock_aconsejable : r.cantidad_aconsejable,
@@ -88,61 +91,68 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
             const nuevosStocks = repuesto.stocks_minimos.map(item => 
                 item.id === r.id ? updatedStock : item
             );
-        
-            setRepuesto({
-                ...repuesto,
-                stocks_minimos: nuevosStocks
-            });
-            if (datos.stock_actual){
+            setRepuesto({ ...repuesto, stocks_minimos: nuevosStocks });
+
+            if (datos.stock_actual) {
                 const hoy = new Date();
-                var dd = String(hoy.getDate()).padStart(2, '0');
-                var mm = String(hoy.getMonth() + 1).padStart(2, '0'); //Enero es 0!
-                var yyyy = hoy.getFullYear();
+                const dd = String(hoy.getDate()).padStart(2, '0');
+                const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+                const yyyy = hoy.getFullYear();
+                const fecha = `${yyyy}-${mm}-${dd}`;
                 
                 axios.post(BACKEND_SERVER + `/api/repuestos/inventario/`, {
-                    nombre : 'Ajuste de stock',
-                    fecha_creacion : yyyy + '-' + mm + '-' + dd,
-                    responsable : user['tec-user'].id
+                    nombre: 'Ajuste de stock',
+                    fecha_creacion: fecha,
+                    responsable: user['tec-user'].id
                 }, {
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`
-                    }     
+                    headers: { 'Authorization': `token ${token['tec-token']}` }     
                 })
-                .then( res => { 
-                        const inventario = res.data
-                        axios.post(BACKEND_SERVER + `/api/repuestos/lineainventario/`, {
-                            inventario : inventario.id,
-                            repuesto : repuesto.id,
-                            almacen : r_almacen,
-                            cantidad : datos.stock_actual, 
+                .then(res => { 
+                    const inventario = res.data;
+                    axios.post(BACKEND_SERVER + `/api/repuestos/lineainventario/`, {
+                        inventario: inventario.id,
+                        repuesto: repuesto.id,
+                        almacen: r_almacen,
+                        cantidad: datos.stock_actual, 
+                    }, {
+                        headers: { 'Authorization': `token ${token['tec-token']}` }     
+                    })
+                    .then(res => {
+                        const linea_inventario = res.data;
+                        axios.post(BACKEND_SERVER + `/api/repuestos/movimiento/`, {
+                            fecha: fecha,
+                            cantidad: datos.stock_actual,
+                            almacen: r_almacen,
+                            usuario: user['tec-user'].id,
+                            linea_inventario: linea_inventario.id
                         }, {
-                            headers: {
-                                'Authorization': `token ${token['tec-token']}`
-                            }     
+                            headers: { 'Authorization': `token ${token['tec-token']}` }     
                         })
-                        .then( res => {
-                            const linea_inventario = res.data;
-                            axios.post(BACKEND_SERVER + `/api/repuestos/movimiento/`, {
-                                fecha : yyyy + '-' + mm + '-' + dd,
-                                cantidad : datos.stock_actual,
-                                almacen : r_almacen,
-                                usuario : user['tec-user'].id,
-                                linea_inventario : linea_inventario.id
-                            }, {
-                                headers: {
-                                    'Authorization': `token ${token['tec-token']}`
-                                }     
-                            })
-                            .then( res => {
-                            })
-                            .catch( err => {console.log(err);})
+                        .then(() => {
+                            setGuardando(prev => ({ ...prev, [r.id]: false }));
                         })
-                        .catch( err => {console.log(err);})
-                    }
-                )
+                        .catch(err => {
+                            console.log(err);
+                            setGuardando(prev => ({ ...prev, [r.id]: false }));
+                        });
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        setGuardando(prev => ({ ...prev, [r.id]: false }));
+                    });
+                })
+                .catch(err => {
+                    console.log(err);
+                    setGuardando(prev => ({ ...prev, [r.id]: false }));
+                });
+            } else {
+                setGuardando(prev => ({ ...prev, [r.id]: false }));
             }
         })
-        .catch(err => { console.log(err);})
+        .catch(err => { 
+            console.log(err);
+            setGuardando(prev => ({ ...prev, [r.id]: false }));
+        });
     }
 
     const handlerListCancelar = () => {      
@@ -288,7 +298,7 @@ const RepPorAlmacen = ({empresa, repuesto, setRepuesto, cerrarListAlmacen, show}
                                                             {!nosoyTecnico?                                                     
                                                                 <td>                                                            
                                                                     <PencilFill className="mr-3 pencil" onClick= {event => {habilitar_linea(r)}}/>                                               
-                                                                    <HandThumbsUpFill className="mr-3 pencil" onClick= {async => {ActualizaStock(r)}}/>
+                                                                    <HandThumbsUpFill className="mr-3 pencil" onClick= {() => ActualizaStock(r)} style={{opacity: guardando[r.id] ? 0.5 : 1, cursor: guardando[r.id] ? 'not-allowed' : 'pointer'}}/>
                                                                     <Receipt className="mr-3 pencil" onClick={event => {trazabilidad(r.almacen.id)}}/>
                                                                     <Trash className="pencil"  onClick={event =>{BorrarAlmacen(r)}} />
                                                                 </td>

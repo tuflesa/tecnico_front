@@ -7,6 +7,7 @@ import { useCookies } from 'react-cookie';
 const EquipoForm = ({show, repuesto_id, handleCloseEquipo, equiposAsignados, updateRepuesto}) => {
     const [token] = useCookies(['tec-token']);
     const [user] = useCookies(['tec-user']);
+    const [enviando, setEnviando] = useState(false);
 
     const [datos, setDatos] = useState({
         empresa: user['tec-user'].perfil.empresa.id,
@@ -159,6 +160,8 @@ const EquipoForm = ({show, repuesto_id, handleCloseEquipo, equiposAsignados, upd
     }
     
     const handlerGuardar = () => {
+        if (enviando) return;// Bloquear doble clic
+        setEnviando(true);
         const newEquipos = [...listaAsignados, parseInt(datos.equipo)];
         axios.patch(BACKEND_SERVER + `/api/repuestos/lista/${repuesto_id}/`, { //tabla repuestos
             equipos: newEquipos
@@ -172,7 +175,10 @@ const EquipoForm = ({show, repuesto_id, handleCloseEquipo, equiposAsignados, upd
                 handlerCancelar();
             }
         )
-        .catch(err => { console.log(err);});
+        .catch(err => { 
+            console.log(err);
+            setEnviando(false);
+        });
     }
 
     return (
@@ -269,10 +275,10 @@ const EquipoForm = ({show, repuesto_id, handleCloseEquipo, equiposAsignados, upd
                 <Modal.Footer>
                     <Button variant="info" 
                         onClick={handlerGuardar}
-                        disabled={guardarDisabled}>
+                        disabled={guardarDisabled || enviando}>
                         Guardar
                     </Button>
-                    <Button variant="waring" onClick={handlerCancelar}>
+                    <Button variant="waring" onClick={handlerCancelar} disabled={enviando}>
                         Cancelar
                     </Button>
                 </Modal.Footer>

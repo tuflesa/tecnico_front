@@ -6,6 +6,7 @@ import { useCookies } from 'react-cookie';
 
 const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repuesto_id, updateRepuesto, repuesto_nombre, repuesto_modelo, repuesto_fabricante, setShowProveedor}) => {
     const [token] = useCookies(['tec-token']);
+    const [enviando, setEnviando] = useState(false);
 
     const [datos, setDatos] = useState({
         proveedor: '',
@@ -63,24 +64,22 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
     }
 
     const handlerGuardar = () => {
+        if (enviando) return;
+        setEnviando(true);
         var newProveedores=[];
-        //const Proveedor_repetido = listaAsignados.filter(p => {return datos.proveedor.includes(p.id)});
         const Proveedor_repetido = listaAsignados.filter( pr => pr === datos.proveedor);
         if(Proveedor_repetido.length!==0){;
             newProveedores = [...listaAsignados]
-        }
-        else{
+        }else{
             newProveedores = [...listaAsignados, parseInt(datos.proveedor)]
         }
         axios.patch(BACKEND_SERVER + `/api/repuestos/lista/${repuesto_id}/`, {
             proveedores: newProveedores
         }, {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-              }     
+            headers: { 'Authorization': `token ${token['tec-token']}` }     
         })
         .then( res => { 
-            axios.post(BACKEND_SERVER + `/api/repuestos/precio/`, {
+            return axios.post(BACKEND_SERVER + `/api/repuestos/precio/`, {
                 proveedor: datos.proveedor,
                 repuesto: repuesto_id,
                 precio: datos.precio,
@@ -89,21 +88,18 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
                 modelo_proveedor: datos.modelo_proveedor?datos.modelo_proveedor:repuesto_modelo,
                 fabricante: datos.fabricante?datos.fabricante:repuesto_fabricante,
             }, {
-                headers: {
-                    'Authorization': `token ${token['tec-token']}`
-                    }     
-            })
-            .then( res => { 
-                    handlerCancelar();
-                }
-            )
-            .catch(err => { console.log(err);});
+                headers: {'Authorization': `token ${token['tec-token']}`}     
+            });
+        })
+        .then( res => { 
             updateRepuesto();
             setShowProveedor(false);
+            handlerCancelar();
         })
-        .catch(err => { console.log(err);});
-        //crear tabla de precios para el articulo del proveedor
-        
+        .catch(err => { 
+            console.log(err);
+            setEnviando(false);
+        });
     }
 
     return (
@@ -200,8 +196,8 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="info" onClick={handlerGuardar}>Guardar</Button>
-                    <Button variant="waring" onClick={handlerCancelar}>Cancelar</Button>
+                    <Button variant="info" onClick={handlerGuardar} disabled={enviando}>Guardar</Button>
+                    <Button variant="warning" onClick={handlerCancelar} disabled={enviando}>Cancelar</Button>
                 </Modal.Footer>
         </Modal>
     );

@@ -12,6 +12,7 @@ function CerrarTodoElPedido({ pedido, show, onClose, updatePedido }) {
     const hoy = () => new Date().toISOString().split('T')[0];
     const lineasPedido = pedido?.lineas_pedido?.filter(linea => linea.por_recibir > 0);
     const lineasAdicionales = pedido?.lineas_adicionales?.filter(linea => linea.por_recibir > 0);
+    const [enviando, setEnviando] = useState(false);
 
     const [datos, setDatos] = useState({
         almacen: '',
@@ -47,14 +48,15 @@ function CerrarTodoElPedido({ pedido, show, onClose, updatePedido }) {
         }
     },[token]);
 
-    const guardarMovimiento = () => {
+    const guardarMovimiento = async () => {
+        if (enviando) return;
         if(lineasPedido.length>0 && almacenes.length===0){
             alert('No están todos los repuestos en el mismo almacén, no se puede llevar a cabo esta acción.');
             onClose();
             resetDatos();
             return;
         }        
-        else if (lineasPedido.length>0 && (!datos.albaran || !datos.almacen)) {
+        if (lineasPedido.length>0 && (!datos.albaran || !datos.almacen)) {
             alert("Debes completar ambos campos.");
             return;
         }
@@ -64,64 +66,54 @@ function CerrarTodoElPedido({ pedido, show, onClose, updatePedido }) {
             return;
         }
 
-        const promesas = [];
+        setEnviando(true);
 
-        if (lineasPedido.length > 0) {
-            promesas.push(
-                ...lineasPedido.map(async (linea) => {
-                    await axios.post(`${BACKEND_SERVER}/api/repuestos/movimiento/`, {
-                        fecha: datos.fecha ? datos.fecha : hoy(),
-                        cantidad: linea.por_recibir,
-                        almacen: datos.almacen,
-                        usuario: user['tec-user'].id,
-                        linea_pedido: linea.id,
-                        linea_inventario: '',
-                        albaran: datos.albaran,
-                    }, {
-                        headers: { Authorization: `token ${token['tec-token']}` }
-                    });
-                    return axios.patch(`${BACKEND_SERVER}/api/repuestos/linea_pedido/${linea.id}/`, {
-                        por_recibir: 0,
-                        cantidad: linea.cantidad,
-                    }, {
-                        headers: { Authorization: `token ${token['tec-token']}` }
-                    });
-                })
-            );
+        try {
+            for (const linea of lineasPedido) {
+                await axios.post(`${BACKEND_SERVER}/api/repuestos/movimiento/`, {
+                    fecha: datos.fecha ? datos.fecha : hoy(),
+                    cantidad: linea.por_recibir,
+                    almacen: datos.almacen,
+                    usuario: user['tec-user'].id,
+                    linea_pedido: linea.id,
+                    linea_inventario: '',
+                    albaran: datos.albaran,
+                }, {
+                    headers: { Authorization: `token ${token['tec-token']}` }
+                });
+                await axios.patch(`${BACKEND_SERVER}/api/repuestos/linea_pedido/${linea.id}/`, {
+                    por_recibir: 0,
+                    cantidad: linea.cantidad,
+                }, {
+                    headers: { Authorization: `token ${token['tec-token']}` }
+                });
+            }
+            for (const linea of lineasAdicionales) {
+                await axios.post(`${BACKEND_SERVER}/api/repuestos/entrega/`, {
+                    linea_adicional: linea.id,
+                    fecha: datos.fecha ? datos.fecha : hoy(),
+                    cantidad: linea.por_recibir,
+                    usuario: user['tec-user'].id,
+                    albaran: datos.albaran,
+                }, {
+                    headers: { Authorization: `token ${token['tec-token']}` }
+                });
+                await axios.patch(`${BACKEND_SERVER}/api/repuestos/linea_adicional_pedido/${linea.id}/`, {
+                    por_recibir: 0,
+                    cantidad: linea.cantidad,
+                }, {
+                    headers: { Authorization: `token ${token['tec-token']}` }
+                });
+            }
+            updatePedido();
+            onClose();
+            resetDatos();
+
+        } catch (err) {
+            console.error(err);
+            alert("Error al registrar movimientos.");
+            setEnviando(false);
         }
-
-        if (lineasAdicionales.length > 0) {
-            promesas.push(
-                ...lineasAdicionales.map(async (linea) => {
-                    await axios.post(`${BACKEND_SERVER}/api/repuestos/entrega/`, {
-                        linea_adicional: linea.id,
-                        fecha: datos.fecha ? datos.fecha : hoy(),
-                        cantidad: linea.por_recibir,
-                        usuario: user['tec-user'].id,
-                        albaran: datos.albaran,
-                    }, {
-                        headers: { Authorization: `token ${token['tec-token']}` }
-                    });
-                    return axios.patch(`${BACKEND_SERVER}/api/repuestos/linea_adicional_pedido/${linea.id}/`, {
-                        por_recibir: 0,
-                        cantidad: linea.cantidad,
-                    }, {
-                        headers: { Authorization: `token ${token['tec-token']}` }
-                    });
-                })
-            );
-        }
-
-        Promise.all(promesas)
-            .then(() => {
-                updatePedido();
-                onClose();
-                resetDatos();
-            })
-            .catch(err => {
-                console.error(err);
-                alert("Error al registrar movimientos.");
-            });
     };
 
     const resetDatos = () => {
@@ -189,8 +181,8 @@ function CerrarTodoElPedido({ pedido, show, onClose, updatePedido }) {
                 </Form>
             </Modal.Body>
             <Modal.Footer>
-                <Button variant="secondary" onClick={CerrarModal}>Cancelar</Button>
-                <Button variant="primary" onClick={guardarMovimiento}>Confirmar</Button>
+                <Button variant="secondary" onClick={CerrarModal} disabled={enviando} >Cancelar</Button>
+                <Button variant="primary" onClick={guardarMovimiento} disabled={enviando} >Confirmar</Button>
             </Modal.Footer>
         </Modal>
     );

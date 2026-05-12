@@ -25,6 +25,7 @@ const ParteMediciones = ({parte, setParte}) => {
     const [lineaLineasTareas, setListLineasTareas] = useState(null);
     const [cambio_fecha, setCambioFecha] = useState(false);
     const [estados, setEstados] = useState(null);
+    const [enviando, setEnviando] = useState(false);
 
     const [datos, setDatos] = useState({
         id: parte.id ? parte.id : null,
@@ -279,6 +280,8 @@ const ParteMediciones = ({parte, setParte}) => {
 
     const crearParte = (event) => {
         event.preventDefault();
+        if (enviando) return;
+        setEnviando(true);
         axios.post(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/`, {
             nombre: datos.nombre,
             tipo: datos.tipo,
@@ -306,6 +309,7 @@ const ParteMediciones = ({parte, setParte}) => {
         .catch(err => { 
             setShowError(true);
             console.log(err);
+            setEnviando(false); 
         })
     } 
 
@@ -353,10 +357,12 @@ const ParteMediciones = ({parte, setParte}) => {
     }
 
     const actualizarDatos = (event) => {
+        event.preventDefault();
+        if (enviando) return;
+        setEnviando(true);
         //Si borramos la fecha, ponemos un null para que no falle el put
         if(datos.fecha_prevista_inicio===''){datos.fecha_prevista_inicio=null}
         if(datos.fecha_finalizacion===''){datos.fecha_finalizacion=null}
-        event.preventDefault();
         axios.put(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${parte.id}/`, {
             nombre: datos.nombre,
             tipo: datos.tipo,
@@ -381,11 +387,13 @@ const ParteMediciones = ({parte, setParte}) => {
                 actualizarLinea();
             }
             setParte(res.data); 
-            updateParte();   
+            updateParte(); 
+            setEnviando(false);  
         })
         .catch(err => { 
             setShowError(true);
             console.log(err);})
+            setEnviando(false);
 
     }
 
@@ -649,8 +657,8 @@ const ParteMediciones = ({parte, setParte}) => {
                         </Row>                                             
                         <Form.Row className="justify-content-center">
                             {parte.id ? 
-                                <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button> :
-                                <Button variant="info" type="submit" className={'mx-2'} onClick={crearParte}>Guardar</Button>
+                                <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos} disabled={enviando}>Actualizar</Button> :
+                                <Button variant="info" type="submit" className={'mx-2'} onClick={crearParte} disabled={enviando}>Guardar</Button>
                             }
                             <Link to='/mantenimiento/partes'>
                                 <Button variant="warning" >

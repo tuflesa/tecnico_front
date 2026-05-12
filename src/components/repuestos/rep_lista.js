@@ -25,6 +25,7 @@ const RepLista = () => {
     const ExcelFile = ReactExport.ExcelFile;
     const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
     const ExcelColumn = ReactExport.ExcelFile.ExcelColumn;
+    const [enviando, setEnviando] = useState(false); 
 
     const [datos, setDatos] = useState({
         pagina: 1,
@@ -108,6 +109,8 @@ const RepLista = () => {
     }
 
     const borrarRepuesto = () => {
+        if (enviando) return;// Bloquear doble clic
+        setEnviando(true);
         axios.patch(BACKEND_SERVER + `/api/repuestos/lista/${repuestoBorrar.id}/`,{ //tabla de repuestos
             descatalogado: true
         }, {
@@ -118,8 +121,12 @@ const RepLista = () => {
             .then(res => {
                 setShow(false);
                 setRepuestoBorrar(null);
+                setEnviando(false);
             })
-            .catch(err => {console.log(err);})
+            .catch(err => {
+                console.log(err);
+                setEnviando(false);
+            })
     }
 
     return (
@@ -197,10 +204,10 @@ const RepLista = () => {
                 </Modal.Header>
                 <Modal.Body>Está a punto de descatalogar el repuesto: <strong>{repuestoBorrar && repuestoBorrar.nombre}</strong></Modal.Body>
                 <Modal.Footer>
-                    <Button variant="danger" onClick={borrarRepuesto}>
+                    <Button variant="danger" onClick={borrarRepuesto} disabled={enviando}>
                         Descatalogar
                     </Button>
-                    <Button variant="waring" onClick={handleClose}>
+                    <Button variant="waring" onClick={handleClose} disabled={enviando}>
                         Cancelar
                     </Button>
                 </Modal.Footer>

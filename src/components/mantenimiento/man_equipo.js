@@ -27,6 +27,7 @@ const ManPorEquipos = () => {
     const [abrirFiltro, setabrirFiltro] = useState(false);
     const [actualizar_seg, setActualizarSeg] = useState(false);
     const [parte, setParte] = useState(null);
+    const [enviando, setEnviando] = useState(false);
 
     const actualizaFiltro = str => {
         setFiltro(str);
@@ -131,6 +132,8 @@ const ManPorEquipos = () => {
     }
     
     const InicioTarea = (linea) => { 
+        if (enviando) return;
+        setEnviando(true);
         axios.get(BACKEND_SERVER + `/api/mantenimiento/trabajadores_linea/?linea=${linea.id}`, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -167,13 +170,15 @@ const ManPorEquipos = () => {
                         .then( res => {
                             setlineasTrabajadores(res.data);
                         })
-                        .catch( err => {
-                            console.log(err);
-                        });
+                        .catch( err => {console.log(err); });
                     })
                     .catch(err => { console.log(err);})
+                    .finally(() => { setEnviando(false); })
                 })
-                .catch(err => { console.log(err);})
+                .catch(err => { 
+                    console.log(err);
+                    setEnviando(false);
+                })
             }
             else{
                 const trabajador_activo = res.data.filter(s => s.trabajador === user['tec-user'].perfil.usuario);
@@ -192,13 +197,18 @@ const ManPorEquipos = () => {
                         updateTarea(); 
                     })
                     .catch(err => { console.log(err);})
+                    .finally(() => { setEnviando(false); })
                 }
                 else if(trabajador_activo.length!==0){
                     alert('Usted ya tiene este trabajo iniciado');
+                    setEnviando(false);
                 }
             }
         })
-        .catch(err => { console.log(err);}) 
+        .catch(err => { 
+            console.log(err);
+            setEnviando(false);
+        }) 
     }
 
     const pedir_observaciones = (linea, parte) => {
@@ -329,7 +339,7 @@ const ManPorEquipos = () => {
                                         <td>{linea.fecha_inicio?invertirFecha(String(linea.fecha_inicio)):''}</td>
                                         <td>{linea.fecha_fin?invertirFecha(String(linea.fecha_fin)):''}</td>
                                         <td>
-                                        <Tools className="mr-3 pencil"  onClick={event =>{InicioTarea(linea)}}/>
+                                        <Tools className="mr-3 pencil"  onClick={event =>{InicioTarea(linea)}} style={{ opacity: enviando ? 0.5 : 1, pointerEvents: enviando ? 'none' : 'auto' }}/>
                                         <FileCheck className="mr-3 pencil"  onClick={event =>{pedir_observaciones(linea, linea.parte)}} />
                                         <Receipt className="mr-3 pencil" onClick={event =>{listarTrabajadores(linea)}}/>
                                         <Link to={`/mantenimiento/parte_op/${linea.parte.id}`}><Eye className="mr-3 pencil"/></Link>

@@ -6,6 +6,7 @@ import axios from 'axios';
 
 const RepPrecioEdit = ({show_modificar, updateRepuesto, setShowModificarProveedor, datos_precio}) => {
     const [token] = useCookies(['tec-token']);
+    const [enviando, setEnviando] = useState(false);
 
     const [datos, setDatos] = useState({
         proveedor: datos_precio? datos_precio.proveedor.nombre:'',
@@ -29,6 +30,8 @@ const RepPrecioEdit = ({show_modificar, updateRepuesto, setShowModificarProveedo
 
     const handlerActualizar = (event) => {
         event.preventDefault();
+        if (enviando) return;// Bloquear doble clic
+        setEnviando(true);
         axios.patch(BACKEND_SERVER + `/api/repuestos/precio/${datos_precio.id}/`, {
             precio: datos.precio,
             descuento: datos.descuento,
@@ -42,16 +45,18 @@ const RepPrecioEdit = ({show_modificar, updateRepuesto, setShowModificarProveedo
                 }     
         })
         .then( res => { 
-                handlerCancelar();
-            }
-        )
-        .catch(err => { console.log(err);});
-        updateRepuesto();
-        setShowModificarProveedor(false);
+            updateRepuesto(); 
+            setShowModificarProveedor(false);
+            handlerCancelar();
+        })
+        .catch(err => { 
+            console.log(err);
+            setEnviando(false);
+        });
     }
 
     const handlerCancelar = () => {
-        setShowModificarProveedor();
+        setShowModificarProveedor(false);
     }
 
     const handleInputChange = (event) => {
@@ -149,8 +154,8 @@ const RepPrecioEdit = ({show_modificar, updateRepuesto, setShowModificarProveedo
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="info" onClick={handlerActualizar}>Actualizar</Button>
-                    <Button variant="waring" onClick={handlerCancelar}>Cancelar</Button>
+                    <Button variant="info" onClick={handlerActualizar} disabled={enviando}>Actualizar</Button>
+                    <Button variant="warning" onClick={handlerCancelar} disabled={enviando}>Cancelar</Button>
                 </Modal.Footer>
         </Modal>
     );

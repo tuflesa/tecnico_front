@@ -34,6 +34,8 @@ const ParteForm = ({parte, setParte, op}) => {
     const [linea_GastoEditar, setLineaGastoEditar] = useState(null);
     const [show_modal_consumible, setShowModalConsumible] = useState(false);
     const [consumibleEditar, setConsumibleEditar] = useState(null);
+    const [enviando, setEnviando] = useState(false);
+    const [guardandoConsumible, setGuardandoConsumible] = useState(false);
     const [datosConsumible, setDatosConsumible] = useState({
         precio: 0,
         descuento: 0
@@ -395,75 +397,57 @@ const ParteForm = ({parte, setParte, op}) => {
         })  
     }
 
-    const handleFinalizar = (event) => {
+    const handleFinalizar = async (event) => {
+        if (enviando) return;
+        if (parte.estado === 3) return;
         var Finalizar_Tarea = window.confirm('Vas a finalizar el parte completo ¿Desea continuar?');
-        if(Finalizar_Tarea){
-            setDatos({
-                ...datos,
-                finalizar: true,
-            }) 
-            //finalizamos la cabecera del parte si es técnico, pondrá fecha_finalización, si es de mantanimiento no se pondrá la fecha.
-            var estado2=datos.estado;
-            var fecha_f=datos.fecha_finalizacion;
-            if(user['tec-user'].perfil.puesto.nombre==='Mantenimiento'){
-                estado2=3;
-                fecha_f=null;
-            }
-            else{
-                estado2=3;
-                fecha_f= datos.fecha_finalizacion;
-            }
-            axios.patch(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${parte.id}/`,{
+        if (!Finalizar_Tarea) {
+            setDatos({ ...datos, finalizar: false });
+            return;
+        }
+        setDatos({ ...datos, finalizar: true });
+        setEnviando(true);
+        try{
+            var estado2 = 3;
+            var fecha_f = user['tec-user'].perfil.puesto.nombre === 'Mantenimiento' 
+                ? null 
+                : datos.fecha_finalizacion;
+
+            // 1. Finalizar cabecera del parte
+            await axios.patch(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${parte.id}/`,{
                 fecha_finalizacion : fecha_f,
                 estado: estado2,
             }, {
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }     
-            })
-            .then( r => {
-                updateParte();
-            })
-            .catch(err => { 
-                console.log(err);})
-
+            });
             //finalizamos todas las tareas de este parte
-            axios.get(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_trabajo/?parte=${parte.id}`,{
+            const res = await axios.get(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_trabajo/?parte=${parte.id}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                     }     
-            })
-            .then( res => {
-                for(var x=0; x<res.data.length; x++){
-                    if(res.data[x].estado===3){
-                    }
-                    else{
-                        axios.patch(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_trabajo/${res.data[x].id}/`,{
-                            fecha_inicio: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
-                            fecha_fin: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
-                            estado: 3,
-                        }, {
-                            headers: {
-                                'Authorization': `token ${token['tec-token']}`
-                            }     
-                        })
-                        .then( r => {
-                            updateParte();
-                        })
-                        .catch(err => { 
-                            console.log(err);})
-                    }
+            });
+            // 3. Finalizar cada línea en secuencia
+            for (const linea of res.data) {
+                if (linea.estado !== 3) {
+                    await axios.patch(BACKEND_SERVER + `/api/mantenimiento/lineas_parte_trabajo/${linea.id}/`,{
+                        fecha_inicio: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
+                        fecha_fin: (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
+                        estado: 3,
+                    }, {
+                        headers: {
+                            'Authorization': `token ${token['tec-token']}`
+                        }     
+                    });
                 }
-            })
-            .catch(err => { 
-                console.log(err);
-            })
-        }
-        if(!Finalizar_Tarea){
-            setDatos({
-                ...datos,
-                finalizar: false,
-            }) 
+            }
+            updateParte();
+        }catch(err){ 
+            console.log(err);
+            alert('Error al finalizar el parte.');
+        } finally {
+            setEnviando(false);
         }
     }
 
@@ -512,13 +496,15 @@ const ParteForm = ({parte, setParte, op}) => {
     }
 
     const crearParte = (event) => {
+        event.preventDefault();
+        if (enviando) return;
         if(datos.tipo==='1'&& soyTecnico.length===0){
             alert('No tienes permisos para crear preventivos, contacte con el administrador');
             return;
         }
         if(datos.fecha_prevista_inicio===''){datos.fecha_prevista_inicio=null}
         if(datos.fecha_finalizacion===''){datos.fecha_finalizacion=null}
-        event.preventDefault();
+        setEnviando(true);
         axios.post(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/`, {
             nombre: datos.nombre,
             tipo: datos.tipo,
@@ -543,14 +529,13 @@ const ParteForm = ({parte, setParte, op}) => {
             setErrores({}); // Reiniciar errores si la petición es exitosa
         })
         .catch(err => { 
-            if (err.response && err.response.data) {
-                setErrores(err.response.data); // Guardar los errores del backend
-            } else {
-                console.log(err);
-            }
-            alert('Faltan datos, por favor, introduce todos los datos obligatorios.')
+            if (err.response?.data) setErrores(err.response.data);
+            alert('Faltan datos, por favor, introduce todos los datos obligatorios.');
             console.log(err);
         })
+        .finally(()=>{
+            setEnviando(false);
+        });
     } 
 
     //actualiza el estado y la fecha de la linea si cambia la fecha_prevista_inicio del parte
@@ -612,6 +597,8 @@ const ParteForm = ({parte, setParte, op}) => {
     }
 
     const actualizarDatos = (event) => {
+        event.preventDefault();
+        if (enviando) return;
         if(datos.tipo==='1'&& soyTecnico.length===0){
             alert('No tienes permisos para crear preventivos, contacte con el administrador');
             return;
@@ -619,7 +606,6 @@ const ParteForm = ({parte, setParte, op}) => {
         //Si borramos la fecha, ponemos un null para que no falle el put
         if(datos.fecha_prevista_inicio===''){datos.fecha_prevista_inicio=null}
         if(datos.fecha_finalizacion===''){datos.fecha_finalizacion=null}
-        event.preventDefault();
         axios.put(BACKEND_SERVER + `/api/mantenimiento/parte_trabajo/${parte.id}/`, {
             nombre: datos.nombre,
             tipo: datos.tipo,
@@ -650,7 +636,11 @@ const ParteForm = ({parte, setParte, op}) => {
         })
         .catch(err => { 
             setShowError(true);
-            console.log(err);})
+            console.log(err);
+        })
+        .finally(()=>{
+            setEnviando(false);
+        })
 
     }
 
@@ -850,37 +840,33 @@ const ParteForm = ({parte, setParte, op}) => {
         });
     };
 
-    const guardarCambiosConsumible = () => {
+    const guardarCambiosConsumible = async () => {
         if (!consumibleEditar) return;
-
-        axios.patch(BACKEND_SERVER + `/api/repuestos/lineas_salidas/${consumibleEditar.linea_salida.id}/`, {
-            precio_ultima_compra: parseFloat(datosConsumible.precio),
-            descuento_ultima_compra: parseFloat(datosConsumible.descuento)
-        }, {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-            }
-        })
-        .then(res => {
-            alert('Consumible actualizado correctamente');
-            cerrarModalConsumible();
-            // Volver a cargar los consumibles
-            axios.get(BACKEND_SERVER + `/api/repuestos/movimiento_trazabilidad/?linea_salida__salida__num_parte=${parte.id}`, {
+        if (guardandoConsumible) return;
+        setGuardandoConsumible(true);
+        try{
+            await axios.patch(BACKEND_SERVER + `/api/repuestos/lineas_salidas/${consumibleEditar.linea_salida.id}/`, {
+                precio_ultima_compra: parseFloat(datosConsumible.precio),
+                descuento_ultima_compra: parseFloat(datosConsumible.descuento)
+            }, {
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
-            })
-            .then(res => {
-                setConsumibles(res.data);
-            })
-            .catch(err => {
-                console.log(err);
             });
-        })
-        .catch(err => {
+            alert('Consumible actualizado correctamente');
+            cerrarModalConsumible();
+            const res = await axios.get(BACKEND_SERVER + `/api/repuestos/movimiento_trazabilidad/?linea_salida__salida__num_parte=${parte.id}`, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }
+            });
+            setConsumibles(res.data);
+        } catch(err){
             console.log(err);
             alert('Error al actualizar el consumible');
-        });
+        } finally {
+            setGuardandoConsumible(false); // Liberar siempre
+        }
     };
 
     useEffect(()=>{
@@ -1132,12 +1118,12 @@ const ParteForm = ({parte, setParte, op}) => {
                         {op?
                         <Form.Row className="justify-content-center">
                             {parte.id? 
-                                <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}>Actualizar</Button> :
-                                <Button variant="info" type="submit" className={'mx-2'} onClick={crearParte}>Guardar</Button>
+                                <Button variant="info" type="submit" className={'mx-2'} onClick={actualizarDatos}disabled={enviando}>Actualizar</Button> :
+                                <Button variant="info" type="submit" className={'mx-2'} onClick={crearParte} disabled={enviando}>Guardar</Button>
                             }
                             <Button variant="info" className={'mx-2'} onClick={() => window.close()}>Cerrar</Button>
                         </Form.Row>
-                        :<Button variant="info" type="submit" className={'mx-2'} href="javascript: history.go(-1)">Cancelar / Volver</Button>}
+                        :<Button variant="info" type="submit" className={'mx-2'} onClick={() => window.history.go(-1)}>Cancelar / Volver</Button>}
                     </Form>
                 </Col>
             </Row>
@@ -1382,10 +1368,10 @@ const ParteForm = ({parte, setParte, op}) => {
                     )}
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={cerrarModalConsumible}>
+                    <Button variant="secondary" onClick={cerrarModalConsumible} disabled={guardandoConsumible}>
                         Cancelar
                     </Button>
-                    <Button variant="primary" onClick={guardarCambiosConsumible}>
+                    <Button variant="primary" onClick={guardarCambiosConsumible} disabled={guardandoConsumible}>
                         Guardar Cambios
                     </Button>
                 </Modal.Footer>

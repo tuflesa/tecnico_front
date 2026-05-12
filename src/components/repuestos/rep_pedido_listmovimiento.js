@@ -16,6 +16,7 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
     const [reset, setReset]=useState(null);
     const [lineaActiva, setLineaActiva] = useState(null);
     const [actualizar_listado, setActualizarListado] = useState(false);
+    const [guardando, setGuardando] = useState(false);
 
     const [datos, setDatos] = useState({
         fecha: null,
@@ -92,8 +93,10 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
         }
     }
 
-    const guardarMovimiento = () => {
+    const guardarMovimiento = async () => {
         if (!lineaElegida) return;
+        if (guardando) return;// Bloquear doble clic
+        setGuardando(true);
     
         const nuevaCantidad = parseFloat(datos.cantidad || lineaElegida.cantidad).toFixed(2);
         const cantidadAnterior = parseFloat(lineaElegida.cantidad).toFixed(2);
@@ -111,58 +114,59 @@ const MovLista = ({linea, handleCloseListMovimiento, show}) => {
     
         if (sinCambios) {
             alert('⚠️ No se han realizado cambios.');
+            setGuardando(false);
             return;
         }
-    
-        axios.patch(`${BACKEND_SERVER}/api/repuestos/movimiento/${lineaElegida.id}/`, {
-            fecha: nuevaFecha,
-            cantidad: nuevaCantidad,
-            almacen: nuevoAlmacen,
-            usuario: user['tec-user'].id,
-            linea_pedido: lineaElegida.linea_pedido,
-            linea_inventario: lineaElegida.linea_inventario,
-            albaran: nuevoAlbaran
-        }, {
-            headers: {
-                'Authorization': `token ${token['tec-token']}`
-            }
-        }).then(res => {
+        try{
+            // 1. Actualizar el movimiento
+            const res = await axios.patch(`${BACKEND_SERVER}/api/repuestos/movimiento/${lineaElegida.id}/`, {
+                fecha: nuevaFecha,
+                cantidad: nuevaCantidad,
+                almacen: nuevoAlmacen,
+                usuario: user['tec-user'].id,
+                linea_pedido: lineaElegida.linea_pedido,
+                linea_inventario: lineaElegida.linea_inventario,
+                albaran: nuevoAlbaran
+            }, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }
+            });
             const nuevaCantidadGuardada = parseFloat(res.data.cantidad);
-            axios.get(`${BACKEND_SERVER}/api/repuestos/stocks_minimos/?repuesto=${linea.repuesto.id}&almacen=${lineaElegida.almacen.id}`, {
+            // 2. Obtener stock actual
+            const r = await axios.get(`${BACKEND_SERVER}/api/repuestos/stocks_minimos/?repuesto=${linea.repuesto.id}&almacen=${lineaElegida.almacen.id}`, {
                 headers: { 'Authorization': `token ${token['tec-token']}` }
-            }).then(r => {
-                const stockActual = parseFloat(r.data[0].stock_act);
-                const stockId = r.data[0].id;
-                const diferenciaStock = nuevaCantidadGuardada - parseFloat(lineaElegida.cantidad);
-                const nuevoStock = (stockActual-nuevaCantidadGuardada) + diferenciaStock;
-    
-                axios.patch(`${BACKEND_SERVER}/api/repuestos/stocks_minimos/${stockId}/`, {
-                    stock_act: nuevoStock.toFixed(2)
+            });
+            const stockActual = parseFloat(r.data[0].stock_act);
+            const stockId = r.data[0].id;
+            const diferenciaStock = nuevaCantidadGuardada - parseFloat(lineaElegida.cantidad);
+            const nuevoStock = (stockActual-nuevaCantidadGuardada) + diferenciaStock;
+            // 3. Actualizar stock
+            await axios.patch(`${BACKEND_SERVER}/api/repuestos/stocks_minimos/${stockId}/`, {
+                stock_act: nuevoStock.toFixed(2)
+            }, {
+                headers: { 'Authorization': `token ${token['tec-token']}` }
+            });
+            // 4. Actualizar por_recibir si la cantidad cambia
+            if (cantidadCambio) {
+                const nuevoPorRecibir = parseFloat(linea.por_recibir) + (parseFloat(lineaElegida.cantidad) - nuevaCantidadGuardada);
+                await axios.patch(`${BACKEND_SERVER}/api/repuestos/linea_pedido/${linea.id}/`, {
+                    por_recibir: nuevoPorRecibir.toFixed(2)
                 }, {
                     headers: { 'Authorization': `token ${token['tec-token']}` }
                 });
-                // Actualizar por_recibir si la cantidad cambia
-                if (cantidadCambio) {
-                    const nuevoPorRecibir = parseFloat(linea.por_recibir) + (parseFloat(lineaElegida.cantidad) - nuevaCantidadGuardada);
-                    axios.patch(`${BACKEND_SERVER}/api/repuestos/linea_pedido/${linea.id}/`, {
-                        por_recibir: nuevoPorRecibir.toFixed(2)
-                    }, {
-                        headers: { 'Authorization': `token ${token['tec-token']}` }
-                    });
-                }
-    
-                alert("✅ Movimiento actualizado correctamente.");
-                actualizarRecibir();
-                handlerCancelar();
-                setActualizarListado(!actualizar_listado);
-            });
-        }).catch(err => {
+            }
+            alert("✅ Movimiento actualizado correctamente.");
+            actualizarRecibir();
+            handlerCancelar();
+            setActualizarListado(!actualizar_listado);
+        } catch(err) {
             console.error(err);
-        });
+            alert("Error al actualizar el movimiento.");
+            setGuardando(false); // Liberar si falla
+        }
     };
-        
-        
-    
+            
     const handlerCancelar = () => {
         setDatos({
             fecha: null,
