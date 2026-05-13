@@ -76,10 +76,7 @@ const GraficoEstado = () => {
             }
         })
         .then(res => {
-<<<<<<< HEAD
             // console.log(res.data);
-=======
->>>>>>> d5783e5f1f10784f2de06c2693ea51a1f0619cac
             setEstado(res.data);
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
