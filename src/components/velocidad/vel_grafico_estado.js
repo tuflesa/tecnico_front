@@ -76,7 +76,10 @@ const GraficoEstado = () => {
             }
         })
         .then(res => {
+<<<<<<< HEAD
             // console.log(res.data);
+=======
+>>>>>>> d5783e5f1f10784f2de06c2693ea51a1f0619cac
             setEstado(res.data);
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -703,7 +706,7 @@ const GraficoEstado = () => {
                             <Tab.Pane eventKey="paradas_pendientes" title={<span className="glow-green">paradas Pendientes</span>}>
                                 <Row>
                                     <Col>
-                                        <div style={{ height: '200px', overflowY: 'auto' }}>
+                                        <div style={{ height: '600px', overflowY: 'auto' }}>
                                             <ParadasAcu Paradas={estado && estado.paradas.filter(p => p.codigo === 'Desconocido')} 
                                                         paradasSeleccionadas={paradasSeleccionadas}
                                                         setParadasSeleccionadas={setParadasSeleccionadas}

@@ -27,7 +27,6 @@ const GraficoVelocidad = () => {
     const [estados, setEstados] = useState(null);
 
     useEffect(() => {
-        // console.log('Leer empresas');
         filtro && axios.get(BACKEND_SERVER + `/api/velocidad/lineas/?zona__empresa=${filtro.empresa}`, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -46,14 +45,12 @@ const GraficoVelocidad = () => {
                     return siglaA.localeCompare(siglaB);
                 });
 
-            console.log(states);
             setEstados(states);
             setLineas(res.data);
         });
     }, [filtro, token]);
 
     useEffect(()=>{
-        // console.log('Leer registros');
         filtro && axios.get(BACKEND_SERVER + '/api/velocidad/registro/' +
                  `?zona__empresa=${filtro.empresa}&fecha=${filtro.fecha}&hora__gte=${filtro.hora_inicio}&hora__lte=${filtro.hora_fin}`, {
             headers: {
@@ -61,7 +58,6 @@ const GraficoVelocidad = () => {
               }
         })
         .then(res => {
-            // console.log(res.data);
             const datos = [];
             const raw_data = res.data;
             const datosLinea = (estado) => {
@@ -84,7 +80,6 @@ const GraficoVelocidad = () => {
                 const ahora = moment();
                 if (puntos.length>0){
                     if(ahora.isAfter(inicio) && ahora.isBefore(fin)) {
-                        console.log('Añadir punto ahora ...');
                         puntos.push({
                             x: new Date(),
                             y: puntos[puntos.length -1].y
@@ -114,7 +109,6 @@ const GraficoVelocidad = () => {
                 
                 return 0;
                 });
-            // console.log(datos);   
             setRegistros(datos);
         });
     },[filtro, actualizar, token, estados]);
@@ -128,8 +122,6 @@ const GraficoVelocidad = () => {
               }
         })
         .then(res => {
-            // console.log(res.data);
-            // console.log('actualizando estados');
             if(estados){
                 const newEstados = estados.map( e => {
                     const regs = res.data.filter(r => r.zona === e.zona.id);
@@ -144,20 +136,13 @@ const GraficoVelocidad = () => {
                         }
                     )
                 });
-                // console.log(newEstados);
                 setEstados(newEstados);
             }
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     },[token, filtro.empresa, lineas, actualizar]);
 
-    useEffect(()=>{
-        console.log('cambio de fecha, hora inicio o hora fin');
-
-    },[filtro.fecha, filtro.hora_inicio, filtro.hora_fin]);
-
     const actualizarGrafico = () => {
-        // console.log(actualizar);
         setActualizar(!actualizar);
     }
 

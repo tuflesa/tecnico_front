@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useRef } from 'react';
 import { BACKEND_SERVER } from '../../constantes';
 import axios from 'axios';
 import { Form, Table, Container} from 'react-bootstrap';
@@ -70,7 +70,7 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acc
                 duracion,
             });
         } else {
-            const filtrada = nuevaSeleccion.filter(p => p.id !== event.target.id);
+            const filtrada = nuevaSeleccion.filter(p => String(p.id) !== String(event.target.id));
             setParadasSeleccionadas(ordenarLista(filtrada));
             return;
         }
@@ -88,7 +88,6 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acc
             await axios.delete( BACKEND_SERVER + `/api/velocidad/eliminar_paradaDB/${parada.id}/`,{
                 headers: { Authorization: `Token ${token["tec-token"]}`} 
             });
-            console.log("Parada eliminada correctamente");
             // 1. Buscamos los periodos de esa parada
             const resPeriodos = await axios.get(`${BACKEND_SERVER}/api/velocidad/periodo/?parada=${parada.id}`, {
                 headers: { 'Authorization': `token ${token['tec-token']}` }
@@ -115,7 +114,7 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acc
                     const resNuevaParada = await axios.post(`${BACKEND_SERVER}/api/velocidad/paradas/`, {
                         codigo: codigoParaEstePeriodo,
                         zona: parada.zona_id,
-                        observaciones: parada.observaciones,
+                        observaciones: "",
                     }, {
                         headers: { 'Authorization': `token ${token['tec-token']}` }
                     });
@@ -140,6 +139,37 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acc
         }
     };
 
+    const handleSeleccionarTodas = (event) => {
+        // Si está en indeterminate o todas marcadas -> limpiar todo
+        if (checkboxTodasRef.current?.indeterminate || todasSeleccionadas) {
+            setParadasSeleccionadas([]);
+        } else {
+            const todasLasParadas = Paradas.map((pdb) => {
+                const { fecha: fechaInicio, hora: horaInicio } = formatearFechaHoraLocal(pdb.inicio);
+                const { fecha: fechaFin, hora: horaFin } = formatearFechaHoraLocal(pdb.fin);
+                return {
+                    id: pdb.id,
+                    checked: true,
+                    fechaInicio,
+                    fechaFin,
+                    horaInicio,
+                    horaFin,
+                    duracion: pdb.duracion,
+                };
+            });
+            setParadasSeleccionadas(ordenarLista(todasLasParadas));
+        }
+    };
+    const checkboxTodasRef = useRef(null);
+    const todasSeleccionadas = Paradas && Paradas.length > 0 && Paradas.every(pdb => estaseleccionado(pdb.id));
+    const algunaSeleccionada = Paradas && Paradas.some(pdb => estaseleccionado(pdb.id));
+    
+    useEffect(() => {
+        if (checkboxTodasRef.current) {
+            checkboxTodasRef.current.indeterminate = algunaSeleccionada && !todasSeleccionadas;
+        }
+    }, [algunaSeleccionada, todasSeleccionadas]);
+
     return (
         <Container>
             <Table striped bordered hover>
@@ -151,7 +181,20 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acc
                     <th>Duración</th>
                     <th>Descripción</th>
                     {!programador && (
-                        acciones || tieneEdionParadas ? <th>Acciones</th> : <th>Observaciones</th>
+                        acciones || tieneEdionParadas 
+                            ? <th>
+                                {acciones && ( 
+                                    <Form.Check
+                                        ref={checkboxTodasRef}
+                                        type="checkbox"
+                                        label="Todas"
+                                        checked={todasSeleccionadas}
+                                        onChange={handleSeleccionarTodas}
+                                    />
+                                )}
+                                {!acciones && 'Acciones'}
+                            </th> 
+                            : <th>Observaciones</th>
                     )}
                     </tr>
                 </thead>
@@ -191,8 +234,8 @@ const ParadasAcu = ({Paradas, paradasSeleccionadas, setParadasSeleccionadas, acc
                                             {tieneEdionParadas && !programador?(
                                                 <>
                                                     <PlusSquare style={{ marginRight: '15px',
-                                                        cursor: pdb.codigo==='Desconocido'?'not-allowed':'pointer', 
-                                                        color:pdb.codigo==='Desconocido'?'gray':'#007bff'}}
+                                                        cursor: 'pointer', 
+                                                        color:'#007bff'}}
                                                         onClick={() => handleOpenModalAñadir(paradaParaModal)}/>
                                                     <PencilFill style={{ color:'#007bff', marginRight: '15px'}} onClick={() => handleOpenModalEditar(paradaParaModal)}/>
                                                     <Trash style={{ 

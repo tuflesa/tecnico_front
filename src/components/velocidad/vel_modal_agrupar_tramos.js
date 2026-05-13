@@ -117,7 +117,6 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
             }
         })
         .then( res => {
-            console.log('que devuelve el buscar montaje: ',res.data);
             setListadoOrdenes(res.data.montajes);
             setIdOF(res.data.xIdOF);
             setIdPos(res.data.xIdPos);
@@ -244,7 +243,7 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
                 xDescripcion: descripcionProdDB,
                 //xFecha: la obtenemos en el backend en duraciones_por_turno
                 //xTiempo la obtenemos en el backend en duraciones_por_turno
-                xObservaciones: observaciones + '--' + descripcion,
+                xObservaciones: observaciones,
                 //xTurno: la obtenemos en el backend en duraciones_por_turno
                 //xIgnorar = false siempre
 
@@ -318,7 +317,25 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
                             `${BACKEND_SERVER}/api/velocidad/guardar_paradas_agrupadas/`,
                             { ...datos, forzar: true },
                             { headers: { 'Authorization': `token ${token['tec-token']}` } }
-                        );
+                        )
+                        .then(res => {
+                            if (res.status === 200) {
+                                setParadasSeleccionadas([]);
+                                setseleTipoParada(null);
+                                setCodigoSeleccionado(null);
+                                setPalabraSeleccionado(null);
+                                setCodigoProdDB(null);
+                                setCodigo_R_ProdDB(null);
+                                setDescripcion(null);
+                                onSaved && onSaved();
+                                onLimpiar && onLimpiar();
+                                setObservaciones('');
+                                cerrarModalTramos();
+                            }
+                        })
+                        .catch(error => {
+                            alert("Error inesperado: " + error.message);
+                        });
                     }
                     return;
                 }

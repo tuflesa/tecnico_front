@@ -45,8 +45,6 @@ const LineChart = ({data, fecha, hora_inicio, hora_fin}) => {
         const innerHeight = height - margin.top - margin.bottom;
 
         const svg =svgRef.current;
-        
-        // console.log(dimensions);
 
         const inicio = moment(fecha + ' ' + hora_inicio)
         const fin = moment(fecha + ' ' + hora_fin)
@@ -97,7 +95,6 @@ const LineChart = ({data, fecha, hora_inicio, hora_fin}) => {
                 }
             });
 
-        // console.log(data);
         data && select(svg).select('.grafico')
             .selectAll('path')
             .data(data)
@@ -149,7 +146,6 @@ const LineChart = ({data, fecha, hora_inicio, hora_fin}) => {
                   const d = x0 - d0.x > d1.x - x0 ? d1 : d0;
                   const xPos = xScale(d.x);
                   const yPos = yScale(d.y);
-                  // console.log(d.x.getHours() + ':' + d.x.getMinutes());
                   select(svg).select('.grafico').select('.' + maquina.siglas)
                     .attr("cx", xPos)
                     .attr("cy", yPos)

@@ -16,7 +16,6 @@ const VelocidadFiltro = ({ actualizaFiltro, filtro }) => {
               }
         })
         .then( res => {
-            //console.log(res.data);
             setEmpresas(res.data);
         })
         .catch( err => {
