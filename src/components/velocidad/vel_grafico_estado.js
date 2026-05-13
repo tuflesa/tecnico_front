@@ -13,6 +13,7 @@ import FlejesAcu from "../trazabilidad/TR_FlejesAcu";
 import ParadasAcu from '../trazabilidad/TR_ParadasAcu';
 import '../../index';
 import ModalAgruparTramos from './vel_modal_agrupar_tramos';
+import calculo_OEE from './vel_calculo_OEE';
 
 const GraficoEstado = () => {
     const [token] = useCookies(['tec-token']);
@@ -75,6 +76,7 @@ const GraficoEstado = () => {
             }
         })
         .then(res => {
+            // console.log(res.data);
             setEstado(res.data);
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -413,6 +415,14 @@ const GraficoEstado = () => {
         const existe = estado.paradas.some(p => p.codigo === 'Desconocido');
         setExisteDesconocido (existe);
     },[estado, paradasSeleccionadas]);
+
+    useEffect(()=>{
+        if(!estado) return;
+
+        const indicadores = calculo_OEE(estado, filtro);
+        // console.log(paradas)
+        console.log(indicadores);
+    },[estado?.paradas]);
 
     const actualizarGrafico = () => {
         setActualizar(!actualizar);
