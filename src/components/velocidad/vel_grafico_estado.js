@@ -35,6 +35,7 @@ const GraficoEstado = () => {
     const [montajes, setMontajes] = useState(null);
     const [tabActiva, setTabActiva] = useState('flejes');
     const [turno_actual, setTurnoActual] = useState(null);
+    const [indicadores, setIndicadores] = useState(null);
     const hoy = new Date();
     const [filtro, setFiltro] = useState({
             fecha: moment(hoy).format('YYYY-MM-DD'),
@@ -419,10 +420,10 @@ const GraficoEstado = () => {
     useEffect(()=>{
         if(!estado) return;
 
-        const indicadores = calculo_OEE(estado, filtro);
-        // console.log(paradas)
+        const resultado = calculo_OEE(estado, filtro);
+        setIndicadores(resultado);
         console.log(indicadores);
-    },[estado?.paradas]);
+    },[estado?.paradas, filtro]);
 
     const actualizarGrafico = () => {
         setActualizar(!actualizar);
@@ -667,6 +668,15 @@ const GraficoEstado = () => {
                                     </Nav.Link>
                                 </Nav.Item>
                             :''}
+                            <Nav.Item>
+                                <Nav.Link eventKey="estadisticas">
+                                {existeDesconocido ? (
+                                    <span>estadisticas</span>
+                                ) : (
+                                    'Estadísticas'
+                                )}
+                                </Nav.Link>
+                            </Nav.Item>
                         </Nav>
                         {tabActiva === 'paradas_pendientes' && (
                             <div className="action-buttons">
@@ -761,8 +771,49 @@ const GraficoEstado = () => {
                                 </Col>
                             </Row>
                         </Tab.Pane>
-                    </Tab.Content>
-                </Tab.Container>
+                        <Tab.Pane eventKey="estadisticas">
+                            {indicadores !== null ? (
+                                <div className="d-flex align-items-center gap-5 mt-3" style={{ marginLeft: '40px' }}>
+                                    <Table striped bordered hover style={{ width: 'auto', marginBottom: 0 }}>
+                                        <tbody>
+                                            <tr>
+                                                <td style={{ minWidth: '200px' }}>Calidad</td>
+                                                <td style={{ minWidth: '100px' }}>{indicadores.calidad.toFixed(2)} %</td>
+                                            </tr>
+                                            <tr>
+                                                <td style={{ minWidth: '200px' }}>Disponibilidad</td>
+                                                <td style={{ minWidth: '100px' }}>{indicadores.disponibilidad.porcentaje.toFixed(2)} %</td>
+                                            </tr>
+                                            <tr>
+                                                <td style={{ minWidth: '200px' }}>Rendimiento</td>
+                                                <td style={{ minWidth: '100px' }}>{indicadores.rendimiento.total.toFixed(2)} %</td>
+                                            </tr>
+                                        </tbody>
+                                    </Table>
+                                    <div style={{ 
+                                        border: '3px solid black', 
+                                        borderRadius: '8px', 
+                                        padding: '20px 40px', //ancho y alto del cuadro
+                                        textAlign: 'center',
+                                        color: 'black',
+                                        fontWeight: 'bold',
+                                        fontSize: '1.7rem',
+                                        marginLeft: '40px'
+                                    }}>
+                                        <div style={{ fontSize: '2.5rem' }}>
+                                            OEE:
+                                        </div>
+                                        <div style={{ fontSize: '2rem', marginTop: '4px' }}>
+                                            {indicadores.OEE.toFixed(2)} %
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <p>Calculando...</p>
+                            )}
+                        </Tab.Pane>
+                        </Tab.Content>
+                    </Tab.Container>
                 <ModalAgruparTramos
                     cerrarModalTramos={cerrarModalTramos}
                     mostrarModalTramos={mostrarModalTramos}
