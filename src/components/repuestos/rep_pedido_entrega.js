@@ -29,6 +29,7 @@ const EntregaForm = ({show, updatePedido, linea_adicional, handleCloseEntrega}) 
 
     const handlerCancelar = () => {      
         handleCloseEntrega();
+        setEnviando(false);
         datos.recibido= '';
         datos.albaran = '';
     } 

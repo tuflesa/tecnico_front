@@ -49,6 +49,7 @@ const LineaAdicionalForm = ({show, pedido_id, handleCloseLineaAdicional, updateP
 
     const handlerCancelar = () => {      
         handleCloseLineaAdicional();
+        setEnviando(false);
     } 
 
     const handlerGuardar = () => {

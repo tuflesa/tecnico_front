@@ -121,6 +121,7 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
 
     const handlerCancelar = () => {      
         handleCloseLinea();
+        setEnviando(false);
     } 
 
     const handlerGuardar = () => {

@@ -36,6 +36,7 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
 
     const handlerCancelar = () => {      
         handleCloseMovimiento();
+        setEnviando(false);
         datos.recibido= '';
         datos.guardar= '';
         datos.albaran = '';
