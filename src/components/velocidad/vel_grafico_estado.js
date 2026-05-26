@@ -434,7 +434,7 @@ const GraficoEstado = () => {
         setActualizar(a => !a);   // refresca datos sin perder filtros
     };
 
-    useInterval(actualizarGrafico, 5000);
+    useInterval(actualizarGrafico, 20000);
 
     const handleSwitchChange = (event) => {
         setVer({

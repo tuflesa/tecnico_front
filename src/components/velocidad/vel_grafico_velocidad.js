@@ -146,7 +146,7 @@ const GraficoVelocidad = () => {
         setActualizar(!actualizar);
     }
 
-    useInterval(actualizarGrafico, 5000);
+    useInterval(actualizarGrafico, 20000);
 
     const seleccionLinea = (e)  => {
         // console.log('seleccion linea')
