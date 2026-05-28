@@ -27,6 +27,7 @@
     "react-html-table-to-excel": "^2.0.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.3",
+    "recharts": "^2.5.0",
     "stream-browserify": "^3.0.0",
     "util": "^0.12.4",
     "web-vitals": "^1.1.1",

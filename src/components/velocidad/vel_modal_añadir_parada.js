@@ -97,6 +97,10 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
     if (!parada && show) return null;
 
     const handleGuardar = async () => {
+        if (!parada?.of) {
+            alert("Error: no se ha podido obtener el identificador de la Orden de Fabricación. Cierre y vuelva a abrir.");
+            return;
+        }
         let T_u_inicio, T_u_fin, pContenedor;
         let periodosCruce = null;
         //<-------------------VALIDACIONES ------------------------>
@@ -111,7 +115,7 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
                 return;
             }
 
-            // 1. Convertir la fecha UTC
+            // 1. Convertir la fecha UTC PARA PODER COMPARAR FECHAS
             T_u_inicio = moment.utc(`${fechaInicioReg}T${horaInicioReg}`).valueOf();
             T_u_fin = moment.utc(`${fechaFinReg}T${horaFinReg}`).valueOf();
 
@@ -122,6 +126,7 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
 
             // 2. BUSCAR EL PERIODO DE INACTIVIDAD QUE CONTIENE EL RANGO INTRO POR EL USUARIO
             pContenedor = periodos.find(p => {
+                //Fechas solo visuales, convertimos
                 const tP_inicio = moment.utc(p.inicio).valueOf();
                 const tP_fin = moment.utc(p.fin).valueOf();
                 return (
@@ -201,6 +206,7 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
                             observaciones: nuevaObs || "",
                             of: parada.of,
                             periodos: [{
+                                //convertimos horas para pasar al backend
                                 inicio: moment.utc(T_u_inicio).toISOString(),
                                 fin:    moment.utc(tP1_fin).toISOString(),
                                 velocidad: 0,
@@ -283,8 +289,8 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
                 // -------------------------- GUARDAMOS EN PROD-BD ----------------------------------
         
         // Convertimos las horas elegidas del nuevo tramo
-        const inicio = moment.utc(horaInicioReg, "HH:mm:ss").valueOf();
-        const fin    = moment.utc(horaFinReg,    "HH:mm:ss").valueOf();
+        //const inicio = moment.utc(horaInicioReg, "HH:mm:ss").valueOf();
+        //const fin    = moment.utc(horaFinReg,    "HH:mm:ss").valueOf();
         let posicion;
         const datos = {
             periodo: pContenedor,
@@ -295,7 +301,8 @@ const ModalAñadirParada = ({ show, onHide, parada, onSaved }) => {
             xIdParada: codigoProdDB,
             //xDescripcion: descripcionProdDB, la buscamos tambien en el backend????
             xFecha: pContenedor.inicio,
-            xTiempo: (fin - inicio) / 1000 / 60,
+            //xTiempo: (fin - inicio) / 1000 / 60,
+            xTiempo: (T_u_fin - T_u_inicio) / 1000 / 60,
             xObservaciones: nuevaObs?nuevaObs + '--' + descripcion: '*'+descripcion,
             xTurno_id: pContenedor.turno, //solo hay un turno pues solo puede estar dentro de un periodo
             //xIgnorar = false siempre,
