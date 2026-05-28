@@ -1,4 +1,4 @@
-import React ,{ useState, useEffect } from 'react';
+import React ,{ useState, useEffect, Fragment } from 'react';
 import axios from 'axios';
 import moment from 'moment';
 import { BACKEND_SERVER } from '../../constantes';
@@ -14,6 +14,7 @@ import ParadasAcu from '../trazabilidad/TR_ParadasAcu';
 import '../../index';
 import ModalAgruparTramos from './vel_modal_agrupar_tramos';
 import calculo_OEE from './vel_calculo_OEE';
+import CuadroEstadisticas from './vel_cuadro_estadisticas';
 
 const GraficoEstado = () => {
     const [token] = useCookies(['tec-token']);
@@ -433,7 +434,7 @@ const GraficoEstado = () => {
         setActualizar(a => !a);   // refresca datos sin perder filtros
     };
 
-    useInterval(actualizarGrafico, 5000);
+    useInterval(actualizarGrafico, 20000);
 
     const handleSwitchChange = (event) => {
         setVer({
@@ -671,7 +672,7 @@ const GraficoEstado = () => {
                             <Nav.Item>
                                 <Nav.Link eventKey="estadisticas">
                                 {existeDesconocido ? (
-                                    <span>estadisticas</span>
+                                    <span>Estadísticas</span>
                                 ) : (
                                     'Estadísticas'
                                 )}
@@ -772,46 +773,52 @@ const GraficoEstado = () => {
                             </Row>
                         </Tab.Pane>
                         <Tab.Pane eventKey="estadisticas">
-                            {indicadores !== null ? (
-                                <div className="d-flex align-items-center gap-5 mt-3" style={{ marginLeft: '40px' }}>
-                                    <Table striped bordered hover style={{ width: 'auto', marginBottom: 0 }}>
-                                        <tbody>
-                                            <tr>
-                                                <td style={{ minWidth: '200px' }}>Calidad</td>
-                                                <td style={{ minWidth: '100px' }}>{indicadores.calidad.toFixed(2)} %</td>
-                                            </tr>
-                                            <tr>
-                                                <td style={{ minWidth: '200px' }}>Disponibilidad</td>
-                                                <td style={{ minWidth: '100px' }}>{indicadores.disponibilidad.porcentaje.toFixed(2)} %</td>
-                                            </tr>
-                                            <tr>
-                                                <td style={{ minWidth: '200px' }}>Rendimiento</td>
-                                                <td style={{ minWidth: '100px' }}>{indicadores.rendimiento.total.toFixed(2)} %</td>
-                                            </tr>
-                                        </tbody>
-                                    </Table>
-                                    <div style={{ 
-                                        border: '3px solid black', 
-                                        borderRadius: '8px', 
-                                        padding: '20px 40px', //ancho y alto del cuadro
-                                        textAlign: 'center',
-                                        color: 'black',
-                                        fontWeight: 'bold',
-                                        fontSize: '1.7rem',
-                                        marginLeft: '40px'
-                                    }}>
-                                        <div style={{ fontSize: '2.5rem' }}>
-                                            OEE:
-                                        </div>
-                                        <div style={{ fontSize: '2rem', marginTop: '4px' }}>
-                                            {indicadores.OEE.toFixed(2)} %
-                                        </div>
-                                    </div>
+                            {indicadores && (
+                                <div
+                                style={{
+                                    display: "flex",
+                                    flexWrap: "wrap",
+                                    gap: "40px",
+                                    justifyContent: "flex-start",
+                                    alignItems: "flex-start",
+                                }}
+                                >
+                                <CuadroEstadisticas
+                                    nombre="Total"
+                                    calidad={indicadores.calidad.porcentaje}
+                                    rendimiento={indicadores.rendimiento.total}
+                                    disponibilidad={indicadores.disponibilidad.porcentaje}
+                                    oee={indicadores.OEE.porcentaje}
+                                />
+
+                                {indicadores.OEE.turnos.map((oee) => {
+                                    const turno = oee.turno;
+
+                                    const calidadTurno =
+                                    indicadores.calidad.turnos.find((c) => c.turno === turno)?.calidad * 100;
+                                    const rendimientoTurno =
+                                    indicadores.rendimiento.turnos.find((r) => r.turno === turno)
+                                        ?.rendimiento * 100;
+                                    const disponibilidadTurno =
+                                    indicadores.disponibilidad.turnos.find((d) => d.turno === turno)
+                                        ?.disponibilidad * 100;
+                                    const oeeTurno =
+                                    indicadores.OEE.turnos.find((o) => o.turno === turno)?.oee * 100;
+
+                                    return (
+                                    <CuadroEstadisticas
+                                        key={turno}
+                                        nombre={`Turno ${turno}`}
+                                        calidad={calidadTurno}
+                                        rendimiento={rendimientoTurno}
+                                        disponibilidad={disponibilidadTurno}
+                                        oee={oeeTurno}
+                                    />
+                                    );
+                                })}
                                 </div>
-                            ) : (
-                                <p>Calculando...</p>
                             )}
-                        </Tab.Pane>
+                            </Tab.Pane>
                         </Tab.Content>
                     </Tab.Container>
                 <ModalAgruparTramos
