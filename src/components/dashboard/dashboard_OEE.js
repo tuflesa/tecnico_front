@@ -12,21 +12,6 @@ import {
 import { BACKEND_SERVER } from '../../constantes';
 import DashboardNavBar from './dashboard_navbar';
 import DashboardFiltro from './dashboard_filtro';
-import calculo_OEE from '../velocidad/vel_calculo_OEE';
-
-// Traduce nuestro formato de fechas al que espera calculo_OEE
-const toFiltroOEE = (fechaDesde, fechaHasta) => ({
-    fecha:       fechaDesde,
-    fecha_fin:   fechaHasta,
-    hora_inicio: '00:00',
-    hora_fin:    '23:59',
-});
-
-const redondear = v => Math.round(v * 10) / 10;
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Componente
-// ─────────────────────────────────────────────────────────────────────────────
 
 const DashboardOEE = () => {
     const hoy       = moment().format('YYYY-MM-DD');
@@ -46,82 +31,73 @@ const DashboardOEE = () => {
         hora_fin:       '22:00',
     });
 
-    const [rawData,    setRawData]    = useState(null);
-    const [oeeRango,   setOeeRango]   = useState(null);
-    const [oeeMensual, setOeeMensual] = useState(null);
-    const [cargando,   setCargando]   = useState(false);
-    const [error,      setError]      = useState(null);
+    const [rawDataRango, setRawDataRango] = useState(null);  // ← gráfico rango
+    const [rawDataMes,   setRawDataMes]   = useState(null);  // ← gráfico mensual
+    const [oeeRango,     setOeeRango]     = useState(null);
+    const [oeeMensual,   setOeeMensual]   = useState(null);
+    const [error,        setError]        = useState(null);
 
     const getHeaders = useCallback(() => ({
         Authorization: `token ${token['tec-token']}`
     }), [token]);
 
-    // ── Fetch datos del backend ───────────────────────────────────────────
-    const fetchOEEData = useCallback((f, year) => {
-        if (!f.zona_id) {
-            setRawData(null);
-            setOeeRango(null);
-            setOeeMensual(null);
-            return;
-        }
-        setCargando(true);
-        setError(null);
-        axios.get(`${BACKEND_SERVER}/api/velocidad/dashboard/oee-data/`, {
+    // ── Llamada 1: gráfico de rango ───────────────────────────────────────
+    useEffect(() => {
+        if (!filtro.zona_id || !filtro.fecha_desde || !filtro.fecha_hasta) return;
+        let activo = true;
+        axios.get(`${BACKEND_SERVER}/api/velocidad/dashboard/oee/`, {
             params: {
-                zona:        f.zona_id,
-                fecha_desde: `${year}-01-01`,
-                fecha_hasta: `${year}-12-31`,
+                zona_id:     filtro.zona_id,
+                fecha_desde: filtro.fecha_desde,
+                fecha_hasta: filtro.fecha_hasta,
+                agrupar:     'rango',
             },
             headers: getHeaders(),
         })
-        .then(res => setRawData(res.data))
-        .catch(() => setError('Error al cargar los datos OEE.'))
-        .finally(() => setCargando(false));
-    }, [getHeaders]);
+        .then(res => { if (activo) setRawDataRango(res.data); })
+        .catch(err => { if (err.response?.status !== 400) console.error(err); });
+        return () => { activo = false; };
+    }, [filtro.zona_id, filtro.fecha_desde, filtro.fecha_hasta]);
 
-    // ── Calcular gráficos cuando llegan datos o cambia el filtro ─────────
+    // ── Llamada 2: gráfico mensual ────────────────────────────────────────
     useEffect(() => {
-        if (!rawData) return;
-
-        // Gráfico 1 — rango seleccionado por el usuario
-        const filtroOEE = toFiltroOEE(filtro.fecha_desde, filtro.fecha_hasta);
-        const ind       = calculo_OEE(rawData, filtroOEE);
-
-        console.log('ind completo:', ind);
-        console.log('ind.OEE:', ind.OEE);
-
-        const turnoA = ind.OEE.turnos.find(t => t.turno === 'A')?.oee ?? 0;
-        const turnoB = ind.OEE.turnos.find(t => t.turno === 'B')?.oee ?? 0;
-
-        setOeeRango([
-            { nombre: 'OEE Total', valor: redondear(ind.OEE.porcentaje),    color: '#378ADD' },
-            { nombre: 'Turno A',   valor: redondear(turnoA * 100),          color: '#2ecc71' },
-            { nombre: 'Turno B',   valor: redondear(turnoB * 100),          color: '#e67e22' },
-        ]);
-
-        // Gráfico 2 — mes a mes del año
-        const meses = [];
-        for (let m = 0; m < 12; m++) {
-            const inicioMes = moment({ year: anio, month: m }).startOf('month').format('YYYY-MM-DD');
-            const finMes    = moment({ year: anio, month: m }).endOf('month').format('YYYY-MM-DD');
-            const indMes    = calculo_OEE(rawData, toFiltroOEE(inicioMes, finMes));
-            const tA        = indMes.OEE.turnos.find(t => t.turno === 'A')?.oee ?? 0;
-            const tB        = indMes.OEE.turnos.find(t => t.turno === 'B')?.oee ?? 0;
-            meses.push({
-                mes:    moment({ year: anio, month: m }).format('MMM'),
-                total:  redondear(indMes.OEE.porcentaje),
-                turnoA: redondear(tA * 100),
-                turnoB: redondear(tB * 100),
-            });
-        }
-        setOeeMensual(meses);
-
-    }, [rawData, filtro.fecha_desde, filtro.fecha_hasta, anio]);
-
-    // ── Refetch cuando cambia zona o año ─────────────────────────────────
-    useEffect(() => {
-        fetchOEEData(filtro, anio);
+        if (!filtro.zona_id || !anio) return;
+        let activo = true;
+        axios.get(`${BACKEND_SERVER}/api/velocidad/dashboard/oee/`, {
+            params: {
+                zona_id:     filtro.zona_id,
+                fecha_desde: `${anio}-01-01`,
+                fecha_hasta: `${anio}-12-31`,
+                agrupar:     'mes',
+            },
+            headers: getHeaders(),
+        })
+        .then(res => { if (activo) setRawDataMes(res.data); })
+        .catch(err => { if (err.response?.status !== 400) console.error(err); });
+        return () => { activo = false; };
     }, [filtro.zona_id, anio]);
+
+    // ── Calcular gráfico rango ────────────────────────────────────────────
+    useEffect(() => {
+        if (!rawDataRango || rawDataRango.length === 0) { setOeeRango(null); return; }
+        const d = rawDataRango[0];
+        setOeeRango([
+            { nombre: 'Total',   valor: d.total?.oee     || 0, color: '#378ADD' },
+            { nombre: 'Turno A', valor: d.turnos?.A?.oee || 0, color: '#2ecc71' },
+            { nombre: 'Turno B', valor: d.turnos?.B?.oee || 0, color: '#e67e22' },
+        ]);
+    }, [rawDataRango]);
+
+    // ── Calcular gráfico mensual ──────────────────────────────────────────
+    useEffect(() => {
+        if (!rawDataMes) { setOeeMensual([]); return; }
+        setOeeMensual(rawDataMes.map(d => ({
+            mes:    moment(d.periodo, 'YYYY-MM').format('MMM'),
+            total:  d.total?.oee     || 0,
+            turnoA: d.turnos?.A?.oee || 0,
+            turnoB: d.turnos?.B?.oee || 0,
+        })));
+    }, [rawDataMes]);
 
     // ── Render ────────────────────────────────────────────────────────────
     return (
@@ -144,14 +120,7 @@ const DashboardOEE = () => {
                     <p className="text-muted mt-3">Selecciona una zona para ver el OEE.</p>
                 )}
 
-                {cargando && (
-                    <div className="text-center mt-5">
-                        <Spinner animation="border" />
-                        <p className="text-muted mt-2">Calculando OEE...</p>
-                    </div>
-                )}
-
-                {!cargando && filtro.zona_id && (
+                {filtro.zona_id && (
                     <Row className="mt-3 gy-3">
 
                         {/* Gráfico 1 — OEE del rango */}
@@ -167,7 +136,7 @@ const DashboardOEE = () => {
                                                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                                                 <XAxis dataKey="nombre" tick={{ fontSize: 12 }} />
                                                 <YAxis domain={[0, 100]} unit="%" tick={{ fontSize: 11 }} />
-                                                <Tooltip formatter={v => `${v}%`} />
+                                                <Tooltip formatter={v => `${v.toFixed(2)}%`} />
                                                 <Bar dataKey="valor" radius={[4, 4, 0, 0]} maxBarSize={60}>
                                                     {oeeRango.map((entry, i) => (
                                                         <Cell key={i} fill={entry.color} fillOpacity={0.85} />
@@ -204,7 +173,7 @@ const DashboardOEE = () => {
                                             </span>
                                         </span>
                                     </Card.Title>
-                                    {oeeMensual ? (
+                                    {oeeMensual && oeeMensual.length > 0 ? (
                                         <ResponsiveContainer width="100%" height={220}>
                                             <BarChart data={oeeMensual} margin={{ top: 8, right: 20, left: 0, bottom: 4 }}>
                                                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
