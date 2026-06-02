@@ -19,6 +19,12 @@ const DashboardOEE = () => {
     const [user]    = useCookies(['tec-user']);
     const empresaId = user['tec-user'].perfil.empresa.id;
 
+    
+    const [loadingRango, setLoadingRango] = useState(false);
+    const [loadingMes, setLoadingMes] = useState(false);
+    const isLoading = loadingRango || loadingMes;
+    const [showLoader, setShowLoader] = useState(false);
+
     const [anio, setAnio] = useState(moment().year());
 
     const [filtro, setFiltro] = useState({
@@ -41,10 +47,22 @@ const DashboardOEE = () => {
         Authorization: `token ${token['tec-token']}`
     }), [token]);
 
+        
+    useEffect(() => {
+        if (isLoading) {
+            setShowLoader(true);
+        } else {
+            const timeout = setTimeout(() => setShowLoader(false), 300);
+            return () => clearTimeout(timeout);
+        }
+    }, [isLoading]);
+
+
     // ── Llamada 1: gráfico de rango ───────────────────────────────────────
     useEffect(() => {
         if (!filtro.zona_id || !filtro.fecha_desde || !filtro.fecha_hasta) return;
         let activo = true;
+        setLoadingRango(true);
         axios.get(`${BACKEND_SERVER}/api/velocidad/dashboard/oee/`, {
             params: {
                 zona_id:     filtro.zona_id,
@@ -54,8 +72,14 @@ const DashboardOEE = () => {
             },
             headers: getHeaders(),
         })
-        .then(res => { if (activo) setRawDataRango(res.data); })
-        .catch(err => { if (err.response?.status !== 400) console.error(err); });
+        .then(res => { 
+            if (activo) setRawDataRango(res.data); 
+        })
+        .catch(err => { if (err.response?.status !== 400) console.error(err); 
+        })
+        .finally(() => {
+            if (activo) setLoadingRango(false);
+        });
         return () => { activo = false; };
     }, [filtro.zona_id, filtro.fecha_desde, filtro.fecha_hasta]);
 
@@ -63,6 +87,7 @@ const DashboardOEE = () => {
     useEffect(() => {
         if (!filtro.zona_id || !anio) return;
         let activo = true;
+        setLoadingMes(true);
         axios.get(`${BACKEND_SERVER}/api/velocidad/dashboard/oee/`, {
             params: {
                 zona_id:     filtro.zona_id,
@@ -72,8 +97,16 @@ const DashboardOEE = () => {
             },
             headers: getHeaders(),
         })
-        .then(res => { if (activo) setRawDataMes(res.data); })
-        .catch(err => { if (err.response?.status !== 400) console.error(err); });
+        .then(res => { 
+            if (activo) setRawDataMes(res.data); 
+        })
+        .catch(err => { if (err.response?.status !== 400) console.error(err); 
+
+        })            
+        .finally(() => {
+            if (activo) setLoadingMes(false);
+        });
+
         return () => { activo = false; };
     }, [filtro.zona_id, anio]);
 
@@ -104,97 +137,110 @@ const DashboardOEE = () => {
         <>
             <DashboardNavBar />
             <Container fluid className="px-4">
+                
+                <div className="position-relative">
 
-                <DashboardFiltro
-                    filtro={filtro}
-                    actualizaFiltro={setFiltro}
-                    token={token['tec-token']}
-                    empresaId={empresaId}
-                    mostrarTurno={false}
-                    mostrarTipoParada={false}
-                />
+                    {showLoader  && (
+                        <div className="dashboard-loading-overlay">
+                            <div className="text-center">
+                                <Spinner animation="border" variant="primary" />
+                                <div className="mt-2 text-muted">Cargando datos...</div>
+                            </div>
+                        </div>
+                    )}
 
-                {error && <Alert variant="danger">{error}</Alert>}
 
-                {!filtro.zona_id && (
-                    <p className="text-muted mt-3">Selecciona una zona para ver el OEE.</p>
-                )}
+                    <DashboardFiltro
+                        filtro={filtro}
+                        actualizaFiltro={setFiltro}
+                        token={token['tec-token']}
+                        empresaId={empresaId}
+                        mostrarTurno={false}
+                        mostrarTipoParada={false}
+                    />
 
-                {filtro.zona_id && (
-                    <Row className="mt-3 gy-3">
+                    {error && <Alert variant="danger">{error}</Alert>}
 
-                        {/* Gráfico 1 — OEE del rango */}
-                        <Col xs={12} md={4}>
-                            <Card className="shadow-sm h-100">
-                                <Card.Body>
-                                    <Card.Title className="mb-3">
-                                        OEE del período seleccionado
-                                    </Card.Title>
-                                    {oeeRango ? (
-                                        <ResponsiveContainer width="100%" height={220}>
-                                            <BarChart data={oeeRango} margin={{ top: 8, right: 30, left: 0, bottom: 4 }}>
-                                                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                                <XAxis dataKey="nombre" tick={{ fontSize: 12 }} />
-                                                <YAxis domain={[0, 100]} unit="%" tick={{ fontSize: 11 }} />
-                                                <Tooltip formatter={v => `${v.toFixed(2)}%`} />
-                                                <Bar dataKey="valor" radius={[4, 4, 0, 0]} maxBarSize={60}>
-                                                    {oeeRango.map((entry, i) => (
-                                                        <Cell key={i} fill={entry.color} fillOpacity={0.85} />
-                                                    ))}
-                                                </Bar>
-                                            </BarChart>
-                                        </ResponsiveContainer>
-                                    ) : (
-                                        <p className="text-muted small">Sin datos.</p>
-                                    )}
-                                </Card.Body>
-                            </Card>
-                        </Col>
+                    {!filtro.zona_id && (
+                        <p className="text-muted mt-3">Selecciona una zona para ver el OEE.</p>
+                    )}
 
-                        {/* Gráfico 2 — OEE mensual */}
-                        <Col xs={12} md={8}>
-                            <Card className="shadow-sm h-100">
-                                <Card.Body>
-                                    <Card.Title className="mb-3 d-flex justify-content-between align-items-center">
-                                        <span>OEE mensual — Total / Turno A / Turno B</span>
-                                        <span className="d-flex align-items-center gap-2">
-                                            <span
-                                                style={{ cursor: 'pointer', color: '#c0392b', fontSize: '1.2rem' }}
-                                                onClick={() => setAnio(a => a - 1)}
-                                            >
-                                                ◀
+                    {filtro.zona_id && (
+                        <Row className="mt-3 gy-3">
+
+                            {/* Gráfico 1 — OEE del rango */}
+                            <Col xs={12} md={4}>
+                                <Card className="shadow-sm h-100">
+                                    <Card.Body>
+                                        <Card.Title className="mb-3">
+                                            OEE del período seleccionado
+                                        </Card.Title>
+                                        {oeeRango ? (
+                                            <ResponsiveContainer width="100%" height={220}>
+                                                <BarChart data={oeeRango} margin={{ top: 8, right: 30, left: 0, bottom: 4 }}>
+                                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                                    <XAxis dataKey="nombre" tick={{ fontSize: 12 }} />
+                                                    <YAxis domain={[0, 100]} unit="%" tick={{ fontSize: 11 }} />
+                                                    <Tooltip formatter={v => `${v.toFixed(2)}%`} />
+                                                    <Bar dataKey="valor" radius={[4, 4, 0, 0]} maxBarSize={60}>
+                                                        {oeeRango.map((entry, i) => (
+                                                            <Cell key={i} fill={entry.color} fillOpacity={0.85} />
+                                                        ))}
+                                                    </Bar>
+                                                </BarChart>
+                                            </ResponsiveContainer>
+                                        ) : (
+                                            <p className="text-muted small">Sin datos.</p>
+                                        )}
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+
+                            {/* Gráfico 2 — OEE mensual */}
+                            <Col xs={12} md={8}>
+                                <Card className="shadow-sm h-100">
+                                    <Card.Body>
+                                        <Card.Title className="mb-3 d-flex justify-content-between align-items-center">
+                                            <span>OEE mensual — Total / Turno A / Turno B</span>
+                                            <span className="d-flex align-items-center gap-2">
+                                                <span
+                                                    style={{ cursor: 'pointer', color: '#c0392b', fontSize: '1.2rem' }}
+                                                    onClick={() => setAnio(a => a - 1)}
+                                                >
+                                                    ◀
+                                                </span>
+                                                <strong style={{ color: '#c0392b', fontSize: '1.1rem' }}>{anio}</strong>
+                                                <span
+                                                    style={{ cursor: 'pointer', color: '#c0392b', fontSize: '1.2rem', opacity: anio >= moment().year() ? 0.3 : 1 }}
+                                                    onClick={() => setAnio(a => Math.min(a + 1, moment().year()))}
+                                                >
+                                                    ▶
+                                                </span>
                                             </span>
-                                            <strong style={{ color: '#c0392b', fontSize: '1.1rem' }}>{anio}</strong>
-                                            <span
-                                                style={{ cursor: 'pointer', color: '#c0392b', fontSize: '1.2rem', opacity: anio >= moment().year() ? 0.3 : 1 }}
-                                                onClick={() => setAnio(a => Math.min(a + 1, moment().year()))}
-                                            >
-                                                ▶
-                                            </span>
-                                        </span>
-                                    </Card.Title>
-                                    {oeeMensual && oeeMensual.length > 0 ? (
-                                        <ResponsiveContainer width="100%" height={220}>
-                                            <BarChart data={oeeMensual} margin={{ top: 8, right: 20, left: 0, bottom: 4 }}>
-                                                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                                <XAxis dataKey="mes" tick={{ fontSize: 11 }} />
-                                                <YAxis domain={[0, 100]} unit="%" tick={{ fontSize: 11 }} />
-                                                <Tooltip formatter={v => `${v}%`} />
-                                                <Legend />
-                                                <Bar dataKey="total"  name="Total"   fill="#378ADD" fillOpacity={0.85} radius={[3,3,0,0]} maxBarSize={18} />
-                                                <Bar dataKey="turnoA" name="Turno A" fill="#2ecc71" fillOpacity={0.85} radius={[3,3,0,0]} maxBarSize={18} />
-                                                <Bar dataKey="turnoB" name="Turno B" fill="#e67e22" fillOpacity={0.85} radius={[3,3,0,0]} maxBarSize={18} />
-                                            </BarChart>
-                                        </ResponsiveContainer>
-                                    ) : (
-                                        <p className="text-muted small">Sin datos.</p>
-                                    )}
-                                </Card.Body>
-                            </Card>
-                        </Col>
+                                        </Card.Title>
+                                        {oeeMensual && oeeMensual.length > 0 ? (
+                                            <ResponsiveContainer width="100%" height={220}>
+                                                <BarChart data={oeeMensual} margin={{ top: 8, right: 20, left: 0, bottom: 4 }}>
+                                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                                    <XAxis dataKey="mes" tick={{ fontSize: 11 }} />
+                                                    <YAxis domain={[0, 100]} unit="%" tick={{ fontSize: 11 }} />
+                                                    <Tooltip formatter={v => `${v}%`} />
+                                                    <Legend />
+                                                    <Bar dataKey="total"  name="Total"   fill="#378ADD" fillOpacity={0.85} radius={[3,3,0,0]} maxBarSize={18} />
+                                                    <Bar dataKey="turnoA" name="Turno A" fill="#2ecc71" fillOpacity={0.85} radius={[3,3,0,0]} maxBarSize={18} />
+                                                    <Bar dataKey="turnoB" name="Turno B" fill="#e67e22" fillOpacity={0.85} radius={[3,3,0,0]} maxBarSize={18} />
+                                                </BarChart>
+                                            </ResponsiveContainer>
+                                        ) : (
+                                            <p className="text-muted small">Sin datos.</p>
+                                        )}
+                                    </Card.Body>
+                                </Card>
+                            </Col>
 
-                    </Row>
-                )}
+                        </Row>
+                    )}
+                </div>
             </Container>
         </>
     );
