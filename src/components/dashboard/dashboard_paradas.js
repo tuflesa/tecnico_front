@@ -25,7 +25,14 @@ const fmtHHMM = min => {
     const m = Math.round(min % 60);
     return `${h}h ${m.toString().padStart(2, '0')}min`;
 };
-const tickHHMM = min => `${Math.floor(min / 60)}h`;
+//const tickHHMM = min => `${Math.floor(min / 60)}h`;
+const tickHHMM = min => {
+    const h = Math.floor(min / 60);
+    const m = Math.round(min % 60);
+    if (h === 0) return `${m}min`;
+    if (m === 0) return `${h}h`;
+    return `${h}h${m}`;
+};
 
 // ── Tooltip ────────────────────────────────────────────────────────────────
 const TooltipParadas = ({ active, payload, label }) => {
