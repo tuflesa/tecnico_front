@@ -231,8 +231,8 @@ const NotificacionForm = ({nota, setNota}) => {
             }
             alert('Faltan datos, por favor, introduce todos los datos obligatorios.')
             console.log(err);
-            setEnviando(false);
-        });
+        })
+        .finally(() => { setEnviando(false); })
     }
     const actualizarNota = (event) => {
         event.preventDefault();
@@ -263,13 +263,12 @@ const NotificacionForm = ({nota, setNota}) => {
         })
         .then( res => { 
             setNota(res.data);
-            setEnviando(false); 
         })
         .catch(err => { 
             setShowError(true);
             console.log(err);
-            setEnviando(false); 
         })
+        .finally(() => { setEnviando(false); })
     } 
 
     const reclamar_nota = (event) => {

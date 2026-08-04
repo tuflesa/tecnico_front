@@ -70,9 +70,11 @@ const ContactoForm = ({show, proveedor_id, handleCloseContacto, updateProveedorC
             handlerCancelar();
         })
         .catch( err => {   
-            console.log(err);
-            setEnviando(false);        
+            console.log(err);       
             handlerCancelar();
+        })
+        .finally(() => {
+            setEnviando(false);
         });
     }
     const ActualizarContacto = (id) =>{
@@ -95,6 +97,8 @@ const ContactoForm = ({show, proveedor_id, handleCloseContacto, updateProveedorC
         })
         .catch (err=>{
             console.log((err));
+        })
+        .finally(() => {
             setEnviando(false);
         });
     }

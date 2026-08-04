@@ -88,8 +88,10 @@ const EntregaForm = ({show, updatePedido, linea_adicional, handleCloseEntrega}) 
         })
         .catch(err => { 
             console.log(err);
-            setEnviando(false);
         })
+        .finally(() => {
+            setEnviando(false);
+        });
     }
 
     const handleInputChange = (event) => {

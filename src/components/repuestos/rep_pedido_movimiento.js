@@ -145,8 +145,10 @@ const MovimientoForm = ({show, updatePedido, linea, handleCloseMovimiento, empre
         })
         .catch(err => { 
             console.log(err);
-            setEnviando(false);
         })
+        .finally(() => {
+            setEnviando(false);
+        });
     }
 
     const handleInputChange = (event) => {

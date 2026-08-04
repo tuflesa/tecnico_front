@@ -61,6 +61,10 @@ const ObservacionesModal = ({ show, onHide, linea, filtro, parte, onUpdateTarea,
                     })
                     .catch(err => {
                         alert('Error al guardar observaciones');
+                    })
+                    .finally(() => {
+                        setEnviando(false);
+                        setYaGuardado(false);
                     });
                 }
                 sessionStorage.removeItem('datos_retorno_salida');

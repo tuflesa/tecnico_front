@@ -156,7 +156,8 @@ const RepPrecio = ()=>{
         } catch (err) {
             console.log(err);
             alert('Error al guardar los precios, inténtalo de nuevo.');
-            setEnviando(false); // Liberar si falla
+        } finally {
+            setEnviando(false); //liberar al finalizar, tanto si falla como si lo hace
         }
     }
     const retroceder =()=>{

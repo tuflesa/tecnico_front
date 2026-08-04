@@ -308,8 +308,10 @@ const ParteMediciones = ({parte, setParte}) => {
         })
         .catch(err => { 
             setShowError(true);
-            console.log(err);
-            setEnviando(false); 
+            console.log(err); 
+        })
+        .finally(()=>{
+            setEnviando(false);
         })
     } 
 
@@ -392,8 +394,11 @@ const ParteMediciones = ({parte, setParte}) => {
         })
         .catch(err => { 
             setShowError(true);
-            console.log(err);})
+            console.log(err);
+        })
+        .finally (()=>{
             setEnviando(false);
+        })
 
     }
 

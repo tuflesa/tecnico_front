@@ -156,9 +156,11 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
             handlerCancelar();
         })
         .catch( err => {
-            console.log(err);
-            setEnviando(false);            
+            console.log(err);           
             handlerCancelar();
+        })
+        .finally(() => {
+            setEnviando(false);
         });
     }
      
@@ -197,10 +199,12 @@ const LineaForm = ({show, pedido_id, handleCloseLinea, proveedor_id, updatePedid
                 updatePedido();
                 handlerCancelar();
             })
-            .catch( err => {           
-                setEnviando(false);
+            .catch( err => {         
                 handlerCancelar();
-            });
+            })
+            .finally(()=>{
+                setEnviando(false);
+            })
         }
     }
 

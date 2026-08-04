@@ -446,7 +446,7 @@ const ParteForm = ({parte, setParte, op}) => {
         }catch(err){ 
             console.log(err);
             alert('Error al finalizar el parte.');
-        } finally {
+        }finally {
             setEnviando(false);
         }
     }

@@ -260,12 +260,13 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         .then( res => { 
             setRepuesto(res.data);
             alert('Repuesto actualizado');
-            setEnviando(false);
         })
         .catch(err => { 
             console.log(err);
-            setEnviando(false);
         })
+        .finally(() => {
+            setEnviando(false);
+        });
     }
 
     const crearDatos = (event) => {
@@ -293,8 +294,10 @@ const RepuestoForm = ({repuesto, setRepuesto}) => {
         })
         .catch(err => { 
             console.log(err);
-            setEnviando(false);
         })
+        .finally(() => {
+            setEnviando(false);
+        });
     }
 
     const handleCloseStock = () => {

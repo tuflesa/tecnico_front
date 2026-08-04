@@ -51,6 +51,8 @@ const RepPrecioEdit = ({show_modificar, updateRepuesto, setShowModificarProveedo
         })
         .catch(err => { 
             console.log(err);
+        })
+        .finally(() => {
             setEnviando(false);
         });
     }

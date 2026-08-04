@@ -371,8 +371,10 @@ const PedidoForm = ({pedido, setPedido}) => {
                 console.log(err);
             }
             alert('Faltan datos, por favor, introduce todos los datos obligatorios.')
-            setEnviando(false);
         })
+        .finally(() => {
+            setEnviando(false);
+        });
     }
 
     const actualizarDatos = (event) => {
@@ -401,13 +403,14 @@ const PedidoForm = ({pedido, setPedido}) => {
         .then( res => { 
             setPedido(res.data);
             updatePedido();
-            setEnviando(false);
             //window.location.href = "/repuestos/pedidos";
         })
         .catch(err => { 
             console.log(err);
-            setEnviando(false);
         })
+        .finally(() => {
+            setEnviando(false);
+        });
 
     }
 

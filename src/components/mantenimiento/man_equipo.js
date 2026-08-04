@@ -177,8 +177,8 @@ const ManPorEquipos = () => {
                 })
                 .catch(err => { 
                     console.log(err);
-                    setEnviando(false);
                 })
+                .finally(() => { setEnviando(false); })
             }
             else{
                 const trabajador_activo = res.data.filter(s => s.trabajador === user['tec-user'].perfil.usuario);
@@ -207,8 +207,8 @@ const ManPorEquipos = () => {
         })
         .catch(err => { 
             console.log(err);
-            setEnviando(false);
         }) 
+        .finally(() => { setEnviando(false); })
     }
 
     const pedir_observaciones = (linea, parte) => {

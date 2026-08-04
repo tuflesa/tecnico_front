@@ -54,8 +54,10 @@ const RepAlmacenForm = ({nombre, empresa, almacen_id}) => {
         })
         .catch(err => { 
             console.log(err);
-            setEnviando(false); //Si falla, permitir reintentar
         })
+        .finally(() => {
+            setEnviando(false);
+        });
         
     }
     const nuevoDatos = (event) => {
@@ -75,8 +77,10 @@ const RepAlmacenForm = ({nombre, empresa, almacen_id}) => {
         })
         .catch(err => { 
             console.log(err);
-            setEnviando(false); //Si falla, permitir reintentar
         })
+        .finally(() => {
+            setEnviando(false);
+        });
         
     }
 

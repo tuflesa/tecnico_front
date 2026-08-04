@@ -177,6 +177,7 @@ const StockMinimoForm = ({show, handleCloseStock, repuesto_escritico, repuesto_i
             handleCancelar();
             } catch(err) { 
                 console.log(err);
+            } finally {
                 setEnviando(false)
             }
     }

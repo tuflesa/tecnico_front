@@ -98,6 +98,8 @@ const ProveedorForm = ({show, handleCloseProveedor, proveedoresAsignados, repues
         })
         .catch(err => { 
             console.log(err);
+        })
+        .finally(() => {
             setEnviando(false);
         });
     }

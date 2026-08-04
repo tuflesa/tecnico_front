@@ -54,12 +54,13 @@ const RepProveedorForm = ({proveedor}) => {
         })
         .then( res => { 
             alert('Proveedor actualizado.');
-            setEnviando(false);
         })
         .catch(err => { 
             console.log(err);
-            setEnviando(false);
         })
+        .finally(() => {
+            setEnviando(false);
+        });
         
     }
     const updateProveedorCont = () => {
@@ -100,8 +101,10 @@ const RepProveedorForm = ({proveedor}) => {
         })
         .catch(err => { 
             console.log(err);
-            setEnviando(false);
         })
+        .finally(() => {
+            setEnviando(false);
+        });
         
     }
     const abrirAddContacto =() =>{

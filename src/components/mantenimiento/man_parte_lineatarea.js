@@ -138,9 +138,10 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateP
 
         } catch(err) {
             console.log(err);
-            setEnviando(false); // Liberar si falla
             handlerCancelar();
-        }             
+        } finally{
+            setEnviando(false);
+        }            
     }
     
     return (        

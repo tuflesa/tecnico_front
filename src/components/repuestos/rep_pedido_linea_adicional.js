@@ -74,9 +74,11 @@ const LineaAdicionalForm = ({show, pedido_id, handleCloseLineaAdicional, updateP
             handlerCancelar();
         })
         .catch( err => {
-            console.log(err);   
-            setEnviando(false);         
+            console.log(err);           
             handlerCancelar();
+        })
+        .finally(() => {
+            setEnviando(false);
         });
     }
 
@@ -109,10 +111,12 @@ const LineaAdicionalForm = ({show, pedido_id, handleCloseLineaAdicional, updateP
                 updatePedido();
                 handlerCancelar();
             })
-            .catch( err => {   
-                setEnviando(false);        
+            .catch( err => {          
                 handlerCancelar();
-            });
+            })
+            .finally(() => {
+                setEnviando(false);
+        });
         }
     }
 

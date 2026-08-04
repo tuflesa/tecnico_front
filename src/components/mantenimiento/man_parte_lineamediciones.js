@@ -112,8 +112,9 @@ const LineaMedicionNueva = ({show, handleCloseLinea, tareaAsignadas, parte, upda
             handlerCancelar();
         } catch(err) {
             console.log(err);
-            setEnviando(false); // Liberar si falla
             handlerCancelar();
+        }finally{
+            setEnviando(false);
         }
     }
     
