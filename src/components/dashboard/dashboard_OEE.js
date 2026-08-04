@@ -33,8 +33,6 @@ const DashboardOEE = () => {
         zona_id:        null,
         turno:          null,
         tipo_parada_id: null,
-        hora_inicio:    '06:00',
-        hora_fin:       '22:00',
     });
 
     const [rawDataRango, setRawDataRango] = useState(null);  // ← gráfico rango
@@ -73,6 +71,7 @@ const DashboardOEE = () => {
             headers: getHeaders(),
         })
         .then(res => { 
+            console.log('DATOS PARA EL GRAFICO',res.data);
             if (activo) setRawDataRango(res.data); 
         })
         .catch(err => { if (err.response?.status !== 400) console.error(err); 

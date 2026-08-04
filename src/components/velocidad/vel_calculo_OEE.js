@@ -118,7 +118,7 @@ const calculo_OEE = (estado, filtro) => {
                     end_ajustado = filtro_inicio;
                 }
                 else {
-                    if (start_moment.isSameOrAfter(filtro_fin)){
+                    if (end_moment.isSameOrAfter(filtro_fin)){
                     end_ajustado = filtro_fin;
                     }
                     else {
@@ -158,6 +158,7 @@ const calculo_OEE = (estado, filtro) => {
     const disponibilidad = t_total > 0 ? (t_producion/t_total)*100: 0;
     // Disponibilidad por turno
     const disponibilidad_por_turno = [];
+    console.log('TIEMPO POR TURNO (minutos):', tiempoPorTurno(paradas));
     tiempoPorTurno(paradas).map( tpt => {
         const produccion = paradas.filter(p => p.turnos.includes(tpt.turno) && 
                                              (p.tipo_parada_nombre === 'Automatico' || p.tipo_parada_nombre === 'Cambio'));
