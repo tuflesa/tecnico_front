@@ -10,6 +10,9 @@ const RodNavBar = () => {
     const soySuperTecnico = user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:false;
     const soyMantenimiento = user['tec-user'].perfil.puesto.nombre==='Mantenimiento'?true:false;
     const soyProgramador = user['tec-user'].perfil.destrezas.filter(s => s === 7);
+    const crear_articulos = user['tec-user'].perfil.destrezas_rodillos.some(
+        destreza => destreza.nombre === 'crear_articulos'
+    );
 
     return (
             <React.Fragment>
@@ -33,6 +36,9 @@ const RodNavBar = () => {
                                     <NavDropdown.Item href="/rodillos/grupos">Bancadas de grupo</NavDropdown.Item> 
                                     <NavDropdown.Item href="/rodillos/bacada_ct">Bancadas CT/Calibradora</NavDropdown.Item> 
                                     <NavDropdown.Item href="/rodillos/montaje">Montajes</NavDropdown.Item> 
+                                    {crear_articulos?
+                                        <NavDropdown.Item href="/rodillos/articulos">Artículos</NavDropdown.Item> 
+                                    :''}
                                     </NavDropdown>
                                     <NavDropdown title="Rectificados Internos" id="nuevos-dropdown" menualign="right">
                                     <NavDropdown.Item href="/rodillos/nueva_rectificacion">Nueva Orden de Rectificado</NavDropdown.Item> 

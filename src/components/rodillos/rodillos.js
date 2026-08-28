@@ -22,6 +22,7 @@ import RodInstanciasRectificar from './rod_instancias_a_rectificar';
 import RodInstanciasXaRectificar from './rod_instancias_xa_rectificar';
 import RodRectificacion_TuflesaForm from './Rod_rectificacion_tuflesa_form';
 import Programadores from './a_rod_programador';
+import RodArticulo from './rod.articulo_nuevo';
 
 const Rodillos = () => {
     
@@ -30,6 +31,7 @@ const Rodillos = () => {
             <RodNavBar />
             <Switch>
                 <Route path='/rodillos/montaje' component={RodMontaje} />
+                <Route path='/rodillos/articulos' component={RodArticulo} />
                 <Route path='/rodillos/programador' component={Programadores} />
                 <Route path='/rodillos/instancias_rectificar' component={RodInstanciasRectificar} />
                 <Route path='/rodillos/instancias_xa_rectificar' component={RodInstanciasXaRectificar} />

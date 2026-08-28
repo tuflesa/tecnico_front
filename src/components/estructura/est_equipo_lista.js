@@ -15,7 +15,7 @@ const EstEquipoLista = () => {
     const [equipoBorrar, setEquipoBorrar] = useState(null);
     const [show, setShow] = useState(false);
     const [user] = useCookies(['tec-user']);
-    const [filtro, setFiltro] = useState({empresa: user['tec-user'].perfil.empresa.id});
+    const [filtro, setFiltro] = useState('');
 
     const actualizaFiltro = str => {
         setFiltro(str);
@@ -31,6 +31,7 @@ const EstEquipoLista = () => {
             // console.log(res.data);
             setEquipos(res.data);
         })
+        .catch(err => {console.log('aqui da el error en est_equpo_lista',err);})
     },[token, filtro]);
 
     const handleTrashClick = (equipo) => {
