@@ -136,7 +136,7 @@ const NotificacionForm = ({nota, setNota}) => {
     }, [token]);
 
     useEffect(() => {
-        axios.get(BACKEND_SERVER + `/api/estructura/zona/?empresa=${user['tec-user'].perfil.empresa.id}`,{
+        axios.get(BACKEND_SERVER + `/api/estructura/zona/?empresa__id=${user['tec-user'].perfil.empresa.id}`,{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }

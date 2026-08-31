@@ -67,7 +67,7 @@ const RodBancadaFiltro = ({actualizaFiltro}) => {
             });
         }
         else {
-            axios.get(BACKEND_SERVER + `/api/estructura/zona/?empresa=${datos.empresa}`,{
+            axios.get(BACKEND_SERVER + `/api/estructura/zona/?empresa__id=${datos.empresa}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }

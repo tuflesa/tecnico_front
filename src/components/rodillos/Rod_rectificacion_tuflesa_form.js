@@ -37,7 +37,7 @@ const RodRectificacion_TuflesaForm = ({rectificacion, setRectificacion, lineas_r
         activado: rectificacion?true:false,
         disabled: rectificacion?rectificacion.finalizado?true:false:false,
         finalizado: rectificacion?rectificacion.finalizado:false,
-        proveedor: lineas_rectificandose?lineas_rectificandose[0].proveedor.id:'',
+        proveedor: lineas_rectificandose? lineas_rectificandose[0].proveedor:'',
         fecha_estimada: rectificacion?rectificacion.fecha_estimada 
             : (hoy_10.getFullYear() + '-' + 
             String(hoy_10.getMonth() + 1).padStart(2, '0') + '-' + 
@@ -123,7 +123,7 @@ const RodRectificacion_TuflesaForm = ({rectificacion, setRectificacion, lineas_r
             });
         }
         else {
-            axios.get(BACKEND_SERVER + `/api/estructura/zona/?empresa=${datos.empresa}&es_maquina_tubo=${true}`,{
+            axios.get(BACKEND_SERVER + `/api/estructura/zona/?empresa__id=${datos.empresa}&es_maquina_tubo=${true}`,{
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }
