@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Row, Col, Form, Button, Container, Table } from 'react-bootstrap';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
-import { Trash, Tools } from 'react-bootstrap-icons';
+import { Trash, Tools, Paperclip, XCircle } from 'react-bootstrap-icons';
 import axios from 'axios';
 import BuscarInstancia from './rod_buscar_instancia';
 import {invertirFecha} from '../utilidades/funciones_fecha';
@@ -16,14 +16,27 @@ const RodBuscarInstanciaCodBarras = ({proveedor, lineas_rectificandose, setLinea
     const [lineas_rectificacion, setLineasRectificacion] = useState([]);
     const [sumar_ejes, setSumaEjes] = useState();
     const [user] = useCookies(['tec-user']);
-    const soyTecnico = user['tec-user'].perfil.puesto.nombre==='Técnico'||user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:false;
-    const soySuperTecnico = user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:false;
+    //const soyTecnico = user['tec-user'].perfil.puesto.nombre==='Técnico'||user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:false;
+    //const soySuperTecnico = user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:false;
+    const gestion_rectificados = user['tec-user'].perfil.destrezas_rodillos.some(
+        destreza => destreza.nombre === 'gestion_rectificados'
+    );
     const [show_datos_nuevos, setShowDatosNuevos] = useState(false);
     const [linea_a_finalizar, setLineaFinalizar] = useState([]);
+    const [documentosDisponibles, setDocumentosDisponibles] = useState([]);
+    const [selectorAbierto, setSelectorAbierto] = useState(null);
 
     useEffect(()=>{
         setLineasRectificacion(lineas_rectificandose);
     }, [token, lineas_rectificandose]);
+
+    useEffect(() => {
+        rectificacion && axios.get(BACKEND_SERVER + `/api/rodillos/doc_rectificado/?rectificado=${rectificacion.id}`, {
+            headers: { 'Authorization': `token ${token['tec-token']}` }
+        })
+        .then(res => setDocumentosDisponibles(res.data))
+        .catch(err => console.log(err));
+    }, [token, rectificacion]);
 
     useEffect(()=>{
         datos.zona && axios.get(BACKEND_SERVER + `/api/rodillos/instancia_listado/?rodillo__operacion__seccion__maquina__id=${datos.zona}`,{
@@ -408,6 +421,43 @@ const RodBuscarInstanciaCodBarras = ({proveedor, lineas_rectificandose, setLinea
     const CerrarModal = () => {
         setShowDatosNuevos(false);
     }
+    
+    //que documento tiene la linea
+    const documentosDeLinea = (linea) => {
+        return documentosDisponibles.filter(doc => (doc.linea_rectificacion || []).includes(linea.id));
+    }
+    
+    //asignar documento a la linea
+    const asignarDocumento = (lineaId, docId) => {
+        axios.post(BACKEND_SERVER + `/api/rodillos/doc_rectificado/${docId}/asignar_linea/`, {
+            linea_rectificacion: lineaId,
+            accion: 'add',
+        }, {
+            headers: { 'Authorization': `token ${token['tec-token']}` }
+        })
+        .then(res => {
+            setDocumentosDisponibles(documentosDisponibles.map(d => d.id === docId ? res.data : d));
+            setSelectorAbierto(null);
+        })
+        .catch(err => console.log(err));
+    }
+
+    // borrar los documentos asignados
+    const quitarDocumento = (linea) => {
+        const docs = documentosDeLinea(linea);
+        docs.forEach(doc => {
+            axios.post(BACKEND_SERVER + `/api/rodillos/doc_rectificado/${doc.id}/asignar_linea/`, {
+                linea_rectificacion: linea.id,
+                accion: 'remove',
+            }, {
+                headers: { 'Authorization': `token ${token['tec-token']}` }
+            })
+            .then(res => {
+                setDocumentosDisponibles(documentosDisponibles.map(d => d.id === doc.id ? res.data : d));
+            })
+            .catch(err => console.log(err));
+        });
+    }
 
     return(
         <Container className='mt-5 pt-1'>
@@ -416,8 +466,8 @@ const RodBuscarInstanciaCodBarras = ({proveedor, lineas_rectificandose, setLinea
                     <Button variant="danger" type="submit" className={'mx-2'} onClick={GuardarLineas}>Mandar Orden</Button> :null} 
                 {datos.linea ?
                     <Button variant="danger" type="submit" className={'mx-2'} onClick={borrar_rectificado}>Eliminar Orden</Button> :
-                    datos.activado===true && soySuperTecnico && !datos.disabled? <Button variant="danger" type="submit" className={'mx-2'} onClick={borrar_rectificado}>Eliminar Orden</Button>: null} 
-                {datos.activado && soySuperTecnico && lineas_rectificacion?
+                    datos.activado===true && gestion_rectificados && !datos.disabled? <Button variant="danger" type="submit" className={'mx-2'} onClick={borrar_rectificado}>Eliminar Orden</Button>: null} 
+                {datos.activado && gestion_rectificados && lineas_rectificacion?
                     <Button variant="primary" type="submit" className={'mx-2'} onClick={DescargarPlanos}>Descargar planos</Button> :null} 
             </Form.Row>
             {datos.linea || rectificacion ?
@@ -437,7 +487,8 @@ const RodBuscarInstanciaCodBarras = ({proveedor, lineas_rectificandose, setLinea
                                     <th>Fecha estimada</th>
                                     {lineas_rectificacion?<th>Fecha rectificado</th>:''}
                                     <th>Observaciones</th>
-                                    {soySuperTecnico?<th>Acciones</th>:''}
+                                    {gestion_rectificados?<th>Archivo</th>:''}
+                                    {gestion_rectificados?<th>Acciones</th>:''}
                                 </tr>
                             </thead>
                             {lineas_rectificacion?
@@ -462,7 +513,7 @@ const RodBuscarInstanciaCodBarras = ({proveedor, lineas_rectificandose, setLinea
                                                                     value={linea.fecha}
                                                                     onChange={handleInputChange_fecha_rectificado(linea)} 
                                                                     placeholder="Fecha estimada" 
-                                                                    disabled={!soyTecnico || linea.nuevo_diametro!==0}/>
+                                                                    disabled={!gestion_rectificados || linea.nuevo_diametro!==0}/>
                                                     </Form.Group>
                                                 </td>
                                                 <td>{linea.fecha_rectificado?invertirFecha(String(linea.fecha_rectificado)):''}</td>
@@ -484,13 +535,58 @@ const RodBuscarInstanciaCodBarras = ({proveedor, lineas_rectificandose, setLinea
                                                         />
                                                     </Form.Group>
                                                 </td>
-                                                {soySuperTecnico?  
+                                                {gestion_rectificados?  
                                                     <td>
-                                                        {rectificacion.empresa===2 || soySuperTecnico?
-                                                            <Tools className="mr-3 pencil"  onClick={event =>{FinalizoRodillo(linea)}}/>
-                                                        :''}
-                                                        <Trash className="mr-3 pencil"  onClick={event => {borrarLinea_rectificado(linea)}} />
-                                                    </td>:''}                             
+                                                        <div className="d-flex align-items-center">
+                                                            <Paperclip
+                                                                className="mr-2"
+                                                                color={documentosDeLinea(linea).length > 0 ? '#0d6efd' : '#adb5bd'}
+                                                                size={18}
+                                                                style={{ cursor: 'pointer' }}
+                                                                onClick={() => {
+                                                                    const docs = documentosDeLinea(linea);
+                                                                    if (docs.length === 1) {
+                                                                        window.open(docs[0].archivo, '_blank');
+                                                                    } else {
+                                                                        setSelectorAbierto(selectorAbierto === linea.instancia.id ? null : linea.instancia.id);
+                                                                    }
+                                                                }}
+                                                            />
+
+                                                            <XCircle
+                                                                className="mr-2"
+                                                                color="red"
+                                                                size={16}
+                                                                style={{ cursor: 'pointer' }}
+                                                                onClick={() => quitarDocumento(linea)}
+                                                            />
+
+                                                            {selectorAbierto === linea.instancia.id &&
+                                                                <Form.Control
+                                                                    as="select"
+                                                                    size="sm"
+                                                                    style={{ width: 'auto', display: 'inline-block' }}
+                                                                    defaultValue=""
+                                                                    onChange={(e) => e.target.value && asignarDocumento(linea.id, parseInt(e.target.value))}
+                                                                >
+                                                                    <option value="">Seleccionar archivo...</option>
+                                                                    {documentosDisponibles.map(doc => (
+                                                                        <option key={doc.id} value={doc.id}>
+                                                                            {doc.archivo.split('/').pop()}
+                                                                        </option>
+                                                                    ))}
+                                                                </Form.Control>
+                                                            }
+                                                        </div>
+                                                    </td>:''}
+                                                    {gestion_rectificados?  
+                                                        <td>
+                                                            {rectificacion.empresa===2 || gestion_rectificados?
+                                                                <Tools className="mr-3 pencil"  onClick={event =>{FinalizoRodillo(linea)}}/>
+                                                            :''}
+                                                            <Trash className="mr-3 pencil"  onClick={event => {borrarLinea_rectificado(linea)}} />
+                                                        </td>
+                                                    :''}                             
                                             </tr>
                                     )})}
                                 </tbody>:

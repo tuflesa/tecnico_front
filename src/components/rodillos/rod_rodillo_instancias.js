@@ -4,9 +4,10 @@ import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { BACKEND_SERVER } from '../../constantes';
 import { Form, Col, Row, Table } from 'react-bootstrap';
-import { PlusCircle, PencilFill} from 'react-bootstrap-icons';
+import { PlusCircle, PencilFill, FileEarmarkText} from 'react-bootstrap-icons';
 import { Link } from 'react-router-dom';
 import RodModificarInstancia from './rod_modificar_instancia';
+import RodDocRectificadoModal from './rod_doc_rectificado_modal';
 
 const RodInstanciasRodillo = ({rodillo}) => {
     const [token] = useCookies(['tec-token']);
@@ -17,7 +18,8 @@ const RodInstanciasRodillo = ({rodillo}) => {
     const [instancias_activas, setInstanciasActivas] = useState([]);
     const [modificar_instancia, setModificarInstancia] = useState(null);
     const [filtroObsoleta, setFiltroObsoleta] = useState('false');
-
+    const [show_doc_modal, setShowDocModal] = useState(false);
+    const [instancia_docs, setInstanciaDocs] = useState(null);
     useEffect(() => {
         if (rodillo.id) {
             let url = `${BACKEND_SERVER}/api/rodillos/instancia_listado/?rodillo__id=${rodillo.id}`;
@@ -60,6 +62,16 @@ const RodInstanciasRodillo = ({rodillo}) => {
         setShowModInstancia(false);
         setModificarInstancia();
         //window.location.reload();
+    }
+
+    const abrirDocumentos = (instancia) => {
+        setInstanciaDocs(instancia);
+        setShowDocModal(true);
+    }
+
+    const cerrarDocumentos = () => {
+        setShowDocModal(false);
+        setInstanciaDocs(null);
     }
 
     return (
@@ -124,6 +136,9 @@ const RodInstanciasRodillo = ({rodillo}) => {
                                             <td><Link title='Modificar'onClick={() => ModificarInstancia(instancia)}>
                                                     <PencilFill className="mr-3 pencil"/>
                                                 </Link>
+                                                <Link title='Documentos' onClick={() => abrirDocumentos(instancia)}>
+                                                    <FileEarmarkText className="mr-3 pencil"/>
+                                                </Link>
                                             </td>
                                         </tr>
                                     </React.Fragment>
@@ -149,6 +164,13 @@ const RodInstanciasRodillo = ({rodillo}) => {
                                         instancias_activas={instancias_activas}
                                         rodillo={rodillo}
                                         />
+                :''}
+                {instancia_docs?
+                    <RodDocRectificadoModal
+                        show={show_doc_modal}
+                        handlerClose={cerrarDocumentos}
+                        instancia={instancia_docs}
+                    />
                 :''}
 
         </Container>

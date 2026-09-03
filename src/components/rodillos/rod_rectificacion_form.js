@@ -22,11 +22,17 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
     const [show_list_rodillos, setShowListRodillos] = useState(null);
     const [rectificacion_nueva, setRectificacion_nueva] = useState([]);
     const [rectificados_pendientes, setRectificadosPendientes] = useState([]); //ya manadados a rectificar
-    const soyTecnico = user['tec-user'].perfil.puesto.nombre==='Técnico'||user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:false;
-    const soySuperTecnico = user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:false;
-    const soyMantenimiento = user['tec-user'].perfil.puesto.nombre==='Mantenimiento'?true:false;
+    //const soyTecnico = user['tec-user'].perfil.puesto.nombre==='Técnico'||user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:false;
+    //const soySuperTecnico = user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:false;
+    //const soyMantenimiento = user['tec-user'].perfil.puesto.nombre==='Mantenimiento'?true:false;
+    const gestion_rectificados = user['tec-user'].perfil.destrezas_rodillos.some(
+        destreza => destreza.nombre === 'gestion_rectificados'
+    );
     const visible = user['tec-user'].perfil.puesto.nombre==='Técnico'||user['tec-user'].perfil.puesto.nombre==='Director Técnico'?true:rectificacion?false:true;
     const [proveedores, setProveedores] = useState([]);
+    const [archivosSeleccionados, setArchivosSeleccionados] = useState([]);
+    const [subiendoArchivos, setSubiendoArchivos] = useState(false);
+    const [documentosSubidos, setDocumentosSubidos] = useState([]);
 
     const [datos, setDatos] = useState({
         id: rectificacion? rectificacion.id : '',
@@ -52,6 +58,20 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
         id_instancia: '',
         idCod: '',
     });
+
+    useEffect(() => { //cargar documentos ya subidos al entrar
+        datos.id && axios.get(BACKEND_SERVER + `/api/rodillos/doc_rectificado/?rectificado=${datos.id}`, {
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( res => {
+            setDocumentosSubidos(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    }, [token, datos.id]);
 
     useEffect(() => {
         const handleEnterKey = (event) => {
@@ -233,6 +253,48 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
         })
     }
 
+    const handleSeleccionArchivos = (event) => {
+        const nuevos = Array.from(event.target.files);
+        setArchivosSeleccionados([...archivosSeleccionados, ...nuevos]);
+        event.target.value = '';
+    }
+
+    const quitarArchivo = (index) => {
+        setArchivosSeleccionados(archivosSeleccionados.filter((_, i) => i !== index));
+    }
+
+    const subirArchivos = () => {
+        if (archivosSeleccionados.length === 0) return;
+        setSubiendoArchivos(true);
+
+        const peticiones = archivosSeleccionados.map((archivo) => {
+            const formData = new FormData();
+            formData.append('archivo', archivo);
+            formData.append('rectificado', datos.id);
+            formData.append('usuario', user['tec-user'].id);
+            formData.append('fecha', hoy.toISOString().split('T')[0]);
+
+            return axios.post(BACKEND_SERVER + '/api/rodillos/doc_rectificado/', formData, {
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`,
+                    'Content-Type': 'multipart/form-data',
+                }
+            });
+        });
+
+        Promise.all(peticiones)
+            .then((respuestas) => {
+                const nuevosDocumentos = respuestas.map(res => res.data);
+                setDocumentosSubidos([...documentosSubidos, ...nuevosDocumentos]);
+                setArchivosSeleccionados([]);
+            })
+            .catch((err) => {
+                console.log(err);
+                alert('Hubo un error subiendo alguno de los documentos');
+            })
+            .finally(() => setSubiendoArchivos(false));
+    }
+
     return(
         <Container className='mt-5 pt-1'>
             <img src ={user['tec-user'].perfil.empresa.id===1?logo:logoTuf} width="200" height="200"></img>
@@ -330,7 +392,7 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
                                         value={datos.fecha}
                                         onChange={handleInputChange} 
                                         placeholder="Fecha creación" 
-                                        disabled={!soySuperTecnico || datos.disabled}/>
+                                        disabled={!gestion_rectificados || datos.disabled}/>
                         </Form.Group>
                     </Col>
                     <Col>
@@ -342,7 +404,7 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
                                         onChange={handleInputChange_estimada} 
                                         placeholder="Fecha estimada"
                                         //disabled={soyMantenimiento || datos.disabled || !rectificacion}
-                                        disabled={soyTecnico?false:rectificacion?true:false}
+                                        disabled={gestion_rectificados?false:rectificacion?true:false}
                                          />
                         </Form.Group>
                     </Col>
@@ -358,6 +420,47 @@ const RodRectificacionForm = ({rectificacion, setRectificacion, lineas_rectifica
                         </Col>
                     :''}
                 </Row>
+                {gestion_rectificados?
+                    <Row>
+                        <Col md={6}>
+                            <Form.Group controlId="archivos_rectificado">
+                                <Form.Label>Documentos del rectificado</Form.Label>
+                                <Form.Control type="file" multiple onChange={handleSeleccionArchivos} />
+                                {archivosSeleccionados.length > 0 &&
+                                    <ul className="mt-2 mb-2">
+                                        {archivosSeleccionados.map((archivo, index) => (
+                                            <li key={index}>
+                                                {archivo.name}{' '}
+                                                <Button variant="link" size="sm" onClick={() => quitarArchivo(index)}>Quitar</Button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                }
+                            </Form.Group>
+
+                            <Button variant="info" disabled={subiendoArchivos || archivosSeleccionados.length===0} onClick={subirArchivos}>
+                                {subiendoArchivos ? 'Subiendo...' : 'Subir documentos'}
+                            </Button>
+                        </Col>
+
+                        <Col md={6}>
+                            {documentosSubidos.length > 0 &&
+                                <>
+                                    <Form.Label>Documentos subidos</Form.Label>
+                                    <ul>
+                                        {documentosSubidos.map((doc) => (
+                                            <li key={doc.id}>
+                                                <a href={doc.archivo} target="_blank" rel="noopener noreferrer">
+                                                    {doc.archivo.split('/').pop()}
+                                                </a>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </>
+                            }
+                        </Col>
+                    </Row>
+                :''}
                 <Form.Row className="justify-content-center">
                     {datos.activado===false? 
                         <Button variant="info" type="submit" className={'mx-2'} onClick={GuardarRectificacion}>Guardar</Button>:''
