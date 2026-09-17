@@ -1,11 +1,17 @@
 import React, { useEffect } from 'react';
 import { useCookies } from 'react-cookie';
-import { Document, Page, Image, View, Text, StyleSheet, Svg, Path, G, Rect, Polygon } from "@react-pdf/renderer";
+import { Document, Page, Image, View, Text, StyleSheet, Svg, Path, G, Rect, Polygon, Font } from "@react-pdf/renderer";
 import logo_bornay from '../../assets/logo_bornay.svg'
 import {invertirFecha} from '../utilidades/funciones_fecha';
 
+const COLOR_MARCA = '#009640'; // verde corporativo Bornay
+const COLOR_TEXTO_SUAVE = '#6b6b6b';
+const COLOR_LINEA = '#e2e2e2';
+const COLOR_ZEBRA = '#f5f8f6';
+
+Font.registerHyphenationCallback(word => [word]);
+
 const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, proveedor, contacto, direccion_envio}) =>{
-    //borro empresa y lo sustituyo por pedido.empresa... la variable empresa entraba sin datos
     var total_pedido= 0;
     const [token] = useCookies(['tec-token']);
 
@@ -17,19 +23,28 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
         return new Intl.NumberFormat('de-DE').format(numero)
     }
 
+    // NOTA sobre el arreglo del salto de página:
+    // Cada fila de la tabla (línea de pedido) ahora lleva wrap={false}. Esto le dice a 
+    // @react-pdf/renderer que trate la fila como un bloque indivisible: si no cabe entera
+    // en lo que queda de página, la mueve completa a la siguiente en lugar de partirla
     function parseData(){
         if(linea){
             return linea.map((data, i)=>{
+                const filaPar = i % 2 === 0;
                 return(
-                    <View key={i}>
-                        <View style={styles.page2}>
+                    <View key={i} wrap={false}>
+                        <View style={[styles.filaPedido, styles.filaTabla, filaPar ? null : styles.filaTablaAlterna]}>
                             <View style={styles.section}>
-                                <View style={styles.section6}><Text>{(data.descripcion_proveedor) +" - " + (data.repuesto.fabricante?  data.repuesto.fabricante:'') + " - " + (data.modelo_proveedor? data.modelo_proveedor:'')}</Text></View>
+                                <View style={styles.section6}>
+                                    <Text>{data.descripcion_proveedor}</Text>
+                                    {data.repuesto.fabricante ? <Text>{data.repuesto.fabricante}</Text> : null}
+                                    {data.modelo_proveedor ? <Text>{data.modelo_proveedor}</Text> : null}
+                                </View>
                                 <View style={styles.section7}><Text>{data.cantidad}</Text></View>
                                 <View style={styles.section7}><Text>{data.tipo_unidad_nombre}</Text></View>
                                 <View style={styles.section9}><Text>{formatNumber(data.precio)}</Text></View>
                                 <View style={styles.section9}><Text>{formatPorcentaje(data.descuento) + '%'}</Text></View>
-                                <View style={styles.section9}><Text>{formatNumber(data.total)}</Text></View>
+                                <View style={styles.section9}><Text style={styles.textoTotalLinea}>{formatNumber(data.total)}</Text></View>
                             </View>
                         </View>
                     </View>
@@ -40,17 +55,20 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
 
     function parse2Data(){
         if(lineas_adicionales){
+            // Para el sombreado, contamos las lineas desde las de pedido y luego adicionales, una si una no, para que aunque tengamos de ambas salga correctamente.
+            const offsetFilas = linea ? linea.length : 0;
             return lineas_adicionales.map((data, i)=>{
+                const filaPar = (offsetFilas + i) % 2 === 0;
                 return(
-                    <View key={i}>
-                        <View style={styles.page2}>
+                    <View key={i} wrap={false}>
+                        <View style={[styles.filaPedido, styles.filaTabla, filaPar ? null : styles.filaTablaAlterna]}>
                             <View style={styles.section}>
                                 <View style={styles.section6}><Text>{data.descripcion}</Text></View>
                                 <View style={styles.section7}><Text>{data.cantidad}</Text></View>
                                 <View style={styles.section7}><Text>{null}</Text></View>
                                 <View style={styles.section9}><Text>{formatNumber(data.precio)}</Text></View>
                                 <View style={styles.section9}><Text>{formatPorcentaje(data.descuento) + '%'}</Text></View>
-                                <View style={styles.section9}><Text>{formatNumber(data.total)}</Text></View>
+                                <View style={styles.section9}><Text style={styles.textoTotalLinea}>{formatNumber(data.total)}</Text></View>
                             </View>
                         </View>
                     </View>
@@ -65,7 +83,9 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
         }
     }
     function Total_adic(){
-        lineas_adicionales.map( linea => total_pedido+=Number(linea.total))
+        if(lineas_adicionales){
+            lineas_adicionales.map( linea => total_pedido+=Number(linea.total))
+        }
     }
 
     const VerLogo = () => (
@@ -167,7 +187,7 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
                     s22.4,60.4,53.7,67.7v6.1L147.7,249L147.7,249z"/>
                 <G>
                     <Path fill="#575756" d="M709.2,265.9c-1.5,0-2.7-0.2-3.6-0.6c-0.9-0.4-1.6-1.1-2-2c-0.4-0.9-0.7-2.1-0.7-3.6
-                        c-0.1-1.9-0.1-3.9-0.1-5.9c0-2,0-3.9,0-5.9s0-3.9,0-5.9c0-2,0.1-3.9,0.1-5.8c0-1.5,0.3-2.8,0.7-3.7c0.4-0.9,1.1-1.6,2-2
+                        c-0.1-1.9-0.1-3.9-0.1-5.9c0-2,0-3.9,0-5.9s0-3.9,0-5.9s0.1-3.9,0.1-5.8c0-1.5,0.3-2.8,0.7-3.7c0.4-0.9,1.1-1.6,2-2
                         c0.9-0.4,2.1-0.6,3.5-0.6c2.1,0,3.6,0.5,4.6,1.4c1,1,1.5,2.5,1.6,4.8c0,1.1,0.1,2.2,0.1,3.3c0,1.1,0,2.2-0.1,3.3H712
                         c0-1.2,0.1-2.4,0.1-3.6c0-1.2,0-2.4-0.1-3.5c-0.1-1-0.3-1.7-0.7-2.1c-0.5-0.5-1.1-0.7-2-0.7c-1,0-1.7,0.2-2.1,0.7
                         c-0.5,0.5-0.7,1.2-0.7,2.1c-0.1,2.1-0.1,4.1-0.1,6.2c0,2.1,0,4.1,0,6.2s0,4.1,0,6.2c0,2.1,0.1,4.1,0.1,6.2c0,1,0.3,1.7,0.7,2.1
@@ -184,7 +204,7 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
                     <Path fill="#575756" d="M760,265.6v-35.5h5.8c2.2,0,3.7,0.5,4.7,1.4c1,0.9,1.5,2.5,1.6,4.7c0.1,1.9,0.1,3.6,0.1,5.1
                         c0,1.5,0,3-0.1,4.6c-0.1,2.2-0.6,3.8-1.6,4.7c-1,0.9-2.6,1.4-4.7,1.4h-2.4v13.5H760z M763.4,249h2.4c1,0,1.7-0.2,2.2-0.7
                         c0.5-0.5,0.7-1.2,0.8-2.2c0-1.1,0.1-2.2,0.1-3.3c0-1.1,0-2.2,0-3.4c0-1.1,0-2.2-0.1-3.4c-0.1-1-0.3-1.7-0.7-2.2
-                        c-0.5-0.5-1.2-0.7-2.1-0.7h-2.4V249L763.4,249z"/>
+                        c-0.5-0.5-1.2-0.7-2.1-0.7H763.4V249L763.4,249z"/>
                     <Path fill="#575756" d="M784.4,265.9c-2.2,0-3.8-0.5-4.8-1.4c-1-1-1.5-2.5-1.5-4.7c-0.1-2-0.1-4-0.1-6c0-2,0-3.9,0-5.9
                         c0-2,0-3.9,0-5.9c0-2,0.1-4,0.1-6c0-2.2,0.5-3.8,1.5-4.7c1-1,2.6-1.4,4.8-1.4s3.8,0.5,4.8,1.4c1,1,1.5,2.5,1.5,4.7
                         c0,2.1,0.1,4.1,0.1,6c0,2,0,3.9,0,5.9c0,2,0,3.9,0,5.9c0,2-0.1,4-0.1,6c-0.1,2.2-0.6,3.8-1.5,4.7
@@ -254,17 +274,24 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
 
     const styles = StyleSheet.create({
         page:{
-            margin: 30,
+            // El margen horizontal (izquierda/derecha) lo aporta SIEMPRE cada bloque por sí mismo (cabecera, page2, page3...),
+            // para que todos compartan exactamente el mismo margen y no se sumen dos márgenes de 30.
+            marginVertical: 30,
+        },
+        pagina: {
+            paddingBottom: 40,
         },
         page1:{
-            //marginLeft: 25,
-            //marginRight: 25,
             textAlign: 'justify',
             margin: 3,
             padding: 3,
             flex: 3,
-            fontSize: 14,
-            marginBottom: 5,
+            fontSize: 20,
+            fontWeight: 'bold',
+            color: COLOR_MARCA,
+            marginBottom: 10,
+            lineHeight: 1.3,
+            textAlign: 'right',
         },
         page2:{
             marginLeft: 30,
@@ -273,28 +300,38 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
         },
 
         page3:{
-            marginLeft: 30,
-            marginRight: 30,
+            marginLeft: 40,
+            marginRight: 40,
             marginTop: 15,
             marginBottom: 15
+        },
+        // Mismo contenedor que "page2" pero con +10pt de margen (40 en vez de 30)
+        filaPedido: {
+            marginLeft: 40,
+            marginRight: 40,
+            marginBottom: 1,
+        },
+        cierrePedido: {
+            marginTop: 6,
+        },
+        page3cierre: {
+            marginLeft: 30,
+            marginRight: 30,
+            marginTop: 4,
+            marginBottom: 8
         },
         section: {
             flexDirection: 'row',
             flexGrow: 1,
             marginBottom: 3,
-            alignItems: 'flex-start',//añadimos a partir de aquí
-            flexWrap: 'nowrap', 
+            alignItems: 'flex-start',
+            flexWrap: 'nowrap',
         },
         imagen: {
             fixed: true,
-            width: 5,
-            height: 80,
+            width: 140,
             margin: 3,
-            marginLeft: 30,
             padding: 5,
-            //marginLeft: 5,
-            flexGrow: 1,
-            //flexDirection: "column",
         },
         iconos: {
             fixed: true,
@@ -303,37 +340,69 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
             flex: 1,
             flexDirection: "column",
         },
+        // CAMBIO 1 (rojo): las 3 columnas (Datos Proveedor / Facturación / Envío)
+        // comparten minHeight para verse a la misma altura, pero CADA UNA conserva
+        // su proporción de ancho (flexGrow) con flexBasis:0 y flexShrink:1, para que
+        // el reparto de ancho sea el correcto y el texto haga wrap dentro de su
+        // propia columna en vez de invadir la columna vecina.
+        columnaDatos: {
+            flexGrow: 3,
+            flexShrink: 1,
+            flexBasis: 0,
+            margin: 5,
+            padding: 5,
+            flexDirection: "column",
+            fontSize: 10,
+            minHeight: 165,
+        },
+        columnaDireccion: {
+            flexGrow: 2,
+            flexShrink: 1,
+            flexBasis: 0,
+            margin: 5,
+            padding: 5,
+            flexDirection: "column",
+            fontSize: 10,
+            minHeight: 165,
+        },
         section3: {
-            //margin: 5,
             marginLeft: 5,
             marginRight: 5,
             marginBottom: 1,
-            //marginTop: 0,
             padding: 5,
             flex: 1,
             flexDirection: "column",
             fontSize: 10,
-            lineHeight: 1.8,
+            lineHeight: 1.4,
         },
         section44: {
-            margin: 3,
-            padding: 3,
+            margin: 5,
+            padding: 5,
             flex: 3,
             flexDirection: "column",
             fontSize: 10,
+            minHeight: 165,
         },
         section_negrita: {
             fontWeight: 'bold',
+        },
+        etiquetaBloque: {
+            color: COLOR_MARCA,
+            fontWeight: 'bold',
+            fontSize: 10,
+            marginTop: 15,
+            marginBottom: 3,
+            textTransform: 'uppercase',
         },
         section4: {
             margin: 5,
             padding: 5,
             flex: 2,
             flexDirection: "column",
-            fontSize: 10
+            fontSize: 10,
+            minHeight: 165,
         },
         section5: {
-            //margin: 5,
             marginLeft: 5,
             marginRight: 5,
             marginBottom: 1,
@@ -347,31 +416,41 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
             flexGrow: 4,
             flexShrink: 1,
             flexBasis: '35%',
-            margin: 5,
-            padding: 5,
+            marginHorizontal: 5,
+            marginVertical: 3,
+            paddingHorizontal: 5,
+            paddingVertical: 2,
             flexDirection: "column",
             fontSize: 10,
             textAlign: 'justify',
             wordWrap: 'break-word',
             },
         section7: {
-            margin: 5,
-            padding: 5,
+            marginHorizontal: 5,
+            marginVertical: 3,
+            paddingHorizontal: 5,
+            paddingVertical: 2,
             flex: 1,
             flexDirection: "column",
             fontSize: 10,
         },
         section8: {
-            margin: 5,
-            padding: 5,
+            marginHorizontal: 5,
+            marginVertical: 3,
+            paddingHorizontal: 5,
+            paddingVertical: 2,
             flex: 2,
             flexDirection: "column",
-            textAlign: 'center',
+            textAlign: 'right',
             fontSize: 10,
+            fontWeight: 'bold',
+            color: '#ffffff',
         },
         section9: {
-            margin: 5,
-            padding: 5,
+            marginHorizontal: 5,
+            marginVertical: 3,
+            paddingHorizontal: 5,
+            paddingVertical: 2,
             flex: 2,
             flexDirection: "column",
             textAlign: 'right',
@@ -380,7 +459,17 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
         sectionTabla: {
             flexDirection: 'row',
             flexGrow: 1,
-            borderBottom: true
+            backgroundColor: COLOR_MARCA,
+        },
+        filaTabla: {
+            paddingTop: 2,
+            paddingBottom: 2,
+        },
+        filaTablaAlterna: {
+            backgroundColor: COLOR_ZEBRA,
+        },
+        textoTotalLinea: {
+            fontWeight: 'bold',
         },
         pageNumber: {
             position: 'absolute',
@@ -391,52 +480,77 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
             textAlign: 'center',
             color: 'grey',
         },
-        totalNumber: {
+        pieLegal: {
+            position: 'absolute',
+            bottom: 45,   // deja hueco encima del número de página (bottom:30)
+            left: 30,
+            right: 30,
+            fontSize: 9,
+            color: 'grey',
+            textAlign: 'justify',
+            lineHeight: 1.6,
+        },
+        cajaTotal: {
+            marginTop: 6,
             marginRight: 70,
             marginBottom: 3,
-            fontSize: 10,
-            bottom: 30,
-            left: 0,
-            right: 0,
-            textAlign: 'right',
-            color: 'grey',
+            alignItems: 'flex-end',
+        },
+        lineaTotal: {
+            width: 220,
+            borderTopWidth: 1.5,
+            borderTopColor: COLOR_MARCA,
+            paddingTop: 4,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+        },
+        totalNumber: {
+            fontSize: 12,
+            fontWeight: 'bold',
+            color: '#1a1a1a',
+        },
+        totalLabel: {
+            fontSize: 11,
+            color: COLOR_TEXTO_SUAVE,
+        },
+        avisoIntracomunitario: {
+            marginTop: 4,
+            fontSize: 9,
+            color: COLOR_TEXTO_SUAVE,
         },
         ComentarioFinal: {
-            position: 'absolute',
+            marginTop: 10,
             fontSize: 9,
-            bottom: 50,
-            left: 15,
-            right: 15,
             textAlign: 'justify',
             color: 'grey',
             lineHeight: 1.6,
         },
         textWithMargin: {
-            marginBottom: 5,
-            lineHeight: 1.6,
+            marginBottom: 3,
+            lineHeight: 1.3,
         },
     });
     return(     
         <Document>
-            <Page size="A4">
+            <Page size="A4" style={styles.pagina}>
                 <Text render={({ pageNumber, totalPages }) => ("  ")} fixed /> 
                 <View style={styles.page} >
-                    <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginLeft: 30, marginRight: 30 }}>
                         <View style={styles.imagen}>
                             {pedido.empresa.id === 1 ? <VerLogo /> : pedido.empresa.id === 2 ? <VerLogo_tuf /> : pedido.empresa.id === 3 ? <VerLogo_com /> : <Image src={pedido.empresa.logo}/>}
                         </View>
-                        <View style={{ flex: 1, marginLeft: 160, justifyContent: 'center' }}>
-                            <View style={styles.section_negrita}>
+                        <View style={{ alignItems: 'flex-end', justifyContent: 'center' }}>
+                            <View style={[styles.section_negrita, { alignItems: 'flex-end' }]}>
                                 <Text style={styles.page1}>Pedido</Text>
-                                <Text style={styles.section44}>Fecha: {fecha_creacion}</Text>
-                                <Text style={{ ...styles.section44, marginBottom: 5 }}>Nº Pedido: {pedido.numero}</Text>
+                                <Text style={{ ...styles.section44, textAlign: 'right', minHeight: 'auto' }}>Fecha: {fecha_creacion}</Text>
+                                <Text style={{ ...styles.section44, textAlign: 'right', marginBottom: 5, minHeight: 'auto' }}>Nº Pedido: {pedido.numero}</Text>
                             </View>
                         </View>
                     </View>
                     <View style={styles.page2}>               
                         <View style={styles.section}>
-                            <View style={styles.section44}>
-                                <Text style={{color: 'grey', marginTop: 15}}>Datos Proveedor:</Text>
+                            <View style={styles.columnaDatos}>
+                                <Text style={styles.etiquetaBloque}>Datos Proveedor</Text>
                                 <Text>{proveedor.nombre}</Text>
                                 <Text>{proveedor.cif}</Text>
                                 <Text>Código:{proveedor.cod_ekon}</Text>
@@ -449,8 +563,8 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
                                 <Text>Creado por:   {pedido.creado_por.get_full_name}</Text>
                                 <Text>Email: {pedido.creado_por.email}</Text>
                             </View>
-                            <View style={styles.section4}>
-                                <Text style={{color: 'grey', marginTop: 15}}>Dirección de Facturación:</Text>
+                            <View style={styles.columnaDireccion}>
+                                <Text style={styles.etiquetaBloque}>Dirección de Facturación</Text>
                                 <Text>{pedido.empresa.id===2?'TUBOS Y FLEJES SLU.':pedido.empresa.id===3?'Comercial Alicantina Siderúrgica S.L.':pedido.empresa.nombre}</Text>
                                 <Text>{pedido.empresa.cif}</Text>
                                 <Text>{pedido.empresa.direccion}</Text>
@@ -460,8 +574,8 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
                                 <Text>Telf: {pedido.empresa.telefono}</Text>
                                 <Text style={{marginTop: 20}}>Fecha de Entrega: {invertirFecha(String(pedido.fecha_prevista_entrega))}</Text>
                             </View>
-                            <View style={styles.section4}>
-                                <Text style={{color: 'grey', marginTop: 15}}>Dirección de Envío:</Text>
+                            <View style={styles.columnaDireccion}>
+                                <Text style={styles.etiquetaBloque}>Dirección de Envío</Text>
                                 <Text>{pedido.empresa.id===2?'TUBOS Y FLEJES SLU.':pedido.empresa.id===3?'Comercial Alicantina Siderúrgica S.L.':pedido.empresa.nombre}</Text>
                                 {/* <Text>{direccion_envio.cif}</Text> */}
                                 <Text>{direccion_envio.direccion}</Text>
@@ -472,28 +586,21 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
                             </View>
                         </View>
                     </View>
-                    <View style={styles.page2}>
-                        <View style={styles.section}>
-                            <View style={styles.section3}>
-                                {/* <Text style={styles.textWithMargin}>Nº Pedido: {pedido.numero}</Text>  */}
-                                <Text style={styles.textWithMargin}>Observaciones pedido: {pedido.observaciones}</Text>                            
+                    {pedido.observaciones ?
+                        <View style={styles.page2}>
+                            <View style={styles.section}>
+                                <View style={styles.section3}>
+                                    <Text style={styles.textWithMargin}>Observaciones pedido: {pedido.observaciones}</Text>
+                                </View>
                             </View>
                         </View>
-                    </View>
-                    <View style={styles.page2}>
-                        <View style={styles.section}>
-                            <View style={styles.section5}>
-                                <Text>Muy Sres. nuestros:</Text>
-                                <Text>Les confirmamos nuestro pedido para el suministro del material que detallamos a continuacion:</Text>
-                            </View>
-                        </View>
-                    </View>
+                    : null}
                     { linea !== '' ?
                         <View style={styles.page3} fixed>
                             <View style={styles.sectionTabla}>
-                                <View style={styles.section6}><Text>Descripción</Text></View>
-                                <View style={styles.section7}><Text>Cant.</Text></View>
-                                <View style={styles.section7}><Text>Und.</Text></View>
+                                <View style={styles.section6}><Text style={{color:'#ffffff', fontWeight:'bold'}}>Descripción</Text></View>
+                                <View style={styles.section7}><Text style={{color:'#ffffff', fontWeight:'bold'}}>Cant.</Text></View>
+                                <View style={styles.section7}><Text style={{color:'#ffffff', fontWeight:'bold'}}>Und.</Text></View>
                                 <View style={styles.section8}><Text>Precio</Text></View>
                                 <View style={styles.section8}><Text>Dto.</Text></View>
                                 <View style={styles.section8}><Text>Total</Text></View>
@@ -506,34 +613,36 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
                 </View>
                 {Total()}
                 {Total_adic()}
-                <View style={styles.totalNumber}>
-                    <Text>Base Imponible: {Number.parseFloat(total_pedido).toFixed(2)}€</Text>
+                <View style={styles.cajaTotal}>
+                    <View style={styles.lineaTotal}>
+                        <Text style={styles.totalLabel}>Base Imponible</Text>
+                        <Text style={styles.totalNumber}>{Number.parseFloat(total_pedido).toFixed(2)}€</Text>
+                    </View>
+                    {proveedor.pais!=='España'?<Text style={styles.avisoIntracomunitario}>OPERACION INTRACOMUNITARIA EXENTA DE IVA</Text>:null}
                 </View>
-                <View style={styles.totalNumber}>
-                    {proveedor.pais!=='España'?<Text style={{marginBottom:10}}>OPERACION INTRACOMUNITARIA EXENTA DE IVA</Text>:null}
-                </View>
-                {/* <View style={styles.totalNumber}><Text>Iva aplicable: {'        ' + proveedor.iva}%</Text></View> */}
-                {/* <View style={styles.totalNumber}><Text>Total Pedido: {Number.parseFloat((total_pedido)*(proveedor.iva/100+1)).toFixed(2)}€</Text></View> */}
-                <View style={styles.page} >
-                    <View style={styles.page2}>
-                        <View style={styles.section}>
-                            <View style={styles.section3}>
-                                <Text>Observaciones pedido: {pedido.observaciones2}</Text>                            
+                <View style={styles.cierrePedido} wrap={false}>
+                    {pedido.observaciones2 ?
+                        <View style={styles.page2}>
+                            <View style={styles.section}>
+                                <View style={styles.section3}>
+                                    <Text>Observaciones pedido: {pedido.observaciones2}</Text>
+                                </View>
                             </View>
                         </View>
-                    </View>
-                    <View style={styles.page3}>
+                    : null}
+                    <View style={styles.page3cierre}>
                         <View style={styles.section}>
                             <View style={styles.section3}>
                                 <Text style={styles.textWithMargin}>Nota: Por favor indicar en nº de pedido en el albarán de entrega.</Text>
                                 <Text style={styles.textWithMargin}>Condiciones de Pago: {proveedor.condicion_pago}</Text>
                                 <Text style={styles.textWithMargin}>Condiciones de Entrega - Incoterm 2020: {proveedor.condicion_entrega}</Text>
-                                
                             </View>
                         </View>
                     </View>
                 </View>
-                <Text style={styles.ComentarioFinal}>La empresa suministradora de los bienes y/o servicios solicitados deberá aplicar políticas que sean conformes a los objetivos de desarrollo sostenible y responsabilidad social, que incluyen un gobierno corporativo, respeto por el medio ambiente, el cumplimiento de los derechos humanos, prácticas operativas, laborales y comerciales justas y con una preocupación hacia el consumidor, la sociedad y el bien común. </Text>
+                <Text style={styles.pieLegal} fixed>
+                    La empresa suministradora de los bienes y/o servicios solicitados deberá aplicar políticas que sean conformes a los objetivos de desarrollo sostenible y responsabilidad social, que incluyen un gobierno corporativo, respeto por el medio ambiente, el cumplimiento de los derechos humanos, prácticas operativas, laborales y comerciales justas y con una preocupación hacia el consumidor, la sociedad y el bien común. 
+                </Text>
                 <Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => (`${pageNumber} / ${totalPages}`)} fixed />
                 <View style={styles.page}fixed></View>                
             </Page>

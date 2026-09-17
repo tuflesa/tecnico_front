@@ -1,6 +1,15 @@
 import React from 'react';
-import { Document, Page, Image, View, Text, StyleSheet, Svg, Path, G, Rect, Polygon} from "@react-pdf/renderer";
+import { Document, Page, Image, View, Text, StyleSheet, Svg, Path, G, Rect, Polygon, Font } from "@react-pdf/renderer";
 import {invertirFecha} from '../utilidades/funciones_fecha';
+
+const COLOR_MARCA = '#009640'; // verde corporativo Bornay
+const COLOR_TEXTO_SUAVE = '#6b6b6b';
+const COLOR_LINEA = '#e2e2e2';
+const COLOR_ZEBRA = '#f5f8f6';
+
+// Igual que en VistaPdf.js: evita que @react-pdf/renderer parta palabras largas
+// a mitad con un guion cuando no caben en el ancho disponible.
+Font.registerHyphenationCallback(word => [word]);
 
 const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicionales, proveedor, contacto, direccion_envio}) =>{
     var total_pedido= 0;
@@ -13,19 +22,25 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicional
         return new Intl.NumberFormat('de-DE').format(numero)
     }
 
+    // Cada fila de la tabla lleva wrap={false} para que no se parta entre dos
     function parseData(){
         if(linea){
             return linea.map((data, i)=>{
+                const filaPar = i % 2 === 0;
                 return(
-                    <View key={i}>
-                        <View style={styles.page2}>
+                    <View key={i} wrap={false}>
+                        <View style={[styles.filaPedido, styles.filaTabla, filaPar ? null : styles.filaTablaAlterna]}>
                             <View style={styles.section}>
-                                <View style={styles.section6}><Text>{(data.descripcion_proveedor) +" - "+ (data.repuesto.fabricante? data.repuesto.fabricante:'') +" - " + (data.repuesto.modelo? data.repuesto.modelo:'')}</Text></View>
+                                <View style={styles.section6}>
+                                    <Text>{data.descripcion_proveedor}</Text>
+                                    {data.repuesto.fabricante ? <Text>{data.repuesto.fabricante}</Text> : null}
+                                    {data.repuesto.modelo ? <Text>{data.repuesto.modelo}</Text> : null}
+                                </View>
                                 <View style={styles.section7}><Text>{data.cantidad}</Text></View>
                                 <View style={styles.section7}><Text>{'pcs'}</Text></View>
                                 <View style={styles.section9}><Text>{formatNumber(data.precio)}</Text></View>
                                 <View style={styles.section9}><Text>{formatPorcentaje(data.descuento) + '%'}</Text></View>
-                                <View style={styles.section9}><Text>{formatNumber(data.total)}</Text></View>
+                                <View style={styles.section9}><Text style={styles.textoTotalLinea}>{formatNumber(data.total)}</Text></View>
                             </View>
                         </View>
                     </View>
@@ -36,17 +51,21 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicional
 
     function parse2Data(){
         if(lineas_adicionales){
+            // Mismo desfase que en VistaPdf.js: para que el zebra siga la
+            // secuencia continua entre las líneas normales y las adicionales.
+            const offsetFilas = linea ? linea.length : 0;
             return lineas_adicionales.map((data, i)=>{
+                const filaPar = (offsetFilas + i) % 2 === 0;
                 return(
-                    <View key={i}>
-                        <View style={styles.page2}>
+                    <View key={i} wrap={false}>
+                        <View style={[styles.filaPedido, styles.filaTabla, filaPar ? null : styles.filaTablaAlterna]}>
                             <View style={styles.section}>
                                 <View style={styles.section6}><Text>{data.descripcion}</Text></View>
                                 <View style={styles.section7}><Text>{data.cantidad}</Text></View>
                                 <View style={styles.section7}><Text>{null}</Text></View>
                                 <View style={styles.section9}><Text>{formatNumber(data.precio)}</Text></View>
                                 <View style={styles.section9}><Text>{formatPorcentaje(data.descuento) + '%'}</Text></View>
-                                <View style={styles.section9}><Text>{formatNumber(data.total)}</Text></View>
+                                <View style={styles.section9}><Text style={styles.textoTotalLinea}>{formatNumber(data.total)}</Text></View>
                             </View>
                         </View>
                     </View>
@@ -61,17 +80,10 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicional
         }
     }
     function Total_adic(){
-        lineas_adicionales.map( linea => total_pedido+=Number(linea.total))
+        if(lineas_adicionales){
+            lineas_adicionales.map( linea => total_pedido+=Number(linea.total))
+        }
     }
-
-    /* const ExampleSvg = () => (
-        <Svg width="200" height="200" viewBox="-100 -100 200 250">
-            <Polygon points="0,0 80,120 -80,120" fill="#234236" />
-            <Polygon points="0,-40 60,60 -60,60" fill="#0C5C4C" />
-            <Polygon points="0,-80 40,0 -40,0" fill="#38755B" />
-            <Rect x="-20" y="120" width="40" height="30" fill="#A32B2D" />
-        </Svg>
-    ); */
 
     const VerLogo = () => (
         <Svg version="1.0" encoding="UTF-8" id="Capa_2" data-name="Capa 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 917.27 304.08">
@@ -259,44 +271,60 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicional
 
     const styles = StyleSheet.create({
         page:{
-            margin: 30,
+            marginVertical: 30,
+        },
+        pagina: {
+            paddingBottom: 40,
         },
         page1:{
-            //marginLeft: 25,
-            //marginRight: 25,
             textAlign: 'justify',
             margin: 3,
             padding: 3,
             flex: 3,
-            fontSize: 14,
-            marginBottom: 5,
+            fontSize: 20,
+            fontWeight: 'bold',
+            color: COLOR_MARCA,
+            marginBottom: 10,
+            lineHeight: 1.3,
+            textAlign: 'right',
         },
         page2:{
             marginLeft: 30,
             marginRight: 30,
-            marginBottom: 3,
+            marginBottom: 1,
         },
         page3:{
-            marginLeft: 30,
-            marginRight: 30,
+            marginLeft: 40,
+            marginRight: 40,
             marginTop: 15,
             marginBottom: 15
+        },
+        filaPedido: {
+            marginLeft: 40,
+            marginRight: 40,
+            marginBottom: 1,
+        },
+        cierrePedido: {
+            marginTop: 6,
+        },
+        page3cierre: {
+            marginLeft: 30,
+            marginRight: 30,
+            marginTop: 4,
+            marginBottom: 8
         },
         section: {
             flexDirection: 'row',
             flexGrow: 1,
             marginBottom: 3,
+            alignItems: 'flex-start',
+            flexWrap: 'nowrap',
         },
         imagen: {
             fixed: true,
-            width: 5,
-            height: 80,
-            margin: 5,
-            marginLeft: 30,
+            width: 140,
+            margin: 3,
             padding: 5,
-            //marginLeft: -45,
-            flexGrow: 1,
-            //flexDirection: "column",
         },
         iconos: {
             fixed: true,
@@ -305,81 +333,131 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicional
             flex: 1,
             flexDirection: "column",
         },
-        section3: {
+        columnaDatos: {
+            flexGrow: 3,
+            flexShrink: 1,
+            flexBasis: 0,
             margin: 5,
+            padding: 5,
+            flexDirection: "column",
+            fontSize: 10,
+            minHeight: 165,
+        },
+        columnaDireccion: {
+            flexGrow: 2,
+            flexShrink: 1,
+            flexBasis: 0,
+            margin: 5,
+            padding: 5,
+            flexDirection: "column",
+            fontSize: 10,
+            minHeight: 165,
+        },
+        section3: {
+            marginLeft: 5,
+            marginRight: 5,
+            marginBottom: 1,
             padding: 5,
             flex: 1,
             flexDirection: "column",
-            fontSize: 10
+            fontSize: 10,
+            lineHeight: 1.4,
         },
         section44: {
-            margin: 3,
-            padding: 3,
+            margin: 5,
+            padding: 5,
             flex: 3,
             flexDirection: "column",
-            fontSize: 10
+            fontSize: 10,
+            minHeight: 165,
         },
         section_negrita: {
             fontWeight: 'bold',
+        },
+        etiquetaBloque: {
+            color: COLOR_MARCA,
+            fontWeight: 'bold',
+            fontSize: 10,
+            marginTop: 15,
+            marginBottom: 3,
+            textTransform: 'uppercase',
         },
         section4: {
             margin: 5,
             padding: 5,
             flex: 2,
             flexDirection: "column",
-            fontSize: 10
+            fontSize: 10,
+            minHeight: 165,
         },
         section5: {
-            margin: 5,
+            marginLeft: 5,
+            marginRight: 5,
+            marginBottom: 1,
             padding: 5,
             flex: 1,
             flexDirection: "column",
-            fontSize: 8
+            fontSize: 8,
+            lineHeight: 1.6,
         },
         section6: {
             flexGrow: 4,
             flexShrink: 1,
             flexBasis: '35%',
-            margin: 5,
-            padding: 5,
+            marginHorizontal: 5,
+            marginVertical: 3,
+            paddingHorizontal: 5,
+            paddingVertical: 2,
             flexDirection: "column",
             fontSize: 10,
             textAlign: 'justify',
             wordWrap: 'break-word',
             },
         section7: {
-            margin: 5,
-            padding: 5,
+            marginHorizontal: 5,
+            marginVertical: 3,
+            paddingHorizontal: 5,
+            paddingVertical: 2,
             flex: 1,
             flexDirection: "column",
             fontSize: 10,
         },
         section8: {
-            margin: 5,
-            padding: 5,
+            marginHorizontal: 5,
+            marginVertical: 3,
+            paddingHorizontal: 5,
+            paddingVertical: 2,
             flex: 2,
             flexDirection: "column",
-            textAlign: 'center',
+            textAlign: 'right',
             fontSize: 10,
+            fontWeight: 'bold',
+            color: '#ffffff',
         },
         section9: {
-            margin: 5,
-            padding: 5,
+            marginHorizontal: 5,
+            marginVertical: 3,
+            paddingHorizontal: 5,
+            paddingVertical: 2,
             flex: 2,
             flexDirection: "column",
             textAlign: 'right',
             fontSize: 10,
         },
-        section10: {
-            margin: 2,
-            flex: 3,
-            flexDirection: "column",
-            fontSize: 8
-        },
         sectionTabla: {
             flexDirection: 'row',
             flexGrow: 1,
-            borderBottom: true
+            backgroundColor: COLOR_MARCA,
+        },
+        filaTabla: {
+            paddingTop: 2,
+            paddingBottom: 2,
+        },
+        filaTablaAlterna: {
+            backgroundColor: COLOR_ZEBRA,
+        },
+        textoTotalLinea: {
+            fontWeight: 'bold',
         },
         pageNumber: {
             position: 'absolute',
@@ -390,52 +468,77 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicional
             textAlign: 'center',
             color: 'grey',
         },
-        totalNumber: {
+        pieLegal: {
+            position: 'absolute',
+            bottom: 45,
+            left: 30,
+            right: 30,
+            fontSize: 9,
+            color: 'grey',
+            textAlign: 'justify',
+            lineHeight: 1.6,
+        },
+        cajaTotal: {
+            marginTop: 6,
             marginRight: 70,
             marginBottom: 3,
-            fontSize: 10,
-            bottom: 30,
-            left: 0,
-            right: 0,
-            textAlign: 'right',
-            color: 'grey',
+            alignItems: 'flex-end',
+        },
+        lineaTotal: {
+            width: 220,
+            borderTopWidth: 1.5,
+            borderTopColor: COLOR_MARCA,
+            paddingTop: 4,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+        },
+        totalNumber: {
+            fontSize: 12,
+            fontWeight: 'bold',
+            color: '#1a1a1a',
+        },
+        totalLabel: {
+            fontSize: 11,
+            color: COLOR_TEXTO_SUAVE,
+        },
+        avisoIntracomunitario: {
+            marginTop: 4,
+            fontSize: 9,
+            color: COLOR_TEXTO_SUAVE,
         },
         ComentarioFinal: {
-            position: 'absolute',
+            marginTop: 10,
             fontSize: 9,
-            bottom: 50,
-            left: 15,
-            right: 15,
             textAlign: 'justify',
             color: 'grey',
+            lineHeight: 1.6,
         },
         textWithMargin: {
-            marginBottom: 5,
+            marginBottom: 3,
+            lineHeight: 1.3,
         },
     });
     return(     
         <Document>
-            <Page size="A4">
-                <Text render={({ pageNumber, totalPages }) => ("  ")} fixed />            
+            <Page size="A4" style={styles.pagina}>
+                <Text render={({ pageNumber, totalPages }) => ("  ")} fixed /> 
                 <View style={styles.page} >
-                    <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginLeft: 30, marginRight: 30 }}>
                         <View style={styles.imagen}>
-                            {pedido.empresa.id === 1 ? <VerLogo /> : pedido.empresa.id === 2 ? <VerLogo_tuf /> : pedido.empresa.id === 3 ? <VerLogo_com /> : <Image src={pedido.empresa.logo}/>}  
+                            {pedido.empresa.id === 1 ? <VerLogo /> : pedido.empresa.id === 2 ? <VerLogo_tuf /> : pedido.empresa.id === 3 ? <VerLogo_com /> : <Image src={pedido.empresa.logo}/>}
                         </View>
-                        <View style={{ flex: 1, marginLeft: 160, justifyContent: 'center' }}>
-                            <View style={styles.section_negrita}>
+                        <View style={{ alignItems: 'flex-end', justifyContent: 'center' }}>
+                            <View style={[styles.section_negrita, { alignItems: 'flex-end' }]}>
                                 <Text style={styles.page1}>Purchase Order</Text>
-                                <Text style={styles.section44}>Date:    {fecha_creacion}</Text>
-                                <Text style={{...styles.section44, marginBottom: 5}}>Order Nº: {pedido.numero}</Text> 
+                                <Text style={{ ...styles.section44, textAlign: 'right', minHeight: 'auto' }}>Date: {fecha_creacion}</Text>
+                                <Text style={{ ...styles.section44, textAlign: 'right', marginBottom: 5, minHeight: 'auto' }}>Order Nº: {pedido.numero}</Text>
                             </View>
                         </View>
                     </View>
                     <View style={styles.page2}>               
                         <View style={styles.section}>
-                            <View style={styles.section44}>
-                                {/* <Text>Date: {fecha_creacion}</Text> */}
-                                {/* {contacto ? <Text>to:   {contacto.nombre}</Text>:<Text>   </Text>} */}
-                                <Text style={{color: 'grey', marginTop: 15}}>Supplier details:</Text>
+                            <View style={styles.columnaDatos}>
+                                <Text style={styles.etiquetaBloque}>Supplier details</Text>
                                 <Text>{proveedor.nombre}</Text>
                                 <Text>{proveedor.cif}</Text>
                                 <Text>Code:{proveedor.cod_ekon}</Text>
@@ -444,12 +547,12 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicional
                                 <Text>{proveedor.direccion}</Text>
                                 <Text>{proveedor.poblacion}</Text>
                                 <Text>{proveedor.pais}</Text>
-                                <Text style={{marginTop: 15}}>Subject:  Pedido</Text>
-                                <Text>Created by: {pedido.creado_por.get_full_name}</Text>
+                                <Text style={{marginTop: 7}}>Subject:  Pedido</Text>
+                                <Text>Created by:   {pedido.creado_por.get_full_name}</Text>
                                 <Text>Email: {pedido.creado_por.email}</Text>
                             </View>
-                            <View style={styles.section4}>
-                                <Text style={{color: 'grey', marginTop: 15}}>Billing address: </Text>
+                            <View style={styles.columnaDireccion}>
+                                <Text style={styles.etiquetaBloque}>Billing address</Text>
                                 <Text>{pedido.empresa.id===2?'TUBOS Y FLEJES SLU.':pedido.empresa.id===3?'Comercial Alicantina Siderúrgica S.L.':pedido.empresa.nombre}</Text>
                                 <Text>{pedido.empresa.cif}</Text>
                                 <Text>{pedido.empresa.direccion}</Text>
@@ -459,39 +562,33 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicional
                                 <Text>Telf: {pedido.empresa.telefono}</Text>
                                 <Text style={{marginTop: 20}}>Delivery Date: {invertirFecha(String(pedido.fecha_prevista_entrega))}</Text>
                             </View>
-                            <View style={styles.section4}>
-                                <Text style={{color: 'grey', marginTop: 15}}>Shipping address: </Text>
+                            <View style={styles.columnaDireccion}>
+                                <Text style={styles.etiquetaBloque}>Shipping address</Text>
                                 <Text>{pedido.empresa.id===2?'TUBOS Y FLEJES SLU.':pedido.empresa.id===3?'Comercial Alicantina Siderúrgica S.L.':pedido.empresa.nombre}</Text>
                                 {/* <Text>{direccion_envio.cif}</Text> */}
                                 <Text>{direccion_envio.direccion}</Text>
                                 <Text>{direccion_envio.poblacion}</Text>
-                                <Text>{direccion_envio.codpostal + ' ' + direccion_envio.provincia}</Text>
+                                <Text>{direccion_envio.codpostal + ' - ' + direccion_envio.provincia}</Text>
                                 <Text>Spain</Text>
                                 <Text>Telf: {direccion_envio.telefono}</Text>
                             </View>
                         </View>
                     </View>
-                    <View style={styles.page2}>
-                        <View style={styles.section}>
-                            <View style={styles.section3}>
-                                <Text style={styles.textWithMargin}>Remarks: {pedido.observaciones}</Text>                            
+                    {pedido.observaciones ?
+                        <View style={styles.page2}>
+                            <View style={styles.section}>
+                                <View style={styles.section3}>
+                                    <Text style={styles.textWithMargin}>Remarks: {pedido.observaciones}</Text>
+                                </View>
                             </View>
                         </View>
-                    </View>
-                    <View style={styles.page2}>
-                        <View style={styles.section}>
-                            <View style={styles.section3}>
-                                <Text>Dear Sirs,</Text>
-                                <Text>We confirm you the purchase order of the following items / spare parts:</Text>
-                            </View>
-                        </View>
-                    </View>
+                    : null}
                     { linea !== '' ?
                         <View style={styles.page3} fixed>
                             <View style={styles.sectionTabla}>
-                                <View style={styles.section6}><Text>Description</Text></View>
-                                <View style={styles.section7}><Text>Qty</Text></View>
-                                <View style={styles.section7}><Text>Unit</Text></View>
+                                <View style={styles.section6}><Text style={{color:'#ffffff', fontWeight:'bold'}}>Description</Text></View>
+                                <View style={styles.section7}><Text style={{color:'#ffffff', fontWeight:'bold'}}>Qty</Text></View>
+                                <View style={styles.section7}><Text style={{color:'#ffffff', fontWeight:'bold'}}>Unit</Text></View>
                                 <View style={styles.section8}><Text>Price/Unit</Text></View>
                                 <View style={styles.section8}><Text>Discount</Text></View>
                                 <View style={styles.section8}><Text>Total</Text></View>
@@ -504,31 +601,38 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicional
                 </View>
                 {Total()}
                 {Total_adic()}
-                <View style={styles.totalNumber}><Text>Order total: {Number.parseFloat(total_pedido).toFixed(2)}€</Text></View>
-                <View style={styles.totalNumber}>
-                    {proveedor.pais!=='España'?<Text style={{marginBottom:10}}>INTRA-COMMUNITY TRANSACTION, EXEMPT FROM VAT</Text>:null}
+                <View style={styles.cajaTotal}>
+                    <View style={styles.lineaTotal}>
+                        <Text style={styles.totalLabel}>Order total</Text>
+                        <Text style={styles.totalNumber}>{Number.parseFloat(total_pedido).toFixed(2)}€</Text>
+                    </View>
+                    {proveedor.pais!=='España'?<Text style={styles.avisoIntracomunitario}>INTRA-COMMUNITY TRANSACTION, EXEMPT FROM VAT</Text>:null}
                 </View>
-                <View style={styles.page} >
-                    <View style={styles.page2}>
-                        <View style={styles.section}>
-                            <View style={styles.section3}>
-                                <Text>Remarks:  {pedido.observaciones2}</Text>                            
+                <View style={styles.cierrePedido} wrap={false}>
+                    {pedido.observaciones2 ?
+                        <View style={styles.page2}>
+                            <View style={styles.section}>
+                                <View style={styles.section3}>
+                                    <Text>Remarks: {pedido.observaciones2}</Text>
+                                </View>
                             </View>
                         </View>
-                    </View>
-                    <View style={styles.page2}>
+                    : null}
+                    <View style={styles.page3cierre}>
                         <View style={styles.section}>
                             <View style={styles.section3}>
                                 <Text style={styles.textWithMargin}>Note: Please indicate the PO number on the delivery note.</Text>
                                 <Text style={styles.textWithMargin}>Payment Terms: {proveedor.condicion_pago}</Text>
-                                <Text style={styles.textWithMargin}>Delivery Conditions: {'Incoterm 2020 - ' + proveedor.condicion_entrega}</Text> 
+                                <Text style={styles.textWithMargin}>Delivery Conditions: {'Incoterm 2020 - ' + proveedor.condicion_entrega}</Text>
                             </View>
                         </View>
                     </View>
-                </View> 
-                <Text style={styles.ComentarioFinal}>The supplying company of the requested goods and/or services must implement policies that are in line with the Sustainable Development Goals and social responsibility objectives. These policies should encompass corporate governance, environmental respect, adherence to human rights, fair operational, labor, and business practices, along with a commitment to consumer welfare, society, and the common good. </Text>
+                </View>
+                <Text style={styles.pieLegal} fixed>
+                    The supplying company of the requested goods and/or services must implement policies that are in line with the Sustainable Development Goals and social responsibility objectives. These policies should encompass corporate governance, environmental respect, adherence to human rights, fair operational, labor, and business practices, along with a commitment to consumer welfare, society, and the common good. 
+                </Text>
                 <Text style={styles.pageNumber} render={({ pageNumber, totalPages }) => (`${pageNumber} / ${totalPages}`)} fixed />
-                <View style={styles.page}fixed></View>        
+                <View style={styles.page}fixed></View>                
             </Page>
         </Document>         
     )    
