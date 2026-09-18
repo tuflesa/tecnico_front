@@ -4,16 +4,26 @@ import { Document, Page, Image, View, Text, StyleSheet, Svg, Path, G, Rect, Poly
 import logo_bornay from '../../assets/logo_bornay.svg'
 import {invertirFecha} from '../utilidades/funciones_fecha';
 
-const COLOR_MARCA = '#009640'; // verde corporativo Bornay
+const COLOR_MARCA = '#009640'; // por defecto
 const COLOR_TEXTO_SUAVE = '#6b6b6b';
 const COLOR_LINEA = '#e2e2e2';
 const COLOR_ZEBRA = '#f5f8f6';
+
+const COLORES_EMPRESA = {
+    1: '#009640', // Bornay
+    2: '#356D9A', // Tuflesa
+    3: '#EA710D', // Comalsid
+};
+const COLOR_MARCA_DEFECTO = COLOR_MARCA;
 
 Font.registerHyphenationCallback(word => [word]);
 
 const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, proveedor, contacto, direccion_envio}) =>{
     var total_pedido= 0;
     const [token] = useCookies(['tec-token']);
+
+    // Color corporativo según la empresa del pedido; si no hay coincidencia, usa el color por defecto
+    const colorMarca = COLORES_EMPRESA[pedido.empresa.id] || COLOR_MARCA_DEFECTO;
 
     const formatNumber = (numero) =>{
         return new Intl.NumberFormat('de-DE',{ style: 'currency', currency: 'EUR' }).format(numero)
@@ -194,8 +204,8 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
                         c0.5,0.5,1.2,0.7,2.1,0.7c1,0,1.7-0.2,2.2-0.7c0.5-0.4,0.8-1.2,0.8-2.1c0-0.7,0-1.5,0-2.3c0-0.8,0-1.5,0-2.3s0-1.5,0-2.3h-2.9v-3
                         h6.2c0,1.2,0.1,2.5,0.1,4.1c0,1.5,0,3.3-0.1,5.3c-0.1,2.2-0.6,3.8-1.6,4.8C713,265.4,711.4,265.9,709.2,265.9L709.2,265.9z"/>
                     <Path fill="#575756" d="M722.1,265.6v-35.5h5.8c2.2,0,3.7,0.5,4.7,1.4c1,0.9,1.5,2.5,1.6,4.7c0.1,1.3,0.1,2.5,0.1,3.6
-                        c0,1.1,0,2.2,0,3.2c0,1,0,2.1-0.1,3.1c-0.1,1.5-0.3,2.7-0.8,3.6c-0.5,0.9-1.2,1.6-2.2,1.9l3.7,13.9h-3.6l-3.3-13.3h-2.5v13.3
-                        H722.1L722.1,265.6z M725.5,249.2h2.4c1,0,1.7-0.2,2.2-0.7c0.5-0.5,0.7-1.2,0.8-2.2c0-1.1,0.1-2.2,0.1-3.4c0-1.1,0-2.3,0-3.4
+                        c0,1.1,0,2.2,0,3.2c0,1,0,2.1-0.1,3.1c-0.1,1.5-0.3,2.7-0.8,3.6c-0.5,0.9-1.2,1.6-2.2,1.9l3.7,13.9h-3.6l-3.3-13.3h-2.5
+                        v13.3H722.1L722.1,265.6z M725.5,249.2h2.4c1,0,1.7-0.2,2.2-0.7c0.5-0.5,0.7-1.2,0.8-2.2c0-1.1,0.1-2.2,0.1-3.4c0-1.1,0-2.3,0-3.4
                         c0-1.2,0-2.3-0.1-3.4c-0.1-1-0.3-1.7-0.7-2.2c-0.5-0.5-1.2-0.7-2.1-0.7h-2.4V249.2z"/>
                     <Path fill="#575756" d="M746.9,265.9c-2.2,0-3.8-0.5-4.8-1.4c-1-1-1.5-2.5-1.5-4.7c-0.1-4.9-0.1-9.9-0.1-14.8s0-9.9,0.1-14.8h3.4
                         c0,3.3-0.1,6.6-0.1,10c0,3.4,0,6.8,0,10.2c0,3.4,0,6.7,0.1,10c0,0.9,0.2,1.6,0.7,2c0.5,0.4,1.2,0.7,2.1,0.7s1.7-0.2,2.1-0.7
@@ -226,7 +236,7 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
                         c-0.5,0.4-0.7,1.1-0.7,2.1c-0.1,2-0.1,4.1-0.1,6.1c0,2.1,0,4.1,0,6.2c0,2.1,0,4.2,0.1,6.3c0,2.1,0.1,4.2,0.1,6.3
                         c0,1,0.3,1.7,0.7,2.1C832.7,262.8,833.5,263,834.4,263L834.4,263z"/>
                     <Path fill="#575756" d="M847.7,265.6v-35.5h5.8c2.2,0,3.7,0.5,4.7,1.4c1,0.9,1.5,2.5,1.6,4.7c0.1,1.3,0.1,2.5,0.1,3.6
-                        c0,1.1,0,2.2,0,3.2c0,1,0,2.1-0.1,3.1c-0.1,1.5-0.3,2.7-0.8,3.6c-0.5,0.9-1.2,1.6-2.2,1.9l3.7,13.9h-3.6l-3.3-13.3h-2.5v13.3
+                        c0,1.1,0,2.2,0,3.2c0,1,0,2.1-0.1,3.1c-0.1,1.5-0.3,2.7-0.8,3.6c-0.5,0.9-1.2,1.6-2.2,1.9l3.7,13.9h-3.6l-3.3-13.3h-2.5
                         H847.7L847.7,265.6z M851.1,249.2h2.4c1,0,1.7-0.2,2.2-0.7c0.5-0.5,0.7-1.2,0.8-2.2c0-1.1,0.1-2.2,0.1-3.4c0-1.1,0-2.3,0-3.4
                         c0-1.2,0-2.3-0.1-3.4c-0.1-1-0.3-1.7-0.7-2.2c-0.5-0.5-1.2-0.7-2.1-0.7h-2.4V249.2z"/>
                     <Path fill="#575756" d="M866.5,265.6v-35.5h5.6l2.1,11.3l3,21.2h1l-0.6-19.5l-0.2-12.9h3.3v35.5h-5.8l-2.3-12.6l-2.5-19.8h-1.1
@@ -274,8 +284,6 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
 
     const styles = StyleSheet.create({
         page:{
-            // El margen horizontal (izquierda/derecha) lo aporta SIEMPRE cada bloque por sí mismo (cabecera, page2, page3...),
-            // para que todos compartan exactamente el mismo margen y no se sumen dos márgenes de 30.
             marginVertical: 30,
         },
         pagina: {
@@ -288,7 +296,7 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
             flex: 3,
             fontSize: 20,
             fontWeight: 'bold',
-            color: COLOR_MARCA,
+            color: colorMarca,
             marginBottom: 10,
             lineHeight: 1.3,
             textAlign: 'right',
@@ -298,14 +306,12 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
             marginRight: 30,
             marginBottom: 1,
         },
-
         page3:{
             marginLeft: 40,
             marginRight: 40,
             marginTop: 15,
             marginBottom: 15
         },
-        // Mismo contenedor que "page2" pero con +10pt de margen (40 en vez de 30)
         filaPedido: {
             marginLeft: 40,
             marginRight: 40,
@@ -340,11 +346,6 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
             flex: 1,
             flexDirection: "column",
         },
-        // CAMBIO 1 (rojo): las 3 columnas (Datos Proveedor / Facturación / Envío)
-        // comparten minHeight para verse a la misma altura, pero CADA UNA conserva
-        // su proporción de ancho (flexGrow) con flexBasis:0 y flexShrink:1, para que
-        // el reparto de ancho sea el correcto y el texto haga wrap dentro de su
-        // propia columna en vez de invadir la columna vecina.
         columnaDatos: {
             flexGrow: 3,
             flexShrink: 1,
@@ -387,7 +388,7 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
             fontWeight: 'bold',
         },
         etiquetaBloque: {
-            color: COLOR_MARCA,
+            color: colorMarca,
             fontWeight: 'bold',
             fontSize: 10,
             marginTop: 15,
@@ -459,7 +460,7 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
         sectionTabla: {
             flexDirection: 'row',
             flexGrow: 1,
-            backgroundColor: COLOR_MARCA,
+            backgroundColor: colorMarca,
         },
         filaTabla: {
             paddingTop: 2,
@@ -482,7 +483,7 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
         },
         pieLegal: {
             position: 'absolute',
-            bottom: 45,   // deja hueco encima del número de página (bottom:30)
+            bottom: 45,
             left: 30,
             right: 30,
             fontSize: 9,
@@ -499,7 +500,7 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
         lineaTotal: {
             width: 220,
             borderTopWidth: 1.5,
-            borderTopColor: COLOR_MARCA,
+            borderTopColor: colorMarca,
             paddingTop: 4,
             flexDirection: 'row',
             justifyContent: 'space-between',
@@ -572,7 +573,11 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
                                 <Text>{pedido.empresa.codpostal}</Text>
                                 <Text>España</Text>
                                 <Text>Telf: {pedido.empresa.telefono}</Text>
-                                <Text style={{marginTop: 20}}>Fecha de Entrega: {invertirFecha(String(pedido.fecha_prevista_entrega))}</Text>
+                                {/* la fecha prevista de entrega solo se muestra si el usuario la ha
+                                    personalizado manualmente (fecha_prevista_modificada === true) */}
+                                {pedido.fecha_prevista_modificada ?
+                                    <Text style={{marginTop: 20}}>Fecha de Entrega: {invertirFecha(String(pedido.fecha_prevista_entrega))}</Text>
+                                : null}
                             </View>
                             <View style={styles.columnaDireccion}>
                                 <Text style={styles.etiquetaBloque}>Dirección de Envío</Text>

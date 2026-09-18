@@ -46,6 +46,11 @@ const PedidoForm = ({pedido, setPedido}) => {
     const [show_cerrar, setShowCerrar] = useState(false);
     const [enviando, setEnviando] = useState(false);
 
+    // Calcula la fecha prevista de entrega por defecto: fecha de creación + 1 mes
+    const calcularFechaPorDefecto = (fechaCreacion) => {
+        return fechaCreacion ? moment(fechaCreacion).add(1, 'months').format('YYYY-MM-DD') : '';
+    };
+
     const [datos, setDatos] = useState({
         id: pedido ? pedido.id : null,
         proveedor: pedido ? pedido.proveedor.id : null,
@@ -54,10 +59,10 @@ const PedidoForm = ({pedido, setPedido}) => {
         creado_por: pedido ? pedido.creado_por.get_full_name : '',
         fecha_creacion: pedido ? pedido.fecha_creacion : (hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
         fecha_entrega: pedido ? pedido.fecha_entrega : null,
-        /* fecha_prevista_entrega: pedido
-        ? pedido.fecha_prevista_entrega
-        : `${nextMonth.getFullYear()}-${String(nextMonth.getMonth() + 1).padStart(2, '0')}-${String(nextMonth.getDate()).padStart(2, '0')}`, */
-        fecha_prevista_entrega: pedido ? pedido.fecha_prevista_entrega : '',
+        fecha_prevista_entrega: pedido
+            ? pedido.fecha_prevista_entrega
+            : calcularFechaPorDefecto(hoy.getFullYear() + '-'+String(hoy.getMonth()+1).padStart(2,'0') + '-' + String(hoy.getDate()).padStart(2,'0')),
+        fecha_prevista_modificada: pedido ? pedido.fecha_prevista_modificada : false,
         finalizado: pedido ? pedido.finalizado : false,
         lineas_pedido: pedido ? pedido.lineas_pedido : null,
         lineas_adicionales: pedido ? pedido.lineas_adicionales : null,
@@ -79,8 +84,8 @@ const PedidoForm = ({pedido, setPedido}) => {
             numero: pedido ? pedido.numero : '',
             creado_por: pedido ? pedido.creado_por.get_full_name : '',
             fecha_creacion: pedido ? pedido.fecha_creacion : (hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate()),
-            //fecha_prevista_entrega: pedido ? pedido.fecha_prevista_entrega : (hoy.getFullYear() + '-'+(hoy.getMonth()+2)+'-'+hoy.getDate()),
-            fecha_prevista_entrega: pedido ? pedido.fecha_prevista_entrega : '',
+            fecha_prevista_entrega: pedido ? pedido.fecha_prevista_entrega : calcularFechaPorDefecto(hoy.getFullYear() + '-'+(hoy.getMonth()+1)+'-'+hoy.getDate()),
+            fecha_prevista_modificada: pedido ? pedido.fecha_prevista_modificada : false,
             fecha_entrega: pedido ? pedido.fecha_entrega : '',
             finalizado: pedido ? pedido.finalizado : false,
             lineas_pedido: pedido.lineas_pedido ? pedido.lineas_pedido : null,
@@ -96,6 +101,19 @@ const PedidoForm = ({pedido, setPedido}) => {
 
         });
     },[pedido]);
+
+    // Mientras el usuario no active el control manual, recalcula la fecha prevista
+    useEffect(()=>{
+        if (!datos.fecha_prevista_modificada) {
+            const fechaCalculada = calcularFechaPorDefecto(datos.fecha_creacion);
+            if (fechaCalculada !== datos.fecha_prevista_entrega) {
+                setDatos(prev => ({
+                    ...prev,
+                    fecha_prevista_entrega: fechaCalculada
+                }));
+            }
+        }
+    },[datos.fecha_creacion, datos.fecha_prevista_modificada]);
 
     useEffect(()=>{
         axios.get(BACKEND_SERVER + `/api/repuestos/proveedor/`, {
@@ -175,6 +193,17 @@ const PedidoForm = ({pedido, setPedido}) => {
             ...datos,
             [event.target.name] : event.target.value
         })
+    }
+
+    // Activa/desactiva la edición manual de la fecha prevista de entrega.
+    // Al desactivarla, se recalcula inmediatamente el valor por defecto.
+    const handleToggleFechaPrevista = () => {
+        const nuevoValor = !datos.fecha_prevista_modificada;
+        setDatos({
+            ...datos,
+            fecha_prevista_modificada: nuevoValor,
+            fecha_prevista_entrega: nuevoValor ? datos.fecha_prevista_entrega : calcularFechaPorDefecto(datos.fecha_creacion)
+        });
     }
 
     const handleFinalizado = (event) => {
@@ -257,9 +286,6 @@ const PedidoForm = ({pedido, setPedido}) => {
                         'Authorization': `token ${token['tec-token']}`
                     }
                 })
-                /* .then( res => { 
-                    alert('Se va a eliminar la linea');
-                }) */ 
                 .then( res => { 
                     updatePedido();
                 })
@@ -340,6 +366,7 @@ const PedidoForm = ({pedido, setPedido}) => {
             fecha_entrega: datos.fecha_entrega,
             fecha_creacion: datos.fecha_creacion,
             fecha_prevista_entrega: datos.fecha_prevista_entrega,
+            fecha_prevista_modificada: datos.fecha_prevista_modificada,
             finalizado: datos.finalizado,
             creado_por: user['tec-user'].id,
             direccion_envio: datos.direccion_envio,
@@ -387,6 +414,7 @@ const PedidoForm = ({pedido, setPedido}) => {
             fecha_entrega: datos.fecha_entrega,
             fecha_creacion: datos.fecha_creacion,
             fecha_prevista_entrega: datos.fecha_prevista_entrega,
+            fecha_prevista_modificada: datos.fecha_prevista_modificada,
             finalizado: datos.finalizado,
             direccion_envio: datos.direccion_envio,
             contacto: datos.contacto,
@@ -595,8 +623,17 @@ const PedidoForm = ({pedido, setPedido}) => {
                                                 name='fecha_prevista_entrega' 
                                                 value={datos.fecha_prevista_entrega}
                                                 onChange={handleInputChange} 
+                                                disabled={!datos.fecha_prevista_modificada}
                                                 className={`form-control ${errores.fecha_prevista_entrega ? 'border-red' : ''}`}
                                                 placeholder="Fecha prevista entrega" />
+                                    <Form.Check
+                                        type="switch"
+                                        id="switch-fecha-prevista"
+                                        label="Personalizar"
+                                        checked={datos.fecha_prevista_modificada}
+                                        onChange={handleToggleFechaPrevista}
+                                        className="mt-1"
+                                    />
                                 </Form.Group>
                             </Col>                            
                         </Row>
