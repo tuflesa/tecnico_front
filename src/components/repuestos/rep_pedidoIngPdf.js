@@ -2,17 +2,24 @@ import React from 'react';
 import { Document, Page, Image, View, Text, StyleSheet, Svg, Path, G, Rect, Polygon, Font } from "@react-pdf/renderer";
 import {invertirFecha} from '../utilidades/funciones_fecha';
 
-const COLOR_MARCA = '#009640'; // verde corporativo Bornay
+const COLOR_MARCA = '#009640'; // verde corporativo Bornay (usado como valor por defecto)
 const COLOR_TEXTO_SUAVE = '#6b6b6b';
 const COLOR_LINEA = '#e2e2e2';
 const COLOR_ZEBRA = '#f5f8f6';
 
-// Igual que en VistaPdf.js: evita que @react-pdf/renderer parta palabras largas
-// a mitad con un guion cuando no caben en el ancho disponible.
+// Color corporativo por empresa
+const COLORES_EMPRESA = {
+    1: '#009640', // Bornay
+    2: '#356D9A', // Tuflesa
+    3: '#EA710D', // Comalsid
+};
+const COLOR_MARCA_DEFECTO = COLOR_MARCA;
+
 Font.registerHyphenationCallback(word => [word]);
 
 const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicionales, proveedor, contacto, direccion_envio}) =>{
     var total_pedido= 0;
+    const colorMarca = COLORES_EMPRESA[pedido.empresa.id] || COLOR_MARCA_DEFECTO;
 
     const formatNumber = (numero) =>{
         return new Intl.NumberFormat('de-DE',{ style: 'currency', currency: 'EUR' }).format(numero)
@@ -22,7 +29,6 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicional
         return new Intl.NumberFormat('de-DE').format(numero)
     }
 
-    // Cada fila de la tabla lleva wrap={false} para que no se parta entre dos
     function parseData(){
         if(linea){
             return linea.map((data, i)=>{
@@ -51,8 +57,6 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicional
 
     function parse2Data(){
         if(lineas_adicionales){
-            // Mismo desfase que en VistaPdf.js: para que el zebra siga la
-            // secuencia continua entre las líneas normales y las adicionales.
             const offsetFilas = linea ? linea.length : 0;
             return lineas_adicionales.map((data, i)=>{
                 const filaPar = (offsetFilas + i) % 2 === 0;
@@ -184,15 +188,15 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicional
                     s22.4,60.4,53.7,67.7v6.1L147.7,249L147.7,249z"/>
                 <G>
                     <Path fill="#575756" d="M709.2,265.9c-1.5,0-2.7-0.2-3.6-0.6c-0.9-0.4-1.6-1.1-2-2c-0.4-0.9-0.7-2.1-0.7-3.6
-                        c-0.1-1.9-0.1-3.9-0.1-5.9c0-2,0-3.9,0-5.9s0-3.9,0-5.9c0-2,0.1-3.9,0.1-5.8c0-1.5,0.3-2.8,0.7-3.7c0.4-0.9,1.1-1.6,2-2
+                        c-0.1-1.9-0.1-3.9-0.1-5.9c0-2,0-3.9,0-5.9s0-3.9,0-5.9s0.1-3.9,0.1-5.8c0-1.5,0.3-2.8,0.7-3.7c0.4-0.9,1.1-1.6,2-2
                         c0.9-0.4,2.1-0.6,3.5-0.6c2.1,0,3.6,0.5,4.6,1.4c1,1,1.5,2.5,1.6,4.8c0,1.1,0.1,2.2,0.1,3.3c0,1.1,0,2.2-0.1,3.3H712
                         c0-1.2,0.1-2.4,0.1-3.6c0-1.2,0-2.4-0.1-3.5c-0.1-1-0.3-1.7-0.7-2.1c-0.5-0.5-1.1-0.7-2-0.7c-1,0-1.7,0.2-2.1,0.7
                         c-0.5,0.5-0.7,1.2-0.7,2.1c-0.1,2.1-0.1,4.1-0.1,6.2c0,2.1,0,4.1,0,6.2s0,4.1,0,6.2c0,2.1,0.1,4.1,0.1,6.2c0,1,0.3,1.7,0.7,2.1
                         c0.5,0.5,1.2,0.7,2.1,0.7c1,0,1.7-0.2,2.2-0.7c0.5-0.4,0.8-1.2,0.8-2.1c0-0.7,0-1.5,0-2.3c0-0.8,0-1.5,0-2.3s0-1.5,0-2.3h-2.9v-3
                         h6.2c0,1.2,0.1,2.5,0.1,4.1c0,1.5,0,3.3-0.1,5.3c-0.1,2.2-0.6,3.8-1.6,4.8C713,265.4,711.4,265.9,709.2,265.9L709.2,265.9z"/>
                     <Path fill="#575756" d="M722.1,265.6v-35.5h5.8c2.2,0,3.7,0.5,4.7,1.4c1,0.9,1.5,2.5,1.6,4.7c0.1,1.3,0.1,2.5,0.1,3.6
-                        c0,1.1,0,2.2,0,3.2c0,1,0,2.1-0.1,3.1c-0.1,1.5-0.3,2.7-0.8,3.6c-0.5,0.9-1.2,1.6-2.2,1.9l3.7,13.9h-3.6l-3.3-13.3h-2.5v13.3
-                        H722.1L722.1,265.6z M725.5,249.2h2.4c1,0,1.7-0.2,2.2-0.7c0.5-0.5,0.7-1.2,0.8-2.2c0-1.1,0.1-2.2,0.1-3.4c0-1.1,0-2.3,0-3.4
+                        c0,1.1,0,2.2,0,3.2c0,1,0,2.1-0.1,3.1c-0.1,1.5-0.3,2.7-0.8,3.6c-0.5,0.9-1.2,1.6-2.2,1.9l3.7,13.9h-3.6l-3.3-13.3h-2.5
+                        v13.3H722.1L722.1,265.6z M725.5,249.2h2.4c1,0,1.7-0.2,2.2-0.7c0.5-0.5,0.7-1.2,0.8-2.2c0-1.1,0.1-2.2,0.1-3.4c0-1.1,0-2.3,0-3.4
                         c0-1.2,0-2.3-0.1-3.4c-0.1-1-0.3-1.7-0.7-2.2c-0.5-0.5-1.2-0.7-2.1-0.7h-2.4V249.2z"/>
                     <Path fill="#575756" d="M746.9,265.9c-2.2,0-3.8-0.5-4.8-1.4c-1-1-1.5-2.5-1.5-4.7c-0.1-4.9-0.1-9.9-0.1-14.8s0-9.9,0.1-14.8h3.4
                         c0,3.3-0.1,6.6-0.1,10c0,3.4,0,6.8,0,10.2c0,3.4,0,6.7,0.1,10c0,0.9,0.2,1.6,0.7,2c0.5,0.4,1.2,0.7,2.1,0.7s1.7-0.2,2.1-0.7
@@ -201,7 +205,7 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicional
                     <Path fill="#575756" d="M760,265.6v-35.5h5.8c2.2,0,3.7,0.5,4.7,1.4c1,0.9,1.5,2.5,1.6,4.7c0.1,1.9,0.1,3.6,0.1,5.1
                         c0,1.5,0,3-0.1,4.6c-0.1,2.2-0.6,3.8-1.6,4.7c-1,0.9-2.6,1.4-4.7,1.4h-2.4v13.5H760z M763.4,249h2.4c1,0,1.7-0.2,2.2-0.7
                         c0.5-0.5,0.7-1.2,0.8-2.2c0-1.1,0.1-2.2,0.1-3.3c0-1.1,0-2.2,0-3.4c0-1.1,0-2.2-0.1-3.4c-0.1-1-0.3-1.7-0.7-2.2
-                        c-0.5-0.5-1.2-0.7-2.1-0.7h-2.4V249L763.4,249z"/>
+                        c-0.5-0.5-1.2-0.7-2.1-0.7H763.4V249L763.4,249z"/>
                     <Path fill="#575756" d="M784.4,265.9c-2.2,0-3.8-0.5-4.8-1.4c-1-1-1.5-2.5-1.5-4.7c-0.1-2-0.1-4-0.1-6c0-2,0-3.9,0-5.9
                         c0-2,0-3.9,0-5.9c0-2,0.1-4,0.1-6c0-2.2,0.5-3.8,1.5-4.7c1-1,2.6-1.4,4.8-1.4s3.8,0.5,4.8,1.4c1,1,1.5,2.5,1.5,4.7
                         c0,2.1,0.1,4.1,0.1,6c0,2,0,3.9,0,5.9c0,2,0,3.9,0,5.9c0,2-0.1,4-0.1,6c-0.1,2.2-0.6,3.8-1.5,4.7
@@ -223,7 +227,7 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicional
                         c-0.5,0.4-0.7,1.1-0.7,2.1c-0.1,2-0.1,4.1-0.1,6.1c0,2.1,0,4.1,0,6.2c0,2.1,0,4.2,0.1,6.3c0,2.1,0.1,4.2,0.1,6.3
                         c0,1,0.3,1.7,0.7,2.1C832.7,262.8,833.5,263,834.4,263L834.4,263z"/>
                     <Path fill="#575756" d="M847.7,265.6v-35.5h5.8c2.2,0,3.7,0.5,4.7,1.4c1,0.9,1.5,2.5,1.6,4.7c0.1,1.3,0.1,2.5,0.1,3.6
-                        c0,1.1,0,2.2,0,3.2c0,1,0,2.1-0.1,3.1c-0.1,1.5-0.3,2.7-0.8,3.6c-0.5,0.9-1.2,1.6-2.2,1.9l3.7,13.9h-3.6l-3.3-13.3h-2.5v13.3
+                        c0,1.1,0,2.2,0,3.2c0,1,0,2.1-0.1,3.1c-0.1,1.5-0.3,2.7-0.8,3.6c-0.5,0.9-1.2,1.6-2.2,1.9l3.7,13.9h-3.6l-3.3-13.3h-2.5
                         H847.7L847.7,265.6z M851.1,249.2h2.4c1,0,1.7-0.2,2.2-0.7c0.5-0.5,0.7-1.2,0.8-2.2c0-1.1,0.1-2.2,0.1-3.4c0-1.1,0-2.3,0-3.4
                         c0-1.2,0-2.3-0.1-3.4c-0.1-1-0.3-1.7-0.7-2.2c-0.5-0.5-1.2-0.7-2.1-0.7h-2.4V249.2z"/>
                     <Path fill="#575756" d="M866.5,265.6v-35.5h5.6l2.1,11.3l3,21.2h1l-0.6-19.5l-0.2-12.9h3.3v35.5h-5.8l-2.3-12.6l-2.5-19.8h-1.1
@@ -283,7 +287,7 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicional
             flex: 3,
             fontSize: 20,
             fontWeight: 'bold',
-            color: COLOR_MARCA,
+            color: colorMarca,
             marginBottom: 10,
             lineHeight: 1.3,
             textAlign: 'right',
@@ -375,7 +379,7 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicional
             fontWeight: 'bold',
         },
         etiquetaBloque: {
-            color: COLOR_MARCA,
+            color: colorMarca,
             fontWeight: 'bold',
             fontSize: 10,
             marginTop: 15,
@@ -447,7 +451,7 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicional
         sectionTabla: {
             flexDirection: 'row',
             flexGrow: 1,
-            backgroundColor: COLOR_MARCA,
+            backgroundColor: colorMarca,
         },
         filaTabla: {
             paddingTop: 2,
@@ -487,7 +491,7 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicional
         lineaTotal: {
             width: 220,
             borderTopWidth: 1.5,
-            borderTopColor: COLOR_MARCA,
+            borderTopColor: colorMarca,
             paddingTop: 4,
             flexDirection: 'row',
             justifyContent: 'space-between',
@@ -547,8 +551,8 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicional
                                 <Text>{proveedor.direccion}</Text>
                                 <Text>{proveedor.poblacion}</Text>
                                 <Text>{proveedor.pais}</Text>
-                                <Text style={{marginTop: 7}}>Subject:  Pedido</Text>
-                                <Text>Created by:   {pedido.creado_por.get_full_name}</Text>
+                                {/* <Text style={{marginTop: 7}}>Subject:  Pedido</Text> */}
+                                <Text style={{marginTop: 7}}>Created by:   {pedido.creado_por.get_full_name}</Text>
                                 <Text>Email: {pedido.creado_por.email}</Text>
                             </View>
                             <View style={styles.columnaDireccion}>
@@ -560,7 +564,9 @@ const VistaIngPdf = ({pedido, verIngPdf, fecha_creacion, linea, lineas_adicional
                                 <Text>{pedido.empresa.codpostal}</Text>
                                 <Text>Spain</Text>
                                 <Text>Telf: {pedido.empresa.telefono}</Text>
-                                <Text style={{marginTop: 20}}>Delivery Date: {invertirFecha(String(pedido.fecha_prevista_entrega))}</Text>
+                                {pedido.fecha_prevista_modificada ?
+                                    <Text style={{marginTop: 20}}>Delivery Date: {invertirFecha(String(pedido.fecha_prevista_entrega))}</Text>
+                                : null}
                             </View>
                             <View style={styles.columnaDireccion}>
                                 <Text style={styles.etiquetaBloque}>Shipping address</Text>

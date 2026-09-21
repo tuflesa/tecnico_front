@@ -560,8 +560,8 @@ const VistaPdf = ({pedido, VerPdf, fecha_creacion, linea, lineas_adicionales, pr
                                 <Text>{proveedor.direccion}</Text>
                                 <Text>{proveedor.poblacion}</Text>
                                 <Text>{proveedor.pais}</Text>
-                                <Text style={{marginTop: 7}}>Asunto:   Pedido</Text>
-                                <Text>Creado por:   {pedido.creado_por.get_full_name}</Text>
+                                {/* <Text style={{marginTop: 7}}>Asunto:   Pedido</Text> */}
+                                <Text style={{marginTop: 7}}>Creado por:   {pedido.creado_por.get_full_name}</Text>
                                 <Text>Email: {pedido.creado_por.email}</Text>
                             </View>
                             <View style={styles.columnaDireccion}>
