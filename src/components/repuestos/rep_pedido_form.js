@@ -273,23 +273,28 @@ const PedidoForm = ({pedido, setPedido}) => {
             }
         }
     }
-    const BorrarLineaAdicional =(lineaAdicional) =>{     
-        if (lineaAdicional.cantidad>lineaAdicional.por_recibir){
-            alert('No se puede eliminar la linea, ya tiene movimientos de recepción');            
-        }
-        else{  
-            var confirmacion = window.confirm('¿Deseas eliminar la línea?');
-            if(confirmacion){
-                fetch (BACKEND_SERVER + `/api/repuestos/linea_adicional_pedido/${lineaAdicional.id}`,{
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `token ${token['tec-token']}`
-                    }
-                })
-                .then( res => { 
-                    updatePedido();
-                })
-            }
+    
+    const BorrarLineaAdicional = (lineaAdicional) => {
+        const tieneMovimientos = parseFloat(lineaAdicional.cantidad) > parseFloat(lineaAdicional.por_recibir);
+        const mensaje = tieneMovimientos
+            ? 'Ya tienes movimientos en esta línea, ¿estás seguro que quieres borrar la línea y sus movimientos?'
+            : '¿Deseas eliminar la línea?';
+
+        var confirmacion = window.confirm(mensaje);
+        if (confirmacion) {
+            fetch(BACKEND_SERVER + `/api/repuestos/linea_adicional_pedido/${lineaAdicional.id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `token ${token['tec-token']}`
+                }
+            })
+            .then(res => {
+                updatePedido();
+            })
+            .catch(err => {
+                console.log(err);
+                alert('No se ha podido eliminar la línea.');
+            })
         }
     }
 
