@@ -23,6 +23,10 @@ const RodLista = () => {
     });
 
     useEffect(()=>{
+        console.log(lista_rodillos);
+    },[lista_rodillos])
+
+    useEffect(()=>{
         setFiltroPag(`&page=${datos.pagina}`);
     },[datos.pagina]);
 

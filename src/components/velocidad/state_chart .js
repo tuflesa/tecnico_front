@@ -39,6 +39,7 @@ const StateChart = ({data, flejes, OFs, montajes, fecha, fecha_fin, hora_inicio,
     // Cuando cambian los datos actualizamos el grafico
     useEffect(()=>{
         if (!dimensions || !maquina) return;
+        // console.log(data[0].registros);
         const width = dimensions.width
             , height = dimensions.height
         const margin = {top: 20, right: 30, bottom: 20, left: 30};
@@ -122,6 +123,30 @@ const StateChart = ({data, flejes, OFs, montajes, fecha, fecha_fin, hora_inicio,
                 }
             });
 
+        const myLineVmin = line()
+            .curve(curveStepAfter)
+            .x( d => xScale(d.x))
+            .y( d => {
+                if (d.v_min>0) {
+                    return yScale(d.v_min);
+                }
+                else {
+                    return yScale(0);
+                }
+            });
+
+        const myLineVok = line()
+            .curve(curveStepAfter)
+            .x( d => xScale(d.x))
+            .y( d => {
+                if (d.v_ok>0) {
+                    return yScale(d.v_ok);
+                }
+                else {
+                    return yScale(0);
+                }
+            });
+
         const myLinePower = line()
             .curve(curveStepAfter)
             .x( d => xScale(d.x))
@@ -171,6 +196,32 @@ const StateChart = ({data, flejes, OFs, montajes, fecha, fecha_fin, hora_inicio,
             .style("stroke-width", 2)
             .transition()
             .attr('d', value => ver.velocidad ? myLine(value.registros) : '');
+
+        // Velocidad mínima
+        data && select(svg).select('.grafico')
+            .selectAll('path.v_min')
+            .data(data)
+            .join('path')
+            .attr("class", "v_min")
+            .attr('fill', 'none')
+            .attr('stroke', 'orange')
+            .style("stroke-width", 1)
+            .attr("stroke-dasharray", "5, 5")
+            .transition()
+            .attr('d', value => ver.velocidad ? myLineVmin(value.registros) : '');
+
+        // Velocidad ok
+        data && select(svg).select('.grafico')
+            .selectAll('path.v_ok')
+            .data(data)
+            .join('path')
+            .attr("class", "v_ok")
+            .attr('fill', 'none')
+            .attr('stroke', 'green')
+            .style("stroke-width", 1)
+            .attr("stroke-dasharray", "5, 5")
+            .transition()
+            .attr('d', value => ver.velocidad ? myLineVok(value.registros) : '');
 
         // Potencia
         data && select(svg).select('.grafico')

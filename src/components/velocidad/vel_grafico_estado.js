@@ -52,9 +52,8 @@ const GraficoEstado = () => {
     })
     const [actualizar, setActualizar] = useState(true);
     const [existeDesconocido, setExisteDesconocido] = useState(false);
-
     const [mostrarModalTramos, setMostrarModalTramos] = useState(false);
-
+    const [colorVelocidad, setColorVelocidad] = useState(null);
 
     const abrirModalTramos = () => {
         setMostrarModalTramos(true);
@@ -161,13 +160,16 @@ const GraficoEstado = () => {
                 const potencia = dato.potencia?dato.potencia:0.0;
                 const frecuencia = dato.frecuencia?dato.frecuencia:0.0;
                 const fuerza = dato.presion?dato.presion:0.0;
-
+                const v_min = dato.vmax * 0.6;
+                const v_ok = dato.vmax * 0.8;
                 return ({
                     x: x,
                     y: y,
                     potencia: potencia,
                     frecuencia: frecuencia,
-                    fuerza: fuerza
+                    fuerza: fuerza,
+                    v_min: v_min,
+                    v_ok: v_ok
                 });
             });
 
@@ -178,7 +180,9 @@ const GraficoEstado = () => {
                         y: datos[datos.length -1].y,
                         potencia: datos[datos.length -1].potencia,
                         frecuencia: datos[datos.length -1].frecuencia,
-                        fuerza: datos[datos.length -1].fuerza
+                        fuerza: datos[datos.length -1].fuerza,
+                        v_min: datos[datos.length -1].v_min,
+                        v_ok: datos[datos.length -1].v_ok
                     });
                 }
                 else {
@@ -187,7 +191,9 @@ const GraficoEstado = () => {
                         y: datos[datos.length -1].y,
                         potencia: datos[datos.length -1].potencia,
                         frecuencia: datos[datos.length -1].frecuencia,
-                        fuerza: datos[datos.length -1].fuerza
+                        fuerza: datos[datos.length -1].fuerza,
+                        v_min: datos[datos.length -1].v_min,
+                        v_ok: datos[datos.length -1].v_ok
                     });
                 }
             }
@@ -426,6 +432,27 @@ const GraficoEstado = () => {
         console.log(indicadores);
     },[estado?.paradas, filtro]);
 
+    // Color velocidad en funcion de vmax: v < 0.6 * vmax rojo, 0.6 * vmax < v < 0.8 vmax naranja, v > 0.8 * vmax verde
+    useEffect(()=>{
+        if (!estado) return;
+        const tpc = estado.estado_act.vmax != 0 ? estado.estado_act.velocidad/estado.estado_act.vmax: 0; // tanto por ciento
+        if (tpc != 0) {
+            if (tpc < 0.6){
+                setColorVelocidad("bg-danger text-white destacado");
+            }
+            else if(tpc > 0.8) {
+                    setColorVelocidad("bg-success text-white destacado");
+                }
+                else{
+                    setColorVelocidad("bg-warning text-dark destacado");
+                }
+        }
+        else{
+            setColorVelocidad(null)
+        }
+        console.log('tpc : ',tpc);
+    },[estado]);
+
     const actualizarGrafico = () => {
         setActualizar(!actualizar);
     }
@@ -481,7 +508,7 @@ const GraficoEstado = () => {
                         </Row>
                         <Row>
                             <Col>
-                                <span className="destacado">
+                                <span className={colorVelocidad ? colorVelocidad : "destacado"}>
                                     {estado && estado.estado_act.velocidad.toFixed(1)}
                                 </span>
                             </Col>

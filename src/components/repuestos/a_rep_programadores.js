@@ -22,6 +22,19 @@ const Programadores = () => {
         setYearSeleccionado(new Date().getFullYear());
         setMostrarModal(true);
     };
+    const rodillosQS = () => {
+        axios.get(BACKEND_SERVER + `/api/rodillos/actualizaIdQSmtt2/`,{
+            headers: {
+                'Authorization': `token ${token['tec-token']}`
+            }
+        })
+        .then( res => {
+            console.log(res.data);
+        })
+        .catch( err => {
+            console.log(err);
+        });
+    };
 
     const cerrarModal = () => {
         setMostrarModal(false);
@@ -96,7 +109,19 @@ const Programadores = () => {
                         }}
                     >
                         Generar horarios anuales
-                    </button>
+                </button>
+                <button 
+                        variant="success"
+                        size="lg"
+                        onClick={rodillosQS}
+                        style={{
+                            marginBottom: "20px",
+                            padding: "8px 16px",
+                            fontWeight: "600"
+                        }}
+                    >
+                        códigos QS mtt2
+                </button>
             </Row>
             {/* <Row>
                 <Col>

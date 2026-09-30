@@ -105,6 +105,8 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
         const fecha_fin = base.length > 0
             ? moment(base[fin].fechaInicio, 'DD/MM/YYYY').format('YYYY-MM-DD') + 'T' + base[fin].horaFin
             : null;
+            console.log(fecha_inicio);
+            console.log(fecha_fin);
         seleTipoParada && axios.get(BACKEND_SERVER + `/api/velocidad/buscar_montajes_of/`,{
             params: {
                 zona_id: id,
@@ -117,6 +119,7 @@ const ModalAgruparTramos = ({ mostrarModalTramos, cerrarModalTramos, paradas, on
             }
         })
         .then( res => {
+            console.log(res.data);
             setListadoOrdenes(res.data.montajes);
             setIdOF(res.data.xIdOF);
             setIdPos(res.data.xIdPos);
