@@ -197,9 +197,16 @@ const RodArticulo = () => {
         if (datos.forma_siglas && datos.dim1 && datos.dim2 && datos.espesor
             && datos.calidad_nombre && datos.acabado_nombre && datos.norma_nombre
             && datos.desarrollo) {
-            const dimensiones = datos.dim1 !== '0'
-                ? `${datos.dim1}x${datos.dim2}x${datos.espesor}`
-                : `${datos.dim2}x${datos.espesor}`;
+            let dimensiones;
+            if (datos.forma_siglas === 'Red.') {
+                dimensiones = datos.dim1 !== '0'
+                    ? `${datos.dim1}x${datos.espesor}`
+                    : `${datos.espesor}`;
+            } else {
+                dimensiones = datos.dim1 !== '0'
+                    ? `${datos.dim1}x${datos.dim2}x${datos.espesor}`
+                    : `${datos.dim2}x${datos.espesor}`;
+            }
             const nombreGenerado = `${datos.forma_siglas} ${dimensiones} ${datos.calidad_nombre} ${datos.acabado_nombre} ${datos.norma_nombre} - D${datos.desarrollo}`;
             setDatos(prev => ({ ...prev, nombre: nombreGenerado }));
         }
