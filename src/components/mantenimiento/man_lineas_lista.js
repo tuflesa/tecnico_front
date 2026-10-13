@@ -91,6 +91,7 @@ const ManLineasListado = () => {
             res.data.results.forEach( r => {
                 //solo para poder utilizar los campos en el excel
                 r['priori']=r.tarea.prioridad;
+                r['num_parte']=r.parte.num_parte;
                 r['nom_parte']=r.parte.nombre;
                 r['obparte']=r.parte.observaciones;
                 r['nom_tarea']=r.tarea.nombre;
@@ -225,6 +226,7 @@ const ManLineasListado = () => {
                     <ExcelFile filename={"ExcelExportExample"} element={<button>Exportar a Excel</button>}>
                         <ExcelSheet data={lineas} name="lineas">
                             <ExcelColumn label="Prioridad" value="priori"/>
+                            <ExcelColumn label="Numero Parte" value="num_parte"/>
                             <ExcelColumn label="Parte" value="nom_parte"/>
                             <ExcelColumn label="Observaciones Parte" value="obparte"/>
                             <ExcelColumn label="Tarea" value="nom_tarea"/>
