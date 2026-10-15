@@ -11,8 +11,28 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateP
     const [listaAsignadas, setListaAsignadas] = useState([]);
     const [tipo_periodo, setTipoPeriodo] = useState(null);
     const [enviando, setEnviando] = useState(false);
-    
-    const [datos, setDatos] = useState({  
+    const estadoInicial = () => ({
+        id: null,
+        nombre: '',
+        especialidad: '',
+        prioridad: '',
+        observaciones: '',
+        fecha_plan: null,
+        estado: parte.fecha_prevista_inicio ? 1 : 4,
+        tipo_periodo: parte.tipo_periodo,
+        periodo: parte.periodo,
+    });
+
+    const [datos, setDatos] = useState(estadoInicial);
+
+    useEffect(() => {
+        console.log('que vale partes: ', parte);
+        if (show) {
+            setDatos(estadoInicial());
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [show]);
+    /* const [datos, setDatos] = useState({  
         id: null,
         nombre: '',
         especialidad: '',
@@ -22,10 +42,10 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateP
         estado: parte.fecha_prevista_inicio?1:4,
         tipo_periodo: parte.tipo_periodo,
         periodo: parte.periodo,
-        //estado: '',
-    }); 
+    });  */
 
     useEffect(() => {
+        console.log('que vale partesssssss: ', parte);
         axios.get(BACKEND_SERVER + '/api/mantenimiento/especialidades/',{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
