@@ -26,6 +26,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
         estado: linea_tarea.estado,
         periodo: linea_tarea.tarea.periodo?linea_tarea.tarea.periodo:0,
         tipo_periodo: linea_tarea.tarea.tipo_periodo?linea_tarea.tarea.tipo_periodo.id:'',
+        mostrar_6_meses: linea_tarea.tarea.mostrar_6_meses ?? false,
     });
 
     useEffect(() => {
@@ -65,10 +66,11 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
     }, [token]);
 
     const handleInputChange = (event) => {
+        const { name, type, checked, value } = event.target;
         setDatos({
             ...datos,
-            [event.target.name] : event.target.value
-        })  
+            [name]: type === 'checkbox' ? checked : value
+        })
     }
     
     const actualizaTarea = (datosActualizados) => {
@@ -78,6 +80,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
             observaciones: datosActualizados.observaciones,
             tipo_periodo: datosActualizados.tipo_periodo,
             periodo: datosActualizados.periodo,
+            mostrar_6_meses: datosActualizados.mostrar_6_meses,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -140,7 +143,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
     }
 
     const cerrarDatos = () => {
-        if(datos.nombre!==linea_tarea.tarea.nombre || datos.prioridad!==linea_tarea.tarea.prioridad || datos.observaciones!==linea_tarea.tarea.observaciones || datos.observaciones_trab!==linea_tarea.observaciones_trab || datos.fecha_plan!==linea_tarea.fecha_plan || datos.fecha_fin!==linea_tarea.fecha_fin || datos.periodo!==linea_tarea.tarea.periodo || datos.tipo_periodo!==linea_tarea.tarea.tipo_periodo?.id){
+        if(datos.nombre!==linea_tarea.tarea.nombre || datos.prioridad!==linea_tarea.tarea.prioridad || datos.observaciones!==linea_tarea.tarea.observaciones || datos.observaciones_trab!==linea_tarea.observaciones_trab || datos.fecha_plan!==linea_tarea.fecha_plan || datos.fecha_fin!==linea_tarea.fecha_fin || datos.periodo!==linea_tarea.tarea.periodo || datos.tipo_periodo!==linea_tarea.tarea.tipo_periodo?.id || datos.mostrar_6_meses!==linea_tarea.tarea.mostrar_6_meses){
             var hay_modificado = window.confirm('No has actualizado los cambios ¿Deseas guardar los datos?');
             if(hay_modificado){
                 const datosActualizados = {...datos};
@@ -170,7 +173,8 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                 prioridad: datosActualizados.prioridad,
                 observaciones: datosActualizados.observaciones,
                 periodo: datosActualizados.periodo,
-                tipo_periodo: { id: datosActualizados.tipo_periodo }
+                tipo_periodo: { id: datosActualizados.tipo_periodo },
+                mostrar_6_meses: datosActualizados.mostrar_6_meses,
             },
             observaciones_trab: datosActualizados.observaciones_trab,
             fecha_plan: datosActualizados.fecha_plan,
@@ -341,6 +345,18 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                                 : null}
                             </Col>
                         </Row> 
+                        <Row>
+                            <Col>
+                                <Form.Group controlId="mostrar_6_meses">
+                                    <Form.Check type="checkbox"
+                                                name="mostrar_6_meses"
+                                                label="Mostrar a los 6 meses"
+                                                checked={datos.mostrar_6_meses}
+                                                onChange={handleInputChange}
+                                                disabled={nosoyTecnico} />
+                                </Form.Group>
+                            </Col>
+                        </Row>
                         <Row>
                             <Col>
                                 <Form.Group controlId="fecha_plan">

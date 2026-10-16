@@ -283,7 +283,12 @@ const ManLineasListado = () => {
                         <tbody>
                             {lineas && lineas.map( linea => {
                                 return (
-                                    <tr key={linea.id} className = {linea.fecha_fin?"table-success" : linea.fecha_inicio && fechapasadaString<linea.fecha_plan?"table-primary":!linea.fecha_inicio && fechapasadaString>linea.fecha_plan?"table-danger" : "" }style={{ backgroundColor: linea.fecha_inicio && fechapasadaString>linea.fecha_plan? 'orange' : " " }}>
+                                    <tr key={linea.id} 
+                                        className = {linea.fecha_fin?"table-success" : linea.fecha_inicio && fechapasadaString<linea.fecha_plan?"table-primary":!linea.fecha_inicio && fechapasadaString>linea.fecha_plan?"table-danger" : "" }
+                                        style={{
+                                            backgroundColor: linea.fecha_inicio && fechapasadaString > linea.fecha_plan ? 'orange' : " ",
+                                            fontWeight: linea.tarea.mostrar_6_meses ? 'bold' : 'normal'
+                                        }}>
                                         <td>{linea.tarea.prioridad}</td>
                                         <td>
                                             <PlusSquare className="mr-3 pencil"  onClick={event => {updateCantidad(1, linea)}} />
