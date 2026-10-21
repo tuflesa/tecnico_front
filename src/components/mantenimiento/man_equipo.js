@@ -330,7 +330,11 @@ const ManPorEquipos = () => {
                         <tbody>
                             {lineas && lineas.map( linea => {
                                 return (
-                                    <tr key={linea.id} style={{ backgroundColor: comparar(linea) ? '#cce5ff': linea.fecha_inicio!==null? 'yellow' : " " }} className="table-secundary">
+                                    <tr key={linea.id} 
+                                        className={"table-secundary"}
+                                        style={{ 
+                                            backgroundColor: comparar(linea) ? '#cce5ff': linea.fecha_inicio!==null? 'yellow' : " ",
+                                            fontWeight: linea.tarea.mostrar_6_meses ? 'bold' : 'normal'}}>
                                         <td>{linea.tarea.prioridad}</td>
                                         <td>{invertirFecha(linea.fecha_plan)}</td>
                                         <td>{linea.tarea.nombre}</td>

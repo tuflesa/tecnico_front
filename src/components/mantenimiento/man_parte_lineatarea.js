@@ -11,8 +11,29 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateP
     const [listaAsignadas, setListaAsignadas] = useState([]);
     const [tipo_periodo, setTipoPeriodo] = useState(null);
     const [enviando, setEnviando] = useState(false);
-    
-    const [datos, setDatos] = useState({  
+    const estadoInicial = () => ({
+        id: null,
+        nombre: '',
+        especialidad: '',
+        prioridad: '',
+        observaciones: '',
+        fecha_plan: null,
+        estado: parte.fecha_prevista_inicio ? 1 : 4,
+        tipo_periodo: parte.tipo_periodo,
+        periodo: parte.periodo,
+        mostrar_6_meses: false,
+    });
+
+    const [datos, setDatos] = useState(estadoInicial);
+
+    useEffect(() => {
+        console.log('que vale partes: ', parte);
+        if (show) {
+            setDatos(estadoInicial());
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [show]);
+    /* const [datos, setDatos] = useState({  
         id: null,
         nombre: '',
         especialidad: '',
@@ -22,10 +43,10 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateP
         estado: parte.fecha_prevista_inicio?1:4,
         tipo_periodo: parte.tipo_periodo,
         periodo: parte.periodo,
-        //estado: '',
-    }); 
+    });  */
 
     useEffect(() => {
+        console.log('que vale partesssssss: ', parte);
         axios.get(BACKEND_SERVER + '/api/mantenimiento/especialidades/',{
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -78,9 +99,10 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateP
     }, [token]);  
     
     const handleInputChange = (event) => {
+        const { name, type, checked, value } = event.target;
         setDatos({
             ...datos,
-            [event.target.name] : event.target.value
+            [name]: type === 'checkbox' ? checked : value
         })
     }
 
@@ -99,6 +121,7 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateP
                 observaciones: datos.observaciones,
                 tipo_periodo: datos.tipo_periodo,
                 periodo: datos.periodo,
+                mostrar_6_meses: datos.mostrar_6_meses,
             },
             {
                 headers: {
@@ -254,6 +277,17 @@ const LineaTareaNueva = ({show, handleCloseLinea, tareaAsignadas, parte, updateP
                                 </Form.Group>
                             </Col>
                         : null}
+                    </Row>
+                    <Row>
+                        <Col>
+                            <Form.Group controlId="mostrar_6_meses">
+                                <Form.Check type="checkbox"
+                                            name="mostrar_6_meses"
+                                            label="Mostrar a los 6 meses"
+                                            checked={datos.mostrar_6_meses}
+                                            onChange={handleInputChange} />
+                            </Form.Group>
+                        </Col>
                     </Row>
                     <Row>                            
                         <Col>

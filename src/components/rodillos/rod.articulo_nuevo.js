@@ -190,6 +190,23 @@ const RodArticulo = () => {
         });
     };
 
+    const handleDecimalChange = (e) => {
+        const { name, value } = e.target;
+        // Permite vacío, dígitos y un único separador (coma o punto)
+        if (value === '' || /^\d*[.,]?\d*$/.test(value)) {
+            setDatos({
+                ...datos,
+                [name]: value 
+            });
+        }
+    };
+
+    const parseDecimal = (v) => {
+        if (v === '' || v === null || v === undefined) return null;
+        const n = parseFloat(String(v).replace(',', '.'));
+        return isNaN(n) ? null : n;
+    };
+
     // Monta el nombre automáticamente cuando ya tenemos todos los datos que lo
     // dejando que lo puedna modificar los usuarios
     useEffect(() => {
@@ -278,7 +295,7 @@ const RodArticulo = () => {
                 acabado: datos.acabado ? parseInt(datos.acabado) : '',
                 norma: datos.norma ? parseInt(datos.norma) : '',
                 desarrollo: datos.desarrollo ? parseInt(datos.desarrollo) : '',
-                Dst: datos.dst ? parseFloat(datos.dst) : null,
+                Dst: parseDecimal(datos.dst),
                 montajes: montajesSeleccionados.map(m => m.id),
             };
 
@@ -428,12 +445,14 @@ const RodArticulo = () => {
                     <Col md={4}>
                         <Form.Group controlId="dst">
                             <Form.Label>Dst (diámetro en soldadura teórico)</Form.Label>
-                            <Form.Control type="number"
-                                          step="0.01"
-                                          name='dst'
-                                          value={datos.dst}
-                                          onChange={handleInputChange}
-                                          placeholder="Dst" />
+                                <Form.Control
+                                    type="text"
+                                    inputMode="decimal"
+                                    name="dst"
+                                    value={datos.dst}
+                                    onChange={handleDecimalChange}
+                                    placeholder="Dst"
+                                />
                         </Form.Group>
                     </Col>
                 </Row>

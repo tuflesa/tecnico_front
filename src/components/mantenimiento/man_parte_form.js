@@ -855,7 +855,7 @@ const ParteForm = ({parte, setParte, op}) => {
             });
             alert('Consumible actualizado correctamente');
             cerrarModalConsumible();
-            const res = await axios.get(BACKEND_SERVER + `/api/repuestos/movimiento_trazabilidad/?linea_salida__salida__num_parte=${parte.id}`, {
+            const res = await parte && axios.get(BACKEND_SERVER + `/api/repuestos/movimiento_trazabilidad/?linea_salida__salida__num_parte=${parte.id}`, {
                 headers: {
                     'Authorization': `token ${token['tec-token']}`
                 }

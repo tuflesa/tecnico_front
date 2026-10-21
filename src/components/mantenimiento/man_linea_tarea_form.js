@@ -12,11 +12,12 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
     const [hoy] = useState(new Date());
     const nosoyTecnico = user['tec-user'].perfil.puesto.nombre==='Operador'||user['tec-user'].perfil.puesto.nombre==='Mantenimiento'?true:false;
     const [enviando, setEnviando] = useState(false);
+    const [especialidades, setEspecialidades] = useState(null);
 
     const [datos, setDatos] = useState({
         id: linea_tarea.id,
         nombre: linea_tarea.tarea.nombre,
-        especialidad: linea_tarea.tarea.especialidad_nombre,
+        especialidad: linea_tarea.tarea.especialidad ?? '',
         prioridad: linea_tarea.tarea.prioridad,
         observaciones: linea_tarea.tarea.observaciones,
         observaciones_trab: linea_tarea.observaciones_trab,
@@ -26,7 +27,16 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
         estado: linea_tarea.estado,
         periodo: linea_tarea.tarea.periodo?linea_tarea.tarea.periodo:0,
         tipo_periodo: linea_tarea.tarea.tipo_periodo?linea_tarea.tarea.tipo_periodo.id:'',
+        mostrar_6_meses: linea_tarea.tarea.mostrar_6_meses ?? false,
     });
+
+    useEffect(() => {
+        axios.get(BACKEND_SERVER + '/api/mantenimiento/especialidades/', {
+            headers: { 'Authorization': `token ${token['tec-token']}` }
+        })
+        .then(res => setEspecialidades(res.data.sort((a, b) => a.nombre.localeCompare(b.nombre))))
+        .catch(err => console.log(err));
+    }, [token]);
 
     useEffect(() => {
         axios.get(BACKEND_SERVER + '/api/mantenimiento/tipo_periodo/',{
@@ -65,10 +75,11 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
     }, [token]);
 
     const handleInputChange = (event) => {
+        const { name, type, checked, value } = event.target;
         setDatos({
             ...datos,
-            [event.target.name] : event.target.value
-        })  
+            [name]: type === 'checkbox' ? checked : value
+        })
     }
     
     const actualizaTarea = (datosActualizados) => {
@@ -78,6 +89,8 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
             observaciones: datosActualizados.observaciones,
             tipo_periodo: datosActualizados.tipo_periodo,
             periodo: datosActualizados.periodo,
+            mostrar_6_meses: datosActualizados.mostrar_6_meses,
+            especialidad: datosActualizados.especialidad || null,
         }, {
             headers: {
                 'Authorization': `token ${token['tec-token']}`
@@ -140,7 +153,7 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
     }
 
     const cerrarDatos = () => {
-        if(datos.nombre!==linea_tarea.tarea.nombre || datos.prioridad!==linea_tarea.tarea.prioridad || datos.observaciones!==linea_tarea.tarea.observaciones || datos.observaciones_trab!==linea_tarea.observaciones_trab || datos.fecha_plan!==linea_tarea.fecha_plan || datos.fecha_fin!==linea_tarea.fecha_fin || datos.periodo!==linea_tarea.tarea.periodo || datos.tipo_periodo!==linea_tarea.tarea.tipo_periodo?.id){
+        if(datos.nombre!==linea_tarea.tarea.nombre || datos.prioridad!==linea_tarea.tarea.prioridad || datos.observaciones!==linea_tarea.tarea.observaciones || datos.observaciones_trab!==linea_tarea.observaciones_trab || datos.fecha_plan!==linea_tarea.fecha_plan || datos.fecha_fin!==linea_tarea.fecha_fin || datos.periodo!==linea_tarea.tarea.periodo || datos.tipo_periodo!==linea_tarea.tarea.tipo_periodo?.id || datos.mostrar_6_meses!==linea_tarea.tarea.mostrar_6_meses || String(datos.especialidad) !== String(linea_tarea.tarea.especialidad ?? '')){
             var hay_modificado = window.confirm('No has actualizado los cambios ¿Deseas guardar los datos?');
             if(hay_modificado){
                 const datosActualizados = {...datos};
@@ -170,7 +183,10 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                 prioridad: datosActualizados.prioridad,
                 observaciones: datosActualizados.observaciones,
                 periodo: datosActualizados.periodo,
-                tipo_periodo: { id: datosActualizados.tipo_periodo }
+                tipo_periodo: { id: datosActualizados.tipo_periodo },
+                mostrar_6_meses: datosActualizados.mostrar_6_meses,
+                especialidad: datosActualizados.especialidad,
+                especialidad_nombre: especialidades?.find(e => String(e.id) === String(datosActualizados.especialidad))?.nombre,
             },
             observaciones_trab: datosActualizados.observaciones_trab,
             fecha_plan: datosActualizados.fecha_plan,
@@ -267,13 +283,18 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                                 </Form.Group>
                             </Col>
                             <Col>
-                                <Form.Group id="especialidad">
+                                <Form.Group controlId="especialidad">
                                     <Form.Label>Especialidad</Form.Label>
-                                    <Form.Control type="text" 
-                                                name='especialidad' 
+                                    <Form.Control as="select"
+                                                name='especialidad'
                                                 value={datos.especialidad}
-                                                disabled
-                                    />
+                                                onChange={handleInputChange}
+                                                disabled={nosoyTecnico}>
+                                        <option key={0} value={''}>Seleccionar</option>
+                                        {especialidades && especialidades.map(esp => (
+                                            <option key={esp.id} value={esp.id}>{esp.nombre}</option>
+                                        ))}
+                                    </Form.Control>
                                 </Form.Group>
                             </Col>                                          
                         </Row>
@@ -341,6 +362,18 @@ const LineaTareaForm = ({linea_tarea, setLineaTarea}) => {
                                 : null}
                             </Col>
                         </Row> 
+                        <Row>
+                            <Col>
+                                <Form.Group controlId="mostrar_6_meses">
+                                    <Form.Check type="checkbox"
+                                                name="mostrar_6_meses"
+                                                label="Mostrar a los 6 meses"
+                                                checked={datos.mostrar_6_meses}
+                                                onChange={handleInputChange}
+                                                disabled={nosoyTecnico} />
+                                </Form.Group>
+                            </Col>
+                        </Row>
                         <Row>
                             <Col>
                                 <Form.Group controlId="fecha_plan">
