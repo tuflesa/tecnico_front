@@ -55,7 +55,7 @@ const LineChart = ({data, fecha, hora_inicio, hora_fin}) => {
             .range([0, innerWidth]);
         
         const yScale = scaleLinear()
-            .domain([0, 100])
+            .domain([0, 140])
             .range([innerHeight, 0]);
 
         const ejeX = axisBottom(xScale);
