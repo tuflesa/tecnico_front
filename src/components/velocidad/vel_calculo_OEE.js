@@ -140,7 +140,8 @@ const calculo_OEE = (estado, filtro) => {
     let t_tnp = 0;
     paradas.filter(p => p.tipo_parada_nombre === 'TNP').map(t => { t_tnp += t.duracion});
     let t_total = 0;
-    paradas.filter(p => p.tipo_parada_nombre !== 'TNP').map(t => { t_total += t.duracion});
+    const paradas_no_TNP = paradas.filter(p => p.tipo_parada_nombre !== 'TNP');
+    paradas_no_TNP.map(t => { t_total += t.duracion});
     // console.log(paradas);
     // console.log(tiempoPorTurno(paradas));
     let t_run = 0;
@@ -158,8 +159,8 @@ const calculo_OEE = (estado, filtro) => {
     const disponibilidad = t_total > 0 ? (t_producion/t_total)*100: 0;
     // Disponibilidad por turno
     const disponibilidad_por_turno = [];
-    console.log('TIEMPO POR TURNO (minutos):', tiempoPorTurno(paradas));
-    tiempoPorTurno(paradas).map( tpt => {
+    console.log('TIEMPO POR TURNO (minutos):', tiempoPorTurno(paradas_no_TNP));
+    tiempoPorTurno(paradas_no_TNP).map( tpt => {
         const produccion = paradas.filter(p => p.turnos.includes(tpt.turno) && 
                                              (p.tipo_parada_nombre === 'Automatico' || p.tipo_parada_nombre === 'Cambio'));
         
