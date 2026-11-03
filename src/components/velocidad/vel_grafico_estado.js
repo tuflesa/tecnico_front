@@ -642,6 +642,7 @@ const GraficoEstado = () => {
                         />
                     </Col>
                 </Row> 
+                {/* ------------------------------ Dibujamos el gráfico -------------------------------------------- */}
                 <Row>
                     <Col className="col-12">
                         <StateChart data={registros}
