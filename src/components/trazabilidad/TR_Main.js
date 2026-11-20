@@ -190,7 +190,7 @@ const TR_Main = () => {
         })
         .then( res => {
             // console.log(res.data);
-            const flejes = res.data.filter(f => f.maquina_siglas == acumulador.maquina_siglas).sort((a, b) => a.pos - b.pos);;
+            const flejes = res.data.filter(f => f.maquina_siglas == acumulador.maquina_siglas || f.maquina_siglas == acumulador.maquila_siglas).sort((a, b) => a.pos - b.pos);;
             // console.log(flejes);
             setFlejesDB(flejes);
         })
@@ -200,13 +200,15 @@ const TR_Main = () => {
     }
 
     const leerEstadoPLC = () => {
+        console.log(acumulador);
+        acumulador&&acumulador.ip&&console.log(acumulador.ip);
         acumulador&&acumulador.ip&&axios.get(BACKEND_SERVER + `/api/trazabilidad/leerEstadoPLC/?acu_id=${acumulador.id}`,{ 
             headers: {
                 'Authorization': `token ${token['tec-token']}`
             }
         })
         .then( res => {
-            // console.log(res.data);
+            console.log(res.data);
             setPLC_status(res.data);
         })
         .catch( err => {
