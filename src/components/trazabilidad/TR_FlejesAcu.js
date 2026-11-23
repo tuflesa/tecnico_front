@@ -31,7 +31,8 @@ const FlejesAcu = ({Flejes}) => {
                 <th>Descripcion</th>
                 <th>Peso</th>
                 <th>Metros teorico</th>
-                <th>Metros medidos</th>
+                <th>Metros entrada</th>
+                <th>Metros salida</th>
                 <th>Metros tubo</th>
                 <th>% Merma</th>
                 <th>Check</th>
@@ -48,8 +49,9 @@ const FlejesAcu = ({Flejes}) => {
                             <td className="bg-secondary text-white">{fdb.metros_teorico.toFixed(1)}</td>
                             <td className={fdb.metros_medido<fdb.metros_teorico?("bg-warning text-dark"):
                                         fdb.metros_medido>=fdb.metros_teorico*1.1?("bg-danger text-white"):("bg-success text-white")}>{fdb.metros_medido.toFixed(1)}</td>
+                            <td>{fdb.metros_salida.toFixed(1)}</td>
                             <td>{fdb.metros_tubo.toFixed(1)}</td>
-                            <td>{((1-fdb.metros_tubo/fdb.metros_medido)*100).toFixed(1)}</td>           
+                            <td>{((1-fdb.metros_tubo/fdb.metros_salida)*100).toFixed(1)}</td>           
                             <td>
                                 <Form.Check
                                     inline

@@ -173,7 +173,7 @@ const TR_Main = () => {
         .then( res => {
             const flejes_OF_actual = res.data.filter(f => f.of == acumulador.of_activa).sort((a, b) => a.pos - b.pos);
             const flejes_OF_next = res.data.filter(f => f.of != acumulador.of_activa).sort((a, b) => a.pos - b.pos);
-            // console.log('Flejes: ', flejes_OF_actual.concat(flejes_OF_next));
+            console.log('Flejes: ', flejes_OF_actual.concat(flejes_OF_next));
             setFlejesAcumulador(flejes_OF_actual.concat(flejes_OF_next));
         })
         .catch( err => {

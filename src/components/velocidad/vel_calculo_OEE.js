@@ -4,7 +4,7 @@ function calculaCalidad(flejes) {
     let calidad =0
     let peso_total = 0
     flejes.map(f => {
-        calidad += f.metros_tubo * f.peso / f.metros_medido;
+        calidad += f.metros_tubo * f.peso / f.metros_salida;
         peso_total += f.peso;
     });
     if (peso_total > 0) {
